@@ -1,0 +1,6 @@
+if [ -z $1 ]; then
+  echo missing para
+else
+  echo start mount /dev/$1
+  sudo mount /dev/$1 ~/workspace
+fi

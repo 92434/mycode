@@ -1,0 +1,2560 @@
+#!/bin/sh -f
+
+#
+#调试标记
+#
+#set -x
+
+#
+#必设的环境变量
+#
+#TOOLCHAIN_DIR="/home/xiaofei/workspace/src/test_build/openwrt_toolchain/openembedded/linaro_eglibc-2.17_eabi"
+TOOLCHAIN_DIR="/usr/local/arm/arm-openwrt-linux-gcc-4.8.2"
+X8_MODULES="/home/xiaofei/workspace/src/x8/output/e2-rootfs"
+ENIGMA2_ORIGIN_ROOTFS="/home/xiaofei/workspace/src/test_build/openwrt_toolchain/openembedded/build-dm800/tmp/rootfs/openpli-enigma2-image"
+#ENIGMA2_RTUTIL5370AP_KO="/home/xiaofei/workspace/src/x8/target/src/sd/rt5370ap/UTIL/os/linux/rtutil5370ap.ko"
+#ENIGMA2_RT5370AP_KO="/home/xiaofei/workspace/src/x8/target/src/sd/rt5370ap/MODULE/os/linux/rt5370ap.ko"
+#ENIGMA2_RTNET5370AP_KO="/home/xiaofei/workspace/src/x8/target/src/sd/rt5370ap/NETIF/os/linux/rtnet5370ap.ko"
+#ENIGMA2_USB_SERIAL_KO="/home/xiaofei/workspace/src/x8/target/output/objs/krome_x8/drivers/usb/serial/usbserial.ko"
+#ENIGMA2_USB_SERIAL_OPTION_KO="/home/xiaofei/workspace/src/x8/target/output/objs/krome_x8/drivers/usb/serial/option.ko"
+#OPENWRT_TARBALL="/home/xiaofei/workspace/src/openwrt/openwrt/bin/pnx84xx-eglibc/openwrt-pnx84xx-rootfs.tar.gz"
+OPENWRT_ORIGIN_ROOTFS="/home/xiaofei/workspace/src/openwrt/git/openwrt/staging_dir/target-arm_v7-a_eglibc-2.18_eabi/root-pnx84xx"
+#OPENWRT_ORIGIN_ROOTFS="/home/xiaofei/workspace/src/openwrt/git/openwrt/staging_dir/target-arm_cortex-a9_eglibc-2.19_eabi/root-pnx84xx"
+#ROOTFS_MEMTEST_BIN="/home/xiaofei/workspace/src/test/memtester-4.2.2/install"
+ROOTFS_DIRECTFB_APPFS_TARBALL="$(pwd)/appfs.tar.gz"
+
+curdir=$(pwd)
+
+ENIGMA2_ADD_ON_TARBALL="$curdir/enigma2_add_on.tar.gz"
+ENIGMA2_E2PROC_KO="$curdir/e2proc.ko"
+ENIGMA2_LINUXDVB_KO="$curdir/linuxdvb.ko"
+ROOTFS_OSCAM_TARBALL="$curdir/oscam.tar.gz"
+ROOTFS_HOMEPAGE_PATCH_TARBALL="$curdir/homepage_patch.tar.gz"
+
+ENIGMA2_ROOTFS="ENIGMA2"
+ENIGMA2_PLATFORM_FIRMWARE="$ENIGMA2_ROOTFS/lib/firmware"
+ENIGMA2_DVB_MODULE="$ENIGMA2_ROOTFS/lib/modules/2.6.34/extra"
+
+OPENWRT_ROOTFS="OPENWRT"
+
+ENIGMA2_ONLY_LIST="list_enigma2_only"
+ENIGMA2_ONLY="ENIGMA2_ONLY"
+
+ROOTFS="rootfs_tmp"
+
+#
+#删除文件或文件夹,参数必须是从当前目录开始的相对路径
+#
+del_files(){
+	echo "del_files $1"
+	if [ -z "$1" -o ! -e "$curdir/$1" ]; then
+		echo "del_files: *$1*$curdir/$1"
+		return
+	fi
+
+	local DST="$curdir/$1"
+
+	rm -rf "$DST"
+}
+
+#
+#同步文件或文件夹，参数2必须是从当前目录开始的相对路径
+#
+rsync_files(){
+	echo "rsync_files $1 $2"
+	if [ -z "$1"  -o -z "$2" ]; then
+		echo "rsync_files: *$1*$2"
+		exit 1
+	fi
+	local SRC="$1"
+	local DST="$curdir/$2"
+
+	rsync -a "$SRC" "$DST"
+}
+
+#
+#从原enigma2的工具链中同步根文件系统所需的库文件。以#开头的文件都是可以忽略的。所以。。。真正需要的文件不多。
+#
+relative_rsync_enigma2_lib(){
+	echo "relative_rsync_enigma2_lib $1 $2"
+	if [ ! -d "$1" -o -z "$2" ]; then
+		echo "relative_rsync_enigma2_lib: *$1*$2"
+		exit 1
+	fi
+
+	local SRC_DIR="$1"
+	local DST_DIR="$curdir/$2"
+
+	while read line
+	do
+		if [ -z "$line" -o "${line:0:1}" == "#" ]; then 
+			continue
+		fi
+		
+		rsync -aR "$SRC_DIR/$line" "$DST_DIR/"
+	done << EOF
+#./lib/audit/sotruss-lib.so
+#./lib/crt1.o
+#./lib/crti.o
+#./lib/crtn.o
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/crtbegin.o
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/crtbeginS.o
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/crtbeginT.o
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/crtend.o
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/crtendS.o
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/arm_neon.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include-fixed/limits.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include-fixed/linux/a.out.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include-fixed/README
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include-fixed/syslimits.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/float.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/iso646.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/mmintrin.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/stdalign.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/stdarg.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/stdbool.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/stddef.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/stdfix.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/stdint-gcc.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/stdint.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/stdnoreturn.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/unwind-arm-common.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/unwind.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/include/varargs.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/install-tools/fixinc_list
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/install-tools/gsyslimits.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/install-tools/include/limits.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/install-tools/include/README
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/install-tools/macro_list
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/install-tools/mkheaders.conf
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/libgcc.a
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/libgcc_eh.a
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/libgcc_initial.a
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/libgcc.map
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/libgcc_pic.a
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/libgcov.a
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/gtype.state
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/ada/gcc-interface/ada-tree.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/alias.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/alloc-pool.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/all-tree.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/ansidecl.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/auto-host.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/basic-block.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/b-header-vars
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/bitmap.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/builtins.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/bversion.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/c-family/c-common.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/c-family/c-common.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/c-family/c-objc.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/c-family/c-pragma.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/c-family/c-pretty-print.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cfg-flags.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cfghooks.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cfgloop.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cgraph.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cif-code.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/configargs.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/arm/aout.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/arm/arm-cores.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/arm/arm.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/arm/arm-opts.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/arm/arm-protos.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/arm/bpabi.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/arm/elf.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/arm/linux-eabi.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/arm/linux-elf.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/arm/linux-gas.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/dbxelf.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/elfos.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/glibc-stdint.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/gnu-user.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/initfini-array.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/linux-android.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/linux.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/config/vxworks-dummy.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/coretypes.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cp/cp-tree.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cp/cp-tree.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cp/cxx-pretty-print.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cp/name-lookup.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cppdefault.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/cpplib.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/c-tree.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/debug.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/defaults.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/diagnostic-core.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/diagnostic.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/diagnostic.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/double-int.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/dumpfile.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/emit-rtl.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/except.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/filenames.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/fixed-value.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/flags.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/flag-types.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/function.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/gcc-plugin.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/genrtl.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/ggc.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/gimple.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/gimple.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/gimple-pretty-print.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/gsstruct.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/gtm-builtins.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/gtype-desc.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/hard-reg-set.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/hashtab.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/highlev-plugin-common.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/hwint.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/incpath.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/input.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/insn-constants.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/insn-flags.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/insn-modes.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/insn-notes.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/internal-fn.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/internal-fn.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/intl.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/ipa-prop.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/ipa-reference.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/ipa-ref.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/ipa-ref-inline.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/ipa-utils.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/is-a.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/java/java-tree.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/langhooks.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/libiberty.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/line-map.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/machmode.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/md5.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/mode-classes.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/objc/objc-tree.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/obstack.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/omp-builtins.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/options.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/opts.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/output.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/params.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/params.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/plugin-api.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/plugin.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/plugin.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/plugin-version.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/pointer-set.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/predict.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/predict.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/prefix.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/pretty-print.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/real.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/realmpfr.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/reg-notes.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/rtl.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/rtl.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/safe-ctype.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/sanitizer.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/sbitmap.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/splay-tree.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/statistics.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/symtab.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/sync-builtins.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/system.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/target.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/target.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/target-hooks-macros.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/timevar.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/timevar.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tm.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tm_p.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tm-preds.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/toplev.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-check.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-dump.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-flow.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-flow-inline.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-inline.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-iterator.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-pass.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-pretty-print.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-ssa-alias.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-ssa-operands.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/tree-ssa-sccvn.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/treestruct.def
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/vec.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/plugin/include/version.h
+#./lib/gcc/arm-openwrt-linux-gnueabi/4.8.2/specs
+#./lib/gconv/ANSI_X3.110.so
+#./lib/gconv/ARMSCII-8.so
+#./lib/gconv/ASMO_449.so
+#./lib/gconv/BIG5HKSCS.so
+#./lib/gconv/BIG5.so
+#./lib/gconv/BRF.so
+#./lib/gconv/CP10007.so
+#./lib/gconv/CP1125.so
+#./lib/gconv/CP1250.so
+#./lib/gconv/CP1251.so
+#./lib/gconv/CP1252.so
+#./lib/gconv/CP1253.so
+#./lib/gconv/CP1254.so
+#./lib/gconv/CP1255.so
+#./lib/gconv/CP1256.so
+#./lib/gconv/CP1257.so
+#./lib/gconv/CP1258.so
+#./lib/gconv/CP737.so
+#./lib/gconv/CP770.so
+#./lib/gconv/CP771.so
+#./lib/gconv/CP772.so
+#./lib/gconv/CP773.so
+#./lib/gconv/CP774.so
+#./lib/gconv/CP775.so
+#./lib/gconv/CP932.so
+#./lib/gconv/CSN_369103.so
+#./lib/gconv/CWI.so
+#./lib/gconv/DEC-MCS.so
+#./lib/gconv/EBCDIC-AT-DE-A.so
+#./lib/gconv/EBCDIC-AT-DE.so
+#./lib/gconv/EBCDIC-CA-FR.so
+#./lib/gconv/EBCDIC-DK-NO-A.so
+#./lib/gconv/EBCDIC-DK-NO.so
+#./lib/gconv/EBCDIC-ES-A.so
+#./lib/gconv/EBCDIC-ES.so
+#./lib/gconv/EBCDIC-ES-S.so
+#./lib/gconv/EBCDIC-FI-SE-A.so
+#./lib/gconv/EBCDIC-FI-SE.so
+#./lib/gconv/EBCDIC-FR.so
+#./lib/gconv/EBCDIC-IS-FRISS.so
+#./lib/gconv/EBCDIC-IT.so
+#./lib/gconv/EBCDIC-PT.so
+#./lib/gconv/EBCDIC-UK.so
+#./lib/gconv/EBCDIC-US.so
+#./lib/gconv/ECMA-CYRILLIC.so
+#./lib/gconv/EUC-CN.so
+#./lib/gconv/EUC-JISX0213.so
+#./lib/gconv/EUC-JP-MS.so
+#./lib/gconv/EUC-JP.so
+#./lib/gconv/EUC-KR.so
+#./lib/gconv/EUC-TW.so
+#./lib/gconv/GB18030.so
+#./lib/gconv/GBBIG5.so
+#./lib/gconv/GBGBK.so
+#./lib/gconv/GBK.so
+#./lib/gconv/gconv-modules
+#./lib/gconv/GEORGIAN-ACADEMY.so
+#./lib/gconv/GEORGIAN-PS.so
+#./lib/gconv/GOST_19768-74.so
+#./lib/gconv/GREEK7-OLD.so
+#./lib/gconv/GREEK7.so
+#./lib/gconv/GREEK-CCITT.so
+#./lib/gconv/HP-GREEK8.so
+#./lib/gconv/HP-ROMAN8.so
+#./lib/gconv/HP-ROMAN9.so
+#./lib/gconv/HP-THAI8.so
+#./lib/gconv/HP-TURKISH8.so
+#./lib/gconv/IBM037.so
+#./lib/gconv/IBM038.so
+#./lib/gconv/IBM1004.so
+#./lib/gconv/IBM1008_420.so
+#./lib/gconv/IBM1008.so
+#./lib/gconv/IBM1025.so
+#./lib/gconv/IBM1026.so
+#./lib/gconv/IBM1046.so
+#./lib/gconv/IBM1047.so
+#./lib/gconv/IBM1097.so
+#./lib/gconv/IBM1112.so
+#./lib/gconv/IBM1122.so
+#./lib/gconv/IBM1123.so
+#./lib/gconv/IBM1124.so
+#./lib/gconv/IBM1129.so
+#./lib/gconv/IBM1130.so
+#./lib/gconv/IBM1132.so
+#./lib/gconv/IBM1133.so
+#./lib/gconv/IBM1137.so
+#./lib/gconv/IBM1140.so
+#./lib/gconv/IBM1141.so
+#./lib/gconv/IBM1142.so
+#./lib/gconv/IBM1143.so
+#./lib/gconv/IBM1144.so
+#./lib/gconv/IBM1145.so
+#./lib/gconv/IBM1146.so
+#./lib/gconv/IBM1147.so
+#./lib/gconv/IBM1148.so
+#./lib/gconv/IBM1149.so
+#./lib/gconv/IBM1153.so
+#./lib/gconv/IBM1154.so
+#./lib/gconv/IBM1155.so
+#./lib/gconv/IBM1156.so
+#./lib/gconv/IBM1157.so
+#./lib/gconv/IBM1158.so
+#./lib/gconv/IBM1160.so
+#./lib/gconv/IBM1161.so
+#./lib/gconv/IBM1162.so
+#./lib/gconv/IBM1163.so
+#./lib/gconv/IBM1164.so
+#./lib/gconv/IBM1166.so
+#./lib/gconv/IBM1167.so
+#./lib/gconv/IBM12712.so
+#./lib/gconv/IBM1364.so
+#./lib/gconv/IBM1371.so
+#./lib/gconv/IBM1388.so
+#./lib/gconv/IBM1390.so
+#./lib/gconv/IBM1399.so
+#./lib/gconv/IBM16804.so
+#./lib/gconv/IBM256.so
+#./lib/gconv/IBM273.so
+#./lib/gconv/IBM274.so
+#./lib/gconv/IBM275.so
+#./lib/gconv/IBM277.so
+#./lib/gconv/IBM278.so
+#./lib/gconv/IBM280.so
+#./lib/gconv/IBM281.so
+#./lib/gconv/IBM284.so
+#./lib/gconv/IBM285.so
+#./lib/gconv/IBM290.so
+#./lib/gconv/IBM297.so
+#./lib/gconv/IBM420.so
+#./lib/gconv/IBM423.so
+#./lib/gconv/IBM424.so
+#./lib/gconv/IBM437.so
+#./lib/gconv/IBM4517.so
+#./lib/gconv/IBM4899.so
+#./lib/gconv/IBM4909.so
+#./lib/gconv/IBM4971.so
+#./lib/gconv/IBM500.so
+#./lib/gconv/IBM5347.so
+#./lib/gconv/IBM803.so
+#./lib/gconv/IBM850.so
+#./lib/gconv/IBM851.so
+#./lib/gconv/IBM852.so
+#./lib/gconv/IBM855.so
+#./lib/gconv/IBM856.so
+#./lib/gconv/IBM857.so
+#./lib/gconv/IBM860.so
+#./lib/gconv/IBM861.so
+#./lib/gconv/IBM862.so
+#./lib/gconv/IBM863.so
+#./lib/gconv/IBM864.so
+#./lib/gconv/IBM865.so
+#./lib/gconv/IBM866NAV.so
+#./lib/gconv/IBM866.so
+#./lib/gconv/IBM868.so
+#./lib/gconv/IBM869.so
+#./lib/gconv/IBM870.so
+#./lib/gconv/IBM871.so
+#./lib/gconv/IBM874.so
+#./lib/gconv/IBM875.so
+#./lib/gconv/IBM880.so
+#./lib/gconv/IBM891.so
+#./lib/gconv/IBM901.so
+#./lib/gconv/IBM902.so
+#./lib/gconv/IBM9030.so
+#./lib/gconv/IBM903.so
+#./lib/gconv/IBM904.so
+#./lib/gconv/IBM905.so
+#./lib/gconv/IBM9066.so
+#./lib/gconv/IBM918.so
+#./lib/gconv/IBM921.so
+#./lib/gconv/IBM922.so
+#./lib/gconv/IBM930.so
+#./lib/gconv/IBM932.so
+#./lib/gconv/IBM933.so
+#./lib/gconv/IBM935.so
+#./lib/gconv/IBM937.so
+#./lib/gconv/IBM939.so
+#./lib/gconv/IBM943.so
+#./lib/gconv/IBM9448.so
+#./lib/gconv/IEC_P27-1.so
+#./lib/gconv/INIS-8.so
+#./lib/gconv/INIS-CYRILLIC.so
+#./lib/gconv/INIS.so
+#./lib/gconv/ISIRI-3342.so
+#./lib/gconv/ISO_10367-BOX.so
+#./lib/gconv/ISO_11548-1.so
+#./lib/gconv/ISO-2022-CN-EXT.so
+#./lib/gconv/ISO-2022-CN.so
+#./lib/gconv/ISO-2022-JP-3.so
+#./lib/gconv/ISO-2022-JP.so
+#./lib/gconv/ISO-2022-KR.so
+#./lib/gconv/ISO_2033.so
+#./lib/gconv/ISO_5427-EXT.so
+#./lib/gconv/ISO_5427.so
+#./lib/gconv/ISO_5428.so
+#./lib/gconv/ISO646.so
+#./lib/gconv/ISO_6937-2.so
+#./lib/gconv/ISO_6937.so
+#./lib/gconv/ISO8859-10.so
+#./lib/gconv/ISO8859-11.so
+#./lib/gconv/ISO8859-13.so
+#./lib/gconv/ISO8859-14.so
+#./lib/gconv/ISO8859-15.so
+#./lib/gconv/ISO8859-16.so
+#./lib/gconv/ISO8859-1.so
+#./lib/gconv/ISO8859-2.so
+#./lib/gconv/ISO8859-3.so
+#./lib/gconv/ISO8859-4.so
+#./lib/gconv/ISO8859-5.so
+#./lib/gconv/ISO8859-6.so
+#./lib/gconv/ISO8859-7.so
+#./lib/gconv/ISO8859-8.so
+#./lib/gconv/ISO8859-9E.so
+#./lib/gconv/ISO8859-9.so
+#./lib/gconv/ISO-IR-197.so
+#./lib/gconv/ISO-IR-209.so
+#./lib/gconv/JOHAB.so
+#./lib/gconv/KOI8-R.so
+#./lib/gconv/KOI8-RU.so
+#./lib/gconv/KOI-8.so
+#./lib/gconv/KOI8-T.so
+#./lib/gconv/KOI8-U.so
+#./lib/gconv/LATIN-GREEK-1.so
+#./lib/gconv/LATIN-GREEK.so
+#./lib/gconv/libCNS.so
+#./lib/gconv/libGB.so
+#./lib/gconv/libISOIR165.so
+#./lib/gconv/libJIS.so
+#./lib/gconv/libJISX0213.so
+#./lib/gconv/libKSC.so
+#./lib/gconv/MAC-CENTRALEUROPE.so
+#./lib/gconv/MACINTOSH.so
+#./lib/gconv/MAC-IS.so
+#./lib/gconv/MAC-SAMI.so
+#./lib/gconv/MAC-UK.so
+#./lib/gconv/MIK.so
+#./lib/gconv/NATS-DANO.so
+#./lib/gconv/NATS-SEFI.so
+#./lib/gconv/PT154.so
+#./lib/gconv/RK1048.so
+#./lib/gconv/SAMI-WS2.so
+#./lib/gconv/SHIFT_JISX0213.so
+#./lib/gconv/SJIS.so
+#./lib/gconv/T.61.so
+#./lib/gconv/TCVN5712-1.so
+#./lib/gconv/TIS-620.so
+#./lib/gconv/TSCII.so
+#./lib/gconv/UHC.so
+#./lib/gconv/UNICODE.so
+#./lib/gconv/UTF-16.so
+#./lib/gconv/UTF-32.so
+#./lib/gconv/UTF-7.so
+#./lib/gconv/VISCII.so
+#./lib/gcrt1.o
+./lib/ld-2.18.so
+./lib/ld-linux-armhf.so.3
+#./lib/ldscripts/armelfb_linux_eabi.x
+#./lib/ldscripts/armelfb_linux_eabi.xbn
+#./lib/ldscripts/armelfb_linux_eabi.xc
+#./lib/ldscripts/armelfb_linux_eabi.xd
+#./lib/ldscripts/armelfb_linux_eabi.xdc
+#./lib/ldscripts/armelfb_linux_eabi.xdw
+#./lib/ldscripts/armelfb_linux_eabi.xn
+#./lib/ldscripts/armelfb_linux_eabi.xr
+#./lib/ldscripts/armelfb_linux_eabi.xs
+#./lib/ldscripts/armelfb_linux_eabi.xsc
+#./lib/ldscripts/armelfb_linux_eabi.xsw
+#./lib/ldscripts/armelfb_linux_eabi.xu
+#./lib/ldscripts/armelfb_linux_eabi.xw
+#./lib/ldscripts/armelf_linux_eabi.x
+#./lib/ldscripts/armelf_linux_eabi.xbn
+#./lib/ldscripts/armelf_linux_eabi.xc
+#./lib/ldscripts/armelf_linux_eabi.xd
+#./lib/ldscripts/armelf_linux_eabi.xdc
+#./lib/ldscripts/armelf_linux_eabi.xdw
+#./lib/ldscripts/armelf_linux_eabi.xn
+#./lib/ldscripts/armelf_linux_eabi.xr
+#./lib/ldscripts/armelf_linux_eabi.xs
+#./lib/ldscripts/armelf_linux_eabi.xsc
+#./lib/ldscripts/armelf_linux_eabi.xsw
+#./lib/ldscripts/armelf_linux_eabi.xu
+#./lib/ldscripts/armelf_linux_eabi.xw
+#./lib/lib
+./lib/libanl-2.18.so
+#./lib/libanl.a
+#./lib/libanl_pic.a
+#./lib/libanl_pic.map
+./lib/libanl.so
+./lib/libanl.so.1
+#./lib/libasan.a
+#./lib/libasan.la
+#./lib/libasan_preinit.o
+./lib/libasan.so
+./lib/libasan.so.0
+./lib/libasan.so.0.0.0
+#./lib/libatomic.a
+#./lib/libatomic.la
+./lib/libatomic.so
+./lib/libatomic.so.1
+./lib/libatomic.so.1.0.0
+./lib/libBrokenLocale-2.18.so
+#./lib/libBrokenLocale.a
+#./lib/libBrokenLocale_pic.a
+#./lib/libBrokenLocale_pic.map
+./lib/libBrokenLocale.so
+./lib/libBrokenLocale.so.1
+#./lib/libbsd-compat.a
+./lib/libc-2.18.so
+#./lib/libc.a
+./lib/libcidn-2.18.so
+#./lib/libcidn_pic.a
+#./lib/libcidn_pic.map
+./lib/libcidn.so
+./lib/libcidn.so.1
+#./lib/libc_nonshared.a
+#./lib/libc_pic.a
+#./lib/libc_pic.map
+./lib/libc_pic/sofini.o
+./lib/libc_pic/soinit.o
+./lib/libcrypt-2.18.so
+#./lib/libcrypt.a
+#./lib/libcrypt_pic.a
+#./lib/libcrypt_pic.map
+./lib/libcrypt.so
+./lib/libcrypt.so.1
+./lib/libc.so
+./lib/libc.so.6
+./lib/libdl-2.18.so
+#./lib/libdl.a
+#./lib/libdl_pic.a
+#./lib/libdl_pic.map
+./lib/libdl.so
+./lib/libdl.so.2
+#./lib/libg.a
+./lib/libgcc_s.so
+./lib/libgcc_s.so.1
+#./lib/libiberty.a
+#./lib/libieee.a
+#./lib/libitm.a
+#./lib/libitm.la
+./lib/libitm.so
+./lib/libitm.so.1
+./lib/libitm.so.1.0.0
+#./lib/libitm.spec
+./lib/libm-2.18.so
+#./lib/libm.a
+#./lib/libmcheck.a
+./lib/libmemusage.so
+#./lib/libm_pic.a
+#./lib/libm_pic.map
+./lib/libm.so
+./lib/libm.so.6
+./lib/libnsl-2.18.so
+./lib/libnsl.a
+#./lib/libnsl_pic.a
+#./lib/libnsl_pic.map
+./lib/libnsl.so
+./lib/libnsl.so.1
+./lib/libnss_compat-2.18.so
+#./lib/libnss_compat_pic.a
+#./lib/libnss_compat_pic.map
+./lib/libnss_compat.so
+./lib/libnss_compat.so.2
+./lib/libnss_db-2.18.so
+#./lib/libnss_db_pic.a
+#./lib/libnss_db_pic.map
+./lib/libnss_db.so
+./lib/libnss_db.so.2
+./lib/libnss_dns-2.18.so
+#./lib/libnss_dns_pic.a
+#./lib/libnss_dns_pic.map
+./lib/libnss_dns.so
+./lib/libnss_dns.so.2
+./lib/libnss_files-2.18.so
+./lib/libnss_files_pic.a
+./lib/libnss_files_pic.map
+./lib/libnss_files.so
+./lib/libnss_files.so.2
+./lib/libnss_hesiod-2.18.so
+#./lib/libnss_hesiod_pic.a
+#./lib/libnss_hesiod_pic.map
+./lib/libnss_hesiod.so
+./lib/libnss_hesiod.so.2
+./lib/libnss_nis-2.18.so
+#./lib/libnss_nis_pic.a
+#./lib/libnss_nis_pic.map
+./lib/libnss_nisplus-2.18.so
+#./lib/libnss_nisplus_pic.a
+#./lib/libnss_nisplus_pic.map
+./lib/libnss_nisplus.so
+./lib/libnss_nisplus.so.2
+./lib/libnss_nis.so
+./lib/libnss_nis.so.2
+./lib/libpcprofile.so
+./lib/libpthread-2.18.so
+#./lib/libpthread.a
+#./lib/libpthread_nonshared.a
+./lib/libpthread.so
+./lib/libpthread.so.0
+./lib/libresolv-2.18.so
+./lib/libresolv.a
+./lib/libresolv_pic.a
+./lib/libresolv_pic.map
+./lib/libresolv.so
+./lib/libresolv.so.2
+#./lib/librpcsvc.a
+./lib/librt-2.18.so
+#./lib/librt.a
+#./lib/librt_pic.a
+#./lib/librt_pic.map
+./lib/librt.so
+./lib/librt.so.1
+./lib/libSegFault.so
+#./lib/libstdc++.a
+#./lib/libstdc++.la
+./lib/libstdc++.so
+./lib/libstdc++.so.6
+./lib/libstdc++.so.6.0.18
+./lib/libstdc++.so.6.0.18-gdb.py
+#./lib/libsupc++.a
+#./lib/libsupc++.la
+./lib/libthread_db-1.0.so
+#./lib/libthread_db_pic.a
+#./lib/libthread_db_pic.map
+./lib/libthread_db.so
+./lib/libthread_db.so.1
+#./lib/libtirpc.a
+#./lib/libtirpc.la
+./lib/libtirpc.so
+./lib/libtirpc.so.1
+./lib/libtirpc.so.1.0.10
+./lib/libutil-2.18.so
+#./lib/libutil.a
+#./lib/libutil_pic.a
+#./lib/libutil_pic.map
+./lib/libutil.so
+./lib/libutil.so.1
+#./lib/Mcrt1.o
+#./lib/Scrt1.o
+EOF
+}
+
+#
+#对相对路径同步方式的封装。参数1是同步子函数，参数2是原文件或文件夹，参数3是目录文件或文件夹。这个函数目的是方便差异化相对路径同步。
+#
+relative_rsync_wrap(){
+	echo "rsync_files_with_relative $1 $2 $3"
+	if [ -z "$1" -o ! -d "$2"  -o -z "$3" ]; then
+		echo "rsync_files_with_relative: *$1*$2*$3"
+		exit 1
+	fi
+	eval "$1 $2 $3"
+}
+
+#
+#接列表进行相对路径同步
+#
+relative_rsync_list() {
+	echo "relative_rsync_list $1 $2 $3"
+	if [ ! -d "$1" -o -z "$2" -o ! -r "$3" ]; then
+		echo "relative_rsync_list: *$1*$2*$3"
+		exit 1
+	fi
+
+	local SRC_DIR="$1"
+	local DST_DIR="$curdir/$2"
+	local FILE_LIST="$3"
+
+	while read line
+	do
+		if [ -z "$line" -o "${line:0:1}" == "#" ]; then 
+			continue
+		fi
+		
+		rsync -aR "$SRC_DIR/$line" "$DST_DIR/"
+	done < "$FILE_LIST"
+}
+
+#
+#其它额外操作
+#
+enigma2_other_op(){
+	echo "enigma2_other_op $1"
+	if [ -z "$1" -o ! -d "$curdir/$1" ]; then
+		echo "enigma2_other_op: *$1*$curdir/$1"
+		exit 1
+	fi
+
+	local DST_DIR="$curdir/$1"
+
+	#修改权限
+	mkdir -p "$DST_DIR/mnt"
+	mkdir -p "$DST_DIR/opt"
+	mkdir -p "$DST_DIR/proc"
+	mkdir -p "$DST_DIR/sys"
+	rm "$DST_DIR/etc/rc3.d/S20usbtunerhelper"
+	rm "$DST_DIR/etc/rc3.d/S21avahi-daemon"
+	tar -zcf rootfs.enigma2.tar.gz -C "$DST_DIR" ./
+}
+
+#
+#制作enigma2根文件系统
+#
+setup_enigma2(){
+	echo "start setup_enigma2"
+	del_files "$ENIGMA2_ROOTFS"
+	rsync_files "$ENIGMA2_ORIGIN_ROOTFS/" "$ENIGMA2_ROOTFS/"
+	uncompress_file "$ENIGMA2_ADD_ON_TARBALL" "$ENIGMA2_ROOTFS"
+	#rsync_files "$ROOTFS_MEMTEST_BIN/" "$ENIGMA2_ROOTFS/"
+	relative_rsync_wrap "relative_rsync_enigma2_lib" "$TOOLCHAIN_DIR" "$ENIGMA2_ROOTFS"
+	rsync_files "$X8_MODULES/lib/" "$ENIGMA2_ROOTFS/lib/"
+	rsync_files "$ENIGMA2_E2PROC_KO" "$ENIGMA2_ROOTFS/lib/modules/2.6.34/extra/"
+	rsync_files "$ENIGMA2_LINUXDVB_KO" "$ENIGMA2_ROOTFS/lib/modules/2.6.34/extra/"
+	add_directfb "$ENIGMA2_ROOTFS"
+	start_enigma2_patch "$ENIGMA2_ROOTFS"
+	add_enigma2_cctv_db "$ENIGMA2_ROOTFS"
+	enigma2_other_op "$ENIGMA2_ROOTFS"
+}
+
+#
+#解压tar包到目标文件夹。参数2的目标文件夹必须是以当前目录开始的相对路径
+#
+uncompress_file(){
+	echo "uncompress_file $1 $2"
+	if [ ! -f "$1" -o -z "$2" ]; then
+		echo "uncompress_file: *$1*$2"
+		exit 1
+	fi
+
+	local TAR_BALL="$1"
+	local DST_DIR="$curdir/$2"
+
+	mkdir -p "$DST_DIR"
+	tar xf "$TAR_BALL" -C "$DST_DIR"
+}
+
+#
+#替换网络配置
+#
+replace_network_config(){
+	echo "replace_network_config $1"
+	if [ -z "$1" -o ! -d "$curdir/$1" ]; then
+		echo "replace_network_config: *$1*$curdir/$1"
+		exit 1
+	fi
+
+	local IPKG_INSTROOT="$curdir/$1"
+
+#	configfile="$IPKG_INSTROOT/etc_config_network.patch"
+#	cat > "$configfile" << EOF
+#--- rootfs/etc/config/network	2013-08-28 15:33:41.000000000 +0800
+#+++ rootfs/etc/config/network	2013-10-22 16:13:36.000000000 +0800
+#@@ -23,7 +23,12 @@
+# 
+# config interface 'wan'
+# 	option ifname 'eth0'
+#-	option proto 'dhcp'
+#+	option proto 'static'
+#+	option ipaddr '192.168.1.212'
+#+	option netmask '255.255.255.0'
+#+	option gateway '192.168.1.1'
+#+	option dns '192.168.1.1'
+#+
+# 
+# config interface 'wan6'
+# 	option ifname '@wan'
+#EOF
+#
+#	pushd "$IPKG_INSTROOT"
+#	patch -p1 < $configfile
+#	popd
+#	rm $configfile
+
+
+#	mkdir -p "$DST_DIR/etc/Wireless/RT2870AP/"
+#
+#	configfile="$DST_DIR/etc/Wireless/RT2870AP/RT2870AP.dat"
+#	cat > "$configfile" << EOF
+##The word of "Default" must not be removed
+#Default
+#CountryRegion=5
+#CountryRegionABand=7
+#CountryCode=TW
+#BssidNum=1
+#SSID=RT2860AP
+#WirelessMode=9
+#TxRate=0
+#Channel=11
+#BasicRate=15
+#BeaconPeriod=100
+#DtimPeriod=1
+#TxPower=100
+#DisableOLBC=0
+#BGProtection=0
+#TxAntenna=
+#RxAntenna=
+#TxPreamble=0
+#RTSThreshold=2347
+#FragThreshold=2346
+#TxBurst=1
+#PktAggregate=0
+#TurboRate=0
+#WmmCapable=0
+#APSDCapable=0
+#DLSCapable=0
+#APAifsn=3;7;1;1
+#APCwmin=4;4;3;2
+#APCwmax=6;10;4;3
+#APTxop=0;0;94;47
+#APACM=0;0;0;0
+#BSSAifsn=3;7;2;2
+#BSSCwmin=4;4;3;2
+#BSSCwmax=10;10;4;3
+#BSSTxop=0;0;94;47
+#BSSACM=0;0;0;0
+#AckPolicy=0;0;0;0
+#NoForwarding=0
+#NoForwardingBTNBSSID=0
+#HideSSID=0
+#StationKeepAlive=0
+#ShortSlot=1
+#AutoChannelSelect=0
+#IEEE8021X=0
+#IEEE80211H=0
+#CSPeriod=10
+#WirelessEvent=0
+#IdsEnable=0
+#AuthFloodThreshold=32
+#AssocReqFloodThreshold=32
+#ReassocReqFloodThreshold=32
+#ProbeReqFloodThreshold=32
+#DisassocFloodThreshold=32
+#DeauthFloodThreshold=32
+#EapReqFooldThreshold=32
+#PreAuth=0
+#AuthMode=OPEN
+#EncrypType=NONE
+#RekeyInterval=0
+#RekeyMethod=DISABLE
+#PMKCachePeriod=10
+#WPAPSK=
+#DefaultKeyID=1
+#Key1Type=0
+#Key1Str=
+#Key2Type=0
+#Key2Str=
+#Key3Type=0
+#Key3Str=
+#Key4Type=0
+#Key4Str=
+#HSCounter=0
+#AccessPolicy0=0
+#AccessControlList0=
+#AccessPolicy1=0
+#AccessControlList1=
+#AccessPolicy2=0
+#AccessControlList2=
+#AccessPolicy3=0
+#AccessControlList3=
+#WdsEnable=0
+#WdsEncrypType=NONE
+#WdsList=
+#WdsKey=
+#RADIUS_Server=192.168.2.3
+#RADIUS_Port=1812
+#RADIUS_Key=ralink
+#own_ip_addr=192.168.5.234
+#EAPifname=br0
+#PreAuthifname=br0
+#HT_HTC=0
+#HT_RDG=0
+#HT_EXTCHA=0
+#HT_LinkAdapt=0
+#HT_OpMode=0
+#HT_MpduDensity=5
+#HT_BW=1
+#HT_AutoBA=1
+#HT_AMSDU=0
+#HT_BAWinSize=64
+#HT_GI=1
+#HT_MCS=33
+#MeshId=MESH
+#MeshAutoLink=1
+#MeshAuthMode=OPEN
+#MeshEncrypType=NONE
+#MeshWPAKEY=
+#MeshDefaultkey=1
+#MeshWEPKEY=
+#WscManufacturer=
+#WscModelName=
+#WscDeviceName=
+#WscModelNumber=
+#WscSerialNumber=
+#RadioOn=1
+#EOF
+#
+#
+#	configfile="$DST_DIR/etc/Wireless/RT2870AP/RT2870APCard.dat"
+#	cat > "$configfile" << EOF
+##The word of "Default" must not be removed, maximum 32 cards, 00 ~ 31
+#Default
+#
+##CARDID, MAC, CARDTYPE
+#SELECT=CARDTYPE
+#
+#00CARDID=/etc/Wireless/RT2870AP/RT2870AP1.dat
+#01CARDID=/etc/Wireless/RT2870AP/RT2870AP2.dat
+#02CARDID=/etc/Wireless/RT2870AP/RT2870AP3.dat
+#
+#00MAC00:0E:2E:C3:D0:48=/etc/Wireless/RT2870AP/RT2870AP1.dat
+#01MAC00:40:F4:FF:AA:40=/etc/Wireless/RT2870AP/RT2870AP2.dat
+#02MAC00:0C:43:10:11:5C=/etc/Wireless/RT2870AP/RT2870AP3.dat
+#
+#00CARDTYPEbgn=/etc/Wireless/RT2870AP/RT2870AP1.dat
+#01CARDTYPEbgn=/etc/Wireless/RT2870AP/RT2870AP2.dat
+#02CARDTYPEabgn=/etc/Wireless/RT2870AP/RT2870AP3.dat
+#
+#
+#
+#EOF
+#
+#	rsync_files "$ENIGMA2_RTUTIL5370AP_KO" "$1/lib/modules/2.6.34/pnx/"
+#	rsync_files "$ENIGMA2_RT5370AP_KO" "$1/lib/modules/2.6.34/pnx/"
+#	rsync_files "$ENIGMA2_RTNET5370AP_KO" "$1/lib/modules/2.6.34/pnx/"
+#	rsync_files "$ENIGMA2_USB_SERIAL_KO" "$1/lib/modules/2.6.34/pnx/"
+#	rsync_files "$ENIGMA2_USB_SERIAL_OPTION_KO" "$1/lib/modules/2.6.34/pnx/"
+
+
+
+	configfile="$IPKG_INSTROOT/change-ppp-sh.patch"
+	cat > "$configfile" << EOF
+--- rootfs/lib/netifd/proto/ppp.sh	2014-03-07 14:07:44.000000000 +0800
++++ rootfs/lib/netifd/proto/ppp.sh	2014-04-02 16:19:15.000000000 +0800
+@@ -9,16 +9,16 @@
+ }
+ 
+ ppp_generic_init_config() {
+-	proto_config_add_string "username"
+-	proto_config_add_string "password"
+-	proto_config_add_string "keepalive"
+-	proto_config_add_int "demand"
+-	proto_config_add_string "pppd_options"
+-	proto_config_add_string "connect"
+-	proto_config_add_string "disconnect"
+-	proto_config_add_boolean "ipv6"
+-	proto_config_add_boolean "authfail"
+-	proto_config_add_int "mtu"
++	proto_config_add_string username
++	proto_config_add_string password
++	proto_config_add_string keepalive
++	proto_config_add_int demand
++	proto_config_add_string pppd_options
++	proto_config_add_string 'connect:file'
++	proto_config_add_string 'disconnect:file'
++	proto_config_add_boolean ipv6
++	proto_config_add_boolean authfail
++	proto_config_add_int mtu
+ }
+ 
+ ppp_generic_setup() {
+@@ -55,7 +55,7 @@
+ 		ip-down-script /lib/netifd/ppp-down \\
+ 		ipv6-down-script /lib/netifd/ppp-down \\
+ 		\${mtu:+mtu \$mtu mru \$mtu} \\
+-		\$pppd_options "\$@"
++		"\$@" \$pppd_options
+ }
+ 
+ ppp_generic_teardown() {
+@@ -190,7 +190,7 @@
+ 
+ 	local load
+ 	for module in slhc ppp_generic ppp_async ppp_mppe ip_gre gre pptp; do
+-		grep -q "\$module" /proc/modules && continue
++		grep -q "^\$module " /proc/modules && continue
+ 		/sbin/insmod \$module 2>&- >&-
+ 		load=1
+ 	done
+EOF
+
+	pushd "$IPKG_INSTROOT"
+	patch -p1 < $configfile
+	popd
+	rm $configfile
+}
+
+#
+#openwrt网络配置
+#
+openwrt_network_config(){
+	echo "openwrt_network_config $1"
+	if [ -z "$1" -o ! -d "$curdir/$1" ]; then
+		echo "openwrt_network_config: *$1*$curdir/$1"
+		exit 1
+	fi
+
+	local DST_DIR="$curdir/$1"
+	
+	#rm "$DST_DIR/etc/init.d/firewall"
+	#rm "$DST_DIR/etc/init.d/dvbnet"
+	#rm "$DST_DIR/etc/localtime"
+	replace_network_config "$1"
+
+}
+
+#
+#制作openwrt根文件系统
+#
+setup_openwrt(){
+	echo "start setup_openwrt"
+	if [ ! -d "$OPENWRT_ORIGIN_ROOTFS" -o ! -d "$ENIGMA2_PLATFORM_FIRMWARE" -o ! -d "$ENIGMA2_DVB_MODULE" ]; then
+		echo "setup_openwrt: *$OPENWRT_ORIGIN_ROOTFS*$ENIGMA2_PLATFORM_FIRMWARE*$ENIGMA2_DVB_MODULE"
+		exit 1
+	fi
+
+	del_files "$OPENWRT_ROOTFS"
+	#uncompress_file "$OPENWRT_TARBALL" "$OPENWRT_ROOTFS"
+	rsync_files "$OPENWRT_ORIGIN_ROOTFS/" "$OPENWRT_ROOTFS/"
+	rsync_files "$ENIGMA2_PLATFORM_FIRMWARE/" "$OPENWRT_ROOTFS/lib/firmware/"
+	rsync_files "$ENIGMA2_DVB_MODULE/" "$OPENWRT_ROOTFS/lib/modules/2.6.34/pnx/"
+	cp -a "$OPENWRT_ROOTFS/etc/config" "$OPENWRT_ROOTFS/etc/config.default"
+	tar -zcf "rootfs.openwrt.tar.gz" -C "$OPENWRT_ROOTFS" ./
+}
+
+#
+#在参数1提供的文件夹下查找包含名字为参数2的文件，保存到参数3提供的文件列表中
+#
+lookup_file(){
+	echo "lookup_file $1 $2 $3"
+	if [ -z "$1" -o ! -d "$curdir/$1" -o -z "$2" -o -z "$3" ]; then
+		echo "lookup_file: *$1*$2*$3"
+		exit 1
+	fi
+
+	local START_DIR="$curdir/$1"
+	local WORD="$2"
+	local FILE_INFO="$3"
+
+	#if [ -z "$FILE_INFO" ]; then
+	#	find "$START_DIR" -name "$WORD" 2>/dev/null
+	#	find "$START_DIR" -type l -exec ls -l "{}" \;|grep "$WORD"|awk '{print $8}' 2>/dev/null
+	#else
+		find "$START_DIR" \( -type f -o -type l \) -exec ls -l {} \;|grep "$WORD"|grep "/.*" -o|awk '{print $1}' 2>/dev/null > "$FILE_INFO"
+	#fi
+}
+
+#
+#将参数1提供的列表中的文件删除。
+#
+del_files_from_list(){
+	echo "del_files_from_list $1"
+	if [ ! -f "$1" ]; then
+		echo "del_files_from_list: *$1"
+		return
+	fi
+
+	local RM_LIST="$1"
+
+	while read line
+	do
+		if [ -z "$line" -o "${line:0:1}" == "#" ]; then 
+			continue
+		fi
+
+		rm "$line"
+	done < "$RM_LIST"
+	rm "$RM_LIST"
+}
+
+#
+#以参数1提供的文件夹为基础，在参数2提供的文件里找基础文件夹中不存在的文件，保存列表到参数3提供的文件列表中;其中参数1,2都必须是从当前文件夹开始的相对路径
+#
+gen_unique_flist(){
+	echo "gen_unique_flist $1 $2 $3"
+	if [ -z "$1" -o ! -d "$curdir/$1" -o -z "$2" -o ! -d "$curdir/$2" -o -z "$3" ]; then
+		echo "gen_unique_flist: *$1*$2*$3"
+		exit 1
+	fi
+	
+	local BASE_DIR="$curdir/$1"
+	local DST_DIR="$curdir/$2"
+	local FILE_LIST="$3"
+
+	pushd "$BASE_DIR"
+	find . \( -type f -o -type l \) -exec echo "^{}^" \;|sort > "$BASE_DIR.files"
+	popd
+	pushd "$DST_DIR"
+	find . \( -type f -o -type l \) -exec echo "^{}^" \;|sort > "$DST_DIR.files"
+	popd
+
+	grep -F -v -f "$BASE_DIR.files" "$DST_DIR.files" | sed 's:\^::g' > "$FILE_LIST"
+
+	rm "$BASE_DIR.files"
+	rm "$DST_DIR.files"
+}
+
+#
+#以参数1提供的样式文件为参考，处理参数2提供的文件列表，最后生成参数3提供的列表文件。以这个列表文件为依据，同步参数4提供的文件到参数5提供的文件夹
+#
+update_unique_files(){
+	echo "update_unique_files $1 $2 $3 $4 $5"
+	if [ ! -f "$1" -o ! -f "$2" -o -z "$3" -o -z "$4" -o -z "$5" ]; then
+		echo "update_unique_files: *$1*$2*$3*$4*$5"
+		exit 1
+	fi
+	local PATTERN_FILE="$1"
+	local RESULT_FILE="$2"
+	local OUTPUT_FILE="$curdir/$3"
+	local SRC_DIR="$4"
+	local DST_DIR="$5"
+
+	grep "^#.*$" "$PATTERN_FILE" |grep -o "[^#].*$" > "$PATTERN_FILE.pattern"
+
+	sed -i 's/^.*$/\^\0\^/g' "$RESULT_FILE"
+	sed -i 's/^.*$/\^\0\^/g' "$PATTERN_FILE.pattern"
+
+	grep -Ff "$RESULT_FILE" "$PATTERN_FILE.pattern" > "$OUTPUT_FILE"
+	mv "$OUTPUT_FILE" "$PATTERN_FILE.pattern"
+
+	echo -n "" > "$OUTPUT_FILE"
+	while read line
+	do
+		if [ -z "$line" -o "${line:0:1}" == "#" ]; then 
+			continue
+		fi
+
+		if ( grep -F "$line" "$PATTERN_FILE.pattern" >/dev/null 2>&1 ); then
+			echo "$line" | sed 's/^\^\(.*\)\^$/#\1/g' >> "$OUTPUT_FILE"
+		else
+			echo "$line" | sed 's/^\^\(.*\)\^$/\1/g' >> "$OUTPUT_FILE"
+		fi
+	done < "$RESULT_FILE"
+
+	sed -i 's/^\^\(.*\)\^$/\1/g' "$RESULT_FILE"
+
+	del_files "$DST_DIR"
+	relative_rsync_list "$SRC_DIR" "$DST_DIR" "$OUTPUT_FILE"
+
+	rm "$PATTERN_FILE.pattern"
+}
+
+#
+#按参数2提供的字串，在参数1指向的目录里删除文件
+#
+del_files_by_name(){
+	echo "del_files_by_name $1 $2"
+	if [ -z "$1" -o -z "$2" ]; then
+		echo "del_files_by_name: *$1*$2"
+		exit 1
+	fi
+
+	local SRC_DIR="$1"
+	local WORD="$2"
+	lookup_file "$SRC_DIR" "$WORD" "rmlist"
+	del_files_from_list "rmlist"
+}
+
+#
+#根据提供的字串，删除enigma2根文件系统中文件名中或链接中含有这个字串的文件。
+#
+del_enigma2_files_by_name(){
+	del_files_by_name "$ENIGMA2_ROOTFS" "busybox"
+	del_files_by_name "$ENIGMA2_ROOTFS" "tinylogin"
+}
+
+#
+#生成x8的配置文件
+#
+gen_x8_config(){
+	echo "gen_x8_config"
+	if [ -z "$1" -o ! -d "$curdir/$1" ]; then
+		echo "gen_x8_config: *$1"
+		exit 1
+	fi
+	local IPKG_INSTROOT="$curdir/$1"
+	local configfile
+	
+
+	configfile="$curdir/enable"
+	cat > "$configfile" << EOF
+#!/bin/sh
+
+enable() {
+	local IPKG_INSTROOT="$IPKG_INSTROOT"
+	if [ ! -x "\$1" ]; then
+		echo "enable: \$1 is not a execuable file"
+	fi
+
+	initscript="\$1"
+
+	. "\$initscript"
+
+	name="\$(basename "\${initscript}")"
+	[ -n "\$START" -o -n "\$STOP" ] || {
+		echo "\$initscript does not have a START or STOP value"
+		return 1
+	}
+	[ "\$START" ] && ln -sf "../init.d/\$name" "\$IPKG_INSTROOT/etc/rc.d/S\${START}\${name##S[0-9][0-9]}"
+	[ "\$STOP"  ] && ln -sf "../init.d/\$name" "\$IPKG_INSTROOT/etc/rc.d/K\${STOP}\${name##K[0-9][0-9]}"
+}
+
+enable "\$1"
+EOF
+	chmod a+x "$configfile"
+
+	configfile="$IPKG_INSTROOT/etc/init.d/alignment"
+	cat > "$configfile" << EOF
+#!/bin/sh /etc/rc.common
+
+START=10
+
+start() {
+	if [ -e /proc/cpu/alignment ] ; then
+	   if [ \$(uname -m) = "armv7l" ]; then
+	       echo "0" > /proc/cpu/alignment
+	   else
+	       echo "3" > /proc/cpu/alignment
+	   fi
+	fi
+	rm /etc/localtime
+}
+EOF
+	chmod a+x "$configfile"
+	./enable "$configfile"
+
+
+
+	configfile="$IPKG_INSTROOT/etc/init.d/devices"
+	cat > "$configfile" << EOF
+#!/bin/sh /etc/rc.common
+
+START=11
+
+start() {
+#
+# Devfs handling script.  Since we arent running devfsd due to various reasons
+# which I will not lay out here, we need to create some links for compatibility.
+
+	. /etc/default/rcS
+
+# exit without doing anything if udev is active
+	if test -e /dev/.udev -o -e /dev/.udevdb; then
+		exit 0
+	fi
+
+	if test -e /dev/.devfsd
+	then
+		:
+	else
+
+		touch /dev/.udev
+		mkdir -p /dev/fb
+		ln -s /dev/fb0 /dev/fb/0
+		ln -sf /proc/self/fd /dev/fd
+	fi
+}
+EOF
+	chmod a+x "$configfile"
+	./enable "$configfile"
+
+
+#	configfile="$IPKG_INSTROOT/etc/init.d/devpts"
+#	cat > "$configfile" << EOF
+##!/bin/sh /etc/rc.common
+#
+#START=11
+#
+#start() {
+#	. /etc/default/devpts
+#
+#	test "\`uname -s\`" = "Linux" || exit 0
+#
+##
+##	First find out if devpts is available. Also check if devfs
+##	is already mounted - in that case we don't want to use devpts.
+##
+#	if test ! -e /dev/.devfsd && ( grep -q devpts /proc/filesystems )
+#	then
+#		#
+#		#	Create multiplexor device.
+#		#
+#		test -c /dev/ptmx || mknod -m 666 /dev/ptmx c 5 2
+#
+#		#
+#		#	Mount /dev/pts if needed.
+#		#
+#		if ( ! grep -q devpts /proc/mounts )
+#		then
+#			mkdir -p /dev/pts
+#			mount -t devpts devpts /dev/pts -ogid=\${TTYGRP},mode=\${TTYMODE}
+#		fi
+#	fi
+#
+#	exit 0
+#}
+#EOF
+#	chmod a+x "$configfile"
+#	./enable "$configfile"
+
+
+
+	configfile="$IPKG_INSTROOT/etc/init.d/bootlogo"
+	cat > "$configfile" << EOF
+#!/bin/sh /etc/rc.common
+
+START=18
+
+start() {
+# thoug not actually a bootlogo task, set the correct videomode before showing the bootlogo
+	cat /etc/videomode > /proc/stb/video/videomode
+
+	/usr/bin/showiframe /usr/share/bootlogo.mvi
+}
+EOF
+	chmod a+x "$configfile"
+	./enable "$configfile"
+
+
+#	configfile="$IPKG_INSTROOT/etc/init.d/rt5370ap"
+#	cat > "$configfile" << EOF
+##!/bin/sh /etc/rc.common
+#
+#START=99
+#
+#start() {
+#	insmod /lib/modules/2.6.34/pnx/rtutil5370ap.ko
+#	insmod /lib/modules/2.6.34/pnx/rt5370ap.ko
+#	insmod /lib/modules/2.6.34/pnx/rtnet5370ap.ko
+#}
+#EOF
+#	chmod a+x "$configfile"
+#	./enable "$configfile"
+
+
+
+#root.*
+#grep -vxf owpw e2pw
+	configfile="$IPKG_INSTROOT/etc/passwd"
+	cat > "$configfile" << EOF
+root:x:0:0:root:/:/bin/ash
+daemon:*:1:1:daemon:/var:/bin/false
+ftp:*:55:55:ftp:/home/ftp:/bin/false
+network:*:101:101:network:/var:/bin/false
+nobody:*:65534:65534:nobody:/var:/bin/false
+bin:*:2:2:bin:/bin:/bin/false
+sys:*:3:3:sys:/dev:/bin/false
+sync:*:4:65534:sync:/bin:/bin/sync
+games:*:5:60:games:/usr/games:/bin/false
+man:*:6:12:man:/var/cache/man:/bin/false
+lp:*:7:7:lp:/var/spool/lpd:/bin/false
+mail:*:8:8:mail:/var/mail:/bin/false
+news:*:9:9:news:/var/spool/news:/bin/false
+uucp:*:10:10:uucp:/var/spool/uucp:/bin/false
+proxy:*:13:13:proxy:/bin:/bin/false
+www-data:*:33:33:www-data:/var/www:/bin/false
+backup:*:34:34:backup:/var/backups:/bin/false
+list:*:38:38:Mailing List Manager:/var/list:/bin/false
+irc:*:39:39:ircd:/var/run/ircd:/bin/false
+gnats:*:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/false
+avahi:x:500:64002:Avahi:/var/run/avahi-daemon:/bin/false
+messagebus:x:501:64003:Linux User,,,:/var/run/dbus:/bin/false
+EOF
+
+#s/\(^[^:]\+:[^:]\+:\)\(.*\)/\10:0:99999:7:::/g
+	configfile="$IPKG_INSTROOT/etc/shadow"
+	cat > "$configfile" << EOF
+root:x:0:0:99999:7:::
+daemon:*:0:0:99999:7:::
+ftp:*:0:0:99999:7:::
+network:*:0:0:99999:7:::
+nobody:*:0:0:99999:7:::
+bin:*:0:0:99999:7:::
+sys:*:0:0:99999:7:::
+sync:*:0:0:99999:7:::
+games:*:0:0:99999:7:::
+man:*:0:0:99999:7:::
+lp:*:0:0:99999:7:::
+mail:*:0:0:99999:7:::
+news:*:0:0:99999:7:::
+uucp:*:0:0:99999:7:::
+proxy:*:0:0:99999:7:::
+www-data:*:0:0:99999:7:::
+backup:*:0:0:99999:7:::
+list:*:0:0:99999:7:::
+irc:*:0:0:99999:7:::
+gnats:*:0:0:99999:7:::
+avahi:x:0:0:99999:7:::
+messagebus:x:0:0:99999:7:::
+EOF
+
+
+	configfile="$IPKG_INSTROOT/etc/group"
+	cat > "$configfile" << EOF
+root:x:0:
+daemon:x:1:
+adm:x:4:
+mail:x:8:
+audio:x:29:
+www-data:x:33:
+ftp:x:55:
+users:x:100:
+network:x:101:
+nogroup:x:65534:
+bin:*:2:
+sys:*:3:
+tty:*:5:
+disk:*:6:
+lp:*:7:
+news:*:9:
+uucp:*:10:
+man:*:12:
+proxy:*:13:
+kmem:*:15:
+dialout:*:20:
+fax:*:21:
+voice:*:22:
+cdrom:*:24:
+floppy:*:25:
+tape:*:26:
+sudo:*:27:
+dip:*:30:
+backup:*:34:
+operator:*:37:
+list:*:38:
+irc:*:39:
+src:*:40:
+gnats:*:41:
+shadow:*:42:
+utmp:*:43:
+video:*:44:
+sasl:*:45:
+plugdev:*:46:
+staff:*:50:
+games:*:60:
+mysql:*:64001:
+avahi:x:64002:
+messagebus:x:64003:
+netdev:x:64004:
+EOF
+
+
+
+	configfile="$IPKG_INSTROOT/etc/init.d/dbus-1"
+	cat > "$configfile" << EOF
+#!/bin/sh /etc/rc.common
+
+START=20
+#STOP=90
+
+SERVICE_DAEMONIZE=1
+
+SERVICE_WRITE_PID=1
+SERVICE_PID_FILE="/var/run/dbus/pid"
+
+DAEMON="/usr/bin/dbus-daemon"
+DESC="system message bus"
+
+start() {
+	echo "Starting \$DESC"
+	dbus-uuidgen --ensure
+	service_start "\$DAEMON"
+}
+
+stop() {
+	echo "Stopping \$DESC"
+	service_stop "\$DAEMON"
+}
+
+restart() {
+	echo "Restarting \$DESC"
+	stop
+	sleep 1
+	start
+}
+
+shutdown() {
+	echo "Shutting down \$DESC"
+	stop
+}
+
+
+reload() {
+	echo "Reloading \$DESC config"
+	dbus-send --print-reply --system --type=method_call \
+	    --dest=org.freedesktop.DBus \
+	    / org.freedesktop.DBus.ReloadConfig > /dev/null
+# hopefully this is enough time for dbus to reload it's config file.
+	echo "done."
+}
+EOF
+	chmod a+x "$configfile"
+	./enable "$configfile"
+
+##??syslogd failed
+#	configfile="$IPKG_INSTROOT/etc/init.d/syslogd"
+#	cat > "$configfile" << EOF
+##!/bin/sh /etc/rc.common
+#
+#START=21
+##STOP=89
+#
+#SERVICE_DAEMONIZE=1
+#
+#SERVICE_WRITE_PID=1
+#SERVICE_MATCH_NAME=1
+#
+#syslogd="/sbin/syslogd"
+#klogd="sbin/klogd"
+#SERVICE_SIG=1
+#DESC="Starting syslog"
+#
+#if [ -f /etc/syslog.conf ]; then
+#	. /etc/syslog.conf
+#	LOG_LOCAL=0
+#	LOG_REMOTE=0
+#	for D in \$DESTINATION; do
+#		if [ "\$D" = "buffer" ]; then
+#			SYSLOG_ARGS="\$SYSLOG_ARGS -C\$BUFFERSIZE"
+#			LOG_LOCAL=1
+#		elif [ "\$D" = "file" ]; then
+#			if [ -n "\$LOGFILE" ]; then
+#				SYSLOG_ARGS="\$SYSLOG_ARGS -O \$LOGFILE"
+#			fi
+#			if [ -n "\$ROTATESIZE" ]; then
+#				SYSLOG_ARGS="\$SYSLOG_ARGS -s \$ROTATESIZE"
+#			fi
+#			if [ -n "\$ROTATEGENS" ]; then
+#				SYSLOG_ARGS="\$SYSLOG_ARGS -b \$ROTATEGENS"
+#			fi
+#			LOCAL=0
+#		elif [ "\$D" = "remote" ]; then
+#			SYSLOG_ARGS="\$SYSLOG_ARGS -R \$REMOTE"
+#			LOG_REMOTE=1
+#		fi
+#	done
+#	if [ "\$LOG_LOCAL" = "1" -a "\$LOG_REMOTE" = "1" ]; then
+#		SYSLOG_ARGS="\$SYSLOG_ARGS -L"
+#	fi
+#	if [ -n "\$MARKINT" ]; then
+#		SYSLOG_ARGS="\$SYSLOG_ARGS -m \$MARKINT"
+#	fi
+#	if [ "\$REDUCE" = "yes" ]; then
+#		SYSLOG_ARGS="\$SYSLOG_ARGS -S"
+#	fi
+#else
+#	# default: log to 16K shm circular buffer
+#	SYSLOG_ARGS="-C"
+#fi
+#
+#start() {
+#	echo -n "Starting \$DESC:"
+#	echo -n "klogd "
+#	service_start "\$klogd" -n
+#	echo -n "syslogd "
+#	service_start "\$syslogd" -n "\$SYSLOG_ARGS"
+#	echo "."
+#}
+#
+#stop() {
+#	echo -n "Stopping \$DESC:"
+#	echo -n "syslogd "
+#	service_stop "\$syslogd"
+#	echo -n "klogd "
+#	service_stop "\$klogd"
+#	echo "."
+#}
+#
+#restart() {
+#	echo -n "Restarting \$DESC:"
+#	stop
+#	sleep 1
+#	start
+#}
+#
+#shutdown() {
+#	echo "Shutting down \$DESC"
+#	stop
+#}
+#
+#reload() {
+#	ehco -n "Reloading \$DESC:"
+#	echo -n "klogd "
+#	service_reload "\$klogd"
+#	echo -n "syslogd "
+#	service_reload "\$syslogd"
+#	echo "."
+#}
+#EOF
+#	chmod a+x "$configfile"
+#	./enable "$configfile"
+#
+
+	configfile="$IPKG_INSTROOT/etc/init.d/inetd"
+	cat > "$configfile" << EOF
+#!/bin/sh /etc/rc.common
+
+START=85
+#STOP=90
+
+SERVICE_DAEMONIZE=1
+
+SERVICE_WRITE_PID=1
+SERVICE_PID_FILE=
+
+DAEMON="/usr/sbin/inetd"
+DESC="internet superserver"
+
+start() {
+	echo "Starting \$DESC"
+	service_start "\$DAEMON"
+}
+
+stop() {
+	echo "Stopping \$DESC"
+	service_stop "\$DAEMON"
+}
+
+restart() {
+	echo "Restarting \$DESC"
+	stop
+	sleep 1
+	start
+}
+
+shutdown() {
+	echo "Shutting down \$DESC"
+	stop
+}
+
+
+reload() {
+	echo "Reloading \$DESC"
+	service_reload "\$DAEMON"
+}
+EOF
+	chmod a+x "$configfile"
+	./enable "$configfile"
+
+
+
+
+	configfile="$IPKG_INSTROOT/etc/init.d/sambad"
+	cat > "$configfile" << EOF
+#!/bin/sh /etc/rc.common
+
+START=85
+#STOP=90
+
+SERVICE_DAEMONIZE=1
+
+SERVICE_WRITE_PID=1
+SERVICE_PID_FILE=
+
+smbd="/usr/sbin/smbd"
+nmbd="/usr/sbin/nmbd"
+SERVICE_SIG=1
+DESC="Starting Samba"
+
+
+start() {
+	mkdir -p /var/volatile/samba
+	echo -n "Starting \$DESC:"
+	echo -n "smbd "
+	service_start "\$smbd"
+	echo -n "nmbd "
+	service_start "\$nmbd"
+	echo "."
+}
+
+stop() {
+	echo -n "Stopping \$DESC:"
+	echo -n "smbd "
+	service_stop "\$smbd"
+	echo -n "nmbd "
+	service_stop "\$nmbd"
+	echo "."
+}
+
+restart() {
+	echo -n "Restarting \$DESC:"
+	stop
+	sleep 1
+	start
+}
+
+shutdown() {
+	echo "Shutting down \$DESC"
+	stop
+}
+
+reload() {
+	ehco -n "Reloading \$DESC:"
+	echo -n "smbd "
+	service_reload "\$smbd"
+	echo -n "nmbd "
+	service_reload "\$nmbd"
+	echo "."
+}
+EOF
+	chmod a+x "$configfile"
+	./enable "$configfile"
+
+
+
+
+	configfile="$IPKG_INSTROOT/etc/init.d/vsftpd"
+	cat > "$configfile" << EOF
+#!/bin/sh /etc/rc.common
+
+START=85
+#STOP=90
+
+SERVICE_DAEMONIZE=1
+
+SERVICE_WRITE_PID=1
+
+DAEMON="/usr/sbin/vsftpd"
+DESC="FTP Server"
+
+start() {
+	echo "Starting \$DESC"
+	service_start "\$DAEMON"
+}
+
+stop() {
+	echo "Stopping \$DESC"
+	service_stop "\$DAEMON"
+}
+
+restart() {
+	echo "Restarting \$DESC"
+	stop
+	sleep 1
+	start
+}
+
+shutdown() {
+	echo "Shutting down \$DESC"
+	stop
+}
+
+
+reload() {
+	echo "Reloading \$DESC config"
+	service_reload "\$DESC"
+}
+EOF
+	chmod a+x "$configfile"
+	./enable "$configfile"
+
+
+
+
+	configfile="$IPKG_INSTROOT/etc/init.d/usbtunerhelper"
+	cat > "$configfile" << EOF
+#!/bin/sh /etc/rc.common
+
+START=20
+STOP=90
+
+SERVICE_DAEMONIZE=1
+
+SERVICE_WRITE_PID=1
+
+DAEMON="/usr/bin/usbtunerhelper"
+DESC="usbtunerhelper daemon"
+
+start() {
+	echo "Starting \$DESC"
+	service_start "\$DAEMON"
+}
+
+stop() {
+	echo "Stopping \$DESC"
+	service_stop "\$DAEMON"
+}
+
+restart() {
+	echo "Restarting \$DESC"
+	stop
+	sleep 1
+	start
+}
+
+shutdown() {
+	echo "Shutting down \$DESC"
+	stop
+}
+
+
+reload() {
+	echo "Reloading \$DESC config"
+	service_reload "\$DESC"
+}
+EOF
+	chmod a+x "$configfile"
+
+
+	configfile="$IPKG_INSTROOT/etc/init.d/avahi-daemon"
+	cat > "$configfile" << EOF
+#!/bin/sh /etc/rc.common
+
+START=20
+STOP=90
+
+SERVICE_DAEMONIZE=1
+
+SERVICE_WRITE_PID=1
+
+DAEMON="/usr/sbin/avahi-daemon"
+DESC="avahi-daemon daemon"
+
+start() {
+	echo "Starting \$DESC"
+	service_start "\$DAEMON"
+}
+
+stop() {
+	echo "Stopping \$DESC"
+	service_stop "\$DAEMON"
+}
+
+restart() {
+	echo "Restarting \$DESC"
+	stop
+	sleep 1
+	start
+}
+
+shutdown() {
+	echo "Shutting down \$DESC"
+	stop
+}
+
+
+reload() {
+	echo "Reloading \$DESC config"
+	service_reload "\$DESC"
+}
+EOF
+	chmod a+x "$configfile"
+
+
+#	configfile="$IPKG_INSTROOT/etc/modules.d/01-pnx"
+#	cat > "$configfile" << EOF
+#pnx/e2proc
+#pnx/lnxplatnativeDrv
+#pnx/lnxKKALDrv
+#pnx/lnxnotifyqDrv
+#pnx/lnxplatDrv
+#pnx/lnxscsDrv
+#pnx/lnxfssDrv
+#pnx/lnxcssDrv
+#pnx/lnxtmasDrv
+#pnx/lnxtmvssDrvGPL
+#pnx/lnxtmvssDrv
+#pnx/lnxpvrDrv
+#pnx/lnxIPfeDrv
+#pnx/irc
+#pnx/fpanel
+#pnx/gpiostandby
+#pnx/linuxdvb pip_support=1
+#pnx/vpmfbDrv cnxtfb_hdwidth=1280 cnxtfb_hdheight=720 cnxtfb_start_unblanked=1 cnxtfb_sddevice=0 cnxtfb_autoscale_sd=2 cnxtfb_flipsync=0
+#pnx/usbserial
+#pnx/option
+#EOF
+
+	local configfile="$IPKG_INSTROOT/etc/inittab"
+
+	cat > "$configfile" << EOF
+::sysinit:/etc/init.d/rcS S boot
+::shutdown:/etc/init.d/rcS K shutdown
+ttyS1::askfirst:/bin/ash --login
+gui::respawn:/usr/bin/enigma2.sh
+EOF
+
+	configfile="$IPKG_INSTROOT/etc_init.d_dvbnode.patch"
+	cat > "$configfile" << EOF
+--- rootfs/etc/init.d/dvbnode	2013-07-15 19:46:37.000000000 +0800
++++ rootfs/etc/init.d/dvbnode	2013-12-05 10:59:03.000000000 +0800
+@@ -37,23 +37,23 @@
+ 	mknod fe_sat1 c 212 1
+ 	ln -s fe_sat1 frontend1
+ 
+-	mknod fe_ext0 c 212 2
+-	ln -s fe_ext0 frontend2
++	#mknod fe_ext0 c 212 2
++	#ln -s fe_ext0 frontend2
+ 
+-	mknod fe_ext1 c 212 3
+-	ln -s fe_ext1 frontend3
++	#mknod fe_ext1 c 212 3
++	#ln -s fe_ext1 frontend3
+ 
+ 	mknod demux0 c 212 16
+ 	mknod demux1 c 212 17
+ 	mknod demux2 c 212 18
+-	mknod demux3 c 212 19
+-	mknod demux4 c 212 20
++	#mknod demux3 c 212 19
++	#mknod demux4 c 212 20
+ 
+ 	mknod dvr0 c 212 32
+ 	mknod dvr1 c 212 33
+ 	mknod dvr2 c 212 34
+-	mknod dvr3 c 212 35
+-	mknod dvr4 c 212 36
++	#mknod dvr3 c 212 35
++	#mknod dvr4 c 212 36
+ 
+ 	mknod video0 c 212 48
+ 	mknod video1 c 212 49
+@@ -64,11 +64,14 @@
+ 	mknod ca0 c 212 80
+ 	mknod ca1 c 212 81
+ 	mknod ca2 c 212 82
+-	mknod ca3 c 212 83
+-	mknod ca4 c 212 84
++	#mknod ca3 c 212 83
++	#mknod ca4 c 212 84
+ 
+ 	mknod net0 c 212 96
+ 	mknod net1 c 212 97
+ 	mknod net2 c 212 98
+ 	mknod net3 c 212 99
++	mkdir -p /dev/misc
++	ln -s /dev/rtc0 /dev/misc/rtc
++
+ }
+EOF
+
+	pushd "$IPKG_INSTROOT"
+	patch -p1 < $configfile
+	popd
+	rm $configfile
+
+
+
+	configfile="$IPKG_INSTROOT/add_autofs.patch"
+	cat > "$configfile" << EOF
+--- /dev/null	2013-12-12 09:11:45.370063745 +0800
++++ rootfs/etc/hotplug.d/block/30-usbmount	2013-12-16 19:50:32.000000000 +0800
+@@ -0,0 +1,40 @@
++#!/bin/sh
++
++case "\$ACTION" in 
++	add)
++		for i in \$(ls /dev/ | grep "sd[a-z][1-9]"); do
++			echo "\$i" | grep "\$DEVNAME[0-9]*"
++			if [ "\$?" -ne 0 ]; then
++				continue
++			fi
++			mkdir -p "/autofs/\$i"
++			if [ "\$?" -ne 0 ]; then
++				continue
++			fi
++			mount -o iocharset=utf8,rw "/dev/\$i" "/autofs/\$i"
++			if [ "\$?" -ne 0 ]; then
++				mount -o rw "/dev/\$i" "/autofs/\$i"
++			fi
++			if [ "\$?" -ne 0 ]; then
++				rmdir "/autofs/\$i"
++			fi
++		done
++	;;
++	change | remove) 
++		for i in \$(ls /autofs/ | grep "sd[a-z][1-9]"); do
++			echo "\$i" | grep "\$DEVNAME[0-9]*"
++			if [ "\$?" -ne 0 ]; then
++				continue
++			fi
++			mount | grep "/autofs/\$i"
++			if [ "\$?" -ne 0 ]; then
++				continue
++			fi
++			umount "/autofs/\$i"
++			if [ "\$?" -ne 0 ]; then
++				continue
++			fi
++			rmdir "/autofs/\$i"
++		done
++	;;
++esac
+EOF
+
+	pushd "$IPKG_INSTROOT"
+	patch -p1 < $configfile
+	popd
+	rm $configfile
+
+	for i in $(find $IPKG_INSTROOT/etc/init.d/ -print);do
+		if [ -n "$(echo `basename $i` | grep "dvbnet")" ]; then
+			continue
+		fi
+		if [ -n "$(echo `basename $i` | grep "usbtunerhelper")" ]; then
+			continue
+		fi
+		if [ -n "$(echo `basename $i` | grep "softcam.oscam")" ]; then
+			continue
+		fi
+		[ -f "$i" ] && ./enable "$i"
+	done
+
+	rm ./enable
+}
+
+#
+#为enigma2打补丁
+#
+start_enigma2_patch(){
+	echo "start_enigma2_patch $1"
+	if [ -z "$1" -o ! -d "$curdir/$1" ]; then
+		echo "start_enigma2_patch: *$1*$curdir/$1"
+		exit 1
+	fi
+
+	local IPKG_INSTROOT="$curdir/$1"
+	local configfile="$IPKG_INSTROOT/webinterface.patch"
+	cat > "$configfile" << EOF
+--- rootfs/usr/lib/enigma2/python/Plugins/Extensions/WebInterface/plugin.py	2013-12-04 14:48:19.000000000 +0800
++++ rootfs/usr/lib/enigma2/python/Plugins/Extensions/WebInterface/plugin.py	2013-09-29 16:36:42.000000000 +0800
+@@ -36,7 +36,7 @@
+ 
+ config.plugins.Webinterface.http = ConfigSubsection()
+ config.plugins.Webinterface.http.enabled = ConfigYesNo(default=True)
+-config.plugins.Webinterface.http.port = ConfigInteger(default = 80, limits=(1, 65535) )
++config.plugins.Webinterface.http.port = ConfigInteger(default = 88, limits=(1, 65535) )
+ config.plugins.Webinterface.http.auth = ConfigYesNo(default=False)
+ 
+ config.plugins.Webinterface.https = ConfigSubsection()
+@@ -185,12 +185,12 @@
+ 			else:
+ 				registerBonjourService('http', config.plugins.Webinterface.http.port.value)
+ 			
+-		#Streaming requires listening on 127.0.0.1:80 no matter what, ensure it its available
+-		if config.plugins.Webinterface.http.port.value != 80 or not config.plugins.Webinterface.http.enabled.value:
++		#Streaming requires listening on 127.0.0.1:88 no matter what, ensure it its available
++		if config.plugins.Webinterface.http.port.value != 88 or not config.plugins.Webinterface.http.enabled.value:
+ 			#LOCAL HTTP Connections (Streamproxy)
+-			ret = startServerInstance(session, '127.0.0.1', 80, config.plugins.Webinterface.http.auth.value, l2k)			
++			ret = startServerInstance(session, '127.0.0.1', 88, config.plugins.Webinterface.http.auth.value, l2k)			
+ 			if ret == False:
+-				errors = "%s%s:%i\n" %(errors, '127.0.0.1', 80)
++				errors = "%s%s:%i\n" %(errors, '127.0.0.1', 88)
+ 			
+ 			if errors != "":
+ 				session.open(MessageBox, "Webinterface - Couldn't listen on:\n %s" % (errors), type=MessageBox.TYPE_ERROR, timeout=30)
+--- rootfs/usr/lib/enigma2/python/Plugins/Extensions/WebInterface/web-data/vlcplayer.js	2013-12-04 15:00:35.000000000 +0800
++++ rootfs/usr/lib/enigma2/python/Plugins/Extensions/WebInterface/web-data/vlcplayer.js	2013-11-09 16:23:56.000000000 +0800
+@@ -231,8 +231,9 @@
+ }
+ 
+ function setStreamTarget(servicereference) {
+-	host = top.location.host;
++	host = top.location.hostname;
+ 	url = 'http://' + host + ':8001/' + decodeURIComponent(servicereference);
++	alert(url)
+ 
+ 	debug("setStreamTarget " + url);
+ 	vlc.playlist.clear();
+EOF
+	pushd "$IPKG_INSTROOT"
+	patch -p1 < $configfile
+	popd
+	rm $configfile
+
+
+#	local configfile="$DST_DIR/usr/bin/enigma2.sh"
+#
+#	cat > "$configfile" << EOF
+##!/bin/sh
+#
+#prefix=/usr
+#exec_prefix=/usr
+#
+#if [ ! -c /dev/dvb/adapter0/net3 ]; then
+#	exit 0
+#fi
+#
+#if [ -x /usr/bin/showiframe -a -f /usr/share/backdrop.mvi ]; then
+#	/usr/bin/showiframe /usr/share/backdrop.mvi
+#fi
+#
+#if [ -d /home/root ]; then
+#	cd /home/root
+#fi
+#
+#LD_PRELOAD=/usr/lib/libopen.so.0.0.0 /usr/bin/enigma2
+#
+## enigma2 exit codes:
+##
+## 0 - restart enigma
+## 1 - halt
+## 2 - reboot
+##
+## >128 signal
+#
+#ret=\$?
+#case \$ret in
+#	1)
+#		/sbin/standby
+#		;;
+#	2)
+#		/sbin/reboot
+#		;;
+#	4)
+#		/sbin/rmmod lcd
+#		/usr/sbin/fpupgrade --upgrade 2>&1 | tee /home/root/fpupgrade.log
+#		sleep 1;
+#		/sbin/rmmod fp
+#		/sbin/modprobe fp
+#		/sbin/reboot
+#		;;
+#	42)
+#		opkg upgrade 2>&1 > /home/root/ipkgupgrade.log
+#		/sbin/reboot
+#		;;
+#	*)
+#		;;
+#esac
+#EOF
+#	chmod a+x "$configfile"
+}
+
+#
+#添加enigma2根文件系统中存在的库到参数2提供的文件夹
+#
+add_enigma2_file_inplace(){
+	echo "add_enigma2_file_inplace $1 $2"
+	if [ ! -d "$1" -o -z "$2" -o ! -d "$curdir/$2" ]; then
+		echo "add_enigma2_file_inplace: *$1*$2"
+		exit 1
+	fi
+
+	local SRC_DIR="$1"
+	local DST_DIR="$curdir/$2"
+
+	while read line
+	do
+		if [ -z "$line" -o "${line:0:1}" == "#" ]; then 
+			continue
+		fi
+		
+		rsync -aR "$SRC_DIR/$line" "$DST_DIR/"
+	done << EOF
+./usr/lib/libpopt.so.0.0.0
+./usr/lib/libpopt.so.0
+EOF
+}
+
+
+#
+#添加cctv节目单
+#
+add_enigma2_cctv_db(){
+	echo "add_enigma2_cctv_db"
+	if [ -z "$1" -o ! -d "$curdir/$1" ]; then
+		echo "add_enigma2_cctv_db: *$1"
+		exit 1
+	fi
+
+	local IPKG_INSTROOT="$curdir/$1"
+	local configfile
+	
+
+	configfile="$curdir/enigma2_cctv_patch.patch"
+	cat > "$configfile" << EOF
+diff -urN rootfs/etc/enigma2/bouquets.radio rootfs/etc/enigma2/bouquets.radio
+--- rootfs/etc/enigma2/bouquets.radio	1970-01-01 08:00:00.000000000 +0800
++++ rootfs/etc/enigma2/bouquets.radio	2013-09-30 16:40:42.000000000 +0800
+@@ -0,0 +1,2 @@
++#NAME Bouquets (Radio)
++#SERVICE 1:7:2:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.radio" ORDER BY bouquet
+diff -urN rootfs/etc/enigma2/bouquets.tv rootfs/etc/enigma2/bouquets.tv
+--- rootfs/etc/enigma2/bouquets.tv	1970-01-01 08:00:00.000000000 +0800
++++ rootfs/etc/enigma2/bouquets.tv	2013-09-30 16:41:57.000000000 +0800
+@@ -0,0 +1,3 @@
++#NAME Bouquets (TV)
++#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.tv" ORDER BY bouquet
++#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.LastScanned.tv" ORDER BY bouquet
+diff -urN rootfs/etc/enigma2/lamedb rootfs/etc/enigma2/lamedb
+--- rootfs/etc/enigma2/lamedb	1970-01-01 08:00:00.000000000 +0800
++++ rootfs/etc/enigma2/lamedb	2013-10-08 10:32:01.000000000 +0800
+@@ -0,0 +1,30 @@
++eDVB services /4/
++transponders
++04830000:0003:0888
++	s 3840000:27500000:0:3:1155:2:0
++/
++end
++services
++012d:04830000:0003:0888:1:0
++CCTV 1
++p:CCTV,c:000200,c:01028a,c:031ffe,f:40,S:0
++012e:04830000:0003:0888:1:0
++CCTV 2
++p:CCTV,f:40,S:0
++012f:04830000:0003:0888:1:0
++CCTV 7
++p:CCTV,f:40,S:0
++0130:04830000:0003:0888:1:0
++CCTV 10
++p:CCTV,f:40,S:0
++0131:04830000:0003:0888:1:0
++CCTV 11
++p:CCTV,f:40,S:0
++0132:04830000:0003:0888:1:0
++CCTV 12
++p:CCTV,f:40,S:0
++0133:04830000:0003:0888:1:0
++CCTV 15
++p:CCTV,f:40,S:0
++end
++Have a lot of bugs!
+diff -urN rootfs/etc/enigma2/profile rootfs/etc/enigma2/profile
+--- rootfs/etc/enigma2/profile	1970-01-01 08:00:00.000000000 +0800
++++ rootfs/etc/enigma2/profile	2013-10-08 17:47:31.000000000 +0800
+@@ -0,0 +1,58 @@
++0.02	PYTHON_START
++0.18	LANGUAGE
++0.78	LOAD:InfoBar
++1.00	LOAD:GUISkin
++1.03	LOAD:ElementTree
++1.75	LOAD:enigma_skin
++2.85	LoadSkin
++3.54	LoadSkinDefaultDone
++3.55	LOAD:Source
++3.55	LOAD:GUIComponent
++8.18	LOAD:enigma
++8.18	LOAD:InfoBarGenerics
++8.34	ChannelSelection.py 1
++8.52	ChannelSelection.py 2
++8.52	ChannelSelection.py 2.1
++8.65	ChannelSelection.py 2.2
++8.65	ChannelSelection.py 2.3
++8.66	ChannelSelection.py 3
++8.67	ChannelSelection.py 4
++8.68	ChannelSelection.py after imports
++9.16	LOAD:InitBar_Components
++9.17	LOAD:HelpableScreen
++9.17	Bouquets
++9.19	ParentalControl
++9.55	LOAD:Navigation
++9.59	LOAD:skin
++9.59	LOAD:Tools
++9.59	config.misc
++9.59	Twisted
++13.78	LOAD:Plugin
++13.78	LOAD:Wizard
++14.27	misc
++14.27	LOAD:ScreenGlobals
++14.33	Screen
++14.33	Standby,PowerKey
++14.33	Scart
++14.33	Load:CI
++14.46	Load:VolumeControl
++14.48	VolumeControl
++14.48	Init:skin
++14.71	InputDevice
++15.00	Timedelay
++15.01	AVSwitch
++15.03	RecordingConfig
++15.03	UsageConfig
++15.06	keymapparser
++15.13	Network
++15.32	LCD
++15.34	SetupDevices
++15.91	RFMod
++15.92	Init:CI
++15.92	readPluginList
++22.80	Init:Session
++22.86	wizards
++23.04	Init:VolumeControl
++23.06	Init:PowerKey
++23.07	Init:Trashcan
++23.07	RunReactor
+diff -urN rootfs/etc/enigma2/settings rootfs/etc/enigma2/settings
+--- rootfs/etc/enigma2/settings	2013-04-19 15:04:20.000000000 +0800
++++ rootfs/etc/enigma2/settings	2013-09-30 16:55:31.000000000 +0800
+@@ -3,19 +3,26 @@
+ config.misc.firstrun=false
+ config.misc.initialchannelselection=false
+ config.misc.defaultchosen=false
+-config.misc.startCounter=23
++config.misc.startCounter=24
+ config.misc.videowizardenabled=false
+ config.Nims.1.configMode=advanced
+ config.Nims.1.advanced.sat.192.lnb=1
+ config.Nims.1.advanced.lnb.1.lof=c_band
+ config.Nims.1.advanced.lnb.1.prio=1
++config.Nims.0.configMode=advanced
++config.Nims.0.advanced.sats=1155
++config.Nims.0.advanced.sat.1155.lnb=32
+ config.Nims.0.advanced.sat.192.lnb=1
+ config.Nims.0.advanced.lnb.1.lof=c_band
+ config.Nims.0.advanced.lnb.1.prio=1
+-config.tv.lastroot=1:7:1:0:0:0:0:0:0:0:(type == 1) || (type == 17) || (type == 22) || (type == 25) || (type == 134) || (type == 195) FROM SATELLITES ORDER BY satellitePosition;1:7:0:0:0:0:C00000:0:0:0:(satellitePosition == 192) && (type == 1) || (type == 17) || (type == 22) || (type == 25) || (type == 134) || (type == 195) ORDER BY name:19.2E Astra 1H/1KR/1L/1M - Services;
+-config.tv.lastservice=1:0:1:132:3:888:C00000:0:0:0:
++config.Nims.0.advanced.lnb.32.threshold=0
++config.Nims.0.advanced.lnb.32.lofh=5750
++config.Nims.0.advanced.lnb.32.lof=ocs5150/5750
++config.Nims.0.advanced.lnb.32.lofl=5150
++config.tv.lastroot=1:7:1:0:0:0:0:0:0:0:(type == 1) || (type == 17) || (type == 22) || (type == 25) || (type == 134) || (type == 195) ORDER BY name;
++config.tv.lastservice=1:0:1:12D:3:888:4830000:0:0:0:
+ config.av.videomode.Scart=1080i
+-config.av.videorate.1080i=60Hz
+-config.av.policy_43=scale
+ config.av.osd_alpha=213
++config.av.policy_43=scale
++config.av.videorate.1080i=60Hz
+ config.av.videoport=Scart
+diff -urN rootfs/etc/enigma2/timers.xml rootfs/etc/enigma2/timers.xml
+--- rootfs/etc/enigma2/timers.xml	1970-01-01 08:00:00.000000000 +0800
++++ rootfs/etc/enigma2/timers.xml	2013-09-30 16:55:31.000000000 +0800
+@@ -0,0 +1,3 @@
++<?xml version="1.0" ?>
++<timers>
++</timers>
+diff -urN rootfs/etc/enigma2/userbouquet.favourites.radio rootfs/etc/enigma2/userbouquet.favourites.radio
+--- rootfs/etc/enigma2/userbouquet.favourites.radio	1970-01-01 08:00:00.000000000 +0800
++++ rootfs/etc/enigma2/userbouquet.favourites.radio	2013-09-30 16:40:42.000000000 +0800
+@@ -0,0 +1 @@
++#NAME Favourites (Radio)
+diff -urN rootfs/etc/enigma2/userbouquet.favourites.tv rootfs/etc/enigma2/userbouquet.favourites.tv
+--- rootfs/etc/enigma2/userbouquet.favourites.tv	1970-01-01 08:00:00.000000000 +0800
++++ rootfs/etc/enigma2/userbouquet.favourites.tv	2013-09-30 16:40:41.000000000 +0800
+@@ -0,0 +1 @@
++#NAME Favourites (TV)
+diff -urN rootfs/etc/enigma2/userbouquet.LastScanned.tv rootfs/etc/enigma2/userbouquet.LastScanned.tv
+--- rootfs/etc/enigma2/userbouquet.LastScanned.tv	1970-01-01 08:00:00.000000000 +0800
++++ rootfs/etc/enigma2/userbouquet.LastScanned.tv	2013-09-30 16:41:57.000000000 +0800
+@@ -0,0 +1,8 @@
++#NAME Last Scanned
++#SERVICE 1:0:1:12D:3:888:4830000:0:0:0:
++#SERVICE 1:0:1:12E:3:888:4830000:0:0:0:
++#SERVICE 1:0:1:12F:3:888:4830000:0:0:0:
++#SERVICE 1:0:1:130:3:888:4830000:0:0:0:
++#SERVICE 1:0:1:131:3:888:4830000:0:0:0:
++#SERVICE 1:0:1:132:3:888:4830000:0:0:0:
++#SERVICE 1:0:1:133:3:888:4830000:0:0:0:
+EOF
+	pushd "$IPKG_INSTROOT"
+	patch -p1 < $configfile
+	popd
+	rm $configfile
+}
+
+#
+#添加softcam应用
+#
+add_softcam() {
+	echo "add_softcam $1"
+	if [ -z "$1" -o ! -d "$curdir/$1" ]; then
+		echo "add_softcam: *$1*$curdir/$1"
+		exit 1
+	fi
+
+	local IPKG_INSTROOT="$curdir/$1"
+	local configfile
+
+	uncompress_file "$ROOTFS_OSCAM_TARBALL" "$1"
+	
+	configfile="$curdir/add_softcam.patch"
+	cat > "$configfile" << EOF
+--- rootfs/usr/local/etc/oscam.conf	2013-10-28 17:53:59.000000000 +0800
++++ rootfs/usr/local/etc/oscam.conf	2013-10-28 17:54:34.000000000 +0800
+@@ -19,7 +19,7 @@
+ httpport      = 1211
+ httpuser      = root	
+ httppwd       = dreambox
+-httpallowed	= 192.168.1.0-192.168.1.240
++httpallowed	= 192.168.2.0-192.168.2.240
+ 
+ # protocols
+ [cccam]
+EOF
+	pushd "$IPKG_INSTROOT"
+	patch -p1 < $configfile
+	popd
+	rm $configfile
+}
+
+
+#
+#添加directfb支持
+#
+add_directfb() {
+	echo "add_directfb $1"
+	if [ -z "$1" -o ! -d "$curdir/$1" ]; then
+		echo "add_directfb: *$1*$curdir/$1"
+		exit 1
+	fi
+
+	mkdir -p "$1/opt"
+	uncompress_file "$ROOTFS_DIRECTFB_APPFS_TARBALL" "$1/opt"
+
+	local IPKG_INSTROOT="$curdir/$1"
+	local configfile
+	
+	configfile="$curdir/$1/opt/envsetup.sh"
+	cat > "$configfile" << EOF
+#!/bin/sh
+
+export LD_LIBRARY_PATH=/lib:/opt/lib:/opt/lib/directfb-1.4-0/systems:/opt/lib/directfb-1.4-0/inputdrivers:/opt/lib/directfb-1.4-0/gfxdrivers:/opt/lib/directfb-1.4-0/interfaces/IDirectFBFont:/opt/lib/directfb-1.4-0/interfaces/IDirectFBImageProvider:/opt/lib/directfb-1.4-0/wm:/opt/lib/directfb-1.4-0/interfaces/IDirectFBVideoProvider
+export DFBARGS=module-dir=/opt/lib/directfb-1.4-0/
+export PATH=\$PATH:/opt/bin
+KERNEL_VERSION=\`uname -r\`
+
+create_fusion_node()
+{
+  device=\$1
+  
+  rm -f /dev/\${device}
+  major=\`awk "\\\\\$2==\"\$device\" {print \\\\\$1}" /proc/devices\`
+  
+  if [ \${major} ]; then
+     echo Creating device node for \$1
+                mknod /dev/\${device} c \$major 0
+  fi
+}
+
+fb_node(){
+	local curdir=\$(pwd)
+
+	if [ ! -L /dev/fb ]; then
+		cd /dev
+		rm /dev/fb -rf
+		ln -s /dev/fb0 /dev/fb
+		insmod /opt/lib/modules/\$KERNEL_VERSION/extra/fusion.ko
+		create_fusion_node "fusion0"
+		/bin/echo -e "depth=32\nvsync-after\npixelformat=ARGB\nno-debug\n" > /etc/directfbrc
+		cp -pR /opt/etc/fb.modes /etc
+	fi
+	cd "\$curdir"
+}
+
+fb_node
+EOF
+}
+
+#
+#制作最终的根文件系统
+#
+make_rootfs(){
+	echo "make_rootfs"
+	del_files "$ROOTFS"
+	rsync_files "$OPENWRT_ROOTFS/" "$ROOTFS/"
+	rsync_files "$ENIGMA2_ONLY/" "$ROOTFS/"
+	#rsync_files "$ROOTFS_MEMTEST_BIN/" "$ROOTFS/"
+	uncompress_file "$ROOTFS_HOMEPAGE_PATCH_TARBALL" "$ROOTFS"
+	gen_x8_config "$ROOTFS"
+	add_enigma2_file_inplace "$ENIGMA2_ROOTFS" "$ROOTFS"
+	openwrt_network_config "$ROOTFS"
+	add_softcam "$ROOTFS"
+}
+
+setup_enigma2
+del_enigma2_files_by_name
+setup_openwrt
+gen_unique_flist "$OPENWRT_ROOTFS" "$ENIGMA2_ROOTFS" "$ENIGMA2_ONLY_LIST"
+update_unique_files "$curdir/$ENIGMA2_ONLY_LIST.old" "$curdir/$ENIGMA2_ONLY_LIST" "$ENIGMA2_ONLY_LIST.new" "$ENIGMA2_ROOTFS" "$ENIGMA2_ONLY"
+make_rootfs
+
+tar -zcf "rootfs.tar.gz" -C "$ROOTFS" ./
+rm -rf "$ROOTFS"
+rm -rf "$ENIGMA2_ONLY"
+rm -rf "$OPENWRT_ROOTFS"
+rm -rf "$ENIGMA2_ROOTFS"
+rm -rf "$curdir/$ENIGMA2_ONLY_LIST"
+rm -rf "$curdir/$ENIGMA2_ONLY_LIST.new"

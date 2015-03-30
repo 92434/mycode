@@ -1,0 +1,17 @@
+#!/bin/sh
+case $1 in
+    "mount")
+    sudo $1 -t vboxsf -o uid=1000 -o gid=1000 share /tmp
+    exit
+    ;;
+
+    "umount")
+    sudo $1 /tmp
+    exit
+    ;;
+esac
+
+echo missing para:mount or umount
+exit
+
+

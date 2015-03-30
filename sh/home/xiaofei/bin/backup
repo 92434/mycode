@@ -1,0 +1,146 @@
+#!/bin/sh -f
+
+#set -x
+
+curdir="$(pwd)"
+BACKUP_DIR="backup"
+
+flist_name(){
+	echo "$curdir/flist"
+}
+
+gen_flist(){
+	local FLIST="$(flist_name)"
+	
+	cat > "$FLIST" << EOF
+#/etc/apt/sources.list
+/home/xiaofei/.vim
+/home/xiaofei/.bashrc
+/home/xiaofei/bin
+/home/xiaofei/eclipse.desktop
+#/var/cache/apt/archives
+EOF
+}
+
+del_flist(){
+	local FLIST="$(flist_name)"
+	rm "$FLIST"
+}
+
+backup_flist(){
+	echo "backup_flist $1"
+
+	local DST_DIR="$curdir/$1"
+	gen_flist
+	if [ ! -r "$(flist_name)" ]; then
+		echo "backup_flist: no file list"
+		exit 1
+	fi
+
+	while read line
+	do
+		if [ -z "$line" -o "${line:0:1}" == "#" ]; then
+			echo "ignore ${line:1}"
+			continue
+		fi
+		sudo rsync -aR "$line" "$DST_DIR/"
+	done < "$(flist_name)"
+
+	del_flist
+}
+
+recovery_flist(){
+	echo "recovery_flist $1"
+
+	local SRC_DIR="$curdir/$1"
+
+	gen_flist
+	if [ ! -r "$(flist_name)" ]; then
+		echo "backup_flist: no file list"
+		exit 1
+	fi
+
+	while read line
+	do
+		if [ -z "$line" ]; then
+			continue
+		fi
+
+		if [ "${line:0:1}" == "#" ]; then
+			echo "ignore ${line:1}"
+			continue
+		fi
+
+		if [ ! -r "$SRC_DIR/.$line" ]; then
+			echo "no files: $SRC_DIR/.$line"
+			continue
+		fi
+
+		sudo rsync -aR "$SRC_DIR/.$line" "/"
+	done < "$(flist_name)"
+
+	del_flist
+
+	sudo rm -rf "$SRC_DIR"
+}
+
+compress_files(){
+	echo "compress_files: $1"
+	if [ ! -d "$curdir/$1" ]; then
+		echo "compress_files: *$1"
+		exit 1
+	fi
+	
+	local SRC_DIR="$curdir/$1"
+	
+	tar Jcf "$(date +%Y%m%d%H%M%S)-$(uname -i)_backup.xz" -C "$SRC_DIR" ./
+
+	sudo rm -rf "$SRC_DIR"
+}
+
+uncompress_files(){
+	echo "uncompress_files $1 $2"
+	if [ -z "$1" -o ! -f "$2" ]; then
+		echo "uncompress_files: *$1*$2"
+		exit 1
+	fi
+
+	local DST_DIR="$curdir/$1"
+	local TAR_BALL="$2"
+
+	sudo rm -rf "$DST_DIR"
+	mkdir -p "$DST_DIR"
+
+	tar Jxf "$TAR_BALL" -C "$DST_DIR"
+}
+
+print_help(){
+	echo "Usages:"
+	echo "$0 [option]"
+	echo "[option] can be this:"
+	echo "      copy		: copy"
+	echo "      recovery tarball	: recovery from tarball"
+}
+
+main(){
+	echo "main $1"
+
+	case $1 in
+		"copy")
+		backup_flist "$BACKUP_DIR"
+		#compress_files "$BACKUP_DIR"
+		;;
+
+		"recovery")
+		shift
+		#uncompress_files "$BACKUP_DIR" "$1"
+		recovery_flist "$BACKUP_DIR"
+		;;
+
+		*)
+		print_help
+		;;
+	esac
+}
+
+main $*

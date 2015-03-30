@@ -1,0 +1,600 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\YinAidanceKit.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.chs\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\YinAidanceKit.ico"
+IDR_YINAIDTYPE          ICON    DISCARDABLE     "res\\YinAidanceKitDoc.ico"
+IDI_ICON1               ICON    DISCARDABLE     "res\\imapclient.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
+IDB_NE_BITMAP           BITMAP  DISCARDABLE     "res\\ne.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR DISCARDABLE  32, 24
+BEGIN
+    BUTTON      ID_MENU_LOGIN
+    BUTTON      ID_MENU_LOGOUT
+    SEPARATOR
+    BUTTON      ID_NE_SUBSIDIARY
+    SEPARATOR
+    BUTTON      ID_RUN_STOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "数据采集"
+    BEGIN
+        MENUITEM "全网采集...",                 ID_MENU_ITEM_ALL_COLLEC
+    END
+    POPUP "问题分析"
+    BEGIN
+        MENUITEM "TE链路健康性",                ID_MENU_ITEM_TE_LINK_HEALTH
+        MENUITEM "ASON_LOG分析 ",               ID_MENU_ITEM_ASONLOG_ANALYSE
+        MENUITEM "重路由分析",                  ID_MENU_ITEM_ROUTE_ASONLOG_ANALYSE
+
+    END
+    POPUP "常用功能"
+    BEGIN
+        MENUITEM "文件上载",                    ID_MENU_FILE_UPLOAD
+        MENUITEM "文件下载",                    ID_MENU_FILE_DOWNLOAD
+    END
+    POPUP "运行"
+    BEGIN
+        MENUITEM "网元检查",                    ID_NE_CHECK
+        MENUITEM "网元辅助",                    ID_NE_SUBSIDIARY
+        MENUITEM "网关信息",                    ID_MENU_ALL_GW_INFO
+    END
+    POPUP "帮助(&H)"
+    BEGIN
+        MENUITEM "关于 AsonKit(&A)...",         ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "关于 AsonKit"
+FONT 9, "宋体"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "AsonKit 1.0 版",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           "版权所有 (C) WDM 武汉主机软件组",IDC_STATIC,40,25,119,
+                    12
+    DEFPUSHBUTTON   "确定",IDOK,178,7,50,14,WS_GROUP
+END
+
+IDD_lOGIN_DIALOG DIALOG DISCARDABLE  0, 0, 178, 123
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "登录"
+FONT 9, "新宋体"
+BEGIN
+    DEFPUSHBUTTON   "确认",IDOK,25,102,50,14
+    PUSHBUTTON      "取消",IDCANCEL,100,102,50,14
+    LTEXT           "本地IP：",IDC_STATIC,16,9,33,8
+    LTEXT           "网关IP：",IDC_STATIC,16,28,33,8
+    LTEXT           "网元ID：",IDC_STATIC,16,47,33,8
+    LTEXT           "用户名：",IDC_STATIC,16,66,33,8
+    LTEXT           "密  码：",IDC_STATIC,16,85,33,8
+    COMBOBOX        IDC_HOST_IP_COMBO,52,7,109,52,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_GATEWAY_IP_COMBO,52,26,75,92,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_NE_ID_EDIT,52,44,109,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_USER_NAME_EDIT,52,63,109,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PASSWORD_EDIT,52,82,109,14,ES_PASSWORD | 
+                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PORT,130,26,31,12,ES_AUTOHSCROLL
+END
+
+IDD_BOTTOM_DIALOG DIALOG DISCARDABLE  0, 0, 410, 244
+STYLE WS_CHILD | WS_VISIBLE
+FONT 9, "新宋体"
+BEGIN
+    CONTROL         "Tab1",IDC_BOTTOM_TAB,"SysTabControl32",TCS_BOTTOM | 
+                    TCS_FIXEDWIDTH,7,196,358,33
+    EDITTEXT        IDC_EDIT_CMD,39,31,127,137,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_AUTOHSCROLL | ES_NOHIDESEL | ES_WANTRETURN | NOT 
+                    WS_BORDER | WS_VSCROLL | WS_HSCROLL
+    EDITTEXT        IDC_EDIT_DEBUG,197,39,156,115,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_NOHIDESEL | 
+                    ES_READONLY | ES_WANTRETURN | NOT WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL
+END
+
+IDD_DIALOG_BUSINESS DIALOG DISCARDABLE  0, 0, 293, 165
+STYLE WS_CHILD
+FONT 9, "宋体"
+BEGIN
+    CONTROL         "List1",IDC_LIST_BUSINESS,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | WS_TABSTOP,7,7,279,107
+END
+
+IDD_DIALOG_NE_IMG DIALOG DISCARDABLE  0, 0, 396, 202
+STYLE WS_CHILD | WS_VSCROLL | WS_HSCROLL
+FONT 9, "宋体"
+BEGIN
+END
+
+IDD_ASSISTANT_DIALOG DIALOG DISCARDABLE  0, 0, 244, 187
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "网元辅助"
+FONT 9, "宋体"
+BEGIN
+    DEFPUSHBUTTON   "执行",IDOK,49,166,50,14
+    PUSHBUTTON      "退出",IDCANCEL,137,166,50,14
+    CONTROL         "Tree1",IDC_ASSISTANT_TREE,"SysTreeView32",WS_BORDER | 
+                    WS_TABSTOP,7,7,230,149
+END
+
+IDD_OUTPUT_DIALOG DIALOG DISCARDABLE  0, 0, 318, 189
+STYLE WS_CHILD
+FONT 9, "宋体"
+BEGIN
+    EDITTEXT        IDC_OUTPUT_EDIT,7,7,120,131,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_NOHIDESEL | 
+                    ES_READONLY | ES_WANTRETURN | NOT WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL
+END
+
+IDD_ALL_COLLEC_DIALOG DIALOG DISCARDABLE  0, 0, 211, 173
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "网元数据采集"
+FONT 9, "宋体"
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,42,152,50,14
+    PUSHBUTTON      "取消",IDCANCEL,116,152,50,14
+    GROUPBOX        "采集领域",IDC_STATIC,7,7,197,30
+    GROUPBOX        "采集方式",IDC_STATIC,7,48,197,56
+    CONTROL         "单站采集",IDC_RADIO_ONLY_SITE,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,17,65,46,10
+    COMBOBOX        IDC_COMBO_NEID,69,64,63,58,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "业务采集",IDC_RADIO_OPERATION,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,17,85,46,10
+    COMBOBOX        IDC_COMBO_THREE_GROUP,69,84,127,54,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "WDM",IDC_CHECK_WDM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,17,21,28,10
+    CONTROL         "SDH",IDC_CHECK_SDH,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,60,21,28,10
+    CONTROL         "OTN",IDC_CHECK_OTN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,103,21,28,10
+    GROUPBOX        "采集内容",IDC_STATIC,7,115,197,31
+    CONTROL         "日志文件",IDC_CHECK_UPLOAD,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,103,129,46,10
+    CONTROL         "配置信息",IDC_CHECK_CFG_INFO,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,17,129,46,10
+END
+
+IDD_SELNE_DIALOG DIALOG DISCARDABLE  0, 0, 192, 134
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "业务网元"
+FONT 9, "宋体"
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,34,112,50,14
+    PUSHBUTTON      "取消",IDCANCEL,103,113,50,14
+    CONTROL         "Tree1",IDC_NEID_LIST_TREE,"SysTreeView32",TVS_HASLINES | 
+                    TVS_CHECKBOXES | WS_BORDER | WS_TABSTOP,7,7,178,94
+END
+
+IDD_ALL_GW_INFO_DIALOG DIALOG DISCARDABLE  0, 0, 158, 125
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "网元信息"
+FONT 9, "宋体"
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,22,104,50,14
+    PUSHBUTTON      "取消",IDCANCEL,86,104,50,14
+    COMBOBOX        IDC_LOCAL_IP_COMBO,53,5,90,70,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_TIMER_EDIT,53,24,90,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TITLE_EDIT,53,43,90,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_USER_EDIT,53,62,90,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PWD_EDIT,53,81,90,12,ES_PASSWORD | ES_AUTOHSCROLL
+    LTEXT           "账   号：",IDC_STATIC,10,64,36,8
+    LTEXT           "密   码：",IDC_STATIC,10,83,36,8
+    LTEXT           "本地 IP：",IDC_STATIC,10,7,36,8
+    LTEXT           "周期(s)：",IDC_STATIC,10,26,36,8
+    LTEXT           "标   题：",IDC_STATIC,10,45,36,8
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "HUAWEI\0"
+            VALUE "FileDescription", "YinAidanceKit  作者：尹文会\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "YinAidanceKit\0"
+            VALUE "LegalCopyright", "版权所有 (C) 2012 武汉WDM主机组\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "YinAidanceKit.EXE\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "AsonKit 应用程序\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_lOGIN_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 171
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 116
+    END
+
+    IDD_BOTTOM_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 403
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 237
+    END
+
+    IDD_DIALOG_BUSINESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 286
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 158
+    END
+
+    IDD_DIALOG_NE_IMG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 378
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 184
+    END
+
+    IDD_ASSISTANT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 237
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 180
+    END
+
+    IDD_OUTPUT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 311
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 182
+    END
+
+    IDD_ALL_COLLEC_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 204
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 166
+    END
+
+    IDD_SELNE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 185
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 127
+    END
+
+    IDD_ALL_GW_INFO_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 151
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 118
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_CURSOR1             CURSOR  DISCARDABLE     "res\\cursor1.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "YinAidanceKit\n\nYinAid\n\n\nYinAidanceKit.Document\nYinAid Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "YinAidanceKit"
+    AFX_IDS_IDLEMESSAGE     "就绪"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "扩展名"
+    ID_INDICATOR_CAPS       "大写"
+    ID_INDICATOR_NUM        "数字"
+    ID_INDICATOR_SCRL       "滚动"
+    ID_INDICATOR_OVR        "改写"
+    ID_INDICATOR_REC        "记录"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_NEW             "建立新文档\n新建"
+    ID_FILE_OPEN            "打开一个现有文档\n打开"
+    ID_FILE_CLOSE           "关闭活动文档\n关闭"
+    ID_FILE_SAVE            "保存活动文档\n保存"
+    ID_FILE_SAVE_AS         "将活动文档以一个新文件名保存\n另存为"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "显示程序信息，版本号和版权\n关于"
+    ID_APP_EXIT             "退出应用程序；提示保存文档\n退出"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "打开该文档"
+    ID_FILE_MRU_FILE2       "打开该文档"
+    ID_FILE_MRU_FILE3       "打开该文档"
+    ID_FILE_MRU_FILE4       "打开该文档"
+    ID_FILE_MRU_FILE5       "打开该文档"
+    ID_FILE_MRU_FILE6       "打开该文档"
+    ID_FILE_MRU_FILE7       "打开该文档"
+    ID_FILE_MRU_FILE8       "打开该文档"
+    ID_FILE_MRU_FILE9       "打开该文档"
+    ID_FILE_MRU_FILE10      "打开该文档"
+    ID_FILE_MRU_FILE11      "打开该文档"
+    ID_FILE_MRU_FILE12      "打开该文档"
+    ID_FILE_MRU_FILE13      "打开该文档"
+    ID_FILE_MRU_FILE14      "打开该文档"
+    ID_FILE_MRU_FILE15      "打开该文档"
+    ID_FILE_MRU_FILE16      "打开该文档"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "切换到下一个窗格\n下一窗格"
+    ID_PREV_PANE            "切换回前一个窗格\n前一窗格"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_SPLIT         "将活动的窗口分隔成窗格\n分隔"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "删除被选对象\n删除"
+    ID_EDIT_CLEAR_ALL       "全部删除\n全部删除"
+    ID_EDIT_COPY            "复制被选对象并将其置于剪贴板上\n复制"
+    ID_EDIT_CUT             "剪切被选对象并将其置于剪贴板上\n剪切"
+    ID_EDIT_FIND            "查找指定的正文\n查找"
+    ID_EDIT_PASTE           "插入剪贴板内容\n粘贴"
+    ID_EDIT_REPEAT          "重复上一步操作\n重复"
+    ID_EDIT_REPLACE         "用不同的正文替换指定的正文\n替换"
+    ID_EDIT_SELECT_ALL      "选择整个文档\n选择全部"
+    ID_EDIT_UNDO            "撤消最后一步操作\n撤消"
+    ID_EDIT_REDO            "重新执行先前已撤消的操作\n重新执行"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "显示或隐藏工具栏\n显隐工具栏"
+    ID_VIEW_STATUS_BAR      "显示或隐藏状态栏\n显隐状态栏"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "改变窗口大小"
+    AFX_IDS_SCMOVE          "改变窗口位置"
+    AFX_IDS_SCMINIMIZE      "将窗口缩小成图标"
+    AFX_IDS_SCMAXIMIZE      "把窗口放大到最大尺寸"
+    AFX_IDS_SCNEXTWINDOW    "切换到下一个文档窗口"
+    AFX_IDS_SCPREVWINDOW    "切换到先前的文档窗口"
+    AFX_IDS_SCCLOSE         "关闭活动的窗口并提示保存所有文档"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "把窗口恢复到正常大小"
+    AFX_IDS_SCTASKLIST      "激活任务表"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_MENU_LOGIN           "Login"
+    ID_MENU_LOGOUT          "Logout"
+    ID_NE_SUBSIDIARY        "Script"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_RUN_STOP             "Stop"
+END
+
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE 4, 2
+#pragma code_page(936)
+#endif //_WIN32
+#include "res\YinAidanceKit.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.chs\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

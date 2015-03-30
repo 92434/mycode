@@ -1,0 +1,11 @@
+
+[Desktop Entry]
+Encoding=UTF-8
+Name=Eclipse
+Comment=Eclipse comment
+Exec=/home/xiaofei/bin/eclipse
+Icon=/home/xiaofei/workspace/adt-bundle-linux-x86/eclipse/icon.xpm
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Development;IDE;

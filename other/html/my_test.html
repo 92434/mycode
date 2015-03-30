@@ -1,0 +1,55 @@
+<html>
+<head>
+<script type="text/javascript">
+function changeSize()
+{
+document.getElementById("compman").height="270"
+document.getElementById("compman").width="164"
+}
+function myClick()
+{
+var txt="Id: " + document.getElementById("myButton").id
+txt=txt + ", type: " + document.getElementById("myButton").type
+alert(txt)
+document.getElementById("myButton").disabled=true
+for(var name in document.getElementById("mySpan")){
+  txt = txt + name + ':' + document.getElementById("mySpan")[name] + '\n'
+}
+document.getElementById("mySpan").innerText = txt
+}
+</script>
+</head>
+
+<body>
+<img id="compman" src="i/eg_bulbon.gif" />
+<br /><br />
+<input type="button" onclick="changeSize()" value="改变图像的高度和宽度">
+<br /><br />
+<form>
+<button id="myButton" onClick="myClick()">请点击我！</button>
+<br />
+<span id='mySpan'>肖飞<span>
+</form>
+</body>
+
+<script type="text/javascript">
+document.write("<p>浏览器：")
+document.write(navigator.appName + "</p>")
+
+document.write("<p>浏览器版本：")
+document.write(navigator.appVersion + "</p>")
+
+document.write("<p>代码：")
+document.write(navigator.appCodeName + "</p>")
+
+document.write("<p>平台：")
+document.write(navigator.platform + "</p>")
+
+document.write("<p>Cookies 启用：")
+document.write(navigator.cookieEnabled + "</p>")
+
+document.write("<p>浏览器的用户代理报头：")
+document.write(navigator.userAgent + "</p>")
+</script>
+
+</html>

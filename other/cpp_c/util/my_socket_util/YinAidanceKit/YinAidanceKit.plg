@@ -1,0 +1,55 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: YinAidanceKit - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\xKF72680\AppData\Local\Temp\RSPC9A9.tmp" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /Fp"..\Dump\Release\AidanceKit/YinAidanceKit.pch" /Yu"stdafx.h" /Fo"..\Dump\Release\AidanceKit/" /Fd"..\Dump\Release\AidanceKit/" /FD /c 
+"E:\svn\AK+Python\ASONKIT工程\YinAidanceKit\MainFrm.cpp"
+]
+Creating command line "cl.exe @C:\Users\xKF72680\AppData\Local\Temp\RSPC9A9.tmp" 
+Creating temporary file "C:\Users\xKF72680\AppData\Local\Temp\RSPC9BA.tmp" with contents
+[
+/nologo /subsystem:windows /incremental:no /pdb:"..\Release/AsonKit.pdb" /machine:I386 /out:"..\Release/AsonKit.exe" 
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\AllCollecDlg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\AllGwInfoDlg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\AssistantDlg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\BottomDlg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\BusinessDlg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\CtrlNeStatic.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\MainFrm.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\MyEdit.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\NeLinkImgDlg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\NePointDlg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\OutputDlg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\OutputView.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\StdAfx.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\UserLoginDlg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\YinAidanceKit.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\YinAidanceKitDoc.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\YinAidanceKitView.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\YinEvent.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\ComNeMsg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\NeClient.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\NeOper.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\YinSocket.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\AppConfig.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Release\AidanceKit\YinAidanceKit.res"
+]
+Creating command line "link.exe @C:\Users\xKF72680\AppData\Local\Temp\RSPC9BA.tmp"
+<h3>Output Window</h3>
+Compiling...
+MainFrm.cpp
+Linking...
+
+
+
+<h3>Results</h3>
+AsonKit.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

@@ -1,0 +1,1 @@
+g++ -o test_macro test_macro.cpp -g -rdynamic -Wall -DXIAOFEI=1

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+add_android_src sdb1
+add_android_repo sdc1

@@ -1,0 +1,56 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: AsonSrv - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\xKF72680\AppData\Local\Temp\RSP14F1.tmp" with contents
+[
+/nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"..\Dump\Debug\AsonSrv/AsonSrv.pch" /Yu"stdafx.h" /Fo"..\Dump\Debug\AsonSrv/" /Fd"..\Dump\Debug\AsonSrv/" /FD /GZ /c 
+"E:\svn\AK+Python\ASONKIT工程\AsonSrv\Network\YinSocket.cpp"
+]
+Creating command line "cl.exe @C:\Users\xKF72680\AppData\Local\Temp\RSP14F1.tmp" 
+Creating temporary file "C:\Users\xKF72680\AppData\Local\Temp\RSP1501.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:yes /pdb:"..\Release/AsonSrv.pdb" /debug /machine:I386 /out:"..\Release/AsonSrv.exe" /pdbtype:sept 
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\AsonSrv.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\CriticalSection.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\SevFrame.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\StdAfx.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\YinEvent.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\ComNeMsg.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\NeOperate.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\TcpClient.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\TcpServer.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\UdpClient.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\YinSocket.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\PythonEx.obj"
+"\svn\AK+Python\ASONKIT工程\Dump\Debug\AsonSrv\FileLog.obj"
+]
+Creating command line "link.exe @C:\Users\xKF72680\AppData\Local\Temp\RSP1501.tmp"
+<h3>Output Window</h3>
+Compiling...
+YinSocket.cpp
+e:\svn\ak+python\asonkit工程\asonsrv\network\yinsocket.cpp(5) : warning C4652: compiler option 'Generate Browser Info' inconsistent with precompiled header; current command-line option will override that defined in the precompiled header
+c:\program files\microsoft platform sdk for windows xp sp2\include\ras.h(282) : error C2146: syntax error : missing ';' before identifier 'reserved'
+c:\program files\microsoft platform sdk for windows xp sp2\include\ras.h(282) : error C2501: 'ULONG_PTR' : missing storage-class or type specifiers
+c:\program files\microsoft platform sdk for windows xp sp2\include\ras.h(282) : error C2501: 'reserved' : missing storage-class or type specifiers
+c:\program files\microsoft platform sdk for windows xp sp2\include\ras.h(722) : error C2065: 'ULONG_PTR' : undeclared identifier
+c:\program files\microsoft platform sdk for windows xp sp2\include\ras.h(722) : error C2275: 'DWORD' : illegal use of this type as an expression
+        c:\program files\microsoft visual studio\vc98\include\windef.h(141) : see declaration of 'DWORD'
+c:\program files\microsoft platform sdk for windows xp sp2\include\ras.h(722) : error C2275: 'HRASCONN' : illegal use of this type as an expression
+        c:\program files\microsoft platform sdk for windows xp sp2\include\ras.h(61) : see declaration of 'HRASCONN'
+c:\program files\microsoft platform sdk for windows xp sp2\include\ras.h(722) : error C2275: 'UINT' : illegal use of this type as an expression
+        c:\program files\microsoft visual studio\vc98\include\windef.h(162) : see declaration of 'UINT'
+c:\program files\microsoft platform sdk for windows xp sp2\include\ras.h(722) : error C2226: syntax error : unexpected type 'tagRASCONNSTATE'
+Error executing cl.exe.
+
+
+
+<h3>Results</h3>
+AsonSrv.exe - 8 error(s), 1 warning(s)
+</pre>
+</body>
+</html>

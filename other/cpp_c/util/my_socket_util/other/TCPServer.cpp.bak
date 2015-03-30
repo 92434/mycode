@@ -1,0 +1,231 @@
+#include <stdio.h>
+#include "winsock2.h"
+#pragma comment (lib, "Ws2_32.lib")
+
+bool b_enable_send = true;
+
+typedef struct _thread_flag
+{
+    LPVOID lpParam;
+    bool b_exit;
+
+    sockaddr_in addr_client;
+} thread_flag_t;
+
+DWORD WINAPI thread_proc_tcp_recv( LPVOID lpParam )
+{
+    thread_flag_t *p_thread_flag = (thread_flag_t *)lpParam;
+
+    SOCKET socket_connect = (SOCKET)p_thread_flag->lpParam;
+    // Send and receive data.
+
+    while (!p_thread_flag->b_exit)
+    {
+        fd_set fd_connect;
+
+        FD_ZERO(&fd_connect);
+        FD_SET(socket_connect,&fd_connect);
+
+        timeval tv;
+        tv.tv_sec = 30;
+        tv.tv_usec = 0;
+
+        printf("slave before select\n");
+        int iErr = select(socket_connect + 1,&fd_connect,NULL,NULL,&tv);
+        printf("slave after select\n");
+        if (iErr == 0)  //0：等待超时，没有可读写或错误的文件
+        {
+            continue;
+        }
+
+        if(FD_ISSET(socket_connect,&fd_connect))
+        {
+            char csz_revc_buffer[4096] = "";
+            memset(csz_revc_buffer, 0, sizeof(csz_revc_buffer));
+            int i_bytes_recv = recv( socket_connect, csz_revc_buffer, sizeof(csz_revc_buffer), 0 );
+
+            if (i_bytes_recv > 0)
+            {
+                printf( "%d:%s (%ld)\n", socket_connect, csz_revc_buffer, i_bytes_recv );
+            }
+            else
+            {
+                p_thread_flag->b_exit = true;
+                printf("exit %d(%d)\n", socket_connect, i_bytes_recv);
+                return 1;
+            }
+        }
+    }
+}
+
+
+DWORD WINAPI thread_proc_tcp_send( LPVOID lpParam )
+{
+    thread_flag_t *p_thread_flag = (thread_flag_t *)lpParam;
+    SOCKET socket_connect = (SOCKET)p_thread_flag->lpParam;
+    // Send and receive data.
+
+    while (!p_thread_flag->b_exit)
+    {
+        if (b_enable_send)
+        {
+            b_enable_send = false;
+            int bytesSent;
+            char sendbuf[32] = "";
+
+            char *cpStop;
+
+            memset(sendbuf, 0, 32);
+            scanf("%s", sendbuf);
+
+            if(sendbuf[0] == ':')
+            {
+                char *cpStart = sendbuf + 1;
+                socket_connect = (SOCKET)strtol(cpStart, &cpStop, 10);
+                printf("change to client %d\n", socket_connect);
+            }
+            else
+            {
+                printf("%d>%s\n", socket_connect, sendbuf);
+                bytesSent = send( socket_connect, sendbuf, strlen(sendbuf), 0 );
+                printf( "Bytes Sent: %ld\n", bytesSent );
+            }
+
+            b_enable_send = true;
+        }
+        else
+        {
+            Sleep(1000);
+        }
+    }
+
+    printf("disconnect from %s on socket %d at 0x%x\n", inet_ntoa(p_thread_flag->addr_client.sin_addr), socket_connect, p_thread_flag);
+    free((p_thread_flag));
+    //closesocket(socket_connect);
+    return 1;
+}
+
+
+
+DWORD WINAPI thread_proc_tcp_server( LPVOID lpParam )
+{
+    DWORD d_thread_id;
+
+    CreateThread(NULL, 0, thread_proc_tcp_recv, lpParam, 0, &d_thread_id);
+    CreateThread(NULL, 0, thread_proc_tcp_send, lpParam, 0, &d_thread_id);
+    return 0;
+}
+
+
+int main()
+{
+
+    // Initialize Winsock.
+    WSADATA wsa_data;
+    int i_wsa_status = WSAStartup( MAKEWORD(2,2), &wsa_data );
+    if ( i_wsa_status != NO_ERROR )
+    {
+        printf("Error at WSAStartup()\n");
+        WSACleanup();
+        return 1;
+    }
+
+    // Create a socket.
+    SOCKET socket_server = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
+
+    if ( socket_server == INVALID_SOCKET )
+    {
+        printf( "Error at socket(): %ld\n", WSAGetLastError() );
+        WSACleanup();
+        return 1;
+    }
+
+
+    // Bind the socket.
+    sockaddr_in addr_server;
+
+    addr_server.sin_family = AF_INET;
+    addr_server.sin_addr.s_addr = inet_addr( "0.0.0.0" );
+    addr_server.sin_port = htons( 27015 );
+
+    if ( bind( socket_server, (SOCKADDR*) &addr_server, sizeof(addr_server) ) == SOCKET_ERROR )
+    {
+        printf( "bind() failed.\n" );
+        closesocket(socket_server);
+        return 1;
+    }
+
+    // Listen on the socket.
+    if ( listen( socket_server, 1 ) == SOCKET_ERROR )
+    {
+        printf( "Error listening on socket.\n");
+        return 1;
+    }
+
+
+    // Accept connections.
+    SOCKET socket_accept = SOCKET_ERROR;
+
+    printf("-----------Server-----------\n");
+
+    while(1)
+    {
+        fd_set fd_server;
+
+        FD_ZERO(&fd_server);
+        FD_SET(socket_server,&fd_server);
+
+        timeval tv;
+        tv.tv_sec = 30;
+        tv.tv_usec = 0;
+
+        //printf( "Waiting for a client to connect...\n" );
+        printf("server before select\n");
+        int iErr = select(socket_server + 1, &fd_server, NULL, NULL, &tv);//不活跃的描述符对应位置0
+        printf("server after select\n");
+        printf("select result:%d\n", iErr);
+
+        if(iErr == 0)  //0：等待超时，没有可读写或错误的文件
+        {
+            continue;
+        }
+
+        if(FD_ISSET(socket_server, &fd_server))//经过select()后的read_fds中对应位为1则FD_ISSET()返回1
+        {
+            sockaddr_in addr_client;
+
+            memset(&addr_client, 0, sizeof(addr_client));
+
+            int addrlen = sizeof(addr_client);
+
+            while ( socket_accept == SOCKET_ERROR )
+            {
+                socket_accept = accept( socket_server, (struct sockaddr *)&addr_client, &addrlen );
+
+                printf("new connection from %s(%d) on socket %d\n",inet_ntoa(addr_client.sin_addr), ntohs(addr_client.sin_port), socket_accept);
+            }
+
+            printf( "Client Connected.\n");
+
+            thread_flag_t *p_thread_flag = (thread_flag_t *)malloc(sizeof(thread_flag_t));
+            if(p_thread_flag)
+            {
+                DWORD d_thread_id;
+
+                memset(p_thread_flag, 0, sizeof(thread_flag_t));
+
+                p_thread_flag->lpParam = (LPVOID)socket_accept;
+                p_thread_flag->b_exit = false;
+                p_thread_flag->addr_client = addr_client;
+
+                socket_accept = SOCKET_ERROR;
+
+                CreateThread(NULL, 0, thread_proc_tcp_server, p_thread_flag, 0, &d_thread_id);
+            }
+        }
+    }
+
+    return 0;
+}
+
+

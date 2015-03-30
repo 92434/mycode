@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Root>
+  这个是根节点的内容
+  <user id="001">用户信息</user>
+</Root>
