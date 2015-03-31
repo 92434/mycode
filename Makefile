@@ -2,7 +2,7 @@ include $(default_rules)
 
 #all_dirs := $(strip $(call all-dirs-under))
 
-SUB_DIRS := utils mytest kernel_test make_test rom_parse linuxstart-20120111 test_utils sqlite lzma
+SUB_DIRS := utils mytest kernel_test make_test rom_parse linuxstart-20120111 test_utils sqlite lzma DES
 
 ifneq ($(shell which arm-xilinx-linux-gnueabi-gcc),)
 SUB_DIRS += xilinx
