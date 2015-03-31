@@ -11,7 +11,7 @@ LDFLAGS += -lrt
 LDFLAGS += -lpthread
 
 c_files :=
-c_files += test_settimer.cpp
+c_files += test_settimer.c
 c_files += test_getopt.cpp
 c_files += test_optparse.cpp
 include $(BUILD_BINS)

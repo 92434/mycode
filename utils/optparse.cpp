@@ -322,3 +322,93 @@ std::string optparse::option_value(std::string s) {
 
 	return ret;
 }
+
+command_parser *command_parser::cur_parser = NULL;
+command_parser *command_parser::add_sub_command(std::string sub_command) {
+	command_parser *parser = new command_parser(sub_command);
+
+	if(parser != 0) {
+		msub_commands[sub_command] = parser;
+	}
+
+	return parser;
+}
+int command_parser::get_option(int argc, char **argv, short_option_mode_t mode) {
+	int ret = -1;
+	ret = optparse::get_option(argc, argv, MODE_PARA);
+	if(ret != 0) {
+		return ret;
+	}
+
+	if(optind >= argc) {
+		return ret;
+	}
+
+	std::map<std::string, command_parser *>::iterator it;
+	for(it = msub_commands.begin(); it != msub_commands.end(); it++) {
+		if(it->first.compare(argv[optind]) == 0) {
+			optind += 1;
+			moption["para"] = "";
+			cur_parser = it->second;
+			break;
+		}
+	}
+
+	if(cur_parser != this) {
+		printf("optind:%d,argc:%d, argv[0]:%s\n",optind, argc - (optind - 1), *(argv + (optind - 1)));
+		ret = cur_parser->get_option(argc - (optind - 1), argv + (optind - 1));
+	}
+
+	return ret;
+}
+int command_parser::get_long_option(int argc, char **argv, short_option_mode_t mode) {
+	int ret = -1;
+	ret = optparse::get_long_option(argc, argv, MODE_PARA);
+	if(ret != 0) {
+		return ret;
+	}
+
+	if(optind >= argc) {
+		return ret;
+	}
+
+	std::map<std::string, command_parser *>::iterator it;
+	for(it = msub_commands.begin(); it != msub_commands.end(); it++) {
+		if(it->first.compare(argv[optind]) == 0) {
+			optind += 1;
+			moption["para"] = "";
+			cur_parser = it->second;
+			break;
+		}
+	}
+
+	if(cur_parser != this) {
+		//printf("optind:%d,argc:%d, argv[0]:%s\n",optind, argc - (optind - 1), *(argv + (optind - 1)));
+		ret = cur_parser->get_long_option(argc - (optind - 1), argv + (optind - 1));
+	}
+
+
+	return ret;
+}
+int command_parser::p_help() {
+	if(cur_parser == this) {
+		optparse::p_help();
+
+		std::string sub_commands;
+		std::map<std::string, command_parser *>::iterator it;
+		for(it = msub_commands.begin(); it != msub_commands.end(); it++) {
+			if(sub_commands.size() != 0) {
+				sub_commands += " ";
+			}
+			sub_commands += it->first;
+		}
+		printf("%20s%5s%s\n", "subcommands:", "", sub_commands.c_str());
+	} else {
+		cur_parser->p_help();
+	}
+}
+
+int command_parser::p_result() {
+	printf("%s:", command_name.c_str());
+	optparse::p_result();
+}
