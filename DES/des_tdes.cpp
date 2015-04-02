@@ -140,13 +140,13 @@ int DES_XOR(ElemType R[48], ElemType L[48] ,int count){
 }
 
 //S盒置换
-int DES_SBOX(ElemType data[48]){
+int DES_SBOX(ElemType data[48]){//6个位1组
 	int cnt;
 	int line,row,output;
 	int cur1,cur2;
 	for(cnt = 0; cnt < 8; cnt++){
 		cur1 = cnt*6;
-		cur2 = cnt<<2;
+		cur2 = cnt<<2;//每组产生1个4位结果
 
 		//计算在S盒中的行与列
 		line = (data[cur1]<<1) + data[cur1+5];
@@ -349,12 +349,12 @@ int main() {
 	printf("加密消耗%d毫秒\n",b-a);
 
 //	system("read");
-	getchar();
+	//getchar();
 	a = clock();
 	//DES_Decrypt("2.txt","key.txt","3.txt");
 	DES_Decrypt("2.txt","\0","3.txt");
 	b = clock();
 	printf("解密消耗%d毫秒\n",b-a);
-	getchar();
+	//getchar();
 	return 0;
 }

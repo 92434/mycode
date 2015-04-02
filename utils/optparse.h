@@ -57,7 +57,7 @@ public:
 	int get_long_option(int argc, char **argv, short_option_mode_t mode = MODE_PARA);
 
 	int p_help();
-	int p_result();
+	int p_result(std::string parsername = "");
 
 	bool have_option(std::string s);
 	std::string option_value(std::string s);
@@ -97,7 +97,11 @@ public:
 
 	int get_long_option(int argc, char **argv, short_option_mode_t mode = MODE_PARA);
 
+	command_parser *get_curparser() {
+		return cur_parser;
+	}
+
 	int p_help();
-	int p_result();
+	int p_result(std::string parsername = "");
 };
 #endif//#ifndef __OPTPARSE_H

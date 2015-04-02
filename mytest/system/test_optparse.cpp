@@ -54,9 +54,19 @@ int test_command_parser(int argc, char **argv) {
 		return ret;
 	}
 	cp2->add_option('c', true, "test c with arg");
-	cp.get_option(argc, argv);
-	cp.p_help();
-	printf("================================================\n");
+	if(cp.get_option(argc, argv) != 0) {
+		cp.p_help();
+
+		ret = -1;
+		return ret;
+	}
+
+	if(cp.get_curparser() != cp2) {
+		cp.p_help();
+
+		return ret;
+	}
+
 	cp.p_result();
 	cp1->p_result();
 	cp2->p_result();
@@ -82,9 +92,19 @@ int test_long_command_parser(int argc, char **argv) {
 	cp2->add_long_option("long_e", false, false, 'e', "test long_e");
 	cp2->add_long_option("long_f", true, false, 'f', "test long_f with arg");
 
-	lcp.get_long_option(argc, argv);
-	lcp.p_help();
-	printf("================================================\n");
+	if(lcp.get_long_option(argc, argv) != 0) {
+		lcp.p_help();
+
+		ret = -1;
+		return ret;
+	}
+
+	if(lcp.get_curparser() != cp2) {
+		lcp.p_help();
+
+		return ret;
+	}
+
 	lcp.p_result();
 	cp1->p_result();
 	cp2->p_result();

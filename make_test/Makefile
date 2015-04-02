@@ -23,3 +23,13 @@ xiaofei : 1
 	echo xiaofei1
 	echo $^
 xiaofei : 3
+
+%.t2 : %.t1
+	echo "$@----t1"
+	touch $@
+
+%.t2 :
+	echo "$@----t2"
+	touch $@
+
+test : 1.t2 2.t2 3.t2

@@ -90,20 +90,24 @@ int optparse::parse_option(int argc, char **argv, char *optstring) {
 //MODE_PARA:optstring start with +(stop at first error,left is parameter for name argument),
 int optparse::get_option(int argc, char **argv, short_option_mode_t mode) {
 	int ret = 0;
+	char *optstring;
 
-	char *optstring = new char[voption.size() * 2];
+	optstring = new char[voption.size() * 2];
 	if(optstring == 0) {
 		ret = -1;
-		return ret;
+		goto l1;
 	}
 
-	initilize_optstring(optstring, mode);
-
-	if(parse_option(argc, argv, optstring) != 0) {
-		ret = -1;
+	ret = initilize_optstring(optstring, mode);
+	if(ret != 0) {
+		goto l2;
 	}
 
+	ret = parse_option(argc, argv, optstring);
+
+l2:
 	delete []optstring;
+l1:
 
 	return ret;
 }
@@ -204,22 +208,28 @@ int optparse::parse_long_option(int argc, char **argv, char *optstring, struct o
 				optarg,
 				optind
 		      );
+
 		if(opt == 0) {
 			printf("opt is %c(%x)\n", vals[option_index], vals[option_index]);
 
-			if(long_options[option_index].flag != 0) {
+			if(long_options[option_index].flag != 0) {//default use short option name
 				std::string o;
 				o.push_back(vals[option_index]);
 				moption[o] = optarg ? optarg : "";
-			} else {
+			} else {//if not exist short option name, use long option name
 				moption[long_options[option_index].name] = optarg ? optarg : "";
 			}
 		} else if(opt == 1) {
+			printf("%s:%s:%d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			if(moption["para"].size()) {
 				moption["para"] += " ";
 			}
 			moption["para"] += optarg ? optarg : "";
-		} else if(opt != '?') {
+			ret = -1;
+		} else if(opt == '?') {
+			ret = -1;
+		} else {
+			printf("%s:%s:%d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			std::string o;
 			o.push_back(opt);
 			moption[o] = optarg ? optarg : "";
@@ -244,26 +254,42 @@ int optparse::parse_long_option(int argc, char **argv, char *optstring, struct o
 int optparse::get_long_option(int argc, char **argv, short_option_mode_t mode) {
 	int ret = 0;
 
-	char *optstring = new char[vlong_option.size() * 2 + 1];
+	char *optstring;
+	struct option *long_options;
+	int *vals;
+
+	optstring = new char[vlong_option.size() * 2 + 1];
 	if(optstring == 0) {
 		ret = -1;
-		return ret;
+		goto l1;
 	}
 
-	struct option *long_options = new struct option[vlong_option.size() + 1];
-	int *vals = new int[vlong_option.size() + 1];
-	if(long_options == 0 || vals == 0) {
+	long_options = new struct option[vlong_option.size() + 1];
+	if(long_options == 0) {
 		ret = -1;
-		return ret;
+		goto l2;
 	}
 
-	initilize_long_option(long_options, optstring, vals, mode);
+	vals = new int[vlong_option.size() + 1];
+	if(vals == 0) {
+		ret = -1;
+		goto l3;
+	}
 
-	parse_long_option(argc, argv, optstring, long_options, vals);
+	ret = initilize_long_option(long_options, optstring, vals, mode);
+	if(ret != 0) {
+		goto l4;
+	}
 
-	delete []optstring;
-	delete []long_options;
+	ret = parse_long_option(argc, argv, optstring, long_options, vals);
+
+l4:
 	delete []vals;
+l3:
+	delete []long_options;
+l2:
+	delete []optstring;
+l1:
 
 	return ret;
 }
@@ -289,10 +315,15 @@ int optparse::p_help() {
 	return ret;
 }
 
-int optparse::p_result() {
+int optparse::p_result(std::string parsername) {
 	int ret = 0;
 	std::map<std::string, std::string>::iterator it;
-	printf("result:\n");
+	if(moption.size() == 0) {
+		ret = -1;
+		return ret;
+	}
+
+	printf("%s:\n", parsername.c_str());
 	for(it = moption.begin(); it != moption.end(); it++) {
 		printf("%20s:%s\n", it->first.c_str(), it->second.c_str());
 	}
@@ -390,6 +421,7 @@ int command_parser::get_long_option(int argc, char **argv, short_option_mode_t m
 
 	return ret;
 }
+
 int command_parser::p_help() {
 	if(cur_parser == this) {
 		optparse::p_help();
@@ -402,13 +434,17 @@ int command_parser::p_help() {
 			}
 			sub_commands += it->first;
 		}
-		printf("%20s%5s%s\n", "subcommands:", "", sub_commands.c_str());
+		if(sub_commands.size() != 0) {
+			printf("%20s%5s%s\n", "subcommands:", "", sub_commands.c_str());
+		}
 	} else {
 		cur_parser->p_help();
 	}
 }
 
-int command_parser::p_result() {
-	printf("%s:", command_name.c_str());
-	optparse::p_result();
+int command_parser::p_result(std::string parsername) {
+	if(parsername.size() == 0) {
+		parsername = command_name;
+	}
+	optparse::p_result(parsername);
 }
