@@ -6,7 +6,7 @@
 //
 
 int test_option_parser(int argc, char **argv) {
-	int ret = -1;
+	int ret = 0;
 
 	optparse opt;
 	opt.add_option('a', true, "test a with arg");
@@ -20,7 +20,7 @@ int test_option_parser(int argc, char **argv) {
 }
 
 int test_long_option_parser(int argc, char **argv) {
-	int ret = -1;
+	int ret = 0;
 
 	optparse opt1;
 	opt1.add_long_option("long_a", false, false, 'a', "test long_a");
@@ -37,7 +37,7 @@ int test_long_option_parser(int argc, char **argv) {
 }
 
 int test_command_parser(int argc, char **argv) {
-	int ret = -1;
+	int ret = 0;
 	command_parser *cp1, *cp2;
 
 	command_parser cp("main");
@@ -75,7 +75,7 @@ int test_command_parser(int argc, char **argv) {
 }
 
 int test_long_command_parser(int argc, char **argv) {
-	int ret = -1;
+	int ret = 0;
 	command_parser *cp1, *cp2;
 
 	command_parser lcp("main");

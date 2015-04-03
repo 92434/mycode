@@ -15,12 +15,14 @@ int mycompress(std::string in, std::string out, int level, unsigned dictsize, in
 	size_t out_size;
 	int numthreads = 2;/* 1 or 2, default = 2 */
 
+	unsigned long long orignal_size;
 
-	std::ifstream ifs(in.c_str());
 	std::ofstream ofs(out.c_str());
+	std::ifstream ifs(in.c_str());
 	if(!ifs.good()) {
 		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		printf("%s:%m\n", strerror(errno));
+		printf("打开文件出错！");
 		ret = -1;
 		goto l1;
 	}
@@ -28,67 +30,69 @@ int mycompress(std::string in, std::string out, int level, unsigned dictsize, in
 	ifs.seekg (0, ifs.end);
 	filesize = ifs.tellg();
 	ifs.seekg (0, ifs.beg);
-	if(!ifs.good()) {
-		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-		printf("%s:%m\n", strerror(errno));
-		ret = -1;
-		goto l2;
-	}
 
 	src_buffer = new unsigned char[filesize]; //原始文件数据
 	if(src_buffer == NULL) {
 		ret = -1;
-		goto l3;
+		goto l2;
 	}
-	compress_buffer = new unsigned char[filesize * 2]; //存放压缩数据
+
+	out_size = filesize * 2;
+	compress_buffer = new unsigned char[out_size]; //存放压缩数据
 	if(compress_buffer == NULL) {
 		ret = -1;
-		goto l4;
+		goto l3;
 	}
 
 	ifs.read((char *)src_buffer, filesize);
-	if(!ifs.good()) {
-		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-		printf("%s:%m\n", strerror(errno));
-		ret = -1;
-		goto l4;
-	}
 
 	if (SZ_OK != LzmaCompress(compress_buffer, &out_size, src_buffer, filesize, prop, &prop_size, level, dictsize, lc, lp, pb, fb, numthreads)) {//出错了
 		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		printf("%s:%m\n", strerror(errno));
 		printf("压缩时出错！");
 		ret = -1;
-		goto l4;
-	}
-
-	if(ofs.good()) {
-		ofs.write((const char *)compress_buffer, out_size);//写入压缩后的数据
+		goto l3;
 	}
 
 	if(!ofs.good()) {
 		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		printf("%s:%m\n", strerror(errno));
-		printf("创建文件出错！");
+		printf("打开文件出错！");
 		ret = -1;
-		goto l5;
+		goto l3;
+	}
+
+	orignal_size = filesize;
+
+	ofs.write((const char *)prop, prop_size);//写入压缩后prop
+	for(int i = 0; i < prop_size; i++) {
+		printf("%02x ", prop[i]);
+	}
+	printf("\n");
+	ofs.write((const char *)&orignal_size, sizeof(orignal_size));//写入压缩后的数据
+	printf("%016x\n", orignal_size);
+	ofs.write((const char *)compress_buffer, out_size);//写入压缩后的数据
+
+	if(!ofs.good()) {
+		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		printf("%s:%m\n", strerror(errno));
+		printf("写入文件出错！");
+		ret = -1;
 	}
 	
 
-l5:
-	ofs.close();
-l4:
-	delete [] compress_buffer;
 l3:
-	delete [] src_buffer;
+	delete [] compress_buffer;
 l2:
-	ifs.close();
+	delete [] src_buffer;
 l1:
+	ofs.close();
+	ifs.close();
 	return ret;
 }
 
 int mydecompress(std::string in, std::string out) {
-	int ret = -1;
+	int ret = 0;
 
 	unsigned char *src_buffer;
 	unsigned char *decompress_buffer;
@@ -96,72 +100,83 @@ int mydecompress(std::string in, std::string out) {
 	size_t out_size;
 	unsigned char prop[5];
 	size_t prop_size = 5;
+	size_t offset = 0;
+	unsigned long long orignal_size;
 
-	std::ifstream ifs(in.c_str());
 	std::ofstream ofs(out.c_str());
+	std::ifstream ifs(in.c_str());
 	if(!ifs.good()) {
 		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		printf("%s:%m\n", strerror(errno));
+		printf("打开文件出错！");
 		ret = -1;
 		goto l1;
 	}
 
-	ifs.seekg (0, ifs.end);
+	ifs.seekg(prop_size, ifs.beg);
+	ifs.read((char *)&orignal_size, sizeof(orignal_size));
+	printf("%016x\n", orignal_size);
+	out_size = orignal_size;
+	ifs.seekg(0, ifs.end);
 	filesize = ifs.tellg();
-	ifs.seekg (0, ifs.beg);
-	if(!ifs.good()) {
-		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-		printf("%s:%m\n", strerror(errno));
-		ret = -1;
-		goto l2;
-	}
+	ifs.seekg(0, ifs.beg);
 
 	src_buffer = new unsigned char[filesize]; //原始文件数据
 	if(src_buffer == NULL) {
 		ret = -1;
-		goto l3;
+		goto l2;
 	}
-	decompress_buffer = new unsigned char[filesize * 10]; //存放压缩数据
+	decompress_buffer = new unsigned char[out_size]; //存放压缩数据
 	if(decompress_buffer == NULL) {
 		ret = -1;
-		goto l4;
+		goto l3;
 	}
+
 	ifs.read((char *)src_buffer, filesize);
-	if(!ifs.good()) {
+
+	memcpy(prop, src_buffer + offset, prop_size);
+	for(int i = 0; i < prop_size; i++) {
+		printf("%02x ", prop[i]);
+	}
+	printf("\n");
+	offset += prop_size;
+	offset += sizeof(orignal_size);
+	filesize -= offset;
+
+	if (SZ_OK != LzmaUncompress(decompress_buffer, &out_size, src_buffer + offset, &filesize, prop, prop_size)) {
 		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		printf("%s:%m\n", strerror(errno));
+		printf("dbuffer:%p, osize:%d, sbuffer:%p, ssize:%d, prop:%p, psize:%d\n", decompress_buffer, out_size, src_buffer, filesize, prop, prop_size);
+		printf("解压缩时出错！\n");
 		ret = -1;
-		goto l4;
+		goto l3;
 	}
 
-	if (SZ_OK != LzmaUncompress(decompress_buffer, &out_size, src_buffer, &filesize, prop, prop_size)) {
-		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-		printf("%s:%m\n", strerror(errno));
-		printf("解压缩时出错！");
-		ret = -1;
-		goto l4;
-	}
-
-	if(ofs.good()) {
-		ofs.write((char *)decompress_buffer, out_size);//写入压缩后的数据
-	}
 	if(!ofs.good()) {
 		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		printf("%s:%m\n", strerror(errno));
 		printf("创建文件出错！");
 		ret = -1;
-		goto l5;
+		goto l3;
 	}
 
-l5:
-	ofs.close();
-l4:
-	delete [] decompress_buffer;
+	ofs.write((char *)decompress_buffer, out_size);//写入压缩后的数据
+
+	if(!ofs.good()) {
+		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		printf("%s:%m\n", strerror(errno));
+		printf("写入文件出错！\n");
+		ret = -1;
+	}
+
+
 l3:
-	delete [] src_buffer;
+	delete [] decompress_buffer;
 l2:
-	ifs.close();
+	delete [] src_buffer;
 l1:
+	ofs.close();
+	ifs.close();
 	return ret;
 }
 
@@ -208,9 +223,9 @@ int main(int argc, char **argv) {
 		return ret;
 	}
 
-	lcp.p_result();
-	cp1->p_result();
-	cp2->p_result();
+	//lcp.p_result();
+	//cp1->p_result();
+	//cp2->p_result();
 
 	std::string infile;
 	std::string outfile;
@@ -218,16 +233,16 @@ int main(int argc, char **argv) {
 	if(!lcp.have_option("I")) {
 		printf("%s\n", "no input file");
 		ret = -1;
-		infile = lcp.option_value("I");
 		return ret;
 	}
+	infile = lcp.option_value("I");
 
 	if(!lcp.have_option("O")) {
 		ret = -1;
 		printf("%s\n", "no output file");
-		outfile = lcp.option_value("O");
 		return ret;
 	}
+	outfile = lcp.option_value("O");
 
 	if(lcp.get_curparser() == cp1) {
 		int level;

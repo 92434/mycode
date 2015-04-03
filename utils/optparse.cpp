@@ -1,5 +1,9 @@
 #include "optparse.h"
 
+//#define printf(args...) printf(args)
+//#define printf(format, ...) fprintf (stderr, format, ## __VA_ARGS__)
+#define printf(args...)
+
 int optparse::add_option(char opt, bool has_arg, std::string info) {
 	int ret  = 0;
 	option_des_t des;
@@ -365,7 +369,7 @@ command_parser *command_parser::add_sub_command(std::string sub_command) {
 	return parser;
 }
 int command_parser::get_option(int argc, char **argv, short_option_mode_t mode) {
-	int ret = -1;
+	int ret = 0;
 	ret = optparse::get_option(argc, argv, MODE_PARA);
 	if(ret != 0) {
 		return ret;
@@ -393,7 +397,7 @@ int command_parser::get_option(int argc, char **argv, short_option_mode_t mode) 
 	return ret;
 }
 int command_parser::get_long_option(int argc, char **argv, short_option_mode_t mode) {
-	int ret = -1;
+	int ret = 0;
 	ret = optparse::get_long_option(argc, argv, MODE_PARA);
 	if(ret != 0) {
 		return ret;
