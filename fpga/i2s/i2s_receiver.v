@@ -27,7 +27,7 @@ wire lrclk;
 wire i2s_dout;
 //wire i2s_din;
 reg [sdsize:0] data = 0;
-reg data_valid;
+reg data_valid = 0;
 
 integer count = sdsize;
 reg lrstate;
@@ -36,12 +36,12 @@ reg lrstate;
 always @(negedge bclk or lrclk) begin
 	if(rst == 0'b0) begin
 		count <= sdsize;
-		lrstate <= lrclk;
+		lrstate <= ~lrclk;
 		data_valid <= 0;
 		data = 0;
 	end
 	else begin
-		if(lrstate != lrclk) begin
+		if((lrstate != lrclk) || (lrstate === 1'bX)) begin
 			lrstate <= lrclk;
 			data[count] <= lrclk;
 			data_valid <= 0;

@@ -50,15 +50,15 @@ initial begin
 
 	testdata[index] = 24'h901234;
 	index = index + 1;
-	rst = 0;
-	#10
-	rst = 1;
+//	rst = 0;
+//	#10
+//	rst = 1;
 end
 
 initial begin
 end
 
-clkgen xiaofeiclk(clk);
+clkgen #(1) xiaofeiclk(clk);
 SEND_DATA_TO_WM8731 sender(
 	clk,
 	rst,
@@ -71,7 +71,7 @@ SEND_DATA_TO_WM8731 sender(
 	sender_data_valid
 	);
 
-receive_data_from_i2s receiver(
+receive_data_from_i2s #(.sdsize(24)) receiver(
 	rst,
 	bclk,
 	daclrc,

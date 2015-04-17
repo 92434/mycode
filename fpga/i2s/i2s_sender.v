@@ -42,6 +42,20 @@ reg [23:0] DATABUF;
 reg data_valid;
 reg data_flag;
 
+initial begin
+	CNT = 1'b0;
+	NEWBCLK = 1'b0;
+	BCLK = 1'b0;
+	READ_SYNC = 1'b0;
+	CNT_BCLK = 6'b0;
+	data_flag = 0;
+	DACLRC = 0;
+	DACDAT = 6'b0;
+	data_valid = 0;
+	READ_EN = 0;
+	DATABUF = 24'h0;
+end
+
 // DIV system clock to BCLK
 always @(posedge CLK or negedge RST) begin
 	if(!RST) begin
