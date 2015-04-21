@@ -20,8 +20,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module i2s_test();
-
+module i2s_test(
+	rst,
+	clk,
+	rclk,
+	rdata,
+	read_enable,
+	output_ready,
+	buffer_full_error,
+	buffer_empty_error
+	);
+	
 parameter DATA_WIDTH = 32;
 
 //for test
@@ -29,6 +38,15 @@ parameter testdata_size = 5;
 parameter sdsize = 24;
 integer test_data_index = 0;
 reg [sdsize - 1 : 0] testdata[testdata_size - 1 : 0];
+
+input rst;
+input clk;
+input rclk;
+output [DATA_WIDTH - 1 : 0] rdata;
+input read_enable;
+output output_ready;
+output buffer_full_error;
+output buffer_empty_error;
 
 //for sender
 wire clk;
@@ -47,10 +65,8 @@ wire s_data_valid;
 
 //for fifo
 parameter NUMBER_OF_OUTPUT_WORDS = 3;                                               
-integer output_count = 0;
-
 wire [DATA_WIDTH - 1 : 0] dacdat_data;
-reg read_enable;
+wire read_enable;
 wire output_ready;
 wire rclk;
 wire [DATA_WIDTH - 1 : 0] rdata;
@@ -84,7 +100,7 @@ end
 assign dacdat_data = {s_data_out[sdsize], {(DATA_WIDTH - 1 - sdsize){1'b0}}, s_data_out[sdsize - 1 : 0]};
 
 
-clkgen #(.clk_period(1)) xiaofeiclk(clk);
+//clkgen #(.clk_period(1)) xiaofeiclk(clk);
 SEND_DATA_TO_WM8731 sender(
 	.CLK(clk),
 	.RST(dacrst),
@@ -108,8 +124,6 @@ receive_data_from_i2s #(.sdsize(24)) receiver(
 	.s_data_valid(s_data_valid)
 	);
 
-assign rclk = dacbclk;
-
 my_fifo xiaofei_fifo(
 	.wclk(s_data_valid),
 	.rclk(rclk),
@@ -120,20 +134,6 @@ my_fifo xiaofei_fifo(
 	.buffer_full_error(buffer_full_error),
 	.buffer_empty_error(buffer_empty_error)
 	);
-
-always @(posedge dacbclk) begin
-	if(output_ready == 1) begin
-		read_enable <= 1;
-	end
-
-	if(read_enable == 1) begin
-		output_count <= output_count + 1;
-		if(output_count == NUMBER_OF_OUTPUT_WORDS - 1) begin
-			read_enable <= 0;
-			output_count <= 0;
-		end
-	end
-end
 
 always @(posedge read_testdata_en) begin
 	if(dacrst == 0) begin
