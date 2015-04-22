@@ -212,6 +212,7 @@
 	        tx_done <= 1'b1;
                 if (mst_exec_state == IDLE) begin
 	          read_pointer <= 0;
+	          count <= 0;
                 end
 	      end                                                                        
 	end                                                                              
