@@ -1,7 +1,7 @@
 
 `timescale 1 ns / 1 ps
 
-module myip_i2s_receiver_v1_0 #
+        module myip_axis_test_v1_0 #
         (
                 // Users to add parameters here
 
@@ -15,12 +15,7 @@ module myip_i2s_receiver_v1_0 #
         )
         (
                 // Users to add ports here
-                output wire [C_M00_AXIS_TDATA_WIDTH - 1 : 0] rdata,
-                output wire axis_tvalid,
-                output wire output_ready,
-                output wire buffer_full_error,
-                output wire buffer_empty_error,
-                output wire [3:0] read_pointer,
+                wire [3:0] read_pointer,
 
                 // User ports ends
                 // Do not modify the ports beyond this line
@@ -35,17 +30,13 @@ module myip_i2s_receiver_v1_0 #
                 output wire  m00_axis_tlast,
                 input wire  m00_axis_tready
         );
-        // Instantiation of Axi Bus Interface M00_AXIS
-        myip_i2s_receiver_v1_0_M00_AXIS # ( 
+// Instantiation of Axi Bus Interface M00_AXIS
+        myip_axis_test_v1_0_M00_AXIS # ( 
                 .C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
                 .C_M_START_COUNT(C_M00_AXIS_START_COUNT)
-        ) myip_i2s_receiver_v1_0_M00_AXIS_inst (
-                .rdata(rdata),
-                .output_ready(output_ready),
-                .axis_tvalid(axis_tvalid),
-                .buffer_full_error(buffer_full_error),
-                .buffer_empty_error(buffer_empty_error),
+        ) myip_axis_test_v1_0_M00_AXIS_inst (
                 .read_pointer(read_pointer),
+
                 .M_AXIS_ACLK(m00_axis_aclk),
                 .M_AXIS_ARESETN(m00_axis_aresetn),
                 .M_AXIS_TVALID(m00_axis_tvalid),
@@ -59,4 +50,4 @@ module myip_i2s_receiver_v1_0 #
 
         // User logic ends
 
-endmodule
+        endmodule

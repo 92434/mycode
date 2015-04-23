@@ -2,7 +2,7 @@
 
 module receive_data_from_i2s #
 	(
-		parameter I2S_DATA_BIT_WIDTH = 24
+		parameter integer I2S_DATA_BIT_WIDTH = 24
 	)
 	(
 		input wire rst,

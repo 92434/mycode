@@ -2,8 +2,8 @@
 
 module my_fifo #
 	(
-		parameter DATA_WIDTH = 32,
-		parameter NUMBER_OF_OUTPUT_WORDS = 8
+		parameter integer DATA_WIDTH = 32,
+		parameter integer NUMBER_OF_OUTPUT_WORDS = 8
 	)
 
 	(

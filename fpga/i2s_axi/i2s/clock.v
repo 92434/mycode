@@ -2,7 +2,7 @@
 
 module clkgen #
 	(
-		parameter clk_period = 5
+		parameter integer clk_period = 5
 	)
 	
 	(

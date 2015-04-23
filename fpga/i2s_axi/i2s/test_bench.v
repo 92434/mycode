@@ -20,10 +20,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 module test #
 	(
-		parameter TEST_DATA_SIZE = 5,
-		parameter DATA_WIDTH = 32,
-		parameter I2S_DATA_BIT_WIDTH = 24,
-		parameter NUMBER_OF_OUTPUT_WORDS = 8                                               
+		parameter integer TEST_DATA_SIZE = 5,
+		parameter integer DATA_WIDTH = 32,
+		parameter integer I2S_DATA_BIT_WIDTH = 24,
+		parameter integer NUMBER_OF_OUTPUT_WORDS = 8                                               
 	)
 	();
 
