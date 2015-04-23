@@ -16,7 +16,7 @@ module myip_i2s_receiver_v1_0 #
         (
                 // Users to add ports here
                 output wire [C_M00_AXIS_TDATA_WIDTH - 1 : 0] rdata,
-                output wire axis_tvalid,
+                output wire tx_en,
                 output wire output_ready,
                 output wire buffer_full_error,
                 output wire buffer_empty_error,
@@ -42,7 +42,7 @@ module myip_i2s_receiver_v1_0 #
         ) myip_i2s_receiver_v1_0_M00_AXIS_inst (
                 .rdata(rdata),
                 .output_ready(output_ready),
-                .axis_tvalid(axis_tvalid),
+                .tx_en(tx_en),
                 .buffer_full_error(buffer_full_error),
                 .buffer_empty_error(buffer_empty_error),
                 .read_pointer(read_pointer),

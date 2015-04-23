@@ -9,7 +9,7 @@ module myip_testbench #
 	);
 
 	wire [C_M00_AXIS_START_COUNT - 1 : 0] rdata;
-	wire axis_tvalid;
+	wire tx_en;
 	wire output_ready;
 	wire buffer_full_error;
 	wire buffer_empty_error;
@@ -37,7 +37,7 @@ module myip_testbench #
 	) myreceiver (
 		.rdata(rdata),
 		.output_ready(output_ready),
-		.axis_tvalid(axis_tvalid),
+		.tx_en(tx_en),
 		.buffer_full_error(buffer_full_error),
 		.buffer_empty_error(buffer_empty_error),
 		.read_pointer(read_pointer),

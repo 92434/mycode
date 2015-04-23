@@ -16,7 +16,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
         (
                 // Users to add ports here
                 output wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] rdata,
-                output wire axis_tvalid,
+                output wire tx_en,
                 output wire output_ready,
                 output wire buffer_full_error,
                 output wire buffer_empty_error,
@@ -79,7 +79,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
         //wait counter. The master waits for the user defined number of clock cycles before initiating a transfer.
         reg [WAIT_COUNT_BITS-1 : 0]         count;
         //streaming data valid
-        //wire          axis_tvalid;
+        wire          axis_tvalid;
         //streaming data valid delayed by one clock cycle
         reg          axis_tvalid_delay;
         //Last of the streaming data 
@@ -88,7 +88,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
         reg          axis_tlast_delay;
         //FIFO implementation signals
         reg [C_M_AXIS_TDATA_WIDTH-1 : 0]         stream_data_out;
-        wire          tx_en;
+        //wire          tx_en;
         //The master has issued all the streaming data stored in FIFO
         reg          tx_done;
 
@@ -108,7 +108,6 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
           // Synchronous reset (active low)                                       
             begin                                                                 
               mst_exec_state <= IDLE;                                             
-              count    <= 0;                                                      
             end                                                                   
           else                                                                    
             case (mst_exec_state)                                                 
@@ -119,7 +118,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
                 //if ( count == 0 )                                                 
                 //  begin                                                           
                   if(output_ready == 1) begin
-                    tx_done <= 0;
+                    count <= 0;
                     mst_exec_state  <= INIT_COUNTER;                              
                   end
                 //  end                                                             
@@ -149,8 +148,6 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
                 if (tx_done)                                                      
                   begin                                                           
                     mst_exec_state <= IDLE;                                       
-                    read_pointer <= 0;
-                    count <= 0;
                   end                                                             
                 else                                                              
                   begin                                                           
@@ -212,7 +209,13 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
               begin                                                                      
                 // tx_done is asserted when NUMBER_OF_OUTPUT_WORDS numbers of streaming data
                 // has been out.                                                         
-                tx_done <= 1'b1;
+                if(mst_exec_state == IDLE) begin
+                  tx_done <= 1'b0;
+                  read_pointer <= 0;
+                end
+                else begin
+                  tx_done <= 1'b1;
+                end
               end                                                                        
         end                                                                              
 
@@ -246,7 +249,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
                 .clk(M_AXIS_ACLK),
                 .rclk(M_AXIS_ACLK),
                 .rdata(rdata),
-                .read_enable(axis_tvalid),
+                .read_enable(tx_en),
                 .output_ready(output_ready),
                 .buffer_full_error(buffer_full_error),
                 .buffer_empty_error(buffer_empty_error)
