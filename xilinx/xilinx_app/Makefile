@@ -7,14 +7,16 @@ TOOLCHAIN_PREFIX := arm-xilinx-linux-gnueabi-
 #CFLAGS += -I$(shell pwd)/../xilinx_driver/zynq-xvdma
 #CFLAGS += -I$(shell pwd)/../xilinx_driver/xotsu2
 #CFLAGS += -I$(shell pwd)/image-filter
-CFLAGS += -I$(shell pwd)/../xilinx_driver/glyphy
+#CFLAGS += -I$(shell pwd)/../xilinx_driver/glyphy
+#CFLAGS += -I$(shell pwd)/../xilinx_driver/i2s_axidma
 #CFLAGS += -U__linux__
 
 LDFLAGS += -lpthread
 LDFLAGS += -static
 
 #c_files := uio_test.c
-c_files := glyphy/glyphy_test.c
+#c_files := glyphy/glyphy_test.c
+c_files := my_i2s_receiver.c
 include $(BUILD_BINS)
 
 #app_c_files := gpio_utils.c
