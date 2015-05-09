@@ -46,6 +46,56 @@ int catch_signal(sig_action_t sig_action) {
 	return ret;
 }
 
+int check_buffer(unsigned int *pdata, int count, unsigned char *pre_value) {
+	int rtn = 0;
+	int i;
+	unsigned char c0, c1;
+	
+	c0 = c1 = *pre_value;
+
+	for(i = 0; i < count; i++) {
+		c1 = (pdata[i] >> 8) & 0xff;
+		switch(c0) {
+			case 0x12:
+				if(c1 != 0x34) {
+					goto failed;
+				}
+				break;
+			case 0x34:
+				if(c1 != 0x56) {
+					goto failed;
+				}
+				break;
+			case 0x56:
+				if(c1 != 0x78) {
+					goto failed;
+				}
+				break;
+			case 0x78:
+				if(c1 != 0x90) {
+					goto failed;
+				}
+				break;
+			case 0x90:
+				if(c1 != 0x12) {
+					goto failed;
+				}
+				break;
+			default:
+				break;
+		}
+		c0 = c1;
+	}
+
+	*pre_value = c0;
+	//printf("!!!success!!!\n");
+	return rtn;
+failed:
+	printf("!!!failed!!!\n");
+	rtn = -1;
+	return rtn;
+}
+
 int main(int argc, char **argv) {
 	int ret = 0;
 	int fd;
@@ -97,16 +147,18 @@ int main(int argc, char **argv) {
 				int nread;
 				unsigned int *pdata = (unsigned int *)read_buf;
 				int i;
+				static unsigned char pre_value = 0;
 
 				nread = read(fd, read_buf, BUFSIZE);
-				printf("nread:%d\n", nread);
+				//printf("nread:%d\n", nread);
 				if(nread <= 0) {
 					continue;
 				}
-				for(i = 0; i < nread / sizeof(unsigned int); i++) {
-					printf("%02x ", (pdata[i] >> 8) & 0xff);
-				}
-				printf("\n");
+				//for(i = 0; i < nread / sizeof(unsigned int); i++) {
+				//	printf("%02x ", (pdata[i] >> 8) & 0xff);
+				//}
+				//printf("\n");
+				check_buffer(pdata, nread / sizeof(unsigned int), &pre_value);
 			}
 		}
 	}
