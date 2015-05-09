@@ -33,7 +33,7 @@ module my_fifo #
 			buffer_full_error <= 0;
 		end
 		else begin
-			if((buffer_index_write == buffer_index_read) && (output_ready == 1)) begin
+			if(buffer_index_write == buffer_index_read) begin
 				buffer_full_error <= 1;
 			end
 			else begin

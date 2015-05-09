@@ -3,7 +3,6 @@
 module myip_i2s_receiver_v1_0_M00_AXIS #
 	(
 		// Users to add parameters here
-		parameter integer ATA_WIDTH = 32,
 		parameter integer I2S_DATA_BIT_WIDTH = 24,
 		parameter integer NUMBER_OF_OUTPUT_WORDS = 8,
 
@@ -17,14 +16,13 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	)
 	(
 		// Users to add ports here
-		output wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] rdata,
+		input wire i2s_receiver_bclk,
+ 		input wire i2s_receiver_lrclk,
+ 		input wire i2s_receiver_sdata,
 		output wire read_enable,
 		output wire output_ready,
 		output wire buffer_full_error,
 		output wire buffer_empty_error,
-		output reg [3:0] read_pointer = 0,
-		output wire [I2S_DATA_BIT_WIDTH:0] i2s_received_data,
-		output wire read_testdata_en,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -64,7 +62,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	// Define the states of state machine
 	// The control state machine oversees the writing of input streaming data to the FIFO,
 	// and outputs the streaming data from the FIFO
-	parameter [1:0] IDLE = 2'b00, // This is the initial/idle state
+	localparam [1:0] IDLE = 2'b00, // This is the initial/idle state
 
 	INIT_COUNTER = 2'b01, // This state initializes the counter, ones
 															// the counter reaches C_M_START_COUNT count,
@@ -74,7 +72,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	// State variable
 	reg [1:0] mst_exec_state = IDLE;
 	// Example design FIFO read pointer
-	//reg [bit_num-1:0] read_pointer;
+	reg [bit_num-1:0] read_pointer;
 
 	// AXI Stream internal signals
 	//wait counter. The master waits for the user defined number of clock cycles before initiating a transfer.
@@ -92,6 +90,8 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	//wire read_enable;
 	//The master has issued all the streaming data stored in FIFO
 	reg tx_done;
+
+	wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] rdata;
 
 
 	// I/O Connections assignments
@@ -241,61 +241,33 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 
 	// Add user logic here
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	wire [23:0] data_source;
-//	wire read_testdata_en;
 
-	wire bclk;
- 	wire read_sync;
- 	wire daclrc;
- 	wire dacdat;
 
 	wire s_data_valid;
 
-	wire [ATA_WIDTH - 1:0] wdata;
-
- 	data_gen #
-		(
-		)
-		testdata
-		(
-			.rst(M_AXIS_ARESETN),
-			.clk(read_testdata_en),
-			.data_source(data_source)
- 		);
-
- 	SEND_DATA_TO_WM8731
-		sender
-		(
-			.CLK(M_AXIS_ACLK),
-			.RST(M_AXIS_ARESETN),
-			.DATA_SOURCE(data_source),
-			.BCLK(bclk),
-			.READ_SYNC(read_sync),
-			.READ_EN(read_testdata_en),
-			.DACLRC(daclrc),
-			.DACDAT(dacdat)
- 		);
+	wire [C_M_AXIS_TDATA_WIDTH - 1:0] wdata;
+	wire [I2S_DATA_BIT_WIDTH:0] i2s_received_data;
 
  	receive_data_from_i2s #
 		(
-			.I2S_DATA_BIT_WIDTH(24)
+			.I2S_DATA_BIT_WIDTH(I2S_DATA_BIT_WIDTH)
 		)
 		receiver
 		(
 			.rst(M_AXIS_ARESETN),
-			.bclk(bclk),
-			.lrclk(daclrc),
-			.sd(dacdat),
+			.bclk(i2s_receiver_bclk),
+			.lrclk(i2s_receiver_lrclk),
+			.sdata(i2s_receiver_sdata),
 			.i2s_received_data(i2s_received_data),
 			.s_data_valid(s_data_valid)
 		);
 
-	assign wdata = {i2s_received_data[I2S_DATA_BIT_WIDTH], {(ATA_WIDTH - 1 - I2S_DATA_BIT_WIDTH){1'b0}}, i2s_received_data[I2S_DATA_BIT_WIDTH - 1 : 0]};
+	assign wdata = {i2s_received_data[I2S_DATA_BIT_WIDTH], {(C_M_AXIS_TDATA_WIDTH - 1 - I2S_DATA_BIT_WIDTH){1'b0}}, i2s_received_data[I2S_DATA_BIT_WIDTH - 1 : 0]};
 
 
 	my_fifo #
 		(
-			.DATA_WIDTH(ATA_WIDTH),
+			.DATA_WIDTH(C_M_AXIS_TDATA_WIDTH),
 			.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS)
 		)
 		xiaofei_fifo

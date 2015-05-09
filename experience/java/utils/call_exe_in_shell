@@ -1,0 +1,16 @@
+	private int execManPageAndExit(String manPage) {
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			Process manProcess = runtime.exec(new String[] { "sh", "-c", "man " + manPage + " > /dev/tty" });
+
+			int manProcessExitCode = manProcess.waitFor();
+
+			if (manProcessExitCode == 0) {
+				return 0;
+			}
+		}
+		catch (Exception e) {
+			// Don't care!
+		}
+		return 1;
+	}

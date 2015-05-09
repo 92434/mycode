@@ -2,13 +2,13 @@
 
 module my_stream_ip #
 	(
-		localparam NUMBER_OF_INPUT_WORDS  = 8;
+		localparam NUMBER_OF_INPUT_WORDS  = 8,
 
-		localparam NUMBER_OF_OUTPUT_WORDS = 8;
+		localparam NUMBER_OF_OUTPUT_WORDS = 8,
 
-		localparam Idle  =3'b100;
-		localparam Read_Inputs = 3'b010;
-		localparam Write_Outputs  = 3'b001;
+		localparam Idle  =3'b100,
+		localparam Read_Inputs = 3'b010,
+		localparam Write_Outputs  = 3'b001
 	)
 	(
 		input wire ACLK,

@@ -8,7 +8,7 @@ module receive_data_from_i2s #
 		input wire rst,
 		input wire bclk,
 		input wire lrclk,
-		input wire sd,
+		input wire sdata,
 		//output wire i2s_din,
 		output reg [I2S_DATA_BIT_WIDTH:0] i2s_received_data = 0,
 		output reg s_data_valid = 0
@@ -38,7 +38,7 @@ module receive_data_from_i2s #
 			end
 			else begin
 				if(count < I2S_DATA_BIT_WIDTH) begin
-					i2s_received_data[count] <= sd;
+					i2s_received_data[count] <= sdata;
 
 					if(count == 0) begin
 						s_data_valid <= 1;

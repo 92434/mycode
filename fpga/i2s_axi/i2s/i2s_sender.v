@@ -1,28 +1,32 @@
 //=============================================================================
-//	SEND_DATA_TO_WM8731.v
+//	send_data_by_i2s.v
 //	one time send 24 bits data;
-//	READ_EN and READ_SYNC as a signal use to get data from RAM or FIFO.
+//	read_data_source_en and read_sync as a signal use to get data from RAM or FIFO.
 //=============================================================================
 //system clock = 50MHz
 `timescale 1ns/1ns
 
-module SEND_DATA_TO_WM8731(
-		input wire CLK,
-		input wire RST,
-		input wire [23:0] DATA_SOURCE,
-		output reg BCLK = 1'b0,
-		output reg READ_SYNC = 1'b0,
-		output reg READ_EN = 0,
-		output reg DACLRC = 0,
-		output reg DACDAT = 0
+module send_data_by_i2s #
+	(
+		parameter integer I2S_SENDER_TEST_DATA_WIDTH = 24
+	)
+	(
+		input wire clk,
+		input wire rst,
+		input wire [I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] data_source,
+		output reg read_data_source_en = 0,
+		output reg read_sync = 1'b0,
+		output reg bclk = 1'b0,
+		output reg lrclk = 0,
+		output reg sdata = 0
 	);
 
 	reg clk_div1 = 0;
-	reg [5:0] CNT_BCLK = 6'b0;
-	reg [23:0] DATABUF;
+	reg [5:0] bclk_count = 6'b0;
+	reg [I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] data_buffer;
 
-	always @(posedge CLK) begin
-		if(RST == 0) begin
+	always @(posedge clk) begin
+		if(rst == 0) begin
 			clk_div1 <= 0;
 		end
 		else begin
@@ -31,67 +35,67 @@ module SEND_DATA_TO_WM8731(
 	end
 
 	always @(posedge clk_div1) begin
-		if(RST == 0) begin
-			BCLK <= 0;
-			READ_SYNC <= 0;
+		if(rst == 0) begin
+			bclk <= 0;
+			read_sync <= 0;
 		end
 		else begin
-			BCLK <= ~BCLK;
-			READ_SYNC <= ~READ_SYNC;
+			bclk <= ~bclk;
+			read_sync <= ~read_sync;
 		end
 	end
 
-	always @(negedge BCLK) begin
-		if(RST == 0) begin
-			DACDAT <= 0;
-			DACLRC <= 0;
-			DATABUF <= 0;
+	always @(negedge bclk) begin
+		if(rst == 0) begin
+			sdata <= 0;
+			lrclk <= 0;
+			data_buffer <= 0;
 		end
 		else begin
-			if((CNT_BCLK>=0)&&(CNT_BCLK<=31)) 
-				DACLRC <= 1'b0; // left channel
+			if((bclk_count>=0)&&(bclk_count<=31)) 
+				lrclk <= 1'b0; // left channel
 			else
-				DACLRC <= 1'b1; // right chanel
+				lrclk <= 1'b1; // right chanel
 
-			if(CNT_BCLK==6'd0 || CNT_BCLK==6'd32) begin
+			if(bclk_count==6'd0 || bclk_count==6'd32) begin
 			end
-			else if(CNT_BCLK==6'd1 || CNT_BCLK==6'd33) begin
-				DACDAT <= DATA_SOURCE[23]; // shift output
-				DATABUF[23:0] <= {DATA_SOURCE[22:0],1'b0};
+			else if(bclk_count==6'd1 || bclk_count==6'd33) begin
+				sdata <= data_source[I2S_SENDER_TEST_DATA_WIDTH - 1]; // shift output
+				data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] <= {data_source[22:0],1'b0};
 			end
-			else if(CNT_BCLK>=6'd2 && CNT_BCLK<=6'd24) begin//it's time send left channel
-				DACDAT <= DATABUF[23]; // shift output
-				DATABUF[23:0] <= {DATABUF[22:0],1'b0};
+			else if(bclk_count>=6'd2 && bclk_count<=6'd24) begin//it's time send left channel
+				sdata <= data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1]; // shift output
+				data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] <= {data_buffer[22:0],1'b0};
 			end
-			else if(CNT_BCLK>=6'd34 && CNT_BCLK<=6'd56) begin // send right channel
-				DACDAT <= DATABUF[23]; // shift output
-				DATABUF[23:0] <= {DATABUF[22:0],1'b0};
+			else if(bclk_count>=6'd34 && bclk_count<=6'd56) begin // send right channel
+				sdata <= data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1]; // shift output
+				data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] <= {data_buffer[22:0],1'b0};
 			end
 			else begin
-				DACDAT <= 0;
-				DATABUF <= 0;
+				sdata <= 0;
+				data_buffer <= 0;
 			end
 
 
-			if(CNT_BCLK == 6'b11_1111) begin
-				CNT_BCLK <= 6'b0;
+			if(bclk_count == 6'b11_1111) begin
+				bclk_count <= 6'b0;
 			end
 			else begin
-				CNT_BCLK <= CNT_BCLK + 1'b1;
+				bclk_count <= bclk_count + 1'b1;
 			end
 		end
 	end
 
-	always @(posedge BCLK) begin
-		if(RST == 0) begin
-			READ_EN <= 0;
+	always @(posedge bclk) begin
+		if(rst == 0) begin
+			read_data_source_en <= 0;
 		end
 		else begin
-			if(CNT_BCLK==6'd0 || CNT_BCLK==6'd32) begin
-				READ_EN <= 1;	//Read data enable
+			if(bclk_count==6'd0 || bclk_count==6'd32) begin
+				read_data_source_en <= 1;	//Read data enable
 			end
 			else begin
-				READ_EN <= 0;
+				read_data_source_en <= 0;
 			end
 		end
 	end

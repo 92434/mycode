@@ -109,8 +109,17 @@ void show_sendbuffer() {
 	printf("\r\n");
 }
 int main() {
+
+#define AXI_MYIP_BASE 0x43c00000
+#define PWM_CYCLE (32 * 8 * 8)
+
 	int rxlen;
 	init_platform();
+
+	unsigned int *p = (unsigned int *)AXI_MYIP_BASE;
+    *p = (100000000 / PWM_CYCLE);
+    *(p + 1) = 0x80000000 + ((100000000 / PWM_CYCLE) / 2);
+
 	printf("Hello World\n\r");
 	init_sendbuffer();
 	while (1) {
