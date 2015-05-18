@@ -34,12 +34,7 @@ module my_fifo #
 		end
 		else begin
 			if((buffer_index_write + 1 == buffer_index_read) || ((buffer_index_read == 0) && (buffer_index_write == BUFFER_SIZE - 1))) begin
-				if(output_ready == 1) begin
-					buffer_full_error <= 1;
-				end
-				else begin
-					buffer_full_error <= 0;
-				end
+				buffer_full_error <= 1;
 			end
 			else begin
 				buffer_full_error <= 0;
