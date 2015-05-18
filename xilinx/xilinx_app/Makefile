@@ -1,6 +1,7 @@
 include $(default_rules)
 
 TOOLCHAIN_PREFIX := arm-xilinx-linux-gnueabi-
+CC = gcc
 
 #CFLAGS += -I$(shell pwd)/filter_driver
 #CFLAGS += -I$(shell pwd)/vdma
@@ -16,7 +17,9 @@ LDFLAGS += -static
 
 #c_files := uio_test.c
 #c_files := glyphy/glyphy_test.c
-c_files := my_i2s_receiver.c
+c_files := i2s/my_i2s_receiver.c
+c_files += i2s/spidev.c
+i2s/my_i2s_receiver.c.LOCAL_CFLAGS := -I$(shell pwd)/../xilinx_driver/i2s_axidma
 include $(BUILD_BINS)
 
 #app_c_files := gpio_utils.c

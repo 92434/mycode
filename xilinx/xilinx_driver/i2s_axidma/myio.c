@@ -27,7 +27,7 @@
 #define DRIVER_NAME "myio-dev"
 #define PWM_DURATION (0 * 4)
 #define PWM_DUTY (1 * 4)
-#define CYCLE (32 * 4096 * 8)
+#define CYCLE (3000000)
 
 struct myio_device {
 	void __iomem *regs;

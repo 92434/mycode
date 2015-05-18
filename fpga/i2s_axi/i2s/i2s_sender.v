@@ -61,15 +61,15 @@ module send_data_by_i2s #
 			end
 			else if(bclk_count==6'd1 || bclk_count==6'd33) begin
 				sdata <= data_source[I2S_SENDER_TEST_DATA_WIDTH - 1]; // shift output
-				data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] <= {data_source[22:0],1'b0};
+				data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] <= {data_source[I2S_SENDER_TEST_DATA_WIDTH - 2:0],1'b0};
 			end
-			else if(bclk_count>=6'd2 && bclk_count<=6'd24) begin//it's time send left channel
+			else if(bclk_count>=6'd2 && bclk_count<=I2S_SENDER_TEST_DATA_WIDTH) begin//it's time send left channel
 				sdata <= data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1]; // shift output
-				data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] <= {data_buffer[22:0],1'b0};
+				data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] <= {data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 2:0],1'b0};
 			end
-			else if(bclk_count>=6'd34 && bclk_count<=6'd56) begin // send right channel
+			else if(bclk_count>=6'd34 && bclk_count<=32 + I2S_SENDER_TEST_DATA_WIDTH) begin // send right channel
 				sdata <= data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1]; // shift output
-				data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] <= {data_buffer[22:0],1'b0};
+				data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1 : 0] <= {data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 2:0],1'b0};
 			end
 			else begin
 				sdata <= 0;

@@ -25,7 +25,44 @@
 #include <linux/kthread.h>
 #include <linux/poll.h>
 
-#define XILINX_DMA_DEVICE_ID_SHIFT	28
+//#include <linux/mutex.h>
+#include <linux/atomic.h>
+
+
+struct xdma_dev {
+	u32 tx_chan;	/* (struct dma_chan *) */
+	u32 tx_cmp;	/* (struct completion *) callback_param */
+	u32 rx_chan;	/* (struct dma_chan *) */
+	u32 rx_cmp;	/* (struct completion *) callback_param */
+	char dma_name[MAX_NAME_SIZE];
+};
+
+struct xdma_chan_cfg {
+	u32 chan;	/* (struct dma_chan *) */
+
+	enum dma_transfer_direction dir;	/* Channel direction */
+	int coalesc;	/* Interrupt coalescing threshold */
+	int delay;	/* Delay counter */
+	int reset;	/* Reset Channel */
+};
+
+struct xdma_buf_info {
+	u32 chan;	/* (struct dma_chan *) */
+	u32 completion;	/* (struct completion *) callback_param */
+
+	dma_cookie_t cookie;
+	u32 buf_offset;
+	u32 buf_size;
+	enum dma_transfer_direction dir;
+};
+
+struct xdma_transfer {
+	u32 chan;	/* (struct dma_chan *) */
+	u32 completion;	/* (struct completion *) callback_param */
+
+	dma_cookie_t cookie;
+	u32 wait;	/* true/false */
+};
 
 typedef struct _match_info {
 	u32 private_value;
@@ -42,12 +79,14 @@ static dev_t dev_num;		// Global variable for the device number
 static struct class *cl;	// Global variable for the device class
 static struct cdev c_dev;	// Global variable for the character device structure
 
-#define RINGBUFFER_SIZE (DMA_LENGTH * 1024)
+#define RINGBUFFER_SIZE (DMA_LENGTH * 256)
 
 typedef struct _ringbuffer {
 	unsigned char buffer[RINGBUFFER_SIZE];
 	unsigned char *pread;
 	unsigned char *pwrite;
+	//bool buffer_empty;
+	atomic_t buffer_empty;
 } ringbuffer_t;
 
 typedef struct _i2s_receiver_dev {
@@ -60,6 +99,11 @@ typedef struct _i2s_receiver_dev {
 } i2s_receiver_dev_t;
 
 static i2s_receiver_dev_t i2s_reciever = {0};
+
+
+//static DEFINE_MUTEX(ringbuffer_status_lock);
+//mutex_lock(&ringbuffer_status_lock);
+//mutex_unlock(&ringbuffer_status_lock);
 
 int read_dma_buffer_from_ringbuffer(unsigned char *buffer);
 bool ringbuffer_empty(void);
@@ -156,7 +200,7 @@ int print_dma_buffer(unsigned char *buffer) {
 
 int read_dma_buffer(unsigned char *buffer, int n) {
 	ssize_t rtn = 0;
-	int i = n;
+	//int i = n;
 
 	while(n-- != 0) {
 		//printk("%d/%d\n", n + 1, i);
@@ -178,7 +222,7 @@ static ssize_t xdma_read(struct file *filp, char __user * buf, size_t len, loff_
 	//printk(KERN_INFO "<%s> file: read()\n", MODULE_NAME);
 
 	if((len == 0) || (len % DMA_LENGTH) != 0) {
-		printk(KERN_INFO "<%s> read: read size is not valid!!!\n", MODULE_NAME, len, *off);
+		printk(KERN_INFO "<%s> read: read size is not valid!!!\n", MODULE_NAME);
 		rtn = -EFAULT;
 		return rtn;
 	}
@@ -435,7 +479,7 @@ void xdma_remove(void) {
 
 			if (xdma_dev_info[i]->tx_cmp) {
 				kfree((struct completion *) xdma_dev_info[i]->tx_cmp);
-				xdma_dev_info[i]->tx_cmp = NULL;
+				xdma_dev_info[i]->tx_cmp = (u32)NULL;
 			}
 
 			if (xdma_dev_info[i]->rx_chan) {
@@ -444,7 +488,7 @@ void xdma_remove(void) {
 
 			if (xdma_dev_info[i]->rx_cmp) {
 				kfree((struct completion *) xdma_dev_info[i]->rx_cmp);
-				xdma_dev_info[i]->rx_cmp = NULL;
+				xdma_dev_info[i]->rx_cmp = (u32)NULL;
 			}
 		}
 	}
@@ -459,6 +503,8 @@ int init_i2s_ring_buffer(void) {
 	}
 
 	i2s_reciever.ringbuffer->pwrite = i2s_reciever.ringbuffer->pread = i2s_reciever.ringbuffer->buffer;
+	//i2s_reciever.ringbuffer->buffer_empty = true;
+	atomic_set(&i2s_reciever.ringbuffer->buffer_empty, 1);
 
 	return rtn;
 }
@@ -475,11 +521,65 @@ int uninit_i2s_ring_buffer(void) {
 	return rtn;
 }
 
+static int check_buffer(unsigned int *pdata, int count, unsigned char *pre_value) {
+	int rtn = 0;
+	int i;
+	unsigned char c0, c1;
+
+	c0 = c1 = *pre_value;
+
+	for(i = 0; i < count; i++) {
+		c1 = pdata[i] & 0xff;
+		switch(c0) {
+			case 0x12:
+				if(c1 != 0x34) {
+					goto failed;
+				}
+				break;
+			case 0x34:
+				if(c1 != 0x56) {
+					goto failed;
+				}
+				break;
+			case 0x56:
+				if(c1 != 0x78) {
+					goto failed;
+				}
+				break;
+			case 0x78:
+				if(c1 != 0x90) {
+					goto failed;
+				}
+				break;
+			case 0x90:
+				if(c1 != 0x12) {
+					goto failed;
+				}
+				break;
+			default:
+				break;
+		}
+		c0 = c1;
+	}
+
+	*pre_value = c0;
+	//printk("!!!success!!!\n");
+	return rtn;
+failed:
+	printk("!!!failed!!!(%d)\n", i);
+	rtn = -1;
+	return rtn;
+}
+
 int write_dma_buffer_to_ringbuffer(unsigned char *buffer) {
 	int rtn = 0;
 
-	if(i2s_reciever.ringbuffer->pwrite == i2s_reciever.ringbuffer->pread) {
+	//static unsigned char pre_value = 0;
+	//check_buffer((unsigned int *)buffer, DMA_LENGTH / sizeof(unsigned int), &pre_value);
+
+	if((i2s_reciever.ringbuffer->pwrite + DMA_LENGTH == i2s_reciever.ringbuffer->pread) || ((i2s_reciever.ringbuffer->pwrite + DMA_LENGTH == i2s_reciever.ringbuffer->buffer + RINGBUFFER_SIZE) && (i2s_reciever.ringbuffer->pread = i2s_reciever.ringbuffer->buffer))) {
 		//printk("<%s> ringbuffer overwrite!!!!!!!!!!!!!!!\n", MODULE_NAME);
+		printk(".");
 	}
 
 	memcpy(i2s_reciever.ringbuffer->pwrite, buffer, DMA_LENGTH);
@@ -490,18 +590,25 @@ int write_dma_buffer_to_ringbuffer(unsigned char *buffer) {
 		i2s_reciever.ringbuffer->pwrite += DMA_LENGTH;
 	}
 
+	//i2s_reciever.ringbuffer->buffer_empty = false;
+	atomic_set(&i2s_reciever.ringbuffer->buffer_empty, 0);
+
 	return rtn;
 }
 
 int read_dma_buffer_from_ringbuffer(unsigned char *buffer) {
 	int rtn = 0;
-	if(i2s_reciever.ringbuffer->pread == i2s_reciever.ringbuffer->pwrite) {
+
+	if(/*i2s_reciever.ringbuffer->buffer_empty == true*/atomic_read(&i2s_reciever.ringbuffer->buffer_empty) == 1) {
 		//printk(KERN_INFO "<%s> ringbuffer nothing!!!!!!!!!!!!!!!\n", MODULE_NAME);
-		rtn = -1;
+		rtn = -EAGAIN;
 		return rtn;
 	}
 
 	copy_to_user(buffer, i2s_reciever.ringbuffer->pread, DMA_LENGTH);
+	static unsigned char pre_value = 0;
+	check_buffer((unsigned int *)buffer, DMA_LENGTH / sizeof(unsigned int), &pre_value);
+
 
 	if((i2s_reciever.ringbuffer->pread + DMA_LENGTH) == (i2s_reciever.ringbuffer->buffer + RINGBUFFER_SIZE)) {
 		i2s_reciever.ringbuffer->pread = i2s_reciever.ringbuffer->buffer;
@@ -509,19 +616,25 @@ int read_dma_buffer_from_ringbuffer(unsigned char *buffer) {
 		i2s_reciever.ringbuffer->pread += DMA_LENGTH;
 	}
 
+	if(i2s_reciever.ringbuffer->pread == i2s_reciever.ringbuffer->pwrite) {
+		//i2s_reciever.ringbuffer->buffer_empty = true;
+		atomic_set(&i2s_reciever.ringbuffer->buffer_empty, 1);
+	}
+
+
 	return rtn;
 }
 
 bool ringbuffer_empty(void) {
-	return (i2s_reciever.ringbuffer->pread == i2s_reciever.ringbuffer->pwrite);
+	bool bempty = true;
+	bempty = /*i2s_reciever.ringbuffer->buffer_empty*/(atomic_read(&i2s_reciever.ringbuffer->buffer_empty) == 1);
+	return bempty;
 }
 
 void xdma_i2s_receive(void) {
-	unsigned int *pdata = xdma_addr;
+	//unsigned int *pdata = (unsigned int *)xdma_addr;
 
-	static int i;
-
-
+	//static int i;
 
 	static struct timeval ti, tf;
 
