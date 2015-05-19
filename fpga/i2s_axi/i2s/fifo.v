@@ -20,8 +20,9 @@ module my_fifo #
 
 	integer buffer_index_read = 0;
 	integer buffer_index_write = 0;
-	integer BUFFER_SIZE = NUMBER_OF_OUTPUT_WORDS * 8;
-	reg [DATA_WIDTH - 1 : 0] buffer[(NUMBER_OF_OUTPUT_WORDS * 8) - 1 : 0];
+	integer BUFFER_SIZE = NUMBER_OF_OUTPUT_WORDS * 64;
+	
+	reg [DATA_WIDTH - 1 : 0] buffer[(NUMBER_OF_OUTPUT_WORDS * 64) - 1 : 0];
 
 	assign output_ready = (buffer_index_write >= buffer_index_read) ?
 				((buffer_index_write >= buffer_index_read + NUMBER_OF_OUTPUT_WORDS) ? 1 : 0)
@@ -57,7 +58,7 @@ module my_fifo #
 		end
 		else begin
 			if(read_enable == 1) begin
-				if((buffer_index_read + 1 == buffer_index_write) || ((buffer_index_write = 0) && (buffer_index_read == BUFFER_SIZE - 1))) begin
+				if((buffer_index_read + 1 == buffer_index_write) || ((buffer_index_write == 0) && (buffer_index_read == BUFFER_SIZE - 1))) begin
 					buffer_empty_error <= 1;
 				end
 				else begin

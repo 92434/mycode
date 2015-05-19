@@ -111,7 +111,7 @@ void show_sendbuffer() {
 int main() {
 
 #define AXI_MYIP_BASE 0x43c00000
-#define PWM_CYCLE (32 * 8 * 8)
+#define PWM_CYCLE (3000000)
 
 	int rxlen;
 	init_platform();

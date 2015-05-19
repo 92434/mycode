@@ -50,55 +50,31 @@ int catch_signal(sig_action_t sig_action) {
 	return ret;
 }
 
-//int check_buffer(unsigned int *pdata, int count, unsigned char *pre_value) {
-//	int rtn = 0;
-//	int i;
-//	unsigned char c0, c1;
-//
-//	c0 = c1 = *pre_value;
-//
-//	for(i = 0; i < count; i++) {
-//		c1 = pdata[i] & 0xff;
-//		switch(c0) {
-//			case 0x12:
-//				if(c1 != 0x34) {
-//					goto failed;
-//				}
-//				break;
-//			case 0x34:
-//				if(c1 != 0x56) {
-//					goto failed;
-//				}
-//				break;
-//			case 0x56:
-//				if(c1 != 0x78) {
-//					goto failed;
-//				}
-//				break;
-//			case 0x78:
-//				if(c1 != 0x90) {
-//					goto failed;
-//				}
-//				break;
-//			case 0x90:
-//				if(c1 != 0x12) {
-//					goto failed;
-//				}
-//				break;
-//			default:
-//				break;
-//		}
-//		c0 = c1;
-//	}
-//
-//	*pre_value = c0;
-//	//printf("!!!success!!!\n");
-//	return rtn;
-//failed:
-//	printf("!!!failed!!!(%d)\n", i);
-//	rtn = -1;
-//	return rtn;
-//}
+int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
+	int rtn = 0;
+	int i;
+	unsigned int ui0, ui1;
+
+	ui0 = ui1 = *pre_value;
+
+	for(i = 0; i < count; i++) {
+		ui1 = pdata[i] & 0x7fffffff;
+		
+		if(ui1 == ui0 + 1) {
+		} else if(ui1 == 0) {
+		} else if(ui0 == 0) {
+		} else {
+			rtn = -1;
+			printf("!!!failed!!!(%d)\n", i);
+			printf("ui0:%010d ui1:%010d\n", ui0, ui1);
+		}
+
+		ui0 = ui1;
+	}
+
+	*pre_value = ui0;
+	return rtn;
+}
 
 static struct sockaddr_in sock_addr;
 
@@ -173,7 +149,7 @@ static int udp_send_data(int fd, unsigned char *buffer, unsigned int len) {
 
 static int tcp_send_data(int fd, unsigned char *buffer, unsigned int len) {
 	int rtn = 0;
-	unsigned int step = 256;
+	unsigned int step = 1024;
 
 	while(len != 0) {
 		rtn = send(fd, buffer, step, 0);
@@ -206,7 +182,7 @@ static read_buffer(int fd, int sock_fd, unsigned char *read_buf) {
 				int nread;
 				unsigned int *pdata = (unsigned int *)read_buf;
 				int i;
-				static unsigned char pre_value = 0;
+				static unsigned int pre_value = 0;
 
 				nread = read(fd, read_buf, BUFSIZE);
 				//printf("nread:%d\n", nread);
@@ -238,7 +214,7 @@ static read_buffer(int fd, int sock_fd, unsigned char *read_buf) {
 		int nread;
 		unsigned int *pdata = (unsigned int *)read_buf;
 		int i;
-		static unsigned char pre_value = 0;
+		static unsigned int pre_value = 0;
 
 		nread = read(fd, read_buf, BUFSIZE);
 		//printf("nread:%d\n", nread);

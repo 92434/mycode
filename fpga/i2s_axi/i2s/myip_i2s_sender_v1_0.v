@@ -20,8 +20,9 @@ module myip_i2s_sender_v1_0 #
  	wire read_sync;
 	wire [I2S_SENDER_TEST_DATA_WIDTH - 1 :0] data_source;
 
- 	data_gen #
+ 	data_gen_counter #
 		(
+			.I2S_SENDER_TEST_DATA_WIDTH(I2S_SENDER_TEST_DATA_WIDTH)
 		)
 		testdata
 		(

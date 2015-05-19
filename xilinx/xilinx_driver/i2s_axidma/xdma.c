@@ -82,11 +82,11 @@ static struct cdev c_dev;	// Global variable for the character device structure
 #define RINGBUFFER_SIZE (DMA_LENGTH * 256)
 
 typedef struct _ringbuffer {
-	unsigned char buffer[RINGBUFFER_SIZE];
 	unsigned char *pread;
 	unsigned char *pwrite;
 	//bool buffer_empty;
 	atomic_t buffer_empty;
+	unsigned char buffer[RINGBUFFER_SIZE];
 } ringbuffer_t;
 
 typedef struct _i2s_receiver_dev {
@@ -202,7 +202,7 @@ int read_dma_buffer(unsigned char *buffer, int n) {
 	ssize_t rtn = 0;
 	//int i = n;
 
-	while(n-- != 0) {
+	while((n-- != 0) && (ringbuffer_empty() == false)) {
 		//printk("%d/%d\n", n + 1, i);
 		if(read_dma_buffer_from_ringbuffer(buffer) != 0) {
 			break;
@@ -233,6 +233,7 @@ static ssize_t xdma_read(struct file *filp, char __user * buf, size_t len, loff_
 		wait_event_interruptible(i2s_reciever.wq, (!ringbuffer_empty()));
 	}
 
+	//printk("read:%p n:%d\n", i2s_reciever.ringbuffer->pread, (len / DMA_LENGTH));
 	rtn = read_dma_buffer(buf, (len / DMA_LENGTH));
 
 	return rtn;
@@ -521,65 +522,45 @@ int uninit_i2s_ring_buffer(void) {
 	return rtn;
 }
 
-static int check_buffer(unsigned int *pdata, int count, unsigned char *pre_value) {
-	int rtn = 0;
-	int i;
-	unsigned char c0, c1;
-
-	c0 = c1 = *pre_value;
-
-	for(i = 0; i < count; i++) {
-		c1 = pdata[i] & 0xff;
-		switch(c0) {
-			case 0x12:
-				if(c1 != 0x34) {
-					goto failed;
-				}
-				break;
-			case 0x34:
-				if(c1 != 0x56) {
-					goto failed;
-				}
-				break;
-			case 0x56:
-				if(c1 != 0x78) {
-					goto failed;
-				}
-				break;
-			case 0x78:
-				if(c1 != 0x90) {
-					goto failed;
-				}
-				break;
-			case 0x90:
-				if(c1 != 0x12) {
-					goto failed;
-				}
-				break;
-			default:
-				break;
-		}
-		c0 = c1;
-	}
-
-	*pre_value = c0;
-	//printk("!!!success!!!\n");
-	return rtn;
-failed:
-	printk("!!!failed!!!(%d)\n", i);
-	rtn = -1;
-	return rtn;
-}
+//int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
+//	int rtn = 0;
+//	int i;
+//	unsigned int ui0, ui1;
+//
+//	ui0 = ui1 = *pre_value;
+//
+//	for(i = 0; i < count; i++) {
+//		ui1 = pdata[i] & 0x7fffffff;
+//		
+//		if(ui1 == ui0 + 1) {
+//		} else if(ui1 == 0) {
+//		} else if(ui0 == 0) {
+//		} else {
+//			rtn = -1;
+//			printk("!!!failed!!!(%d)\n", i);
+//			printk("ui0:%010d ui1:%010d\n", ui0, ui1);
+//		}
+//
+//		ui0 = ui1;
+//	}
+//
+//	*pre_value = ui0;
+//	//printk("!!!success!!!\n");
+//	return rtn;
+//}
 
 int write_dma_buffer_to_ringbuffer(unsigned char *buffer) {
 	int rtn = 0;
 
-	//static unsigned char pre_value = 0;
+	//static unsigned int pre_value = 0;
 	//check_buffer((unsigned int *)buffer, DMA_LENGTH / sizeof(unsigned int), &pre_value);
 
-	if((i2s_reciever.ringbuffer->pwrite + DMA_LENGTH == i2s_reciever.ringbuffer->pread) || ((i2s_reciever.ringbuffer->pwrite + DMA_LENGTH == i2s_reciever.ringbuffer->buffer + RINGBUFFER_SIZE) && (i2s_reciever.ringbuffer->pread = i2s_reciever.ringbuffer->buffer))) {
+	if((i2s_reciever.ringbuffer->pwrite + DMA_LENGTH == i2s_reciever.ringbuffer->pread) || ((i2s_reciever.ringbuffer->pwrite + DMA_LENGTH == i2s_reciever.ringbuffer->buffer + RINGBUFFER_SIZE) && (i2s_reciever.ringbuffer->pread == i2s_reciever.ringbuffer->buffer))) {
+		static struct timeval t;
 		//printk("<%s> ringbuffer overwrite!!!!!!!!!!!!!!!\n", MODULE_NAME);
-		printk(".");
+		do_gettimeofday(&t);
+		printk(".(%d.%d)\n", t.tv_sec, t.tv_usec);
+		printk("write:%p read:%p buffer:%p, size:%d\n", i2s_reciever.ringbuffer->pwrite, i2s_reciever.ringbuffer->pread, i2s_reciever.ringbuffer->buffer, RINGBUFFER_SIZE);
 	}
 
 	memcpy(i2s_reciever.ringbuffer->pwrite, buffer, DMA_LENGTH);
@@ -599,26 +580,25 @@ int write_dma_buffer_to_ringbuffer(unsigned char *buffer) {
 int read_dma_buffer_from_ringbuffer(unsigned char *buffer) {
 	int rtn = 0;
 
-	if(/*i2s_reciever.ringbuffer->buffer_empty == true*/atomic_read(&i2s_reciever.ringbuffer->buffer_empty) == 1) {
-		//printk(KERN_INFO "<%s> ringbuffer nothing!!!!!!!!!!!!!!!\n", MODULE_NAME);
+	if(ringbuffer_empty() == true) {
 		rtn = -EAGAIN;
 		return rtn;
 	}
 
+	if((i2s_reciever.ringbuffer->pread + DMA_LENGTH == i2s_reciever.ringbuffer->pwrite) || ((i2s_reciever.ringbuffer->pread + DMA_LENGTH == i2s_reciever.ringbuffer->buffer + RINGBUFFER_SIZE) && (i2s_reciever.ringbuffer->pwrite == i2s_reciever.ringbuffer->buffer))) {
+		//i2s_reciever.ringbuffer->buffer_empty = true;
+		atomic_set(&i2s_reciever.ringbuffer->buffer_empty, 1);
+	}
+
 	copy_to_user(buffer, i2s_reciever.ringbuffer->pread, DMA_LENGTH);
-	static unsigned char pre_value = 0;
-	check_buffer((unsigned int *)buffer, DMA_LENGTH / sizeof(unsigned int), &pre_value);
+	//static unsigned int pre_value = 0;
+	//check_buffer((unsigned int *)buffer, DMA_LENGTH / sizeof(unsigned int), &pre_value);
 
 
 	if((i2s_reciever.ringbuffer->pread + DMA_LENGTH) == (i2s_reciever.ringbuffer->buffer + RINGBUFFER_SIZE)) {
 		i2s_reciever.ringbuffer->pread = i2s_reciever.ringbuffer->buffer;
 	} else {
 		i2s_reciever.ringbuffer->pread += DMA_LENGTH;
-	}
-
-	if(i2s_reciever.ringbuffer->pread == i2s_reciever.ringbuffer->pwrite) {
-		//i2s_reciever.ringbuffer->buffer_empty = true;
-		atomic_set(&i2s_reciever.ringbuffer->buffer_empty, 1);
 	}
 
 

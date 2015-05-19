@@ -11,7 +11,7 @@ extern "C" {
 #define MODULE_NAME "xdma"
 //#define DMA_LENGTH (32*1024*1024)
 #define AXI_BUS_WIDTH_BY_BYTE (32 / 8)
-#define I2S_DATA_COUNT_EACH_GROUP (2048)
+#define I2S_DATA_COUNT_EACH_GROUP (1024)
 #define DMA_LENGTH (AXI_BUS_WIDTH_BY_BYTE * I2S_DATA_COUNT_EACH_GROUP)	// max image is 1024x1024 for now!
 #define MAX_DEVICES 4
 #define MAX_NAME_SIZE 64

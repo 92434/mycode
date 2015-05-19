@@ -61,10 +61,10 @@
 
 static int receive_data(int sockfd, unsigned char *buf, unsigned int len) {
 	int rtn = 0;
-	FILE *f = fopen("i2s.dat", "wb+");
-	if(f == 0) {
-		printf("open file error:%s\n", strerror(errno));
-	}
+	//FILE *f = fopen("i2s.dat", "wb+");
+	//if(f == 0) {
+	//	printf("open file error:%s\n", strerror(errno));
+	//}
 
 	while(1)
 	{
@@ -96,35 +96,16 @@ static int receive_data(int sockfd, unsigned char *buf, unsigned int len) {
 		//check_buffer(pdata, z / sizeof(unsigned int), &pre_value);
 
 		for(i = 0; i < z / sizeof(unsigned int); i++) {
-			if((i != 0) && (i % 16 == 0)) {
+			if((i != 0) && (i % 10 == 0)) {
 				printf("\n");
 			}
-			printf("%08x ", pdata[i] & 0x7fffffff);
-			unsigned short value0 = (pdata[i] >> 8) & 0xffff;
-			unsigned short value = (value0 << 8) | (value0 >> 8);
-			if(value == 0) {
-				if(value001 == false) {
-					value001 = true;
-				} else {
-					if(value002 == false) {
-						value002 = true;
-						fwrite("!!", sizeof(unsigned char), 2, f);
-					} else {
-						disable_write = true;
-					}
-				}
-			} else {
-				disable_write = value001 = value002 = false;
-			}
-			if(disable_write == true) {
-				continue;
-			}
-			fwrite((char *)&value, sizeof(unsigned short), 1, f);
+			printf("%10d ", pdata[i] & 0x7fffffff);
+			//fwrite((char *)pdata, sizeof(unsigned int), 1, f);
 		}
 		printf("\n");
 	}
 	close(sockfd);
-	fclose(f);
+	//fclose(f);
 
 	return rtn;
 }
