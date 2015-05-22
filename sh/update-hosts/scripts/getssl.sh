@@ -22,14 +22,18 @@ if [ ! -d output ]; then
 fi
 output=output/result
 j=0
+totalcount=($(wc -l $1))
+totalcount=${totalcount[0]}
+curcount=0
 > $output
 echo -e "IP\tLOSS\tTIME\tSSL"
 echo -e "IP\tLOSS\tTIME\tSSL" > $output
 while read i
 do
+	((curcount++))
 	((j++))
 	{
-		echo $j
+		echo "[$((curcount * 100 / totalcount))%] $j"
 		ip=${i}
 		c=$(nmap --host-timeout 5s $ip -p 443 2>/dev/null | grep -Pc "443/tcp open")
 		if [ $c -ne 1 ]; then
