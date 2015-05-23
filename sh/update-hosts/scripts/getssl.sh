@@ -25,6 +25,7 @@ j=0
 totalcount=($(wc -l $1))
 totalcount=${totalcount[0]}
 curcount=0
+percent=
 > $output
 echo -e "IP\tLOSS\tTIME\tSSL"
 echo -e "IP\tLOSS\tTIME\tSSL" > $output
@@ -33,23 +34,24 @@ do
 	((curcount++))
 	((j++))
 	{
-		echo "[$((curcount * 100 / totalcount))%] $j"
+		percent="[$((curcount * 100 / totalcount))%]"
+		echo "$percent $j"
 		ip=${i}
 		c=$(nmap --host-timeout 5s $ip -p 443 2>/dev/null | grep -Pc "443/tcp open")
 		if [ $c -ne 1 ]; then
-			echo -e "$ip\tNO\tNO\tNO"
+			echo -e "$percent $ip\tNO\tNO\tNO"
 #			echo -e "$ip\tNO\tNO\tNO" >> $output
 			continue
 		fi
 		cer=$(curl --connect-timeout 2 https://$ip 2>&1 | grep -Po "'\S*'" |head -1|cut -d \' -f 2)
 		if [ -z $cer ]; then
-			echo -e "$ip\tNO\tNO\tNO"
+			echo -e "$percent $ip\tNO\tNO\tNO"
 #			echo -e "$ip\tNO\tNO\tNO" >> $output
 			continue
 		fi
 		wget_info=$(wget -T 2 -t 1 -P output/tmp --no-check-certificate https://$ip 2>&1 1>/dev/null)
 		if [ -z "$(echo $wget_info | grep "awaiting response\.\.\. 200 OK")" ]; then
-			echo -e "$ip\tNO\tNO\tNO"
+			echo -e "$percent $ip\tNO\tNO\tNO"
 #			echo -e "$ip\tNO\tNO\tNO" >> $output
 			continue
 #		else
@@ -60,12 +62,12 @@ do
 		loss=$(grep -Po "\w+%" $ping)
 		c=$(grep -c "time=" $ping)
 		if [ $c -eq 0 ]; then
-			echo -e "$ip\t$loss\tNO\t$cer"
+			echo -e "$percent $ip\t$loss\tNO\t$cer"
 			echo -e "$ip\t$loss\tNO\t$cer" >> $output
 			continue
 		fi
 		avgtime=$(grep -P "time=" $ping | awk '{print $7}' | awk 'BEGIN {FS="=";s=0;c=0;}{s+=$2;c++;} END {print s*1000/c}')
-		echo -e "$ip\t$loss\t$avgtime\t$cer"
+		echo -e "$percent $ip\t$loss\t$avgtime\t$cer"
 		echo -e "$ip\t$loss\t$avgtime\t$cer" >> $output
 	} &
 	if ((j==256));then
