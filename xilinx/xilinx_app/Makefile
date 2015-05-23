@@ -17,9 +17,6 @@ LDFLAGS += -static
 
 #c_files := uio_test.c
 #c_files := glyphy/glyphy_test.c
-c_files := i2s/my_i2s_receiver.c
-c_files += i2s/spidev.c
-i2s/my_i2s_receiver.c.LOCAL_CFLAGS := -I$(shell pwd)/../xilinx_driver/i2s_axidma
 include $(BUILD_BINS)
 
 #app_c_files := gpio_utils.c

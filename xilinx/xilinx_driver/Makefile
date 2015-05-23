@@ -7,8 +7,6 @@ export KERNEL_DIR := /home/xiaofei/workspace/src/xilinx/src/linux-xlnx/output
 #dirs += zynq-xvdma/
 #dirs += xotsu2/
 #dirs += glyphy/
-dirs += i2s_axidma/
-dirs += spi/
 ifneq ($(KERNELRELEASE),)
 obj-m := $(dirs)
 #obj-m += my_uio_device.o
