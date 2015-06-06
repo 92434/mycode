@@ -252,3 +252,23 @@ function test_set_var() {
 #$ git gc  
 #$ du -hs  
 # 84K  
+
+
+function get_system_bitwidth() {
+	expr "$(getconf -a | grep LONG_BIT)" : "LONG_BIT\s*\(.*\)"
+}
+
+function get_system_info() {
+	echo $(get_system_bitwidth)
+}
+#get_system_info
+
+function mount_iso() {
+	local ISO=$1
+	local MOUNT_POINT=$2
+	sudo mount -o loop,ro -t iso9660 -r "$ISO" "$MOUNT_POINT"
+}
+
+function restart_wifi_ap() {
+	sudo ap-hotspot restart
+}
