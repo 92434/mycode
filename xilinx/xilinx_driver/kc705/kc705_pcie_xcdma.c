@@ -4,12 +4,15 @@
 #include <linux/interrupt.h>
 
 
-#define mydebug(format, ...) printk("[%s:%s:%d]<%s>:" format, __FILE__, __PRETTY_FUNCTION__, __LINE__, MODULE_NAME, ## __VA_ARGS__)
-#define myprintf(format, ...) printk(format, ## __VA_ARGS__)
+#define mydebug(format, ...) printk(KERN_DEBUG "[%s:%s:%d]<%s>:" format, __FILE__, __PRETTY_FUNCTION__, __LINE__, MODULE_NAME, ## __VA_ARGS__)
+#define myprintf(format, ...) printk(KERN_ERR format, ## __VA_ARGS__)
 
-//#define __devinit
-//#define __devexit
-//#define __devexit_p(f) f
+#if defined(i386)
+#define __devinit
+#define __devexit
+#define __devexit_p(f) f
+#else
+#endif
 
 /** @name Macros for PCI probing
  * @{
@@ -23,8 +26,55 @@
 #define DRIVER_DESCRIPTION "kc705 pcie xcdma driver"
 #define DRIVER_VERSION "1.0"
 
+//Base Address
+#define BASE_AXI_PCIe_DM 0x80000000
+#define BASE_AXI_PCIe_SG 0x80800000
+#define BASE_Translation_BRAM 0x81000000
+#define BASE_AXI_PCIe_CTL 0x81008000
+#define BASE_AXI_CDMA_LITE 0x8100c000
+
+//PCIe:BAR0 Address Offset for the accessible Interfaces
+#define OFFSET_Translation_BRAM 0x0
+#define OFFSET_AXI_PCIe_CTL (BASE_AXI_PCIe_CTL - BASE_Translation_BRAM)
+#define OFFSET_AXI_CDMA_LITE (BASE_AXI_CDMA_LITE - BASE_Translation_BRAM)
+
+//AXI CDMA Register Summary
+#define CDMA_CR 0x00 //CDMA Control.
+#define CDMA_SR 0x04 //CDMA Status.
+#define CDMA_CURDESC_PNTR 0x08 //Current Descriptor Pointer.
+//#define Reserved 0x0C //N/A
+#define CDMA_TAILDESC_PNTR 0x10 //Tail Descriptor Pointer.
+//#define Reserved 0x14 //N/A
+#define CDMA_SA 0x18 //Source Address.
+//#define Reserved 0x1C //N/A
+#define CDMA_DA 0x20 //Destination Address.
+//#define Reserved 0x24 //N/A
+#define CDMA_BTT 0x28 //Bytes to Transfer.
+
+//Address Map for the AXI to PCIe Address Translation Registers
+#define AXIBAR2PCIEBAR_0U 0x208 //default be set to 0
+#define AXIBAR2PCIEBAR_0L 0x20c //default be set to 0xa0000000
+#define AXIBAR2PCIEBAR_1U 0x210 //default be set to 0
+#define AXIBAR2PCIEBAR_1L 0x214 //default be set to 0xc0000000
+
+#define SG_DESCRIPTOR_SIZE 0x40
+
+////Transfer Descriptor Word Summary
+//#define DES_NXTDESC_PNTR 0x00 //[31:5]
+////#define DES_RESERVED 0x04
+//#define DES_SA 0x08
+////#define DES_RESERVED 0x0c
+//#define DES_DA 0x10
+////#define DES_RESERVED 0x14
+//#define DES_CONTROL 0x18 //[22:0] size to transfer
+//#define DES_STATUS 0x1c //bit31:Cmplt bit30:DMADecErr bit29:DMASlvErr bit28:DMAIntErr
+
 
 #define MAX_BARS 6/**< Maximum number of BARs */
+
+#define SG_SIZE 0x10000
+#define DM_CHANNEL_TX_SIZE 0x10000
+#define DM_CHANNEL_RX_SIZE 0x10000
 
 /** Driver Module information */
 MODULE_AUTHOR("xiaofei");
@@ -77,20 +127,163 @@ typedef struct {
 	timer_func_t func;
 } timer_data_t;
 
+typedef union {
+	struct {
+		uint32_t NXTDESC_PNTR;
+		uint32_t PAD0;
+		uint32_t SA;
+		uint32_t PAD1;
+		uint32_t DA;
+		uint32_t PAD2;
+		uint32_t CONTROL;
+		uint32_t STATUS;
+	} des;
+	unsigned char des_space[0x40];
+} kc705_transfer_descriptor_t;
+
+typedef struct {
+	struct list_head sg_item;
+	kc705_transfer_descriptor_t des;
+} kc705_sg_item_info_t;
 
 typedef struct {
 	struct pci_dev *pdev; /**< PCI device entry */
-	u32 barMask;                    /**< Bitmask for BAR information */
+	u32 bar_mask;                    /**< Bitmask for BAR information */
 	struct {
-		unsigned long basePAddr; /**< Base address of device memory */
-		unsigned long baseLen; /**< Length of device memory */
-		void __iomem * baseVAddr; /**< VA - mapped address */
-	} barInfo[MAX_BARS];
-	int MSIEnabled;
+		unsigned long base_phyaddr; /**< Base address of device memory */
+		unsigned long base_len; /**< Length of device memory */
+		void __iomem * base_vaddr; /**< VA - mapped address */
+	} bar_info[MAX_BARS];
+	int msi_enable;
+	void *sg_memory;
+	void *dm_memory;
 } kc705_pci_dev_t;
 
 static kc705_pci_dev_t *kc705_pci_dev = NULL;
+static LIST_HEAD(sg_list_info);
 
+static int flush_sg_des_items(kc705_transfer_descriptor_t *axi_pcie_sg_port, struct list_head *sg_list) {
+	kc705_transfer_descriptor_t *pdes = axi_pcie_sg_port; //buffer for sg, axi address 0x80800000
+	kc705_sg_item_info_t *info;
+	uint32_t bar_sg_next_addr_offset = BASE_AXI_PCIe_SG + SG_DESCRIPTOR_SIZE;
+	
+
+	list_for_each_entry(info, sg_list, sg_item) {
+		//kc705_sg_item_info_t *next_info = list_next_entry(info, sg_item);
+
+		if(info->sg_item.next != sg_list) {
+		//if(&(next_info->sg_item) != sg_list) {
+			info->des.des.NXTDESC_PNTR = bar_sg_next_addr_offset;
+		} else {
+			info->des.des.NXTDESC_PNTR = BASE_AXI_PCIe_SG + SG_DESCRIPTOR_SIZE;
+		}
+
+
+		pdes->des = info->des.des;
+
+		pdes += 1;
+		bar_sg_next_addr_offset += SG_DESCRIPTOR_SIZE;
+
+	}
+
+	return 0;
+}
+
+static int alloc_sg_des_item(uint32_t SA, uint32_t DA, uint32_t CONTROL, struct list_head *sg_list) {
+	int rtn = 0;
+	kc705_sg_item_info_t *sg_item = (kc705_sg_item_info_t *)vzalloc(sizeof(kc705_sg_item_info_t));
+
+	if(sg_item == NULL) {
+		rtn = -1;
+		mydebug("alloc sg_item failed.\n");
+		return rtn;
+	}
+
+	sg_item->des.des.SA = SA;
+	sg_item->des.des.DA = DA;
+	sg_item->des.des.CONTROL = CONTROL;
+	list_add_tail(&sg_item->sg_item, sg_list);
+	return 0;
+}
+
+static void free_sg_des_items(struct list_head *sg_list) {
+	kc705_sg_item_info_t *sg_item, *sg_item_next;
+	list_for_each_entry_safe(sg_item, sg_item_next, sg_list, sg_item) {
+		list_del(&sg_item->sg_item);
+
+		vfree(sg_item);
+	}
+}
+
+static int prepare_bram_vaddr(void) {
+	uint64_t memory_tx = (uint64_t)kc705_pci_dev->dm_memory;
+	uint64_t memory_rx = (uint64_t)kc705_pci_dev->dm_memory + DM_CHANNEL_TX_SIZE;
+	uint64_t memory_sg = (uint64_t)kc705_pci_dev->sg_memory;
+
+	uint32_t *bram_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
+	uint32_t *sg_map_ctl_reg = bram_vaddr + OFFSET_AXI_PCIe_CTL + AXIBAR2PCIEBAR_0U;
+
+	//bind sg 
+	writel((memory_sg >> 32) & 0xffffffff, sg_map_ctl_reg);
+	sg_map_ctl_reg++;
+	writel(memory_sg & 0xffffffff, sg_map_ctl_reg);
+
+	//prepare tx && rx buffer address for dm map ctl register
+	writel((memory_tx >> 32) & 0xffffffff, bram_vaddr);
+	bram_vaddr++;
+	writel(memory_tx & 0xffffffff, bram_vaddr);
+
+	bram_vaddr++;
+	writel((memory_rx >> 32) & 0xffffffff, bram_vaddr);
+	bram_vaddr++;
+	writel(memory_rx & 0xffffffff, bram_vaddr);
+
+	return 0;
+}
+
+static int prepare_sg_des_chain(uint32_t tx_axiaddr, uint32_t tx_size, uint32_t rx_axiaddr, uint32_t rx_size, struct list_head *sg_list) {
+	int rtn = 0;
+	int offset = 0;
+	rtn = alloc_sg_des_item(
+			BASE_Translation_BRAM + offset,
+			BASE_AXI_PCIe_CTL + AXIBAR2PCIEBAR_1U,
+			sizeof(uint64_t),
+			sg_list
+		);
+	if(rtn != 0) {
+		goto failed;
+	}
+
+	offset += sizeof(uint64_t);
+
+	rtn = alloc_sg_des_item(BASE_AXI_PCIe_DM, tx_axiaddr, tx_size, sg_list);
+	if(rtn != 0) {
+		goto failed;
+	}
+
+	rtn = alloc_sg_des_item(
+			BASE_Translation_BRAM + offset,
+			BASE_AXI_PCIe_CTL + AXIBAR2PCIEBAR_1U,
+			sizeof(uint64_t),
+			sg_list
+		);
+	if(rtn != 0) {
+		goto failed;
+	}
+
+	rtn = alloc_sg_des_item(rx_axiaddr, BASE_AXI_PCIe_DM, rx_size, sg_list);
+	if(rtn != 0) {
+		goto failed;
+	}
+
+
+	flush_sg_des_items((kc705_transfer_descriptor_t *)kc705_pci_dev->sg_memory, sg_list);
+
+failed:
+	free_sg_des_items(sg_list);
+
+	return rtn;
+}
 
 static int start_timer(timer_data_t *pdata) {
 	unsigned long tmo = msecs_to_jiffies(pdata->ms);
@@ -198,8 +391,8 @@ static void read_pci_root_configuration(struct pci_dev * pdev) {
 	printk("Procdir %p\n", me->procdir);
 	printk("Number %d\n", me->number);
 	printk("Primary %d\n", me->primary);
-	printk("Secondary %d\n", me->secondary);
-	printk("Subordinate %d\n", me->subordinate);
+//	printk("Secondary %d\n", me->secondary);
+//	printk("Subordinate %d\n", me->subordinate);
 	printk("Name %s\n", me->name);
 	printk("Bridge_ctl %d\n", me->bridge_ctl);
 	printk("Bridge %p\n", me->bridge);
@@ -339,21 +532,33 @@ static irqreturn_t isr(int irq, void *dev_id)
 	return IRQ_NONE;
 }
 
-static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_id *ent) {
+static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *ent) {
 	int rtn = 0;
 	int i;
 
 	kc705_pci_dev = (kc705_pci_dev_t *)vzalloc(sizeof(kc705_pci_dev_t));
 	if(kc705_pci_dev == NULL) {
-		mydebug(KERN_ERR "alloc kc705_pci_dev failed.\n");
+		mydebug("alloc kc705_pci_dev failed.\n");
 		rtn = -1;
 		goto alloc_kc705_pci_dev_failed;
+	}
+
+	kc705_pci_dev->sg_memory = kzalloc(SG_SIZE, GFP_KERNEL);
+	if(kc705_pci_dev->sg_memory == NULL) {
+		rtn = -1;
+		goto alloc_sg_memory_failed;
+	}
+
+	kc705_pci_dev->dm_memory = kzalloc(DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE, GFP_KERNEL);
+	if(kc705_pci_dev->dm_memory == NULL) {
+		rtn = -1;
+		goto alloc_dm_memory_failed;
 	}
 
 	rtn = pci_enable_device(pdev);
 	if(rtn < 0)
 	{
-		mydebug(KERN_ERR "PCI device enable failed.\n");
+		mydebug("PCI device enable failed.\n");
 		goto pci_enable_device_failed;
 	}
 
@@ -376,7 +581,7 @@ static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_i
 	 */
 	rtn = pci_request_regions(pdev, MODULE_NAME);
 	if(rtn < 0) {
-		mydebug(KERN_ERR "Could not request PCI regions.\n");
+		mydebug("Could not request PCI regions.\n");
 		goto pci_request_regions_failed;
 	}
 
@@ -387,7 +592,7 @@ static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_i
 	rtn = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
 #endif
 	if(rtn < 0) {
-		mydebug(KERN_ERR "pci_set_dma_mask failed\n");
+		mydebug("pci_set_dma_mask failed\n");
 		goto pci_set_dma_mask_failed;
 	}
 
@@ -397,20 +602,20 @@ static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_i
 		/* Atleast BAR0 must be there. */
 		if((size = pci_resource_len(pdev, i)) == 0) {
 			if(i == 0) {
-				mydebug(KERN_ERR "BAR 0 not valid, aborting.\n");
+				mydebug("BAR 0 not valid, aborting.\n");
 				goto pci_resource_len_failed;
 			} else {
 				continue;
 			}
 		} else {/* Set a bitmask for all the BARs that are present. */
-			(kc705_pci_dev->barMask) |= ( 1 << i );
+			(kc705_pci_dev->bar_mask) |= ( 1 << i );
 		}
 
 		/* Check all BARs for memory-mapped or I/O-mapped. The driver is
 		 * intended to be memory-mapped.
 		 */
 		if(!(pci_resource_flags(pdev, i) & IORESOURCE_MEM)) {
-			mydebug(KERN_ERR "BAR %d is of wrong type, aborting.\n", i);
+			mydebug("BAR %d is of wrong type, aborting.\n", i);
 			goto bar_resource_type_failed;
 		}
 
@@ -421,29 +626,29 @@ static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_i
 		 * of memory. Or mapping should be done based on user request
 		 * with user size. Neither is being done now - maybe later.
 		 */
-		if((kc705_pci_dev->barInfo[i].baseVAddr = ioremap((kc705_pci_dev->barInfo[i].basePAddr), size)) == 0UL) {
-			mydebug(KERN_ERR "Cannot map BAR %d space, invalidating.\n", i);
-			(kc705_pci_dev->barMask) &= ~( 1 << i );
+		if((kc705_pci_dev->bar_info[i].base_vaddr = ioremap((kc705_pci_dev->bar_info[i].base_phyaddr), size)) == 0UL) {
+			mydebug("Cannot map BAR %d space, invalidating.\n", i);
+			(kc705_pci_dev->bar_mask) &= ~( 1 << i );
 		} else {
 			mydebug(
-					KERN_INFO "[BAR %d] Base PA %x Len %d VA %x\n",
+					"[BAR %d] Base PA %x Len %d VA %x\n",
 					i,
-					(u32)(kc705_pci_dev->barInfo[i].basePAddr),
-					(u32)(kc705_pci_dev->barInfo[i].baseLen),
-					(u32)(kc705_pci_dev->barInfo[i].baseVAddr)
+					(u32)(kc705_pci_dev->bar_info[i].base_phyaddr),
+					(u32)(kc705_pci_dev->bar_info[i].base_len),
+					(u32)(kc705_pci_dev->bar_info[i].base_vaddr)
 			       );
 		}
 	}
 
-	kc705_pci_dev->pdev=pdev;
+	kc705_pci_dev->pdev = pdev;
 
 	/* Save private data pointer in device structure */
 	pci_set_drvdata(pdev, kc705_pci_dev);
 
 	/* Now enable interrupts using MSI mode */
 	if(!pci_enable_msi(pdev)) {
-		mydebug(KERN_INFO "MSI enabled\n");
-		kc705_pci_dev->MSIEnabled = 1;
+		mydebug("MSI enabled\n");
+		kc705_pci_dev->msi_enable = 1;
 	}
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18)
 	rtn = request_irq(pdev->irq, isr, SA_SHIRQ, MODULE_NAME, pdev);
@@ -451,8 +656,8 @@ static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_i
 	rtn = request_irq(pdev->irq, isr, IRQF_SHARED, MODULE_NAME, pdev);
 #endif
 	if(rtn) {
-		mydebug(KERN_ERR "Could not allocate interrupt %d\n", pdev->irq);
-		mydebug(KERN_ERR "Unload driver and try running with polled mode instead\n");
+		mydebug("Could not allocate interrupt %d\n", pdev->irq);
+		mydebug("Unload driver and try running with polled mode instead\n");
 		rtn = 0;
 		goto request_irq_failed;
 	}
@@ -464,6 +669,10 @@ pci_set_dma_mask_failed:
 pci_request_regions_failed:
 	pci_disable_device(pdev);
 pci_enable_device_failed:
+	kfree(kc705_pci_dev->dm_memory);
+alloc_dm_memory_failed:
+	kfree(kc705_pci_dev->sg_memory);
+alloc_sg_memory_failed:
 	vfree(kc705_pci_dev);
 request_irq_failed:
 bar_resource_type_failed:
@@ -472,19 +681,25 @@ alloc_kc705_pci_dev_failed:
 	return rtn;
 }
 
-static void __devexit kc705_remove(struct pci_dev *pdev) {
+static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_id *ent) {
+	int rtn = 0;
+	rtn = kc705_probe_pcie(pdev, ent);
+	return rtn;
+}
+
+static void kc705_remove_pcie(struct pci_dev *pdev) {
 	int i;
 
 	free_irq(pdev->irq, pdev);
 
-	if(kc705_pci_dev->MSIEnabled) {
+	if(kc705_pci_dev->msi_enable) {
 		pci_disable_msi(pdev);
 	}
 	pci_set_drvdata(pdev, NULL);
 
 	for(i = 0; i < MAX_BARS; i++) {
-		if((kc705_pci_dev->barMask) & ( 1 << i )) {
-			iounmap(kc705_pci_dev->barInfo[i].baseVAddr);
+		if((kc705_pci_dev->bar_mask) & ( 1 << i )) {
+			iounmap(kc705_pci_dev->bar_info[i].base_vaddr);
 		}
 	}
 
@@ -492,7 +707,15 @@ static void __devexit kc705_remove(struct pci_dev *pdev) {
 
 	pci_disable_device(pdev);
 
+	kfree(kc705_pci_dev->dm_memory);
+
+	kfree(kc705_pci_dev->sg_memory);
+
 	vfree(kc705_pci_dev);
+}
+
+static void __devexit kc705_remove(struct pci_dev *pdev) {
+	kc705_remove_pcie(pdev);
 }
 
 static struct pci_driver kc705_pcie_driver = {
@@ -514,7 +737,7 @@ static void my_timer_func(unsigned long __opaque) {
 	unsigned long tmo = msecs_to_jiffies(pdata->ms);
 	struct timer_list *tl = pdata->tl;
 
-	mydebug(KERN_ERR "\n");
+	myprintf("!\n");
 	tl->expires = jiffies + tmo;
 	add_timer(tl);
 }
@@ -529,7 +752,7 @@ static int __init kc705_init(void) {
 	pdata = alloc_timer(&my_timer, 1000, my_timer_func);
 #endif//#ifdef test_timer
 
-	mydebug(KERN_ERR "kc705 initilized!(%s)\n", "xiaofei");
+	mydebug("kc705 initilized!(%s)\n", "xiaofei");
 	return rtn;
 }
 
@@ -540,7 +763,7 @@ static void __exit kc705_exit(void) {
 	/* Then, unregister driver with PCI in order to free up resources */
 	pci_unregister_driver(&kc705_pcie_driver);
 
-	mydebug(KERN_ERR "kc705 exit!\n");
+	mydebug("kc705 exit!\n");
 }
 
 module_init(kc705_init);
