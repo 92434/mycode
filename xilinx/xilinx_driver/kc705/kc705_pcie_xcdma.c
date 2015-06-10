@@ -162,6 +162,7 @@ typedef struct {
 static kc705_pci_dev_t *kc705_pci_dev = NULL;
 static LIST_HEAD(sg_list_info);
 
+static uint32_t cdma_tail_des_axi_addr = BASE_AXI_PCIe_SG;
 static int flush_sg_des_items(kc705_transfer_descriptor_t *axi_pcie_sg_port, struct list_head *sg_list) {
 	kc705_transfer_descriptor_t *pdes = axi_pcie_sg_port; //buffer for sg, axi address 0x80800000
 	kc705_sg_item_info_t *info;
@@ -174,15 +175,16 @@ static int flush_sg_des_items(kc705_transfer_descriptor_t *axi_pcie_sg_port, str
 		if(info->sg_item.next != sg_list) {
 		//if(&(next_info->sg_item) != sg_list) {
 			info->des.des.NXTDESC_PNTR = bar_sg_next_addr_offset;
+			cdma_tail_des_axi_addr = bar_sg_next_addr_offset;
+			bar_sg_next_addr_offset += SG_DESCRIPTOR_SIZE;
 		} else {
-			info->des.des.NXTDESC_PNTR = BASE_AXI_PCIe_SG + SG_DESCRIPTOR_SIZE;
+			info->des.des.NXTDESC_PNTR = BASE_AXI_PCIe_SG;
 		}
 
 
 		pdes->des = info->des.des;
 
-		pdes += 1;
-		bar_sg_next_addr_offset += SG_DESCRIPTOR_SIZE;
+		pdes++;
 
 	}
 
@@ -215,28 +217,61 @@ static void free_sg_des_items(struct list_head *sg_list) {
 	}
 }
 
+static int configure_cdma_engine(void) {
+#define XILINX_VDMA_LOOP_COUNT 1000000
+	uint8_t *bram_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
+	uint8_t *cdma_base_vaddr = (uint8_t *)(bram_vaddr + OFFSET_AXI_CDMA_LITE); 
+
+	//reset cdma
+	uint32_t default_value = 0x00010002;//0000_0000_0000_0001(irq threshold)_0000_0000_0000_001(tail ptr enable)0
+	uint32_t value;
+	int loop = XILINX_VDMA_LOOP_COUNT;
+	
+	//reset
+	value = default_value | (1 << 2);//reset bit
+	writel(value, cdma_base_vaddr + CDMA_CR);
+	do {
+		value = readl(cdma_base_vaddr + CDMA_CR) & (1 << 2);
+	} while(loop-- && value);
+	
+	
+	writel(BASE_AXI_PCIe_SG, cdma_base_vaddr + CDMA_CURDESC_PNTR);
+
+	return 0;
+}
+
+static int start_cdma(uint32_t tail_des_axi_addr) {
+	uint8_t *bram_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
+	uint8_t *cdma_base_vaddr = (uint8_t *)(bram_vaddr + OFFSET_AXI_CDMA_LITE); 
+
+	writel(tail_des_axi_addr, cdma_base_vaddr + CDMA_TAILDESC_PNTR);
+	return 0;
+}
+
+
 static int prepare_bram_vaddr(void) {
 	uint64_t memory_tx = (uint64_t)kc705_pci_dev->dm_memory;
 	uint64_t memory_rx = (uint64_t)kc705_pci_dev->dm_memory + DM_CHANNEL_TX_SIZE;
 	uint64_t memory_sg = (uint64_t)kc705_pci_dev->sg_memory;
 
-	uint32_t *bram_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint32_t *sg_map_ctl_reg = bram_vaddr + OFFSET_AXI_PCIe_CTL + AXIBAR2PCIEBAR_0U;
+	uint8_t *bram_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
+	uint32_t *sg_vaddr_map_ctl_reg = (uint32_t *)(bram_vaddr + OFFSET_AXI_PCIe_CTL + AXIBAR2PCIEBAR_0U);
+	uint32_t *dm_vddr_info_base = (uint32_t *)bram_vaddr;
 
 	//bind sg 
-	writel((memory_sg >> 32) & 0xffffffff, sg_map_ctl_reg);
-	sg_map_ctl_reg++;
-	writel(memory_sg & 0xffffffff, sg_map_ctl_reg);
+	writel((memory_sg >> 32) & 0xffffffff, sg_vaddr_map_ctl_reg);
+	sg_vaddr_map_ctl_reg++;
+	writel(memory_sg & 0xffffffff, sg_vaddr_map_ctl_reg);
 
 	//prepare tx && rx buffer address for dm map ctl register
-	writel((memory_tx >> 32) & 0xffffffff, bram_vaddr);
-	bram_vaddr++;
-	writel(memory_tx & 0xffffffff, bram_vaddr);
+	writel((memory_tx >> 32) & 0xffffffff, dm_vddr_info_base);
+	dm_vddr_info_base++;
+	writel(memory_tx & 0xffffffff, dm_vddr_info_base);
 
-	bram_vaddr++;
-	writel((memory_rx >> 32) & 0xffffffff, bram_vaddr);
-	bram_vaddr++;
-	writel(memory_rx & 0xffffffff, bram_vaddr);
+	dm_vddr_info_base++;
+	writel((memory_rx >> 32) & 0xffffffff, dm_vddr_info_base);
+	dm_vddr_info_base++;
+	writel(memory_rx & 0xffffffff, dm_vddr_info_base);
 
 	return 0;
 }
@@ -283,6 +318,14 @@ failed:
 	free_sg_des_items(sg_list);
 
 	return rtn;
+}
+
+static int test_cdma(void) {
+	prepare_bram_vaddr();
+	prepare_sg_des_chain(0, 8, 0, 8, &sg_list_info);
+	configure_cdma_engine();
+	start_cdma(cdma_tail_des_axi_addr);
+	return 0;
 }
 
 static int start_timer(timer_data_t *pdata) {
@@ -526,8 +569,10 @@ static irqreturn_t isr(int irq, void *dev_id)
 #endif
 {
 	struct pci_dev *pdev = dev_id;
-	pdev = pdev;
+	kc705_pci_dev_t * kc705_pci_dev = pci_get_drvdata(pdev);
 
+	kc705_pci_dev = kc705_pci_dev;
+	mydebug("\n");
 	/* Handle DMA and any user interrupts */
 	return IRQ_NONE;
 }
@@ -536,6 +581,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	int rtn = 0;
 	int i;
 
+	//alloc memory for driver
 	kc705_pci_dev = (kc705_pci_dev_t *)vzalloc(sizeof(kc705_pci_dev_t));
 	if(kc705_pci_dev == NULL) {
 		mydebug("alloc kc705_pci_dev failed.\n");
@@ -543,6 +589,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		goto alloc_kc705_pci_dev_failed;
 	}
 
+	//alloc memory for cdma
 	kc705_pci_dev->sg_memory = kzalloc(SG_SIZE, GFP_KERNEL);
 	if(kc705_pci_dev->sg_memory == NULL) {
 		rtn = -1;
@@ -583,17 +630,6 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	if(rtn < 0) {
 		mydebug("Could not request PCI regions.\n");
 		goto pci_request_regions_failed;
-	}
-
-	/* Returns success if PCI is capable of 32-bit DMA */
-#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,36)
-	rtn = pci_set_dma_mask(pdev, DMA_32BIT_MASK);
-#else
-	rtn = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
-#endif
-	if(rtn < 0) {
-		mydebug("pci_set_dma_mask failed\n");
-		goto pci_set_dma_mask_failed;
 	}
 
 	for(i = 0; i < MAX_BARS; i++) {
@@ -645,6 +681,17 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	/* Save private data pointer in device structure */
 	pci_set_drvdata(pdev, kc705_pci_dev);
 
+	/* Returns success if PCI is capable of 32-bit DMA */
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,36)
+	rtn = pci_set_dma_mask(pdev, DMA_32BIT_MASK);
+#else
+	rtn = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
+#endif
+	if(rtn < 0) {
+		mydebug("pci_set_dma_mask failed\n");
+		goto pci_set_dma_mask_failed;
+	}
+
 	/* Now enable interrupts using MSI mode */
 	if(!pci_enable_msi(pdev)) {
 		mydebug("MSI enabled\n");
@@ -684,6 +731,7 @@ alloc_kc705_pci_dev_failed:
 static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_id *ent) {
 	int rtn = 0;
 	rtn = kc705_probe_pcie(pdev, ent);
+	test_cdma();
 	return rtn;
 }
 
@@ -695,6 +743,7 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 	if(kc705_pci_dev->msi_enable) {
 		pci_disable_msi(pdev);
 	}
+
 	pci_set_drvdata(pdev, NULL);
 
 	for(i = 0; i < MAX_BARS; i++) {
@@ -768,4 +817,3 @@ static void __exit kc705_exit(void) {
 
 module_init(kc705_init);
 module_exit(kc705_exit);
-
