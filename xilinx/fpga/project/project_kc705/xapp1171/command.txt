@@ -1,0 +1,2 @@
+cd D:/xf/fpga/ip_repo/download/xapp1171
+vivado -source kintexSubsystemFiles/kintexGenerationScript.tcl

@@ -7,5 +7,6 @@
 #KERNEL-OBJS += modules-name.o
 
 KERNEL-OBJS += pmodoled-gpio.o
+KERNEL-OBJS += timer_test.o
 
 include $(BUILD_KO)
