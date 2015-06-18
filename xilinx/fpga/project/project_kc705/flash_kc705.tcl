@@ -1,10 +1,12 @@
-set bitstream_file D:/xf/fpga/ip_repo/download/rdf0281-kc705-base-trd-2014-3/k7_pcie_dma_ddr3_base/ready_to_test/k7_pcie_dma_ddr3_base_x4_gen2.bit
-set mcs_file D:/xf/fpga/ip_repo/download/rdf0281-kc705-base-trd-2014-3/k7_pcie_dma_ddr3_base/ready_to_test/KC705.mcs
+set bitstream_file D:/xf/fpga/ip_repo/download/xapp1171/design_1_wrapper.bit
+set mcs_file D:/xf/fpga/ip_repo/download/xapp1171/KC705.mcs
 set cfgmem_part_name 28f00ap30t-bpi-x16
 
 refresh_hw_device [lindex [get_hw_devices] 0]
 
-write_cfgmem -force -format MCS -size 128 -interface BPIx16 -loadbit "up 0x0 $bitstream_file" $mcs_file
+if {![file exists $mcs_file]} {
+	write_cfgmem -force -format MCS -size 128 -interface BPIx16 -loadbit "up 0x0 $bitstream_file" $mcs_file
+}
 
 create_hw_cfgmem -hw_device [lindex [get_hw_devices] 0] -mem_dev [lindex [get_cfgmem_parts $cfgmem_part_name] 0]
 
