@@ -10,6 +10,15 @@ local_targets: xiaofei
 	echo $$\(CURDIR\) is $(CURDIR)
 	echo $$\(MAKEFLAGS\) is $(MAKEFLAGS)
 
+#define get-device-major
+#	$(strip $(shell awk '/$(1)/ {print $$1}' /proc/devices))
+#endef
+#define get-device-major
+#	$(shell awk '/$(1)/ {print $$1}' /proc/devices)
+#endef
+
+get-device-major = $(shell awk '/$(1)/ {print $$1}' /proc/devices)
+
 # Cancel implicit rules on top Makefile
 $(CURDIR)/Makefile Makefile:
 
@@ -33,3 +42,7 @@ xiaofei : 3
 	touch $@
 
 test : 1.t2 2.t2 3.t2
+	echo $(call get-device-major,rtc)
+	echo $(get-device-major)
+
+
