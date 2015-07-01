@@ -2,7 +2,10 @@ import ctypes
 
 dll = ctypes.CDLL('./out/lib/libtest.so')
 pchar_array = ctypes.c_char_p * 4
-array = pchar_array('arg1', 'arg2', 'arg3', 'arg4')
+array = pchar_array()
+for i in range(0, len(array)):
+	array[i] = 'arg' + str(i)
+print(type(array))
 dll.main(4, array)
 
 class S(ctypes.Structure):
