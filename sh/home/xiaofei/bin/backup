@@ -117,10 +117,10 @@ print_help(){
 	echo "Usages:"
 	echo "$0 [option]"
 	echo "[option] can be this:"
-	echo "copy_compress:copy to tarball"
-	echo "uncompress_recovery:recovery from tarball"
-	echo "copy:copy"
-	echo "recovery:recovery"
+	echo "	copy_compress			:copy to tarball"
+	echo "	uncompress_recovery tarball	:recovery from tarball"
+	echo "	copy				:copy"
+	echo "	recovery			:recovery"
 }
 
 main(){
