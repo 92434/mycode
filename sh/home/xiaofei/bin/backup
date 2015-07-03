@@ -16,6 +16,7 @@ gen_flist(){
 #/etc/apt/sources.list
 /home/xiaofei/.vim
 /home/xiaofei/.bashrc
+/home/xiaofei/.pythonrc.py
 /home/xiaofei/bin
 /home/xiaofei/eclipse.desktop
 #/var/cache/apt/archives
@@ -30,7 +31,7 @@ del_flist(){
 backup_flist(){
 	echo "backup_flist $1"
 
-	local DST_DIR="$curdir/$1"
+	local DST_DIR="$1"
 	gen_flist
 	if [ ! -r "$(flist_name)" ]; then
 		echo "backup_flist: no file list"
@@ -52,7 +53,7 @@ backup_flist(){
 recovery_flist(){
 	echo "recovery_flist $1"
 
-	local SRC_DIR="$curdir/$1"
+	local SRC_DIR="$1"
 
 	gen_flist
 	if [ ! -r "$(flist_name)" ]; then
@@ -80,18 +81,16 @@ recovery_flist(){
 	done < "$(flist_name)"
 
 	del_flist
-
-	sudo rm -rf "$SRC_DIR"
 }
 
 compress_files(){
 	echo "compress_files: $1"
-	if [ ! -d "$curdir/$1" ]; then
+	if [ ! -d "$1" ]; then
 		echo "compress_files: *$1"
 		exit 1
 	fi
 	
-	local SRC_DIR="$curdir/$1"
+	local SRC_DIR="$1"
 	
 	tar Jcf "$(date +%Y%m%d%H%M%S)-$(uname -i)_backup.xz" -C "$SRC_DIR" ./
 
@@ -105,7 +104,7 @@ uncompress_files(){
 		exit 1
 	fi
 
-	local DST_DIR="$curdir/$1"
+	local DST_DIR="$1"
 	local TAR_BALL="$2"
 
 	sudo rm -rf "$DST_DIR"
@@ -118,23 +117,35 @@ print_help(){
 	echo "Usages:"
 	echo "$0 [option]"
 	echo "[option] can be this:"
-	echo "      copy		: copy"
-	echo "      recovery tarball	: recovery from tarball"
+	echo "copy_compress:copy to tarball"
+	echo "uncompress_recovery:recovery from tarball"
+	echo "copy:copy"
+	echo "recovery:recovery"
 }
 
 main(){
 	echo "main $1"
 
 	case $1 in
+		"copy_compress")
+		backup_flist "$curdir/$BACKUP_DIR"
+		compress_files "$curdir/$BACKUP_DIR"
+		;;
+
+		"uncompress_recovery")
+		shift
+		uncompress_files "$curdir/$BACKUP_DIR" "$1"
+		recovery_flist "$curdir/$BACKUP_DIR"
+		rm -rf "$curdir/$BACKUP_DIR"
+		;;
+
 		"copy")
-		backup_flist "$BACKUP_DIR"
-		#compress_files "$BACKUP_DIR"
+		backup_flist "$curdir"
 		;;
 
 		"recovery")
 		shift
-		#uncompress_files "$BACKUP_DIR" "$1"
-		recovery_flist "$BACKUP_DIR"
+		recovery_flist "$curdir"
 		;;
 
 		*)
