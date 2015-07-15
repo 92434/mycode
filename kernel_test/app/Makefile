@@ -9,6 +9,7 @@ c_files += serial_test.c
 c_files += serial_test.c
 c_files += serial_test.c
 c_files += getevent.c
+c_files += cdev_test.c
 include $(BUILD_BINS)
 
 app_c_files := lsusb.c
