@@ -27,6 +27,9 @@
 #define PCI_VENDOR_ID_DMA   0x10EE      /**< Vendor ID - Xilinx */
 
 #define PCI_DEVICE_ID_DMA   0x7012      /**< Xilinx's Device ID */
+static int my_pci_device_id = 0;
+module_param(my_pci_device_id, int, 0644);
+MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
 
 /** Driver information */
 #define MODULE_NAME "kc705_pcie_xdma"
@@ -934,6 +937,12 @@ static void my_timer_func(unsigned long __opaque) {
 
 static int __init kc705_init(void) {
 	int rtn = 0;
+
+	if(my_pci_device_id != 0) {
+		mydebug("my_pci_device_id:0x%x!\n", my_pci_device_id);
+		ids[0].device = my_pci_device_id;
+	}
+
 	/* Just register the driver. No kernel boot options used. */
 	rtn = pci_register_driver(&kc705_pcie_driver);
 #ifdef test_timer
