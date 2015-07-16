@@ -272,3 +272,14 @@ function mount_iso() {
 function restart_wifi_ap() {
 	sudo ap-hotspot restart
 }
+
+
+function dump_data() {
+	local file="$1"
+	hexdump -e '"%08.08_ax " 8/1 "%02x " "\n"' "$file"
+}
+
+function get_net_data() {
+	local interface="$1"
+	sudo tcpdump -i "$interface" -An
+}
