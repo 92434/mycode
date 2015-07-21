@@ -52,7 +52,7 @@ static int __init mod_info_init(void)
 
 	list_for_each_entry(mod,THIS_MODULE->list.prev, list) {
 		printk("=================================================================================\n");
-		printk("name:%s state:%d refcnt:%u\n", mod->name, mod->state, module_refcount(mod));
+		printk("name:%s state:%d refcnt:%lu\n", mod->name, mod->state, module_refcount(mod));
 
 		//What modules depend on me?
 		printk("used by:");
@@ -88,7 +88,7 @@ static int __init mod_info_init(void)
 			module_put(mod);
 			mod->state = 0;
 		}
-		printk("name:%s state:%d refcnt:%u\n",mod->name,mod->state,module_refcount(mod));
+		printk("name:%s state:%d refcnt:%lu\n",mod->name,mod->state,module_refcount(mod));
 	}
 	return 0;
 }

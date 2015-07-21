@@ -23,7 +23,7 @@ static void __exit mem_exit(void);
 static int mem_open(struct inode *inode,struct file *filp);
 static int mem_release(struct inode *inode, struct file *filp);
 static ssize_t mem_read(struct file *filp,char __user *buf,size_t count,loff_t *fpos);
-static ssize_t mem_write(struct file *filp, char __user *buf,size_t count ,loff_t *fops);
+static ssize_t mem_write(struct file *filp, const char __user *buf,size_t count ,loff_t *fops);
 
 static const struct file_operations mem_fops={
 	.owner = THIS_MODULE,
@@ -130,7 +130,7 @@ static ssize_t mem_read(struct file *filp,char __user *buf,size_t count,loff_t *
 		return 0;
 	}
 }
-static ssize_t mem_write(struct file *filp, char __user *buf,size_t count ,loff_t *fops)
+static ssize_t mem_write(struct file *filp, const char __user *buf,size_t count ,loff_t *fops)
 {
 	int ret = -1;
 	char *tmp;
