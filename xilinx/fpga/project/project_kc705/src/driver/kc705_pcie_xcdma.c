@@ -37,7 +37,7 @@ MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
 
 //Base Address
 //memory
-#define BASE_AXI_DDR_ADDR 0x00000008
+#define BASE_AXI_DDR_ADDR 0x00000000
 #define BASE_AXI_PCIe_DM 0x80000000
 #define BASE_AXI_PCIe_SG 0x80800000
 //regs
@@ -86,8 +86,10 @@ MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
 #define MAX_BARS 6/**< Maximum number of BARs */
 
 #define SG_SIZE 0x10000
-#define DM_CHANNEL_TX_SIZE 0x10000
-#define DM_CHANNEL_RX_SIZE 0x10000
+#define DM_CHANNEL_TX_MAX_SIZE 0x10000//this value must be a multiple of 0x10000 
+#define DM_CHANNEL_RX_MAX_SIZE 0x10000//this value must be a multiple of 0x10000
+#define DM_CHANNEL_TX_SIZE 32
+#define DM_CHANNEL_RX_SIZE 16
 
 /** Driver Module information */
 MODULE_AUTHOR("xiaofei");
@@ -301,7 +303,7 @@ static int start_cdma(uint32_t tail_des_axi_addr) {
 
 static int prepare_bram_vaddr(void) {
 	uint64_t memory_tx = (uint64_t)kc705_pci_dev->dm_addr;
-	uint64_t memory_rx = (uint64_t)kc705_pci_dev->dm_addr + DM_CHANNEL_TX_SIZE;
+	uint64_t memory_rx = (uint64_t)kc705_pci_dev->dm_addr + DM_CHANNEL_TX_MAX_SIZE;
 	uint64_t memory_sg = (uint64_t)kc705_pci_dev->sg_addr;
 
 	uint8_t *bram_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
@@ -373,7 +375,7 @@ failed:
 
 static void prepare_dm_data(void) {
 	uint8_t *tx_addr = kc705_pci_dev->dm_memory;
-	uint8_t *rx_addr = kc705_pci_dev->dm_memory + DM_CHANNEL_RX_SIZE;
+	uint8_t *rx_addr = kc705_pci_dev->dm_memory + DM_CHANNEL_TX_MAX_SIZE;
 
 	int i;
 
@@ -381,19 +383,19 @@ static void prepare_dm_data(void) {
 		tx_addr[i] = (uint8_t)i;
 	}
 
-	for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
+	for(i = 0; i < DM_CHANNEL_RX_SIZE; i++) {
 		rx_addr[i] = (uint8_t)0;
 	}
 }
 
 static void test_dm_data(void) {
 	uint8_t *tx_addr = kc705_pci_dev->dm_memory;
-	uint8_t *rx_addr = kc705_pci_dev->dm_memory + DM_CHANNEL_RX_SIZE;
+	uint8_t *rx_addr = kc705_pci_dev->dm_memory + DM_CHANNEL_TX_MAX_SIZE;
 
 	int i;
 
 	mydebug("tx_addr:%p\n", (void *)tx_addr);
-	for(i = 0; i < 1024; i++) {
+	for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
 		if((i != 0) && (i % 16 == 0)) {
 			printk("\n");
 		}
@@ -404,7 +406,7 @@ static void test_dm_data(void) {
 	printk("\n");
 
 	mydebug("rx_addr:%p\n", (void *)rx_addr);
-	for(i = 0; i < 1024; i++) {
+	for(i = 0; i < DM_CHANNEL_RX_SIZE; i++) {
 		if((i != 0) && (i % 16 == 0)) {
 			printk("\n");
 		}
@@ -444,7 +446,7 @@ static void dump_regs(void) {
 
 static int test_cdma(void) {
 	configure_cdma_engine();
-	prepare_sg_des_chain(BASE_AXI_DDR_ADDR, 8, BASE_AXI_DDR_ADDR, 8, &sg_list_info);
+	prepare_sg_des_chain(BASE_AXI_DDR_ADDR, DM_CHANNEL_TX_SIZE, BASE_AXI_DDR_ADDR + DM_CHANNEL_RX_SIZE, DM_CHANNEL_RX_SIZE, &sg_list_info);
 	prepare_bram_vaddr();
 	start_cdma(cdma_tail_des_axi_addr);
 	return 0;
@@ -677,7 +679,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	}
 	mydebug("kc705_pci_dev->sg_memory:%p kc705_pci_dev->sg_addr:%p\n", (void *)kc705_pci_dev->sg_memory, (void *)kc705_pci_dev->sg_addr);
 
-	kc705_pci_dev->dm_memory = dma_zalloc_coherent(&(pdev->dev), DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE, &(kc705_pci_dev->dm_addr), GFP_KERNEL);
+	kc705_pci_dev->dm_memory = dma_zalloc_coherent(&(pdev->dev), DM_CHANNEL_TX_MAX_SIZE + DM_CHANNEL_RX_MAX_SIZE, &(kc705_pci_dev->dm_addr), GFP_KERNEL);
 	if(kc705_pci_dev->dm_memory == NULL) {
 		rtn = -1;
 		mydebug("dma_zalloc_coherent failed.\n");
@@ -801,7 +803,7 @@ pci_set_dma_mask_failed:
 pci_request_regions_failed:
 	pci_disable_device(pdev);
 pci_enable_device_failed:
-	dma_free_coherent(&(pdev->dev), DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE, kc705_pci_dev->dm_memory, kc705_pci_dev->dm_addr);
+	dma_free_coherent(&(pdev->dev), DM_CHANNEL_TX_MAX_SIZE + DM_CHANNEL_RX_MAX_SIZE, kc705_pci_dev->dm_memory, kc705_pci_dev->dm_addr);
 alloc_dm_memory_failed:
 	dma_free_coherent(&(pdev->dev), SG_SIZE, kc705_pci_dev->sg_memory, kc705_pci_dev->sg_addr);
 alloc_sg_memory_failed:
@@ -856,7 +858,7 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 
 	pci_disable_device(pdev);
 
-	dma_free_coherent(&(pdev->dev), DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE, kc705_pci_dev->dm_memory, kc705_pci_dev->dm_addr);
+	dma_free_coherent(&(pdev->dev), DM_CHANNEL_TX_MAX_SIZE + DM_CHANNEL_RX_MAX_SIZE, kc705_pci_dev->dm_memory, kc705_pci_dev->dm_addr);
 
 	dma_free_coherent(&(pdev->dev), SG_SIZE, kc705_pci_dev->sg_memory, kc705_pci_dev->sg_addr);
 
@@ -881,14 +883,14 @@ static struct pci_driver kc705_pcie_driver = {
 timer_data_t *pdata = NULL;
 
 static void default_timer_func(unsigned long __opaque) {
-	//timer_data_t *pdata = (timer_data_t *)__opaque;
-	//unsigned long tmo = msecs_to_jiffies(pdata->ms);
-	//struct timer_list *tl = pdata->tl;
+	timer_data_t *pdata = (timer_data_t *)__opaque;
+	unsigned long tmo = msecs_to_jiffies(pdata->ms);
+	struct timer_list *tl = pdata->tl;
 
 	myprintf("!\n");
 	schedule_work(&(kc705_pci_dev->work));
-	//tl->expires = jiffies + tmo;
-	//add_timer(tl);
+	tl->expires = jiffies + tmo;
+	add_timer(tl);
 }
 
 static int start_timer(timer_data_t *pdata) {
@@ -975,7 +977,7 @@ static int __init kc705_init(void) {
 	/* Just register the driver. No kernel boot options used. */
 	rtn = pci_register_driver(&kc705_pcie_driver);
 #ifdef test_timer
-	pdata = alloc_timer(3000, NULL);
+	pdata = alloc_timer(1000, NULL);
 #endif
 
 	mydebug("kc705 initilized!(%s)\n", "xiaofei");
