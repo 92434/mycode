@@ -162,7 +162,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi_pcie_0, and set properties
   set axi_pcie_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_pcie:2.5 axi_pcie_0 ]
-  set_property -dict [ list CONFIG.AXIBAR2PCIEBAR_0 {0x00000000} CONFIG.AXIBAR_AS_0 {false} CONFIG.AXIBAR_NUM {1} CONFIG.BAR0_SIZE {64} CONFIG.BAR1_ENABLED {false} CONFIG.BAR_64BIT {false} CONFIG.DEVICE_ID {0x7012} CONFIG.INCLUDE_BAROFFSET_REG {true} CONFIG.MAX_LINK_SPEED {2.5_GT/s} CONFIG.M_AXI_DATA_WIDTH {128} CONFIG.NO_OF_LANES {X4} CONFIG.PCIEBAR2AXIBAR_0 {0x80800000} CONFIG.S_AXI_DATA_WIDTH {128}  ] $axi_pcie_0
+  set_property -dict [ list CONFIG.AXIBAR2PCIEBAR_0 {0x00000000} CONFIG.AXIBAR_AS_0 {true} CONFIG.AXIBAR_NUM {1} CONFIG.BAR0_SIZE {64} CONFIG.BAR1_ENABLED {false} CONFIG.BAR_64BIT {false} CONFIG.BASE_CLASS_MENU {Simple_communication_controllers} CONFIG.DEVICE_ID {0x7012} CONFIG.INCLUDE_BAROFFSET_REG {true} CONFIG.MAX_LINK_SPEED {2.5_GT/s} CONFIG.M_AXI_DATA_WIDTH {128} CONFIG.NO_OF_LANES {X4} CONFIG.PCIEBAR2AXIBAR_0 {0x80800000} CONFIG.SUB_CLASS_INTERFACE_MENU {Generic_XT_compatible_serial_controller} CONFIG.S_AXI_DATA_WIDTH {128} CONFIG.XLNX_REF_BOARD {KC705_REVC}  ] $axi_pcie_0
 
   # Create instance: axi_pcie_0_axi_periph, and set properties
   set axi_pcie_0_axi_periph [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_pcie_0_axi_periph ]
@@ -207,8 +207,8 @@ proc create_root_design { parentCell } {
   connect_bd_net -net axi_dma_0_mm2s_introut [get_bd_pins axi_dma_0/mm2s_introut] [get_bd_pins util_vector_logic_0/Op1]
   connect_bd_net -net axi_dma_0_s2mm_introut [get_bd_pins axi_dma_0/s2mm_introut] [get_bd_pins util_vector_logic_0/Op2]
   connect_bd_net -net axi_pcie_0_MSI_enable [get_bd_ports MSI_enable] [get_bd_pins axi_pcie_0/MSI_enable]
-  connect_bd_net -net axi_pcie_0_axi_aclk_out [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_dma_0/m_axi_s2mm_aclk] [get_bd_pins axi_mem_intercon/ACLK] [get_bd_pins axi_mem_intercon/M00_ACLK] [get_bd_pins axi_mem_intercon/S00_ACLK] [get_bd_pins axi_mem_intercon/S01_ACLK] [get_bd_pins axi_pcie_0/axi_aclk_out] [get_bd_pins axi_pcie_0_axi_periph/ACLK] [get_bd_pins axi_pcie_0_axi_periph/S00_ACLK] [get_bd_pins axis_data_fifo_0/s_axis_aclk] [get_bd_pins rst_axi_pcie_0_125M/slowest_sync_clk]
-  connect_bd_net -net axi_pcie_0_axi_ctl_aclk_out [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins axi_pcie_0/axi_ctl_aclk_out] [get_bd_pins axi_pcie_0_axi_periph/M00_ACLK] [get_bd_pins axi_pcie_0_axi_periph/M01_ACLK]
+  connect_bd_net -net axi_pcie_0_axi_aclk_out [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_dma_0/m_axi_s2mm_aclk] [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins axi_mem_intercon/ACLK] [get_bd_pins axi_mem_intercon/M00_ACLK] [get_bd_pins axi_mem_intercon/S00_ACLK] [get_bd_pins axi_mem_intercon/S01_ACLK] [get_bd_pins axi_pcie_0/axi_aclk_out] [get_bd_pins axi_pcie_0_axi_periph/ACLK] [get_bd_pins axi_pcie_0_axi_periph/M00_ACLK] [get_bd_pins axi_pcie_0_axi_periph/S00_ACLK] [get_bd_pins axis_data_fifo_0/s_axis_aclk] [get_bd_pins rst_axi_pcie_0_125M/slowest_sync_clk]
+  connect_bd_net -net axi_pcie_0_axi_ctl_aclk_out [get_bd_pins axi_pcie_0/axi_ctl_aclk_out] [get_bd_pins axi_pcie_0_axi_periph/M01_ACLK]
   connect_bd_net -net axi_pcie_0_mmcm_lock [get_bd_pins axi_pcie_0/mmcm_lock] [get_bd_pins rst_axi_pcie_0_125M/dcm_locked]
   connect_bd_net -net reset_1 [get_bd_ports reset] [get_bd_pins rst_axi_pcie_0_125M/ext_reset_in]
   connect_bd_net -net rst_axi_pcie_0_125M_interconnect_aresetn [get_bd_pins axi_mem_intercon/ARESETN] [get_bd_pins axi_pcie_0_axi_periph/ARESETN] [get_bd_pins rst_axi_pcie_0_125M/interconnect_aresetn]

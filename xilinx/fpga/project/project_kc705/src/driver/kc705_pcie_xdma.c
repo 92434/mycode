@@ -73,7 +73,6 @@ MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
 #define DM_CHANNEL_TX_SIZE 0x8
 #define DM_CHANNEL_RX_SIZE 0x8
 
-#define XILINX_VDMA_LOOP_COUNT 1000000
 
 /** Driver Module information */
 MODULE_AUTHOR("xiaofei");
@@ -119,12 +118,14 @@ MODULE_DEVICE_TABLE(pci, ids);
 //#define DMA_BD_CNT 3999
 
 
+#ifdef test_timer
 typedef void (*timer_func_t)(unsigned long);
 typedef struct {
 	struct timer_list *tl;
 	unsigned long ms;
 	timer_func_t func;
 } timer_data_t;
+#endif
 
 typedef struct {
 	struct pci_dev *pdev; /**< PCI device entry */
@@ -137,11 +138,14 @@ typedef struct {
 	int msi_enable;
 	void *dm_memory;
 	dma_addr_t dm_addr;
+	//struct completion tx_cmp;
+	//struct completion rx_cmp;
 } kc705_pci_dev_t;
 
 static kc705_pci_dev_t *kc705_pci_dev = NULL;
 
 static int wait_for_iostatus_timeout(unsigned long count, uint8_t *paddr, uint32_t mask, uint32_t expection) {
+#define XILINX_VDMA_LOOP_COUNT 1000000
 	uint32_t value = 0;
 	int rtn = 0;
 
@@ -264,22 +268,38 @@ static int default_config_dma(void) {
 static int start_dma_mm2s(void) {
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
-
 	uint32_t value;
+	//unsigned long tmo = msecs_to_jiffies(1000);
+
+	//init_completion(&(kc705_pci_dev->tx_cmp));
 
 	value = DM_CHANNEL_TX_SIZE;
 	writel(value, dma_base_vaddr + MM2S_LENGTH);
+
+	//tmo = wait_for_completion_timeout(&(kc705_pci_dev->tx_cmp), tmo);
+	//if (0 == tmo) {
+	//	printk(KERN_ERR "<%s> Error: tx transfer timed out\n", MODULE_NAME);
+	//}
+	
 	return 0;
 }
 
 static int start_dma_s2mm(void) {
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
-
 	uint32_t value;
+	//unsigned long tmo = msecs_to_jiffies(1000);
+
+	//init_completion(&(kc705_pci_dev->rx_cmp));
 
 	value = DM_CHANNEL_RX_SIZE;
 	writel(value, dma_base_vaddr + S2MM_LENGTH);
+
+	//tmo = wait_for_completion_timeout(&(kc705_pci_dev->rx_cmp), tmo);
+	//if (0 == tmo) {
+	//	printk(KERN_ERR "<%s> Error: rx transfer timed out\n", MODULE_NAME);
+	//}
+	
 	return 0;
 }
 
@@ -365,46 +385,46 @@ static int test_dma(void) {
 		}
 		printk("\n");
 
-		for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
-			ptr[i] = 0;
-		}
+		//for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
+		//	ptr[i] = 0;
+		//}
 
-		for(i = 0; i < DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE; i++) {
-			if((i != 0) && (i % 16 == 0)) {
-				printk("\n");
-			}
-			printk("%02x ", ptr[i]);
-		}
-		printk("\n");
-		{
-			uint32_t value;
-			uint64_t addr_rx = (uint64_t)BASE_AXI_PCIe_BAR0;
-			uint64_t addr_tx = (uint64_t)BASE_AXI_PCIe_BAR0 + DM_CHANNEL_TX_SIZE;
+		//for(i = 0; i < DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE; i++) {
+		//	if((i != 0) && (i % 16 == 0)) {
+		//		printk("\n");
+		//	}
+		//	printk("%02x ", ptr[i]);
+		//}
+		//printk("\n");
+		//{
+		//	uint32_t value;
+		//	uint64_t addr_rx = (uint64_t)BASE_AXI_PCIe_BAR0;
+		//	uint64_t addr_tx = (uint64_t)BASE_AXI_PCIe_BAR0 + DM_CHANNEL_TX_SIZE;
 
-			value = (uint32_t)(addr_tx);
-			writel(value, dma_base_vaddr + MM2S_SA);
-			value = (uint32_t)(addr_rx);
-			writel(value, dma_base_vaddr + S2MM_DA);
-		}
-		start_dma_mm2s();
-		start_dma_s2mm();
-		rtn = wait_for_iostatus_timeout(XILINX_VDMA_LOOP_COUNT * 10, dma_base_vaddr + MM2S_DMASR, BITMASK(1)/*Idle*/, BITMASK(1));
-		if(rtn != 0) {
-			mydebug("tx time out!\n");
-		}
+		//	value = (uint32_t)(addr_tx);
+		//	writel(value, dma_base_vaddr + MM2S_SA);
+		//	value = (uint32_t)(addr_rx);
+		//	writel(value, dma_base_vaddr + S2MM_DA);
+		//}
+		//start_dma_mm2s();
+		//start_dma_s2mm();
+		//rtn = wait_for_iostatus_timeout(XILINX_VDMA_LOOP_COUNT * 10, dma_base_vaddr + MM2S_DMASR, BITMASK(1)/*Idle*/, BITMASK(1));
+		//if(rtn != 0) {
+		//	mydebug("tx time out!\n");
+		//}
 
-		rtn = wait_for_iostatus_timeout(XILINX_VDMA_LOOP_COUNT * 10, dma_base_vaddr + S2MM_DMASR, BITMASK(1)/*Idle*/, BITMASK(1));
-		if(rtn != 0) {
-			mydebug("rx time out!\n");
-		}
+		//rtn = wait_for_iostatus_timeout(XILINX_VDMA_LOOP_COUNT * 10, dma_base_vaddr + S2MM_DMASR, BITMASK(1)/*Idle*/, BITMASK(1));
+		//if(rtn != 0) {
+		//	mydebug("rx time out!\n");
+		//}
 
-		for(i = 0; i < DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE; i++) {
-			if((i != 0) && (i % 16 == 0)) {
-				printk("\n");
-			}
-			printk("%02x ", ptr[i]);
-		}
-		printk("\n");
+		//for(i = 0; i < DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE; i++) {
+		//	if((i != 0) && (i % 16 == 0)) {
+		//		printk("\n");
+		//	}
+		//	printk("%02x ", ptr[i]);
+		//}
+		//printk("\n");
 	}
 	return 0;
 }
@@ -669,11 +689,13 @@ static irqreturn_t isr(int irq, void *dev_id)
 
 	value = readl(dma_base_vaddr + MM2S_DMASR);
 	if((value & BITMASK(12)/*IOC_Irq*/) != 0) {
+		//complete(&(kc705_pci_dev->tx_cmp));
 		mydebug("\n");
 		value |= BITMASK(12);
 		writel(value, dma_base_vaddr + MM2S_DMASR);
 		status = IRQ_HANDLED;
 	} else if((value & BITMASK(14)/*Err_Irq*/) != 0) {
+		//complete(&(kc705_pci_dev->tx_cmp));
 		mydebug("\n");
 		value |= BITMASK(14);
 		writel(value, dma_base_vaddr + MM2S_DMASR);
@@ -682,11 +704,13 @@ static irqreturn_t isr(int irq, void *dev_id)
 
 	value = readl(dma_base_vaddr + S2MM_DMASR);
 	if((value & BITMASK(12)/*IOC_Irq*/) != 0) {
+		//complete(&(kc705_pci_dev->rx_cmp));
 		mydebug("\n");
 		value |= BITMASK(12);
 		writel(value, dma_base_vaddr + S2MM_DMASR);
 		status = IRQ_HANDLED;
 	} else if((value & BITMASK(14)/*Err_Irq*/) != 0) {
+		//complete(&(kc705_pci_dev->rx_cmp));
 		mydebug("\n");
 		value |= BITMASK(14);
 		writel(value, dma_base_vaddr + S2MM_DMASR);
@@ -722,7 +746,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	{
 		uint8_t *ptr = (uint8_t *)kc705_pci_dev->dm_memory;
 		for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
-			ptr[i] = i;
+			ptr[i] = 8 + i;
 		}
 		for(i = 0; i < DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE; i++) {
 			if((i != 0) && (i % 16 == 0)) {
