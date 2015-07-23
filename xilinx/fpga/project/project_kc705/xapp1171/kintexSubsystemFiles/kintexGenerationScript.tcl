@@ -123,10 +123,6 @@ proc create_hier_cell_pcie_cdma_subsystem {} {
                            CONFIG.BAR0_SCALE {Kilobytes}           \
                            CONFIG.BAR0_SIZE {64}                   \
                            CONFIG.PCIEBAR2AXIBAR_0 {0x81000000}    \
-                           CONFIG.BAR1_ENABLED {true}              \
-                           CONFIG.BAR1_SCALE {Kilobytes}           \
-                           CONFIG.BAR1_SIZE {64}                   \
-                           CONFIG.PCIEBAR2AXIBAR_1 {0x80000000}    \
                            CONFIG.COMP_TIMEOUT {50ms}              \
                            CONFIG.AXIBAR_NUM {2}                   \
                            CONFIG.AXIBAR_AS_0 {true}               \
@@ -248,12 +244,12 @@ proc generateSubsystem {migFile projName designName} {
   # DMA Data Port
   create_bd_addr_seg -range 32768 -offset 0x81000000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data] [get_bd_addr_segs /pcie_cdma_subsystem/translation_bram/S_AXI/Mem0] DMA_2_TransBram
   create_bd_addr_seg -range 16384 -offset 0x81008000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data] [get_bd_addr_segs /pcie_cdma_subsystem/axi_pcie_1/S_AXI_CTL/CTL0] DMA_2_PcieCtl
-  create_bd_addr_seg -range 8M -offset 0x80800000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data] [get_bd_addr_segs /pcie_cdma_subsystem/axi_pcie_1/S_AXI/BAR0] DMA_2_PcieSG
-  create_bd_addr_seg -range 8M -offset 0x80000000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data] [get_bd_addr_segs /pcie_cdma_subsystem/axi_pcie_1/S_AXI/BAR1] DMA_2_PcieDM
-  create_bd_addr_seg -range 2G -offset 0x00000000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data] [get_bd_addr_segs /ddr3_mem/memmap/memaddr] DMA_2_Ddr3
+  create_bd_addr_seg -range 65536 -offset 0x80800000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data] [get_bd_addr_segs /pcie_cdma_subsystem/axi_pcie_1/S_AXI/BAR0] DMA_2_PcieSG
+  create_bd_addr_seg -range 65536 -offset 0x80000000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data] [get_bd_addr_segs /pcie_cdma_subsystem/axi_pcie_1/S_AXI/BAR1] DMA_2_PcieDM
+  create_bd_addr_seg -range 65536 -offset 0x00000000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data] [get_bd_addr_segs /ddr3_mem/memmap/memaddr] DMA_2_Ddr3
   # DMA SG Port
-  create_bd_addr_seg -range 8M -offset 0x80800000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data_SG] [get_bd_addr_segs /pcie_cdma_subsystem/axi_pcie_1/S_AXI/BAR0] DMAsg_2_PcieSG
-  create_bd_addr_seg -range 8M -offset 0x80000000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data_SG] [get_bd_addr_segs /pcie_cdma_subsystem/axi_pcie_1/S_AXI/BAR1] DMAsg_2_PcieDM
+  create_bd_addr_seg -range 65536 -offset 0x80800000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data_SG] [get_bd_addr_segs /pcie_cdma_subsystem/axi_pcie_1/S_AXI/BAR0] DMAsg_2_PcieSG
+  create_bd_addr_seg -range 65536 -offset 0x80000000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_cdma_1/Data_SG] [get_bd_addr_segs /pcie_cdma_subsystem/axi_pcie_1/S_AXI/BAR1] DMAsg_2_PcieDM
   # PCIe Master Port
   create_bd_addr_seg -range 32768 -offset 0x81000000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_pcie_1/M_AXI] [get_bd_addr_segs /pcie_cdma_subsystem/translation_bram/S_AXI/Mem0] PCIe_2_TransBram
   create_bd_addr_seg -range 16384 -offset 0x81008000 [get_bd_addr_spaces /pcie_cdma_subsystem/axi_pcie_1/M_AXI] [get_bd_addr_segs /pcie_cdma_subsystem/axi_pcie_1/S_AXI_CTL/CTL0] PCIe_2_PcieCtl
