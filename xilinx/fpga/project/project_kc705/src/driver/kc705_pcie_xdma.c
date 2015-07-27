@@ -2,7 +2,6 @@
 #include <linux/pci.h>
 #include <linux/version.h>
 #include <linux/interrupt.h>
-#include <linux/dma-mapping.h>
 
 
 #define mydebug(format, ...) printk(KERN_DEBUG "[%s:%s:%d]<%s>:" format, __FILE__, __PRETTY_FUNCTION__, __LINE__, MODULE_NAME, ## __VA_ARGS__)
@@ -37,15 +36,15 @@ MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
 #define DRIVER_VERSION "1.0"
 
 //Base Address
-#define BASE_AXI_PCIe 0x80800000
-#define BASE_AXI_DMA_LITE 0x80800000
-#define BASE_AXI_PCIe_CTL 0x80804000
-#define BASE_AXI_PCIe_BAR0 0x80000000
+#define BASE_AXI_PCIe 0x81000000
+#define BASE_AXI_PCIe_CTL 0x81008000
+#define BASE_AXI_DMA_LITE 0x8100c000
+
+#define BASE_AXI_PCIe_BAR0 0x80800000
 
 //PCIe:BAR0 Address Offset for the accessible Interfaces
 #define OFFSET_AXI_PCIe_CTL (BASE_AXI_PCIe_CTL - BASE_AXI_PCIe)
 #define OFFSET_AXI_DMA_LITE (BASE_AXI_DMA_LITE - BASE_AXI_PCIe)
-//#define OFFSET_AXI_PCIe_BAR0 (BASE_AXI_PCIe_BAR0 - BASE_AXI_PCIe)
 
 //AXI DMA Register Summary
 #define MM2S_DMACR 0x00 //MM2S DMA Control register
@@ -68,8 +67,9 @@ MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
 
 #define MAX_BARS 6/**< Maximum number of BARs */
 
-//#define DM_CHANNEL_TX_SIZE 0x1000
-//#define DM_CHANNEL_RX_SIZE 0x1000
+#define DM_CHANNEL_TX_MAX_SIZE 0x8000
+#define DM_CHANNEL_RX_MAX_SIZE 0x8000
+
 #define DM_CHANNEL_TX_SIZE 0x8
 #define DM_CHANNEL_RX_SIZE 0x8
 
@@ -179,12 +179,10 @@ static int reset_dma(void) {//this operation will reset entire axi dma
 	mask = BITMASK(2)/*reset bit*/;
 	value = default_value | mask;
 	writel(value, dma_base_vaddr + MM2S_DMACR);
-	mydebug("dma_base_vaddr + MM2S_DMACR:%x\n", readl(dma_base_vaddr + MM2S_DMACR));
 	rtn = wait_for_iostatus_timeout(0, dma_base_vaddr + MM2S_DMACR, mask, 0);
 	if(rtn != 0) {
 		mydebug("time out!\n");
 	}
-	mydebug("dma_base_vaddr + MM2S_DMACR:%x\n", readl(dma_base_vaddr + MM2S_DMACR));
 
 	return rtn;
 }
@@ -194,15 +192,13 @@ static int default_config_dma(void) {
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
 	uint64_t addr_tx = (uint64_t)BASE_AXI_PCIe_BAR0;
-	uint64_t addr_rx = (uint64_t)BASE_AXI_PCIe_BAR0 + DM_CHANNEL_TX_SIZE;
+	uint64_t addr_rx = (uint64_t)BASE_AXI_PCIe_BAR0 + DM_CHANNEL_TX_MAX_SIZE;
 
 	uint32_t value;
 	uint32_t mask;
 	int rtn = 0;
 
 	mydebug("dma_base_vaddr:%p\n", dma_base_vaddr);
-	mydebug("dma_base_vaddr + MM2S_DMACR:%x\n", readl(dma_base_vaddr + MM2S_DMACR));
-	mydebug("dma_base_vaddr + MM2S_DMASR:%x\n", readl(dma_base_vaddr + MM2S_DMASR));
 	mask = BITMASK(0)/*RS bit*/;
 	value = readl(dma_base_vaddr + MM2S_DMACR) | mask;
 	writel(value, dma_base_vaddr + MM2S_DMACR);
@@ -211,24 +207,18 @@ static int default_config_dma(void) {
 	if(rtn != 0) {
 		mydebug("time out!\n");
 	}
-	mydebug("dma_base_vaddr + MM2S_DMASR:%x\n", readl(dma_base_vaddr + MM2S_DMASR));
 	mask = BITMASK(12)/*IOC_IrqEn*/ | BITMASK(14)/*Err_IrqEn*/;
 	value = readl(dma_base_vaddr + MM2S_DMACR) | mask;
 	writel(value, dma_base_vaddr + MM2S_DMACR);
 	value = (uint32_t)(addr_tx);
 	writel(value, dma_base_vaddr + MM2S_SA);
-	mydebug("dma_base_vaddr + MM2S_SA:%x\n", readl(dma_base_vaddr + MM2S_SA));
 	//value = (uint32_t)(addr_tx >> 32);
 	//writel(value, dma_base_vaddr + MM2S_SA_MSB);
-	mydebug("dma_base_vaddr + MM2S_SA_MSB:%x\n", readl(dma_base_vaddr + MM2S_SA_MSB));
-	//value = DM_CHANNEL_TX_SIZE;
+	//value = DM_CHANNEL_TX_MAX_SIZE;
 	//writel(value, dma_base_vaddr + MM2S_LENGTH);
-	mydebug("dma_base_vaddr + MM2S_DMACR:%x\n", readl(dma_base_vaddr + MM2S_DMACR));
 
 
 
-	mydebug("dma_base_vaddr + S2MM_DMACR:%x\n", readl(dma_base_vaddr + S2MM_DMACR));
-	mydebug("dma_base_vaddr + S2MM_DMASR:%x\n", readl(dma_base_vaddr + S2MM_DMASR));
 	mask = BITMASK(0)/*RS bit*/;
 	value = readl(dma_base_vaddr + S2MM_DMACR) | mask;
 	writel(value, dma_base_vaddr + S2MM_DMACR);
@@ -237,30 +227,11 @@ static int default_config_dma(void) {
 	if(rtn != 0) {
 		mydebug("time out!\n");
 	}
-	mydebug("dma_base_vaddr + S2MM_DMASR:%x\n", readl(dma_base_vaddr + S2MM_DMASR));
 	mask = BITMASK(12)/*IOC_IrqEn*/ | BITMASK(14)/*Err_IrqEn*/;
 	value = readl(dma_base_vaddr + S2MM_DMACR) | mask;
 	writel(value, dma_base_vaddr + S2MM_DMACR);
 	value = (uint32_t)(addr_rx);
 	writel(value, dma_base_vaddr + S2MM_DA);
-	mydebug("dma_base_vaddr + S2MM_DA:%x\n", readl(dma_base_vaddr + S2MM_DA));
-	//value = (uint32_t)(addr_rx >> 32);
-	//writel(value, dma_base_vaddr + S2MM_DA_MSB);
-	mydebug("dma_base_vaddr + S2MM_DA_MSB:%x\n", readl(dma_base_vaddr + S2MM_DA_MSB));
-	//value = DM_CHANNEL_RX_SIZE;
-	//writel(value, dma_base_vaddr + S2MM_LENGTH);
-	mydebug("dma_base_vaddr + S2MM_DMACR:%x\n", readl(dma_base_vaddr + S2MM_DMACR));
-
-	//{
-	//	uint8_t *pcie_bar_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_PCIe_BAR0); 
-	//	uint32_t *ptr = (uint32_t *)(pcie_bar_vaddr + DM_CHANNEL_TX_SIZE);
-	//	int i;
-	//	for(i = 0; i < 5; i++) {
-	//		value = i;
-	//		writel(value, ptr + i);
-	//		mydebug("write %p:%x\n", ptr + i, readl(ptr + i));
-	//	}
-	//}
 
 	return rtn;
 }
@@ -280,7 +251,7 @@ static int start_dma_mm2s(void) {
 	//if (0 == tmo) {
 	//	printk(KERN_ERR "<%s> Error: tx transfer timed out\n", MODULE_NAME);
 	//}
-	
+
 	return 0;
 }
 
@@ -299,7 +270,7 @@ static int start_dma_s2mm(void) {
 	//if (0 == tmo) {
 	//	printk(KERN_ERR "<%s> Error: rx transfer timed out\n", MODULE_NAME);
 	//}
-	
+
 	return 0;
 }
 
@@ -316,20 +287,18 @@ static int prepare_dm_addr_map(void) {
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint32_t *sg_vaddr_map_ctl_reg = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + AXIBAR2PCIEBAR_0U);
 
-	int i;
-	mydebug("base_vaddr:%p\n", base_vaddr);
-	mydebug("(void *)dm_addr:%p\n", (void *)dm_addr);
-
 	//bind bar0 
-	mydebug("sg_vaddr_map_ctl_reg:%p\n", sg_vaddr_map_ctl_reg);
 	writel((uint32_t)(dm_addr >> 32), sg_vaddr_map_ctl_reg);
-	mydebug("(uint32_t)(dm_addr >> 32):%x\n", (uint32_t)(dm_addr >> 32));
-	mydebug("readl(sg_vaddr_map_ctl_reg):%x\n", readl(sg_vaddr_map_ctl_reg));
 	sg_vaddr_map_ctl_reg++;
-	mydebug("sg_vaddr_map_ctl_reg:%p\n", sg_vaddr_map_ctl_reg);
 	writel((uint32_t)dm_addr, sg_vaddr_map_ctl_reg);
-	mydebug("(uint32_t)dm_addr:%x\n", (uint32_t)dm_addr);
-	mydebug("readl(sg_vaddr_map_ctl_reg):%x\n", readl(sg_vaddr_map_ctl_reg));
+
+	return 0;
+}
+
+static int dump_regs(void) {
+	int i;
+	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
+
 	printk("\n\npcie_ctl:\n");
 	for(i = 0; i < 0xfff; i += sizeof(uint32_t)) {
 		if((i != 0) && (i % (8 * sizeof(uint32_t)) == 0)) {
@@ -344,132 +313,68 @@ static int prepare_dm_addr_map(void) {
 		}
 		printk("%08x(@0x%03x) ", readl(base_vaddr + OFFSET_AXI_DMA_LITE + i), i);
 	}
+	printk("\n");
+	
+	return 0;
+}
 
+static void prepare_test_data(void) {
+	int i;
+	uint8_t *ptr = (uint8_t *)kc705_pci_dev->dm_memory;
+
+	for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
+		ptr[i] = 8 + i;
+	}
+
+	printk("\n");
+}
+
+static int test_result(void) {
+	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
+	uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
+	int rtn;
+	uint8_t *ptr = (uint8_t *)kc705_pci_dev->dm_memory;
+	int i;
+
+
+	//rtn = wait_for_iostatus_timeout(XILINX_VDMA_LOOP_COUNT, dma_base_vaddr + MM2S_DMASR, BITMASK(1)/*Idle*/, BITMASK(1));
+	//if(rtn != 0) {
+	//	mydebug("tx time out!\n");
+	//}
+
+	//rtn = wait_for_iostatus_timeout(XILINX_VDMA_LOOP_COUNT, dma_base_vaddr + S2MM_DMASR, BITMASK(1)/*Idle*/, BITMASK(1));
+	//if(rtn != 0) {
+	//	mydebug("rx time out!\n");
+	//}
+
+	for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
+		if((i != 0) && (i % 16 == 0)) {
+			printk("\n");
+		}
+		printk("%02x ", ptr[i]);
+	}
+	printk("\n");
+
+	ptr = (uint8_t *)kc705_pci_dev->dm_memory + DM_CHANNEL_TX_MAX_SIZE + 4;
+	for(i = 0; i < DM_CHANNEL_RX_SIZE; i++) {
+		if((i != 0) && (i % 16 == 0)) {
+			printk("\n");
+		}
+		printk("%02x ", ptr[i]);
+	}
+	printk("\n");
 
 	return 0;
 }
 
 static int test_dma(void) {
+	prepare_test_data();
 	start_dma_mm2s();
 	start_dma_s2mm();
-	{
-		uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-		uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
-		int rtn;
-		uint8_t *ptr = (uint8_t *)kc705_pci_dev->dm_memory;
-		int i;
-
-		mydebug("dma_base_vaddr + MM2S_DMASR:%x\n", readl(dma_base_vaddr + MM2S_DMASR));
-		mydebug("dma_base_vaddr + S2MM_DMASR:%x\n", readl(dma_base_vaddr + S2MM_DMASR));
-
-		rtn = wait_for_iostatus_timeout(XILINX_VDMA_LOOP_COUNT, dma_base_vaddr + MM2S_DMASR, BITMASK(1)/*Idle*/, BITMASK(1));
-		if(rtn != 0) {
-			mydebug("tx time out!\n");
-		}
-
-		rtn = wait_for_iostatus_timeout(XILINX_VDMA_LOOP_COUNT, dma_base_vaddr + S2MM_DMASR, BITMASK(1)/*Idle*/, BITMASK(1));
-		if(rtn != 0) {
-			mydebug("rx time out!\n");
-		}
-
-		mydebug("dma_base_vaddr + MM2S_DMASR:%x\n", readl(dma_base_vaddr + MM2S_DMASR));
-		mydebug("dma_base_vaddr + S2MM_DMASR:%x\n", readl(dma_base_vaddr + S2MM_DMASR));
-		mydebug("dma_base_vaddr + MM2S_DMASR:%x\n", readl(dma_base_vaddr + MM2S_DMACR));
-		mydebug("dma_base_vaddr + S2MM_DMASR:%x\n", readl(dma_base_vaddr + S2MM_DMACR));
-
-		for(i = 0; i < DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE; i++) {
-			if((i != 0) && (i % 16 == 0)) {
-				printk("\n");
-			}
-			printk("%02x ", ptr[i]);
-		}
-		printk("\n");
-
-		//for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
-		//	ptr[i] = 0;
-		//}
-
-		//for(i = 0; i < DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE; i++) {
-		//	if((i != 0) && (i % 16 == 0)) {
-		//		printk("\n");
-		//	}
-		//	printk("%02x ", ptr[i]);
-		//}
-		//printk("\n");
-		//{
-		//	uint32_t value;
-		//	uint64_t addr_rx = (uint64_t)BASE_AXI_PCIe_BAR0;
-		//	uint64_t addr_tx = (uint64_t)BASE_AXI_PCIe_BAR0 + DM_CHANNEL_TX_SIZE;
-
-		//	value = (uint32_t)(addr_tx);
-		//	writel(value, dma_base_vaddr + MM2S_SA);
-		//	value = (uint32_t)(addr_rx);
-		//	writel(value, dma_base_vaddr + S2MM_DA);
-		//}
-		//start_dma_mm2s();
-		//start_dma_s2mm();
-		//rtn = wait_for_iostatus_timeout(XILINX_VDMA_LOOP_COUNT * 10, dma_base_vaddr + MM2S_DMASR, BITMASK(1)/*Idle*/, BITMASK(1));
-		//if(rtn != 0) {
-		//	mydebug("tx time out!\n");
-		//}
-
-		//rtn = wait_for_iostatus_timeout(XILINX_VDMA_LOOP_COUNT * 10, dma_base_vaddr + S2MM_DMASR, BITMASK(1)/*Idle*/, BITMASK(1));
-		//if(rtn != 0) {
-		//	mydebug("rx time out!\n");
-		//}
-
-		//for(i = 0; i < DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE; i++) {
-		//	if((i != 0) && (i % 16 == 0)) {
-		//		printk("\n");
-		//	}
-		//	printk("%02x ", ptr[i]);
-		//}
-		//printk("\n");
-	}
+	dump_regs();
+	test_result();
 	return 0;
 }
-
-#ifdef test_timer
-static int start_timer(timer_data_t *pdata) {
-	unsigned long tmo = msecs_to_jiffies(pdata->ms);
-	struct timer_list *tl = pdata->tl;
-	timer_func_t func = pdata->func;
-
-	init_timer(tl);
-	tl->expires = jiffies + tmo;
-	tl->data = (unsigned long)pdata;
-	tl->function = func;
-	add_timer(tl);
-
-	return 0;
-}
-
-static timer_data_t *alloc_timer(struct timer_list *tl, unsigned long ms, timer_func_t func) {
-	timer_data_t *pdata = (timer_data_t *)vzalloc(sizeof(timer_data_t));
-	if(pdata == NULL) {
-		return NULL;
-	}
-
-	pdata->tl = tl;
-	pdata->ms = ms;
-	pdata->func = func;
-
-	start_timer(pdata);
-
-	return pdata;
-}
-
-static void free_timer(void *pdata) {
-
-	struct timer_list *tl = ((timer_data_t *)pdata)->tl;
-
-	if(pdata == NULL) {
-		return;
-	}
-	del_timer(tl);
-	vfree(pdata);
-}
-#endif
 
 static void read_pci_root_configuration(struct pci_dev * pdev) {
 	int i;
@@ -734,27 +639,11 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	}
 
 	//alloc memory for dma
-	mydebug("\n");
-	kc705_pci_dev->dm_memory = dma_zalloc_coherent(&(pdev->dev), DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE, &(kc705_pci_dev->dm_addr), GFP_KERNEL);
+	kc705_pci_dev->dm_memory = dma_zalloc_coherent(&(pdev->dev), DM_CHANNEL_TX_MAX_SIZE + DM_CHANNEL_RX_MAX_SIZE, &(kc705_pci_dev->dm_addr), GFP_KERNEL);
 	if(kc705_pci_dev->dm_memory == NULL) {
 		rtn = -1;
 		mydebug("dma_zalloc_coherent failed.\n");
 		goto alloc_dm_memory_failed;
-	}
-	mydebug("\n");
-
-	{
-		uint8_t *ptr = (uint8_t *)kc705_pci_dev->dm_memory;
-		for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
-			ptr[i] = 8 + i;
-		}
-		for(i = 0; i < DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE; i++) {
-			if((i != 0) && (i % 16 == 0)) {
-				printk("\n");
-			}
-			printk("%02x ", ptr[i]);
-		}
-		printk("\n");
 	}
 
 	rtn = pci_enable_device(pdev);
@@ -882,7 +771,7 @@ pci_set_dma_mask_failed:
 pci_request_regions_failed:
 	pci_disable_device(pdev);
 pci_enable_device_failed:
-	dma_free_coherent(&(pdev->dev), DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE, kc705_pci_dev->dm_memory, kc705_pci_dev->dm_addr);
+	dma_free_coherent(&(pdev->dev), DM_CHANNEL_TX_MAX_SIZE + DM_CHANNEL_RX_MAX_SIZE, kc705_pci_dev->dm_memory, kc705_pci_dev->dm_addr);
 alloc_dm_memory_failed:
 	vfree(kc705_pci_dev);
 request_irq_failed:
@@ -921,7 +810,7 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 
 	pci_disable_device(pdev);
 
-	dma_free_coherent(&(pdev->dev), DM_CHANNEL_TX_SIZE + DM_CHANNEL_RX_SIZE, kc705_pci_dev->dm_memory, kc705_pci_dev->dm_addr);
+	dma_free_coherent(&(pdev->dev), DM_CHANNEL_TX_MAX_SIZE + DM_CHANNEL_RX_MAX_SIZE, kc705_pci_dev->dm_memory, kc705_pci_dev->dm_addr);
 
 	vfree(kc705_pci_dev);
 }
@@ -940,24 +829,91 @@ static struct pci_driver kc705_pcie_driver = {
 
 #ifdef test_timer
 //timer test
-struct timer_list my_timer;
 timer_data_t *pdata = NULL;
 
-static void my_timer_func(unsigned long __opaque) {
+static void default_timer_func(unsigned long __opaque) {
 	timer_data_t *pdata = (timer_data_t *)__opaque;
 	unsigned long tmo = msecs_to_jiffies(pdata->ms);
 	struct timer_list *tl = pdata->tl;
 
-	{
-		int test_dma(void);
-		test_dma();
-	}
-	myprintf("!\n");
+	//myprintf("!\n");
+	//schedule_work(&(kc705_pci_dev->work));
 	tl->expires = jiffies + tmo;
 	add_timer(tl);
 }
-//timer test
-#endif//#ifdef test_timer
+
+static int start_timer(timer_data_t *pdata) {
+	unsigned long tmo = msecs_to_jiffies(pdata->ms);
+	struct timer_list *tl = pdata->tl;
+	timer_func_t func = pdata->func;
+
+	init_timer(tl);
+	tl->expires = jiffies + tmo;
+	tl->data = (unsigned long)pdata;
+	tl->function = func;
+	add_timer(tl);
+
+	return 0;
+}
+
+static timer_data_t *alloc_timer(unsigned long ms, timer_func_t func) {
+	timer_data_t *pdata = NULL;
+	struct timer_list *tl = NULL;
+
+	if(func == NULL) {
+		func = default_timer_func;
+	}
+
+	pdata = (timer_data_t *)vzalloc(sizeof(timer_data_t));
+	if(pdata == NULL) {
+		mydebug("no memory for timer_data!\n");
+		goto alloc_timer_data_failed;
+	}
+
+	tl = (struct timer_list *)vzalloc(sizeof(struct timer_list));
+	if(tl == NULL) {
+		mydebug("no memory for timer_list!\n");
+		goto alloc_timer_list_failed;
+	}
+
+	pdata->tl = tl;
+	pdata->ms = ms;
+	pdata->func = func;
+
+	start_timer(pdata);
+
+	return pdata;
+
+	vfree(tl);
+alloc_timer_list_failed:
+	vfree(pdata);
+alloc_timer_data_failed:
+	return NULL;
+}
+
+static void free_timer(void *pdata) {
+
+	struct timer_list *tl;
+
+	if(pdata == NULL) {
+		mydebug("no timer_data!\n");
+		return;
+	}
+
+	tl = ((timer_data_t *)pdata)->tl;
+	if(tl == NULL) {
+		mydebug("no timer_list!\n");
+		goto free_timer_data;
+	}
+
+	del_timer(tl);
+	vfree(tl);
+
+free_timer_data:
+	vfree(pdata);
+}
+
+#endif
 
 static int __init kc705_init(void) {
 	int rtn = 0;
@@ -970,7 +926,7 @@ static int __init kc705_init(void) {
 	/* Just register the driver. No kernel boot options used. */
 	rtn = pci_register_driver(&kc705_pcie_driver);
 #ifdef test_timer
-	pdata = alloc_timer(&my_timer, 1000, my_timer_func);
+	pdata = alloc_timer(1000, NULL);
 #endif//#ifdef test_timer
 
 	mydebug("kc705 initilized!\n");

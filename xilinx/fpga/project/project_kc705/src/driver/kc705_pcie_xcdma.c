@@ -25,7 +25,7 @@
  */
 #define PCI_VENDOR_ID_DMA   0x10EE      /**< Vendor ID - Xilinx */
 
-#define PCI_DEVICE_ID_DMA   0x7024      /**< Xilinx's Device ID */
+#define PCI_DEVICE_ID_DMA   0x7012      /**< Xilinx's Device ID */
 static int my_pci_device_id = 0;
 module_param(my_pci_device_id, int, 0644);
 MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
@@ -373,7 +373,7 @@ failed:
 	return rtn;
 }
 
-static void prepare_dm_data(void) {
+static void prepare_test_data(void) {
 	uint8_t *tx_addr = kc705_pci_dev->dm_memory;
 	uint8_t *rx_addr = kc705_pci_dev->dm_memory + DM_CHANNEL_TX_MAX_SIZE;
 
@@ -388,7 +388,7 @@ static void prepare_dm_data(void) {
 	}
 }
 
-static void test_dm_data(void) {
+static void test_result(void) {
 	uint8_t *tx_addr = kc705_pci_dev->dm_memory;
 	uint8_t *rx_addr = kc705_pci_dev->dm_memory + DM_CHANNEL_TX_MAX_SIZE;
 
@@ -445,6 +445,7 @@ static void dump_regs(void) {
 }
 
 static int test_cdma(void) {
+	prepare_test_data();
 	configure_cdma_engine();
 	prepare_sg_des_chain(BASE_AXI_DDR_ADDR, DM_CHANNEL_TX_SIZE, BASE_AXI_DDR_ADDR + DM_CHANNEL_RX_SIZE, DM_CHANNEL_RX_SIZE, &sg_list_info);
 	prepare_bram_vaddr();
@@ -821,7 +822,7 @@ static void work_func(struct work_struct *work) {
 	mutex_lock(&work_lock);
 	kc705_pci_dev = kc705_pci_dev;
 	dump_regs();
-	test_dm_data();
+	test_result();
 	mutex_unlock(&work_lock);
 }
 
@@ -831,7 +832,6 @@ static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_i
 
 	INIT_WORK(&(kc705_pci_dev->work), work_func);
 
-	prepare_dm_data();
 	test_cdma();
 	return rtn;
 }
@@ -980,7 +980,7 @@ static int __init kc705_init(void) {
 	pdata = alloc_timer(1000, NULL);
 #endif
 
-	mydebug("kc705 initilized!(%s)\n", "xiaofei");
+	mydebug("kc705 initilized!\n");
 	return rtn;
 }
 
