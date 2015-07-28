@@ -16,10 +16,20 @@ KERNEL-OBJS += kc705-cdma.o
 include $(BUILD_KO)
 
 
-install:
-#	sudo insmod kc705-cdma.ko my_pci_device_id=0x7028
+install-cdma:
+#	sudo insmod kc705-dma.ko
 	sudo insmod kc705-cdma.ko
 	dmesg
-uninstall:
+
+uninstall-cdma:
 	sudo rmmod kc705-cdma
+	sudo dmesg -c
+
+install-dma:
+#	sudo insmod kc705-dma.ko my_pci_device_id=0x7028
+	sudo insmod kc705-dma.ko
+	dmesg
+
+uninstall-dma:
+	sudo rmmod kc705-dma
 	sudo dmesg -c
