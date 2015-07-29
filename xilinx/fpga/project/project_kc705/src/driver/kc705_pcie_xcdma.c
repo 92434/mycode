@@ -88,7 +88,7 @@ MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
 
 #define MAX_BARS 6/**< Maximum number of BARs */
 
-#define DM_CHANNEL_TX_SIZE 32
+#define DM_CHANNEL_TX_SIZE 16
 #define DM_CHANNEL_RX_SIZE 16
 
 /** Driver Module information */
@@ -293,6 +293,7 @@ static int start_cdma(uint32_t tail_des_axi_addr) {
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_CDMA_LITE); 
 
+	init_completion(&(kc705_pci_dev->cmp));
 	//update cdma curdesc pointer
 	writel(BASE_AXI_PCIe_BAR0, cdma_base_vaddr + CDMA_CURDESC_PNTR);
 
@@ -316,28 +317,28 @@ static int dma_trans_sync(void) {
 
 static int prepare_bars_map(void) {
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint32_t *dm_vddr_info_base = (uint32_t *)base_vaddr;
-	uint32_t *sg_vaddr_map_ctl_reg = (uint32_t *)(bram_vaddr + OFFSET_AXI_PCIe_CTL + AXIBAR2PCIEBAR_0U);
+	uint32_t *bram_vddr_reg = (uint32_t *)base_vaddr;
+	uint32_t *bar_vddr_map_ctrl_reg = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + AXIBAR2PCIEBAR_0U);
 
+	uint64_t memory_sg = (uint64_t)kc705_pci_dev->bar_map_addr[0];
 	uint64_t memory_tx = (uint64_t)kc705_pci_dev->bar_map_addr[1];
 	uint64_t memory_rx = (uint64_t)kc705_pci_dev->bar_map_addr[2];
-	uint64_t memory_sg = (uint64_t)kc705_pci_dev->bar_map_addr[0];
 
 
 	//bind sg 
-	writel((memory_sg >> 32) & 0xffffffff, sg_vaddr_map_ctl_reg);
-	sg_vaddr_map_ctl_reg++;
-	writel(memory_sg & 0xffffffff, sg_vaddr_map_ctl_reg);
+	writel((memory_sg >> 32) & 0xffffffff, bar_vddr_map_ctrl_reg);
+	bar_vddr_map_ctrl_reg++;
+	writel(memory_sg & 0xffffffff, bar_vddr_map_ctrl_reg);
 
 	//prepare tx && rx buffer address for dm map ctl register at TR BRAM
-	writel((memory_tx >> 32) & 0xffffffff, dm_vddr_info_base);
-	dm_vddr_info_base++;
-	writel(memory_tx & 0xffffffff, dm_vddr_info_base);
+	writel((memory_tx >> 32) & 0xffffffff, bram_vddr_reg);
+	bram_vddr_reg++;
+	writel(memory_tx & 0xffffffff, bram_vddr_reg);
 
-	dm_vddr_info_base++;
-	writel((memory_rx >> 32) & 0xffffffff, dm_vddr_info_base);
-	dm_vddr_info_base++;
-	writel(memory_rx & 0xffffffff, dm_vddr_info_base);
+	bram_vddr_reg++;
+	writel((memory_rx >> 32) & 0xffffffff, bram_vddr_reg);
+	bram_vddr_reg++;
+	writel(memory_rx & 0xffffffff, bram_vddr_reg);
 
 	return 0;
 }
@@ -432,7 +433,7 @@ static void prepare_test_data(void) {
 
 static void test_result(void) {
 	uint8_t *tx_addr = kc705_pci_dev->bar_map_memory[1];
-	uint8_t *rx_addr = kc705_pci_dev->bar_map_memory[2];
+	uint8_t *rx_addr = kc705_pci_dev->bar_map_memory[2] + 4;
 
 	int i;
 
@@ -460,11 +461,11 @@ static int test_cdma(void) {
 	prepare_bars_map();
 	prepare_test_data();
 	configure_cdma_engine();
-	prepare_sg_des_chain(BASE_AXI_DDR_ADDR, DM_CHANNEL_TX_SIZE, BASE_AXI_DDR_ADDR + DM_CHANNEL_RX_SIZE, DM_CHANNEL_RX_SIZE, &sg_list_info);
+	prepare_sg_des_chain(BASE_AXI_DDR_ADDR, DM_CHANNEL_TX_SIZE, BASE_AXI_DDR_ADDR, DM_CHANNEL_RX_SIZE, &sg_list_info);
 	start_cdma(cdma_tail_des_axi_addr);
 	dma_trans_sync();
-	dump_regs();
-	test_result();
+	//dump_regs();
+	//test_result();
 	return 0;
 }
 
@@ -666,13 +667,38 @@ static irqreturn_t isr(int irq, void *dev_id, struct pt_regs *regs)
 static irqreturn_t isr(int irq, void *dev_id)
 #endif
 {
+	irqreturn_t status = IRQ_NONE;
+
 	struct pci_dev *pdev = dev_id;
 	kc705_pci_dev_t * kc705_pci_dev = pci_get_drvdata(pdev);
+	uint8_t *base_vaddr;
+	uint8_t *cdma_base_vaddr;
+	uint32_t value;
 
-	kc705_pci_dev = kc705_pci_dev;
 	mydebug("\n");
+
+	if(kc705_pci_dev == NULL) {
+		mydebug("\n");
+		return status;
+	}
+	base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
+	cdma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_CDMA_LITE); 
+	value = readl(cdma_base_vaddr + CDMA_SR);
+	if((value & BITMASK(12)/*IOC_Irq*/) != 0) {
+		complete(&(kc705_pci_dev->cmp));
+		mydebug("\n");
+		value |= BITMASK(12);
+		writel(value, cdma_base_vaddr + CDMA_SR);
+		status = IRQ_HANDLED;
+	} else if((value & BITMASK(14)/*Err_Irq*/) != 0) {
+		complete(&(kc705_pci_dev->cmp));
+		mydebug("\n");
+		value |= BITMASK(14);
+		writel(value, cdma_base_vaddr + CDMA_SR);
+		status = IRQ_HANDLED;
+	}
 	/* Handle DMA and any user interrupts */
-	return IRQ_NONE;
+	return status;
 }
 
 static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *ent) {
@@ -700,7 +726,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 				goto pci_enable_device_failed;
 			} else {
 				mydebug("kc705_pci_dev->bar_map_memory[%d]:%p\n", i, kc705_pci_dev->bar_map_memory[i]);
-				mydebug("kc705_pci_dev->bar_map_addr[%d]:%p\n", i, kc705_pci_dev->bar_map_addr[i]);
+				mydebug("kc705_pci_dev->bar_map_addr[%d]:%p\n", i, (void *)kc705_pci_dev->bar_map_addr[i]);
 				mydebug("kc705_pci_dev->bar_map_memory_size[%d]:%x\n", i, kc705_pci_dev->bar_map_memory_size[i]);
 			}
 		}
@@ -850,7 +876,7 @@ static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_i
 
 	rtn = kc705_probe_pcie(pdev, ent);
 	INIT_WORK(&(kc705_pci_dev->work), work_func);
-	test_dma();
+	test_cdma();
 	return rtn;
 }
 

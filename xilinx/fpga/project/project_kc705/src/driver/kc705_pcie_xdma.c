@@ -75,9 +75,8 @@ MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
 
 #define MAX_BARS 6/**< Maximum number of BARs */
 
-#define DM_CHANNEL_TX_SIZE 0x8
-#define DM_CHANNEL_RX_SIZE 0x8
-
+#define DM_CHANNEL_TX_SIZE 8
+#define DM_CHANNEL_RX_SIZE 8
 
 /** Driver Module information */
 MODULE_AUTHOR("xiaofei");
@@ -273,22 +272,22 @@ static int dma_trans_sync(void) {
 static int prepare_bars_map(void) {
 	uint64_t addr;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint32_t *sg_vaddr_map_ctl_reg = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + AXIBAR2PCIEBAR_0U);
+	uint32_t *bar_vddr_map_ctrl_reg = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + AXIBAR2PCIEBAR_0U);
 
 	//bind bar0 
 	addr = (uint64_t)kc705_pci_dev->bar_map_addr[0];
-	writel((uint32_t)(addr >> 32), sg_vaddr_map_ctl_reg);
-	sg_vaddr_map_ctl_reg++;
+	writel((uint32_t)(addr >> 32), bar_vddr_map_ctrl_reg);
+	bar_vddr_map_ctrl_reg++;
 
-	writel((uint32_t)addr, sg_vaddr_map_ctl_reg);
-	sg_vaddr_map_ctl_reg++;
+	writel((uint32_t)addr, bar_vddr_map_ctrl_reg);
+	bar_vddr_map_ctrl_reg++;
 
 	//bind bar1 
 	addr = (uint64_t)kc705_pci_dev->bar_map_addr[1];
-	writel((uint32_t)(addr >> 32), sg_vaddr_map_ctl_reg);
-	sg_vaddr_map_ctl_reg++;
+	writel((uint32_t)(addr >> 32), bar_vddr_map_ctrl_reg);
+	bar_vddr_map_ctrl_reg++;
 
-	writel((uint32_t)addr, sg_vaddr_map_ctl_reg);
+	writel((uint32_t)addr, bar_vddr_map_ctrl_reg);
 
 	return 0;
 }
@@ -639,7 +638,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 				goto pci_enable_device_failed;
 			} else {
 				mydebug("kc705_pci_dev->bar_map_memory[%d]:%p\n", i, kc705_pci_dev->bar_map_memory[i]);
-				mydebug("kc705_pci_dev->bar_map_addr[%d]:%p\n", i, kc705_pci_dev->bar_map_addr[i]);
+				mydebug("kc705_pci_dev->bar_map_addr[%d]:%p\n", i, (void *)kc705_pci_dev->bar_map_addr[i]);
 				mydebug("kc705_pci_dev->bar_map_memory_size[%d]:%x\n", i, kc705_pci_dev->bar_map_memory_size[i]);
 			}
 		}
