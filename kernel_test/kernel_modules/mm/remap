@@ -1,0 +1,9 @@
+vm_insert_page: remap page to vma
+vm_insert_pfn: insert single pfn into user vma
+remap_pfn_range: remap kernel memory to userspace
+zap_page_range: remove user pages in a given range
+
+vmap: map an array of pages into virtually contiguous space
+vunmap: release virtual mapping obtained by vmap()
+persistent_ram_vmap: map phys_addr_t to virt addr
+persistent_ram_iomap: map phys_addr_t to io mem
