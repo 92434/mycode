@@ -1,6 +1,6 @@
-#include "xiaofei_list_buffer.h"
-#include "xiaofei_debug.h"
 #include <linux/vmalloc.h>
+#include "xiaofei_debug.h"
+#include "xiaofei_list_buffer.h"
 
 list_buffer_t *init_list_buffer(void) {
 	list_buffer_t *list = (list_buffer_t *)vzalloc(sizeof(list_buffer_t));
@@ -89,21 +89,24 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 	buffer_node_t *node;
 	int end_offset;
 	int read_count = 0;
+	int read_offset, write_offset;
 
 	node = list_entry(list->read, buffer_node_t, list);
+	read_offset = node->read_offset;
+	write_offset = node->write_offset;
 
-	if(node->read_offset == node->write_offset) {
+	if(read_offset == write_offset) {
 		return read_count;
 	}
 
-	end_offset = node->read_offset + size;
+	end_offset = read_offset + size;
 
 	if(end_offset > node->size) {
 		end_offset = node->size;
 	}
 
-	if((node->read_offset < node->write_offset) && (node->write_offset < end_offset)) {
-		end_offset = node->write_offset;
+	if((read_offset < write_offset) && (write_offset < end_offset)) {
+		end_offset = write_offset;
 	}
 
 	myprintf("node:%p\n", (void *)node);
@@ -118,10 +121,13 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 		memcpy(buffer, data, read_count);
 	}
 
-	node->read_offset += read_count;
-	if(node->read_offset == node->size) {
+	read_offset += read_count;
+
+	if(read_offset == node->size) {
 		list->read = list->read->next;
 	}
+	
+	node->read_offset = read_offset;
 
 	return read_count;
 }
@@ -131,47 +137,61 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 	buffer_node_t *node;
 	int end_offset;
 	int write_count = 0;
+	int read_offset, write_offset;
 
 	node = list_entry(list->write, buffer_node_t, list);
-	
+
 	if(node->write_offset == node->size) {
 		node->write_offset = 0;
 	}
+	read_offset = node->read_offset;
+	write_offset = node->write_offset;
+	
 
-	end_offset = node->write_offset + size;
+	end_offset = write_offset + size;
 	if(end_offset > node->size) {
 		end_offset = node->size;
 	}
 
-	if((node->write_offset <= node->read_offset) && (node->read_offset < end_offset)) {
-		myprintf("overwrite from %p!\n", (void *)(node->buffer + node->read_offset));
+	if((write_offset <= read_offset) && (read_offset < end_offset)) {
+		myprintf("overwrite from %p!\n", (void *)(node->buffer + read_offset));
 	}
 
-	if(node->read_offset == node->size) {
+	if(read_offset == node->size) {
 		node->read_offset = 0;
 	}
 
-	data = node->buffer + node->write_offset;
+	data = node->buffer + write_offset;
 
 	myprintf("node:%p\n", (void *)node);
 	myprintf("end_offset:%d\n", end_offset);
-	myprintf("node->write_offset:%d\n\n", node->write_offset);
-	write_count = end_offset - node->write_offset;
+	myprintf("write_offset:%d\n\n", write_offset);
+	write_count = end_offset - write_offset;
 
 	if(buffer != NULL) {
 		memcpy(data, buffer, write_count);
 	}
 
-	node->write_offset += write_count;
-	if(node->write_offset == node->size) {
+	write_offset += write_count;
+	if(write_offset == node->size) {
 		list->write = list->write->next;
 	}
+
+	node->write_offset = write_offset;
 
 	return write_count;
 }
 
-#define BUFFER_COUNT 6
-#define BUFFER_SIZE 4
+bool list_buffer_empty(list_buffer_t *list) {
+	buffer_node_t *node;
+
+	node = list_entry(list->read, buffer_node_t, list);
+
+	return (node->read_offset == node->write_offset);
+}
+
+#define BUFFER_COUNT 1
+#define BUFFER_SIZE 24
 static char *buffers[BUFFER_COUNT];
 
 void start_test_buffer_list(void) {
@@ -215,11 +235,11 @@ void start_test_buffer_list(void) {
 		i -= n;
 	}
 	read_buffer(data_buffer + 0, 2, list);
-	write_buffer(data_buffer + 8, 2, list);
-	write_buffer(data_buffer + 10, 2, list);
+	//write_buffer(data_buffer + 8, 2, list);
+	//write_buffer(data_buffer + 10, 2, list);
 	read_buffer(data_buffer + 2, 2, list);
-	write_buffer(data_buffer + 12, 2, list);
-	write_buffer(data_buffer + 14, 2, list);
+	//write_buffer(data_buffer + 12, 2, list);
+	//write_buffer(data_buffer + 14, 2, list);
 	//write large data continuely
 
 	//read large data continuely
@@ -232,6 +252,9 @@ void start_test_buffer_list(void) {
 		data += n;
 		i -= n;
 	}
+
+	write_buffer(data_buffer + 10, 2, list);
+	read_buffer(data_buffer, 2, list);
 
 	printk("\n");
 	for(i = 0; i < BUFFER_COUNT * BUFFER_SIZE; i++) {
