@@ -20,10 +20,18 @@ MODULE_ALIAS(MODULE_NAME);
 timer_data_t *pdata = NULL;
 #endif
 
+#ifdef test_buffer_list
+#include "utils/xiaofei_list_buffer.h"
+#endif
+
 
 static int __init test_init(void) {
 #ifdef test_timer
 	pdata = alloc_timer(1000, NULL);
+#endif
+
+#ifdef test_buffer_list
+	start_test_buffer_list();
 #endif
 	return 0;
 }
