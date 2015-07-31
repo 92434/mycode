@@ -465,7 +465,7 @@ static int test_cdma(void) {
 	start_cdma(cdma_tail_des_axi_addr);
 	dma_trans_sync();
 	//dump_regs();
-	//test_result();
+	test_result();
 	return 0;
 }
 
