@@ -9,7 +9,6 @@
 #include "kc705.h"
 #include "pcie.h"
 #include "dma_common.h"
-#include "axi_cdma.h"
 
 /**
  * Macro to export pci_device_id to user space to allow hot plug and
