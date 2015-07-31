@@ -1,8 +1,5 @@
-#ifndef _XCDMA_H
-#define _XCDMA_H
-
-#include <linux/version.h>
-
+#ifndef _AXI_CDMA_H
+#define _AXI_CDMA_H
 //AXI CDMA Register Summary
 #define CDMA_CR 0x00 //CDMA Control.
 #define CDMA_SR 0x04 //CDMA Status.
@@ -15,12 +12,6 @@
 #define CDMA_DA 0x20 //Destination Address.
 //#define Reserved 0x24 //N/A
 #define CDMA_BTT 0x28 //Bytes to Transfer.
-
-//Address Map for the AXI to PCIe Address Translation Registers
-#define AXIBAR2PCIEBAR_0U 0x208 //default be set to 0
-#define AXIBAR2PCIEBAR_0L 0x20c //default be set to 0xa0000000
-#define AXIBAR2PCIEBAR_1U 0x210 //default be set to 0
-#define AXIBAR2PCIEBAR_1L 0x214 //default be set to 0xc0000000
 
 #define SG_DESCRIPTOR_SIZE 0x40
 
@@ -53,16 +44,16 @@ typedef struct {
 	kc705_transfer_descriptor_t des;
 } kc705_sg_item_info_t;
 
+extern struct completion cmp;
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
 irqreturn_t isr(int irq, void *dev_id, struct pt_regs *regs);
 #else
 irqreturn_t isr(int irq, void *dev_id);
 #endif
-
 int prepare_bars_map(kc705_pci_dev_t *kc705_pci_dev);
 int init_dma(kc705_pci_dev_t *kc705_pci_dev);
-int dma_worker_thread(void *ppara);
 int alloc_sg_list_chain(uint32_t tx_axiaddr, uint32_t tx_size, uint32_t rx_axiaddr, uint32_t rx_size);
 void free_sg_list_chain(void);
-
-#endif //#define _XCDMA_H
+int dma_worker_thread(void *ppara);
+#endif// #ifndef _AXI_CDMA_H

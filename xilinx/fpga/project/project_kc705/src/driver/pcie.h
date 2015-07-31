@@ -22,6 +22,12 @@
 #define OFFSET_AXI_PCIe_CTL (BASE_AXI_PCIe_CTL - BASE_AXI_PCIe)
 #define OFFSET_AXI_CDMA_LITE (BASE_AXI_CDMA_LITE - BASE_AXI_PCIe)
 
+//Address Map for the AXI to PCIe Address Translation Registers
+#define AXIBAR2PCIEBAR_0U 0x208 //default be set to 0
+#define AXIBAR2PCIEBAR_0L 0x20c //default be set to 0xa0000000
+#define AXIBAR2PCIEBAR_1U 0x210 //default be set to 0
+#define AXIBAR2PCIEBAR_1L 0x214 //default be set to 0xc0000000
+
 #define AXI_PCIe_BAR0_SIZE 0x10000
 #define AXI_PCIe_BAR1_SIZE 0x10000
 

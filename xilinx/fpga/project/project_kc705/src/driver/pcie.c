@@ -8,7 +8,8 @@
 
 #include "kc705.h"
 #include "pcie.h"
-#include "xcdma.h"
+#include "dma_common.h"
+#include "axi_cdma.h"
 
 /**
  * Macro to export pci_device_id to user space to allow hot plug and
@@ -266,7 +267,7 @@ void dump_memory(void *addr, int size) {
 	printk("addr:0x%p\n", addr);
 	for(i = 0; i < size; i++) {
 		if((i != 0) && (i % (8 * sizeof(uint32_t)) == 0)) {
-			printk("\n", addr + i);
+			printk("\n");
 		}
 		//printk("%08x(@0x%03x) ", memory[i], i);
 		printk("%02x ", memory[i]);
