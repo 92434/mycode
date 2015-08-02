@@ -13,7 +13,6 @@
 #kc705-cdma-objs := kc705_pcie_xcdma.o
 #KERNEL-OBJS += kc705-cdma.o
 
-
 kc705-modules-objs := kc705.o pcie.o dma_common.o utils/xiaofei_kthread.o utils/xiaofei_timer.o axi_cdma.o
 KERNEL-OBJS += kc705-modules.o
 
