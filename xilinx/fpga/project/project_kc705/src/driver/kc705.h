@@ -15,8 +15,8 @@
 #endif
 
 /** Driver information */
-#define MODULE_NAME "kc705_pcie_xcdma"
-#define DRIVER_DESCRIPTION "kc705 pcie xcdma driver"
+#define MODULE_NAME "kc705_pcie"
+#define DRIVER_DESCRIPTION "kc705 pcie driver"
 #define DRIVER_VERSION "1.0"
 
 #endif //#define _KC705_H

@@ -7,6 +7,9 @@
 #include "pcie.h"
 #include "dma_common.h"
 
+#define BASE_AXI_CDMA_LITE 0x8100c000
+#define OFFSET_AXI_CDMA_LITE (BASE_AXI_CDMA_LITE - BASE_AXI_PCIe)
+
 //AXI CDMA Register Summary
 #define CDMA_CR 0x00 //CDMA Control.
 #define CDMA_SR 0x04 //CDMA Status.
@@ -51,7 +54,7 @@ typedef struct {
 	kc705_transfer_descriptor_t des;
 } kc705_sg_item_info_t;
 
-extern struct completion cmp;
+struct completion cmp;
 
 static LIST_HEAD(sg_descripter_list);
 static uint32_t cdma_tail_des_axi_addr;
@@ -94,7 +97,7 @@ irqreturn_t isr(int irq, void *dev_id)
 	return status;
 }
 
-static int init_cdma_engine(kc705_pci_dev_t *kc705_pci_dev) {
+int init_dma(kc705_pci_dev_t *kc705_pci_dev) {
 	int rtn;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_CDMA_LITE); 
@@ -112,8 +115,9 @@ static int init_cdma_engine(kc705_pci_dev_t *kc705_pci_dev) {
 	}
 
 	//enable sg mode
-	value = readl(cdma_base_vaddr + CDMA_CR);
+	value = readl(cdma_base_vaddr + CDMA_CR) & (~(BITMASK(3)));//sg mode
 	writel(value, cdma_base_vaddr + CDMA_CR);
+
 	value = readl(cdma_base_vaddr + CDMA_CR) | BITMASK(3);//sg mode
 	writel(value, cdma_base_vaddr + CDMA_CR);
 
@@ -121,12 +125,11 @@ static int init_cdma_engine(kc705_pci_dev_t *kc705_pci_dev) {
 	value = readl(cdma_base_vaddr + CDMA_CR) | BITMASK(12)/*ioc interrupt*/ | BITMASK(14)/*err interrupt*/;
 	writel(value, cdma_base_vaddr + CDMA_CR);
 
-	return rtn;
-}
+	value = readl(cdma_base_vaddr + CDMA_CR) | (2 << 16)/*IRQThreshold:2*/;
+	writel(value, cdma_base_vaddr + CDMA_CR);
 
-int init_dma(kc705_pci_dev_t *kc705_pci_dev) {
-	init_cdma_engine(kc705_pci_dev);
-	return 0;
+
+	return rtn;
 }
 
 static int alloc_sg_des_item(uint32_t SA, uint32_t DA, uint32_t CONTROL, struct list_head *sg_list) {
@@ -183,7 +186,7 @@ static void free_sg_des_items(struct list_head *sg_list) {
 	}
 }
 
-int alloc_sg_list_chain(uint32_t tx_axiaddr, uint32_t tx_size, uint32_t rx_axiaddr, uint32_t rx_size) {
+int alloc_sg_list_chain(uint32_t tx_axiaddr, uint32_t rx_axiaddr) {
 	int rtn = 0;
 	int offset = 0;
 
@@ -201,7 +204,7 @@ int alloc_sg_list_chain(uint32_t tx_axiaddr, uint32_t tx_size, uint32_t rx_axiad
 
 	offset += sizeof(uint64_t);
 
-	rtn = alloc_sg_des_item(BASE_AXI_PCIe_BAR1, tx_axiaddr, tx_size, &sg_descripter_list);
+	rtn = alloc_sg_des_item(tx_axiaddr, BASE_AXI_DDR_ADDR, DM_CHANNEL_TX_SIZE, &sg_descripter_list);
 	if(rtn != 0) {
 		goto failed;
 	}
@@ -216,7 +219,7 @@ int alloc_sg_list_chain(uint32_t tx_axiaddr, uint32_t tx_size, uint32_t rx_axiad
 		goto failed;
 	}
 
-	rtn = alloc_sg_des_item(rx_axiaddr, BASE_AXI_PCIe_BAR1, rx_size, &sg_descripter_list);
+	rtn = alloc_sg_des_item(BASE_AXI_DDR_ADDR, rx_axiaddr, DM_CHANNEL_RX_SIZE, &sg_descripter_list);
 	if(rtn != 0) {
 		goto failed;
 	}
@@ -256,6 +259,19 @@ int prepare_bars_map(kc705_pci_dev_t *kc705_pci_dev) {
 	return 0;
 }
 
+static int dma_prepare_transfer(kc705_pci_dev_t *kc705_pci_dev, uint64_t addr_tx, uint64_t addr_rx) {
+	int rtn = 0;
+
+	rtn = alloc_sg_list_chain(addr_tx, addr_rx);
+	if(rtn != 0) {
+		return rtn;
+	}
+
+	rtn = flush_sg_des_items(kc705_pci_dev->bar_map_memory[0], &sg_descripter_list);
+
+	return rtn;
+}
+
 static int start_cdma(kc705_pci_dev_t *kc705_pci_dev) {
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_CDMA_LITE); 
@@ -269,6 +285,21 @@ static int start_cdma(kc705_pci_dev_t *kc705_pci_dev) {
 	return 0;
 }
 
+static int dma_trans_sync(kc705_pci_dev_t *kc705_pci_dev) {
+	unsigned long tmo;
+	int rtn = 0;
+
+	tmo = msecs_to_jiffies(1000);
+	tmo = wait_for_completion_timeout(&cmp, tmo);
+	if (0 == tmo) {
+		mydebug("transfer timed out!\n");
+		rtn = -1;
+	}
+
+	return rtn;
+}
+
+void inc_dma_op_count(void);
 int dma_worker_thread(void *ppara) {
 	int rtn = 0;
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
@@ -279,14 +310,14 @@ int dma_worker_thread(void *ppara) {
 
 		set_current_state(TASK_UNINTERRUPTIBLE);  
 		//schedule_timeout(1*HZ); 
-		//init_dma(kc705_pci_dev);
-		flush_sg_des_items(kc705_pci_dev->bar_map_memory[0], &sg_descripter_list);
+		init_dma(kc705_pci_dev);
+		dma_prepare_transfer(kc705_pci_dev, BASE_AXI_PCIe_BAR1, BASE_AXI_PCIe_BAR1);
 		//dump_memory(kc705_pci_dev->bar_map_memory[0], 4 * 0x40);
 		prepare_test_data(kc705_pci_dev);
 		start_cdma(kc705_pci_dev);
 		dma_trans_sync(kc705_pci_dev);
+		inc_dma_op_count();
 		test_result(kc705_pci_dev);
-		//dump_regs();
 		//mydebug("\n");
 	}
 

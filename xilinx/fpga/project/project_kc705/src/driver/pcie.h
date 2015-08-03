@@ -11,7 +11,6 @@
 #define BASE_AXI_PCIe 0x81000000
 #define BASE_Translation_BRAM 0x81000000
 #define BASE_AXI_PCIe_CTL 0x81008000
-#define BASE_AXI_CDMA_LITE 0x8100c000
 //memory
 #define BASE_AXI_DDR_ADDR 0x00000000
 #define BASE_AXI_PCIe_BAR0 0x80800000
@@ -20,7 +19,6 @@
 //PCIe:BAR0 Address Offset for the accessible Interfaces
 #define OFFSET_Translation_BRAM (BASE_Translation_BRAM - BASE_AXI_PCIe)
 #define OFFSET_AXI_PCIe_CTL (BASE_AXI_PCIe_CTL - BASE_AXI_PCIe)
-#define OFFSET_AXI_CDMA_LITE (BASE_AXI_CDMA_LITE - BASE_AXI_PCIe)
 
 //Address Map for the AXI to PCIe Address Translation Registers
 #define AXIBAR2PCIEBAR_0U 0x208 //default be set to 0
@@ -29,12 +27,12 @@
 #define AXIBAR2PCIEBAR_1L 0x214 //default be set to 0xc0000000
 
 #define AXI_PCIe_BAR0_SIZE 0x10000
-#define AXI_PCIe_BAR1_SIZE 0x10000
+#define AXI_PCIe_BAR1_SIZE 0x800000
 
 #define MAX_BARS 6/**< Maximum number of BARs */
 
-#define DM_CHANNEL_TX_SIZE 16
-#define DM_CHANNEL_RX_SIZE 16
+#define DM_CHANNEL_TX_SIZE 0x10000
+#define DM_CHANNEL_RX_SIZE 0x10000
 
 typedef struct {
 	struct pci_dev *pdev; /**< PCI device entry */
@@ -53,5 +51,5 @@ typedef struct {
 
 extern struct pci_driver kc705_pcie_driver;
 void dump_memory(void *addr, int size);
-void dump_regs(void);
+void dump_regs(uint8_t *reg_addr, int size);
 #endif //#define _PCIE_H

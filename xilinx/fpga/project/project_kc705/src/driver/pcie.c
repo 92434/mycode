@@ -230,37 +230,22 @@ static void read_pci_root_configuration(struct pci_dev * pdev) {
 	printk("Bridge %p\n", me->bridge);
 }
 
-void dump_regs(void) {
+void dump_regs(uint8_t *reg_addr, int size) {
 	int i;
-	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
+	uint8_t *base_vaddr = reg_addr;
 
-	printk("\n\ntr_bram:\n");
-	for(i = 0; i < 0xfff; i += sizeof(uint32_t)) {
+	for(i = 0; i < size; i += sizeof(uint32_t)) {
 		if((i != 0) && (i % (8 * sizeof(uint32_t)) == 0)) {
 			printk("\n");
 		}
-		printk("%08x(@0x%03x) ", readl(base_vaddr + OFFSET_Translation_BRAM + i), i);
+		printk("%08x(@0x%03x) ", readl(base_vaddr + i), i);
 	}
 
-	printk("\n\npcie_ctrl:\n");
-	for(i = 0; i < 0xfff; i += sizeof(uint32_t)) {
-		if((i != 0) && (i % (8 * sizeof(uint32_t)) == 0)) {
-			printk("\n");
-		}
-		printk("%08x(@0x%03x) ", readl(base_vaddr + OFFSET_AXI_PCIe_CTL + i), i);
-	}
-	printk("\n\ndma_lite:\n");
-	for(i = 0; i < 0xfff; i += sizeof(uint32_t)) {
-		if((i != 0) && (i % (8 * sizeof(uint32_t)) == 0)) {
-			printk("\n");
-		}
-		printk("%08x(@0x%03x) ", readl(base_vaddr + OFFSET_AXI_CDMA_LITE + i), i);
-	}
 	printk("\n");
 }
 
 void dump_memory(void *addr, int size) {
-	uint8_t *memory = (uint32_t *)addr;
+	uint8_t *memory = (uint8_t *)addr;
 	int i;
 
 	printk("addr:0x%p\n", addr);
@@ -268,11 +253,34 @@ void dump_memory(void *addr, int size) {
 		if((i != 0) && (i % (8 * sizeof(uint32_t)) == 0)) {
 			printk("\n");
 		}
-		//printk("%08x(@0x%03x) ", memory[i], i);
 		printk("%02x ", memory[i]);
 	}
 
 	printk("\n");
+}
+
+static uint64_t dma_op_count = 0;
+static struct timeval start_time = {0};
+
+void inc_dma_op_count(void) {
+	dma_op_count++;
+}
+
+static test_performance(void) {
+	struct timeval stop_time;
+
+	do_gettimeofday(&stop_time);
+
+	//mydebug("dma_op_count:%ld\n", dma_op_count);
+	//mydebug("stop_time.tv_sec:%lu\n", stop_time.tv_sec);
+	//mydebug("start_time.tv_sec:%lu\n", start_time.tv_sec);
+	//mydebug("stop_time.tv_usec:%lu\n", stop_time.tv_usec);
+	//mydebug("start_time.tv_usec:%lu\n", start_time.tv_usec);
+
+	mydebug("DMA speed in count/s: %lu\n", dma_op_count);
+
+	dma_op_count = 0;
+	do_gettimeofday(&start_time);
 }
 
 static void work_func(struct work_struct *work) {
@@ -280,7 +288,7 @@ static void work_func(struct work_struct *work) {
 
 	mutex_lock(&work_lock);
 	kc705_pci_dev = kc705_pci_dev;
-	mydebug("\n");
+	test_performance();
 	mutex_unlock(&work_lock);
 }
 
@@ -297,7 +305,7 @@ static void timer_func(unsigned long __opaque) {
 static int start_work_loop(void) {
 	INIT_WORK(&(kc705_pci_dev->work), work_func);
 	prepare_bars_map(kc705_pci_dev);
-	alloc_sg_list_chain(BASE_AXI_DDR_ADDR, DM_CHANNEL_TX_SIZE, BASE_AXI_DDR_ADDR, DM_CHANNEL_RX_SIZE);
+	alloc_sg_list_chain(BASE_AXI_PCIe_BAR1, BASE_AXI_PCIe_BAR1);
 	init_dma(kc705_pci_dev);
 
 	ptimer_data = alloc_timer(1000, timer_func);
