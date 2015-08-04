@@ -266,7 +266,7 @@ void inc_dma_op_count(void) {
 	dma_op_count++;
 }
 
-static test_performance(void) {
+static void test_performance(void) {
 	struct timeval stop_time;
 
 	do_gettimeofday(&stop_time);
@@ -277,7 +277,7 @@ static test_performance(void) {
 	//mydebug("stop_time.tv_usec:%lu\n", stop_time.tv_usec);
 	//mydebug("start_time.tv_usec:%lu\n", start_time.tv_usec);
 
-	mydebug("DMA speed in count/s: %lu\n", dma_op_count);
+	printk("DMA speed: %d.%03dMb/s\n", (dma_op_count * DM_CHANNEL_TX_SIZE) / (1024 * 1024), ((dma_op_count * DM_CHANNEL_TX_SIZE) % (1024 * 1024)) * (1000 * 1000) / (1024 * 1024));
 
 	dma_op_count = 0;
 	do_gettimeofday(&start_time);
@@ -304,9 +304,6 @@ static void timer_func(unsigned long __opaque) {
 
 static int start_work_loop(void) {
 	INIT_WORK(&(kc705_pci_dev->work), work_func);
-	prepare_bars_map(kc705_pci_dev);
-	alloc_sg_list_chain(BASE_AXI_PCIe_BAR1, BASE_AXI_PCIe_BAR1);
-	init_dma(kc705_pci_dev);
 
 	ptimer_data = alloc_timer(1000, timer_func);
 	thread = alloc_work_thread(dma_worker_thread, kc705_pci_dev, "%s", "pcie_thread");
@@ -321,8 +318,6 @@ static void end_work_loop(void) {
 	if(ptimer_data != NULL) {
 		free_timer(ptimer_data);
 	}
-
-	free_sg_list_chain();
 }
 
 static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *ent) {

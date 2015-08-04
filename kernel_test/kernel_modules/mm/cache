@@ -1,0 +1,4 @@
+kmem_cache_create:Create a cache.
+kmem_cache_alloc:Allocate an object
+kmem_cache_free:Deallocate an object
+kmem_cache_destroy:free cache

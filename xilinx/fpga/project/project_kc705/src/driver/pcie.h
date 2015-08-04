@@ -27,12 +27,12 @@
 #define AXIBAR2PCIEBAR_1L 0x214 //default be set to 0xc0000000
 
 #define AXI_PCIe_BAR0_SIZE 0x10000
-#define AXI_PCIe_BAR1_SIZE 0x800000
+#define AXI_PCIe_BAR1_SIZE 0x10000
 
 #define MAX_BARS 6/**< Maximum number of BARs */
 
-#define DM_CHANNEL_TX_SIZE 0x10000
-#define DM_CHANNEL_RX_SIZE 0x10000
+#define DM_CHANNEL_TX_SIZE 0x1000
+#define DM_CHANNEL_RX_SIZE 0x1000
 
 typedef struct {
 	struct pci_dev *pdev; /**< PCI device entry */
