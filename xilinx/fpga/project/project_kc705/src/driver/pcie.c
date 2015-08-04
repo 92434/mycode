@@ -30,10 +30,6 @@ static struct pci_device_id ids[] = {
 	{}     /* terminate list with empty entry */
 };
 
-static int my_pci_device_id = 0;
-module_param(my_pci_device_id, int, 0644);
-MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
-
 static kc705_pci_dev_t *kc705_pci_dev = NULL;
 static DEFINE_MUTEX(work_lock);
 static timer_data_t *ptimer_data = NULL;
