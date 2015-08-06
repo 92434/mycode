@@ -190,6 +190,48 @@ bool list_buffer_empty(list_buffer_t *list) {
 	return (node->read_offset == node->write_offset);
 }
 
+int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, list_buffer_t *list) {
+	int rtn = 0;
+	char *data;
+	buffer_node_t *node;
+	int end_offset;
+	int write_count, read_count;
+	int write_offset, read_offset;
+
+	if((write_node == NULL) || (read_node == NULL)) {
+		rtn = -1;
+		return rtn;
+	}
+
+	node = list_entry(list->write, buffer_node_t, list);
+	*write_node = *node;
+
+	if(write_node->write_offset == write_node->size) {
+		write_node->write_offset = 0;
+	}
+	write_offset = write_node->write_offset;
+	end_offset = write_node->size;
+	write_count = end_offset - write_offset;
+	write_node->avail_for_write = write_count;
+	printk("write_node->avail_for_write:%d\n", write_node->avail_for_write);
+
+
+	node = list_entry(list->read, buffer_node_t, list);
+	*read_node = *node;
+
+	read_offset = read_node->read_offset;
+	end_offset = read_node->write_offset;
+	if((read_offset > read_node->write_offset)) {
+		end_offset = read_node->size;
+	}
+	read_count = end_offset - read_node->read_offset;
+
+	read_node->avail_for_read = read_count;
+	printk("read_node->avail_for_read:%d\n", read_node->avail_for_read);
+
+	return rtn;
+}
+
 #define BUFFER_COUNT 1
 #define BUFFER_SIZE 24
 static char *buffers[BUFFER_COUNT];
@@ -200,6 +242,7 @@ void start_test_buffer_list(void) {
 	char *data_buffer;
 	char *data;
 	int loop;
+	buffer_node_t read, write;
 
 	for(i = 0; i < BUFFER_COUNT; i++) {
 		buffers[i] = (char *)vzalloc(BUFFER_SIZE);
@@ -230,13 +273,16 @@ void start_test_buffer_list(void) {
 	loop = 0;
 	while(i > 0) {
 		int n;
+		get_buffer_node_info(&write, &read, list);
 		n = write_buffer(data, 1, list);
 		data += n;
 		i -= n;
 	}
+	get_buffer_node_info(&write, &read, list);
 	read_buffer(data_buffer + 0, 2, list);
 	//write_buffer(data_buffer + 8, 2, list);
 	//write_buffer(data_buffer + 10, 2, list);
+	get_buffer_node_info(&write, &read, list);
 	read_buffer(data_buffer + 2, 2, list);
 	//write_buffer(data_buffer + 12, 2, list);
 	//write_buffer(data_buffer + 14, 2, list);
@@ -248,12 +294,15 @@ void start_test_buffer_list(void) {
 	loop = 0;
 	while(i > 0) {
 		int n;
+		get_buffer_node_info(&write, &read, list);
 		n = read_buffer(data, 1, list);
 		data += n;
 		i -= n;
 	}
 
+	get_buffer_node_info(&write, &read, list);
 	write_buffer(data_buffer + 10, 2, list);
+	get_buffer_node_info(&write, &read, list);
 	read_buffer(data_buffer, 2, list);
 
 	printk("\n");

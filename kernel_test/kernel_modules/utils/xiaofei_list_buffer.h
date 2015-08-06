@@ -9,6 +9,8 @@ typedef struct _buffer_node {
 	int write_offset;
 	char *buffer;
 	void *buffer_addr;
+	int avail_for_read;
+	int avail_for_write;
 } buffer_node_t;
 
 typedef struct _list_buffer {
