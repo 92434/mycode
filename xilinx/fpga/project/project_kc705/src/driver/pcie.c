@@ -328,9 +328,17 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		goto alloc_kc705_pci_dev_failed;
 	}
 
-	kc705_pci_dev->bar_map_memory_size[0] = AXI_PCIe_BAR0_SIZE;
+
+	kc705_pci_dev->list = init_list_buffer();
+	if(kc705_pci_dev->list == NULL) {
+		rtn = -1;
+		goto init_list_buffer_failed;
+	}
+
+	kc705_pci_dev->bar_map_memory_size[0] = 0;
 	kc705_pci_dev->bar_map_memory_size[1] = AXI_PCIe_BAR1_SIZE;
 	kc705_pci_dev->bar_map_memory_size[2] = AXI_PCIe_BAR1_SIZE;
+	kc705_pci_dev->bar_map_memory_size[3] = AXI_PCIe_BAR1_SIZE;
 	//alloc memory for cdma
 	for(i = 0; i < MAX_BARS; i++) {
 		if(kc705_pci_dev->bar_map_memory_size[i] != 0) {
@@ -343,6 +351,9 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 				mydebug("kc705_pci_dev->bar_map_memory[%d]:%p\n", i, kc705_pci_dev->bar_map_memory[i]);
 				mydebug("kc705_pci_dev->bar_map_addr[%d]:%p\n", i, (void *)kc705_pci_dev->bar_map_addr[i]);
 				mydebug("kc705_pci_dev->bar_map_memory_size[%d]:%x\n", i, kc705_pci_dev->bar_map_memory_size[i]);
+				if(i > 1) {
+					add_list_buffer_item((char *)kc705_pci_dev->bar_map_memory[i], (void *)kc705_pci_dev->bar_map_addr[i], kc705_pci_dev->bar_map_memory_size[i], kc705_pci_dev->list);
+				}
 			}
 		}
 	}
@@ -471,10 +482,12 @@ pci_enable_device_failed:
 			dma_free_coherent(&(pdev->dev), kc705_pci_dev->bar_map_memory_size[i], kc705_pci_dev->bar_map_memory[i], kc705_pci_dev->bar_map_addr[i]);
 		}
 	}
+	uninit_list_buffer(kc705_pci_dev->list);
 	vfree(kc705_pci_dev);
 request_irq_failed:
 bar_resource_type_failed:
 pci_resource_len_failed:
+init_list_buffer_failed:
 alloc_kc705_pci_dev_failed:
 	return rtn;
 }
@@ -510,6 +523,7 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 		}
 	}
 
+	uninit_list_buffer(kc705_pci_dev->list);
 	vfree(kc705_pci_dev);
 	mutex_unlock(&work_lock);
 }

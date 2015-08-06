@@ -25,5 +25,6 @@ int read_buffer(char *buffer, int size, list_buffer_t *list);
 int write_buffer(char *buffer, int size, list_buffer_t *list);
 bool list_buffer_empty(list_buffer_t *list);
 void start_test_buffer_list(void);
+int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, list_buffer_t *list);
 
 #endif//#ifndef _XIAOFEI_LIST_BUFFER_H

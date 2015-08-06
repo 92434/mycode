@@ -173,25 +173,25 @@ static int dma_prepare_transfer(kc705_pci_dev_t *kc705_pci_dev, uint64_t addr_tx
 	return rtn;
 }
 
-static int start_dma_mm2s(kc705_pci_dev_t *kc705_pci_dev) {
+static int start_dma_mm2s(kc705_pci_dev_t *kc705_pci_dev, int tx_size) {
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
 	uint32_t value;
 
 	init_completion(&tx_cmp);
-	value = DM_CHANNEL_TX_SIZE;
+	value = (uint32_t)tx_size;
 	writel(value, dma_base_vaddr + MM2S_LENGTH);
 
 	return 0;
 }
 
-static int start_dma_s2mm(kc705_pci_dev_t *kc705_pci_dev) {
+static int start_dma_s2mm(kc705_pci_dev_t *kc705_pci_dev, int rx_size) {
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
 	uint32_t value;
 
 	init_completion(&rx_cmp);
-	value = DM_CHANNEL_RX_SIZE;
+	value = (uint32_t)rx_size;
 	writel(value, dma_base_vaddr + S2MM_LENGTH);
 
 	return 0;
@@ -218,6 +218,39 @@ static int dma_trans_sync(kc705_pci_dev_t *kc705_pci_dev) {
 	return rtn;
 }
 
+static int get_dma_data(kc705_pci_dev_t *kc705_pci_dev) {
+	int rtn = 0;
+	buffer_node_t write;
+	uint64_t addr_tx_bar;
+	uint64_t addr_tx;
+	uint64_t addr_rx_bar;
+	uint64_t addr_rx;
+	uint8_t *memory_tx;
+	uint8_t *memory_rx;
+
+	rtn = get_buffer_node_info(&write, NULL, kc705_pci_dev->list);
+	if(rtn != 0) {
+		rtn = -1;
+		return rtn;
+	}
+
+	addr_tx_bar = (uint64_t)kc705_pci_dev->bar_map_addr[1];
+	addr_rx_bar = (uint64_t)write.buffer_addr;
+	addr_tx = (uint64_t)(BASE_AXI_PCIe_BAR0 + write.write_offset);
+	addr_rx = (uint64_t)(BASE_AXI_PCIe_BAR1 + write.write_offset);
+	memory_tx = (uint8_t *)(kc705_pci_dev->bar_map_memory[1] + write.write_offset);
+	memory_rx = (uint8_t *)(write.buffer + write.write_offset);
+
+	prepare_test_data(memory_tx, DM_CHANNEL_TX_SIZE, memory_rx, DM_CHANNEL_RX_SIZE);
+	dma_prepare_transfer(kc705_pci_dev, addr_tx_bar, addr_rx_bar, addr_tx, addr_rx);
+	start_dma_mm2s(kc705_pci_dev, DM_CHANNEL_TX_SIZE);
+	start_dma_s2mm(kc705_pci_dev, DM_CHANNEL_RX_SIZE);
+	dma_trans_sync(kc705_pci_dev);
+	write_buffer(NULL, DM_CHANNEL_RX_SIZE, kc705_pci_dev->list);
+	test_result(memory_tx, DM_CHANNEL_TX_SIZE, memory_rx, DM_CHANNEL_RX_SIZE);
+	read_buffer(NULL, DM_CHANNEL_RX_SIZE, kc705_pci_dev->list);
+}
+
 void inc_dma_op_count(void);
 int dma_worker_thread(void *ppara) {
 	int rtn = 0;
@@ -234,12 +267,7 @@ int dma_worker_thread(void *ppara) {
 		//schedule_timeout(1*HZ); 
 		//init_dma(kc705_pci_dev);
 		//dump_memory(kc705_pci_dev->bar_map_memory[0], 4 * 0x40);
-		prepare_test_data(kc705_pci_dev);
-		dma_prepare_transfer(kc705_pci_dev, (uint64_t)kc705_pci_dev->bar_map_addr[1], (uint64_t)kc705_pci_dev->bar_map_addr[2], (uint64_t)BASE_AXI_PCIe_BAR0, (uint64_t)BASE_AXI_PCIe_BAR1);
-		start_dma_mm2s(kc705_pci_dev);
-		start_dma_s2mm(kc705_pci_dev);
-		dma_trans_sync(kc705_pci_dev);
-		test_result(kc705_pci_dev);
+		get_dma_data(kc705_pci_dev);
 		inc_dma_op_count();
 		//mydebug("\n");
 	}

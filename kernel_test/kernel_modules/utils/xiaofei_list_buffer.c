@@ -109,9 +109,9 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 		end_offset = write_offset;
 	}
 
-	myprintf("node:%p\n", (void *)node);
-	myprintf("end_offset:%d\n", end_offset);
-	myprintf("node->read_offset:%d\n\n", node->read_offset);
+	//myprintf("node:%p\n", (void *)node);
+	//myprintf("end_offset:%d\n", end_offset);
+	//myprintf("node->read_offset:%d\n\n", node->read_offset);
 
 	data = node->buffer + node->read_offset;
 
@@ -153,7 +153,7 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 		end_offset = node->size;
 	}
 
-	if((write_offset <= read_offset) && (read_offset < end_offset)) {
+	if((write_offset < read_offset) && (read_offset < end_offset)) {
 		myprintf("overwrite from %p!\n", (void *)(node->buffer + read_offset));
 	}
 
@@ -163,9 +163,10 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 
 	data = node->buffer + write_offset;
 
-	myprintf("node:%p\n", (void *)node);
-	myprintf("end_offset:%d\n", end_offset);
-	myprintf("write_offset:%d\n\n", write_offset);
+	//myprintf("node:%p\n", (void *)node);
+	//myprintf("end_offset:%d\n", end_offset);
+	//myprintf("write_offset:%d\n\n", write_offset);
+
 	write_count = end_offset - write_offset;
 
 	if(buffer != NULL) {
@@ -198,36 +199,40 @@ int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, li
 	int write_count, read_count;
 	int write_offset, read_offset;
 
-	if((write_node == NULL) || (read_node == NULL)) {
+	if((write_node == NULL) && (read_node == NULL)) {
 		rtn = -1;
 		return rtn;
 	}
 
-	node = list_entry(list->write, buffer_node_t, list);
-	*write_node = *node;
+	if(write_node != NULL) {
+		node = list_entry(list->write, buffer_node_t, list);
+		*write_node = *node;
 
-	if(write_node->write_offset == write_node->size) {
-		write_node->write_offset = 0;
+		if(write_node->write_offset == write_node->size) {
+			write_node->write_offset = 0;
+		}
+		write_offset = write_node->write_offset;
+		end_offset = write_node->size;
+		write_count = end_offset - write_offset;
+		write_node->avail_for_write = write_count;
+		//printk("write_node->avail_for_write:%d\n", write_node->avail_for_write);
 	}
-	write_offset = write_node->write_offset;
-	end_offset = write_node->size;
-	write_count = end_offset - write_offset;
-	write_node->avail_for_write = write_count;
-	printk("write_node->avail_for_write:%d\n", write_node->avail_for_write);
 
 
-	node = list_entry(list->read, buffer_node_t, list);
-	*read_node = *node;
+	if(read_node != NULL) {
+		node = list_entry(list->read, buffer_node_t, list);
+		*read_node = *node;
 
-	read_offset = read_node->read_offset;
-	end_offset = read_node->write_offset;
-	if((read_offset > read_node->write_offset)) {
-		end_offset = read_node->size;
+		read_offset = read_node->read_offset;
+		end_offset = read_node->write_offset;
+		if((read_offset > read_node->write_offset)) {
+			end_offset = read_node->size;
+		}
+		read_count = end_offset - read_node->read_offset;
+
+		read_node->avail_for_read = read_count;
+		//printk("read_node->avail_for_read:%d\n", read_node->avail_for_read);
 	}
-	read_count = end_offset - read_node->read_offset;
-
-	read_node->avail_for_read = read_count;
-	printk("read_node->avail_for_read:%d\n", read_node->avail_for_read);
 
 	return rtn;
 }

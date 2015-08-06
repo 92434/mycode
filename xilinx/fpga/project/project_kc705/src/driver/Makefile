@@ -7,7 +7,7 @@
 #KERNEL-OBJS += modules-name.o
 
 #KBUILD_CFLAGS += -Dtest_timer
-#KBUILD_CFLAGS += -Dtest_buffer_list
+KBUILD_CFLAGS += -Dtest_buffer_list
 
 #kc705-dma-objs := kc705_pcie_xdma.o
 #KERNEL-OBJS += kc705-dma.o
@@ -15,14 +15,14 @@
 #kc705-cdma-objs := kc705_pcie_xcdma.o
 #KERNEL-OBJS += kc705-cdma.o
 #
-#test-module-objs := test_utils.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o
-#KERNEL-OBJS += test-module.o
+test-module-objs := test_utils.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o
+KERNEL-OBJS += test-module.o
 
 ifdef CDMA
-kc705-module-objs := kc705.o pcie.o dma_common.o utils/xiaofei_kthread.o utils/xiaofei_timer.o axi_cdma.o
+kc705-module-objs := kc705.o pcie.o dma_common.o utils/xiaofei_kthread.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o axi_cdma.o
 KERNEL-OBJS += kc705-module.o
 else
-kc705-module-objs := kc705.o pcie.o dma_common.o utils/xiaofei_kthread.o utils/xiaofei_timer.o axi_dma.o
+kc705-module-objs := kc705.o pcie.o dma_common.o utils/xiaofei_kthread.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o axi_dma.o
 KERNEL-OBJS += kc705-module.o
 endif
 
@@ -47,13 +47,13 @@ include $(BUILD_KO)
 #	sudo dmesg -c
 #
 #
-#install-test:
-#	sudo insmod test-module.ko
-#	dmesg
-#
-#uninstall-test:
-#	sudo rmmod test-module
-#	sudo dmesg -c
+install-test:
+	sudo insmod test-module.ko
+	dmesg
+
+uninstall-test:
+	sudo rmmod test-module
+	sudo dmesg -c
 
 install: kc705-module.ko
 	sudo insmod kc705-module.ko

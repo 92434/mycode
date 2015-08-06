@@ -35,26 +35,27 @@ int write_addr_to_reg(uint32_t *reg, uint64_t addr) {
 	return 0;
 }
 
-void prepare_test_data(kc705_pci_dev_t *kc705_pci_dev) {
-	uint8_t *tx_addr = kc705_pci_dev->bar_map_memory[1];
-	uint8_t *rx_addr = kc705_pci_dev->bar_map_memory[2];
+void prepare_test_data(uint8_t *tx_memory, int tx_size, uint8_t *rx_memory, int rx_size) {
+	uint8_t *tx_addr = tx_memory;
+	uint8_t *rx_addr = rx_memory;
 	int i;
 
-	for(i = 0; i < kc705_pci_dev->bar_map_memory_size[1]; i++) {
+	for(i = 0; i < tx_size; i++) {
 		tx_addr[i] = 8 + i;
 	}
 
-	for(i = 0; i < kc705_pci_dev->bar_map_memory_size[2]; i++) {
+	for(i = 0; i < rx_size; i++) {
 		rx_addr[i] = 0;
 	}
 }
 
-void test_result(kc705_pci_dev_t *kc705_pci_dev) {
-	uint8_t *tx_addr = kc705_pci_dev->bar_map_memory[1];
-	uint8_t *rx_addr = kc705_pci_dev->bar_map_memory[2];
+void test_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_size) {
+	uint8_t *tx_addr = memory_tx;
+	uint8_t *rx_addr = memory_rx;
 
 	int i;
 	bool success = true;
+	int pos;
 
 	//mydebug("tx_addr:%p\n", (void *)tx_addr);
 	//for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
@@ -75,14 +76,23 @@ void test_result(kc705_pci_dev_t *kc705_pci_dev) {
 	//}
 	//printk("\n");
 
-	for(i = 0; i < DM_CHANNEL_RX_SIZE; i++) {
+	for(i = 0; i < rx_size; i++) {
 		if(rx_addr[i] != tx_addr[i]) {
 			success = false;
+			pos = i;
 			break;
 		}
 	}
 
 	if(success == false) {
 		printk("!\n");
+		mydebug("pos:%p\n", pos);
+		for(i = pos; i < 8; i++) {
+			if((i != 0) && (i % 16 == 0)) {
+				printk("\n");
+			}
+			printk("%02x ", rx_addr[i]);
+		}
+		printk("\n");
 	}
 }

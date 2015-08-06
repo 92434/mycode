@@ -1,5 +1,8 @@
 #ifndef _PCIE_H
 #define _PCIE_H
+
+#include "utils/xiaofei_list_buffer.h"
+
 /** @name Macros for PCI probing
  * @{
  */
@@ -47,6 +50,7 @@ typedef struct {
 	void *bar_map_memory[MAX_BARS];
 	dma_addr_t bar_map_addr[MAX_BARS];
 	struct work_struct work;
+	list_buffer_t *list;
 } kc705_pci_dev_t;
 
 extern struct pci_driver kc705_pcie_driver;
