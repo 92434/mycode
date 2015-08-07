@@ -9,6 +9,7 @@
 #include "kc705.h"
 #include "pcie.h"
 #include "dma_common.h"
+#include "pcie_device.h"
 
 /**
  * Macro to export pci_device_id to user space to allow hot plug and
@@ -223,7 +224,7 @@ static void read_pci_root_configuration(struct pci_dev * pdev) {
 //	printk("Subordinate %d\n", me->subordinate);
 	printk("Name %s\n", me->name);
 	printk("Bridge_ctl %d\n", me->bridge_ctl);
-	printk("Bridge %p\n", me->bridge);
+	printk("Bridge %p\n", (void *)me->bridge);
 }
 
 void dump_regs(uint8_t *reg_addr, int size) {
@@ -273,7 +274,7 @@ static void test_performance(void) {
 	//mydebug("stop_time.tv_usec:%lu\n", stop_time.tv_usec);
 	//mydebug("start_time.tv_usec:%lu\n", start_time.tv_usec);
 
-	printk("DMA speed: %d.%06dMB/s\n", (dma_op_count * DM_CHANNEL_TX_SIZE) / (1024 * 1024), ((dma_op_count * DM_CHANNEL_TX_SIZE) % (1024 * 1024)) * (1000 * 1000) / (1024 * 1024));
+	printk("DMA speed: %d.%06dMB/s\n", (int)(dma_op_count * DM_CHANNEL_TX_SIZE) / (1024 * 1024), (int)((dma_op_count * DM_CHANNEL_TX_SIZE) % (1024 * 1024)) * (1000 * 1000) / (1024 * 1024));
 
 	dma_op_count = 0;
 	do_gettimeofday(&start_time);
@@ -302,11 +303,16 @@ static int start_work_loop(void) {
 	INIT_WORK(&(kc705_pci_dev->work), work_func);
 
 	ptimer_data = alloc_timer(1000, timer_func);
+
 	thread = alloc_work_thread(dma_worker_thread, kc705_pci_dev, "%s", "pcie_thread");
+
+	setup_kc705_dev(kc705_pci_dev);
 	return 0;
 }
 
 static void end_work_loop(void) {
+	uninstall_kc705_dev(kc705_pci_dev);
+
 	if(thread != NULL) {
 		free_work_thread(thread);
 	}

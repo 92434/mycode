@@ -1,4 +1,5 @@
 #include <linux/vmalloc.h>
+
 #include "xiaofei_debug.h"
 #include "xiaofei_list_buffer.h"
 
@@ -14,15 +15,25 @@ exit:
 }
 
 
-static bool buffer_node_exist(buffer_node_t *node, list_buffer_t *list) {
+static bool buffer_node_exist(char *buffer, list_buffer_t *list) {
 	bool rtn = false;
 
-	struct list_head *node_list = &(node->list);
-	struct list_head *item, *next;
+	buffer_node_t *node = NULL, *node_next = NULL;
 	
-	list_for_each_safe(item, next, list->write) {
-		if(node_list == item) {
+	if((list == NULL) || (list->first == NULL)) {
+		return rtn;
+	}
+
+	node = list_prepare_entry(node, list->first, list);
+	if(node->buffer == buffer) {
+		rtn = true;
+		return rtn;
+	}
+
+	list_for_each_entry_safe(node, node_next, list->first, list) {
+		if(node->buffer == buffer) {
 			rtn = true;
+			return rtn;
 		}
 	}
 
@@ -37,27 +48,36 @@ buffer_node_t *add_list_buffer_item(char *buffer, void *buffer_addr, int size, l
 		goto exit;
 	}
 
+	if(buffer_node_exist(buffer, list)) {
+		goto exit;
+	}
+
 	node = (buffer_node_t *)vzalloc(sizeof(buffer_node_t));
 	if(node == NULL) {
 		mydebug("alloc buffer_node_t failed.\n");
 		goto exit;
 	}
 
+	printk("alloc node:%p\n", (void *)node);
+
 	node->size = size;
 	node->buffer = buffer;
 	node->buffer_addr = buffer_addr;
 	node->read_offset = size;
 	node->write_offset = 0;
+	node->base_addr_of_list_buffer = list->size;
+	printk("node->base_addr_of_list_buffer:%d\n", node->base_addr_of_list_buffer);
+
+	list->size += node->size;
 	node_list = &(node->list);
+	
 
 	INIT_LIST_HEAD(node_list);
 
-	if(list->write == NULL) {
+	if(list->first == NULL) {
+		list->first = node_list;
 		list->write = node_list;
 		list->read = node_list;
-	} else if(buffer_node_exist(node, list)) {
-		vfree(node);
-		node = NULL;
 	}else {
 		list_add(node_list, list->write);
 	}
@@ -73,14 +93,19 @@ void uninit_list_buffer(list_buffer_t *list) {
 		return;
 	}
 
-	list_for_each_entry_safe(node, node_next, list->write, list) {
-		vfree(node);
-	}
-	
-	if((node != NULL) && (&(node->list) == list->write)) {
-		vfree(node);
+	if(list->first == NULL) {
+		goto release_list;
 	}
 
+	list_for_each_entry_safe(node, node_next, list->first, list) {
+		vfree(node);
+		printk("free node:%p\n", (void *)node);
+	}
+
+	vfree(node);
+	printk("free node:%p\n", (void *)node);
+
+release_list:
 	vfree(list);
 }
 
@@ -183,17 +208,8 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 	return write_count;
 }
 
-bool list_buffer_empty(list_buffer_t *list) {
-	buffer_node_t *node;
-
-	node = list_entry(list->read, buffer_node_t, list);
-
-	return (node->read_offset == node->write_offset);
-}
-
 int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, list_buffer_t *list) {
 	int rtn = 0;
-	char *data;
 	buffer_node_t *node;
 	int end_offset;
 	int write_count, read_count;
@@ -212,6 +228,7 @@ int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, li
 			write_node->write_offset = 0;
 		}
 		write_offset = write_node->write_offset;
+
 		end_offset = write_node->size;
 		write_count = end_offset - write_offset;
 		write_node->avail_for_write = write_count;
@@ -224,17 +241,36 @@ int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, li
 		*read_node = *node;
 
 		read_offset = read_node->read_offset;
-		end_offset = read_node->write_offset;
-		if((read_offset > read_node->write_offset)) {
+		write_offset = read_node->write_offset;
+
+		end_offset = write_offset;
+		if((read_offset > write_offset)) {
 			end_offset = read_node->size;
 		}
-		read_count = end_offset - read_node->read_offset;
+		read_count = end_offset - read_offset;
 
 		read_node->avail_for_read = read_count;
 		//printk("read_node->avail_for_read:%d\n", read_node->avail_for_read);
 	}
 
 	return rtn;
+}
+
+bool read_available(list_buffer_t *list) {
+	buffer_node_t read;
+	bool available = false;
+	int rtn;
+
+	rtn = get_buffer_node_info(NULL, &read, list);
+	if(rtn != 0) {
+		return available;
+	}
+
+	if(read.avail_for_read != 0) {
+		available = true;
+	}
+
+	return available;
 }
 
 #define BUFFER_COUNT 1

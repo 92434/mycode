@@ -86,7 +86,7 @@ void test_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_siz
 
 	if(success == false) {
 		printk("!\n");
-		mydebug("pos:%p\n", pos);
+		mydebug("pos:%d\n", pos);
 		for(i = pos; i < 8; i++) {
 			if((i != 0) && (i % 16 == 0)) {
 				printk("\n");

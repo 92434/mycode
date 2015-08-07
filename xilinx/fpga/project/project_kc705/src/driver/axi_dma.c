@@ -249,6 +249,8 @@ static int get_dma_data(kc705_pci_dev_t *kc705_pci_dev) {
 	write_buffer(NULL, DM_CHANNEL_RX_SIZE, kc705_pci_dev->list);
 	test_result(memory_tx, DM_CHANNEL_TX_SIZE, memory_rx, DM_CHANNEL_RX_SIZE);
 	read_buffer(NULL, DM_CHANNEL_RX_SIZE, kc705_pci_dev->list);
+
+	return rtn;
 }
 
 void inc_dma_op_count(void);
