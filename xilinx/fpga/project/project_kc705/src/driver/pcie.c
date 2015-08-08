@@ -274,7 +274,7 @@ static void test_performance(void) {
 	//mydebug("stop_time.tv_usec:%lu\n", stop_time.tv_usec);
 	//mydebug("start_time.tv_usec:%lu\n", start_time.tv_usec);
 
-	printk("DMA speed: %d.%06dMB/s\n", (int)(dma_op_count * DM_CHANNEL_TX_SIZE) / (1024 * 1024), (int)((dma_op_count * DM_CHANNEL_TX_SIZE) % (1024 * 1024)) * (1000 * 1000) / (1024 * 1024));
+	printk("DMA speed: %u.%06uMB/s\n", (unsigned int)(dma_op_count * DM_CHANNEL_TX_SIZE) / (1024 * 1024), (unsigned int)((dma_op_count * DM_CHANNEL_TX_SIZE) % (1024 * 1024)) * (1000 * 1000) / (1024 * 1024));
 
 	dma_op_count = 0;
 	do_gettimeofday(&start_time);

@@ -168,6 +168,9 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 
 	if(node->write_offset == node->size) {
 		node->write_offset = 0;
+		if(node->read_offset == node->write_offset) {
+			myprintf("overwrite from %p!\n", (void *)(node->buffer + node->write_offset));
+		}
 	}
 	read_offset = node->read_offset;
 	write_offset = node->write_offset;

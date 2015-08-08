@@ -228,6 +228,7 @@ static int get_dma_data(kc705_pci_dev_t *kc705_pci_dev) {
 	uint8_t *memory_tx;
 	uint8_t *memory_rx;
 
+	//mydebug("\n");
 	rtn = get_buffer_node_info(&write, NULL, kc705_pci_dev->list);
 	if(rtn != 0) {
 		rtn = -1;
@@ -248,7 +249,7 @@ static int get_dma_data(kc705_pci_dev_t *kc705_pci_dev) {
 	dma_trans_sync(kc705_pci_dev);
 	write_buffer(NULL, DM_CHANNEL_RX_SIZE, kc705_pci_dev->list);
 	test_result(memory_tx, DM_CHANNEL_TX_SIZE, memory_rx, DM_CHANNEL_RX_SIZE);
-	read_buffer(NULL, DM_CHANNEL_RX_SIZE, kc705_pci_dev->list);
+	//read_buffer(NULL, DM_CHANNEL_RX_SIZE, kc705_pci_dev->list);
 
 	return rtn;
 }

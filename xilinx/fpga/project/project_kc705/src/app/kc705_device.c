@@ -5,23 +5,23 @@
 #include <errno.h>    
 #include <string.h>
 #include <fcntl.h>    
-#include <list.h>    
-
 #include <netinet/in.h>
+#include <sys/mman.h>
+#include <sys/ioctl.h>
 
 #define BUFSIZE 0x1000
 
 //driver struct
 #define PCIE_DEVICE_IOCTL_BASE	'W'
-#define PCIE_DEVICE_IOCTL_GET_NODE_INFO	_IO(PCIE_DEVICE_IOCTL_BASE, 0)
-#define PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE _IO(PCIE_DEVICE_IOCTL_BASE, 1)
+#define PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE	_IO(PCIE_DEVICE_IOCTL_BASE, 0)
+#define PCIE_DEVICE_IOCTL_GET_NODE_INFO	_IO(PCIE_DEVICE_IOCTL_BASE, 1)
 
-typedef struct node_info {
+typedef struct _node_info {
 	int size;
 	int read_offset;
 	int avail_for_read;
 	int base_addr_of_list_buffer;
-} buffer_node_t;
+} node_info_t;
 //driver struct
 
 typedef void (*sig_action_t)(int, siginfo_t *, void *);
@@ -231,7 +231,8 @@ static read_buffer(int fd, int sock_fd, unsigned char *read_buf) {
 		int i;
 		static unsigned int pre_value = 0;
 
-		nread = read(fd, read_buf, BUFSIZE);
+		//nread = read(fd, read_buf, BUFSIZE);
+		nread = read(fd, NULL, BUFSIZE);
 		//printf("nread:%d\n", nread);
 		if(nread <= 0) {
 			continue;
@@ -267,10 +268,10 @@ int main(int argc, char **argv) {
 	//sock_fd = init_udp_client("192.168.1.170", 10000);
 	//sock_fd = init_udp_client("192.168.1.210", 10000);
 	//sock_fd = init_tcp_client("192.168.1.210", 10000);
-	sock_fd = init_tcp_client("192.168.1.175", 10000);
+	//sock_fd = init_tcp_client("192.168.1.175", 10000);
 
 	if ((fd = open(dev, O_RDONLY))<0) {
-		printf("err: can't open serial port!(%s)\n", strerror(errno));
+		printf("err: can't open device(%s)!(%s)\n", dev, strerror(errno));
 		ret = -1;
 		return ret;
 	}
@@ -279,11 +280,19 @@ int main(int argc, char **argv) {
 	//用以下方法将socket设置为非阻塞方式
 	fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 
+	ret = ioctl(fd, PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE, &mmap_size);
+	if (ret != 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+	printf("mmap_size:%d(%x)\n", mmap_size, mmap_size);
 
-	mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (off_t)0);
+	//mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (off_t)0);
+	mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ, MAP_SHARED, fd, (off_t)0);
 	if(mmap_memory == (void *)-1) {
-		printf("xiaofei: %s:%d %s\n", __func__, __LINE__, strerror(errno));
+		printf("xiaofei: %s:%d: %s\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
+		return ret;
 	}
 
 	if(catch_signal(0) == -1) {

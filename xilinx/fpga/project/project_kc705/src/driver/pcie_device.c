@@ -2,6 +2,7 @@
 #include <linux/fs.h>
 #include <linux/sched.h>
 #include <linux/highmem.h>
+#include <linux/poll.h>
 
 #include "pcie.h"
 #include "pcie_device.h"
@@ -21,17 +22,20 @@ static int kc705_open(struct inode *i, struct file *filp) {
 	kc705_pci_dev_t *kc705_pci_dev = container_of(i->i_cdev, kc705_pci_dev_t, cdev);
 	filp->private_data = kc705_pci_dev;
 	init_waitqueue_head(&wq);
+	mydebug("\n");
 	return 0;
 }
 
 static int kc705_close(struct inode *i, struct file *filp) {
-
+	mydebug("\n");
 	return 0;
 }
 
 static ssize_t kc705_read(struct file *filp, char __user * buf, size_t len, loff_t * off) {
 	int rtn = 0;
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)filp->private_data;
+
+	//mydebug("\n");
 
 	if(len == 0) {
 		return rtn;
@@ -49,8 +53,21 @@ static ssize_t kc705_read(struct file *filp, char __user * buf, size_t len, loff
 }
 
 static ssize_t kc705_write(struct file *filp, const char __user * buf, size_t len, loff_t * off) {
-
+	mydebug("\n");
 	return len;
+}
+
+static unsigned int kc705_poll(struct file *filp, poll_table *wait) {
+	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)filp->private_data;
+	unsigned int mask =0;
+
+	/* 把等待队列添加到poll_table */
+	poll_wait(filp, &wq, wait);
+
+	/*返回掩码*/
+	if (read_available(kc705_pci_dev->list))
+		mask = POLLIN | POLLRDNORM;/*设备可读*/
+	return mask;
 }
 
 static int kc705_mmap(struct file *filp, struct vm_area_struct *vma) {
@@ -60,6 +77,8 @@ static int kc705_mmap(struct file *filp, struct vm_area_struct *vma) {
 	unsigned long vma_start;
 	buffer_node_t *node = NULL, *node_next = NULL;
 	list_buffer_t *list = kc705_pci_dev->list;
+
+	mydebug("\n");
 
 	if((list == NULL) || (list->read == NULL)) {
 		return -EAGAIN;
@@ -80,6 +99,7 @@ static int kc705_mmap(struct file *filp, struct vm_area_struct *vma) {
 	if(rtn != 0) {
 		return -EAGAIN;
 	}
+	mydebug("node->buffer:%p node->size:%d\n", node->buffer, node->size);
 	vma_start += node->size;
 	requested_size -= node->size;
 
@@ -88,29 +108,44 @@ static int kc705_mmap(struct file *filp, struct vm_area_struct *vma) {
 		if(rtn != 0) {
 			return -EAGAIN;
 		}
+		mydebug("node->buffer:%p node->size:%d\n", node->buffer, node->size);
 		vma_start += node->size;
 		requested_size -= node->size;
 	}
+	mydebug("requested_size:%d\n", requested_size);
 
 	return 0;
 }
 
 static long kc705_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
+	int ret = 0;
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)filp->private_data;
 	list_buffer_t *list = kc705_pci_dev->list;
 
+	mydebug("\n");
 	switch (cmd) {
 		case PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE:
 			{
 				if (copy_to_user((int *)arg, &list->size, sizeof(int))) {
-					return -EFAULT;
+					mydebug("\n");
+					ret = -EFAULT;
 				}
 			}
 			break;
 		case PCIE_DEVICE_IOCTL_GET_NODE_INFO:
 			{
-				if (copy_to_user((int *)arg, &list->size, sizeof(int))) {
-					return -EFAULT;
+				buffer_node_t read;
+				node_info_t info;
+				ret = get_buffer_node_info(NULL, &read, kc705_pci_dev->list);
+				if(ret != 0) {
+					ret = -EFAULT;
+				}
+				info.size = read.size;
+				info.read_offset = read.read_offset;
+				info.avail_for_read = read.avail_for_read;
+				info.base_addr_of_list_buffer = read.base_addr_of_list_buffer;
+				if (copy_to_user((int *)arg, &info, sizeof(node_info_t))) {
+					ret = -EFAULT;
 				}
 			}
 			break;
@@ -118,7 +153,7 @@ static long kc705_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) 
 			break;
 	}
 
-	return 0;
+	return ret;
 }
 
 static const struct file_operations kc705_fops = {
@@ -129,6 +164,7 @@ static const struct file_operations kc705_fops = {
 	.write = kc705_write,
 	.mmap = kc705_mmap,
 	.unlocked_ioctl = kc705_ioctl,
+	.poll = kc705_poll,
 };
 
 int setup_kc705_dev(kc705_pci_dev_t *kc705_pci_dev) {
