@@ -166,16 +166,15 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 
 	node = list_entry(list->write, buffer_node_t, list);
 
+	read_offset = node->read_offset;
 	if(node->write_offset == node->size) {
 		node->write_offset = 0;
-		if(node->read_offset == node->write_offset) {
-			myprintf("overwrite from %p!\n", (void *)(node->buffer + node->write_offset));
+		if(read_offset == 0) {
+			myprintf("overwrite from %p!\n", (void *)(node->buffer + read_offset));
 		}
 	}
-	read_offset = node->read_offset;
 	write_offset = node->write_offset;
 	
-
 	end_offset = write_offset + size;
 	if(end_offset > node->size) {
 		end_offset = node->size;
