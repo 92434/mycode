@@ -138,9 +138,9 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 	//myprintf("end_offset:%d\n", end_offset);
 	//myprintf("node->read_offset:%d\n\n", node->read_offset);
 
-	data = node->buffer + node->read_offset;
+	data = node->buffer + read_offset;
 
-	read_count = end_offset - node->read_offset;
+	read_count = end_offset - read_offset;
 
 	if(buffer != NULL) {
 		memcpy(buffer, data, read_count);
@@ -167,6 +167,10 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 	node = list_entry(list->write, buffer_node_t, list);
 
 	read_offset = node->read_offset;
+	if(read_offset == node->size) {
+		node->read_offset = 0;
+	}
+
 	if(node->write_offset == node->size) {
 		node->write_offset = 0;
 		if(read_offset == 0) {
@@ -182,10 +186,6 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 
 	if((write_offset < read_offset) && (read_offset < end_offset)) {
 		myprintf("overwrite from %p!\n", (void *)(node->buffer + read_offset));
-	}
-
-	if(read_offset == node->size) {
-		node->read_offset = 0;
 	}
 
 	data = node->buffer + write_offset;
