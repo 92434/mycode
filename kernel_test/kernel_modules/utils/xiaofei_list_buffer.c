@@ -121,7 +121,7 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 	write_offset = node->write_offset;
 
 	if(read_offset == write_offset) {
-		return read_count;
+		goto exit;
 	}
 
 	end_offset = read_offset + size;
@@ -148,6 +148,7 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 
 	read_offset += read_count;
 
+exit:
 	if(read_offset == node->size) {
 		list->read = list->read->next;
 	}
@@ -171,13 +172,17 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 	if(node->write_offset == node->size) {
 		node->write_offset = 0;
 		if(read_offset == 0) {
+			buffer_node_t *node1;
+
+			node1 = list_entry(list->read, buffer_node_t, list);
 			myprintf("overwrite from %p!\n", (void *)(node->buffer + read_offset));
+			myprintf("overwrite:node->read_offset:%x\n", node->read_offset);
+			myprintf("overwrite:node1->buffer:%x\n", node1->buffer);
+			myprintf("overwrite:node1->read_offset:%x\n", node1->read_offset);
+			myprintf("overwrite:node1->write_offset:%x\n", node1->write_offset);
 		}
 	}
 
-	if(read_offset == node->size) {
-		node->read_offset = 0;
-	}
 	write_offset = node->write_offset;
 	
 	end_offset = write_offset + size;
@@ -207,6 +212,9 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 	}
 
 	node->write_offset = write_offset;
+	if(read_offset == node->size) {
+		node->read_offset = 0;
+	}
 
 	return write_count;
 }

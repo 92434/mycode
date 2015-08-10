@@ -341,12 +341,12 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		goto init_list_buffer_failed;
 	}
 
-	kc705_pci_dev->bar_map_memory_size[0] = 0;
-	kc705_pci_dev->bar_map_memory_size[1] = AXI_PCIe_BAR1_SIZE;
-	kc705_pci_dev->bar_map_memory_size[2] = AXI_PCIe_BAR1_SIZE;
-	kc705_pci_dev->bar_map_memory_size[3] = AXI_PCIe_BAR1_SIZE;
+	//kc705_pci_dev->bar_map_memory_size[0] = 0;
+	for(i = 1; i < MAX_MAP_BARS; i++) {
+		kc705_pci_dev->bar_map_memory_size[i] = AXI_PCIe_BAR1_SIZE;
+	}
 	//alloc memory for cdma
-	for(i = 0; i < MAX_BARS; i++) {
+	for(i = 0; i < MAX_MAP_BARS; i++) {
 		if(kc705_pci_dev->bar_map_memory_size[i] != 0) {
 			kc705_pci_dev->bar_map_memory[i] = dma_zalloc_coherent(&(pdev->dev), kc705_pci_dev->bar_map_memory_size[i], &(kc705_pci_dev->bar_map_addr[i]), GFP_KERNEL);
 			if(kc705_pci_dev->bar_map_memory[i] == NULL) {
@@ -483,7 +483,7 @@ pci_set_dma_mask_failed:
 pci_request_regions_failed:
 	pci_disable_device(pdev);
 pci_enable_device_failed:
-	for(i = 0; i < MAX_BARS; i++) {
+	for(i = 0; i < MAX_MAP_BARS; i++) {
 		if(kc705_pci_dev->bar_map_memory[i] != 0) {
 			dma_free_coherent(&(pdev->dev), kc705_pci_dev->bar_map_memory_size[i], kc705_pci_dev->bar_map_memory[i], kc705_pci_dev->bar_map_addr[i]);
 		}
@@ -523,7 +523,7 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 
 	pci_disable_device(pdev);
 
-	for(i = 0; i < MAX_BARS; i++) {
+	for(i = 0; i < MAX_MAP_BARS; i++) {
 		if(kc705_pci_dev->bar_map_memory[i] != 0) {
 			dma_free_coherent(&(pdev->dev), kc705_pci_dev->bar_map_memory_size[i], kc705_pci_dev->bar_map_memory[i], kc705_pci_dev->bar_map_addr[i]);
 		}

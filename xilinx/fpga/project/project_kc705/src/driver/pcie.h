@@ -34,6 +34,7 @@
 #define AXI_PCIe_BAR1_SIZE 0x10000
 
 #define MAX_BARS 6/**< Maximum number of BARs */
+#define MAX_MAP_BARS 256/**< Maximum number of BARs */
 
 #define DM_CHANNEL_TX_SIZE 0x1000
 #define DM_CHANNEL_RX_SIZE 0x1000
@@ -47,9 +48,9 @@ typedef struct {
 		void __iomem * base_vaddr; /**< VA - mapped address */
 	} bar_info[MAX_BARS];
 	int msi_enable;
-	int bar_map_memory_size[MAX_BARS];
-	void *bar_map_memory[MAX_BARS];
-	dma_addr_t bar_map_addr[MAX_BARS];
+	int bar_map_memory_size[MAX_MAP_BARS];
+	void *bar_map_memory[MAX_MAP_BARS];
+	dma_addr_t bar_map_addr[MAX_MAP_BARS];
 	struct work_struct work;
 	list_buffer_t *list;
 	struct cdev cdev;
