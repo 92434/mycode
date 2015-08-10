@@ -34,7 +34,7 @@
 #define AXI_PCIe_BAR1_SIZE 0x10000
 
 #define MAX_BARS 6/**< Maximum number of BARs */
-#define MAX_MAP_BARS 256/**< Maximum number of BARs */
+#define MAX_MAP_BARS 1024/**< Maximum number of MAX_MAP_BARS */
 
 #define DM_CHANNEL_TX_SIZE 0x1000
 #define DM_CHANNEL_RX_SIZE 0x1000

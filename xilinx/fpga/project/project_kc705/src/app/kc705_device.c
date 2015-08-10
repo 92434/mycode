@@ -180,7 +180,7 @@ static int tcp_send_data(int fd, unsigned char *buffer, unsigned int len) {
 	return rtn;
 }
 
-#if 1
+#if 0
 static read_buffer(int fd, int sock_fd, unsigned char *read_buf) {
 	struct timeval tv;
 	fd_set fds;
@@ -199,7 +199,8 @@ static read_buffer(int fd, int sock_fd, unsigned char *read_buf) {
 				int i;
 				static unsigned int pre_value = 0;
 
-				nread = read(fd, read_buf, BUFSIZE);
+				//nread = read(fd, read_buf, BUFSIZE);
+				nread = read(fd, NULL, BUFSIZE);
 				//printf("nread:%d\n", nread);
 				if(nread <= 0) {
 					continue;
