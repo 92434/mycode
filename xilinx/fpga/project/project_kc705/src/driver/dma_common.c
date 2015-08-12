@@ -9,7 +9,7 @@
 int wait_for_iostatus_timeout(unsigned long count, uint8_t *paddr, uint32_t mask, uint32_t expection) {
 #define XILINX_VDMA_LOOP_COUNT 1000000
 	uint32_t value = 0;
-	int rtn = 0;
+	int ret = 0;
 
 	if(count == 0) {
 		count = XILINX_VDMA_LOOP_COUNT;
@@ -21,10 +21,10 @@ int wait_for_iostatus_timeout(unsigned long count, uint8_t *paddr, uint32_t mask
 	} while(count != 0 && value != expection);
 
 	if(count == 0) {
-		rtn = -1;
+		ret = -1;
 	}
 
-	return rtn;
+	return ret;
 }
 
 int write_addr_to_reg(uint32_t *reg, uint64_t addr) {

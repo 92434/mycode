@@ -98,7 +98,7 @@ irqreturn_t isr(int irq, void *dev_id)
 }
 
 static int init_dma(kc705_pci_dev_t *kc705_pci_dev) {
-	int rtn;
+	int ret;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_CDMA_LITE); 
 
@@ -109,8 +109,8 @@ static int init_dma(kc705_pci_dev_t *kc705_pci_dev) {
 	//reset
 	value = default_value | BITMASK(2);//reset bit
 	writel(value, cdma_base_vaddr + CDMA_CR);
-	rtn = wait_for_iostatus_timeout(0, cdma_base_vaddr + CDMA_CR, BITMASK(2), 0);
-	if(rtn != 0) {
+	ret = wait_for_iostatus_timeout(0, cdma_base_vaddr + CDMA_CR, BITMASK(2), 0);
+	if(ret != 0) {
 		mydebug("time out!\n");
 	}
 
@@ -129,17 +129,17 @@ static int init_dma(kc705_pci_dev_t *kc705_pci_dev) {
 	writel(value, cdma_base_vaddr + CDMA_CR);
 
 
-	return rtn;
+	return ret;
 }
 
 static int alloc_sg_des_item(uint32_t SA, uint32_t DA, uint32_t CONTROL, struct list_head *sg_list) {
-	int rtn = 0;
+	int ret = 0;
 	kc705_sg_item_info_t *sg_item = (kc705_sg_item_info_t *)vzalloc(sizeof(kc705_sg_item_info_t));
 
 	if(sg_item == NULL) {
-		rtn = -1;
+		ret = -1;
 		mydebug("alloc sg_item failed.\n");
-		return rtn;
+		return ret;
 	}
 
 	sg_item->des.des.SA = SA;
@@ -159,50 +159,50 @@ static void free_sg_des_items(struct list_head *sg_list) {
 }
 
 static int alloc_sg_list_chain(uint32_t tx_axiaddr, uint32_t rx_axiaddr) {
-	int rtn = 0;
+	int ret = 0;
 	int offset = 0;
 
 	free_sg_des_items(&sg_descripter_list);
 
-	rtn = alloc_sg_des_item(
+	ret = alloc_sg_des_item(
 			BASE_Translation_BRAM + offset,
 			BASE_AXI_PCIe_CTL + AXIBAR2PCIEBAR_1U,
 			sizeof(uint64_t),
 			&sg_descripter_list
 		);
-	if(rtn != 0) {
+	if(ret != 0) {
 		goto failed;
 	}
 
 	offset += sizeof(uint64_t);
 
-	rtn = alloc_sg_des_item(tx_axiaddr, BASE_AXI_DDR_ADDR, DM_CHANNEL_TX_SIZE, &sg_descripter_list);
-	if(rtn != 0) {
+	ret = alloc_sg_des_item(tx_axiaddr, BASE_AXI_DDR_ADDR, DM_CHANNEL_TX_SIZE, &sg_descripter_list);
+	if(ret != 0) {
 		goto failed;
 	}
 
-	rtn = alloc_sg_des_item(
+	ret = alloc_sg_des_item(
 			BASE_Translation_BRAM + offset,
 			BASE_AXI_PCIe_CTL + AXIBAR2PCIEBAR_1U,
 			sizeof(uint64_t),
 			&sg_descripter_list
 		);
-	if(rtn != 0) {
+	if(ret != 0) {
 		goto failed;
 	}
 
-	rtn = alloc_sg_des_item(BASE_AXI_DDR_ADDR, rx_axiaddr, DM_CHANNEL_RX_SIZE, &sg_descripter_list);
-	if(rtn != 0) {
+	ret = alloc_sg_des_item(BASE_AXI_DDR_ADDR, rx_axiaddr, DM_CHANNEL_RX_SIZE, &sg_descripter_list);
+	if(ret != 0) {
 		goto failed;
 	}
 
-	return rtn;
+	return ret;
 
 failed:
-	rtn = -1;
+	ret = -1;
 	free_sg_des_items(&sg_descripter_list);
 
-	return rtn;
+	return ret;
 }
 
 static int flush_sg_des_items(kc705_transfer_descriptor_t *axi_pcie_sg_port, struct list_head *sg_list) {
@@ -252,18 +252,18 @@ static int prepare_bars_map(kc705_pci_dev_t *kc705_pci_dev, uint64_t addr_sg_bar
 }
 
 static int dma_prepare_transfer(kc705_pci_dev_t *kc705_pci_dev, uint64_t addr_sg_bar, uint64_t addr_tx_bar, uint64_t addr_rx_bar, uint64_t addr_tx, uint64_t addr_rx) {
-	int rtn = 0;
+	int ret = 0;
 
 	prepare_bars_map(kc705_pci_dev, addr_sg_bar, addr_tx_bar, addr_rx_bar);
 
-	rtn = alloc_sg_list_chain(addr_tx, addr_rx);
-	if(rtn != 0) {
-		return rtn;
+	ret = alloc_sg_list_chain(addr_tx, addr_rx);
+	if(ret != 0) {
+		return ret;
 	}
 
-	rtn = flush_sg_des_items(kc705_pci_dev->bar_map_memory[0], &sg_descripter_list);
+	ret = flush_sg_des_items(kc705_pci_dev->bar_map_memory[0], &sg_descripter_list);
 
-	return rtn;
+	return ret;
 }
 
 static int start_cdma(kc705_pci_dev_t *kc705_pci_dev) {
@@ -281,21 +281,21 @@ static int start_cdma(kc705_pci_dev_t *kc705_pci_dev) {
 
 static int dma_trans_sync(kc705_pci_dev_t *kc705_pci_dev) {
 	unsigned long tmo;
-	int rtn = 0;
+	int ret = 0;
 
 	tmo = msecs_to_jiffies(1000);
 	tmo = wait_for_completion_timeout(&cmp, tmo);
 	if (0 == tmo) {
 		mydebug("transfer timed out!\n");
-		rtn = -1;
+		ret = -1;
 	}
 
-	return rtn;
+	return ret;
 }
 
 void inc_dma_op_count(void);
 int dma_worker_thread(void *ppara) {
-	int rtn = 0;
+	int ret = 0;
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
 
 	init_dma(kc705_pci_dev);
@@ -318,5 +318,5 @@ int dma_worker_thread(void *ppara) {
 		//mydebug("\n");
 	}
 
-	return rtn;
+	return ret;
 }

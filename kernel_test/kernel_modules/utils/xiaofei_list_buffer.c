@@ -176,7 +176,7 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 			node1 = list_entry(list->read, buffer_node_t, list);
 			myprintf("overwrite from %p!\n", (void *)(node->buffer + read_offset));
 			myprintf("overwrite:node->read_offset:%x\n", node->read_offset);
-			myprintf("overwrite:node1->buffer:%x\n", node1->buffer);
+			myprintf("overwrite:node1->buffer:%p\n", node1->buffer);
 			myprintf("overwrite:node1->read_offset:%x\n", node1->read_offset);
 			myprintf("overwrite:node1->write_offset:%x\n", node1->write_offset);
 		}
@@ -195,7 +195,7 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 		node1 = list_entry(list->read, buffer_node_t, list);
 		myprintf("overwrite from %p!\n", (void *)(node->buffer + read_offset));
 		myprintf("overwrite:node->read_offset:%x\n", node->read_offset);
-		myprintf("overwrite:node1->buffer:%x\n", node1->buffer);
+		myprintf("overwrite:node1->buffer:%p\n", node1->buffer);
 		myprintf("overwrite:node1->read_offset:%x\n", node1->read_offset);
 		myprintf("overwrite:node1->write_offset:%x\n", node1->write_offset);
 	}

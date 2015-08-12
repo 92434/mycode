@@ -7,9 +7,6 @@
 #include "pcie.h"
 #include "dma_common.h"
 
-#define BASE_AXI_DMA_LITE 0x8100c000
-#define OFFSET_AXI_DMA_LITE (BASE_AXI_DMA_LITE - BASE_AXI_PCIe)
-
 //AXI DMA Register Summary
 #define MM2S_DMACR 0x00 //MM2S DMA Control register
 #define MM2S_DMASR 0x04 //MM2S DMA Status register
@@ -23,40 +20,24 @@
 #define S2MM_DA_MSB 0x4C //S2MM Destination Address. Upper 32 bit address.
 #define S2MM_LENGTH 0x58 //S2MM Buffer Length (Bytes)
 
-static struct completion tx_cmp;
-static struct completion rx_cmp;
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
-irqreturn_t isr(int irq, void *dev_id, struct pt_regs *regs)
-#else
-irqreturn_t isr(int irq, void *dev_id)
-#endif
-{
+static irqreturn_t process_isr(void *ppara) {
 	irqreturn_t status = IRQ_NONE;
-
-	struct pci_dev *pdev = dev_id;
-	kc705_pci_dev_t * kc705_pci_dev = pci_get_drvdata(pdev);
-	uint8_t *base_vaddr;
-	uint8_t *dma_base_vaddr;
+	pcie_dma_t *dma = (pcie_dma_t *)ppara;
+	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
+	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
+	uint8_t *dma_base_vaddr = base_vaddr + dma->dma_lite_offset; 
 	uint32_t value;
 
-	if(kc705_pci_dev == NULL) {
-		mydebug("\n");
-		return status;
-	}
-
-	base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
 
 	value = readl(dma_base_vaddr + MM2S_DMASR);
 	if((value & BITMASK(12)/*IOC_Irq*/) != 0) {
-		complete(&tx_cmp);
+		complete(&dma->tx_cmp);
 		//mydebug("\n");
 		value |= BITMASK(12);
 		writel(value, dma_base_vaddr + MM2S_DMASR);
 		status = IRQ_HANDLED;
 	} else if((value & BITMASK(14)/*Err_Irq*/) != 0) {
-		complete(&tx_cmp);
+		complete(&dma->tx_cmp);
 		mydebug("\n");
 		value |= BITMASK(14);
 		writel(value, dma_base_vaddr + MM2S_DMASR);
@@ -65,13 +46,13 @@ irqreturn_t isr(int irq, void *dev_id)
 
 	value = readl(dma_base_vaddr + S2MM_DMASR);
 	if((value & BITMASK(12)/*IOC_Irq*/) != 0) {
-		complete(&rx_cmp);
+		complete(&dma->rx_cmp);
 		//mydebug("\n");
 		value |= BITMASK(12);
 		writel(value, dma_base_vaddr + S2MM_DMASR);
 		status = IRQ_HANDLED;
 	} else if((value & BITMASK(14)/*Err_Irq*/) != 0) {
-		complete(&rx_cmp);
+		complete(&dma->rx_cmp);
 		mydebug("\n");
 		value |= BITMASK(14);
 		writel(value, dma_base_vaddr + S2MM_DMASR);
@@ -82,29 +63,23 @@ irqreturn_t isr(int irq, void *dev_id)
 	return status;
 }
 
-
-static int prepare_bars_map(kc705_pci_dev_t *kc705_pci_dev, uint64_t addr_tx_bar, uint64_t addr_rx_bar) {
+static int prepare_bars_map(pcie_dma_t *dma, uint64_t tx_bar_map_addr, uint64_t rx_bar_map_addr) {
+	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint32_t *bar_vddr_map_ctrl_reg = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + AXIBAR2PCIEBAR_0U);
+	uint32_t *bar_vddr_map_ctrl_reg = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset);
 
-	//bind bar0 
-	write_addr_to_reg(bar_vddr_map_ctrl_reg, addr_tx_bar);
-
-	bar_vddr_map_ctrl_reg++;
-	bar_vddr_map_ctrl_reg++;
-
-	//bind bar1 
-	write_addr_to_reg(bar_vddr_map_ctrl_reg, addr_rx_bar);
+	write_addr_to_reg(bar_vddr_map_ctrl_reg, tx_bar_map_addr);
+	bar_vddr_map_ctrl_reg += 2;
+	write_addr_to_reg(bar_vddr_map_ctrl_reg, rx_bar_map_addr);
 
 	return 0;
 }
 
-static int init_dma(kc705_pci_dev_t *kc705_pci_dev) {
-	int rtn;
+static int init_dma(pcie_dma_t *dma) {
+	int ret;
+	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
-	//uint64_t addr_tx = (uint64_t)BASE_AXI_PCIe_BAR0;
-	//uint64_t addr_rx = (uint64_t)BASE_AXI_PCIe_BAR1;
+	uint8_t *dma_base_vaddr = base_vaddr + dma->dma_lite_offset; 
 
 	uint32_t value;
 	uint32_t mask;
@@ -114,8 +89,8 @@ static int init_dma(kc705_pci_dev_t *kc705_pci_dev) {
 	mask = BITMASK(2)/*reset bit*/;
 	value = default_value | mask;
 	writel(value, dma_base_vaddr + MM2S_DMACR);
-	rtn = wait_for_iostatus_timeout(0, dma_base_vaddr + MM2S_DMACR, mask, 0);
-	if(rtn != 0) {
+	ret = wait_for_iostatus_timeout(0, dma_base_vaddr + MM2S_DMACR, mask, 0);
+	if(ret != 0) {
 		mydebug("time out!\n");
 	}
 
@@ -123,143 +98,144 @@ static int init_dma(kc705_pci_dev_t *kc705_pci_dev) {
 	value = readl(dma_base_vaddr + MM2S_DMACR) | mask;
 	writel(value, dma_base_vaddr + MM2S_DMACR);
 	mask = BITMASK(0)/*Halted bit*/;
-	rtn = wait_for_iostatus_timeout(0, dma_base_vaddr + MM2S_DMASR, mask, 0);
-	if(rtn != 0) {
+	ret = wait_for_iostatus_timeout(0, dma_base_vaddr + MM2S_DMASR, mask, 0);
+	if(ret != 0) {
 		mydebug("time out!\n");
 	}
 	mask = BITMASK(12)/*IOC_IrqEn*/ | BITMASK(14)/*Err_IrqEn*/;
 	value = readl(dma_base_vaddr + MM2S_DMACR) | mask;
 	writel(value, dma_base_vaddr + MM2S_DMACR);
-	//value = (uint32_t)(addr_tx);
-	//writel(value, dma_base_vaddr + MM2S_SA);
-
 
 	mask = BITMASK(0)/*RS bit*/;
 	value = readl(dma_base_vaddr + S2MM_DMACR) | mask;
 	writel(value, dma_base_vaddr + S2MM_DMACR);
 	mask = BITMASK(0)/*Halted bit*/;
-	rtn = wait_for_iostatus_timeout(0, dma_base_vaddr + S2MM_DMASR, mask, 0);
-	if(rtn != 0) {
+	ret = wait_for_iostatus_timeout(0, dma_base_vaddr + S2MM_DMASR, mask, 0);
+	if(ret != 0) {
 		mydebug("time out!\n");
 	}
 	mask = BITMASK(12)/*IOC_IrqEn*/ | BITMASK(14)/*Err_IrqEn*/;
 	value = readl(dma_base_vaddr + S2MM_DMACR) | mask;
 	writel(value, dma_base_vaddr + S2MM_DMACR);
-	//value = (uint32_t)(addr_rx);
-	//writel(value, dma_base_vaddr + S2MM_DA);
 
-	return rtn;
+	return ret;
 }
 
-static int transfer_des_setting(kc705_pci_dev_t *kc705_pci_dev, uint64_t addr_tx, uint64_t addr_rx) {
+static int transfer_des_setting(pcie_dma_t *dma, uint64_t tx_axi_addr, uint64_t rx_axi_addr) {
+	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
+	uint8_t *dma_base_vaddr = base_vaddr + dma->dma_lite_offset; 
 	uint32_t value;
 
-	value = (uint32_t)(addr_tx);
+	value = (uint32_t)(tx_axi_addr);
 	writel(value, dma_base_vaddr + MM2S_SA);
 
-	value = (uint32_t)(addr_rx);
+	value = (uint32_t)(rx_axi_addr);
 	writel(value, dma_base_vaddr + S2MM_DA);
 
 	return 0;
 }
 
-static int dma_prepare_transfer(kc705_pci_dev_t *kc705_pci_dev, uint64_t addr_tx_bar, uint64_t addr_rx_bar, uint64_t addr_tx, uint64_t addr_rx) {
-	int rtn = 0;
+static int dma_prepare_transfer(pcie_dma_t *dma, uint64_t tx_bar_map_addr, uint64_t rx_bar_map_addr, uint64_t tx_axi_addr, uint64_t rx_axi_addr) {
+	int ret = 0;
 
-	prepare_bars_map(kc705_pci_dev, addr_tx_bar, addr_rx_bar);
-	transfer_des_setting(kc705_pci_dev, addr_tx, addr_rx);
-	return rtn;
+	prepare_bars_map(dma, tx_bar_map_addr, rx_bar_map_addr);
+	transfer_des_setting(dma, tx_axi_addr, rx_axi_addr);
+	return ret;
 }
 
-static int start_dma_mm2s(kc705_pci_dev_t *kc705_pci_dev, int tx_size) {
+static int start_dma_mm2s(pcie_dma_t *dma, int tx_size) {
+	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
+	uint8_t *dma_base_vaddr = base_vaddr + dma->dma_lite_offset; 
 	uint32_t value;
 
-	init_completion(&tx_cmp);
+	init_completion(&dma->tx_cmp);
 	value = (uint32_t)tx_size;
 	writel(value, dma_base_vaddr + MM2S_LENGTH);
 
 	return 0;
 }
 
-static int start_dma_s2mm(kc705_pci_dev_t *kc705_pci_dev, int rx_size) {
+static int start_dma_s2mm(pcie_dma_t *dma, int rx_size) {
+	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint8_t *dma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_DMA_LITE); 
+	uint8_t *dma_base_vaddr = base_vaddr + dma->dma_lite_offset; 
 	uint32_t value;
 
-	init_completion(&rx_cmp);
+	init_completion(&dma->rx_cmp);
 	value = (uint32_t)rx_size;
 	writel(value, dma_base_vaddr + S2MM_LENGTH);
 
 	return 0;
 }
 
-static int dma_trans_sync(kc705_pci_dev_t *kc705_pci_dev) {
+static int dma_trans_sync(pcie_dma_t *dma) {
 	unsigned long tmo;
-	int rtn = 0;
+	int ret = 0;
 
 	tmo = msecs_to_jiffies(1000);
-	tmo = wait_for_completion_timeout(&tx_cmp, tmo);
+	tmo = wait_for_completion_timeout(&dma->tx_cmp, tmo);
 	if (0 == tmo) {
 		printk("tx transfer timed out!\n");
-		rtn = -1;
+		ret = -1;
 	}
 
 	tmo = msecs_to_jiffies(1000);
-	tmo = wait_for_completion_timeout(&rx_cmp, tmo);
+	tmo = wait_for_completion_timeout(&dma->rx_cmp, tmo);
 	if (0 == tmo) {
 		printk("rx transfer timed out!\n");
-		rtn = -1;
+		ret = -1;
 	}
 
-	return rtn;
+	return ret;
 }
 
-static int get_dma_data(kc705_pci_dev_t *kc705_pci_dev) {
-	int rtn = 0;
+static int get_dma_data(pcie_dma_t *dma) {
+	int ret = 0;
 	buffer_node_t write;
-	uint64_t addr_tx_bar;
-	uint64_t addr_tx;
-	uint64_t addr_rx_bar;
-	uint64_t addr_rx;
-	uint8_t *memory_tx;
-	uint8_t *memory_rx;
+
+	uint8_t *tx_bar_map_memory;
+	uint8_t *rx_bar_map_memory;
+	uint64_t tx_bar_map_addr;
+	uint64_t rx_bar_map_addr;
+
+	uint64_t tx_axi_addr;
+	uint64_t rx_axi_addr;
 
 	//mydebug("\n");
-	rtn = get_buffer_node_info(&write, NULL, kc705_pci_dev->list);
-	if(rtn != 0) {
-		rtn = -1;
-		return rtn;
+	ret = get_buffer_node_info(&write, NULL, dma->list);
+	if(ret != 0) {
+		ret = -1;
+		return ret;
 	}
 
-	addr_tx_bar = (uint64_t)kc705_pci_dev->bar_map_addr[1];
-	addr_rx_bar = (uint64_t)write.buffer_addr;
-	addr_tx = (uint64_t)(BASE_AXI_PCIe_BAR0 + write.write_offset);
-	addr_rx = (uint64_t)(BASE_AXI_PCIe_BAR1 + write.write_offset);
-	memory_tx = (uint8_t *)(kc705_pci_dev->bar_map_memory[1] + write.write_offset);
-	memory_rx = (uint8_t *)(write.buffer + write.write_offset);
+	tx_bar_map_memory = (uint8_t *)(dma->bar_map_memory[1] + write.write_offset);
+	rx_bar_map_memory = (uint8_t *)(write.buffer + write.write_offset);
+	prepare_test_data(tx_bar_map_memory, DMA_BLOCK_SIZE, rx_bar_map_memory, DMA_BLOCK_SIZE);
 
-	prepare_test_data(memory_tx, DM_CHANNEL_TX_SIZE, memory_rx, DM_CHANNEL_RX_SIZE);
-	dma_prepare_transfer(kc705_pci_dev, addr_tx_bar, addr_rx_bar, addr_tx, addr_rx);
-	start_dma_mm2s(kc705_pci_dev, DM_CHANNEL_TX_SIZE);
-	start_dma_s2mm(kc705_pci_dev, DM_CHANNEL_RX_SIZE);
-	dma_trans_sync(kc705_pci_dev);
-	write_buffer(NULL, DM_CHANNEL_RX_SIZE, kc705_pci_dev->list);
-	test_result(memory_tx, DM_CHANNEL_TX_SIZE, memory_rx, DM_CHANNEL_RX_SIZE);
-	//read_buffer(NULL, DM_CHANNEL_RX_SIZE, kc705_pci_dev->list);
+	tx_bar_map_addr = (uint64_t)dma->bar_map_addr[1];
+	rx_bar_map_addr = (uint64_t)write.buffer_addr;
+	tx_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_0 + write.write_offset);
+	rx_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_1 + write.write_offset);
+	dma_prepare_transfer(dma, tx_bar_map_addr, rx_bar_map_addr, tx_axi_addr, rx_axi_addr);
 
-	return rtn;
+	start_dma_mm2s(dma, DMA_BLOCK_SIZE);
+	start_dma_s2mm(dma, DMA_BLOCK_SIZE);
+	dma_trans_sync(dma);
+	write_buffer(NULL, DMA_BLOCK_SIZE, dma->list);
+	test_result(tx_bar_map_memory, DMA_BLOCK_SIZE, rx_bar_map_memory, DMA_BLOCK_SIZE);
+	//read_buffer(NULL, DMA_BLOCK_SIZE, dma->list);
+
+	return ret;
 }
 
 void inc_dma_op_count(void);
-int dma_worker_thread(void *ppara) {
-	int rtn = 0;
-	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
+static int dma_worker_thread(void *ppara) {
+	int ret = 0;
+	pcie_dma_t *dma = (pcie_dma_t *)ppara;
 
-	init_dma(kc705_pci_dev);
+	init_dma(dma);
 
 	while(true) {
 		if(kthread_should_stop()) {
@@ -268,12 +244,17 @@ int dma_worker_thread(void *ppara) {
 
 		set_current_state(TASK_UNINTERRUPTIBLE);  
 		//schedule_timeout(1*HZ); 
-		//init_dma(kc705_pci_dev);
-		//dump_memory(kc705_pci_dev->bar_map_memory[0], 4 * 0x40);
-		get_dma_data(kc705_pci_dev);
+		//init_dma(dma);
+		//dump_memory(dma->bar_map_memory[0], 4 * 0x40);
+		get_dma_data(dma);
 		inc_dma_op_count();
 		//mydebug("\n");
 	}
 
-	return rtn;
+	return ret;
 }
+
+dma_op_t axi_dma_op = {
+	.process_isr = process_isr,
+	.thread_func = dma_worker_thread,
+};

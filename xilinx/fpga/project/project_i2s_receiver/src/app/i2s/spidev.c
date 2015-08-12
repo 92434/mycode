@@ -62,7 +62,7 @@ static const struct st_cmd cmds[] =
 };
 
 static int reg_op(int fd, unsigned char reg, unsigned char *pvalue, read_write_t read_write) {
-	int rtn = 0;
+	int ret = 0;
 #define BUFFER_LEN 128
 	uint8_t tx[BUFFER_LEN] = {0xff};
 	uint8_t rx[BUFFER_LEN] = {0xff};
@@ -109,50 +109,50 @@ static int reg_op(int fd, unsigned char reg, unsigned char *pvalue, read_write_t
 	}
 
 	printf("%s", "send:");
-	for (rtn = 0; rtn < ptr_tx->len; rtn++) {
-		if ((rtn != 0) && (rtn % 16 == 0))
+	for (ret = 0; ret < ptr_tx->len; ret++) {
+		if ((ret != 0) && (ret % 16 == 0))
 			puts("");
-		printf("%.2X ", tx[rtn]);
+		printf("%.2X ", tx[ret]);
 	}
 
 	puts("");
 
-	rtn = ioctl(fd, SPI_IOC_MESSAGE(msg_count), tr);
-	if (rtn < 1)
+	ret = ioctl(fd, SPI_IOC_MESSAGE(msg_count), tr);
+	if (ret < 1)
 		pabort("can't send spi message");
 
 
 	printf("%s", "receive:");
-	for (rtn = 0; rtn < ptr_rx->len; rtn++) {
-		if ((rtn != 0) && (rtn % 16 == 0))
+	for (ret = 0; ret < ptr_rx->len; ret++) {
+		if ((ret != 0) && (ret % 16 == 0))
 			puts("");
-		printf("%.2X ", rx[rtn]);
-		*pvalue = rx[rtn];
+		printf("%.2X ", rx[ret]);
+		*pvalue = rx[ret];
 	}
 	puts("");
-	return rtn;
+	return ret;
 }
 
 static int write_reg(int fd, unsigned char reg, unsigned char value) {
-	int rtn = 0;
+	int ret = 0;
 	reg_op(fd, reg, &value, spi_write);
-	return rtn;
+	return ret;
 }
 
 static unsigned char read_reg(int fd, unsigned char reg) {
-	int rtn = 0;
+	int ret = 0;
 	unsigned char value;
 	reg_op(fd, reg, &value, spi_read);
 	return value;
 }
 
 static int read_and_write_reg(int fd, unsigned char reg, unsigned char mask, unsigned char value) {
-	int rtn = 0;
+	int ret = 0;
 	unsigned char temp_value = read_reg(fd, reg);
 	temp_value = temp_value & (~mask);
 	value = value & mask;
 	write_reg(fd, reg, temp_value | value);
-	return rtn;
+	return ret;
 }
 
 static unsigned char tty_get_char(void) {
@@ -171,7 +171,7 @@ static int do_cmd(int fd, int c)
 {
 #define BUFFER_LEN 128
 
-	int rtn = 0;
+	int ret = 0;
 
 	printf("c:%d\n", c);
 	if(c >= ARRAY_SIZE(cmds)) {
@@ -294,7 +294,7 @@ static int do_cmd(int fd, int c)
 			break;
 	}
 
-	return rtn;
+	return ret;
 }
 
 static void print_usage(const char *prog)
@@ -384,7 +384,7 @@ static void parse_opts(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	int rtn = 0;
+	int ret = 0;
 	int fd;
 	int i;
 	int c;
@@ -398,34 +398,34 @@ int main(int argc, char *argv[])
 	/*
 	 * spi mode
 	 */
-	rtn = ioctl(fd, SPI_IOC_WR_MODE, &mode);
-	if (rtn == -1)
+	ret = ioctl(fd, SPI_IOC_WR_MODE, &mode);
+	if (ret == -1)
 		pabort("can't set spi mode");
 
-	rtn = ioctl(fd, SPI_IOC_RD_MODE, &mode);
-	if (rtn == -1)
+	ret = ioctl(fd, SPI_IOC_RD_MODE, &mode);
+	if (ret == -1)
 		pabort("can't get spi mode");
 
 	/*
 	 * bits per word
 	 */
-	rtn = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
-	if (rtn == -1)
+	ret = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
+	if (ret == -1)
 		pabort("can't set bits per word");
 
-	rtn = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
-	if (rtn == -1)
+	ret = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
+	if (ret == -1)
 		pabort("can't get bits per word");
 
 	/*
 	 * max speed hz
 	 */
-	rtn = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
-	if (rtn == -1)
+	ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
+	if (ret == -1)
 		pabort("can't set max speed hz");
 
-	rtn = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
-	if (rtn == -1)
+	ret = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
+	if (ret == -1)
 		pabort("can't get max speed hz");
 
 	printf("spi mode: %d\n", mode);
@@ -453,5 +453,5 @@ int main(int argc, char *argv[])
 
 	close(fd);
 
-	return rtn;
+	return ret;
 }

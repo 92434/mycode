@@ -17,8 +17,9 @@ static int my_pci_device_id = 0;
 module_param(my_pci_device_id, int, 0644);
 MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
 
+extern struct pci_driver kc705_pcie_driver;
 static int __init kc705_init(void) {
-	int rtn = 0;
+	int ret = 0;
 
 	if(my_pci_device_id != 0) {
 		mydebug("my_pci_device_id:0x%x!\n", my_pci_device_id);
@@ -26,11 +27,11 @@ static int __init kc705_init(void) {
 	}
 
 	/* Just register the driver. No kernel boot options used. */
-	rtn = pci_register_driver(&kc705_pcie_driver);
+	ret = pci_register_driver(&kc705_pcie_driver);
 
 	mydebug("kc705 initilized!\n");
 
-	return rtn;
+	return ret;
 }
 
 static void __exit kc705_exit(void) {

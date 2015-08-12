@@ -41,11 +41,11 @@ static struct platform_device wm8804_device = {
 
 static int __init my_mod_init(void)
 {
-	int rtn = 0;
+	int ret = 0;
 	printk("%s\n", __PRETTY_FUNCTION__);
-	rtn = platform_device_register(&wm8804_device);
+	ret = platform_device_register(&wm8804_device);
 
-	return rtn;
+	return ret;
 }
 
 static void __exit my_mod_exit(void) {

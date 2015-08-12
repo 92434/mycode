@@ -66,7 +66,7 @@ int catch_signal(sig_action_t sig_action) {
 }
 
 int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
-	int rtn = 0;
+	int ret = 0;
 	int i;
 	unsigned int ui0, ui1;
 
@@ -79,7 +79,7 @@ int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
 		} else if(ui1 == 0) {
 		} else if(ui0 == 0) {
 		} else {
-			rtn = -1;
+			ret = -1;
 			printf("!!!failed!!!(%d)\n", i);
 			printf("ui0:%010d ui1:%010d\n", ui0, ui1);
 		}
@@ -88,96 +88,96 @@ int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
 	}
 
 	*pre_value = ui0;
-	return rtn;
+	return ret;
 }
 
 static struct sockaddr_in sock_addr;
 
 static int init_udp_client(unsigned char *ip_addr, unsigned int port) {
-	int rtn = 0;
+	int ret = 0;
 	memset(&sock_addr, 0, sizeof(sock_addr));
 
 	//协议地址
 	sock_addr.sin_family = AF_INET;
 
 	//Linux下IP地址转换函数，可以在将IP地址在“点分十进制”和“整数”之间转换 
-	if((rtn = inet_pton(AF_INET, ip_addr, &sock_addr.sin_addr)) <= 0){
+	if((ret = inet_pton(AF_INET, ip_addr, &sock_addr.sin_addr)) <= 0){
 		printf("inet_pton error for %s\n", ip_addr);
 		exit(0);
 	}
 
 	sock_addr.sin_port = htons(port);
 
-	if((rtn = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+	if((ret = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 		printf("create socket error: %s(errno: %d)\n",strerror(errno),errno);
 		exit(0);
 	}
 
-	return rtn;
+	return ret;
 }
 
 static int init_tcp_client(unsigned char *ip_addr, unsigned int port) {
-	int rtn = 0;
+	int ret = 0;
 	memset(&sock_addr, 0, sizeof(sock_addr));
 
 	//协议地址
 	sock_addr.sin_family = AF_INET;
 
 	//Linux下IP地址转换函数，可以在将IP地址在“点分十进制”和“整数”之间转换 
-	if((rtn = inet_pton(AF_INET, ip_addr, &sock_addr.sin_addr)) <= 0){
+	if((ret = inet_pton(AF_INET, ip_addr, &sock_addr.sin_addr)) <= 0){
 		printf("inet_pton error for %s\n", ip_addr);
 		exit(0);
 	}
 
 	sock_addr.sin_port = htons(port);
 
-	if((rtn = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+	if((ret = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		printf("create socket error: %s(errno: %d)\n",strerror(errno),errno);
 		exit(0);
 	}
 
-	if(connect(rtn, (struct sockaddr*)&sock_addr, sizeof(sock_addr)) < 0){
+	if(connect(ret, (struct sockaddr*)&sock_addr, sizeof(sock_addr)) < 0){
 		//连接请求
 		printf("connect error: %s(errno: %d)\n",strerror(errno),errno);
 	}
 
-	return rtn;
+	return ret;
 }
 
 static int udp_send_data(int fd, unsigned char *buffer, unsigned int len) {
-	int rtn = 0;
+	int ret = 0;
 	unsigned int step = 256;
 
 	while(len != 0) {
-		rtn = sendto(fd, buffer, step, 0, (struct sockaddr *)&sock_addr, sizeof(sock_addr));
-		if(rtn <= 0) {
+		ret = sendto(fd, buffer, step, 0, (struct sockaddr *)&sock_addr, sizeof(sock_addr));
+		if(ret <= 0) {
 			printf("err: para error!:%s\n", strerror(errno));
 		} else {
-			//printf("send data len %d!\n", rtn);
+			//printf("send data len %d!\n", ret);
 		}
 
 		len -= step;
 		buffer += step;
 	}
-	return rtn;
+	return ret;
 }
 
 static int tcp_send_data(int fd, unsigned char *buffer, unsigned int len) {
-	int rtn = 0;
+	int ret = 0;
 	unsigned int step = 1024;
 
 	while(len != 0) {
-		rtn = send(fd, buffer, step, 0);
-		if(rtn <= 0) {
+		ret = send(fd, buffer, step, 0);
+		if(ret <= 0) {
 			printf("err: para error!:%s\n", strerror(errno));
 		} else {
-			//printf("send data len %d!\n", rtn);
+			//printf("send data len %d!\n", ret);
 		}
 
 		len -= step;
 		buffer += step;
 	}
-	return rtn;
+	return ret;
 }
 
 #if 0

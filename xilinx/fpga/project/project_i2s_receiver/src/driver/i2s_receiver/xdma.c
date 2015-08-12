@@ -139,7 +139,7 @@ static bool xdma_filter(struct dma_chan *chan, void *param) {
 }
 
 int xdma_probe(void) {
-	int rtn = 0;
+	int ret = 0;
 
 	dma_cap_mask_t mask;
 	match_info_t match_tx, match_rx;
@@ -162,14 +162,14 @@ int xdma_probe(void) {
 
 		if (!tx_chan && !rx_chan) {
 			printk(KERN_INFO "<%s> probe: channels not found for %s\n", MODULE_NAME, names[i]);
-			rtn = -1;
+			ret = -1;
 			break;
 		} else {
 			xdma_add_dev_info(tx_chan, rx_chan, names[i]);
 		}
 	}
 
-	return rtn;
+	return ret;
 }
 
 
@@ -187,7 +187,7 @@ static int xdma_close(struct inode *i, struct file *f) {
 }
 
 int print_dma_buffer(unsigned char *buffer) {
-	int rtn = 0;
+	int ret = 0;
 	int i;
 	unsigned int *pdata = (unsigned int *)buffer;
 	for(i = 0; i < I2S_DATA_COUNT_EACH_GROUP; i++) {
@@ -195,11 +195,11 @@ int print_dma_buffer(unsigned char *buffer) {
 	}
 	printk("\n");
 
-	return rtn;
+	return ret;
 }
 
 int read_dma_buffer(unsigned char *buffer, int n) {
-	ssize_t rtn = 0;
+	ssize_t ret = 0;
 	//int i = n;
 
 	while((n-- != 0) && (ringbuffer_empty() == false)) {
@@ -211,20 +211,20 @@ int read_dma_buffer(unsigned char *buffer, int n) {
 		//print_dma_buffer(buffer);
 
 		buffer += DMA_LENGTH;
-		rtn += DMA_LENGTH;
+		ret += DMA_LENGTH;
 	}
 
-	return rtn;
+	return ret;
 }
 
 static ssize_t xdma_read(struct file *filp, char __user * buf, size_t len, loff_t * off) {
-	int rtn = 0;
+	int ret = 0;
 	//printk(KERN_INFO "<%s> file: read()\n", MODULE_NAME);
 
 	if((len == 0) || (len % DMA_LENGTH) != 0) {
 		printk(KERN_INFO "<%s> read: read size is not valid!!!\n", MODULE_NAME);
-		rtn = -EFAULT;
-		return rtn;
+		ret = -EFAULT;
+		return ret;
 	}
 
 	while(ringbuffer_empty()) {
@@ -234,9 +234,9 @@ static ssize_t xdma_read(struct file *filp, char __user * buf, size_t len, loff_
 	}
 
 	//printk("read:%p n:%d\n", i2s_reciever.ringbuffer->pread, (len / DMA_LENGTH));
-	rtn = read_dma_buffer(buf, (len / DMA_LENGTH));
+	ret = read_dma_buffer(buf, (len / DMA_LENGTH));
 
-	return rtn;
+	return ret;
 }
 
 static ssize_t xdma_write(struct file *f, const char __user * buf, size_t len, loff_t * off) {
@@ -496,22 +496,22 @@ void xdma_remove(void) {
 }
 
 int init_i2s_ring_buffer(void) {
-	int rtn = 0;
+	int ret = 0;
 
 	i2s_reciever.ringbuffer = (ringbuffer_t *)kzalloc(sizeof(ringbuffer_t), GFP_KERNEL);
 	if(i2s_reciever.ringbuffer == NULL) {
-		rtn = -1;
+		ret = -1;
 	}
 
 	i2s_reciever.ringbuffer->pwrite = i2s_reciever.ringbuffer->pread = i2s_reciever.ringbuffer->buffer;
 	//i2s_reciever.ringbuffer->buffer_empty = true;
 	atomic_set(&i2s_reciever.ringbuffer->buffer_empty, 1);
 
-	return rtn;
+	return ret;
 }
 
 int uninit_i2s_ring_buffer(void) {
-	int rtn = 0;
+	int ret = 0;
 
 	if(i2s_reciever.ringbuffer != NULL) {
 		kfree((ringbuffer_t *) i2s_reciever.ringbuffer);
@@ -519,11 +519,11 @@ int uninit_i2s_ring_buffer(void) {
 
 	i2s_reciever.ringbuffer = NULL;
 
-	return rtn;
+	return ret;
 }
 
 //int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
-//	int rtn = 0;
+//	int ret = 0;
 //	int i;
 //	unsigned int ui0, ui1;
 //
@@ -536,7 +536,7 @@ int uninit_i2s_ring_buffer(void) {
 //		} else if(ui1 == 0) {
 //		} else if(ui0 == 0) {
 //		} else {
-//			rtn = -1;
+//			ret = -1;
 //			printk("!!!failed!!!(%d)\n", i);
 //			printk("ui0:%010d ui1:%010d\n", ui0, ui1);
 //		}
@@ -546,11 +546,11 @@ int uninit_i2s_ring_buffer(void) {
 //
 //	*pre_value = ui0;
 //	//printk("!!!success!!!\n");
-//	return rtn;
+//	return ret;
 //}
 
 int write_dma_buffer_to_ringbuffer(unsigned char *buffer) {
-	int rtn = 0;
+	int ret = 0;
 
 	//static unsigned int pre_value = 0;
 	//check_buffer((unsigned int *)buffer, DMA_LENGTH / sizeof(unsigned int), &pre_value);
@@ -574,15 +574,15 @@ int write_dma_buffer_to_ringbuffer(unsigned char *buffer) {
 	//i2s_reciever.ringbuffer->buffer_empty = false;
 	atomic_set(&i2s_reciever.ringbuffer->buffer_empty, 0);
 
-	return rtn;
+	return ret;
 }
 
 int read_dma_buffer_from_ringbuffer(unsigned char *buffer) {
-	int rtn = 0;
+	int ret = 0;
 
 	if(ringbuffer_empty() == true) {
-		rtn = -EAGAIN;
-		return rtn;
+		ret = -EAGAIN;
+		return ret;
 	}
 
 	if((i2s_reciever.ringbuffer->pread + DMA_LENGTH == i2s_reciever.ringbuffer->pwrite) || ((i2s_reciever.ringbuffer->pread + DMA_LENGTH == i2s_reciever.ringbuffer->buffer + RINGBUFFER_SIZE) && (i2s_reciever.ringbuffer->pwrite == i2s_reciever.ringbuffer->buffer))) {
@@ -602,7 +602,7 @@ int read_dma_buffer_from_ringbuffer(unsigned char *buffer) {
 	}
 
 
-	return rtn;
+	return ret;
 }
 
 bool ringbuffer_empty(void) {
@@ -674,7 +674,7 @@ void xdma_i2s_receive(void) {
 }
 
 int i2s_receiver_worker_thread(void *ppara) {
-	int rtn = 0;
+	int ret = 0;
 	while(true) {
 		if(kthread_should_stop()) {
 			return -1;
@@ -685,30 +685,30 @@ int i2s_receiver_worker_thread(void *ppara) {
 		xdma_i2s_receive();
 	}
 
-	return rtn;
+	return ret;
 }
 
 static int start_receiver_thread(void) {
-	int rtn = 0;
+	int ret = 0;
 
 	i2s_reciever.i2s_receiver_thread = kthread_run(i2s_receiver_worker_thread, NULL, "%s", "i2s_receiver_driver");
 
 	if (IS_ERR_OR_NULL(i2s_reciever.i2s_receiver_thread)) {
-		rtn = i2s_reciever.i2s_receiver_thread ? PTR_ERR(i2s_reciever.i2s_receiver_thread) : -EINTR;
+		ret = i2s_reciever.i2s_receiver_thread ? PTR_ERR(i2s_reciever.i2s_receiver_thread) : -EINTR;
 	}
 
-	return rtn;
+	return ret;
 }
 
 static int stop_receiver_thread(void) {
-	int rtn = 0;
-	rtn = kthread_stop(i2s_reciever.i2s_receiver_thread);
-	return rtn;
+	int ret = 0;
+	ret = kthread_stop(i2s_reciever.i2s_receiver_thread);
+	return ret;
 }
 
 static int __init xdma_init(void)
 {
-	int rtn = 0;
+	int ret = 0;
 
 	/* device constructor */
 	printk(KERN_INFO "<%s> init: registered\n", MODULE_NAME);
@@ -716,27 +716,27 @@ static int __init xdma_init(void)
 	/* allocate mmap area */
 	xdma_addr = dma_zalloc_coherent(NULL, DMA_LENGTH, &xdma_handle, GFP_KERNEL);
 	if (!xdma_addr) {
-		rtn = -1;
+		ret = -1;
 		printk(KERN_ERR "<%s> Error: allocating dma memory failed\n", MODULE_NAME);
-		rtn = -ENOMEM;
+		ret = -ENOMEM;
 		goto dma_zalloc_coherent_failed;
 	}
 
 	/* hardware setup */
 	if(xdma_probe() != 0) {
-		rtn = -1;
+		ret = -1;
 		printk(KERN_ERR "<%s> Error: xdma_probe_failed\n", MODULE_NAME);
 		goto xdma_probe_failed;
 	}
 
 	if ((cl = class_create(THIS_MODULE, MODULE_NAME)) == NULL) {
-		rtn = -1;
+		ret = -1;
 		printk(KERN_ERR "<%s> Error: class_create_failed\n", MODULE_NAME);
 		goto class_create_failed;
 	}
 
 	if (alloc_chrdev_region(&dev_num, 0, 1, MODULE_NAME) < 0) {
-		rtn = -1;
+		ret = -1;
 		printk(KERN_ERR "<%s> Error: alloc_chrdev_region_failed\n", MODULE_NAME);
 		goto alloc_chrdev_region_failed;
 	}
@@ -744,12 +744,12 @@ static int __init xdma_init(void)
 	cdev_init(&c_dev, &fops);
 
 	if (cdev_add(&c_dev, dev_num, 1) == -1) {
-		rtn = -1;
+		ret = -1;
 		goto cdev_add_failed;
 	}
 
 	if (device_create(cl, NULL, dev_num, NULL, MODULE_NAME) == NULL) {
-		rtn = -1;
+		ret = -1;
 		printk(KERN_ERR "<%s> Error: device_create_failed\n", MODULE_NAME);
 		goto device_create_failed;
 	}
@@ -760,7 +760,7 @@ static int __init xdma_init(void)
 
 	start_receiver_thread();
 
-	return rtn;
+	return ret;
 
 init_i2s_ring_buffer_failed:
 	device_destroy(cl, dev_num);
@@ -775,7 +775,7 @@ class_create_failed:
 xdma_probe_failed:
 	dma_free_coherent(NULL, DMA_LENGTH, xdma_addr, xdma_handle);
 dma_zalloc_coherent_failed:
-	return rtn;
+	return ret;
 }
 
 static void __exit xdma_exit(void) {

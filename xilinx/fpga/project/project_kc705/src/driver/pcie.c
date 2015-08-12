@@ -11,6 +11,9 @@
 #include "dma_common.h"
 #include "pcie_device.h"
 
+int setup_kc705_dev(pcie_dma_t *dma, char *nameformat, ...);
+void uninstall_kc705_dev(pcie_dma_t *dma);
+
 /**
  * Macro to export pci_device_id to user space to allow hot plug and
  * module loading system to know what module works with which hardware device
@@ -34,7 +37,12 @@ static struct pci_device_id ids[] = {
 static kc705_pci_dev_t *kc705_pci_dev = NULL;
 static DEFINE_MUTEX(work_lock);
 static timer_data_t *ptimer_data = NULL;
-static struct task_struct *thread = NULL;
+static int dma_lite_offset[DMA_MAX] = {
+	OFFSET_AXI_DMA_LITE,
+};
+static int pcie_bar_map_ctl_offset[DMA_MAX] = {
+	AXIBAR2PCIEBAR_0U,
+};
 
 static void read_pci_configuration(struct pci_dev * pdev) {
 	int i;
@@ -274,7 +282,7 @@ static void test_performance(void) {
 	//mydebug("stop_time.tv_usec:%lu\n", stop_time.tv_usec);
 	//mydebug("start_time.tv_usec:%lu\n", start_time.tv_usec);
 
-	printk("DMA speed: %u.%06uMB/s\n", (unsigned int)(dma_op_count * DM_CHANNEL_TX_SIZE) / (1024 * 1024), (unsigned int)((dma_op_count * DM_CHANNEL_TX_SIZE) % (1024 * 1024)) * (1000 * 1000) / (1024 * 1024));
+	printk("DMA speed: %u.%06uMB/s\n", (unsigned int)(dma_op_count * DMA_BLOCK_SIZE) / (1024 * 1024), (unsigned int)((dma_op_count * DMA_BLOCK_SIZE) % (1024 * 1024)) * (1000 * 1000) / (1024 * 1024));
 
 	dma_op_count = 0;
 	do_gettimeofday(&start_time);
@@ -300,21 +308,30 @@ static void timer_func(unsigned long __opaque) {
 }
 
 static int start_work_loop(void) {
-	INIT_WORK(&(kc705_pci_dev->work), work_func);
+	int i;
 
+	INIT_WORK(&(kc705_pci_dev->work), work_func);
 	ptimer_data = alloc_timer(1000, timer_func);
 
-	thread = alloc_work_thread(dma_worker_thread, kc705_pci_dev, "%s", "pcie_thread");
+	for(i = 0; i < DMA_MAX; i++) {
+		pcie_dma_t *dma = kc705_pci_dev->dma + i;
+		dma->dma_thread = alloc_work_thread(dma->dma_op.thread_func, dma, "%s_%d", "pciedma", i);
+		setup_kc705_dev(dma, "%s_%d", "pciedma", i);
+	}
 
-	setup_kc705_dev(kc705_pci_dev);
 	return 0;
 }
 
 static void end_work_loop(void) {
-	uninstall_kc705_dev(kc705_pci_dev);
+	int i;
 
-	if(thread != NULL) {
-		free_work_thread(thread);
+	for(i = 0; i < DMA_MAX; i++) {
+		pcie_dma_t *dma = kc705_pci_dev->dma + i;
+
+		uninstall_kc705_dev(dma);
+		if(dma->dma_thread != NULL) {
+			free_work_thread(dma->dma_thread);
+		}
 	}
 
 	if(ptimer_data != NULL) {
@@ -322,72 +339,77 @@ static void end_work_loop(void) {
 	}
 }
 
-static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *ent) {
-	int rtn = 0;
-	int i;
+extern dma_op_t axi_dma_op;
+#define DMA_BAR_MEM_START_INDEX 1
+static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pdev) {
+	int ret = 0;
+	int i, j;
 
-	//alloc memory for driver
-	kc705_pci_dev = (kc705_pci_dev_t *)vzalloc(sizeof(kc705_pci_dev_t));
-	if(kc705_pci_dev == NULL) {
-		mydebug("alloc kc705_pci_dev failed.\n");
-		rtn = -1;
-		goto alloc_kc705_pci_dev_failed;
-	}
+	kc705_pci_dev->dma[0].dma_op = axi_dma_op;
+	kc705_pci_dev->dma[0].pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0;
+	kc705_pci_dev->dma[0].pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1;
 
+	for(i = 0; i < DMA_MAX; i++) {
+		pcie_dma_t *dma = kc705_pci_dev->dma + i;
 
-	kc705_pci_dev->list = init_list_buffer();
-	if(kc705_pci_dev->list == NULL) {
-		rtn = -1;
-		goto init_list_buffer_failed;
-	}
+		dma->kc705_pci_dev = kc705_pci_dev;
 
-	//kc705_pci_dev->bar_map_memory_size[0] = 0;
-	for(i = 1; i < MAX_MAP_BARS; i++) {
-		kc705_pci_dev->bar_map_memory_size[i] = AXI_PCIe_BAR1_SIZE;
-	}
-	//alloc memory for cdma
-	for(i = 0; i < MAX_MAP_BARS; i++) {
-		if(kc705_pci_dev->bar_map_memory_size[i] != 0) {
-			kc705_pci_dev->bar_map_memory[i] = dma_zalloc_coherent(&(pdev->dev), kc705_pci_dev->bar_map_memory_size[i], &(kc705_pci_dev->bar_map_addr[i]), GFP_KERNEL);
-			if(kc705_pci_dev->bar_map_memory[i] == NULL) {
-				rtn = -1;
-				mydebug("dma_zalloc_coherent failed.\n");
-				goto pci_enable_device_failed;
-			} else {
-				mydebug("kc705_pci_dev->bar_map_memory[%d]:%p\n", i, kc705_pci_dev->bar_map_memory[i]);
-				mydebug("kc705_pci_dev->bar_map_addr[%d]:%p\n", i, (void *)kc705_pci_dev->bar_map_addr[i]);
-				mydebug("kc705_pci_dev->bar_map_memory_size[%d]:%x\n", i, kc705_pci_dev->bar_map_memory_size[i]);
-				if(i > 1) {
-					add_list_buffer_item((char *)kc705_pci_dev->bar_map_memory[i], (void *)kc705_pci_dev->bar_map_addr[i], kc705_pci_dev->bar_map_memory_size[i], kc705_pci_dev->list);
+		dma->list = init_list_buffer();
+		if(dma->list == NULL) {
+			ret = -1;
+			return ret;
+		}
+
+		dma->dma_lite_offset = dma_lite_offset[i];
+		dma->pcie_bar_map_ctl_offset = pcie_bar_map_ctl_offset[i];
+
+		//dma->bar_map_memory_size[0] = 0;
+		for(j = DMA_BAR_MEM_START_INDEX; j < MAX_BAR_MAP_MEMORY; j++) {
+			dma->bar_map_memory_size[j] = AXI_PCIe_BAR1_SIZE;
+		}
+
+		//alloc memory for cdma
+		for(j = 0; j < MAX_BAR_MAP_MEMORY; j++) {
+			if(dma->bar_map_memory_size[j] != 0) {
+				dma->bar_map_memory[j] = dma_zalloc_coherent(&(pdev->dev), dma->bar_map_memory_size[j], &(dma->bar_map_addr[j]), GFP_KERNEL);
+				if(dma->bar_map_memory[j] == NULL) {
+					ret = -1;
+					mydebug("dma_zalloc_coherent failed.\n");
+					return ret;
+				} else {
+					mydebug("dma->bar_map_memory[%d]:%p\n", j, dma->bar_map_memory[j]);
+					mydebug("dma->bar_map_addr[%d]:%p\n", j, (void *)dma->bar_map_addr[j]);
+					mydebug("dma->bar_map_memory_size[%d]:%x\n", j, dma->bar_map_memory_size[j]);
+					if(j > DMA_BAR_MEM_START_INDEX) {//
+						add_list_buffer_item((char *)dma->bar_map_memory[j], (void *)dma->bar_map_addr[j], dma->bar_map_memory_size[j], dma->list);
+					}
 				}
 			}
 		}
 	}
 
-	rtn = pci_enable_device(pdev);
-	if(rtn < 0)
-	{
-		mydebug("PCI device enable failed.\n");
-		goto pci_enable_device_failed;
+	return ret;
+}
+
+static void uninit_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pdev) {
+	int i, j;
+
+	for(i = 0; i < DMA_MAX; i++) {
+		pcie_dma_t *dma = kc705_pci_dev->dma + i;
+
+		for(j = 0; j < MAX_BAR_MAP_MEMORY; j++) {
+			if(dma->bar_map_memory[j] != 0) {
+				dma_free_coherent(&(pdev->dev), dma->bar_map_memory_size[j], dma->bar_map_memory[j], dma->bar_map_addr[j]);
+			}
+		}
+		uninit_list_buffer(dma->list);
 	}
 
+}
 
-	/*
-	 * Enable bus-mastering on device. Calls pcibios_set_master() to do
-	 * the needed architecture-specific settings.
-	 */
-	pci_set_master(pdev);
-
-	/* Reserve PCI I/O and memory resources. Mark all PCI regions
-	 * associated with PCI device as being reserved by owner. Do not
-	 * access any address inside the PCI regions unless this call returns
-	 * successfully.
-	 */
-	rtn = pci_request_regions(pdev, MODULE_NAME);
-	if(rtn < 0) {
-		mydebug("Could not request PCI regions.\n");
-		goto pci_request_regions_failed;
-	}
+static int ioremap_pcie_bars(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pdev) {
+	int ret = 0;
+	int i;
 
 	for(i = 0; i < MAX_BARS; i++) {
 
@@ -395,7 +417,8 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		if((kc705_pci_dev->bar_info[i].base_len = pci_resource_len(pdev, i)) == 0) {
 			if(i == 0) {
 				mydebug("BAR 0 not valid, aborting.\n");
-				goto pci_resource_len_failed;
+				ret = -1;
+				return ret;
 			} else {
 				continue;
 			}
@@ -410,7 +433,8 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		 */
 		if(!(pci_resource_flags(pdev, i) & IORESOURCE_MEM)) {
 			mydebug("BAR %d is of wrong type, aborting.\n", i);
-			goto bar_resource_type_failed;
+			ret = -1;
+			return ret;
 		}
 
 		/* Map bus memory to CPU space. The ioremap may fail if size
@@ -423,6 +447,8 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		if((kc705_pci_dev->bar_info[i].base_vaddr = ioremap((kc705_pci_dev->bar_info[i].base_phyaddr), kc705_pci_dev->bar_info[i].base_len)) == 0UL) {
 			mydebug("Cannot map BAR %d space, invalidating.\n", i);
 			(kc705_pci_dev->bar_mask) &= ~( 1 << i );
+			ret = -1;
+			return ret;
 		} else {
 			mydebug(
 					"[BAR %d] Base PA %p Len %d VA %p\n",
@@ -434,6 +460,91 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		}
 	}
 
+	return ret;
+}
+
+static void iounmap_pcie_bars(kc705_pci_dev_t *kc705_pci_dev) {
+	int i;
+
+	for(i = 0; i < MAX_BARS; i++) {
+		if((kc705_pci_dev->bar_mask) & ( 1 << i )) {
+			iounmap(kc705_pci_dev->bar_info[i].base_vaddr);
+		}
+	}
+}
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+irqreturn_t isr(int irq, void *dev_id, struct pt_regs *regs)
+#else
+irqreturn_t isr(int irq, void *dev_id)
+#endif
+{
+	irqreturn_t status = IRQ_NONE;
+	struct pci_dev *pdev = dev_id;
+	kc705_pci_dev_t * kc705_pci_dev = pci_get_drvdata(pdev);
+	int i;
+
+	if(kc705_pci_dev == NULL) {
+		mydebug("\n");
+		return status;
+	}
+
+	for(i = 0; i < DMA_MAX; i++) {
+		pcie_dma_t *dma = kc705_pci_dev->dma + i;
+		status = dma->dma_op.process_isr(dma);
+		if(status == IRQ_HANDLED) {
+			//return status;
+		}
+	}
+
+	/* Handle DMA and any user interrupts */
+	return status;
+}
+
+static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *ent) {
+	int ret = 0;
+
+	//alloc memory for driver
+	kc705_pci_dev = (kc705_pci_dev_t *)vzalloc(sizeof(kc705_pci_dev_t));
+	if(kc705_pci_dev == NULL) {
+		mydebug("alloc kc705_pci_dev failed.\n");
+		ret = -1;
+		goto alloc_kc705_pci_dev_failed;
+	}
+
+	ret = prepare_dma_memory(kc705_pci_dev, pdev);
+	if(ret != 0) {
+		goto free_pcie_resource;
+	}
+
+	ret = pci_enable_device(pdev);
+	if(ret < 0) {
+		mydebug("PCI device enable failed.\n");
+		goto free_dma_resource;
+	}
+
+	/*
+	 * Enable bus-mastering on device. Calls pcibios_set_master() to do
+	 * the needed architecture-specific settings.
+	 */
+	pci_set_master(pdev);
+
+	/* Reserve PCI I/O and memory resources. Mark all PCI regions
+	 * associated with PCI device as being reserved by owner. Do not
+	 * access any address inside the PCI regions unless this call returns
+	 * successfully.
+	 */
+	ret = pci_request_regions(pdev, MODULE_NAME);
+	if(ret < 0) {
+		mydebug("Could not request PCI regions.\n");
+		goto pci_request_regions_failed;
+	}
+
+	ret = ioremap_pcie_bars(kc705_pci_dev, pdev);
+	if(ret != 0) {
+		goto remap_pcie_bars_failed;
+	}
+
 	kc705_pci_dev->pdev = pdev;
 
 	/* Save private data pointer in device structure */
@@ -441,11 +552,11 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 
 	/* Returns success if PCI is capable of 32-bit DMA */
 #if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,36)
-	rtn = pci_set_dma_mask(pdev, DMA_32BIT_MASK);
+	ret = pci_set_dma_mask(pdev, DMA_32BIT_MASK);
 #else
-	rtn = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
+	ret = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
 #endif
-	if(rtn < 0) {
+	if(ret < 0) {
 		mydebug("pci_set_dma_mask failed\n");
 		goto pci_set_dma_mask_failed;
 	}
@@ -456,14 +567,14 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		kc705_pci_dev->msi_enable = 1;
 	}
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18)
-	rtn = request_irq(pdev->irq, isr, SA_SHIRQ, MODULE_NAME, pdev);
+	ret = request_irq(pdev->irq, isr, SA_SHIRQ, MODULE_NAME, pdev);
 #else
-	rtn = request_irq(pdev->irq, isr, IRQF_SHARED, MODULE_NAME, pdev);
+	ret = request_irq(pdev->irq, isr, IRQF_SHARED, MODULE_NAME, pdev);
 #endif
-	if(rtn) {
+	if(ret != 0) {
 		mydebug("Could not allocate interrupt %d\n", pdev->irq);
 		mydebug("Unload driver and try running with polled mode instead\n");
-		rtn = 0;
+		ret = 0;
 		goto request_irq_failed;
 	}
 
@@ -478,29 +589,22 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 
 	return 0;
 
+request_irq_failed:
 pci_set_dma_mask_failed:
+	iounmap_pcie_bars(kc705_pci_dev);
+remap_pcie_bars_failed:
 	pci_release_regions(pdev);
 pci_request_regions_failed:
 	pci_disable_device(pdev);
-pci_enable_device_failed:
-	for(i = 0; i < MAX_MAP_BARS; i++) {
-		if(kc705_pci_dev->bar_map_memory[i] != 0) {
-			dma_free_coherent(&(pdev->dev), kc705_pci_dev->bar_map_memory_size[i], kc705_pci_dev->bar_map_memory[i], kc705_pci_dev->bar_map_addr[i]);
-		}
-	}
-	uninit_list_buffer(kc705_pci_dev->list);
+free_dma_resource:
+	uninit_dma_memory(kc705_pci_dev, pdev);
+free_pcie_resource:
 	vfree(kc705_pci_dev);
-request_irq_failed:
-bar_resource_type_failed:
-pci_resource_len_failed:
-init_list_buffer_failed:
 alloc_kc705_pci_dev_failed:
-	return rtn;
+	return ret;
 }
 
 static void kc705_remove_pcie(struct pci_dev *pdev) {
-	int i;
-
 	mutex_lock(&work_lock);
 
 	end_work_loop();
@@ -513,23 +617,13 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 
 	pci_set_drvdata(pdev, NULL);
 
-	for(i = 0; i < MAX_BARS; i++) {
-		if((kc705_pci_dev->bar_mask) & ( 1 << i )) {
-			iounmap(kc705_pci_dev->bar_info[i].base_vaddr);
-		}
-	}
+	iounmap_pcie_bars(kc705_pci_dev);
 
 	pci_release_regions(pdev);
 
 	pci_disable_device(pdev);
 
-	for(i = 0; i < MAX_MAP_BARS; i++) {
-		if(kc705_pci_dev->bar_map_memory[i] != 0) {
-			dma_free_coherent(&(pdev->dev), kc705_pci_dev->bar_map_memory_size[i], kc705_pci_dev->bar_map_memory[i], kc705_pci_dev->bar_map_addr[i]);
-		}
-	}
-
-	uninit_list_buffer(kc705_pci_dev->list);
+	uninit_dma_memory(kc705_pci_dev, pdev);
 	vfree(kc705_pci_dev);
 	mutex_unlock(&work_lock);
 }

@@ -35,13 +35,13 @@ static struct spi_board_info wm8804_spi_info = {
 };
 
 static int add_spi_device(struct spi_board_info *info) {
-	int rtn = 0;
+	int ret = 0;
 	struct spi_device *spi_device;
 
 	spi_master = spi_busnum_to_master(info->bus_num);
 	if (!spi_master) {
 		printk("spi_busnum_to_master(%d) returned NULL\n", info->bus_num);
-		rtn = -ENOSYS;
+		ret = -ENOSYS;
 		goto spi_busnum_to_master_failed;
 	}
 
@@ -49,7 +49,7 @@ static int add_spi_device(struct spi_board_info *info) {
 	if (!spi_device) {
 		//put_device(&spi_master->dev);
 		printk("spi_alloc_device() failed\n");
-		rtn = -ENOMEM;
+		ret = -ENOMEM;
 		goto spi_alloc_device_failed;
 	}
 
@@ -60,15 +60,15 @@ static int add_spi_device(struct spi_board_info *info) {
 	spi_device->bits_per_word = 8;
 	spi_device->controller_data = info->controller_data;
 
-	rtn = spi_add_device(spi_device);
-	if (rtn < 0) {
+	ret = spi_add_device(spi_device);
+	if (ret < 0) {
 		//spi_dev_put(spi_device);
-		printk("spi_add_device() failed %d\n", rtn);
+		printk("spi_add_device() failed %d\n", ret);
 		goto spi_add_device_failed;
 	}
 	spidevice = spi_device;
 
-	return rtn;
+	return ret;
 
 	//device_del(spi_device->dev);
 spi_add_device_failed:
@@ -76,23 +76,23 @@ spi_add_device_failed:
 spi_alloc_device_failed:
 	spi_master_put(spi_master);
 spi_busnum_to_master_failed:
-	return rtn;
+	return ret;
 }
 
 static int remove_spi_device(void) {
-	int rtn = 0;
+	int ret = 0;
 	spi_unregister_device(spidevice);
 	spi_master_put(spi_master);
-	return rtn;
+	return ret;
 }
 
 static int __init my_mod_init(void)
 {
-	int rtn = 0;
+	int ret = 0;
 	printk("%s\n", __PRETTY_FUNCTION__);
-	rtn = add_spi_device(&wm8804_spi_info);
+	ret = add_spi_device(&wm8804_spi_info);
 
-	return rtn;
+	return ret;
 }
 
 static void __exit my_mod_exit(void) {

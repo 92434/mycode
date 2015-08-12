@@ -213,13 +213,13 @@ static int flush_sg_des_items(kc705_transfer_descriptor_t *axi_pcie_sg_port, str
 }
 
 static int alloc_sg_des_item(uint32_t SA, uint32_t DA, uint32_t CONTROL, struct list_head *sg_list) {
-	int rtn = 0;
+	int ret = 0;
 	kc705_sg_item_info_t *sg_item = (kc705_sg_item_info_t *)vzalloc(sizeof(kc705_sg_item_info_t));
 
 	if(sg_item == NULL) {
-		rtn = -1;
+		ret = -1;
 		mydebug("alloc sg_item failed.\n");
-		return rtn;
+		return ret;
 	}
 
 	sg_item->des.des.SA = SA;
@@ -241,7 +241,7 @@ static void free_sg_des_items(struct list_head *sg_list) {
 static int wait_for_iostatus_timeout(unsigned long count, uint8_t *paddr, uint32_t mask, uint32_t expection) {
 #define XILINX_VDMA_LOOP_COUNT 1000000
 	uint32_t value = 0;
-	int rtn = 0;
+	int ret = 0;
 
 	if(count == 0) {
 		count = XILINX_VDMA_LOOP_COUNT;
@@ -253,14 +253,14 @@ static int wait_for_iostatus_timeout(unsigned long count, uint8_t *paddr, uint32
 	} while(count != 0 && value != expection);
 
 	if(count == 0) {
-		rtn = -1;
+		ret = -1;
 	}
 
-	return rtn;
+	return ret;
 }
 
 static int configure_cdma_engine(void) {
-	int rtn;
+	int ret;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + OFFSET_AXI_CDMA_LITE); 
 
@@ -271,8 +271,8 @@ static int configure_cdma_engine(void) {
 	//reset
 	value = default_value | BITMASK(2);//reset bit
 	writel(value, cdma_base_vaddr + CDMA_CR);
-	rtn = wait_for_iostatus_timeout(0, cdma_base_vaddr + CDMA_CR, BITMASK(2), 0);
-	if(rtn != 0) {
+	ret = wait_for_iostatus_timeout(0, cdma_base_vaddr + CDMA_CR, BITMASK(2), 0);
+	if(ret != 0) {
 		mydebug("time out!\n");
 	}
 
@@ -286,7 +286,7 @@ static int configure_cdma_engine(void) {
 	value = readl(cdma_base_vaddr + CDMA_CR) | BITMASK(12)/*ioc interrupt*/ | BITMASK(14)/*err interrupt*/;
 	writel(value, cdma_base_vaddr + CDMA_CR);
 
-	return rtn;
+	return ret;
 }
 
 static int start_cdma(uint32_t tail_des_axi_addr) {
@@ -303,16 +303,16 @@ static int start_cdma(uint32_t tail_des_axi_addr) {
 
 static int dma_trans_sync(void) {
 	unsigned long tmo;
-	int rtn = 0;
+	int ret = 0;
 
 	tmo = msecs_to_jiffies(1000);
 	tmo = wait_for_completion_timeout(&(kc705_pci_dev->cmp), tmo);
 	if (0 == tmo) {
 		printk(KERN_ERR "<%s> Error: rx transfer timed out\n", MODULE_NAME);
-		rtn = -1;
+		ret = -1;
 	}
 
-	return rtn;
+	return ret;
 }
 
 static int prepare_bars_map(void) {
@@ -344,38 +344,38 @@ static int prepare_bars_map(void) {
 }
 
 static int prepare_sg_des_chain(uint32_t tx_axiaddr, uint32_t tx_size, uint32_t rx_axiaddr, uint32_t rx_size, struct list_head *sg_list) {
-	int rtn = 0;
+	int ret = 0;
 	int offset = 0;
 
-	rtn = alloc_sg_des_item(
+	ret = alloc_sg_des_item(
 			BASE_Translation_BRAM + offset,
 			BASE_AXI_PCIe_CTL + AXIBAR2PCIEBAR_1U,
 			sizeof(uint64_t),
 			sg_list
 		);
-	if(rtn != 0) {
+	if(ret != 0) {
 		goto failed;
 	}
 
 	offset += sizeof(uint64_t);
 
-	rtn = alloc_sg_des_item(BASE_AXI_PCIe_BAR1, tx_axiaddr, tx_size, sg_list);
-	if(rtn != 0) {
+	ret = alloc_sg_des_item(BASE_AXI_PCIe_BAR1, tx_axiaddr, tx_size, sg_list);
+	if(ret != 0) {
 		goto failed;
 	}
 
-	rtn = alloc_sg_des_item(
+	ret = alloc_sg_des_item(
 			BASE_Translation_BRAM + offset,
 			BASE_AXI_PCIe_CTL + AXIBAR2PCIEBAR_1U,
 			sizeof(uint64_t),
 			sg_list
 		);
-	if(rtn != 0) {
+	if(ret != 0) {
 		goto failed;
 	}
 
-	rtn = alloc_sg_des_item(rx_axiaddr, BASE_AXI_PCIe_BAR1, rx_size, sg_list);
-	if(rtn != 0) {
+	ret = alloc_sg_des_item(rx_axiaddr, BASE_AXI_PCIe_BAR1, rx_size, sg_list);
+	if(ret != 0) {
 		goto failed;
 	}
 
@@ -385,7 +385,7 @@ static int prepare_sg_des_chain(uint32_t tx_axiaddr, uint32_t tx_size, uint32_t 
 failed:
 	free_sg_des_items(sg_list);
 
-	return rtn;
+	return ret;
 }
 
 static void dump_regs(void) {
@@ -702,14 +702,14 @@ static irqreturn_t isr(int irq, void *dev_id)
 }
 
 static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *ent) {
-	int rtn = 0;
+	int ret = 0;
 	int i;
 
 	//alloc memory for driver
 	kc705_pci_dev = (kc705_pci_dev_t *)vzalloc(sizeof(kc705_pci_dev_t));
 	if(kc705_pci_dev == NULL) {
 		mydebug("alloc kc705_pci_dev failed.\n");
-		rtn = -1;
+		ret = -1;
 		goto alloc_kc705_pci_dev_failed;
 	}
 
@@ -721,7 +721,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		if(kc705_pci_dev->bar_map_memory_size[i] != 0) {
 			kc705_pci_dev->bar_map_memory[i] = dma_zalloc_coherent(&(pdev->dev), kc705_pci_dev->bar_map_memory_size[i], &(kc705_pci_dev->bar_map_addr[i]), GFP_KERNEL);
 			if(kc705_pci_dev->bar_map_memory[i] == NULL) {
-				rtn = -1;
+				ret = -1;
 				mydebug("dma_zalloc_coherent failed.\n");
 				goto pci_enable_device_failed;
 			} else {
@@ -732,8 +732,8 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		}
 	}
 
-	rtn = pci_enable_device(pdev);
-	if(rtn < 0)
+	ret = pci_enable_device(pdev);
+	if(ret < 0)
 	{
 		mydebug("PCI device enable failed.\n");
 		goto pci_enable_device_failed;
@@ -751,8 +751,8 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	 * access any address inside the PCI regions unless this call returns
 	 * successfully.
 	 */
-	rtn = pci_request_regions(pdev, MODULE_NAME);
-	if(rtn < 0) {
+	ret = pci_request_regions(pdev, MODULE_NAME);
+	if(ret < 0) {
 		mydebug("Could not request PCI regions.\n");
 		goto pci_request_regions_failed;
 	}
@@ -809,11 +809,11 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 
 	/* Returns success if PCI is capable of 32-bit DMA */
 #if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,36)
-	rtn = pci_set_dma_mask(pdev, DMA_32BIT_MASK);
+	ret = pci_set_dma_mask(pdev, DMA_32BIT_MASK);
 #else
-	rtn = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
+	ret = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
 #endif
-	if(rtn < 0) {
+	if(ret < 0) {
 		mydebug("pci_set_dma_mask failed\n");
 		goto pci_set_dma_mask_failed;
 	}
@@ -824,14 +824,14 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		kc705_pci_dev->msi_enable = 1;
 	}
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18)
-	rtn = request_irq(pdev->irq, isr, SA_SHIRQ, MODULE_NAME, pdev);
+	ret = request_irq(pdev->irq, isr, SA_SHIRQ, MODULE_NAME, pdev);
 #else
-	rtn = request_irq(pdev->irq, isr, IRQF_SHARED, MODULE_NAME, pdev);
+	ret = request_irq(pdev->irq, isr, IRQF_SHARED, MODULE_NAME, pdev);
 #endif
-	if(rtn) {
+	if(ret) {
 		mydebug("Could not allocate interrupt %d\n", pdev->irq);
 		mydebug("Unload driver and try running with polled mode instead\n");
-		rtn = 0;
+		ret = 0;
 		goto request_irq_failed;
 	}
 
@@ -858,7 +858,7 @@ request_irq_failed:
 bar_resource_type_failed:
 pci_resource_len_failed:
 alloc_kc705_pci_dev_failed:
-	return rtn;
+	return ret;
 }
 
 static void work_func(struct work_struct *work) {
@@ -872,12 +872,12 @@ static void work_func(struct work_struct *work) {
 }
 
 static int __devinit kc705_probe(struct pci_dev *pdev, const struct pci_device_id *ent) {
-	int rtn = 0;
+	int ret = 0;
 
-	rtn = kc705_probe_pcie(pdev, ent);
+	ret = kc705_probe_pcie(pdev, ent);
 	INIT_WORK(&(kc705_pci_dev->work), work_func);
 	test_cdma();
-	return rtn;
+	return ret;
 }
 
 static void kc705_remove_pcie(struct pci_dev *pdev) {
@@ -1013,7 +1013,7 @@ free_timer_data:
 #endif
 
 static int __init kc705_init(void) {
-	int rtn = 0;
+	int ret = 0;
 
 	if(my_pci_device_id != 0) {
 		mydebug("my_pci_device_id:0x%x!\n", my_pci_device_id);
@@ -1021,13 +1021,13 @@ static int __init kc705_init(void) {
 	}
 
 	/* Just register the driver. No kernel boot options used. */
-	rtn = pci_register_driver(&kc705_pcie_driver);
+	ret = pci_register_driver(&kc705_pcie_driver);
 #ifdef test_timer
 	pdata = alloc_timer(1000, NULL);
 #endif//#ifdef test_timer
 
 	mydebug("kc705 initilized!\n");
-	return rtn;
+	return ret;
 }
 
 static void __exit kc705_exit(void) {
