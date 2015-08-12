@@ -23,17 +23,17 @@ module_param_array(int_array, int, &narr, 0644);
 MODULE_PARM_DESC(int_array, "A integer array");
 
 static bool is_ascii_str(char *str) {
-	bool rtn = true;
+	bool ret = true;
 
 	while(*str) {
 		if(!isprint(*str)) {
-			rtn = false;
+			ret = false;
 			break;
 		}
 		str++;
 	}
 
-	return rtn;
+	return ret;
 }
 
 static int __init mod_info_init(void)

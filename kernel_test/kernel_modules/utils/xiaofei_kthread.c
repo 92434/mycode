@@ -2,7 +2,7 @@
 #include "xiaofei_debug.h"
 
 static int default_worker_thread(void *ppara) {
-	int rtn = 0;
+	int ret = 0;
 	while(true) {
 		if(kthread_should_stop()) {
 			return -1;
@@ -13,7 +13,7 @@ static int default_worker_thread(void *ppara) {
 		mydebug("\n");
 	}
 
-	return rtn;
+	return ret;
 }
 
 struct task_struct *alloc_work_thread(thread_func_t func, void *ppara, char *format, ...) {

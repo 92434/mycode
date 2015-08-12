@@ -16,28 +16,28 @@ exit:
 
 
 static bool buffer_node_exist(char *buffer, list_buffer_t *list) {
-	bool rtn = false;
+	bool ret = false;
 
 	buffer_node_t *node = NULL, *node_next = NULL;
 	
 	if((list == NULL) || (list->first == NULL)) {
-		return rtn;
+		return ret;
 	}
 
 	node = list_prepare_entry(node, list->first, list);
 	if(node->buffer == buffer) {
-		rtn = true;
-		return rtn;
+		ret = true;
+		return ret;
 	}
 
 	list_for_each_entry_safe(node, node_next, list->first, list) {
 		if(node->buffer == buffer) {
-			rtn = true;
-			return rtn;
+			ret = true;
+			return ret;
 		}
 	}
 
-	return rtn;
+	return ret;
 }
 
 buffer_node_t *add_list_buffer_item(char *buffer, void *buffer_addr, int size, list_buffer_t *list) {
@@ -226,15 +226,15 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 }
 
 int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, list_buffer_t *list) {
-	int rtn = 0;
+	int ret = 0;
 	buffer_node_t *node;
 	int end_offset;
 	int write_count, read_count;
 	int write_offset, read_offset;
 
 	if((write_node == NULL) && (read_node == NULL)) {
-		rtn = -1;
-		return rtn;
+		ret = -1;
+		return ret;
 	}
 
 	if(write_node != NULL) {
@@ -270,16 +270,16 @@ int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, li
 		//printk("read_node->avail_for_read:%d\n", read_node->avail_for_read);
 	}
 
-	return rtn;
+	return ret;
 }
 
 bool read_available(list_buffer_t *list) {
 	buffer_node_t read;
 	bool available = false;
-	int rtn;
+	int ret;
 
-	rtn = get_buffer_node_info(NULL, &read, list);
-	if(rtn != 0) {
+	ret = get_buffer_node_info(NULL, &read, list);
+	if(ret != 0) {
 		return available;
 	}
 
