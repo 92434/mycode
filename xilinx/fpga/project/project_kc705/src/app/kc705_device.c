@@ -180,13 +180,13 @@ static int tcp_send_data(int fd, unsigned char *buffer, unsigned int len) {
 	return ret;
 }
 
-#if 0
+#if 1
 static read_buffer(int fd, int sock_fd, unsigned char *read_buf) {
 	struct timeval tv;
 	fd_set fds;
 
-	tv.tv_sec=0;
-	tv.tv_usec=1;
+	tv.tv_sec=1;
+	tv.tv_usec=0;
 	while(stop == 0) {
 		//printf("wait...\n");
 		FD_ZERO(&fds);

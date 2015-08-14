@@ -55,6 +55,7 @@ static unsigned int kc705_poll(struct file *filp, poll_table *wait) {
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
 	unsigned int mask =0;
 
+
 	/* 把等待队列添加到poll_table */
 	poll_wait(filp, &dma->wq, wait);
 

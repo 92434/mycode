@@ -380,8 +380,7 @@ static int pcie_tr_thread(void *ppara) {
 			return ret;
 		}
 
-		set_current_state(TASK_INTERRUPTIBLE);  
-		//set_current_state(TASK_UNINTERRUPTIBLE);  
+		set_current_state(TASK_UNINTERRUPTIBLE);  
 		//schedule_timeout(1*HZ); 
 		
 		size = get_pcie_tr(kc705_pci_dev, &tr);
@@ -389,18 +388,19 @@ static int pcie_tr_thread(void *ppara) {
 			static int cur_dma = 0;
 
 			pcie_dma_t *dma = kc705_pci_dev->dma + cur_dma;
+			put_pcie_tr(dma, 0, 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE);
 
-			tr.dma = dma;
-			tr.tx_dest_axi_addr = 0;
-			tr.rx_src_axi_addr = 0;
-			tr.tx_size = DMA_BLOCK_SIZE;
-			tr.rx_size = DMA_BLOCK_SIZE;
+			//tr.dma = dma;
+			//tr.tx_dest_axi_addr = 0;
+			//tr.rx_src_axi_addr = 0;
+			//tr.tx_size = DMA_BLOCK_SIZE;
+			//tr.rx_size = DMA_BLOCK_SIZE;
 
-			tr.dma->dma_op.dma_tr(tr.dma,
-					tr.tx_dest_axi_addr,
-					tr.rx_src_axi_addr,
-					tr.tx_size,
-					tr.rx_size);
+			//tr.dma->dma_op.dma_tr(tr.dma,
+			//		tr.tx_dest_axi_addr,
+			//		tr.rx_src_axi_addr,
+			//		tr.tx_size,
+			//		tr.rx_size);
 
 			cur_dma++;
 			if(DMA_MAX == cur_dma) {
