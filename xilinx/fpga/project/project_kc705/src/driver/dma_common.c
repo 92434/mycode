@@ -58,7 +58,7 @@ void test_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_siz
 	int pos;
 
 	//mydebug("tx_addr:%p\n", (void *)tx_addr);
-	//for(i = 0; i < DM_CHANNEL_TX_SIZE; i++) {
+	//for(i = 0; i < tx_size; i++) {
 	//	if((i != 0) && (i % 16 == 0)) {
 	//		printk("\n");
 	//	}
@@ -68,7 +68,7 @@ void test_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_siz
 	//printk("\n");
 
 	//mydebug("rx_addr:%p\n", (void *)rx_addr);
-	//for(i = 0; i < DM_CHANNEL_RX_SIZE; i++) {
+	//for(i = 0; i < rx_size; i++) {
 	//	if((i != 0) && (i % 16 == 0)) {
 	//		printk("\n");
 	//	}

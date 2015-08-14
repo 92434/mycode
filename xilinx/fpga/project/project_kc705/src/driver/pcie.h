@@ -3,9 +3,13 @@
 
 #include <linux/device.h>
 #include <linux/cdev.h>
+#include <linux/mutex.h>
 
-#include "utils/xiaofei_list_buffer.h"
+#include "utils/xiaofei_debug.h"
+#include "utils/xiaofei_timer.h"
 #include "utils/xiaofei_kthread.h"
+#include "utils/xiaofei_list_buffer.h"
+
 
 /** @name Macros for PCI probing
  * @{
@@ -17,18 +21,22 @@
 //regs
 #define BASE_AXI_PCIe 0x81000000
 #define BASE_Translation_BRAM 0x81000000
-#define BASE_AXI_PCIe_CTL 0x81008000
-#define BASE_AXI_DMA_LITE 0x8100c000
+#define BASE_AXI_PCIe_CTL 0x81004000
+#define BASE_AXI_DMA_LITE_0 0x81008000
+#define BASE_AXI_DMA_LITE_1 0x8100c000
 //memory
 #define BASE_AXI_DDR_ADDR 0x00000000
-#define BASE_AXI_PCIe_BAR0 0x80800000
-#define BASE_AXI_PCIe_BAR1 0x80000000
+#define BASE_AXI_PCIe_BAR0 0x80000000
+#define BASE_AXI_PCIe_BAR1 0x80010000
+#define BASE_AXI_PCIe_BAR2 0x80020000
+#define BASE_AXI_PCIe_BAR3 0x80030000
 
 
 //PCIe:BAR0 Address Offset for the accessible Interfaces
 #define OFFSET_Translation_BRAM (BASE_Translation_BRAM - BASE_AXI_PCIe)
 #define OFFSET_AXI_PCIe_CTL (BASE_AXI_PCIe_CTL - BASE_AXI_PCIe)
-#define OFFSET_AXI_DMA_LITE (BASE_AXI_DMA_LITE - BASE_AXI_PCIe)
+#define OFFSET_AXI_DMA_LITE_0 (BASE_AXI_DMA_LITE_0 - BASE_AXI_PCIe)
+#define OFFSET_AXI_DMA_LITE_1 (BASE_AXI_DMA_LITE_1 - BASE_AXI_PCIe)
 
 //Address Map for the AXI to PCIe Address Translation Registers
 #define AXIBAR2PCIEBAR_0U 0x208 //default be set to 0
@@ -44,8 +52,7 @@
 #define AXIBAR2PCIEBAR_5U 0x230 //
 #define AXIBAR2PCIEBAR_5L 0x234 //
 
-#define AXI_PCIe_BAR0_SIZE 0x10000
-#define AXI_PCIe_BAR1_SIZE 0x10000
+#define PCIe_MAP_BAR_SIZE 0x10000
 
 /**< Maximum number of BARs */
 #define MAX_BARS 6
@@ -56,14 +63,21 @@
 
 typedef enum {
 	DMA0 = 0,
+	DMA1,
 	DMA_MAX
 } dma_index_t;
 
 typedef irqreturn_t (*process_isr_t)(void *ppara);
-
+typedef int (*init_dma_t)(void *ppara);
+typedef int (*dma_tr_t)(void *ppara,
+		uint64_t tx_dest_axi_addr,
+		uint64_t rx_src_axi_addr,
+		int tx_size,
+		int rx_size);
 typedef struct _dma_op {
+	init_dma_t init_dma;
 	process_isr_t process_isr; 
-	thread_func_t thread_func;
+	dma_tr_t dma_tr; 
 } dma_op_t;
 
 typedef struct {
@@ -80,7 +94,6 @@ typedef struct {
 	dma_op_t dma_op;
 	struct completion tx_cmp;
 	struct completion rx_cmp;
-	struct task_struct *dma_thread;
 
 	char dev_name[16];
 	wait_queue_head_t wq;
@@ -88,6 +101,14 @@ typedef struct {
 	struct class *kc705_class;
 	struct device *device;
 } pcie_dma_t;
+
+typedef struct {
+	pcie_dma_t *dma;
+	uint64_t tx_dest_axi_addr;
+	uint64_t rx_src_axi_addr;
+	int tx_size;
+	int rx_size;
+} pcie_tr_t;
 
 typedef struct {
 	struct pci_dev *pdev; /**< PCI device entry */
@@ -100,6 +121,10 @@ typedef struct {
 	int msi_enable;
 	struct work_struct work;
 	pcie_dma_t dma[DMA_MAX];
+	struct task_struct *pcie_tr_thread;
+	timer_data_t *ptimer_data;
+	list_buffer_t *pcie_tr_list;
+	spinlock_t alloc_lock;
 } kc705_pci_dev_t;
 
 #endif //#define _PCIE_H

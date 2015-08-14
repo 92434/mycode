@@ -1,10 +1,7 @@
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <linux/interrupt.h>
-
-#include "utils/xiaofei_debug.h"
-#include "utils/xiaofei_timer.h"
-#include "utils/xiaofei_kthread.h"
+#include <linux/version.h>
 
 #include "kc705.h"
 #include "pcie.h"
@@ -36,12 +33,13 @@ static struct pci_device_id ids[] = {
 
 static kc705_pci_dev_t *kc705_pci_dev = NULL;
 static DEFINE_MUTEX(work_lock);
-static timer_data_t *ptimer_data = NULL;
 static int dma_lite_offset[DMA_MAX] = {
-	OFFSET_AXI_DMA_LITE,
+	OFFSET_AXI_DMA_LITE_0,
+	OFFSET_AXI_DMA_LITE_1,
 };
 static int pcie_bar_map_ctl_offset[DMA_MAX] = {
 	AXIBAR2PCIEBAR_0U,
+	AXIBAR2PCIEBAR_2U,
 };
 
 static void read_pci_configuration(struct pci_dev * pdev) {
@@ -307,15 +305,129 @@ static void timer_func(unsigned long __opaque) {
 	add_timer(tl);
 }
 
+static int init_pcie_tr(kc705_pci_dev_t *kc705_pci_dev) {
+	int ret = 0;
+	pcie_tr_t *tr;
+
+	kc705_pci_dev->pcie_tr_list = init_list_buffer();
+	if(kc705_pci_dev->pcie_tr_list == NULL) {
+		ret = -1;
+		return ret;
+	}
+
+	tr = (pcie_tr_t *)vzalloc(sizeof(pcie_tr_t) * 1024);
+	add_list_buffer_item((char *)tr, (void *)NULL, sizeof(pcie_tr_t) * 1024, kc705_pci_dev->pcie_tr_list);
+
+	return ret;
+}
+
+static void uninit_pcie_tr(kc705_pci_dev_t *kc705_pci_dev) {
+	buffer_node_t *node;
+
+	node = list_entry(kc705_pci_dev->pcie_tr_list->first, buffer_node_t, list);
+	vfree(node->buffer);
+	
+	uninit_list_buffer(kc705_pci_dev->pcie_tr_list);
+}
+
+int put_pcie_tr(pcie_dma_t *dma,
+		uint64_t tx_dest_axi_addr,
+		uint64_t rx_src_axi_addr,
+		int tx_size,
+		int rx_size) {
+	int ret = 0;
+	pcie_tr_t tr;
+
+	tr.dma = dma;
+	tr.tx_dest_axi_addr = tx_dest_axi_addr;
+	tr.rx_src_axi_addr = rx_src_axi_addr;
+	tr.tx_size = tx_size;
+	tr.rx_size = rx_size;
+
+	spin_lock(&kc705_pci_dev->alloc_lock);
+	ret = write_buffer((char *)&tr, sizeof(pcie_tr_t), kc705_pci_dev->pcie_tr_list);
+	spin_unlock(&kc705_pci_dev->alloc_lock);
+
+	return ret;
+}
+
+int read_buffer(char *buffer, int size, list_buffer_t *list);
+static int get_pcie_tr(kc705_pci_dev_t *kc705_pci_dev, pcie_tr_t *tr) {
+	int ret;
+
+	ret = read_buffer((char *)tr, sizeof(pcie_tr_t), kc705_pci_dev->pcie_tr_list);
+
+	return ret;
+}
+
+static int pcie_tr_thread(void *ppara) {
+	int ret = 0;
+	int i;
+
+	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
+
+	for(i = 0; i < DMA_MAX; i++) {
+		pcie_dma_t *dma = kc705_pci_dev->dma + i;
+		dma->dma_op.init_dma(dma);
+	}
+
+	while(true) {
+		int size;
+		pcie_tr_t tr;
+
+		if(kthread_should_stop()) {
+			ret = -1;
+			return ret;
+		}
+
+		set_current_state(TASK_INTERRUPTIBLE);  
+		//set_current_state(TASK_UNINTERRUPTIBLE);  
+		//schedule_timeout(1*HZ); 
+		
+		size = get_pcie_tr(kc705_pci_dev, &tr);
+		if(size == 0) {
+			static int cur_dma = 0;
+
+			pcie_dma_t *dma = kc705_pci_dev->dma + cur_dma;
+
+			tr.dma = dma;
+			tr.tx_dest_axi_addr = 0;
+			tr.rx_src_axi_addr = 0;
+			tr.tx_size = DMA_BLOCK_SIZE;
+			tr.rx_size = DMA_BLOCK_SIZE;
+
+			tr.dma->dma_op.dma_tr(tr.dma,
+					tr.tx_dest_axi_addr,
+					tr.rx_src_axi_addr,
+					tr.tx_size,
+					tr.rx_size);
+
+			cur_dma++;
+			if(DMA_MAX == cur_dma) {
+				cur_dma = 0;
+			}
+		} else {
+			tr.dma->dma_op.dma_tr(tr.dma,
+					tr.tx_dest_axi_addr,
+					tr.rx_src_axi_addr,
+					tr.tx_size,
+					tr.rx_size);
+		}
+	 }
+
+	return ret;
+}
+
 static int start_work_loop(void) {
 	int i;
 
 	INIT_WORK(&(kc705_pci_dev->work), work_func);
-	ptimer_data = alloc_timer(1000, timer_func);
+	kc705_pci_dev->ptimer_data = alloc_timer(1000, timer_func);
+
+	kc705_pci_dev->pcie_tr_thread = alloc_work_thread(pcie_tr_thread, kc705_pci_dev, "%s", "pcie_tr");
 
 	for(i = 0; i < DMA_MAX; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
-		dma->dma_thread = alloc_work_thread(dma->dma_op.thread_func, dma, "%s_%d", "pciedma", i);
 		setup_kc705_dev(dma, "%s_%d", "pciedma", i);
 	}
 
@@ -329,13 +441,14 @@ static void end_work_loop(void) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
 
 		uninstall_kc705_dev(dma);
-		if(dma->dma_thread != NULL) {
-			free_work_thread(dma->dma_thread);
-		}
 	}
 
-	if(ptimer_data != NULL) {
-		free_timer(ptimer_data);
+	if(kc705_pci_dev->pcie_tr_thread != NULL) {
+		free_work_thread(kc705_pci_dev->pcie_tr_thread);
+	}
+
+	if(kc705_pci_dev->ptimer_data != NULL) {
+		free_timer(kc705_pci_dev->ptimer_data);
 	}
 }
 
@@ -345,9 +458,12 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 	int ret = 0;
 	int i, j;
 
-	kc705_pci_dev->dma[0].dma_op = axi_dma_op;
-	kc705_pci_dev->dma[0].pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0;
-	kc705_pci_dev->dma[0].pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1;
+	kc705_pci_dev->dma[DMA0].dma_op = axi_dma_op;
+	kc705_pci_dev->dma[DMA0].pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0;
+	kc705_pci_dev->dma[DMA0].pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1;
+	kc705_pci_dev->dma[DMA1].dma_op = axi_dma_op;
+	kc705_pci_dev->dma[DMA1].pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR2;
+	kc705_pci_dev->dma[DMA1].pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR3;
 
 	for(i = 0; i < DMA_MAX; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
@@ -365,7 +481,7 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 
 		//dma->bar_map_memory_size[0] = 0;
 		for(j = DMA_BAR_MEM_START_INDEX; j < MAX_BAR_MAP_MEMORY; j++) {
-			dma->bar_map_memory_size[j] = AXI_PCIe_BAR1_SIZE;
+			dma->bar_map_memory_size[j] = PCIe_MAP_BAR_SIZE;
 		}
 
 		//alloc memory for cdma
@@ -491,9 +607,8 @@ irqreturn_t isr(int irq, void *dev_id)
 
 	for(i = 0; i < DMA_MAX; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
-		status = dma->dma_op.process_isr(dma);
-		if(status == IRQ_HANDLED) {
-			//return status;
+		if(dma->dma_op.process_isr(dma) == IRQ_HANDLED) {
+			status = IRQ_HANDLED;
 		}
 	}
 
@@ -516,6 +631,12 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	if(ret != 0) {
 		goto free_pcie_resource;
 	}
+
+	ret = init_pcie_tr(kc705_pci_dev);
+	if(ret != 0) {
+		goto init_pcie_tr_failed;
+	}
+
 
 	ret = pci_enable_device(pdev);
 	if(ret < 0) {
@@ -597,6 +718,8 @@ remap_pcie_bars_failed:
 pci_request_regions_failed:
 	pci_disable_device(pdev);
 free_dma_resource:
+	uninit_pcie_tr(kc705_pci_dev);
+init_pcie_tr_failed:
 	uninit_dma_memory(kc705_pci_dev, pdev);
 free_pcie_resource:
 	vfree(kc705_pci_dev);
@@ -622,6 +745,8 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 	pci_release_regions(pdev);
 
 	pci_disable_device(pdev);
+
+	uninit_pcie_tr(kc705_pci_dev);
 
 	uninit_dma_memory(kc705_pci_dev, pdev);
 	vfree(kc705_pci_dev);
