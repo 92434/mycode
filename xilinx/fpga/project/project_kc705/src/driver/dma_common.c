@@ -57,27 +57,9 @@ void test_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_siz
 	bool success = true;
 	int pos;
 
-	//mydebug("tx_addr:%p\n", (void *)tx_addr);
-	//for(i = 0; i < tx_size; i++) {
-	//	if((i != 0) && (i % 16 == 0)) {
-	//		printk("\n");
-	//	}
-	//	printk("%02x ", tx_addr[i]);
-	//}
-
-	//printk("\n");
-
-	//mydebug("rx_addr:%p\n", (void *)rx_addr);
-	//for(i = 0; i < rx_size; i++) {
-	//	if((i != 0) && (i % 16 == 0)) {
-	//		printk("\n");
-	//	}
-	//	printk("%02x ", rx_addr[i]);
-	//}
-	//printk("\n");
-
 	for(i = 0; i < rx_size; i++) {
 		if(rx_addr[i] != tx_addr[i]) {
+			mydebug("%d:%d\n", tx_addr[i], rx_addr[i]);
 			success = false;
 			pos = i;
 			break;
@@ -87,7 +69,14 @@ void test_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_siz
 	if(success == false) {
 		printk("!\n");
 		mydebug("pos:%d\n", pos);
-		for(i = pos; i < 8; i++) {
+		for(i = pos; i < pos + 8; i++) {
+			if((i != 0) && (i % 16 == 0)) {
+				printk("\n");
+			}
+			printk("%02x ", tx_addr[i]);
+		}
+		printk("\n");
+		for(i = pos; i < pos + 8; i++) {
 			if((i != 0) && (i % 16 == 0)) {
 				printk("\n");
 			}
@@ -95,4 +84,24 @@ void test_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_siz
 		}
 		printk("\n");
 	}
+}
+
+void inc_dma_op_tx_count(pcie_dma_t *dma, long unsigned int count) {
+	dma->tx_count += count;
+}
+
+void inc_dma_op_rx_count(pcie_dma_t *dma, long unsigned int count) {
+	dma->rx_count += count;
+}
+
+long unsigned int get_op_tx_count(pcie_dma_t *dma) {
+	long unsigned int count = dma->tx_count;
+	dma->tx_count = 0;
+	return count;
+}
+
+long unsigned int get_op_rx_count(pcie_dma_t *dma) {
+	long unsigned int count = dma->rx_count;
+	dma->rx_count = 0;
+	return count;
 }

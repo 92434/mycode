@@ -25,6 +25,7 @@ static int kc705_close(struct inode *i, struct file *filp) {
 	return 0;
 }
 
+void inc_dma_op_rx_count(pcie_dma_t *dma, long unsigned int count);
 static ssize_t kc705_read(struct file *filp, char __user * buf, size_t len, loff_t * off) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
@@ -42,7 +43,7 @@ static ssize_t kc705_read(struct file *filp, char __user * buf, size_t len, loff
 	}
 
 	ret = read_buffer(buf, len, dma->list);
-	dma->dma_op.inc_dma_op_rx_count(dma, ret);
+	inc_dma_op_rx_count(dma, ret);
 
 	return ret;
 }

@@ -35,11 +35,11 @@ static kc705_pci_dev_t *kc705_pci_dev = NULL;
 static DEFINE_MUTEX(work_lock);
 static int dma_lite_offset[DMA_MAX] = {
 	OFFSET_AXI_DMA_LITE_0,
-	OFFSET_AXI_DMA_LITE_1,
+	//OFFSET_AXI_DMA_LITE_1,
 };
 static int pcie_bar_map_ctl_offset[DMA_MAX] = {
 	AXIBAR2PCIEBAR_0U,
-	AXIBAR2PCIEBAR_2U,
+	//AXIBAR2PCIEBAR_2U,
 };
 
 static void read_pci_configuration(struct pci_dev * pdev) {
@@ -265,6 +265,8 @@ void dump_memory(void *addr, int size) {
 #define SPEED_MB (1024 * 1024)
 
 //static struct timeval start_time = {0};
+long unsigned int get_op_tx_count(pcie_dma_t *dma);
+long unsigned int get_op_rx_count(pcie_dma_t *dma);
 static void test_performance(kc705_pci_dev_t *kc705_pci_dev) {
 	int i;
 	long unsigned int total_tx_speed = 0;
@@ -280,8 +282,8 @@ static void test_performance(kc705_pci_dev_t *kc705_pci_dev) {
 
 	for(i = 0; i < DMA_MAX; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
-		long unsigned int tx_speed = dma->dma_op.get_op_tx_count(dma);
-		long unsigned int rx_speed = dma->dma_op.get_op_rx_count(dma);
+		long unsigned int tx_speed = get_op_tx_count(dma);
+		long unsigned int rx_speed = get_op_rx_count(dma);
 
 		printk("DMA[%02d](MB/s)|U:%4lu.%06lu|D:%4lu.%06lu|A:%4lu.%06lu\n",
 			i,
@@ -405,19 +407,7 @@ static int pcie_tr_thread(void *ppara) {
 
 			pcie_dma_t *dma = kc705_pci_dev->dma + cur_dma;
 
-			put_pcie_tr(dma, 0, 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE);
-
-			//tr.dma = dma;
-			//tr.tx_dest_axi_addr = 0;
-			//tr.rx_src_axi_addr = 0;
-			//tr.tx_size = DMA_BLOCK_SIZE;
-			//tr.rx_size = DMA_BLOCK_SIZE;
-
-			//tr.dma->dma_op.dma_tr(tr.dma,
-			//		tr.tx_dest_axi_addr,
-			//		tr.rx_src_axi_addr,
-			//		tr.tx_size,
-			//		tr.rx_size);
+			put_pcie_tr(dma, BASE_AXI_DDR_ADDR, BASE_AXI_DDR_ADDR, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE);
 
 			cur_dma++;
 			if(DMA_MAX == cur_dma) {
@@ -470,17 +460,18 @@ static void end_work_loop(void) {
 }
 
 extern dma_op_t axi_dma_op;
+extern dma_op_t axi_cdma_op;
 #define DMA_BAR_MEM_START_INDEX 1
 static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pdev) {
 	int ret = 0;
 	int i, j;
 
-	kc705_pci_dev->dma[DMA0].dma_op = axi_dma_op;
+	kc705_pci_dev->dma[DMA0].dma_op = axi_cdma_op;
 	kc705_pci_dev->dma[DMA0].pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0;
 	kc705_pci_dev->dma[DMA0].pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1;
-	kc705_pci_dev->dma[DMA1].dma_op = axi_dma_op;
-	kc705_pci_dev->dma[DMA1].pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR2;
-	kc705_pci_dev->dma[DMA1].pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR3;
+	//kc705_pci_dev->dma[DMA1].dma_op = axi_dma_op;
+	//kc705_pci_dev->dma[DMA1].pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR2;
+	//kc705_pci_dev->dma[DMA1].pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR3;
 
 	for(i = 0; i < DMA_MAX; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
@@ -496,8 +487,7 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 		dma->dma_lite_offset = dma_lite_offset[i];
 		dma->pcie_bar_map_ctl_offset = pcie_bar_map_ctl_offset[i];
 
-		//dma->bar_map_memory_size[0] = 0;
-		for(j = DMA_BAR_MEM_START_INDEX; j < MAX_BAR_MAP_MEMORY; j++) {
+		for(j = 0; j < MAX_BAR_MAP_MEMORY; j++) {
 			dma->bar_map_memory_size[j] = PCIe_MAP_BAR_SIZE;
 		}
 
