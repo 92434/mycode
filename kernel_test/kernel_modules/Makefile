@@ -6,13 +6,14 @@
 #modules-name-objs := obj1.o obj2.o obj3.o
 #KERNEL-OBJS += modules-name.o
 
-#KBUILD_CFLAGS += -Dtest_timer
-KBUILD_CFLAGS += -Dtest_buffer_list
+KBUILD_CFLAGS += -Dtest_timer
+#KBUILD_CFLAGS += -Dtest_buffer_list
+KBUILD_CFLAGS += -Dtest_kthread
 
 KERNEL-OBJS += pmodoled-gpio.o
 KERNEL-OBJS += mod_info.o
 KERNEL-OBJS += cdev.o
-test-module-objs := test_utils.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o
+test-module-objs := test_utils.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o utils/xiaofei_kthread.o
 KERNEL-OBJS += test-module.o
 
 include $(BUILD_KO)
