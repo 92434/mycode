@@ -171,7 +171,7 @@ static int dma_trans_sync(pcie_dma_t *dma, int tx_size, int rx_size) {
 	uint32_t value;
 	
 	if(tx_size != 0) {
-		tmo = msecs_to_jiffies(1000);
+		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->tx_cmp, tmo);
 		if (0 == tmo) {
 			myprintf("%p:tx transfer timed out!\n", (void *)dma);
@@ -184,7 +184,7 @@ static int dma_trans_sync(pcie_dma_t *dma, int tx_size, int rx_size) {
 	}
 
 	if(rx_size != 0) {
-		tmo = msecs_to_jiffies(1000);
+		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->rx_cmp, tmo);
 		if (0 == tmo) {
 			myprintf("%p:rx transfer timed out!\n", (void *)dma);
@@ -197,6 +197,30 @@ static int dma_trans_sync(pcie_dma_t *dma, int tx_size, int rx_size) {
 	}
 
 	return ret;
+}
+
+static void inc_dma_op_tx_count(void *ppara, long unsigned int count) {
+	pcie_dma_t *dma = (pcie_dma_t *)ppara;
+	dma->tx_count += count;
+}
+
+static void inc_dma_op_rx_count(void *ppara, long unsigned int count) {
+	pcie_dma_t *dma = (pcie_dma_t *)ppara;
+	dma->rx_count += count;
+}
+
+static long unsigned int get_op_tx_count(void *ppara) {
+	pcie_dma_t *dma = (pcie_dma_t *)ppara;
+	long unsigned int count = dma->tx_count;
+	dma->tx_count = 0;
+	return count;
+}
+
+static long unsigned int get_op_rx_count(void *ppara) {
+	pcie_dma_t *dma = (pcie_dma_t *)ppara;
+	long unsigned int count = dma->rx_count;
+	dma->rx_count = 0;
+	return count;
 }
 
 static int dma_tr(void *ppara,
@@ -249,9 +273,8 @@ static int dma_tr(void *ppara,
 	write_buffer(NULL, rx_size, dma->list);
 	test_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size);
 	//read_buffer(NULL, rx_size, dma->list);
-void inc_dma_op_count(void);
-	inc_dma_op_count();
-
+	dma->dma_op.inc_dma_op_tx_count(dma, tx_size);
+	
 	return ret;
 }
 
@@ -259,4 +282,8 @@ dma_op_t axi_dma_op = {
 	.init_dma = init_dma,
 	.process_isr = process_isr,
 	.dma_tr = dma_tr,
+	.inc_dma_op_tx_count = inc_dma_op_tx_count,
+	.inc_dma_op_rx_count = inc_dma_op_rx_count,
+	.get_op_tx_count = get_op_tx_count,
+	.get_op_rx_count = get_op_rx_count,
 };

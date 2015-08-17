@@ -42,6 +42,7 @@ static ssize_t kc705_read(struct file *filp, char __user * buf, size_t len, loff
 	}
 
 	ret = read_buffer(buf, len, dma->list);
+	dma->dma_op.inc_dma_op_rx_count(dma, ret);
 
 	return ret;
 }

@@ -262,36 +262,52 @@ void dump_memory(void *addr, int size) {
 	printk("\n");
 }
 
-static uint64_t dma_op_count = 0;
-static struct timeval start_time = {0};
+#define SPEED_MB (1024 * 1024)
 
-void inc_dma_op_count(void) {
-	dma_op_count++;
-}
+//static struct timeval start_time = {0};
+static void test_performance(kc705_pci_dev_t *kc705_pci_dev) {
+	int i;
+	long unsigned int total_tx_speed = 0;
+	long unsigned int total_rx_speed = 0;
+	//struct timeval stop_time;
 
-static void test_performance(void) {
-	struct timeval stop_time;
+	//do_gettimeofday(&stop_time);
 
-	do_gettimeofday(&stop_time);
-
-	//mydebug("dma_op_count:%ld\n", dma_op_count);
 	//mydebug("stop_time.tv_sec:%lu\n", stop_time.tv_sec);
 	//mydebug("start_time.tv_sec:%lu\n", start_time.tv_sec);
 	//mydebug("stop_time.tv_usec:%lu\n", stop_time.tv_usec);
 	//mydebug("start_time.tv_usec:%lu\n", start_time.tv_usec);
 
-	printk("DMA speed: %u.%06uMB/s\n", (unsigned int)(dma_op_count * DMA_BLOCK_SIZE) / (1024 * 1024), (unsigned int)((dma_op_count * DMA_BLOCK_SIZE) % (1024 * 1024)) * (1000 * 1000) / (1024 * 1024));
+	for(i = 0; i < DMA_MAX; i++) {
+		pcie_dma_t *dma = kc705_pci_dev->dma + i;
+		long unsigned int tx_speed = dma->dma_op.get_op_tx_count(dma);
+		long unsigned int rx_speed = dma->dma_op.get_op_rx_count(dma);
 
-	dma_op_count = 0;
-	do_gettimeofday(&start_time);
+		printk("DMA[%02d](MB/s)|U:%4lu.%06lu|D:%4lu.%06lu|A:%4lu.%06lu\n",
+			i,
+			tx_speed / SPEED_MB, (1000 * 1000) * (tx_speed % SPEED_MB) / SPEED_MB,
+			rx_speed / SPEED_MB, (1000 * 1000) * (rx_speed % SPEED_MB) / SPEED_MB,
+			(rx_speed + tx_speed) / SPEED_MB, (1000 * 1000) * ((rx_speed + tx_speed) % SPEED_MB) / SPEED_MB);
+
+		total_tx_speed += tx_speed;
+		total_rx_speed += rx_speed;
+
+	}
+
+	printk("all    (MB/s)|U:%4lu.%06lu|D:%4lu.%06lu|A:%4lu.%06lu\n",
+		total_tx_speed / SPEED_MB, (1000 * 1000) * (total_tx_speed % SPEED_MB) / SPEED_MB,
+		total_rx_speed / SPEED_MB, (1000 * 1000) * (total_rx_speed % SPEED_MB) / SPEED_MB,
+		(total_tx_speed + total_rx_speed) / SPEED_MB, (1000 * 1000) * ((total_tx_speed + total_rx_speed) % SPEED_MB) / SPEED_MB);
+	printk("\n");
+
+	//do_gettimeofday(&start_time);
 }
 
 static void work_func(struct work_struct *work) {
 	kc705_pci_dev_t *kc705_pci_dev = container_of(work, kc705_pci_dev_t, work);
 
 	mutex_lock(&work_lock);
-	kc705_pci_dev = kc705_pci_dev;
-	test_performance();
+	test_performance(kc705_pci_dev);
 	mutex_unlock(&work_lock);
 }
 
@@ -388,6 +404,7 @@ static int pcie_tr_thread(void *ppara) {
 			static int cur_dma = 0;
 
 			pcie_dma_t *dma = kc705_pci_dev->dma + cur_dma;
+
 			put_pcie_tr(dma, 0, 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE);
 
 			//tr.dma = dma;

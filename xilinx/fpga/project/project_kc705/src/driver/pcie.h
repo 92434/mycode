@@ -74,10 +74,18 @@ typedef int (*dma_tr_t)(void *ppara,
 		uint64_t rx_src_axi_addr,
 		int tx_size,
 		int rx_size);
+typedef void (*inc_dma_op_tx_count_t)(void *ppara, long unsigned int count);
+typedef void (*inc_dma_op_rx_count_t)(void *ppara, long unsigned int count);
+typedef long unsigned int (*get_op_tx_count_t)(void *ppara);
+typedef long unsigned int (*get_op_rx_count_t)(void *ppara);
 typedef struct _dma_op {
 	init_dma_t init_dma;
 	process_isr_t process_isr; 
 	dma_tr_t dma_tr; 
+	inc_dma_op_tx_count_t inc_dma_op_tx_count;
+	inc_dma_op_rx_count_t inc_dma_op_rx_count;
+	get_op_tx_count_t get_op_tx_count;
+	get_op_rx_count_t get_op_rx_count;
 } dma_op_t;
 
 typedef struct {
@@ -94,6 +102,8 @@ typedef struct {
 	dma_op_t dma_op;
 	struct completion tx_cmp;
 	struct completion rx_cmp;
+	long unsigned int tx_count;
+	long unsigned int rx_count;
 
 	char dev_name[16];
 	wait_queue_head_t wq;
