@@ -17,38 +17,25 @@
 #define PCI_VENDOR_ID_DMA   0x10EE      /**< Vendor ID - Xilinx */
 #define PCI_DEVICE_ID_DMA   0x7012      /**< Xilinx's Device ID */
 
-////Base Address
-////regs
-//#define BASE_AXI_PCIe 0x81000000
-//#define BASE_Translation_BRAM 0x81000000
-//#define BASE_AXI_PCIe_CTL 0x81004000
-//#define BASE_AXI_DMA_LITE_0 0x81008000
-//#define BASE_AXI_DMA_LITE_1 0x8100c000
-////memory
-//#define BASE_AXI_DDR_ADDR 0x00000000
-//#define BASE_AXI_PCIe_BAR0 0x80000000
-//#define BASE_AXI_PCIe_BAR1 0x80010000
-//#define BASE_AXI_PCIe_BAR2 0x80020000
-//#define BASE_AXI_PCIe_BAR3 0x80030000
-
 //Base Address
 //regs
 #define BASE_AXI_PCIe 0x81000000
-#define BASE_Translation_BRAM 0x81000000
-#define BASE_AXI_PCIe_CTL 0x81008000
-#define BASE_AXI_DMA_LITE_0 0x8100c000
+#define BASE_AXI_PCIe_CTL 0x81000000
+#define BASE_AXI_DMA_LITE_0 0x81004000
+#define BASE_AXI_DMA_LITE_1 0x81008000
+#define BASE_Translation_BRAM 0x8100c000
 //memory
 #define BASE_AXI_DDR_ADDR 0x00000000
-#define BASE_AXI_PCIe_BAR0 0x80800000
-#define BASE_AXI_PCIe_BAR1 0x80000000
+#define BASE_AXI_PCIe_BAR0 0x80000000
+#define BASE_AXI_PCIe_BAR1 0x80010000
 #define BASE_AXI_PCIe_BAR2 0x80020000
 #define BASE_AXI_PCIe_BAR3 0x80030000
 
 //PCIe:BAR0 Address Offset for the accessible Interfaces
-#define OFFSET_Translation_BRAM (BASE_Translation_BRAM - BASE_AXI_PCIe)
 #define OFFSET_AXI_PCIe_CTL (BASE_AXI_PCIe_CTL - BASE_AXI_PCIe)
 #define OFFSET_AXI_DMA_LITE_0 (BASE_AXI_DMA_LITE_0 - BASE_AXI_PCIe)
 #define OFFSET_AXI_DMA_LITE_1 (BASE_AXI_DMA_LITE_1 - BASE_AXI_PCIe)
+#define OFFSET_Translation_BRAM (BASE_Translation_BRAM - BASE_AXI_PCIe)
 
 //Address Map for the AXI to PCIe Address Translation Registers
 #define AXIBAR2PCIEBAR_0U 0x208 //default be set to 0
@@ -75,7 +62,7 @@
 
 typedef enum {
 	DMA0 = 0,
-	//DMA1,
+	DMA1,
 	DMA_MAX
 } dma_index_t;
 

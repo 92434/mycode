@@ -7,9 +7,6 @@
 #include "pcie.h"
 #include "dma_common.h"
 
-#define BASE_AXI_CDMA_LITE 0x8100c000
-#define OFFSET_AXI_CDMA_LITE (BASE_AXI_CDMA_LITE - BASE_AXI_PCIe)
-
 //AXI CDMA Register Summary
 #define CDMA_CR 0x00 //CDMA Control.
 #define CDMA_SR 0x04 //CDMA Status.

@@ -35,11 +35,11 @@ static kc705_pci_dev_t *kc705_pci_dev = NULL;
 static DEFINE_MUTEX(work_lock);
 static int dma_lite_offset[DMA_MAX] = {
 	OFFSET_AXI_DMA_LITE_0,
-	//OFFSET_AXI_DMA_LITE_1,
+	OFFSET_AXI_DMA_LITE_1,
 };
 static int pcie_bar_map_ctl_offset[DMA_MAX] = {
 	AXIBAR2PCIEBAR_0U,
-	//AXIBAR2PCIEBAR_2U,
+	AXIBAR2PCIEBAR_2U,
 };
 
 static void read_pci_configuration(struct pci_dev * pdev) {
@@ -466,12 +466,12 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 	int ret = 0;
 	int i, j;
 
-	kc705_pci_dev->dma[DMA0].dma_op = axi_cdma_op;
+	kc705_pci_dev->dma[DMA0].dma_op = axi_dma_op;
 	kc705_pci_dev->dma[DMA0].pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0;
 	kc705_pci_dev->dma[DMA0].pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1;
-	//kc705_pci_dev->dma[DMA1].dma_op = axi_dma_op;
-	//kc705_pci_dev->dma[DMA1].pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR2;
-	//kc705_pci_dev->dma[DMA1].pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR3;
+	kc705_pci_dev->dma[DMA1].dma_op = axi_cdma_op;
+	kc705_pci_dev->dma[DMA1].pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR2;
+	kc705_pci_dev->dma[DMA1].pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR3;
 
 	for(i = 0; i < DMA_MAX; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
@@ -626,6 +626,8 @@ irqreturn_t isr(int irq, void *dev_id)
 static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *ent) {
 	int ret = 0;
 
+	mydebug("pdev->dev.of_node:%p\n", pdev->dev.of_node);
+
 	//alloc memory for driver
 	kc705_pci_dev = (kc705_pci_dev_t *)vzalloc(sizeof(kc705_pci_dev_t));
 	if(kc705_pci_dev == NULL) {
@@ -731,32 +733,36 @@ init_pcie_tr_failed:
 free_pcie_resource:
 	vfree(kc705_pci_dev);
 alloc_kc705_pci_dev_failed:
+	kc705_pci_dev = NULL;
 	return ret;
 }
 
 static void kc705_remove_pcie(struct pci_dev *pdev) {
 	mutex_lock(&work_lock);
+	if(kc705_pci_dev != NULL) {
+		end_work_loop();
 
-	end_work_loop();
+		if(pdev->irq != 0) {
+			free_irq(pdev->irq, pdev);
+		}
 
-	free_irq(pdev->irq, pdev);
+		if(kc705_pci_dev->msi_enable) {
+			pci_disable_msi(pdev);
+		}
 
-	if(kc705_pci_dev->msi_enable) {
-		pci_disable_msi(pdev);
+		pci_set_drvdata(pdev, NULL);
+
+		iounmap_pcie_bars(kc705_pci_dev);
+
+		pci_release_regions(pdev);
+
+		pci_disable_device(pdev);
+
+		uninit_pcie_tr(kc705_pci_dev);
+
+		uninit_dma_memory(kc705_pci_dev, pdev);
+		vfree(kc705_pci_dev);
 	}
-
-	pci_set_drvdata(pdev, NULL);
-
-	iounmap_pcie_bars(kc705_pci_dev);
-
-	pci_release_regions(pdev);
-
-	pci_disable_device(pdev);
-
-	uninit_pcie_tr(kc705_pci_dev);
-
-	uninit_dma_memory(kc705_pci_dev, pdev);
-	vfree(kc705_pci_dev);
 	mutex_unlock(&work_lock);
 }
 

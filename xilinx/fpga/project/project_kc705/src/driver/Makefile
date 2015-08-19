@@ -18,15 +18,20 @@ KBUILD_CFLAGS += -Dtest_buffer_list
 test-module-objs := test_utils.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o
 KERNEL-OBJS += test-module.o
 
-ifdef CDMA
-kc705-module-objs := kc705.o pcie.o dma_common.o utils/xiaofei_kthread.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o axi_cdma.o
+kc705-module-objs := kc705.o pcie.o dma_common.o pcie_device.o utils/xiaofei_kthread.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o axi_dma.o axi_cdma.o
 KERNEL-OBJS += kc705-module.o
-else
-kc705-module-objs := kc705.o pcie.o dma_common.o utils/xiaofei_kthread.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o axi_dma.o
-KERNEL-OBJS += kc705-module.o
-endif
 
 include $(BUILD_KO)
+
+app : kc705_device.c
+	gcc -o app kc705_device.c
+
+all : app
+
+clean-app :
+	-rm app
+
+clean : clean-app
 
 #install-dma:
 ##	sudo insmod kc705-dma.ko my_pci_device_id=0x7028
@@ -58,7 +63,11 @@ uninstall-test:
 install: kc705-module.ko
 	sudo insmod kc705-module.ko
 	dmesg
+	sudo ./app /dev/pciedma_0 &
+	sudo ./app /dev/pciedma_1 &
 
 uninstall:
+	-sudo killall -9 app
+	while test -n "$(ps -elf | grep app 2>/dev/null)"; do sleep 1;done
 	sudo rmmod kc705-module
 	sudo dmesg -c
