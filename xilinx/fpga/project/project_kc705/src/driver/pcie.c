@@ -334,6 +334,11 @@ static int init_pcie_tr(kc705_pci_dev_t *kc705_pci_dev) {
 	}
 
 	tr = (pcie_tr_t *)vzalloc(sizeof(pcie_tr_t) * 1024);
+	if(tr == NULL) {
+		mydebug("alloc tr failed.\n");
+		ret = -1;
+		return ret;
+	}
 	add_list_buffer_item((char *)tr, (void *)NULL, sizeof(pcie_tr_t) * 1024, kc705_pci_dev->pcie_tr_list);
 
 	return ret;

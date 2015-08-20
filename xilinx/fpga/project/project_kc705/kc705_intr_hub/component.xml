@@ -36,7 +36,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>8b31bee4</spirit:value>
+            <spirit:value>99d3ed94</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -52,7 +52,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>8b31bee4</spirit:value>
+            <spirit:value>99d3ed94</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -147,7 +147,7 @@
       <spirit:file>
         <spirit:name>intr_hub.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_9b6d0cae</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_925e4c11</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -193,8 +193,8 @@
         <xilinx:taxonomy>/UserIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>intr_hub_v1_0</xilinx:displayName>
-      <xilinx:coreRevision>3</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2015-08-19T10:26:56Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>7</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2015-08-20T06:39:19Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="user.org:user:intr_hub:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/project_kc705_dma/kc705_intr_hub/kc705_intr_hub.srcs/sources_1/new</xilinx:tag>
         <xilinx:tag xilinx:name="(none):user:intr_hub:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/project_kc705_dma/kc705_intr_hub/kc705_intr_hub.srcs/sources_1/new</xilinx:tag>
@@ -204,7 +204,7 @@
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2014.3</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="e2a9b86b"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="562c2d50"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="1be83ca4"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="3e76f6c6"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="d6cfb353"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="7b349718"/>

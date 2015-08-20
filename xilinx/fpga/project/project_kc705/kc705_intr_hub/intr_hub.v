@@ -22,7 +22,7 @@
 
 module intr_hub #
 	(
-		parameter integer INT_NUM   = 32
+		parameter integer INT_NUM = 32
 	)
 	(
 		input wire [INT_NUM - 1:0] int_i,
@@ -31,7 +31,7 @@ module intr_hub #
 		output wire int_o
 	);
 
-	wire [INT_NUM - 1:0] int_o_inst = 0;
+	wire [INT_NUM - 1:0] int_o_inst;
 
 	//-------------intr Instantiation----------------------------------------------------------//
 	genvar i;
@@ -48,5 +48,5 @@ module intr_hub #
 		end
 	endgenerate
 	
-	assign int_o = (int_o_inst != 0) ? 1'b1 : 1'b0;
+	assign int_o = (int_o_inst == 0) ? 1'b0 : 1'b1;
 endmodule
