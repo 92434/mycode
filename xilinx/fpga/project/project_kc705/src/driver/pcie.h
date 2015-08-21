@@ -21,9 +21,10 @@
 //regs
 #define BASE_AXI_PCIe 0x81000000
 #define BASE_AXI_PCIe_CTL 0x81000000
-#define BASE_AXI_DMA_LITE_0 0x81004000
-#define BASE_AXI_DMA_LITE_1 0x81008000
-#define BASE_Translation_BRAM 0x8100c000
+#define BASE_AXI_DMA_LITE_0 0x81001000
+#define BASE_AXI_DMA_LITE_1 0x81002000
+#define BASE_Translation_BRAM 0x81003000
+#define BASE_AXI_GPIO_LITE 0x81004000
 //memory
 #define BASE_AXI_DDR_ADDR 0x00000000
 #define BASE_AXI_PCIe_BAR0 0x80000000
@@ -36,6 +37,7 @@
 #define OFFSET_AXI_DMA_LITE_0 (BASE_AXI_DMA_LITE_0 - BASE_AXI_PCIe)
 #define OFFSET_AXI_DMA_LITE_1 (BASE_AXI_DMA_LITE_1 - BASE_AXI_PCIe)
 #define OFFSET_Translation_BRAM (BASE_Translation_BRAM - BASE_AXI_PCIe)
+#define OFFSET_AXI_GPIO_LITE (BASE_AXI_GPIO_LITE - BASE_AXI_PCIe)
 
 //Address Map for the AXI to PCIe Address Translation Registers
 #define AXIBAR2PCIEBAR_0U 0x208 //default be set to 0
@@ -65,6 +67,11 @@ typedef enum {
 	DMA1,
 	DMA_MAX
 } dma_index_t;
+
+typedef enum {
+	GPIOCHIP_0 = 0,
+	GPIOCHIP_MAX,
+} gpiochip_index_t;
 
 typedef irqreturn_t (*process_isr_t)(void *ppara);
 typedef int (*init_dma_t)(void *ppara);
@@ -123,6 +130,7 @@ typedef struct {
 	int msi_enable;
 	struct work_struct work;
 	pcie_dma_t dma[DMA_MAX];
+	void *gpiochip[GPIOCHIP_MAX];
 	struct task_struct *pcie_tr_thread;
 	timer_data_t *ptimer_data;
 	list_buffer_t *pcie_tr_list;

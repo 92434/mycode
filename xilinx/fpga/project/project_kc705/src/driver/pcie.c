@@ -37,9 +37,14 @@ static int dma_lite_offset[DMA_MAX] = {
 	OFFSET_AXI_DMA_LITE_0,
 	OFFSET_AXI_DMA_LITE_1,
 };
+
 static int pcie_bar_map_ctl_offset[DMA_MAX] = {
 	AXIBAR2PCIEBAR_0U,
 	AXIBAR2PCIEBAR_2U,
+};
+
+static int gpio_lite_offset[GPIOCHIP_MAX] = {
+	OFFSET_AXI_GPIO_LITE,
 };
 
 static void read_pci_configuration(struct pci_dev * pdev) {
@@ -430,8 +435,16 @@ static int pcie_tr_thread(void *ppara) {
 	return ret;
 }
 
+void *kc705_add_gpio_chip(uint8_t *base_addr, char *namefmt, ...);
+int create_gpio_proc_dir(void);
 static int start_work_loop(void) {
 	int i;
+
+	for(i = 0; i < GPIOCHIP_MAX; i++) {
+		kc705_pci_dev->gpiochip[i] = kc705_add_gpio_chip(kc705_pci_dev->bar_info[0].base_vaddr + gpio_lite_offset[i], "gpiochip%d", i);
+	}
+
+	create_gpio_proc_dir();
 
 	INIT_WORK(&(kc705_pci_dev->work), work_func);
 	kc705_pci_dev->ptimer_data = alloc_timer(1000, timer_func);
@@ -446,6 +459,8 @@ static int start_work_loop(void) {
 	return 0;
 }
 
+void kc705_remove_gpio_chip(void *ppara);
+void remove_gpio_proc_dir(void);
 static void end_work_loop(void) {
 	int i;
 
@@ -461,6 +476,14 @@ static void end_work_loop(void) {
 
 	if(kc705_pci_dev->ptimer_data != NULL) {
 		free_timer(kc705_pci_dev->ptimer_data);
+	}
+
+	remove_gpio_proc_dir();
+
+	for(i = 0; i < GPIOCHIP_MAX; i++) {
+		if(kc705_pci_dev->gpiochip[i] != NULL) {
+			kc705_remove_gpio_chip(kc705_pci_dev->gpiochip[i]);
+		}
 	}
 }
 

@@ -11,7 +11,7 @@
 #define IP_IER 0x128 //IP Interrupt Enable Register (IP IER).
 #define IP_ISR 0x120 //IP Interrupt Status Register.
 
-#define CHANNEL_PIN_NUMBER 32
+#define CHANNEL_PIN_NUMBER 1
 #define NAME_SIZE 20
 
 typedef enum {
@@ -106,9 +106,11 @@ static int gpio_channel_set_output(uint8_t *gpio_bank_base, unsigned int channel
 			value = readl(gpio_bank_base + GPIO_TRI) & ~(BITMASK(offset));
 			writel(value, gpio_bank_base + GPIO_TRI);
 			break;
-		default:
+		case 1:
 			value = readl(gpio_bank_base + GPIO2_TRI) & ~(BITMASK(offset));
 			writel(value, gpio_bank_base + GPIO2_TRI);
+			break;
+		default:
 			break;
 	}
 
@@ -116,15 +118,15 @@ static int gpio_channel_set_output(uint8_t *gpio_bank_base, unsigned int channel
 }
 
 static int gpio_channel_get_direction(uint8_t *gpio_bank_base, unsigned int channel_index, unsigned int offset) {
-	uint32_t value;
+	uint32_t value = 0;
 	switch(channel_index) {
 		case 0:
-			value = readl(gpio_bank_base + GPIO_TRI) & ~(BITMASK(offset));
-			writel(value, gpio_bank_base + GPIO_TRI);
+			value = readl(gpio_bank_base + GPIO_TRI);
+			break;
+		case 1:
+			value = readl(gpio_bank_base + GPIO2_TRI);
 			break;
 		default:
-			value = readl(gpio_bank_base + GPIO2_TRI) & ~(BITMASK(offset));
-			writel(value, gpio_bank_base + GPIO2_TRI);
 			break;
 	}
 
@@ -186,6 +188,7 @@ static int kc705_gpio_direction_input(struct gpio_chip *chip, unsigned offset) {
 
 static int kc705_gpio_direction_output(struct gpio_chip *chip, unsigned offset, int value) {
 	kc705_gpio_chip_channel_t *gpio = container_of(chip, kc705_gpio_chip_channel_t, chip);
+	mydebug("\n");
 
 	gpio_channel_set_output(gpio->base_addr, gpio->channel_index, offset);
 	gpio_channel_set(gpio->base_addr, gpio->channel_index, offset, !!value);
@@ -203,6 +206,7 @@ static struct gpio_chip chip_example = {
 	//.label = label,
 	//.request = request,
 	//.free = free,
+	.base = -1,
 	.get_direction = kc705_gpio_get_direction,
 	.direction_input = kc705_gpio_direction_input,
 	.direction_output = kc705_gpio_direction_output,
@@ -234,11 +238,11 @@ void *kc705_add_gpio_chip(uint8_t *base_addr, char *namefmt, ...) {
 	for(i = 0; i < channel_size; i++) {
 		kc705_gpio_chip->gpio_channel[i].base_addr = base_addr;
 		kc705_gpio_chip->gpio_channel[i].channel_index = i;
-		snprintf(kc705_gpio_chip->gpio_channel[i].name, sizeof(kc705_gpio_chip->gpio_channel[i].name), "%s_%d", base_name, i);
+		snprintf(kc705_gpio_chip->gpio_channel[i].name, sizeof(kc705_gpio_chip->gpio_channel[i].name), "%s_channel%d", base_name, i);
 		kc705_gpio_chip->gpio_channel[i].chip = chip_example;
 		kc705_gpio_chip->gpio_channel[i].chip.label = kc705_gpio_chip->gpio_channel[i].name;
 		if(gpiochip_add(&(kc705_gpio_chip->gpio_channel[i].chip)) != 0) {
-			mydebug("gpiochip_add failed.\n");
+			mydebug("gpiochip_add %d failed.\n", i);
 		} else {
 			kc705_gpio_chip->gpio_channel[i].initilized = true;
 		}
