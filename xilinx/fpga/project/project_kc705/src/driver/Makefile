@@ -21,6 +21,8 @@ KERNEL-OBJS += test-module.o
 kc705-module-objs := kc705.o pcie.o dma_common.o pcie_device.o utils/xiaofei_kthread.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o axi_dma.o axi_cdma.o gpio.o gpio_proc.o
 KERNEL-OBJS += kc705-module.o
 
+KERNEL-OBJS += i2c-gpio.o i2c-dev.o spi-gpio.o spidev.o
+
 include $(BUILD_KO)
 
 app : kc705_device.c
