@@ -217,6 +217,7 @@ static struct gpio_chip chip_example = {
 	.ngpio = CHANNEL_PIN_NUMBER,
 };
 
+int create_gpio_proc_dir(void);
 void *kc705_add_gpio_chip(uint8_t *base_addr, char *namefmt, ...) {
 	void *ret;
 	int i;
@@ -249,14 +250,19 @@ void *kc705_add_gpio_chip(uint8_t *base_addr, char *namefmt, ...) {
 		mydebug("kc705_gpio_chip->gpio_channel[i].chip.base:%d\n", kc705_gpio_chip->gpio_channel[i].chip.base);
 	}
 	
+	create_gpio_proc_dir();
+
 	ret = (void *)kc705_gpio_chip;
 	return ret;
 }
 
+void remove_gpio_proc_dir(void);
 void kc705_remove_gpio_chip(void *ppara) {
 	kc705_gpio_chip_t *kc705_gpio_chip = (kc705_gpio_chip_t *)ppara;
 	int i;
 	
+	remove_gpio_proc_dir();
+
 	for(i = 0; i < channel_size; i++) {
 		if(kc705_gpio_chip->gpio_channel[i].initilized) {
 			gpiochip_remove(&(kc705_gpio_chip->gpio_channel[i].chip));
