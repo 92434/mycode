@@ -2,7 +2,7 @@
 <spirit:component xmlns:xilinx="http://www.xilinx.com" xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1685-2009" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <spirit:vendor>xiaofei</spirit:vendor>
   <spirit:library>user</spirit:library>
-  <spirit:name>intr_hub</spirit:name>
+  <spirit:name>multi_to_one</spirit:name>
   <spirit:version>1.0</spirit:version>
   <spirit:busInterfaces>
     <spirit:busInterface>
@@ -29,14 +29,14 @@
         <spirit:displayName>Verilog Synthesis</spirit:displayName>
         <spirit:envIdentifier>verilogSource:vivado.xilinx.com:synthesis</spirit:envIdentifier>
         <spirit:language>verilog</spirit:language>
-        <spirit:modelName>intr_hub</spirit:modelName>
+        <spirit:modelName>multi_to_one</spirit:modelName>
         <spirit:fileSetRef>
           <spirit:localName>xilinx_verilogsynthesis_view_fileset</spirit:localName>
         </spirit:fileSetRef>
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>99d3ed94</spirit:value>
+            <spirit:value>c9b108d6</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -45,14 +45,14 @@
         <spirit:displayName>Verilog Simulation</spirit:displayName>
         <spirit:envIdentifier>verilogSource:vivado.xilinx.com:simulation</spirit:envIdentifier>
         <spirit:language>verilog</spirit:language>
-        <spirit:modelName>intr_hub</spirit:modelName>
+        <spirit:modelName>multi_to_one</spirit:modelName>
         <spirit:fileSetRef>
           <spirit:localName>xilinx_verilogbehavioralsimulation_view_fileset</spirit:localName>
         </spirit:fileSetRef>
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>99d3ed94</spirit:value>
+            <spirit:value>c9b108d6</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -66,29 +66,27 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>f2e62ce7</spirit:value>
+            <spirit:value>8d731bec</spirit:value>
+          </spirit:parameter>
+        </spirit:parameters>
+      </spirit:view>
+      <spirit:view>
+        <spirit:name>xilinx_verilogtestbench</spirit:name>
+        <spirit:displayName>Verilog Test Bench</spirit:displayName>
+        <spirit:envIdentifier>verilogSource:vivado.xilinx.com:simulation.testbench</spirit:envIdentifier>
+        <spirit:language>verilog</spirit:language>
+        <spirit:fileSetRef>
+          <spirit:localName>xilinx_verilogtestbench_view_fileset</spirit:localName>
+        </spirit:fileSetRef>
+        <spirit:parameters>
+          <spirit:parameter>
+            <spirit:name>viewChecksum</spirit:name>
+            <spirit:value>56207095</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
     </spirit:views>
     <spirit:ports>
-      <spirit:port>
-        <spirit:name>int_i</spirit:name>
-        <spirit:wire>
-          <spirit:direction>in</spirit:direction>
-          <spirit:vector>
-            <spirit:left spirit:format="long" spirit:resolve="dependent" spirit:dependency="(spirit:decode(id(&apos;MODELPARAM_VALUE.INT_NUM&apos;)) - 1)">31</spirit:left>
-            <spirit:right spirit:format="long" spirit:resolve="immediate">0</spirit:right>
-          </spirit:vector>
-          <spirit:wireTypeDefs>
-            <spirit:wireTypeDef>
-              <spirit:typeName>wire</spirit:typeName>
-              <spirit:viewNameRef>xilinx_verilogsynthesis</spirit:viewNameRef>
-              <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
-            </spirit:wireTypeDef>
-          </spirit:wireTypeDefs>
-        </spirit:wire>
-      </spirit:port>
       <spirit:port>
         <spirit:name>clk</spirit:name>
         <spirit:wire>
@@ -116,9 +114,13 @@
         </spirit:wire>
       </spirit:port>
       <spirit:port>
-        <spirit:name>int_o</spirit:name>
+        <spirit:name>in_data</spirit:name>
         <spirit:wire>
-          <spirit:direction>out</spirit:direction>
+          <spirit:direction>in</spirit:direction>
+          <spirit:vector>
+            <spirit:left spirit:format="long" spirit:resolve="immediate">7</spirit:left>
+            <spirit:right spirit:format="long" spirit:resolve="immediate">0</spirit:right>
+          </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
               <spirit:typeName>wire</spirit:typeName>
@@ -128,12 +130,46 @@
           </spirit:wireTypeDefs>
         </spirit:wire>
       </spirit:port>
+      <spirit:port>
+        <spirit:name>valid</spirit:name>
+        <spirit:wire>
+          <spirit:direction>out</spirit:direction>
+          <spirit:vector>
+            <spirit:left spirit:format="long" spirit:resolve="dependent" spirit:dependency="spirit:decode(id(&apos;MODELPARAM_VALUE.COUNT&apos;))">32</spirit:left>
+            <spirit:right spirit:format="long" spirit:resolve="immediate">0</spirit:right>
+          </spirit:vector>
+          <spirit:wireTypeDefs>
+            <spirit:wireTypeDef>
+              <spirit:typeName>reg</spirit:typeName>
+              <spirit:viewNameRef>xilinx_verilogsynthesis</spirit:viewNameRef>
+              <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
+            </spirit:wireTypeDef>
+          </spirit:wireTypeDefs>
+        </spirit:wire>
+      </spirit:port>
+      <spirit:port>
+        <spirit:name>out_data</spirit:name>
+        <spirit:wire>
+          <spirit:direction>out</spirit:direction>
+          <spirit:vector>
+            <spirit:left spirit:format="long" spirit:resolve="immediate">7</spirit:left>
+            <spirit:right spirit:format="long" spirit:resolve="immediate">0</spirit:right>
+          </spirit:vector>
+          <spirit:wireTypeDefs>
+            <spirit:wireTypeDef>
+              <spirit:typeName>reg</spirit:typeName>
+              <spirit:viewNameRef>xilinx_verilogsynthesis</spirit:viewNameRef>
+              <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
+            </spirit:wireTypeDef>
+          </spirit:wireTypeDefs>
+        </spirit:wire>
+      </spirit:port>
     </spirit:ports>
     <spirit:modelParameters>
       <spirit:modelParameter xsi:type="spirit:nameValueTypeType" spirit:dataType="integer">
-        <spirit:name>INT_NUM</spirit:name>
-        <spirit:displayName>Int Num</spirit:displayName>
-        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.INT_NUM">32</spirit:value>
+        <spirit:name>COUNT</spirit:name>
+        <spirit:displayName>Count</spirit:displayName>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.COUNT">32</spirit:value>
       </spirit:modelParameter>
     </spirit:modelParameters>
   </spirit:model>
@@ -141,47 +177,58 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>intr_instance.v</spirit:name>
+        <spirit:name>src/multi_to_one.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>intr_hub.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_925e4c11</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_c9b108d6</spirit:userFileType>
+        <spirit:isIncludeFile>false</spirit:isIncludeFile>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>intr_instance.v</spirit:name>
+        <spirit:name>src/multi_to_one.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>intr_hub.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:isIncludeFile>false</spirit:isIncludeFile>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
       <spirit:name>xilinx_xpgui_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>xgui/intr_hub_v1_0.tcl~</spirit:name>
+        <spirit:name>xgui/multi_to_one_v1_0.tcl~</spirit:name>
         <spirit:userFileType>XGUI_VERSION_2</spirit:userFileType>
         <spirit:userFileType>unknown</spirit:userFileType>
-        <spirit:userFileType>CHECKSUM_f2e62ce7</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_8d731bec</spirit:userFileType>
+      </spirit:file>
+    </spirit:fileSet>
+    <spirit:fileSet>
+      <spirit:name>xilinx_verilogtestbench_view_fileset</spirit:name>
+      <spirit:file>
+        <spirit:name>src/clock.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>src/testbench.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>src/multi_to_one.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
     </spirit:fileSet>
   </spirit:fileSets>
-  <spirit:description>intr_hub_v1_0</spirit:description>
+  <spirit:description>multi_to_one</spirit:description>
   <spirit:parameters>
     <spirit:parameter>
-      <spirit:name>INT_NUM</spirit:name>
-      <spirit:displayName>Int Num</spirit:displayName>
-      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.INT_NUM" spirit:order="1100">32</spirit:value>
+      <spirit:name>COUNT</spirit:name>
+      <spirit:displayName>Count</spirit:displayName>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.COUNT" spirit:order="1100">32</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>Component_Name</spirit:name>
       <spirit:displayName>Component Name</spirit:displayName>
-      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">intr_hub_v1_0</spirit:value>
+      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">multi_to_one_v1_0</spirit:value>
     </spirit:parameter>
   </spirit:parameters>
   <spirit:vendorExtensions>
@@ -192,22 +239,22 @@
       <xilinx:taxonomies>
         <xilinx:taxonomy>/UserIP</xilinx:taxonomy>
       </xilinx:taxonomies>
-      <xilinx:displayName>intr_hub_v1_0</xilinx:displayName>
-      <xilinx:coreRevision>7</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2015-08-20T06:39:19Z</xilinx:coreCreationDateTime>
+      <xilinx:displayName>multi_to_one</xilinx:displayName>
+      <xilinx:coreRevision>32</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2015-08-27T10:28:32Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
-        <xilinx:tag xilinx:name="user.org:user:intr_hub:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/project_kc705_dma/kc705_intr_hub/kc705_intr_hub.srcs/sources_1/new</xilinx:tag>
-        <xilinx:tag xilinx:name="(none):user:intr_hub:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/project_kc705_dma/kc705_intr_hub/kc705_intr_hub.srcs/sources_1/new</xilinx:tag>
-        <xilinx:tag xilinx:name="xiaofei:user:intr_hub:1.0_ARCHIVE_LOCATION">/home/action/workspace</xilinx:tag>
+        <xilinx:tag xilinx:name="user.org:user:multi_to_one:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/test_multi_to_one/test_multi_to_one.srcs/sources_1/new</xilinx:tag>
+        <xilinx:tag xilinx:name="(none):user:multi_to_one:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/test_multi_to_one/test_multi_to_one.srcs/sources_1/new</xilinx:tag>
+        <xilinx:tag xilinx:name="xiaofei:user:multi_to_one:1.0_ARCHIVE_LOCATION">/home/action/workspace</xilinx:tag>
       </xilinx:tags>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2014.3</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="e2a9b86b"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="1be83ca4"/>
-      <xilinx:checksum xilinx:scope="ports" xilinx:value="3e76f6c6"/>
-      <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="d6cfb353"/>
-      <xilinx:checksum xilinx:scope="parameters" xilinx:value="7b349718"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="940af128"/>
+      <xilinx:checksum xilinx:scope="ports" xilinx:value="024e709b"/>
+      <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="86cb8d8e"/>
+      <xilinx:checksum xilinx:scope="parameters" xilinx:value="6ccd42ec"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>
 </spirit:component>

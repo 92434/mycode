@@ -7,8 +7,6 @@ module myip_testbench #
 	(
 	);
 
-	wire [INT_NUM - 1 : 0] int_source;
-
 	wire clk;
 	reg rst;
 	reg [INT_NUM - 1 : 0] int_i = 0;
