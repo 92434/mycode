@@ -46,11 +46,11 @@ module i2s_receiver_wapper #(
 		end
 		else begin
 			for(index = 0;index < I2S_RECEIVER_NUM; index=index+1) begin
-				if(read_enable_R == 1 && chip_select[index] == 1) begin
+				if(read_enable_R == 1 && chip_select[index] == 1) begin//?chip_select need delay
 					local_rdata <= i2s_rdata[index];
 				end
 
-				read_enable_R = read_enable;
+				read_enable_R <= read_enable;//delay 1 clock
 			end
 		end
 	end

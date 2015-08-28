@@ -86,13 +86,13 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	//streaming data valid
 	wire axis_tvalid;
 	//streaming data valid delayed by one clock cycle
-	reg axis_tvalid_delay = 0;
+	reg axis_tvalid_delay = 0;//?not enough
 	//Last of the streaming data
 	wire axis_tlast;
 	//Last of the streaming data delayed by one clock cycle
-	reg axis_tlast_delay = 0;
+	reg axis_tlast_delay = 0;//?not enough
 	//FIFO implementation signals
-	reg [C_M_AXIS_TDATA_WIDTH-1 : 0] stream_data_out = 0;
+	reg [C_M_AXIS_TDATA_WIDTH-1 : 0] stream_data_out = 0;//?not enough
 
 	//The master has issued all the streaming data stored in FIFO
 	reg tx_done;
@@ -104,7 +104,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	// I/O Connections assignments
 
 	assign M_AXIS_TVALID = axis_tvalid_delay;
-	assign M_AXIS_TDATA = stream_data_out;
+	assign M_AXIS_TDATA = stream_data_out;//?not enough
 	assign M_AXIS_TLAST = axis_tlast_delay;
 	assign M_AXIS_TSTRB = {(C_M_AXIS_TDATA_WIDTH/8){1'b1}};
 
@@ -133,7 +133,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 							chip_select[index] <= 1;
 						end
 						else begin
-							chip_select[index] <= 0;
+							chip_select[index] <= 0;//?if null, add index
 						end
 					// end
 					//else
@@ -278,7 +278,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 			.output_ready(output_ready),
 			.buffer_full_error(buffer_full_error),
 			.buffer_empty_error(buffer_empty_error),
-			.rdata(rdata),
+			.rdata(rdata),//?delay 2 clock for clk
 			.s_data_valid(s_data_valid),
 			.i2s_received_data(i2s_received_data),
 			.local_read_enable(local_read_enable)
