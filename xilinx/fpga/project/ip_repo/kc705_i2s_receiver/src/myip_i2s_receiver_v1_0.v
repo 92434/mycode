@@ -4,6 +4,7 @@
 module myip_i2s_receiver_v1_0 #
 	(
 		// Users to add parameters here
+		parameter integer I2S_RECEIVER_NUM = 1,
 		parameter integer I2S_DATA_BIT_WIDTH = 24,
 		parameter integer NUMBER_OF_OUTPUT_WORDS = 8,
 
@@ -17,13 +18,18 @@ module myip_i2s_receiver_v1_0 #
 	)
 	(
 		// Users to add ports here
-		input wire i2s_receiver_bclk,
- 		input wire i2s_receiver_lrclk,
- 		input wire i2s_receiver_sdata,
+		input wire [I2S_RECEIVER_NUM - 1 : 0] i2s_receiver_bclk,
+		input wire [I2S_RECEIVER_NUM - 1 : 0] i2s_receiver_lrclk,
+		input wire [I2S_RECEIVER_NUM - 1 : 0] i2s_receiver_sdata,
 		output wire read_enable,
-		output wire output_ready,
-		output wire buffer_full_error,
-		output wire buffer_empty_error,
+		output wire [I2S_RECEIVER_NUM - 1 : 0] output_ready,
+		output wire [I2S_RECEIVER_NUM - 1 : 0] buffer_full_error,
+		output wire [I2S_RECEIVER_NUM - 1 : 0] buffer_empty_error,
+		output wire [I2S_RECEIVER_NUM - 1 : 0] chip_select,
+
+		output wire s_data_valid,
+		output wire [I2S_DATA_BIT_WIDTH:0] i2s_received_data,
+		output wire [I2S_RECEIVER_NUM - 1:0] local_read_enable,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -40,6 +46,7 @@ module myip_i2s_receiver_v1_0 #
 	);
 	// Instantiation of Axi Bus Interface M00_AXIS
 	myip_i2s_receiver_v1_0_M00_AXIS # ( 
+		.I2S_RECEIVER_NUM(I2S_RECEIVER_NUM),
 		.I2S_DATA_BIT_WIDTH(I2S_DATA_BIT_WIDTH),
 		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
 		.C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
@@ -52,6 +59,11 @@ module myip_i2s_receiver_v1_0 #
 		.read_enable(read_enable),
 		.buffer_full_error(buffer_full_error),
 		.buffer_empty_error(buffer_empty_error),
+		.chip_select(chip_select),
+
+		.s_data_valid(s_data_valid),
+		.i2s_received_data(i2s_received_data),
+		.local_read_enable(local_read_enable),
 
 		.M_AXIS_ACLK(m00_axis_aclk),
 		.M_AXIS_ARESETN(m00_axis_aresetn),

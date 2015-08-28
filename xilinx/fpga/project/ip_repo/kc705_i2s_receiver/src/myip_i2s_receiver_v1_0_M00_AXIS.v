@@ -3,6 +3,7 @@
 module myip_i2s_receiver_v1_0_M00_AXIS #
 	(
 		// Users to add parameters here
+		parameter integer I2S_RECEIVER_NUM = 1,
 		parameter integer I2S_DATA_BIT_WIDTH = 24,
 		parameter integer NUMBER_OF_OUTPUT_WORDS = 8,
 
@@ -16,13 +17,18 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	)
 	(
 		// Users to add ports here
-		input wire i2s_receiver_bclk,
- 		input wire i2s_receiver_lrclk,
- 		input wire i2s_receiver_sdata,
-		output wire read_enable,
-		output wire output_ready,
-		output wire buffer_full_error,
-		output wire buffer_empty_error,
+		input wire [I2S_RECEIVER_NUM - 1 : 0] i2s_receiver_bclk,
+		input wire [I2S_RECEIVER_NUM - 1 : 0] i2s_receiver_lrclk,
+		input wire [I2S_RECEIVER_NUM - 1 : 0] i2s_receiver_sdata,
+		input wire read_enable,
+		output wire [I2S_RECEIVER_NUM - 1 : 0] output_ready,
+		output wire [I2S_RECEIVER_NUM - 1 : 0] buffer_full_error,
+		output wire [I2S_RECEIVER_NUM - 1 : 0] buffer_empty_error,
+		output reg [I2S_RECEIVER_NUM - 1 : 0] chip_select,
+
+		output wire s_data_valid,
+		output wire [I2S_DATA_BIT_WIDTH:0] i2s_received_data,
+		output wire [I2S_RECEIVER_NUM - 1:0] local_read_enable,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -87,11 +93,12 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	reg axis_tlast_delay = 0;
 	//FIFO implementation signals
 	reg [C_M_AXIS_TDATA_WIDTH-1 : 0] stream_data_out = 0;
-	//wire read_enable;
+
 	//The master has issued all the streaming data stored in FIFO
 	reg tx_done;
 
 	wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] rdata;
+	reg [7:0] index = 0;
 
 
 	// I/O Connections assignments
@@ -109,6 +116,8 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 		// Synchronous reset (active low)
 			begin
 				mst_exec_state <= IDLE;
+				index <= 0;
+				chip_select <= 0;
 			end
 		else
 			case (mst_exec_state)
@@ -118,9 +127,13 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 					// presence of valid streaming data
 					//if ( count == 0 )
 					// begin
-						if(output_ready == 1) begin
+						if(output_ready[index] == 1) begin
 							count <= 0;
 							mst_exec_state <= INIT_COUNTER;
+							chip_select[index] <= 1;
+						end
+						else begin
+							chip_select[index] <= 0;
 						end
 					// end
 					//else
@@ -149,6 +162,13 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 					if (tx_done)
 						begin
 							mst_exec_state <= IDLE;
+							chip_select[index] <= 0;
+							if(index == I2S_RECEIVER_NUM - 1) begin
+								index = 0;
+							end
+							else begin
+								index <= index + 1;
+							end
 						end
 					else
 						begin
@@ -223,7 +243,6 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	//FIFO read enable generation
 
 	assign read_enable = M_AXIS_TREADY && axis_tvalid;
-//	assign output_ready = 1;
 
 	// Streaming output data is read from FIFO
 	always @( posedge M_AXIS_ACLK )
@@ -242,45 +261,27 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	// Add user logic here
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-	wire s_data_valid;
-
-	wire [C_M_AXIS_TDATA_WIDTH - 1:0] wdata;
-	wire [I2S_DATA_BIT_WIDTH:0] i2s_received_data;
-
- 	receive_data_from_i2s #
-		(
-			.I2S_DATA_BIT_WIDTH(I2S_DATA_BIT_WIDTH)
-		)
-		receiver
-		(
+	i2s_receiver_wapper #(
+			.I2S_RECEIVER_NUM(I2S_RECEIVER_NUM),
+			.C_M_AXIS_TDATA_WIDTH(C_M_AXIS_TDATA_WIDTH),
+			.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
+			.I2S_DATA_BIT_WIDTH(I2S_DATA_BIT_WIDTH),
+			.ID_WIDTH(5)
+		) myreceiver (
 			.rst(M_AXIS_ARESETN),
 			.bclk(i2s_receiver_bclk),
 			.lrclk(i2s_receiver_lrclk),
 			.sdata(i2s_receiver_sdata),
-			.i2s_received_data(i2s_received_data),
-			.s_data_valid(s_data_valid)
-		);
-
-	assign wdata = {i2s_received_data[I2S_DATA_BIT_WIDTH], {(C_M_AXIS_TDATA_WIDTH - 1 - I2S_DATA_BIT_WIDTH){1'b0}}, i2s_received_data[I2S_DATA_BIT_WIDTH - 1 : 0]};
-
-
-	my_fifo #
-		(
-			.DATA_WIDTH(C_M_AXIS_TDATA_WIDTH),
-			.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS)
-		)
-		xiaofei_fifo
-		(
-			.rst(M_AXIS_ARESETN),
-			.wclk(s_data_valid),
-			.rclk(M_AXIS_ACLK),
-			.wdata(wdata),
-			.rdata(rdata),
-			.read_enable(read_enable),//stay 3 cycles
+			.read_enable(read_enable),
+			.chip_select(chip_select),
+			.clk(M_AXIS_ACLK),
 			.output_ready(output_ready),
 			.buffer_full_error(buffer_full_error),
-			.buffer_empty_error(buffer_empty_error)
+			.buffer_empty_error(buffer_empty_error),
+			.rdata(rdata),
+			.s_data_valid(s_data_valid),
+			.i2s_received_data(i2s_received_data),
+			.local_read_enable(local_read_enable)
 		);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// User logic ends
