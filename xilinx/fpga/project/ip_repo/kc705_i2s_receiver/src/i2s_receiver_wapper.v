@@ -29,7 +29,7 @@ module i2s_receiver_wapper #(
 	);
 	
 	wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] i2s_rdata [I2S_RECEIVER_NUM - 1:0];
-	reg [C_M_AXIS_TDATA_WIDTH - 1 : 0] local_rdata;
+	reg [C_M_AXIS_TDATA_WIDTH - 1 : 0] local_rdata = 0;
 	wire [I2S_RECEIVER_NUM - 1:0] local_s_data_valid;
 	wire [I2S_DATA_BIT_WIDTH:0] local_i2s_received_data [I2S_RECEIVER_NUM - 1:0];
 
