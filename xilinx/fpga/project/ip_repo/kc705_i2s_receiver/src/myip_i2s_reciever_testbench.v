@@ -2,11 +2,11 @@
 
 module myip_testbench #
 	(
-		parameter integer I2S_RECEIVER_NUM = 2,
+		parameter integer I2S_RECEIVER_NUM = 4,
 		parameter I2S_DATA_BIT_WIDTH = 24,
 
 		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
-		parameter integer C_M00_AXIS_START_COUNT = 32
+		parameter integer C_M00_AXIS_START_COUNT = 1
 	)
 	(
 	);

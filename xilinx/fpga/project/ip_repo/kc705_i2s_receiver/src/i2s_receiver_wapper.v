@@ -34,7 +34,6 @@ module i2s_receiver_wapper #(
 	wire [I2S_DATA_BIT_WIDTH:0] local_i2s_received_data [I2S_RECEIVER_NUM - 1:0];
 
 	reg [7 : 0] index;
-	reg read_enable_R = 0;
 
 	assign s_data_valid = local_s_data_valid[0];
 	assign i2s_received_data = local_i2s_received_data[0];
@@ -46,11 +45,9 @@ module i2s_receiver_wapper #(
 		end
 		else begin
 			for(index = 0;index < I2S_RECEIVER_NUM; index=index+1) begin
-				if(read_enable_R == 1 && chip_select[index] == 1) begin//?chip_select need delay
+				if(read_enable == 1 && chip_select[index] == 1) begin
 					local_rdata <= i2s_rdata[index];
 				end
-
-				read_enable_R <= read_enable;//delay 1 clock
 			end
 		end
 	end

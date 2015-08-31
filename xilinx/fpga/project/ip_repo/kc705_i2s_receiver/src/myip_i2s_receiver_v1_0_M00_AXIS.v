@@ -86,13 +86,13 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	//streaming data valid
 	wire axis_tvalid;
 	//streaming data valid delayed by one clock cycle
-	reg axis_tvalid_delay = 0;//?not enough
+	reg axis_tvalid_R = 0;
 	//Last of the streaming data
 	wire axis_tlast;
 	//Last of the streaming data delayed by one clock cycle
-	reg axis_tlast_delay = 0;//?not enough
+	reg axis_tlast_R = 0;
 	//FIFO implementation signals
-	reg [C_M_AXIS_TDATA_WIDTH-1 : 0] stream_data_out = 0;//?not enough
+	//reg [C_M_AXIS_TDATA_WIDTH-1 : 0] stream_data_out = 0;
 
 	//The master has issued all the streaming data stored in FIFO
 	reg tx_done;
@@ -103,9 +103,10 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 
 	// I/O Connections assignments
 
-	assign M_AXIS_TVALID = axis_tvalid_delay;
-	assign M_AXIS_TDATA = stream_data_out;//?not enough
-	assign M_AXIS_TLAST = axis_tlast_delay;
+	assign M_AXIS_TVALID = axis_tvalid_R;
+	//assign M_AXIS_TDATA = stream_data_out;
+	assign M_AXIS_TDATA = rdata;
+	assign M_AXIS_TLAST = axis_tlast_R;
 	assign M_AXIS_TSTRB = {(C_M_AXIS_TDATA_WIDTH/8){1'b1}};
 
 
@@ -133,7 +134,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 							chip_select[index] <= 1;
 						end
 						else begin
-							chip_select[index] <= 0;//?if null, add index
+							chip_select[index] <= 0;
 						end
 					// end
 					//else
@@ -195,13 +196,13 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	begin
 		if (!M_AXIS_ARESETN)
 			begin
-				axis_tvalid_delay <= 1'b0;
-				axis_tlast_delay <= 1'b0;
+				axis_tvalid_R <= 1'b0;
+				axis_tlast_R <= 1'b0;
 			end
 		else
 			begin
-				axis_tvalid_delay <= axis_tvalid;
-				axis_tlast_delay <= axis_tlast;
+				axis_tvalid_R <= axis_tvalid;
+				axis_tlast_R <= axis_tlast;
 			end
 	end
 
@@ -244,19 +245,18 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 
 	assign read_enable = M_AXIS_TREADY && axis_tvalid;
 
-	// Streaming output data is read from FIFO
-	always @( posedge M_AXIS_ACLK )
-	begin
-		if(!M_AXIS_ARESETN)
-			begin
-				stream_data_out <= 0;
-			end
-		else if (read_enable)// && M_AXIS_TSTRB[byte_index]
-			begin
-//				stream_data_out <= read_pointer + 32'b1;
-				stream_data_out <= rdata;
-			end
-	end
+	//// Streaming output data is read from FIFO
+	//always @( posedge M_AXIS_ACLK )
+	//begin
+	//	if(!M_AXIS_ARESETN)
+	//		begin
+	//			stream_data_out <= 0;
+	//		end
+	//	else if (read_enable)// && M_AXIS_TSTRB[byte_index]
+	//		begin
+	//			stream_data_out <= read_pointer + 32'b1;
+	//		end
+	//end
 
 	// Add user logic here
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,7 +278,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 			.output_ready(output_ready),
 			.buffer_full_error(buffer_full_error),
 			.buffer_empty_error(buffer_empty_error),
-			.rdata(rdata),//?delay 2 clock for clk
+			.rdata(rdata),
 			.s_data_valid(s_data_valid),
 			.i2s_received_data(i2s_received_data),
 			.local_read_enable(local_read_enable)
