@@ -25,9 +25,9 @@ module intr_hub #
 		parameter integer INT_NUM = 32
 	)
 	(
-		input wire [INT_NUM - 1:0] int_i,
-		input wire clk,
 		input wire rst,
+		input wire clk,
+		input wire [INT_NUM - 1:0] int_i,
 		output wire int_o
 	);
 
