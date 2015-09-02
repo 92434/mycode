@@ -55,6 +55,8 @@
 module serializer_10b1b(/*AUTOARG*/
    // Outputs
    sdout,
+   start,
+   sout_data,
    // Inputs
    sclk_0, sclk_180, ce, reset, din_10b
    ) ;
@@ -64,7 +66,8 @@ module serializer_10b1b(/*AUTOARG*/
    input reset;         // Synchronous reset for clk domain
    input [9:0] din_10b;     // 10-bit parallel data
    output      sdout;       // Serial data at sclk*2 rate (uses DDR)
-
+output wire start;
+output reg [9:0] sout_data;
    // Parameters for gray code counter
    parameter [2:0]
 		CNT_RESET   = 3'b000,
@@ -99,11 +102,14 @@ module serializer_10b1b(/*AUTOARG*/
 	  start_bit <= 1'b1;
       end 
 
+  assign start = start_bit;
+
   // Synchronous process for serial half bit-rate clock
    // gray code counter.
    always @(posedge sclk_0)
      begin
 	sdata_slice_R <= sdata_slice;
+	sout_data <= din_10b_R;
 	if (reset) 
 	   cnt_curr_state <= CNT_RESET;
 	else
@@ -147,7 +153,8 @@ module serializer_10b1b(/*AUTOARG*/
 
 
    // DDR primitive instantiation
-   ODDR2 #(
+   //ODDR2 #(
+   oddr_2 #(
       .DDR_ALIGNMENT("NONE"), // Sets output alignment to "NONE", "C0" or "C1
       .INIT(1'b0),            // Sets initial state of the Q output to 1'b0 or 1'b1
       .SRTYPE("SYNC")         // Specifies "SYNC" or "ASYNC" set/reset

@@ -39,15 +39,34 @@ module testbench #(
 	wire ce;
 	wire [4 : 0] ce_sr;
 	wire output_ready;
+	wire start;
+	wire [9:0] sout_data;
+	wire [9:0] sout_data_1;
+	wire [7:0] din_8b_R_debug;
+
+	reg [2 : 0] i;
 
 	initial begin
 		rst = 0;
-		#3
+		#9
 		rst = 1;
 	end
 
+	assign sout_data_1 = {
+			sout_data[0],
+			sout_data[1],
+			sout_data[2],
+			sout_data[3],
+			sout_data[4],
+			sout_data[5],
+			sout_data[6],
+			sout_data[7],
+			sout_data[8],
+			sout_data[9]
+		};
+
 	// Add user logic here
-	clkgen #(.clk_period(2)) xiaofeiclk_wr(.clk(din_clk));
+	clkgen #(.clk_period(6)) xiaofeiclk_wr(.clk(din_clk));
 	clkgen #(.clk_period(1)) xiaofeiclk_rd(.clk(clk));
 
 	data_gen_counter #(
@@ -60,10 +79,17 @@ module testbench #(
 	
 	always @(posedge din_clk) begin
 		if(rst == 0) begin
+			i <= 0;
 			valid <= 0;
 		end
 		else begin
-			valid <= ~valid;
+			if(i == 3) begin
+				valid <= 0;
+			end
+			else begin
+				valid <= 1;
+			end
+			i <= i + 1;
 		end
 	end
 	
@@ -81,7 +107,10 @@ module testbench #(
 			.dout(dout),
 			.ce(ce),
 			.ce_sr(ce_sr),
-			.output_ready(output_ready)
+			.output_ready(output_ready),
+			.start(start),
+			.sout_data(sout_data),
+			.din_8b_R_debug(din_8b_R_debug)
 		);
 	// User logic ends
 endmodule

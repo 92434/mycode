@@ -50,6 +50,7 @@
 module encoder_8b10b (/*AUTOARG*/
    // Outputs
    dout, valid, code_err,
+   din_8b_R_debug,
    // Inputs
    din, kin, clk, ce
    ) ;
@@ -64,6 +65,7 @@ module encoder_8b10b (/*AUTOARG*/
    output [9:0] dout;
    output 	valid;
    output 	code_err;
+   output wire [7:0] din_8b_R_debug;
 
    // Output registers
    reg 		code_err;
@@ -129,6 +131,7 @@ module encoder_8b10b (/*AUTOARG*/
 	     
 	  end // if (ce)
      end // always @ (posedge clk)
+     assign din_8b_R_debug = din_8b_R;
    
 	
 

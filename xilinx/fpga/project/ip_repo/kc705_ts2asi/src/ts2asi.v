@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 /* Module Description:
-  This module implements the complete data path for the DVB ASI
+This module implements the complete data path for the DVB ASI
  */
 
 module ts2asi #(
@@ -29,13 +29,13 @@ module ts2asi #(
 	(
 		// Inputs
 		input wire rst, //Synchronous reset
-		input wire clk, //half-bit rate  clock, 
+		input wire clk, //half-bit rate clock, 
 
 		input wire din_clk,
 		input wire valid,
 		input wire [7:0] din_8b, // 8-bit input data to be encoded, serialized, transmitted
 
-		output wire asi_out, //1-bit serialized output data.  8b10b encoded.
+		output wire asi_out, //1-bit serialized output data. 8b10b encoded.
 
 		//debug ports
 		output wire [FIFO_DATA_WIDTH - 1 : 0] din,
@@ -44,7 +44,10 @@ module ts2asi #(
 		output wire output_ready,
 
 		output reg ce, //Clock enable for parallel domain
-		output reg [4 : 0] ce_sr
+		output reg [4 : 0] ce_sr,
+		output wire start,
+ 		output wire [9:0] sout_data,
+		output wire [7:0] din_8b_R_debug
 	);
 
 	reg output_ready_R;
@@ -52,7 +55,7 @@ module ts2asi #(
 
 	// Tx clock enable generation
 	always @(posedge clk) begin
-		if (rst) begin
+		if (rst == 0) begin
 			ce <= 1'b0;
 			ce_sr <= 5'b00001;
 		end
@@ -65,7 +68,7 @@ module ts2asi #(
 	assign din = (valid == 0) ? {1'b1, 8'hBC} : {1'b0, din_8b};
 	assign dout = (output_ready_R == 0) ? {1'b1, 8'hBC} : rdata;
 
-	always @(negedge clk) begin
+	always @(negedge ce) begin
 		if (rst == 0) begin
 			output_ready_R <= 0;
 		end
@@ -75,12 +78,12 @@ module ts2asi #(
 	end
 
 	my_fifo #(
-			.DATA_WIDTH(9),
+			.DATA_WIDTH(FIFO_DATA_WIDTH),
 			.NUMBER_OF_OUTPUT_WORDS(1)
 		) xiaofei_fifo (
 			.rst(rst),
 			.wclk(din_clk),
-			.rclk(clk),
+			.rclk(ce),
 			.wdata(din),
 			.rdata(rdata),
 			.read_enable(output_ready),
@@ -93,9 +96,9 @@ module ts2asi #(
 	//reg [7:0] din_8b_R = 8'h00;
 
 	// Internal signals
-	//wire [9:0] data_enc10b;
+	wire [9:0] data_enc10b;
 
-   
+ 
 	//// Synchronous process
 	//always @(posedge clk) begin
 	//	if(ce) begin
@@ -103,25 +106,28 @@ module ts2asi #(
 	//		kchar_in_R <= kchar_in;
 	//	end
 	//end
-   
-	//// 8b10b Encoder
-	//encoder_8b10b encoder_inst(
-	//	.din(din_8b_R),
-	//	.kin(kchar_in_R),
-	//	.clk(clk),
-	//	.ce(ce),
-	//	.dout(data_enc10b),
-	//	.valid(),
-	//	.code_err());
+ 
+	// 8b10b Encoder
+	encoder_8b10b encoder_inst(
+		.din_8b_R_debug(din_8b_R_debug),
+		.din(dout[7 : 0]),
+		.kin(dout[8]),
+		.clk(clk),
+		.ce(ce),
+		.dout(data_enc10b),
+		.valid(),
+		.code_err());
 
 
-	//// Instantiate the 10:1 serializer
-	//serializer_10b1b asi_serializer(
-	//	.sclk_0(clk),
-	//	.sclk_180(~clk),
-	//	.ce(ce),
-	//	.reset(rst),
-	//	.din_10b(data_enc10b),
-	//	.sdout(asi_out));
+	// Instantiate the 10:1 serializer
+	serializer_10b1b asi_serializer(
+		.sout_data(sout_data),
+		.start(start),
+		.sclk_0(clk),
+		.sclk_180(~clk),
+		.ce(ce),
+		.reset(~rst),
+		.din_10b(data_enc10b),
+		.sdout(asi_out));
 
 endmodule // txdata_path
