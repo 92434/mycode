@@ -203,14 +203,14 @@
 	// Total number of output data
 	// function called clogb2 that returns an integer which has the
 	// value of the ceiling of the log base 2.
-	function integer clogb2 (input integer bit_depth);
+	function integer clogb2(input integer bit_depth);
 		begin
 			for(clogb2=0; bit_depth>0; clogb2=clogb2+1)
 				bit_depth = bit_depth >> 1;
 		end
 	endfunction
-	localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32)+ 1;
-	localparam integer OPT_MEM_ADDR_BITS = clogb2(1024 * 8);
+	localparam integer ADDR_LSB = clogb2((C_S_AXI_DATA_WIDTH - 1) / 8); //(C_S_AXI_DATA_WIDTH/32) + 1;
+	localparam integer OPT_MEM_ADDR_BITS = C_S_AXI_ADDR_WIDTH - ADDR_LSB - 1;
 	localparam integer USER_NUM_MEM = 1;
 	// I/O Connections assignments
 
