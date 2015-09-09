@@ -1,10 +1,10 @@
 `timescale 1ns / 1ps
 
 module axi4_logic_ram_wrap #(
-		parameter integer C_S_AXI_ADDR_WIDTH = 6,
+		parameter integer C_S_AXI_ADDR_WIDTH = 13,
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
-		parameter integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32)+ 1,
-		parameter integer OPT_MEM_ADDR_BITS = 3,
+		parameter integer ADDR_LSB = 2,
+		parameter integer OPT_MEM_ADDR_BITS = 10,
 		parameter integer USER_NUM_MEM = 1
 	)
 	(
@@ -37,7 +37,7 @@ module axi4_logic_ram_wrap #(
 	endgenerate
 
 	// implement Block RAM(s)
-	generate for(i=0; i<= USER_NUM_MEM-1; i=i+1)
+	generate for(i=0; i<USER_NUM_MEM; i=i+1)
 		begin:BRAM_GEN
 			wire mem_rden;
 			wire mem_wren;

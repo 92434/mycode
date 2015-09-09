@@ -35,21 +35,25 @@ int write_addr_to_reg(uint32_t *reg, uint64_t addr) {
 	return 0;
 }
 
-void prepare_test_data(uint8_t *tx_memory, int tx_size, uint8_t *rx_memory, int rx_size) {
+void prepare_test_data(uint8_t *tx_memory, int tx_size, uint8_t *rx_memory, int rx_size, uint8_t *tx_data) {
 	uint8_t *tx_addr = tx_memory;
 	uint8_t *rx_addr = rx_memory;
 	int i;
 
-	for(i = 0; i < tx_size; i++) {
-		tx_addr[i] = 8 + i;
-	}
+	if(tx_data != NULL) {
+		memcpy(tx_addr, tx_data, tx_size);
+	} else {
+		for(i = 0; i < tx_size; i++) {
+			tx_addr[i] = 8 + i;
+		}
 
-	for(i = 0; i < rx_size; i++) {
-		rx_addr[i] = 0;
+		for(i = 0; i < rx_size; i++) {
+			rx_addr[i] = 0;
+		}
 	}
 }
 
-void test_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_size) {
+void get_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_size, uint8_t *rx_data) {
 	uint8_t *tx_addr = memory_tx;
 	uint8_t *rx_addr = memory_rx;
 
@@ -84,6 +88,11 @@ void test_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_siz
 		}
 		printk("\n");
 	}
+
+	if(rx_data != NULL) {
+		memcpy(rx_data, rx_addr, rx_size);
+	}
+
 }
 
 void inc_dma_op_tx_count(pcie_dma_t *dma, long unsigned int count) {
@@ -104,4 +113,26 @@ long unsigned int get_op_rx_count(pcie_dma_t *dma) {
 	long unsigned int count = dma->rx_count;
 	dma->rx_count = 0;
 	return count;
+}
+
+int tr_wait(pcie_dma_t *dma) {
+	int ret = 0;
+	unsigned long tmo;
+
+	init_completion(&dma->tr_cmp);
+	tmo = msecs_to_jiffies(10);
+	tmo = wait_for_completion_timeout(&dma->tr_cmp, tmo);
+	if (0 == tmo) {
+		myprintf("%p:tr_wait timed out!\n", (void *)dma);
+		ret = -1;
+	}
+
+	return ret;
+}
+
+int tr_wakeup(pcie_dma_t *dma) {
+	int ret = 0;
+
+	init_completion(&dma->rx_cmp);
+	return ret;
 }

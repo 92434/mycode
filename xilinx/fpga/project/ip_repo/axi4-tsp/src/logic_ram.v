@@ -3,7 +3,7 @@
 
 module logic_ram #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
-		parameter integer OPT_MEM_ADDR_BITS = 3
+		parameter integer OPT_MEM_ADDR_BITS = 10
 	)
 	(
 		input wire S_AXI_ACLK,
@@ -16,29 +16,24 @@ module logic_ram #(
 	);
 
 	// implement Block RAM(s)
-	reg [8-1:0] byte_ram [0 : 1024 * 8];
+	reg [C_S_AXI_DATA_WIDTH-1:0] byte_ram [0 : 1024 * 2];
+	integer i;
 
-	genvar mem_byte_index;
-	generate for(mem_byte_index=0; mem_byte_index<= (C_S_AXI_DATA_WIDTH/8-1); mem_byte_index=mem_byte_index+1)
-		begin : BYTE_BRAM_GEN
-			wire [8-1:0] data_in;
-			wire [8-1:0] data_out;
-
-			//assigning 8 bit data
-			assign data_in = S_AXI_WDATA[(mem_byte_index*8+7) -: 8];
-			assign data_out = byte_ram[mem_address * (C_S_AXI_DATA_WIDTH/8) + mem_byte_index];
-
-			always @(posedge S_AXI_ACLK) begin
-				if (mem_wren && S_AXI_WSTRB[mem_byte_index]) begin
-					byte_ram[mem_address * (C_S_AXI_DATA_WIDTH/8) + mem_byte_index] <= data_in;
-				end
-			end
-
-			always @(posedge S_AXI_ACLK) begin
-				if (mem_rden) begin
-					axi_rdata[(mem_byte_index*8+7) -: 8] <= data_out;
+	//assigning 8 bit data
+	always @(posedge S_AXI_ACLK) begin
+		if (mem_wren) begin
+			for(i = 0; i < (C_S_AXI_DATA_WIDTH / 8); i = i + 1) begin
+				if(S_AXI_WSTRB[i] == 1) begin
+					byte_ram[mem_address][(8 * i + 7) -: 8] <= S_AXI_WDATA[(8 * i + 7) -: 8];
 				end
 			end
 		end
-	endgenerate
+	end
+
+	always @(posedge S_AXI_ACLK) begin
+		if (mem_rden) begin
+			axi_rdata <= byte_ram[mem_address];
+		end
+	end
+
 endmodule

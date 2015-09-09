@@ -25,6 +25,7 @@
 #define BASE_AXI_DMA_LITE_1 0x81002000
 #define BASE_Translation_BRAM 0x81003000
 #define BASE_AXI_GPIO_LITE 0x81004000
+#define BASE_AXI_TSP_LITE 0x81006000
 //memory
 #define BASE_AXI_DDR_ADDR 0x00000000
 #define BASE_AXI_PCIe_BAR0 0x80000000
@@ -38,6 +39,7 @@
 #define OFFSET_AXI_DMA_LITE_1 (BASE_AXI_DMA_LITE_1 - BASE_AXI_PCIe)
 #define OFFSET_Translation_BRAM (BASE_Translation_BRAM - BASE_AXI_PCIe)
 #define OFFSET_AXI_GPIO_LITE (BASE_AXI_GPIO_LITE - BASE_AXI_PCIe)
+#define OFFSET_AXI_TSP_LITE (BASE_AXI_TSP_LITE - BASE_AXI_PCIe)
 
 //Address Map for the AXI to PCIe Address Translation Registers
 #define AXIBAR2PCIEBAR_0U 0x208 //default be set to 0
@@ -63,12 +65,6 @@
 #define DMA_BLOCK_SIZE 0x1000
 
 typedef enum {
-	DMA0 = 0,
-	DMA1,
-	DMA_MAX
-} dma_index_t;
-
-typedef enum {
 	GPIOCHIP_0 = 0,
 	GPIOCHIP_MAX,
 } gpiochip_index_t;
@@ -79,7 +75,9 @@ typedef int (*dma_tr_t)(void *ppara,
 		uint64_t tx_dest_axi_addr,
 		uint64_t rx_src_axi_addr,
 		int tx_size,
-		int rx_size);
+		int rx_size,
+		uint8_t *tx_data,
+		uint8_t *rx_data);
 
 typedef struct _dma_op {
 	init_dma_t init_dma;
@@ -89,6 +87,7 @@ typedef struct _dma_op {
 
 typedef struct {
 	void *kc705_pci_dev;
+	int bar_map_memory_num;
 	int bar_map_memory_size[MAX_BAR_MAP_MEMORY];
 	void *bar_map_memory[MAX_BAR_MAP_MEMORY];
 	dma_addr_t bar_map_addr[MAX_BAR_MAP_MEMORY];
@@ -96,9 +95,11 @@ typedef struct {
 	int pcie_bar_map_ctl_offset;
 	int pcie_map_bar_axi_addr_0;
 	int pcie_map_bar_axi_addr_1;
+	int dma_bar_map_num;
 	list_buffer_t *list;
 	struct cdev cdev;
 	dma_op_t dma_op;
+	struct completion tr_cmp;
 	struct completion tx_cmp;
 	struct completion rx_cmp;
 	long unsigned int tx_count;
@@ -117,6 +118,8 @@ typedef struct {
 	uint64_t rx_src_axi_addr;
 	int tx_size;
 	int rx_size;
+	uint8_t *tx_data;
+	uint8_t *rx_data;
 } pcie_tr_t;
 
 typedef struct {
@@ -129,7 +132,7 @@ typedef struct {
 	} bar_info[MAX_BARS];
 	int msi_enable;
 	struct work_struct work;
-	pcie_dma_t dma[DMA_MAX];
+	pcie_dma_t *dma;
 	void *gpiochip[GPIOCHIP_MAX];
 	struct task_struct *pcie_tr_thread;
 	timer_data_t *ptimer_data;

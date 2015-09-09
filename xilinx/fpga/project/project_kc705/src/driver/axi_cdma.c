@@ -32,6 +32,15 @@
 //#define DES_CONTROL 0x18 //[22:0] size to transfer
 //#define DES_STATUS 0x1c //bit31:Cmplt bit30:DMADecErr bit29:DMASlvErr bit28:DMAIntErr
 
+/*
+ *dma->bar_map_memory[0]-----------for sg
+ *dma->bar_map_memory[1]-----------for tx test data
+ *dma->bar_map_memory[2-MAX_BAR_MAP_MEMORY]-----------for rx data
+ *
+ *
+ *
+ * */
+
 static int init_dma(void *ppara) {
 	int ret;
 	pcie_dma_t *dma = (pcie_dma_t *)ppara;
@@ -229,11 +238,15 @@ static int prepare_bars_map(pcie_dma_t *dma, uint64_t tx_src_bar_map_addr, uint6
 }
 
 void inc_dma_op_tx_count(pcie_dma_t *dma, long unsigned int count);
+void inc_dma_op_rx_count(pcie_dma_t *dma, long unsigned int count);
+int tr_wakeup(pcie_dma_t *dma);
 static int dma_tr(void *ppara,
 		uint64_t tx_dest_axi_addr,
 		uint64_t rx_src_axi_addr,
 		int tx_size,
-		int rx_size) {
+		int rx_size,
+		uint8_t *tx_data,
+		uint8_t *rx_data) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)ppara;
 	buffer_node_t write;
@@ -256,11 +269,11 @@ static int dma_tr(void *ppara,
 
 	tx_src_bar_map_memory = (uint8_t *)(dma->bar_map_memory[1] + write.write_offset);
 	rx_dest_bar_map_memory = (uint8_t *)(write.buffer + write.write_offset);
-	prepare_test_data(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size);
+	prepare_test_data(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size, tx_data);
 
 	tx_src_bar_map_addr = (uint64_t)dma->bar_map_addr[1];
 	rx_dest_bar_map_addr = (uint64_t)write.buffer_addr;
-	prepare_bars_map(dma, tx_src_bar_map_addr, rx_dest_bar_map_addr);
+	prepare_bars_map(dma, tx_src_bar_map_addr, rx_dest_bar_map_addr);//bind sg to bar0, write addr to bram
 
 	tx_src_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_1 + write.write_offset);
 	rx_dest_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_1 + write.write_offset);
@@ -309,13 +322,17 @@ static int dma_tr(void *ppara,
 		dma->dma_op.init_dma(dma);
 	}
 
-	write_buffer(NULL, rx_size, dma->list);
-	test_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size);
+	//write_buffer(NULL, rx_size, dma->list);
+	get_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size, rx_data);//id
+
 	//read_buffer(NULL, rx_size, dma->list);
 	inc_dma_op_tx_count(dma, tx_size);
+	inc_dma_op_rx_count(dma, rx_size);
 	
 exit:
 	free_sg_des_items(&sg_descripter_list);
+
+	tr_wakeup(dma);
 
 	return ret;
 }

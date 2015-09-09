@@ -10,17 +10,17 @@
 		// Width of S_AXI data bus
 		parameter integer C_S_AXI_DATA_WIDTH	= 32,
 		// Width of S_AXI address bus
-		parameter integer C_S_AXI_ADDR_WIDTH	= 6,
+		parameter integer C_S_AXI_ADDR_WIDTH	= 13,
 		// Width of optional user defined signal in write address channel
-		parameter integer C_S_AXI_AWUSER_WIDTH	= 1,
+		parameter integer C_S_AXI_AWUSER_WIDTH	= 0,
 		// Width of optional user defined signal in read address channel
-		parameter integer C_S_AXI_ARUSER_WIDTH	= 1,
+		parameter integer C_S_AXI_ARUSER_WIDTH	= 0,
 		// Width of optional user defined signal in write data channel
-		parameter integer C_S_AXI_WUSER_WIDTH	= 1,
+		parameter integer C_S_AXI_WUSER_WIDTH	= 0,
 		// Width of optional user defined signal in read data channel
-		parameter integer C_S_AXI_RUSER_WIDTH	= 1,
+		parameter integer C_S_AXI_RUSER_WIDTH	= 0,
 		// Width of optional user defined signal in write response channel
-		parameter integer C_S_AXI_BUSER_WIDTH	= 1
+		parameter integer C_S_AXI_BUSER_WIDTH	= 0
 	)
 	(
 		// Users to add ports here
@@ -199,8 +199,18 @@
 	//ADDR_LSB = 2 for 32 bits (n downto 2) 
 	//ADDR_LSB = 3 for 42 bits (n downto 3)
 
-	localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32)+ 1;
-	localparam integer OPT_MEM_ADDR_BITS = 3;
+	//Total number of output data.
+	// Total number of output data
+	// function called clogb2 that returns an integer which has the
+	// value of the ceiling of the log base 2.
+	function integer clogb2(input integer bit_depth);
+		begin
+			for(clogb2=0; bit_depth>0; clogb2=clogb2+1)
+				bit_depth = bit_depth >> 1;
+		end
+	endfunction
+	localparam integer ADDR_LSB = clogb2((C_S_AXI_DATA_WIDTH - 1) / 8); //(C_S_AXI_DATA_WIDTH/32) + 1;
+	localparam integer OPT_MEM_ADDR_BITS = C_S_AXI_ADDR_WIDTH - ADDR_LSB - 1;
 	localparam integer USER_NUM_MEM = 1;
 	//----------------------------------------------
 	//-- Signals for user logic memory space example
@@ -551,7 +561,7 @@
 	      begin:BYTE_BRAM_GEN
 	        wire [8-1:0] data_in ;
 	        wire [8-1:0] data_out;
-	        reg  [8-1:0] byte_ram [0 : 15];
+	        reg  [8-1:0] byte_ram [0 : 1024 * 2];
 	        integer  j;
 	     
 	        //assigning 8 bit data

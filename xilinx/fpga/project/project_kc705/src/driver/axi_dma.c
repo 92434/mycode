@@ -20,6 +20,15 @@
 #define S2MM_DA_MSB 0x4C //S2MM Destination Address. Upper 32 bit address.
 #define S2MM_LENGTH 0x58 //S2MM Buffer Length (Bytes)
 
+/*
+ *dma->bar_map_memory[0]-----------unused
+ *dma->bar_map_memory[1]-----------for tx test data
+ *dma->bar_map_memory[2-MAX_BAR_MAP_MEMORY]-----------for rx data
+ *
+ *
+ *
+ * */
+
 static int init_dma(void *ppara) {
 	int ret;
 	pcie_dma_t *dma = (pcie_dma_t *)ppara;
@@ -187,11 +196,14 @@ static int dma_trans_sync(pcie_dma_t *dma, int tx_size, int rx_size) {
 }
 
 void inc_dma_op_tx_count(pcie_dma_t *dma, long unsigned int count);
+int tr_wakeup(pcie_dma_t *dma);
 static int dma_tr(void *ppara,
 		uint64_t tx_dest_axi_addr,
 		uint64_t rx_src_axi_addr,
 		int tx_size,
-		int rx_size) {
+		int rx_size,
+		uint8_t *tx_data,
+		uint8_t *rx_data) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)ppara;
 	buffer_node_t write;
@@ -209,7 +221,7 @@ static int dma_tr(void *ppara,
 
 	tx_src_bar_map_memory = (uint8_t *)(dma->bar_map_memory[1] + write.write_offset);
 	rx_dest_bar_map_memory = (uint8_t *)(write.buffer + write.write_offset);
-	prepare_test_data(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size);
+	prepare_test_data(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size, tx_data);
 
 	tx_src_bar_map_addr = (uint64_t)dma->bar_map_addr[1];
 	rx_dest_bar_map_addr = (uint64_t)write.buffer_addr;
@@ -234,10 +246,12 @@ static int dma_tr(void *ppara,
 		dma->dma_op.init_dma(dma);
 	}
 
+	get_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size, rx_data);
 	write_buffer(NULL, rx_size, dma->list);
-	test_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size);
 	//read_buffer(NULL, rx_size, dma->list);
 	inc_dma_op_tx_count(dma, tx_size);
+
+	tr_wakeup(dma);
 	
 	return ret;
 }
