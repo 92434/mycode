@@ -80,6 +80,8 @@ static int dma_tr(void *ppara,
 	inc_dma_op_rx_count(dma, rx_size);
 
 	tr_wakeup(dma);
+
+	return ret;
 }
 
 dma_op_t pseudo_dma_op = {

@@ -135,6 +135,7 @@ typedef struct {
 	pcie_dma_t *dma;
 	void *gpiochip[GPIOCHIP_MAX];
 	struct task_struct *pcie_tr_thread;
+	struct task_struct *test_thread[10];
 	timer_data_t *ptimer_data;
 	list_buffer_t *pcie_tr_list;
 	spinlock_t alloc_lock;

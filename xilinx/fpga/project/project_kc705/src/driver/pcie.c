@@ -466,20 +466,15 @@ static int pcie_tr_thread(void *ppara) {
 		
 		size = get_pcie_tr(kc705_pci_dev, &tr);
 		if(size == 0) {
-			static int cur_dma = 0;
+			pcie_dma_t *dma = kc705_pci_dev->dma;
 
-			pcie_dma_t *dma = kc705_pci_dev->dma + cur_dma;
-
-			if(cur_dma == 2) {
-				put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE);
-			} else {
-				put_pcie_tr(dma, BASE_AXI_DDR_ADDR + 0, BASE_AXI_DDR_ADDR + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE);
-			}
-
-			cur_dma++;
-			if(DMA_MAX == cur_dma) {
-				cur_dma = 0;
-			}
+			dma->dma_op.dma_tr(dma,
+					0,
+					0,
+					DMA_BLOCK_SIZE,
+					DMA_BLOCK_SIZE,
+					NULL,
+					NULL);
 		} else {
 			tr.dma->dma_op.dma_tr(tr.dma,
 					tr.tx_dest_axi_addr,
@@ -490,6 +485,34 @@ static int pcie_tr_thread(void *ppara) {
 					tr.rx_data);
 		}
 	 }
+
+	return ret;
+}
+
+static int test_thread(void *ppara) {
+	int ret = 0;
+
+	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
+
+	while(true) {
+		pcie_dma_t *dma = kc705_pci_dev->dma + 1;
+
+		if(kthread_should_stop()) {
+			ret = -1;
+			return ret;
+		}
+
+		set_current_state(TASK_UNINTERRUPTIBLE);  
+		schedule_timeout(msecs_to_jiffies(100)); 
+
+
+		put_pcie_tr(dma, BASE_AXI_DDR_ADDR + 0, BASE_AXI_DDR_ADDR + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE);
+
+		dma++;
+
+		put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 189);
+
+	}
 
 	return ret;
 }
@@ -512,6 +535,10 @@ static int start_work_loop(void) {
 		setup_kc705_dev(dma, "%s_%d", "pciedma", i);
 	}
 
+	for(i = 0; i < 10; i++) {
+		kc705_pci_dev->test_thread[i] = alloc_work_thread(test_thread, kc705_pci_dev, "%s_%d", "test", i);
+	}
+
 	return 0;
 }
 
@@ -523,6 +550,12 @@ static void end_work_loop(void) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
 
 		uninstall_kc705_dev(dma);
+	}
+
+	for(i = 0; i < 10; i++) {
+		if(kc705_pci_dev->test_thread[i] != NULL) {
+			free_work_thread(kc705_pci_dev->test_thread[i]);
+		}
 	}
 
 	if(kc705_pci_dev->pcie_tr_thread != NULL) {

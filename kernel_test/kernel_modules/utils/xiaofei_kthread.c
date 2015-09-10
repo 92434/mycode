@@ -19,16 +19,18 @@ static int default_worker_thread(void *ppara) {
 struct task_struct *alloc_work_thread(thread_func_t func, void *ppara, char *format, ...) {
 	va_list args;
 	struct task_struct *thread;
+	char name[16];
 
 	va_start(args, format);
+	vsnprintf(name, sizeof(name), format, args);
+	va_end(args);
 
 	if(func == NULL) {
 		func = default_worker_thread;
 	}
 
-	thread = kthread_run(func, ppara, format, args);
+	thread = kthread_run(func, ppara, name);
 
-	va_end(args);
 
 	return thread;
 }
