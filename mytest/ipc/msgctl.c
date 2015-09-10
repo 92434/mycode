@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
 
 	memset(&buf1, 0x00, sizeof(struct message)) ;
 
-	flag = msgrcv(msqid, &buf1, recvlength ,3,0) ;
+	flag = msgrcv(msqid, &buf1, recvlength, 3, 0) ;
 
 	if (flag < 0) {
 		perror("recv message error") ;
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 
 	printf("type=%d, message=%s\n", buf1.mtype, buf1.mtext) ;
 
-	flag = msgctl(msqid, IPC_RMID,NULL) ;
+	flag = msgctl(msqid, IPC_RMID, NULL) ;
 
 	if (flag < 0) {
 		perror("rm message queue error") ;

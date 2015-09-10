@@ -34,6 +34,10 @@ int main(int argc, char **argv) {
 	int sendlength, recvlength ;
 	int key ;
 
+	unlink("msg.tmp");  
+
+	system("touch msg.tmp");
+
 	key = ftok("msg.tmp", 0x01) ;
 
 	if (key < 0) {

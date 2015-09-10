@@ -49,5 +49,7 @@ int main(int argc, char **argv) {
 
 	printf("type=%d,time=%s, message=%s\n", buf1.mtype, buf1.time, buf1.mtext) ;
 	system("ipcs -q") ;
+
+	unlink("msg.tmp");  
 	return 0 ;
 }
