@@ -6,6 +6,15 @@
 
 #include "utils/xiaofei_debug.h"
 
+/*
+ *test:
+ *echo pin_num pin_dir >/proc/test_gpio/gpio_direction
+ *cat /proc/test_gpio/gpio_direction
+ *
+ *
+ *
+ * */
+
 typedef enum {
 	gpio_direction = 0,
 	gpio_item_count,

@@ -714,9 +714,9 @@ static void iounmap_pcie_bars(kc705_pci_dev_t *kc705_pci_dev) {
 }
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
-irqreturn_t isr(int irq, void *dev_id, struct pt_regs *regs)
+static irqreturn_t isr(int irq, void *dev_id, struct pt_regs *regs)
 #else
-irqreturn_t isr(int irq, void *dev_id)
+static irqreturn_t isr(int irq, void *dev_id)
 #endif
 {
 	irqreturn_t status = IRQ_NONE;
