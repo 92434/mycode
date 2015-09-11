@@ -6,81 +6,53 @@
 #include <pthread.h>
 #include <time.h>
 
-#if 1
-pthread_attr_t attr;
-timer_t hard_timer, software_timer;
-struct sigevent hard_evp, software_evp;
+#define TIMER_THREAD_NUM 2
 
-static void watchdog_hard_timeout(union sigval v)
-{
+pthread_attr_t attr[TIMER_THREAD_NUM];
+struct sigevent sigenv[TIMER_THREAD_NUM];
+timer_t timer[TIMER_THREAD_NUM] = {0};
+int sleep_duration[TIMER_THREAD_NUM] = {1,1};
+
+static void timeout(union sigval v) {
 	time_t t;
 	char p[32];
-	timer_t *q;
+	timer_t *ptimer;
 	struct itimerspec ts;
 	int ret;
 
 	time(&t);
 	strftime(p, sizeof(p), "%T", localtime(&t));
-	printf("watchdog hard timeout!\n");
-	printf("%s thread %d, val = %u, signal captured.\n", p, (unsigned int)pthread_self(), v.sival_int);
+	ptimer = (timer_t *)(v.sival_ptr);
+	printf("%s ptimer:%p, thread %x, val = %x, signal captured.\n", p, ptimer, (unsigned int)pthread_self(), v.sival_int);
 
-	q = (timer_t *)(v.sival_ptr);
-	printf("hard timer_t:%d add:%p, q:%p!\n", (int)hard_timer, &hard_timer, q);
 	ts.it_interval.tv_sec = 0;
 	ts.it_interval.tv_nsec = 0;
-	ts.it_value.tv_sec = 1;
+	ts.it_value.tv_sec = (*ptimer == timer[0]) ? sleep_duration[0] :
+				(*ptimer == timer[1]) ? sleep_duration[1] : 0;
 	ts.it_value.tv_nsec = 0;
 
-	ret = timer_settime(*q, CLOCK_REALTIME, &ts, NULL);
+	ret = timer_settime(*ptimer, CLOCK_REALTIME, &ts, NULL);
 	if (ret != 0) {
 		printf("settime err(%d)!\n", ret);
 	}
 }
 
-static void watchdog_software_timeout(union sigval v)
-{
-	time_t t;
-	char p[32];
-	timer_t *q;
-	struct itimerspec ts;
-	int ret;
-
-	time(&t);
-	strftime(p, sizeof(p), "%T", localtime(&t));
-	printf("watchdog software timeout!\n");
-	printf("%s thread %d, val = %u, signal captured.\n", p, (unsigned int)pthread_self(), v.sival_int);
-
-	q = (timer_t *)(v.sival_ptr);
-	printf("hard timer_t:%d add:%p, q:%p!\n", (int)hard_timer, &hard_timer, q); 
-	ts.it_interval.tv_sec = 0;
-	ts.it_interval.tv_nsec = 0;
-	ts.it_value.tv_sec = 2;
-	ts.it_value.tv_nsec = 0;
-
-	ret = timer_settime(*q, CLOCK_REALTIME, &ts, NULL);
-	if (ret != 0) {
-		printf("settime err(%d)!\n", ret);
-	} 
+static void my_pthread_attr_destroy(pthread_attr_t *pattr) {
+	pthread_attr_destroy(pattr);
 }
 
-static void dcmi_sol_pthread_attr_destroy(pthread_attr_t *attr)
-{
-	pthread_attr_destroy(attr);
-}
-
-static int dcmi_sol_pthread_attr_init(pthread_attr_t *attr)
-{
+static int my_pthread_attr_init(pthread_attr_t *pattr) {
 	int ret;
 
-	if ((ret = pthread_attr_init(attr) != 0)) {
+	if ((ret = pthread_attr_init(pattr) != 0)) {
 		goto err;
 	}
-	if ((ret = pthread_attr_setdetachstate(attr, PTHREAD_CREATE_DETACHED)) != 0) {
-		dcmi_sol_pthread_attr_destroy(attr);
+	if ((ret = pthread_attr_setdetachstate(pattr, PTHREAD_CREATE_DETACHED)) != 0) {
+		my_pthread_attr_destroy(pattr);
 		goto err;
 	}
 	/* 设置线程的栈大小,失败则用系统默认值 */
-	pthread_attr_setstacksize(attr, 128 * 1024);
+	pthread_attr_setstacksize(pattr, 128 * 1024);
 
 	return 0;
 err:
@@ -88,70 +60,55 @@ err:
 	return -1;
 }
 
-int main(void)
-{
+int main(void) {
 	struct itimerspec ts;
 	int ret;
+	int i;
 
-	ret = dcmi_sol_pthread_attr_init(&attr);
-	if (ret != 0) {
-		printf("init pthread attributes fail(%d)!\n", ret);
-		exit(-1);
-	}
+	for(i = 0; i < TIMER_THREAD_NUM; i++) {
+		ret = my_pthread_attr_init(&attr[i]);
+		if (ret != 0) {
+			printf("init pthread attributes fail(%d)!\n", ret);
+			exit(-1);
+		}
 
-	memset(&hard_evp, 0, sizeof(struct sigevent));
-	hard_evp.sigev_value.sival_ptr = &hard_timer;
-	hard_evp.sigev_notify = SIGEV_THREAD;
-	hard_evp.sigev_notify_function = watchdog_hard_timeout;
-	hard_evp.sigev_notify_attributes = NULL;//&attr;
+		memset(&sigenv[i], 0, sizeof(struct sigevent));
+		sigenv[i].sigev_value.sival_ptr = &timer[i];
+		sigenv[i].sigev_notify = SIGEV_THREAD;
+		sigenv[i].sigev_notify_function = timeout;
+		sigenv[i].sigev_notify_attributes = &attr[i];
+		printf("attr: %p\n", &attr[i]);
 
-	memset(&software_evp, 0, sizeof(struct sigevent));
-	software_evp.sigev_value.sival_ptr = &software_timer;
-	software_evp.sigev_notify = SIGEV_THREAD;
-	software_evp.sigev_notify_function = watchdog_software_timeout;
-	//software_evp.sigev_notify_attributes = NULL;//&attr;
-	software_evp.sigev_notify_attributes = &attr;
+		ret = timer_create(CLOCK_REALTIME, &sigenv[i], &timer[i]);
+		if(ret != 0) {
+			perror("timer_create fail !");
+			exit(-1);
+		}
 
-	ret = timer_create(CLOCK_REALTIME, &hard_evp, &hard_timer);
-	if(ret != 0) {
-		perror("hard timer_create fail!");
-		exit(-1);
-	}
-	ret = timer_create(CLOCK_REALTIME, &software_evp, &software_timer);
-	if (ret != 0) {
-		timer_delete(hard_timer);
-		perror("software timer_create fail!");
-		exit(-1);
-	}
+		ts.it_interval.tv_sec = 0;
+		ts.it_interval.tv_nsec = 0;
+		ts.it_value.tv_sec = sleep_duration[i];
+		ts.it_value.tv_nsec = 0;
 
-	ts.it_interval.tv_sec = 0;
-	ts.it_interval.tv_nsec = 0;
-	ts.it_value.tv_sec = 1;
-	ts.it_value.tv_nsec = 0;
-
-	ret = timer_settime(hard_timer, CLOCK_REALTIME, &ts, NULL);
-	if(ret != 0) {
-		perror("hard timer_settime fail!");
-		timer_delete(hard_timer);
-		timer_delete(software_timer);
-		exit(-1);
-	}
-
-	ts.it_value.tv_sec = 2;
-	ret = timer_settime(software_timer, CLOCK_REALTIME, &ts, NULL);
-	if(ret != 0) {
-		perror("hard timer_settime fail!");
-		timer_delete(hard_timer);
-		timer_delete(software_timer);
-		exit(-1);
+		ret = timer_settime(timer[i], CLOCK_REALTIME, &ts, NULL);
+		if(ret != 0) {
+			perror("timer_settime fail !");
+			exit(-1);
+		}
 	}
 
 	while(1) {
-		printf("main ready sleep!\n");
-		sleep(3);
-		printf("main sleep finish!\n");
+		sleep(1);
+		printf("thread %x.\n", (unsigned int)pthread_self());
+	}
+
+error:
+	for(i = 0; i < TIMER_THREAD_NUM; i++) {
+		if(timer[i] != 0) {
+			timer_delete(timer[i]);
+		}
+		my_pthread_attr_destroy(&attr[i]);
 	}
 
 	return 0;
 }
-#endif
