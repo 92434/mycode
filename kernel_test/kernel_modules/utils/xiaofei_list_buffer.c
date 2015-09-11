@@ -58,7 +58,7 @@ buffer_node_t *add_list_buffer_item(char *buffer, void *buffer_addr, int size, l
 		goto exit;
 	}
 
-	printk("alloc node:%p\n", (void *)node);
+	//printk("alloc node:%p\n", (void *)node);
 
 	node->size = size;
 	node->buffer = buffer;
@@ -66,7 +66,7 @@ buffer_node_t *add_list_buffer_item(char *buffer, void *buffer_addr, int size, l
 	node->read_offset = size;
 	node->write_offset = 0;
 	node->base_addr_of_list_buffer = list->size;
-	printk("node->base_addr_of_list_buffer:%d\n", node->base_addr_of_list_buffer);
+	//printk("node->base_addr_of_list_buffer:%d\n", node->base_addr_of_list_buffer);
 
 	list->size += node->size;
 	node_list = &(node->list);
@@ -99,11 +99,11 @@ void uninit_list_buffer(list_buffer_t *list) {
 
 	list_for_each_entry_safe(node, node_next, list->first, list) {
 		vfree(node);
-		printk("free node:%p\n", (void *)node);
+		//printk("free node:%p\n", (void *)node);
 	}
 
 	vfree(node);
-	printk("free node:%p\n", (void *)node);
+	//printk("free node:%p\n", (void *)node);
 
 release_list:
 	vfree(list);

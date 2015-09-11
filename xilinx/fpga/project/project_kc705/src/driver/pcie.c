@@ -81,6 +81,7 @@ static dma_static_config_info_t dma_info[] = {
 };
 
 #define DMA_MAX (sizeof(dma_info) / sizeof(dma_static_config_info_t))
+#define MAX_TEST_THREAD 10
 
 static int gpio_lite_offset[GPIOCHIP_MAX] = {
 	OFFSET_AXI_GPIO_LITE,
@@ -535,7 +536,7 @@ static int start_work_loop(void) {
 		setup_kc705_dev(dma, "%s_%d", "pciedma", i);
 	}
 
-	for(i = 0; i < 10; i++) {
+	for(i = 0; i < MAX_TEST_THREAD; i++) {
 		kc705_pci_dev->test_thread[i] = alloc_work_thread(test_thread, kc705_pci_dev, "%s_%d", "test", i);
 	}
 
@@ -552,7 +553,7 @@ static void end_work_loop(void) {
 		uninstall_kc705_dev(dma);
 	}
 
-	for(i = 0; i < 10; i++) {
+	for(i = 0; i < MAX_TEST_THREAD; i++) {
 		if(kc705_pci_dev->test_thread[i] != NULL) {
 			free_work_thread(kc705_pci_dev->test_thread[i]);
 		}
@@ -612,9 +613,9 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 					mydebug("dma_zalloc_coherent failed.\n");
 					return ret;
 				} else {
-					mydebug("dma->bar_map_memory[%d]:%p\n", j, dma->bar_map_memory[j]);
-					mydebug("dma->bar_map_addr[%d]:%p\n", j, (void *)dma->bar_map_addr[j]);
-					mydebug("dma->bar_map_memory_size[%d]:%x\n", j, dma->bar_map_memory_size[j]);
+					//mydebug("dma->bar_map_memory[%d]:%p\n", j, dma->bar_map_memory[j]);
+					//mydebug("dma->bar_map_addr[%d]:%p\n", j, (void *)dma->bar_map_addr[j]);
+					//mydebug("dma->bar_map_memory_size[%d]:%x\n", j, dma->bar_map_memory_size[j]);
 					if(j > DMA_BAR_MEM_START_INDEX) {//
 						add_list_buffer_item((char *)dma->bar_map_memory[j], (void *)dma->bar_map_addr[j], dma->bar_map_memory_size[j], dma->list);
 					}

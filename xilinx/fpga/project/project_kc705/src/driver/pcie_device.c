@@ -96,7 +96,7 @@ static int kc705_mmap(struct file *filp, struct vm_area_struct *vma) {
 	if(ret != 0) {
 		return -EAGAIN;
 	}
-	mydebug("node->buffer:%p node->size:%d\n", node->buffer, node->size);
+	//mydebug("node->buffer:%p node->size:%d\n", node->buffer, node->size);
 	vma_start += node->size;
 	requested_size -= node->size;
 
@@ -105,7 +105,7 @@ static int kc705_mmap(struct file *filp, struct vm_area_struct *vma) {
 		if(ret != 0) {
 			return -EAGAIN;
 		}
-		mydebug("node->buffer:%p node->size:%d\n", node->buffer, node->size);
+		//mydebug("node->buffer:%p node->size:%d\n", node->buffer, node->size);
 		vma_start += node->size;
 		requested_size -= node->size;
 	}
