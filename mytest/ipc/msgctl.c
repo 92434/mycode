@@ -27,6 +27,8 @@ int main(int argc, char **argv) {
 		return -1 ;
 	}
 
+	printf("msqid:%d\n", msqid);
+
 	buf.mtype = 1 ;
 
 	strcpy(buf.mtext, "happy new year!") ;
