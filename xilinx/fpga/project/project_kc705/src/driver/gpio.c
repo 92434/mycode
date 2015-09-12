@@ -188,7 +188,6 @@ static int kc705_gpio_direction_input(struct gpio_chip *chip, unsigned offset) {
 
 static int kc705_gpio_direction_output(struct gpio_chip *chip, unsigned offset, int value) {
 	kc705_gpio_chip_channel_t *gpio = container_of(chip, kc705_gpio_chip_channel_t, chip);
-	mydebug("\n");
 
 	gpio_channel_set_output(gpio->base_addr, gpio->channel_index, offset);
 	gpio_channel_set(gpio->base_addr, gpio->channel_index, offset, !!value);

@@ -21,7 +21,7 @@ static void timeout(union sigval v) {
 	int ret;
 
 	time(&t);
-	strftime(p, sizeof(p), "%T", localtime(&t));
+	strftime(p, sizeof(p), "%F(%u) %T", localtime(&t));
 	ptimer = (timer_t *)(v.sival_ptr);
 	printf("%s ptimer:%p, thread %x, val = %x, signal captured.\n", p, ptimer, (unsigned int)pthread_self(), v.sival_int);
 
