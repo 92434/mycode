@@ -17,6 +17,9 @@ if $CSCOPE_DB == ""
 	"set sta
 endif
 
+"set filetype indent
+:filetype indent on
+
 "autoindent
 set ai	
 
