@@ -16,6 +16,8 @@ c_files += test_string_op.cpp
 c_files += data_process.cpp
 c_files += udp_server.cpp
 c_files += tcp_server_in.cpp
+c_files += tcp_server_un.cpp
+c_files += tcp_client_un.cpp
 include $(BUILD_BINS)
 
 app_c_files := io_epoll_test.cpp
