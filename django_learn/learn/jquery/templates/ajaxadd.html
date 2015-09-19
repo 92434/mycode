@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<body>
+<p>请输入两个数字</p>
+<form action="" method="get">
+	a: <input type="text" id="a" name="a" value='123'> <br>
+	b: <input type="text" id="b" name="b" value='456'> <br>
+	<p>result: <span id='result'></span></p>
+	<button type="button" id='sum'>提交</button>
+</form>
+
+<form action="" method="get">
+	<button type="button" id='get_pic'>取图片</button>
+	<p>这个是图片: <span id='pic_label'></span></p>
+</form>
+
+<form action="{% url 'jquery:jquery' "post_select" %}" id='form_post_select' method="get">
+<input type="text" name="input_post_select" value="1">
+<input type="text" name="input_post_select" value="2">
+<input type="text" name="input_post_select" value="3">
+<input type="text" name="input_post_select" value="4">
+<input type="submit" value="submit" />
+<button type="button" id='post_select_button'>button</button>
+<p>response<span id='post_select_response'></span></p>
+</form>
+
+
+{% load staticfiles %}
+<!--script src={% static "jquery-ui-1.11.4.custom/jquery-1.10.2.js" %}></script-->
+<!--script src={% static "jquery-ui-1.11.4.custom/jquery-1.10.2.js" %}></script-->
+<!--script src={% static "jquery-ui-1.11.4.custom/jquery-1.10.2.js" %}></script-->
+<!--script src={% static "jquery-ui-1.11.4.custom/jquery-1.10.2.js" %}></script-->
+<script src={% static "jquery-ui-1.11.4.custom/jquery.min.js" %}></script>
+<script src={% static "jquery-ui-1.11.4.custom/jquery.min.js" %}></script>
+<script src={% static "jquery-ui-1.11.4.custom/jquery.min.js" %}></script>
+<script src={% static "jquery-ui-1.11.4.custom/jquery.min.js" %}></script>
+{% url 'jquery:jquery' "ajaxadd_result" as the_url %}
+<script>
+	$(document).ready(function(){
+		$("#sum").click(function(){
+			var a = $("#a").val();
+			var b = $("#b").val();
+ 
+			$.get("{% url 'jquery:jquery' "ajaxadd_result" %}", {'a':a, 'b':b}, function(ret){
+				$('#result').html(ret)
+			})
+		});
+		$("#get_pic").click(function(){
+			$.get("{% url 'jquery:jquery' "ajaxgetpic_result" %}", {}, function(ret){
+				$('#pic_label').html('') //清空前面的结果
+				$.each(ret, function(index, item){
+					$('#pic_label').append("<img src={% static 'pics/' %}" + item + ">");
+					console.log("<img src={% static 'pics/' %}" + item + ">");
+				})
+			})
+		});
+
+		$("#post_select_button").click(function(){
+			$.get("{% url 'jquery:jquery' "post_select" %}", $(':input[name="input_post_select"]'), function(ret){
+					$('#post_select_response').html('') //清空前面的结果
+					//$('#post_select_response').html(ret)
+					$.each(ret, function(index, item){
+						$('#post_select_response').append("<p>" + index + ":" + item + "</p>");
+					})
+
+			});
+
+		});
+	});
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>欢迎光临 自强学堂！</title>
+		<script src="http://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+	</head>
+	<body>
+		欢迎光临自强学堂
+
+		<div id="list"> 学习 </div>
+		<div id='dict'></div>
+
+		<script type="text/javascript">
+			//列表
+			var List = {{ List|safe }};
+
+			//下面的代码把List的每一部分放到头部和尾部
+			$('#list').prepend(List[0]);
+			$('#list').append(List[1]);
+
+			console.log('--- 遍历 List 方法 1 ---')
+				for(i in List){
+				console.log(i);// i为索引
+			}
+
+			console.log('--- 遍历 List 方法 2 ---')
+			for (var i = List.length - 1; i >= 0; i--) {
+				// 鼠标右键，审核元素，选择 console可以看到输入的值
+				console.log(List[i]);
+			};
+
+			console.log('--- 同时遍历索引和内容，使用 jQuery.each() 方法 ---')
+			$.each(List, function(index, item){
+				console.log(index);
+				console.log(item);
+			});
+
+
+			// 字典
+			var Dict = {{ Dict|safe }};
+			console.log("--- 两种字典的取值方式  ---")
+			console.log(Dict['site']);
+			console.log(Dict.author);
+
+			console.log("---  遍历字典  ---");
+			for(i in Dict) {
+				console.log(i + Dict[i]);//注意，此处 i 为键值
+			}
+		</script>
+
+		<p>课程列表：</p>
+		{% for i in TutorialList %}
+			<li>{{ i }}<li/>
+		{% empty %}
+			<li>抱歉，列表为空</li>
+		{% endfor %}
+
+		{% url 'app1:add' 123 456 as the_url %}
+		<a href="{{ the_url }}">链接到：{{ the_url }}</a>
+
+		<li/>
+		成绩是:{{var}}
+		{% if var >= 90 %}
+		成绩优秀，自强学堂你没少去吧！学得不错
+		{% elif var >= 80 %}
+		成绩良好
+		{% elif var >= 70 %}
+		成绩一般
+		{% elif var >= 60 %}
+		需要努力
+		{% else %}
+		不及格啊，大哥！多去自强学堂学习啊！
+		{% endif %}
+
+	</body>
+</html>

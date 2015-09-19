@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	{% load staticfiles %}
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>jQuery EasyUI</title>
+	<link rel="stylesheet" type="text/css" href={% static "easy_ui/themes/default/easyui.css" %}>
+	<link rel="stylesheet" type="text/css" href={% static "easy_ui/themes/icon.css" %}>
+	<script type="text/javascript" src={% static "easy_ui/jquery.min.js" %}></script>
+	<script type="text/javascript" src={% static "easy_ui/jquery.easyui.min.js" %}></script>
+
+	<script type="text/javascript">
+		$(function() {
+			$.ajaxSetup(
+				{
+					headers: { "X-CSRFToken": getCookie("csrftoken") }	
+				}
+			);
+		});
+		function getCookie(name) {
+			var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+			if(arr=document.cookie.match(reg))
+				return unescape(arr[2]);
+			else
+				return null;
+		}
+		$(function() {
+			var $dg = $("#dg");
+
+			$dg.datagrid({
+				url : "servlet/list",
+				width : 700,
+				height : 250,
+				rownumbers : true,
+				pagination : true,
+				collapsible : true,
+				loadMsg : "loading...",
+
+				columns : [ [ 
+					{
+						field : 'code',
+						title : 'Code',
+						width : 100,
+						editor : "validatebox"
+					}, {
+						field : 'name',
+						title : 'Name',
+						width : 200,
+						editor : "validatebox"
+					}, {
+						field : 'price',
+						title : 'Price',
+						width : 200,
+						align : 'right',
+						editor : "numberbox"
+					}
+					] ],
+
+				toolbar : [ 
+					{
+						text : "添加",
+						iconCls : "icon-add",
+						handler : function() {
+							$dg.datagrid('appendRow', {});
+							var rows = $dg.datagrid('getRows');
+							$dg.datagrid('beginEdit', rows.length - 1);
+						}
+					}, {
+						text : "编辑",
+						iconCls : "icon-edit",
+						handler : function() {
+							var row = $dg.datagrid('getSelected');
+							if (row) {
+								var rowIndex = $dg.datagrid('getRowIndex', row);
+								$dg.datagrid('beginEdit', rowIndex);
+							}
+						}
+					}, {
+						text : "删除",
+						iconCls : "icon-remove",
+						handler : function() {
+							var row = $dg.datagrid('getSelected');
+							if (row) {
+								var rowIndex = $dg.datagrid('getRowIndex', row);
+								$dg.datagrid('deleteRow', rowIndex);
+							}
+						}
+					}, {
+						text : "结束编辑",
+						iconCls : "icon-cancel",
+						handler :endEdit
+					}, {
+						text : "保存",
+						iconCls : "icon-save",
+						handler : function() {
+							endEdit();
+							//dir($dg.datagrid, $('#debug'), '');
+							if ($dg.datagrid('getChanges').length) {
+								var inserted = $dg.datagrid('getChanges', "inserted");
+								var deleted = $dg.datagrid('getChanges', "deleted");
+								var updated = $dg.datagrid('getChanges', "updated");
+								var rows = $dg.datagrid('getSelections');
+								var effectRow = new Object();
+
+								if (inserted.length) {
+									effectRow["inserted"] = JSON.stringify(inserted);
+								}
+								if (deleted.length) {
+									effectRow["deleted"] = JSON.stringify(deleted);
+								}
+								if (updated.length) {
+									effectRow["updated"] = JSON.stringify(updated);
+								}
+								$.get("servlet/commit", effectRow, function(rsp) {
+									if(rsp.status){
+										alert("提交成功！");
+										$dg.datagrid('acceptChanges');
+									}
+									else {
+										alert("提交失败！");
+									}
+									//var PropertyList=''; 
+									//for(i in rsp){ 
+									//		PropertyList=PropertyList+i+'属性：'+rsp[i]+'\r\n'; 
+									//} 
+									//alert(PropertyList);
+								});
+							}
+						}
+					}
+				]
+			});
+			function endEdit(){
+				var rows = $dg.datagrid('getRows');
+				for ( var i = 0; i < rows.length; i++) {
+					$dg.datagrid('endEdit', i);
+				}
+			}
+			function dir(obj, target, space) {
+
+				if(space=='') {
+					target.html('') //清空前面的结果
+				}
+
+				for(i in obj){ 
+					target.append(space + i + ":</br>");
+					if(getType(obj[i]) == 'Object') {
+						space = space + '>'
+						dir(obj[i], target, space)
+					} else {
+						target.append(space + i + "=" + obj[i] + "</br>");
+					}
+				} 
+			}
+			function getType(x){  
+				if(x==null){  
+					return "null";  
+				}  
+				var t= typeof x;  
+				if(t!="object"){  
+					return t;  
+				}  
+				var c=Object.prototype.toString.apply(x);  
+				c=c.substring(8,c.length-1);  
+				if(c!="Object"){  
+					return c;  
+				}  
+				if(x.constructor==Object){  
+					return c  
+				}  
+				if("classname" in x.prototype.constructor  
+						&& typeof x.prototype.constructor.classname=="string"){  
+					return x.constructor.prototype.classname;  
+				}  
+				return "<unknown type>";  
+			} 
+		});
+
+	</script>
+</head>
+<body>
+	<form>{% csrf_token %}<table id="dg" title="批量操作"></table></form>
+	<!--p>debug: <span id='debug'></span></p-->
+</body>
+</html>
