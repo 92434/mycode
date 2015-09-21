@@ -46,10 +46,10 @@ void prepare_test_data(uint8_t *tx_memory, int tx_size, uint8_t *rx_memory, int 
 		for(i = 0; i < tx_size; i++) {
 			tx_addr[i] = 8 + i;
 		}
+	}
 
-		for(i = 0; i < rx_size; i++) {
-			rx_addr[i] = 0;
-		}
+	for(i = 0; i < rx_size; i++) {
+		rx_addr[i] = 0;
 	}
 }
 
@@ -115,24 +115,27 @@ long unsigned int get_op_rx_count(pcie_dma_t *dma) {
 	return count;
 }
 
-int tr_wait(pcie_dma_t *dma) {
+int tr_wait(pcie_dma_t *dma, struct completion *tr_cmp) {
 	int ret = 0;
 	unsigned long tmo;
 
-	init_completion(&dma->tr_cmp);
-	tmo = msecs_to_jiffies(10);
-	tmo = wait_for_completion_timeout(&dma->tr_cmp, tmo);
+	init_completion(tr_cmp);
+	tmo = msecs_to_jiffies(1000);
+	tmo = wait_for_completion_timeout(tr_cmp, tmo);
 	if (0 == tmo) {
-		myprintf("%p:tr_wait timed out!\n", (void *)dma);
+		myprintf("%s:tr_wait timed out!\n", dma->dev_name);
 		ret = -1;
 	}
 
 	return ret;
 }
 
-int tr_wakeup(pcie_dma_t *dma) {
+int tr_wakeup(struct completion *tr_cmp) {
 	int ret = 0;
 
-	init_completion(&dma->rx_cmp);
+	if(tr_cmp != NULL) {
+		//mydebug("tr_cmp:%p\n", tr_cmp);
+		complete(tr_cmp);
+	}
 	return ret;
 }

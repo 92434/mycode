@@ -6,6 +6,15 @@
 #include "pcie.h"
 #include "dma_common.h"
 
+/*
+ *dma->bar_map_memory[0]-----------unused
+ *dma->bar_map_memory[1]-----------for tx test data
+ *dma->bar_map_memory[2-MAX_BAR_MAP_MEMORY]-----------for rx data
+ *
+ *
+ *
+ * */
+
 static int init_dma(void *ppara) {
 	return 0;
 }
@@ -19,16 +28,20 @@ static irqreturn_t process_isr(void *ppara) {
 
 void inc_dma_op_tx_count(pcie_dma_t *dma, long unsigned int count);
 void inc_dma_op_rx_count(pcie_dma_t *dma, long unsigned int count);
-int tr_wakeup(pcie_dma_t *dma);
-static int dma_tr(void *ppara,
-		uint64_t tx_dest_axi_addr,
-		uint64_t rx_src_axi_addr,
-		int tx_size,
-		int rx_size,
-		uint8_t *tx_data,
-		uint8_t *rx_data) {
+int tr_wakeup(struct completion *tr_cmp);
+static int dma_tr(void *ppara) {
 	int ret = 0;
-	pcie_dma_t *dma = (pcie_dma_t *)ppara;
+
+	pcie_tr_t *tr = (pcie_tr_t *)ppara;
+	pcie_dma_t *dma = tr->dma;
+	uint64_t tx_dest_axi_addr = tr->tx_dest_axi_addr;
+	uint64_t rx_src_axi_addr = tr->rx_src_axi_addr;
+	int tx_size = tr->tx_size;
+	int rx_size = tr->rx_size;
+	uint8_t *tx_data = tr->tx_data;
+	uint8_t *rx_data = tr->rx_data;
+	struct completion *tr_cmp = tr->tr_cmp;
+
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint8_t *dma_base_vaddr = base_vaddr + dma->dma_lite_offset; 
@@ -41,8 +54,12 @@ static int dma_tr(void *ppara,
 	tx_dest_memory = (uint8_t *)(dma_base_vaddr + tx_dest_axi_addr);
 	rx_src_memory = (uint8_t *)(dma_base_vaddr + rx_src_axi_addr);
 
-	tx_data = (uint8_t *)(dma->bar_map_memory[0]);
-	rx_data = (uint8_t *)(dma->bar_map_memory[1]);
+	if(tx_data == NULL) {
+		tx_data = (uint8_t *)(dma->bar_map_memory[1]);
+	}
+	if(rx_data == NULL) {
+		rx_data = (uint8_t *)(dma->bar_map_memory[2]);
+	}
 
 	prepare_test_data(tx_data, tx_size, rx_data, rx_size, tx_data);
 
@@ -62,15 +79,15 @@ static int dma_tr(void *ppara,
 
 	if(rx_size != 0) {
 		for(i = 0; i + 4 <= rx_size; i += 4) {
-			*((uint32_t *)(rx_data + i)) = readl(tx_dest_memory + i);
+			*((uint32_t *)(rx_data + i)) = readl(rx_src_memory + i);
 		}
 		pos = i;
 		for(i = pos; i + 2 <= rx_size; i += 2) {
-			*((uint16_t *)(rx_data + i)) = readw(tx_dest_memory + i);
+			*((uint16_t *)(rx_data + i)) = readw(rx_src_memory + i);
 		}
 		pos = i;
 		for(i = pos; i + 1 <= rx_size; i += 1) {
-			*((uint8_t *)(rx_data + i)) = readb(tx_dest_memory + i);
+			*((uint8_t *)(rx_data + i)) = readb(rx_src_memory + i);
 		}
 	}
 
@@ -79,7 +96,7 @@ static int dma_tr(void *ppara,
 	inc_dma_op_tx_count(dma, tx_size);
 	inc_dma_op_rx_count(dma, rx_size);
 
-	tr_wakeup(dma);
+	tr_wakeup(tr_cmp);
 
 	return ret;
 }

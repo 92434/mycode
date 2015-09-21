@@ -71,13 +71,7 @@ typedef enum {
 
 typedef irqreturn_t (*process_isr_t)(void *ppara);
 typedef int (*init_dma_t)(void *ppara);
-typedef int (*dma_tr_t)(void *ppara,
-		uint64_t tx_dest_axi_addr,
-		uint64_t rx_src_axi_addr,
-		int tx_size,
-		int rx_size,
-		uint8_t *tx_data,
-		uint8_t *rx_data);
+typedef int (*dma_tr_t)(void *ppara);
 
 typedef struct _dma_op {
 	init_dma_t init_dma;
@@ -99,7 +93,6 @@ typedef struct {
 	list_buffer_t *list;
 	struct cdev cdev;
 	dma_op_t dma_op;
-	struct completion tr_cmp;
 	struct completion tx_cmp;
 	struct completion rx_cmp;
 	long unsigned int tx_count;
@@ -120,6 +113,7 @@ typedef struct {
 	int rx_size;
 	uint8_t *tx_data;
 	uint8_t *rx_data;
+	struct completion *tr_cmp;
 } pcie_tr_t;
 
 typedef struct {

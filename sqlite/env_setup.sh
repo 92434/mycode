@@ -273,4 +273,5 @@ function mytest() {
 	rm "$database"
 	import_cvs
 	query_item
+# insert into xiaofei(name,stamp) select name, ifnull(stamp, (datetime('now', 'localtime'))) from xiaofei_;
 }

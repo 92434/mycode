@@ -410,26 +410,50 @@ static void uninit_pcie_tr(kc705_pci_dev_t *kc705_pci_dev) {
 	uninit_list_buffer(kc705_pci_dev->pcie_tr_list);
 }
 
+int tr_wait(pcie_dma_t *dma, struct completion *tr_cmp);
 int put_pcie_tr(pcie_dma_t *dma,
 		uint64_t tx_dest_axi_addr,
 		uint64_t rx_src_axi_addr,
 		int tx_size,
-		int rx_size) {
+		int rx_size,
+		uint8_t *tx_data,
+		uint8_t *rx_data,
+		bool wait) {
 	int ret = 0;
-	pcie_tr_t tr;
 
+	pcie_tr_t tr;
 	tr.dma = dma;
 	tr.tx_dest_axi_addr = tx_dest_axi_addr;
 	tr.rx_src_axi_addr = rx_src_axi_addr;
 	tr.tx_size = tx_size;
 	tr.rx_size = rx_size;
-	tr.tx_data = NULL;
-	tr.rx_data = NULL;
+	tr.tx_data = tx_data;
+	tr.rx_data = rx_data;
+
+	if(wait) {
+		struct completion *tr_cmp = (struct completion *)vzalloc(sizeof(struct completion));
+		if(tr_cmp == NULL) {
+			mydebug("alloc tr_cmp failed.\n");
+			ret = -1;
+			goto exit;
+		} else {
+			tr.tr_cmp = tr_cmp;
+		}
+	} else {
+		tr.tr_cmp = NULL;
+	}
 
 	spin_lock(&kc705_pci_dev->alloc_lock);
 	ret = write_buffer((char *)&tr, sizeof(pcie_tr_t), kc705_pci_dev->pcie_tr_list);
 	spin_unlock(&kc705_pci_dev->alloc_lock);
 
+	//mydebug("tr.tr_cmp:%p\n", tr.tr_cmp);
+	if(tr.tr_cmp != NULL) {
+		tr_wait(tr.dma, tr.tr_cmp);
+		vfree(tr.tr_cmp);
+	}
+
+exit:
 	return ret;
 }
 
@@ -469,22 +493,17 @@ static int pcie_tr_thread(void *ppara) {
 		if(size == 0) {
 			pcie_dma_t *dma = kc705_pci_dev->dma;
 
-			dma->dma_op.dma_tr(dma,
-					0,
-					0,
-					DMA_BLOCK_SIZE,
-					DMA_BLOCK_SIZE,
-					NULL,
-					NULL);
-		} else {
-			tr.dma->dma_op.dma_tr(tr.dma,
-					tr.tx_dest_axi_addr,
-					tr.rx_src_axi_addr,
-					tr.tx_size,
-					tr.rx_size,
-					tr.tx_data,
-					tr.rx_data);
+			tr.dma = dma;
+			tr.tx_dest_axi_addr = 0;
+			tr.rx_src_axi_addr = 0;
+			tr.tx_size = DMA_BLOCK_SIZE;
+			tr.rx_size = DMA_BLOCK_SIZE;
+			tr.tx_data = NULL;
+			tr.rx_data = NULL;
+			tr.tr_cmp = NULL;
 		}
+
+		tr.dma->dma_op.dma_tr(&tr);
 	 }
 
 	return ret;
@@ -492,10 +511,12 @@ static int pcie_tr_thread(void *ppara) {
 
 static int test_thread(void *ppara) {
 	int ret = 0;
-
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
 
 	while(true) {
+		uint8_t *tx_data;
+		uint8_t *rx_data;
+
 		pcie_dma_t *dma = kc705_pci_dev->dma + 1;
 
 		if(kthread_should_stop()) {
@@ -504,15 +525,37 @@ static int test_thread(void *ppara) {
 		}
 
 		set_current_state(TASK_UNINTERRUPTIBLE);  
-		schedule_timeout(msecs_to_jiffies(100)); 
+		schedule_timeout(msecs_to_jiffies(1000)); 
 
 
-		put_pcie_tr(dma, BASE_AXI_DDR_ADDR + 0, BASE_AXI_DDR_ADDR + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE);
+		put_pcie_tr(dma, BASE_AXI_DDR_ADDR + 0, BASE_AXI_DDR_ADDR + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
 
 		dma++;
 
-		put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 189);
+		//mydebug("%p:tx_data:%p\n", current, tx_data);
+		//mydebug("%p:rx_data:%p\n", current, rx_data);
+		tx_data = (uint8_t *)vzalloc(DMA_BLOCK_SIZE);
+		if(tx_data == NULL) {
+			mydebug("alloc tx_data failed.\n");
+		}
 
+		rx_data = (uint8_t *)vzalloc(DMA_BLOCK_SIZE);
+		if(rx_data == NULL) {
+			mydebug("alloc rx_data failed.\n");
+		}
+
+		//mydebug("%p:tx_data:%p\n", current, tx_data);
+		//mydebug("%p:rx_data:%p\n", current, rx_data);
+
+		put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 0, tx_data, NULL, true);
+		put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 0, 189, NULL, rx_data, true);
+
+		if(tx_data != NULL) {
+			vfree(tx_data);
+		}
+		if(rx_data != NULL) {
+			vfree(rx_data);
+		}
 	}
 
 	return ret;
@@ -604,7 +647,7 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 			dma->bar_map_memory_size[j] = PCIe_MAP_BAR_SIZE;
 		}
 
-		//alloc memory for cdma
+		//alloc memory cdma
 		for(j = 0; j < MAX_BAR_MAP_MEMORY; j++) {
 			if(dma->bar_map_memory_size[j] != 0) {
 				dma->bar_map_memory[j] = dma_zalloc_coherent(&(pdev->dev), dma->bar_map_memory_size[j], &(dma->bar_map_addr[j]), GFP_KERNEL);
