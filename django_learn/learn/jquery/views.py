@@ -12,12 +12,34 @@ import logging
 
 logger = logging.getLogger('django.request')
 
+crud_data = [
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+		{"firstname":"3","lastname":"3","phone":"3", "email":"a@a.com"},
+	]
 class view_handler(object):
 	def __init__(self):
 		pass
 
-	def handle_view(self, request, view):
+	def handle_view(self, request, view_fields):
+			view = '_'.join(view_fields)
+			view = view.split('.')[0]
 			mname = 'do_' + view
+			print mname
 			if not hasattr(self, mname):
 				#raise Http404('invalid request!')
 				return HttpResponse('error request!')
@@ -59,7 +81,7 @@ class view_handler(object):
 		logger.debug(str(request.POST))
 		logger.debug(str(request.GET))
 		return render(request, "%s.html" %(view))
-	def do_list(self, request, view):
+	def do_serverlist_servlet_list(self, request, view):
 		logger.debug(str(request.POST))
 		logger.debug(str(request.GET))
 		result = [
@@ -67,17 +89,16 @@ class view_handler(object):
 			]
 		return HttpResponse(json.dumps(result), content_type='application/json')
 
-	def do_commit(self, request, view):
+	def do_serverlist_servlet_commit(self, request, view):
 		logger.debug(str(request.POST))
 		logger.debug(str(request.GET))
-		print request.GET
 		result = {'status' : True}
 		return HttpResponse(json.dumps(result), content_type='application/json')
 
 	def do_ajaxadd(self, request, view):
 		return render(request, "%s.html" %(view))
 
-	def do_ajaxadd_result(self, request, view):
+	def do_ajaxadd_add(self, request, view):
 		a = request.GET['a']
 		b = request.GET['b']
 		try:
@@ -87,7 +108,7 @@ class view_handler(object):
 		except:
 			return HttpResponse('error request!')
 
-	def do_ajaxgetpic_result(self, request, view):
+	def do_ajaxadd_get_pic(self, request, view):
 		BASE_DIR = settings.BASE_DIR  # 项目目录
 		PICS = os.listdir(os.path.join(BASE_DIR, 'jquery/static/pics'))
 		logger.debug('PICS:%s' %(PICS))
@@ -96,15 +117,45 @@ class view_handler(object):
 		logger.debug(dir(request.POST))
 		return HttpResponse(json.dumps(result_list), content_type='application/json')
 
-	def do_post_select(self, request, view):
+	def do_ajaxadd_form_post(self, request, view):
 		logger.debug(request.GET)
-		return HttpResponse(json.dumps(request.GET.getlist('input_post_select')), content_type='application/json')
+		return HttpResponse(json.dumps(request.GET.getlist('form_post')), content_type='application/json')
+
+	def do_crud(self, request, view):
+		logger.debug(request.GET)
+		return render(request, "%s.html" %(view))
+
+	def do_crud_get_users(self, request, view):
+		global crud_data
+		logger.debug(str(request.POST))
+		rows = int(request.POST.getlist('rows')[0])
+		page = int(request.POST.getlist('page')[0])
+		start = rows * (page - 1) 
+		end = start + rows
+		return HttpResponse(json.dumps(crud_data[start : -1]), content_type='application/json')
+	def do_crud_save_user(self, request, view):
+		global crud_data
+		logger.debug(str(request.POST))
+		d = {}
+		d[u'firstname'] = request.POST.getlist('lastname')
+		d[u'lastname'] = request.POST.getlist('lastname')
+		d[u'phone'] = request.POST.getlist('lastname')
+		d[u'email'] = request.POST.getlist('lastname')
+		crud_data.append(request.POST);
+		return HttpResponse(json.dumps(crud_data), content_type='application/json')
+	def do_crud_update_user(self, request, view):
+		global crud_data
+		logger.debug(str(request.POST))
+		return HttpResponse(json.dumps(crud_data), content_type='application/json')
+
+
 		
 
 
 # Create your views here.
 @csrf_exempt
-def index(request, view):
+def index(request, groups):
+	view_fields = groups.strip('/').split('/')
 	handler = view_handler()
-	return handler.handle_view(request, view)
+	return handler.handle_view(request, view_fields)
 	#return render(request, 'home.html', { 'TutorialList': get_list, 'var':random.uniform(0,100), 'List': json.dumps(List), 'Dict': json.dumps(Dict) })
