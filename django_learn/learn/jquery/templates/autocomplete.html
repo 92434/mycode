@@ -1,37 +1,35 @@
 <!doctype html>
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<title>jQuery UI Autocomplete - Default functionality</title>
-	{% load staticfiles %}
-	<link rel="stylesheet" href={% static "jquery-ui-1.11.4.custom/jquery-ui.css" %}>
-	<link rel="stylesheet" href={% static "jquery-ui-1.11.4.custom/jquery-ui.css" %}>
-	<link rel="stylesheet" href={% static "jquery-ui-1.11.4.custom/jquery-ui.css" %}>
-	<link rel="stylesheet" href={% static "jquery-ui-1.11.4.custom/jquery-ui.css" %}>
-	<script src={% static "jquery-ui-1.11.4.custom/jquery-1.10.2.js" %}></script>
-	<script src={% static "jquery-ui-1.11.4.custom/jquery-1.10.2.js" %}></script>
-	<script src={% static "jquery-ui-1.11.4.custom/jquery-1.10.2.js" %}></script>
-	<script src={% static "jquery-ui-1.11.4.custom/jquery-1.10.2.js" %}></script>
-	<script src={% static "jquery-ui-1.11.4.custom/jquery-ui.js" %}></script>
-	<script src={% static "jquery-ui-1.11.4.custom/jquery-ui.js" %}></script>
-	<script src={% static "jquery-ui-1.11.4.custom/jquery-ui.js" %}></script>
-	<script src={% static "jquery-ui-1.11.4.custom/jquery-ui.js" %}></script>
-	<script>
-	$(function() {
-	var availableTags = {{data|safe}};
-	$( "#tags" ).autocomplete({
-		source: availableTags
-	});
-	});
-	</script>
-</head>
-<body>
- 
-<div class="ui-widget">
-	<label for="tags">Tags: </label>
-	<input id="tags">
-</div>
- 
- 
-</body>
+	<head>
+		<meta charset="utf-8">
+		<title>jQuery UI Autocomplete - Default functionality</title>
+		{% load staticfiles %}
+		<link rel="stylesheet" href={% static "jquery-ui-1.11.4.custom/jquery-ui.css" %}>
+		<script src={% static "jquery-ui-1.11.4.custom/external/jquery/jquery.js" %}></script>
+		<script src={% static "jquery-ui-1.11.4.custom/jquery-ui.js" %}></script>
+		<script src={% static "utils/debug.js" %}></script>
+		<script>
+			$(function() {
+				var availableTags = {{data|safe}};
+				$( "#tags" ).autocomplete({
+					source : availableTags,
+					change : function(e,u) {
+						$('#debug').html('</br>');
+						$('#debug').append(dir(e, ''));
+						$('#debug').append(dir(u, ''));
+					}
+				});
+			});
+		</script>
+	</head>
+	<body>
+
+		<div class="ui-widget">
+			<label for="tags">Tags: </label>
+			<input id="tags">
+		</div>
+		<p>debug: <span id='debug'></span></p>
+
+
+	</body>
 </html>
