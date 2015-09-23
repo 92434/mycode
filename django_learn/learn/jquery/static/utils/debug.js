@@ -1,13 +1,35 @@
-function dir(obj, space) {
+function dir(obj, space, label) {
 	var s = '';
 
+
+	try{
+		s += space + '$' + label + ':' + obj + '=' + obj.toSource() + '</br>';
+	} catch(err) {
+		s += space + '$' + label + ':' + obj + '</br>';
+	}
+
+	space += '>'
+
 	for (i in obj) {
-		if (getType(obj[i]) == 'Object') {
-			s += space + i + ':' + obj[i] + '</br>';
-			space += '>';
-			s += dir(obj[i], space);
-		} else {
-			s += space + '$' + i + "=" + obj[i] + "</br>";
+		var type = '';
+
+		try{
+			s += space + '$' + i + '=' + obj[i] + '=' + obj[i].toSource() + '</br>';
+		} catch(err) {
+			s += space + '$' + i + '=' + obj[i] + '</br>';
+		}
+
+		try{
+			type = getType(obj[i]);
+		} catch(err) {
+			console.log(err)
+			console.log(i + ':' + obj[i])
+			type = 'Object'
+		}
+
+		if (type == 'Object') {
+			//s += space + i + ':' + obj[i] + '</br>';
+			s += dir(obj[i], space, i);
 		}
 	}
 	return s;

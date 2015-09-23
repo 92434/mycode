@@ -132,7 +132,8 @@ class view_handler(object):
 		page = int(request.POST.getlist('page')[0])
 		start = rows * (page - 1) 
 		end = start + rows
-		return HttpResponse(json.dumps(crud_data[start : -1]), content_type='application/json')
+		d = {'rows' : crud_data[start : end], 'page' : page, 'total' : len(crud_data)}
+		return HttpResponse(json.dumps(d), content_type='application/json')
 	def do_crud_save_user(self, request, view):
 		global crud_data
 		logger.debug(str(request.POST))
@@ -146,6 +147,7 @@ class view_handler(object):
 	def do_crud_update_user(self, request, view):
 		global crud_data
 		logger.debug(str(request.POST))
+		logger.debug(str(request.GET))
 		return HttpResponse(json.dumps(crud_data), content_type='application/json')
 
 

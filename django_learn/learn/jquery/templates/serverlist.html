@@ -96,7 +96,7 @@
 							handler : function() {
 								endEdit();
 								$('#debug').html('</br>');
-								$('#debug').append(dir($dg.datagrid, ''));
+								$('#debug').append(dir($dg.datagrid, '', 'datagrid'));
 								if ($dg.datagrid('getChanges').length) {
 									var inserted = $dg.datagrid('getChanges', "inserted");
 									var deleted = $dg.datagrid('getChanges', "deleted");

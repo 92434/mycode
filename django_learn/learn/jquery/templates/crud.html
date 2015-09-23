@@ -18,8 +18,11 @@
 
 		<table id="dg" title="My Users" class="easyui-datagrid" style="width:700px;height:250px"
 			url="get_users.php"
-			toolbar="#toolbar" pagination="true"
-			rownumbers="true" fitColumns="true" singleSelect="true">
+			toolbar="#toolbar"
+			pagination="true"
+			rownumbers="true"
+			fitColumns="true"
+			singleSelect="true">
 			<thead>
 				<tr>
 					<th field="firstname" width="50">First Name</th>
@@ -74,16 +77,22 @@
 				if (row){
 					$('#dlg').dialog('open').dialog('center').dialog('setTitle','Edit User');
 					$('#fm').form('load',row);
-					$('#debug').html('</br>');
-					$('#debug').append($('#dg').datagrid("getRowIndex",row) + '</br>');
-					$('#debug').append(dir($('#dg').datagrid("getRowIndex",row), ''));
-					url = 'update_user.php?id='+row.id;
+					//JSON.stringify();
+					var options = $('#dg').datagrid('getPager').data("pagination").options;
+					var curr = options.pageNumber;
+					var total = options.total;
+					var max = Math.ceil(total/options.pageSize);
+					var rowindex = $('#dg').datagrid("getRowIndex",row);
+					url = 'update_user.php?id=' + JSON.stringify([curr, options.pageSize, total, rowindex]);
 				}
 			}
 			function saveUser(){
 				$('#fm').form('submit',{
 					url: url,
 					onSubmit: function(){
+						$('#debug').html('</br>');
+						$('#debug').append(dir($('#dg').datagrid('getPager'), '', 'pager'));
+						$('#debug').append(dir($(this).form('validate'), '', 'form validate'));
 						return $(this).form('validate');
 					},
 					success: function(result){
