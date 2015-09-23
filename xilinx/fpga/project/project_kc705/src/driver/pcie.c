@@ -6,10 +6,13 @@
 #include "kc705.h"
 #include "pcie.h"
 #include "dma_common.h"
-#include "pcie_device.h"
 
-int setup_kc705_dev(pcie_dma_t *dma, char *nameformat, ...);
-void uninstall_kc705_dev(pcie_dma_t *dma);
+int setup_pcie_dma_dev(pcie_dma_t *dma, char *nameformat, ...);
+void uninstall_pcie_dma_dev(pcie_dma_t *dma);
+int setup_kc705_dev(kc705_pci_dev_t *kc705_pci_dev, char *namefmt, ...);
+void uninstall_kc705_dev(kc705_pci_dev_t *kc705_pci_dev);
+void *kc705_add_gpio_chip(uint8_t *base_addr, char *namefmt, ...);
+void kc705_remove_gpio_chip(void *ppara);
 
 /**
  * Macro to export pci_device_id to user space to allow hot plug and
@@ -457,6 +460,12 @@ exit:
 	return ret;
 }
 
+static void reset_pcie_tr(void) {
+	spin_lock(&kc705_pci_dev->alloc_lock);
+	buffer_reset(kc705_pci_dev->pcie_tr_list);
+	spin_unlock(&kc705_pci_dev->alloc_lock);
+}
+
 int read_buffer(char *buffer, int size, list_buffer_t *list);
 static int get_pcie_tr(kc705_pci_dev_t *kc705_pci_dev, pcie_tr_t *tr) {
 	int ret;
@@ -516,6 +525,7 @@ static int test_thread(void *ppara) {
 	while(true) {
 		uint8_t *tx_data;
 		uint8_t *rx_data;
+		//pcie_tr_t tr;
 
 		pcie_dma_t *dma = kc705_pci_dev->dma + 1;
 
@@ -549,6 +559,16 @@ static int test_thread(void *ppara) {
 
 		put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 0, tx_data, NULL, true);
 		put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 0, 189, NULL, rx_data, true);
+		//put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 189, tx_data, rx_data, true);
+		//tr.dma = dma;
+		//tr.tx_dest_axi_addr = 0;
+		//tr.rx_src_axi_addr = 0;
+		//tr.tx_size = 189;
+		//tr.rx_size = 189;
+		//tr.tx_data = tx_data;
+		//tr.rx_data = rx_data;
+		//tr.tr_cmp = NULL;
+		//tr.dma->dma_op.dma_tr(&tr);
 
 		if(tx_data != NULL) {
 			vfree(tx_data);
@@ -561,60 +581,81 @@ static int test_thread(void *ppara) {
 	return ret;
 }
 
-void *kc705_add_gpio_chip(uint8_t *base_addr, char *namefmt, ...);
-static int start_work_loop(void) {
+static void add_local_device(void) {
 	int i;
 
 	for(i = 0; i < GPIOCHIP_MAX; i++) {
 		kc705_pci_dev->gpiochip[i] = kc705_add_gpio_chip(kc705_pci_dev->bar_info[0].base_vaddr + gpio_lite_offset[i], "gpiochip%d", i);
 	}
 
-	INIT_WORK(&(kc705_pci_dev->work), work_func);
-	kc705_pci_dev->ptimer_data = alloc_timer(1000, timer_func);
-
-	kc705_pci_dev->pcie_tr_thread = alloc_work_thread(pcie_tr_thread, kc705_pci_dev, "%s", "pcie_tr");
+	setup_kc705_dev(kc705_pci_dev, "%s", "kc705_pcie");
 
 	for(i = 0; i < DMA_MAX; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
-		setup_kc705_dev(dma, "%s_%d", "pciedma", i);
+		setup_pcie_dma_dev(dma, "%s_%d", "pciedma", i);
 	}
-
-	for(i = 0; i < MAX_TEST_THREAD; i++) {
-		kc705_pci_dev->test_thread[i] = alloc_work_thread(test_thread, kc705_pci_dev, "%s_%d", "test", i);
-	}
-
-	return 0;
 }
 
-void kc705_remove_gpio_chip(void *ppara);
-static void end_work_loop(void) {
+static void remove_local_device(void) {
 	int i;
 
 	for(i = 0; i < DMA_MAX; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
 
-		uninstall_kc705_dev(dma);
+		uninstall_pcie_dma_dev(dma);
 	}
+
+	uninstall_kc705_dev(kc705_pci_dev);
+
+	for(i = 0; i < GPIOCHIP_MAX; i++) {
+		if(kc705_pci_dev->gpiochip[i] != NULL) {
+			kc705_remove_gpio_chip(kc705_pci_dev->gpiochip[i]);
+			kc705_pci_dev->gpiochip[i] = NULL;
+		}
+	}
+}
+
+void start_dma(void) {
+	int i;
+
+	if(kc705_pci_dev->ptimer_data == NULL) {
+		INIT_WORK(&(kc705_pci_dev->work), work_func);
+		kc705_pci_dev->ptimer_data = alloc_timer(1000, timer_func);
+	}
+
+	if(kc705_pci_dev->pcie_tr_thread == NULL) {
+		kc705_pci_dev->pcie_tr_thread = alloc_work_thread(pcie_tr_thread, kc705_pci_dev, "%s", "pcie_tr");
+	}
+
+	for(i = 0; i < MAX_TEST_THREAD; i++) {
+		if(kc705_pci_dev->test_thread[i] == NULL) {
+			kc705_pci_dev->test_thread[i] = alloc_work_thread(test_thread, kc705_pci_dev, "%s_%d", "test", i);
+		}
+	}
+}
+
+void stop_dma(void) {
+	int i;
 
 	for(i = 0; i < MAX_TEST_THREAD; i++) {
 		if(kc705_pci_dev->test_thread[i] != NULL) {
 			free_work_thread(kc705_pci_dev->test_thread[i]);
+			kc705_pci_dev->test_thread[i] = NULL;
 		}
 	}
 
 	if(kc705_pci_dev->pcie_tr_thread != NULL) {
 		free_work_thread(kc705_pci_dev->pcie_tr_thread);
+		kc705_pci_dev->pcie_tr_thread = NULL;
 	}
 
 	if(kc705_pci_dev->ptimer_data != NULL) {
 		free_timer(kc705_pci_dev->ptimer_data);
+		kc705_pci_dev->ptimer_data = NULL;
 	}
 
-	for(i = 0; i < GPIOCHIP_MAX; i++) {
-		if(kc705_pci_dev->gpiochip[i] != NULL) {
-			kc705_remove_gpio_chip(kc705_pci_dev->gpiochip[i]);
-		}
-	}
+	reset_pcie_tr();
+
 }
 
 #define DMA_BAR_MEM_START_INDEX 1
@@ -885,7 +926,8 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	read_pci_root_configuration(pdev);
 
 
-	start_work_loop();
+	add_local_device();
+	start_dma();
 
 	return 0;
 
@@ -912,7 +954,11 @@ alloc_kc705_pci_dev_failed:
 static void kc705_remove_pcie(struct pci_dev *pdev) {
 	mutex_lock(&work_lock);
 	if(kc705_pci_dev != NULL) {
-		end_work_loop();
+
+		remove_local_device();
+
+		stop_dma();
+
 
 		if(pdev->irq != 0) {
 			free_irq(pdev->irq, pdev);

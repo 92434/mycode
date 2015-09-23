@@ -1,5 +1,5 @@
-#ifndef _PCIE_DEVICE_H
-#define _PCIE_DEVICE_H
+#ifndef _PCIE_DMA_DEVICE_H
+#define _PCIE_DMA_DEVICE_H
 
 //driver struct
 #define PCIE_DEVICE_IOCTL_BASE	'W'
@@ -14,4 +14,4 @@ typedef struct _node_info {
 } node_info_t;
 //driver struct
 
-#endif//#ifndef _PCIE_DEVICE_H
+#endif//#ifndef _PCIE_DMA_DEVICE_H

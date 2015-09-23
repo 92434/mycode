@@ -289,3 +289,7 @@ bool read_available(list_buffer_t *list) {
 
 	return available;
 }
+
+void buffer_reset(list_buffer_t *list) {
+	list->read = list->write = list->first;
+}

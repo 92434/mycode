@@ -36,6 +36,7 @@ struct task_struct *alloc_work_thread(thread_func_t func, void *ppara, char *for
 }
 
 int free_work_thread(struct task_struct *thread) {
+	mydebug("stopping master sync thread %d ...\n", task_pid_nr(thread));
 	return kthread_stop(thread);
 }
 

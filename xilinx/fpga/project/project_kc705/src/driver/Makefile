@@ -16,7 +16,7 @@ KBUILD_CFLAGS += -Dtest_buffer_list
 #KERNEL-OBJS += kc705-cdma.o
 #
 
-kc705-module-objs := kc705.o pcie.o dma_common.o xdma_device.o utils/xiaofei_kthread.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o axi_dma.o axi_cdma.o pseudo_dma.o gpio.o gpio_proc.o
+kc705-module-objs := kc705.o pcie.o dma_common.o kc705_device.o pcie_dma_device.o utils/xiaofei_kthread.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o axi_dma.o axi_cdma.o pseudo_dma.o gpio.o gpio_proc.o
 KERNEL-OBJS += kc705-module.o
 
 spi-gpio-all-objs := spi-gpio.o spi-bitbang.o

@@ -91,17 +91,17 @@ typedef struct {
 	int pcie_map_bar_axi_addr_1;
 	int dma_bar_map_num;
 	list_buffer_t *list;
-	struct cdev cdev;
 	dma_op_t dma_op;
 	struct completion tx_cmp;
 	struct completion rx_cmp;
 	long unsigned int tx_count;
 	long unsigned int rx_count;
 
+	struct cdev cdev;
 	char dev_name[16];
 	wait_queue_head_t wq;
-	dev_t kc705_dev_id;
-	struct class *kc705_class;
+	dev_t pcie_dma_dev_id;
+	struct class *pcie_dma_class;
 	struct device *device;
 } pcie_dma_t;
 
@@ -133,6 +133,12 @@ typedef struct {
 	timer_data_t *ptimer_data;
 	list_buffer_t *pcie_tr_list;
 	spinlock_t alloc_lock;
+
+	struct cdev cdev;
+	char dev_name[16];
+	dev_t kc705_dev_id;
+	struct class *kc705_class;
+	struct device *device;
 } kc705_pci_dev_t;
 
 #endif //#define _PCIE_H

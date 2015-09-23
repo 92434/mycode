@@ -5,14 +5,14 @@
 #include <linux/poll.h>
 
 #include "pcie.h"
-#include "pcie_device.h"
+#include "pcie_dma_device.h"
 
 #include "utils/xiaofei_debug.h"
 
 #define MAX_KC705_DEV_NUM 16
 
 
-static int kc705_open(struct inode *i, struct file *filp) {
+static int pcie_dma_open(struct inode *i, struct file *filp) {
 	pcie_dma_t *dma = container_of(i->i_cdev, pcie_dma_t, cdev);
 	filp->private_data = dma;
 	init_waitqueue_head(&dma->wq);
@@ -20,13 +20,13 @@ static int kc705_open(struct inode *i, struct file *filp) {
 	return 0;
 }
 
-static int kc705_close(struct inode *i, struct file *filp) {
+static int pcie_dma_close(struct inode *i, struct file *filp) {
 	mydebug("\n");
 	return 0;
 }
 
 void inc_dma_op_rx_count(pcie_dma_t *dma, long unsigned int count);
-static ssize_t kc705_read(struct file *filp, char __user * buf, size_t len, loff_t * off) {
+static ssize_t pcie_dma_read(struct file *filp, char __user * buf, size_t len, loff_t * off) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
 
@@ -48,12 +48,12 @@ static ssize_t kc705_read(struct file *filp, char __user * buf, size_t len, loff
 	return ret;
 }
 
-static ssize_t kc705_write(struct file *filp, const char __user * buf, size_t len, loff_t * off) {
+static ssize_t pcie_dma_write(struct file *filp, const char __user * buf, size_t len, loff_t * off) {
 	mydebug("\n");
 	return len;
 }
 
-static unsigned int kc705_poll(struct file *filp, poll_table *wait) {
+static unsigned int pcie_dma_poll(struct file *filp, poll_table *wait) {
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
 	unsigned int mask =0;
 
@@ -67,7 +67,7 @@ static unsigned int kc705_poll(struct file *filp, poll_table *wait) {
 	return mask;
 }
 
-static int kc705_mmap(struct file *filp, struct vm_area_struct *vma) {
+static int pcie_dma_mmap(struct file *filp, struct vm_area_struct *vma) {
 	int ret;
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
 	unsigned long requested_size;
@@ -114,7 +114,7 @@ static int kc705_mmap(struct file *filp, struct vm_area_struct *vma) {
 	return 0;
 }
 
-static long kc705_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
+static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
 	list_buffer_t *list = dma->list;
@@ -153,18 +153,18 @@ static long kc705_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) 
 	return ret;
 }
 
-static const struct file_operations kc705_fops = {
+static const struct file_operations pcie_dma_fops = {
 	.owner = THIS_MODULE,
-	.open = kc705_open,
-	.release = kc705_close,
-	.read = kc705_read,
-	.write = kc705_write,
-	.mmap = kc705_mmap,
-	.unlocked_ioctl = kc705_ioctl,
-	.poll = kc705_poll,
+	.open = pcie_dma_open,
+	.release = pcie_dma_close,
+	.read = pcie_dma_read,
+	.write = pcie_dma_write,
+	.mmap = pcie_dma_mmap,
+	.unlocked_ioctl = pcie_dma_ioctl,
+	.poll = pcie_dma_poll,
 };
 
-int setup_kc705_dev(pcie_dma_t *dma, char *namefmt, ...) {
+int setup_pcie_dma_dev(pcie_dma_t *dma, char *namefmt, ...) {
 	int status = 0;
 
 	va_list args;
@@ -173,34 +173,34 @@ int setup_kc705_dev(pcie_dma_t *dma, char *namefmt, ...) {
 	vsnprintf(dma->dev_name, sizeof(dma->dev_name), namefmt, args);
 	va_end(args);
 
-	if (dma->kc705_dev_id == 0) {
+	if (dma->pcie_dma_dev_id == 0) {
 		/* Alloc Major & Minor number for char device */
-		status = alloc_chrdev_region(&dma->kc705_dev_id, 0, MAX_KC705_DEV_NUM, dma->dev_name);
+		status = alloc_chrdev_region(&dma->pcie_dma_dev_id, 0, MAX_KC705_DEV_NUM, dma->dev_name);
 		if (status) {
 			mydebug("\n");
 			goto alloc_chrdev_region_failed;
 		}
-		printk("MAJOR(dma->kc705_dev_id):%d\n", MAJOR(dma->kc705_dev_id));
+		printk("MAJOR(dma->pcie_dma_dev_id):%d\n", MAJOR(dma->pcie_dma_dev_id));
 	}
 
-	if (dma->kc705_class == NULL) {
-		dma->kc705_class = class_create(THIS_MODULE, dma->dev_name);
-		if (IS_ERR(dma->kc705_class)) {
-			status = PTR_ERR(dma->kc705_class);
+	if (dma->pcie_dma_class == NULL) {
+		dma->pcie_dma_class = class_create(THIS_MODULE, dma->dev_name);
+		if (IS_ERR(dma->pcie_dma_class)) {
+			status = PTR_ERR(dma->pcie_dma_class);
 			mydebug("\n");
 			goto class_create_failed;
 		}
 	}
 
-	cdev_init(&dma->cdev, &kc705_fops);
+	cdev_init(&dma->cdev, &pcie_dma_fops);
 
-	status = cdev_add(&dma->cdev, dma->kc705_dev_id, 1);
+	status = cdev_add(&dma->cdev, dma->pcie_dma_dev_id, 1);
 	if (status < 0) {
 		goto cdev_add_failed;
 	}
 
 	/* Add Device node in system */
-	dma->device = device_create(dma->kc705_class, NULL, dma->kc705_dev_id, NULL, "%s", dma->dev_name);
+	dma->device = device_create(dma->pcie_dma_class, NULL, dma->pcie_dma_dev_id, NULL, "%s", dma->dev_name);
 	if (IS_ERR(dma->device)) {
 		status = PTR_ERR(dma->device);
 		goto device_create_failed;
@@ -208,23 +208,23 @@ int setup_kc705_dev(pcie_dma_t *dma, char *namefmt, ...) {
 
 	return status;
 
-	device_destroy(dma->kc705_class, dma->kc705_dev_id);
+	device_destroy(dma->pcie_dma_class, dma->pcie_dma_dev_id);
 device_create_failed:
 	cdev_del(&dma->cdev);
 cdev_add_failed:
-	class_destroy(dma->kc705_class);
+	class_destroy(dma->pcie_dma_class);
 class_create_failed:
-	unregister_chrdev_region(dma->kc705_dev_id, MAX_KC705_DEV_NUM);
+	unregister_chrdev_region(dma->pcie_dma_dev_id, MAX_KC705_DEV_NUM);
 alloc_chrdev_region_failed:
 	return status;
 }
 
-void uninstall_kc705_dev(pcie_dma_t *dma) {
+void uninstall_pcie_dma_dev(pcie_dma_t *dma) {
 	if(dma->device != NULL) {
-		device_destroy(dma->kc705_class, dma->kc705_dev_id);
+		device_destroy(dma->pcie_dma_class, dma->pcie_dma_dev_id);
 		cdev_del(&dma->cdev);
-		class_destroy(dma->kc705_class);
-		unregister_chrdev_region(dma->kc705_dev_id, MAX_KC705_DEV_NUM);
+		class_destroy(dma->pcie_dma_class);
+		unregister_chrdev_region(dma->pcie_dma_dev_id, MAX_KC705_DEV_NUM);
 		dma->device = NULL;
 	}
 }
