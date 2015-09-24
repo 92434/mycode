@@ -441,6 +441,7 @@ int put_pcie_tr(pcie_dma_t *dma,
 			goto exit;
 		} else {
 			tr.tr_cmp = tr_cmp;
+			init_completion(tr.tr_cmp);
 		}
 	} else {
 		tr.tr_cmp = NULL;
@@ -486,14 +487,9 @@ static int pcie_tr_thread(void *ppara) {
 		dma->dma_op.init_dma(dma);
 	}
 
-	while(true) {
+	while(!kthread_should_stop()) {
 		int size;
 		pcie_tr_t tr;
-
-		if(kthread_should_stop()) {
-			ret = -1;
-			return ret;
-		}
 
 		set_current_state(TASK_UNINTERRUPTIBLE);  
 		//schedule_timeout(1*HZ); 
@@ -521,18 +517,13 @@ static int pcie_tr_thread(void *ppara) {
 static int test_thread(void *ppara) {
 	int ret = 0;
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
+	uint8_t *tx_data = NULL;
+	uint8_t *rx_data = NULL;
 
-	while(true) {
-		uint8_t *tx_data;
-		uint8_t *rx_data;
+	while(!kthread_should_stop()) {
 		//pcie_tr_t tr;
 
 		pcie_dma_t *dma = kc705_pci_dev->dma + 1;
-
-		if(kthread_should_stop()) {
-			ret = -1;
-			return ret;
-		}
 
 		set_current_state(TASK_UNINTERRUPTIBLE);  
 		schedule_timeout(msecs_to_jiffies(1000)); 
@@ -544,22 +535,27 @@ static int test_thread(void *ppara) {
 
 		//mydebug("%p:tx_data:%p\n", current, tx_data);
 		//mydebug("%p:rx_data:%p\n", current, rx_data);
-		tx_data = (uint8_t *)vzalloc(DMA_BLOCK_SIZE);
 		if(tx_data == NULL) {
-			mydebug("alloc tx_data failed.\n");
+			tx_data = (uint8_t *)vzalloc(DMA_BLOCK_SIZE);
+			if(tx_data == NULL) {
+				mydebug("alloc tx_data failed.\n");
+			}
 		}
 
-		rx_data = (uint8_t *)vzalloc(DMA_BLOCK_SIZE);
 		if(rx_data == NULL) {
-			mydebug("alloc rx_data failed.\n");
+			rx_data = (uint8_t *)vzalloc(DMA_BLOCK_SIZE);
+			if(rx_data == NULL) {
+				mydebug("alloc rx_data failed.\n");
+			}
 		}
 
 		//mydebug("%p:tx_data:%p\n", current, tx_data);
 		//mydebug("%p:rx_data:%p\n", current, rx_data);
 
-		put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 0, tx_data, NULL, true);
-		put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 0, 189, NULL, rx_data, true);
-		//put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 189, tx_data, rx_data, true);
+		//put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 0, tx_data, NULL, true);
+		//put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 0, 189, NULL, rx_data, true);
+		put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 189, tx_data, rx_data, true);
+		//put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 189, NULL, NULL, true);
 		//tr.dma = dma;
 		//tr.tx_dest_axi_addr = 0;
 		//tr.rx_src_axi_addr = 0;
@@ -570,13 +566,15 @@ static int test_thread(void *ppara) {
 		//tr.tr_cmp = NULL;
 		//tr.dma->dma_op.dma_tr(&tr);
 
-		if(tx_data != NULL) {
-			vfree(tx_data);
-		}
-		if(rx_data != NULL) {
-			vfree(rx_data);
-		}
 	}
+
+	if(tx_data != NULL) {
+		vfree(tx_data);
+	}
+	if(rx_data != NULL) {
+		vfree(rx_data);
+	}
+	mydebug("\n");
 
 	return ret;
 }

@@ -117,15 +117,16 @@ long unsigned int get_op_rx_count(pcie_dma_t *dma) {
 
 int tr_wait(pcie_dma_t *dma, struct completion *tr_cmp) {
 	int ret = 0;
-	unsigned long tmo;
+	//unsigned long tmo;
 
-	init_completion(tr_cmp);
-	tmo = msecs_to_jiffies(1000);
-	tmo = wait_for_completion_timeout(tr_cmp, tmo);
-	if (0 == tmo) {
-		myprintf("%s:tr_wait timed out!\n", dma->dev_name);
-		ret = -1;
-	}
+	//tmo = msecs_to_jiffies(1000);
+	//tmo = wait_for_completion_timeout(tr_cmp, tmo);
+	//if (0 == tmo) {
+	//	myprintf("(%d)%s:tr_wait timed out!\n", task_pid_nr(current), dma->dev_name);
+	//	ret = -1;
+	//}
+
+	wait_for_completion(tr_cmp);
 
 	return ret;
 }

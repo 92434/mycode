@@ -70,7 +70,6 @@ static long kc705_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) 
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)filp->private_data;
 	kc705_pci_dev = kc705_pci_dev;
 
-	mydebug("\n");
 	switch (cmd) {
 		case PCIE_DEVICE_IOCTL_START_DMA_THREAD:
 			{
