@@ -188,6 +188,8 @@ static ssize_t gpio_direction_write(struct file *file, const char __user *buffer
 			default:
 				break;
 		}
+	} else {
+		mydebug("%s\n", cmd);
 	}
 
 

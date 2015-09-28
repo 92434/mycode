@@ -925,7 +925,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 
 
 	add_local_device();
-	start_dma();
+	//start_dma();
 
 	return 0;
 

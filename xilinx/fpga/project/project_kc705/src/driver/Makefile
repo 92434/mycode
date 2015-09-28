@@ -20,7 +20,7 @@ kc705-module-objs := kc705.o pcie.o dma_common.o kc705_device.o pcie_dma_device.
 KERNEL-OBJS += kc705-module.o
 
 spi-gpio-all-objs := spi-gpio.o spi-bitbang.o
-KERNEL-OBJS += i2c-gpio.o i2c-dev.o spi-gpio-all.o spidev.o
+KERNEL-OBJS += i2c-gpio.o i2c-dev.o spi-gpio-all.o spidev.o kc705_i2c_device.o
 
 include $(BUILD_KO)
 

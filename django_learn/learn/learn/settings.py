@@ -158,3 +158,9 @@ LOGGING = {
 
 OUTPUT_DIR = os.path.join(BASE_DIR, 'blog/static', 'media')
 MEDIA_URL = 'static/media/'
+
+UEDITOR_SETTINGS = {
+		'config': {
+			'static_dir': '/blog/static'
+		}
+}
