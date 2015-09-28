@@ -20,8 +20,8 @@ def controller(request):
 		"uploadvideo": action_upload,
 		"uploadfile": action_upload,
 		"catchimage": action_upload,
-		"listimage": action_list_image,
-		"listfile": action_list_files
+		"listimage": action_list,
+		"listfile": action_list,
 	}
 	return reponse_action.get(action)(request, action)
 
@@ -87,9 +87,6 @@ def action_upload(request, action):
 		},
 	}
 
-	if not request.method == "POST":
-		return  HttpResponse(json.dumps(get_http_response_state(info = '请求方法错误：不是POST')), content_type='application/json')
-
 	return do_upload(request, upload_action.get(action))
 
 def do_upload(request, action_info):
@@ -148,7 +145,8 @@ def catcher_remote_image(request, upload_config):
 			}
 		)
 
-		path, local_path, local_file_path = get_local_file_path(settings.django_settings.BASE_DIR + config.ueditor_php_config.get('static_dir', ''), config_path_format, path_format, remote_file_name)
+		base_dir = os.path.join(settings.django_settings.BASE_DIR, config.ueditor_php_config.get('static_dir', '/static/').lstrip('/'))
+		path, local_path, local_file_path = get_local_file_path(base_dir, config_path_format, path_format, remote_file_name)
 
 
 		info = ''
@@ -336,6 +334,97 @@ def upload(request, upload_config):
 	)
 
 	return HttpResponse(json.dumps(return_info, ensure_ascii = False), content_type = "application/javascript")
+
+def action_list(request, action):
+	"""列出文件"""
+
+	list_action = {
+		"listfile": {
+			'config': {
+				'action_manager_list_size' : 'fileManagerListSize',
+				'action_manager_list_path' : 'fileManagerListPath',
+				'action_manager_allow_files': 'fileManagerAllowFiles',
+			},
+		},
+		'listimage': {
+			'config': {
+				'action_manager_list_size': 'imageManagerListSize',
+				'action_manager_list_path': 'imageManagerListPath',
+				'action_manager_allow_files': 'imageManagerAllowFiles',
+			},
+		},
+	}
+
+	return do_list(request, list_action.get(action))
+
+def do_list(request, action_info)
+
+	state = "SUCCESS"
+	if not request.method == "GET":
+		return  HttpResponse(json.dumps(get_http_response_state(info = '请求方法错误：不是GET')), content_type='application/json')
+
+	list_config = action_info.get('config')
+
+	#取得动作
+	action_manager_list_size = list_config.get('action_manager_list_size')
+	list_size = request.GET.get(action_manager_list_size, config.ueditor_php_config.get(action_manager_list_size))
+	action_manager_list_path = list_config.get('action_manager_list_path')
+	list_path = request.GET.get(action_manager_list_path, config.ueditor_php_config.get(action_manager_list_path))
+	action_manager_allow_files = list_config.get('action_manager_allow_files')
+	allow_files = request.GET.get(action_manager_list_path, config.ueditor_php_config.get(action_manager_allow_files))
+
+	#取得参数
+	list_size = long(request.GET.get("size", list_size))
+	list_start = long(request.GET.get("start", 0))
+
+	base_dir = os.path.join(settings.django_settings.BASE_DIR, config.ueditor_php_config.get('static_dir', '/static/').lstrip('/'))
+	root_path = os.path.join(base_dir, list_path.lstrip('/'))
+	files = get_files(root_path, root_path, allowFiles[action])
+
+	#返回数据
+	if len(files) == 0:
+		return_info = get_http_response_state(state = 'ERROR_FILE_NOT_FOUND').update(
+			{
+				"list": [],
+				"start": list_start,
+				"total": 0,
+			}
+		)
+	else:
+		return_info = get_http_response_state(state = 'SUCCESS').update(
+			{
+				"list": files[list_start : list_start + list_size],
+				"start": list_start,
+				"total": len(files)
+			}
+		)
+
+	
+	return HttpResponse(json.dumps(return_info), content_type="application/javascript")
+
+
+def get_files(base_dir, path, allow_types=[]):
+	files = []
+
+	items = os.listdir(base_dir, path.lstrip('/'))
+	for item in items:
+		item = unicode(item)
+		item_path = os.path.join(path, item)
+		item_full_path = os.path.join(base_dir, item_path)
+
+		if os.path.isdir(item_full_path):
+			files.extend(get_files(base_dir, item_path, allow_types))
+		else:
+			ext = os.path.splitext(item_path)[1]
+			if ext in allow_types:
+				files.append({
+					"url":urllib.basejoin(settings.django_settings.STATIC_URL, item_path.lstrip('/')),
+					"mtime":os.path.getmtime(item_full_path)
+				})
+
+	return files
+
+
 
 
 def get_local_file_path(base_dir, path_format_string, path_var, file_name):
