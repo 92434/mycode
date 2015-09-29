@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.http import HttpResponse, Http404
+from django.views.decorators.csrf import csrf_exempt
+
 import os
+import json
+import urllib
+import base64
 
 from . import config
 from .utils import *
@@ -118,7 +123,7 @@ def catcher_remote_image(request, upload_config):
 
 	for remote_url in remote_urls:
 		#http开头验证
-		if not remote_url.startwith('http'):
+		if not remote_url.startswith('http'):
 			state = 'ERROR_HTTP_LINK'
 			return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
 
@@ -145,34 +150,43 @@ def catcher_remote_image(request, upload_config):
 			}
 		)
 
-		base_dir = os.path.join(settings.django_settings.BASE_DIR, config.ueditor_php_config.get('static_dir', '/static/').lstrip('/'))
+		base_dir = os.path.join(config.django_settings.BASE_DIR, config.ueditor_php_config.get('static_dir', config.django_settings.STATIC_URL).lstrip('/'))
 		path, local_path, local_file_path = get_local_file_path(base_dir, config_path_format, path_format, remote_file_name)
+		try:
+			if not os.path.exists(local_path):
+				os.makedirs(local_path)
+		except Exception, E:
+			state = 'ERROR_CREATE_DIR'
+			return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
 
 
-		info = ''
 
 		try:
 			remote_image = urllib.urlopen(remote_url)
 			 #将抓取到的文件写入文件
 			try:
-				with oepn(local_file_path, 'wb') as f:
+				with open(local_file_path, 'wb') as f:
 					f.write(remote_image.read())
 			except Exception,E:
-				info = u"写入抓取图片文件错误:%s" % E.message
+				state = 'ERROR_WRITE_CONTENT'
+				return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
 		except Exception,E:
-			info = u"抓取图片错误：%s" % E.message
+			state = 'ERROR_FILE_NOT_FOUND'
+			return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
 
-		catcher_infos.append(
-				get_http_response_state(info = info).update(
-					{
-						"url": urllib.basejoin(settings.django_settings.STATIC_URL, path.lstrip('/')),
-						"size": os.path.getsize(local_file_path),
-						"title": os.path.basename(remote_file_name),
-						"original": remote_file_name,
-						"source": remote_url,
-					}
-				)
+		file_path = os.path.join(path, remote_file_name)
+		catcher_info = get_http_response_state(state = state)
+		catcher_info.update(
+			{
+				"url": urllib.basejoin(config.django_settings.STATIC_URL, file_path.lstrip('/')),
+				"size": os.path.getsize(local_file_path),
+				"title": os.path.basename(remote_file_name),
+				"original": remote_file_name,
+				"source": remote_url,
+			}
 		)
+
+		catcher_infos.append(catcher_info)
 
 	return_info={
 		"state": "SUCCESS" if len(catcher_infos) > 0 else "NO CATCHER INFO",
@@ -203,52 +217,39 @@ def up_base64(request, upload_config):
 		{
 			"basename":upload_original_name,
 			"extname":upload_original_ext[1:],
-			"filename":upload_original_name
+			"filename":upload_original_name,
 		}
-
-	#文件类型检验
-	action_allow_files = upload_config.get('action_allow_files')
-	allow_files = request.GET.get(action_allow_files, config.ueditor_php_config.get(action_allow_files))
-
-	if not upload_original_ext in allow_files:
-		state = 'ERROR_TYPE_NOT_ALLOWED'
-		return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
-
-	action_max_size = upload_config.get('action_max_size')
-	max_size = request.GET.get(action_max_size, config.ueditor_php_config.get(action_max_size))
-
-	#大小检验
-	if  upload_file_size != 0:
-		from utils import FileSize
-		MF = FileSize(max_size)
-		if upload_file_size > MF.size:
-			state = 'MAX_FILE_SIZE_EXCEED'
-			return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
-
+	)
 
 	#检测保存路径是否存在,如果不存在则需要创建
-	base_dir = os.path.join(settings.django_settings.BASE_DIR, config.ueditor_php_config.get('static_dir', ''), '/static/').lstrip('/'))
+	base_dir = os.path.join(config.django_settings.BASE_DIR, config.ueditor_php_config.get('static_dir', config.django_settings.STATIC_URL).lstrip('/'))
 	action_path_format = upload_config.get('action_path_format')
 	config_path_format = config.ueditor_php_config.get(action_path_format)
 	#取得输出文件的路径
 	path, local_path, local_file_path = get_local_file_path(base_dir, config_path_format, path_format, upload_file_name)
+	try:
+		if not os.path.exists(local_path):
+			os.makedirs(local_path)
+	except Exception, E:
+		state = 'ERROR_CREATE_DIR'
+		return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
 
 	#所有检测完成后写入文件
 	content = request.POST.get(field_name)
 
-	import base64
 	try:
-		with open(filename, 'wb') as f:
+		with open(local_file_path, 'wb') as f:
 			f.write(base64.decodestring(content))
 	except Exception,E:
-		print 'up_base64:', E.message
 		state = "ERROR_WRITE_CONTENT"
 		return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
 
 	#返回数据
-	return_info = get_http_response_state(state = state).update(
+	file_path = os.path.join(path, upload_file_name)
+	return_info = get_http_response_state(state = state)
+	return_info.update(
 		{
-			'url': urllib.basejoin(settings.django_settings.STATIC_URL, path.lstrip('/')),#保存后的文件名称
+			'url': urllib.basejoin(config.django_settings.STATIC_URL, file_path.lstrip('/')),#保存后的文件名称
 			'original': upload_file_name,#原始文件名
 			'type': upload_original_ext,
 			'size': upload_file_size
@@ -283,8 +284,9 @@ def upload(request, upload_config):
 		{
 			"basename":upload_original_name,
 			"extname":upload_original_ext[1:],
-			"filename":upload_original_name
+			"filename":upload_original_name,
 		}
+	)
 
 	#文件类型检验
 	action_allow_files = upload_config.get('action_allow_files')
@@ -298,35 +300,41 @@ def upload(request, upload_config):
 	max_size = request.GET.get(action_max_size, config.ueditor_php_config.get(action_max_size))
 
 	#大小检验
-	if  upload_file_size != 0:
-		from utils import FileSize
-		MF = FileSize(max_size)
+	if upload_file_size != 0:
+		MF = file_size(max_size)
 		if upload_file_size > MF.size:
 			state = 'MAX_FILE_SIZE_EXCEED'
 			return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
 
 
 	#检测保存路径是否存在,如果不存在则需要创建
-	base_dir = os.path.join(settings.django_settings.BASE_DIR, config.ueditor_php_config.get('static_dir', ''), '/static/').lstrip('/'))
+	base_dir = os.path.join(config.django_settings.BASE_DIR, config.ueditor_php_config.get('static_dir', config.django_settings.STATIC_URL).lstrip('/'))
 	action_path_format = upload_config.get('action_path_format')
 	config_path_format = config.ueditor_php_config.get(action_path_format)
 	#取得输出文件的路径
 	path, local_path, local_file_path = get_local_file_path(base_dir, config_path_format, path_format, upload_file_name)
+	try:
+		if not os.path.exists(local_path):
+			os.makedirs(local_path)
+	except Exception, E:
+		state = 'ERROR_CREATE_DIR'
+		return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
 
 	#所有检测完成后写入文件
 	try:
-		with open(local_file_path, 'wb'):
+		with open(local_file_path, 'wb') as f:
 			for chunk in file.chunks():
 				f.write(chunk)
 	except Exception,E:
-		print 'upload:', E.message
 		state = "ERROR_WRITE_CONTENT"
 		return  HttpResponse(json.dumps(get_http_response_state(state = state)), content_type='application/json')
 
 	#返回数据
-	return_info = get_http_response_state(state = state).update(
+	file_path = os.path.join(path, upload_file_name)
+	return_info = get_http_response_state(state = state)
+	return_info.update(
 		{
-			'url': urllib.basejoin(settings.django_settings.STATIC_URL, path.lstrip('/')),#保存后的文件名称
+			'url': urllib.basejoin(config.django_settings.STATIC_URL, file_path.lstrip('/')),#保存后的文件名称
 			'original': upload_file_name,#原始文件名
 			'type': upload_original_ext,
 			'size': upload_file_size
@@ -357,7 +365,7 @@ def action_list(request, action):
 
 	return do_list(request, list_action.get(action))
 
-def do_list(request, action_info)
+def do_list(request, action_info):
 
 	state = "SUCCESS"
 	if not request.method == "GET":
@@ -377,13 +385,15 @@ def do_list(request, action_info)
 	list_size = long(request.GET.get("size", list_size))
 	list_start = long(request.GET.get("start", 0))
 
-	base_dir = os.path.join(settings.django_settings.BASE_DIR, config.ueditor_php_config.get('static_dir', '/static/').lstrip('/'))
+	
+	base_dir = os.path.join(config.django_settings.BASE_DIR, config.ueditor_php_config.get('static_dir', config.django_settings.STATIC_URL).lstrip('/'))
 	root_path = os.path.join(base_dir, list_path.lstrip('/'))
-	files = get_files(root_path, root_path, allowFiles[action])
+	files = list_get_files(base_dir, list_path, allow_files)
 
 	#返回数据
 	if len(files) == 0:
-		return_info = get_http_response_state(state = 'ERROR_FILE_NOT_FOUND').update(
+		return_info = get_http_response_state(state = 'ERROR_FILE_NOT_FOUND')
+		return_info.update(
 			{
 				"list": [],
 				"start": list_start,
@@ -391,7 +401,8 @@ def do_list(request, action_info)
 			}
 		)
 	else:
-		return_info = get_http_response_state(state = 'SUCCESS').update(
+		return_info = get_http_response_state(state = 'SUCCESS')
+		return_info.update(
 			{
 				"list": files[list_start : list_start + list_size],
 				"start": list_start,
@@ -401,37 +412,3 @@ def do_list(request, action_info)
 
 	
 	return HttpResponse(json.dumps(return_info), content_type="application/javascript")
-
-
-def get_files(base_dir, path, allow_types=[]):
-	files = []
-
-	items = os.listdir(base_dir, path.lstrip('/'))
-	for item in items:
-		item = unicode(item)
-		item_path = os.path.join(path, item)
-		item_full_path = os.path.join(base_dir, item_path)
-
-		if os.path.isdir(item_full_path):
-			files.extend(get_files(base_dir, item_path, allow_types))
-		else:
-			ext = os.path.splitext(item_path)[1]
-			if ext in allow_types:
-				files.append({
-					"url":urllib.basejoin(settings.django_settings.STATIC_URL, item_path.lstrip('/')),
-					"mtime":os.path.getmtime(item_full_path)
-				})
-
-	return files
-
-
-
-
-def get_local_file_path(base_dir, path_format_string, path_var, file_name):
-	path = path_format_string % path_var
-	local_path = os.path.join(base_dir, path.lstrip('/'))
-	local_file_path = os.path.join(local_path, file_name)
-	if not os.path.exists(local_path):
-		os.makedirs(local_path)
-	return (path, local_path, local_path)
-

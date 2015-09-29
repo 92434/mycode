@@ -1,7 +1,12 @@
-#coding:utf-8
+# -*- coding: utf-8 -*-
 
 import datetime
 import random
+import re
+import os
+import urllib
+
+from . import config
 
 state_info_map = {
 	"SUCCESS": "SUCCESS", #上传成功标记，在UEditor中内不可改变，否则flash判断会出错
@@ -54,4 +59,163 @@ def get_time_format(dt = None):
 		"rnd": random.randrange(000,999),
 	}
 
+def list_get_files(base_dir, path, allow_types):
+	files = []
 
+	cur_dir = os.path.join(base_dir, path.lstrip('/'))
+	if not os.path.exists(cur_dir):
+		return files
+
+	items = os.listdir(cur_dir)
+	for item in items:
+		item = unicode(item)
+
+		item_path = os.path.join(path, item)
+
+		item_full_path = os.path.join(base_dir, item_path.lstrip('/'))
+		if os.path.isdir(item_full_path):
+			files.extend(list_get_files(base_dir, item_path, allow_types))
+		else:
+			ext = os.path.splitext(item_path)[1]
+			if ext in allow_types:
+				files.append(
+					{
+						"url": urllib.basejoin(config.django_settings.STATIC_URL, item_path.lstrip('/')),
+						"mtime": os.path.getmtime(item_full_path)
+					}
+				)
+
+	return files
+
+def get_local_file_path(base_dir, path_format_string, path_var, file_name):
+	path = path_format_string % path_var
+	local_path = os.path.join(base_dir, path.lstrip('/'))
+	local_file_path = os.path.join(local_path, file_name)
+	return (path, local_path, local_file_path)
+
+#文件大小类
+class file_size():
+	SIZE_UNIT = {
+		"Byte":1,
+		"KB":1024,
+		"MB":1048576,
+		"GB":1073741824,
+		"TB":1099511627776L
+	}
+
+	def __init__(self, size):
+		self.size = long(format(size))
+
+	@staticmethod
+	def Format(size):
+		if isinstance(size, int) or isinstance(size, long):
+			return size
+
+		if not isinstance(size, str):
+			return 0
+
+		size_upper = size.lstrip().upper().replace(" ","")
+		pattern = re.compile(r"(\d*\.?(?=\d)\d*)(byte|kb|mb|gb|tb)", re.I)
+		match = pattern.match(size_upper)
+		if match:
+			m_size, m_unit = match.groups()
+			if m_size.find(".") == -1:
+				m_size = long(m_size)
+			else:
+				m_size = float(m_size)
+			if m_unit != "BYTE":
+				return m_size * file_size.SIZE_UNIT[m_unit]
+			else:
+				return m_size
+		else:
+			return 0
+
+	#返回字节为单位的值
+	@property
+	def size(self):
+		return self.size
+
+	@size.setter
+	def size(self, newsize):
+		try:
+			self.size = long(newsize)
+		except:
+			self.size = 0
+
+	#返回带单位的自动值
+	@property
+	def FriendValue(self):
+		if self.size < file_size.SIZE_UNIT["KB"]:
+			unit = "Byte"
+		elif self.size < file_size.SIZE_UNIT["MB"]:
+			unit = "KB"
+		elif self.size < file_size.SIZE_UNIT["GB"]:
+			unit = "MB"
+		elif self.size < file_size.SIZE_UNIT["TB"]:
+			unit = "GB"
+		else:
+			unit = "TB"
+
+		if (self.size % file_size.SIZE_UNIT[unit]) == 0:
+			return "%s%s" % ((self.size / file_size.SIZE_UNIT[unit]), unit)
+		else:
+			return "%0.2f%s" % (round(float(self.size) / float(file_size.SIZE_UNIT[unit]), 2), unit)
+
+	def __str__(self):
+		return self.FriendValue
+
+	#相加
+	def __add__(self, other):
+		if isinstance(other, file_size):
+			return file_size(other.size + self.size)
+		else:
+			return file_size(file_size(other).size + self.size)
+	def __sub__(self, other):
+		if isinstance(other, file_size):
+			return file_size(self.size - other.size)
+		else:
+			return file_size(self.size - file_size(other).size)
+	def __gt__(self, other):
+		if isinstance(other, file_size):
+			if self.size > other.size:
+				return True
+			else:
+				return False
+		else:
+			if self.size > file_size(other).size:
+				return True
+			else:
+				return False
+	def __lt__(self,  other):
+		if isinstance(other, file_size):
+			if other.size > self.size:
+				return True
+			else:
+				return False
+		else:
+			if file_size(other).size > self.size:
+				return True
+			else:
+				return False
+	def __ge__(self, other):
+		if isinstance(other, file_size):
+			if self.size >= other.size:
+				return True
+			else:
+				return False
+		else:
+			if self.size >= file_size(other).size:
+				return True
+			else:
+				return False
+	def __le__(self, other):
+		if isinstance(other, file_size):
+			if other.size >= self.size:
+				return True
+			else:
+				return False
+		else:
+			if file_size(other).size >= self.size:
+				return True
+			else:
+				return False
