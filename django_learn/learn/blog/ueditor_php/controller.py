@@ -7,8 +7,8 @@ import json
 import urllib
 import base64
 
-from . import config
-from .utils import *
+import config
+from utils import *
 
 @csrf_exempt
 def controller(request):
