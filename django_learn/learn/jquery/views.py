@@ -149,8 +149,9 @@ class view_handler(object):
 		logger.debug(str(request.GET))
 		return HttpResponse(json.dumps(crud_data), content_type='application/json')
 
-
-		
+	def do_galaxies(self, request, view):
+		print request
+		return render(request, "%s.html" %(view))
 
 
 # Create your views here.
