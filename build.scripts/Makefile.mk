@@ -53,6 +53,14 @@ TOOLCHAIN_PREFIX :=
 CC := g++
 AR := ar
 JAVAC := javac
+JAVA := java
+JAR := jar
+comma:=,
+dot:=.
+semicolon:=:
+star:=*
+empty:=
+space:= $(empty) $(empty)
 
 MAKE := make
 
