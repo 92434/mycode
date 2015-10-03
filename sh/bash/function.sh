@@ -281,5 +281,6 @@ function dump_data() {
 
 function get_net_data() {
 	local interface="$1"
-	sudo tcpdump -i "$interface" -An
+	shift
+	sudo tcpdump -i "$interface" -An $*
 }
