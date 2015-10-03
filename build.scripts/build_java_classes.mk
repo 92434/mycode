@@ -33,9 +33,14 @@ $(eval $(jar_file).option := cvfe)
 endif
 $(eval $(jar_file).entry_point := $(entry_point))
 
+ifneq ($(LOCAL_PRECONDITION),)
+$(eval target_files += $(LOCAL_PRECONDITION))
+endif
+
 $(eval target_files += $(jar_file))
 
 include_class_path :=
 jar_name := 
 package_inc :=
 entry_point :=
+LOCAL_PRECONDITION :=

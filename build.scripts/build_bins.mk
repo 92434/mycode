@@ -23,6 +23,10 @@ $(foreach c_file,$(c_files),$(eval $(call gen-bin-path-from-c-file-name,$(c_file
 $(foreach c_file,$(c_files),$(eval $(call gen-bin-path-from-c-file-name,$(c_file)).local_cflags := $($(c_file).LOCAL_CFLAGS) $(LOCAL_CFLAGS)))
 $(foreach c_file,$(c_files),$(eval $(strip $(call gen-bin-path-from-c-file-name,$(c_file))) : $($(c_file).LOCAL_DEPS) $(LOCAL_DEPS)))
 
+ifneq ($(LOCAL_PRECONDITION),)
+$(eval target_files += $(LOCAL_PRECONDITION))
+endif
+
 $(eval target_files += $(bin_files))
 
 ##########################################################################################################################3
@@ -46,9 +50,11 @@ bins_d_files := $(call gen-d-file-name-for-bin-file-from-c-file-name,$(c_files))
 $(foreach c_file,$(c_files),$(eval $(call gen-d-file-name-for-bin-file-from-c-file-name,$(c_file)).local_cflags := $($(c_file).LOCAL_CFLAGS) $(LOCAL_CFLAGS)))
 $(eval d_files += $(bins_d_files))
 
-LOCAL_CFLAGS :=
-LOCAL_LDFLAGS :=
-LOCAL_DEPS :=
 $(foreach c_file,$(c_files),$(eval $(c_file).LOCAL_CFLAGS :=))
 $(foreach c_file,$(c_files),$(eval $(c_file).LOCAL_LDFLAGS :=))
 $(foreach c_file,$(c_files),$(eval $(c_file).LOCAL_DEPS :=))
+
+LOCAL_CFLAGS :=
+LOCAL_LDFLAGS :=
+LOCAL_DEPS :=
+LOCAL_PRECONDITION :=

@@ -41,6 +41,10 @@ $(eval $(staticd_lib).o_files := $(staticd_lib_o_files))
 $(staticd_lib) : $(staticd_lib_o_files) $(LOCAL_DEPS)
 	$(call transform-o-files-to-lib-file)
 
+ifneq ($(LOCAL_PRECONDITION),)
+$(eval target_files += $(LOCAL_PRECONDITION))
+endif
+
 $(eval target_files += $(staticd_lib))
 
 ##########################################################################################################################3
@@ -68,3 +72,4 @@ $(eval d_files += $(staticd_lib_o_files_d_files))
 LOCAL_CFLAGS :=
 LOCAL_LDFLAGS :=
 LOCAL_DEPS :=
+LOCAL_PRECONDITION :=

@@ -22,6 +22,10 @@ $(eval $(app_bin_file).local_ldflags := $(LOCAL_LDFLAGS))
 $(app_bin_file) : $(LOCAL_DEPS)
 	$(call transform-c-files-to-app-file)
 
+ifneq ($(LOCAL_PRECONDITION),)
+$(eval target_files += $(LOCAL_PRECONDITION))
+endif
+
 $(eval target_files += $(app_bin_file))
 
 ##########################################################################################################################3
@@ -52,3 +56,4 @@ $(eval d_files += $(app_d_file))
 LOCAL_CFLAGS :=
 LOCAL_LDFLAGS :=
 LOCAL_DEPS :=
+LOCAL_PRECONDITION :=

@@ -22,6 +22,10 @@ $(eval $(shared_lib).local_cflags := $(LOCAL_CFLAGS))
 $(shared_lib) : $(shared_lib_c_files) $(LOCAL_DEPS)
 	$(call transform-c-files-to-so-file)
 
+ifneq ($(LOCAL_PRECONDITION),)
+$(eval target_files += $(LOCAL_PRECONDITION))
+endif
+
 $(eval target_files += $(shared_lib))
 
 ##########################################################################################################################3
@@ -51,3 +55,4 @@ $(eval d_files += $(shared_lib_d_file))
 LOCAL_LDFLAGS :=
 LOCAL_CFLAGS :=
 LOCAL_DEPS :=
+LOCAL_PRECONDITION :=
