@@ -71,22 +71,22 @@ struct Node *nodes = NULL;
 
 
 void cmd_to_args( char *str, int *argc, char **argv, int max_argv ) {
-    int len, i;
+	int len, i;
 
-    len = strlen(str);
-    *argc = 0;
+	len = strlen(str);
+	*argc = 0;
 
 	/* Zero out white/control characters  */
-    for( i = 0; i <= len; i++ ) {
+	for( i = 0; i <= len; i++ ) {
 		if( str[i] <= ' ') {
-            str[i] = '\0';
+			str[i] = '\0';
 		}
-    }
+	}
 
 	/* Record strings */
-    for( i = 0; i <= len; i++ ) {
+	for( i = 0; i <= len; i++ ) {
 
-        if( str[i] == '\0') {
+		if( str[i] == '\0') {
 			continue;
 		}
 
@@ -94,10 +94,10 @@ void cmd_to_args( char *str, int *argc, char **argv, int max_argv ) {
 			break;
 		}
 
-        argv[*argc] = &str[i];
-        *argc += 1;
-        i += strlen( &str[i] );
-    }
+		argv[*argc] = &str[i];
+		*argc += 1;
+		i += strlen( &str[i] );
+	}
 
 	argv[*argc] = NULL;
 }
@@ -260,27 +260,27 @@ int addr_parse_full( IP *addr, const char *full_addr_str, const char* default_po
 
 int net_set_nonblocking(int fd)
 {
-    int rc;
+	int rc;
 	int nonblocking = 1;
 
-    rc = fcntl(fd, F_GETFL, 0);
-    if(rc < 0)
-        return -1;
+	rc = fcntl(fd, F_GETFL, 0);
+	if(rc < 0)
+		return -1;
 
-    rc = fcntl(fd, F_SETFL, nonblocking?(rc | O_NONBLOCK):(rc & ~O_NONBLOCK));
-    if(rc < 0)
-        return -1;
+	rc = fcntl(fd, F_SETFL, nonblocking?(rc | O_NONBLOCK):(rc & ~O_NONBLOCK));
+	if(rc < 0)
+		return -1;
 
-    return 0;
+	return 0;
 }
 
 int net_bind(
-	const char *name,
-	const char* addr,
-	const char* port,
-	const char* ifce,
-	int protocol, int af
-) {
+		const char *name,
+		const char* addr,
+		const char* port,
+		const char* ifce,
+		int protocol, int af
+	    ) {
 	char addrbuf[FULL_ADDSTRLEN+1];
 	int sock;
 	int val;
@@ -345,8 +345,8 @@ int net_bind(
 	}
 
 	printf( ifce ? "%s: Bind to %s, interface %s\n" : "%s: Bind to %s\n" ,
-		name, str_addr( &sockaddr, addrbuf ), ifce
-	);
+			name, str_addr( &sockaddr, addrbuf ), ifce
+	      );
 
 	return sock;
 }
@@ -355,7 +355,7 @@ int is_own_addr( IP* addr ) {
 	int fd;
 	struct ifreq ifr;
 	int af = AF_INET;
-	
+
 	if(addr->ss_family != af ) {
 		printf("error in is_own_addr");
 		exit(1);
@@ -374,8 +374,8 @@ int is_own_addr( IP* addr ) {
 	close(fd);
 
 	return memcmp( &((IP4 *)&ifr.ifr_addr)->sin_addr, &((IP4*)addr)->sin_addr, 4) == 0;
- 
-	
+
+
 	return 0;
 }
 
@@ -420,13 +420,13 @@ void *run_loop( void *_ ) {
 	while( running ) {
 		gettimeofday( &time_now, NULL );
 
-        tv.tv_sec = 0;
-        tv.tv_usec = 500000;
+		tv.tv_sec = 0;
+		tv.tv_usec = 500000;
 
 		memcpy( &fds_working, &fds, sizeof(fds) );
 
 		rc = select( max_fd + 1, &fds_working, NULL, NULL, &tv );
-		
+
 		if( rc < 0 ) {
 			if( errno == EINTR ) {
 				printf("NET: EINTR\n");
@@ -482,7 +482,7 @@ void add_node( int id, IP *addr) {
 		memcpy( &n->addr, addr, sizeof(IP) );
 		return;
 	}
-	
+
 	//printf( "add_node: %s  [%d]\n", str_addr( addr, addrbuf ), id );
 
 	new = calloc( 1, sizeof(struct Node));
@@ -490,7 +490,7 @@ void add_node( int id, IP *addr) {
 
 	new->id = id;
 	memcpy( &new->addr, addr, sizeof(IP) );
-	
+
 	if( nodes == NULL ) {
 		nodes = new;
 	} else while( n != NULL ) {
@@ -503,23 +503,23 @@ void add_node( int id, IP *addr) {
 }
 
 /* 
-	We want a server that is not behind a NAT or that
-	is at least connected to both other peers.
-	
-	We choose the first node that is not addr.
-	This is a very broken approach. :/
-*/
+   We want a server that is not behind a NAT or that
+   is at least connected to both other peers.
+
+   We choose the first node that is not addr.
+   This is a very broken approach. :/
+   */
 struct Node *find_server( IP *addr ) {
 	struct Node *n = nodes;
-	
+
 	while(n) {
 		if(!addr_equal(addr, &n->addr)) {
 			return n;
 		}
-		
+
 		n = n->next;
 	}
-	
+
 	return NULL;
 }
 
@@ -534,7 +534,7 @@ void request_punch_help( int sock, IP *addr ) {
 		printf("could not find server for %s\n", str_addr(addr, addrbuf1));
 		return;
 	}
-	
+
 	msg.type = PUNCH_HELP;
 	msg.own_id = own_id;
 	memcpy(&msg.addr, addr, sizeof(IP));
@@ -550,7 +550,7 @@ void send_ping( int sock, IP *addr ) {
 	memset(&msg, 0, sizeof(msg));
 	msg.type = PING;
 	msg.own_id = own_id;
-	
+
 	printf("send ping to %s\n", str_addr(addr, addrbuf) );
 	int rc = sendto( sock, &msg, sizeof(struct MSG), 0, (struct sockaddr *)addr, sizeof(IP) );
 	if(rc  < 0) {
@@ -568,9 +568,9 @@ void send_punch_now( int sock, IP *send_to, int id, IP *addr ) {
 	msg.own_id = own_id;
 	msg.id = id;
 	memcpy( &msg.addr, addr, sizeof(IP));
-	
+
 	printf("Send map request to %s to punch %s\n", str_addr(send_to, addrbuf1), str_addr(addr, addrbuf2));
-	
+
 	int rc = sendto( sock, &msg, sizeof(struct MSG), 0, (struct sockaddr *)send_to, sizeof(IP) );
 	if(rc  < 0) {
 		printf("error: %s\n", strerror(rc));
@@ -606,7 +606,7 @@ void client_handle( int rc, int sock, time_t now ) {
 	struct Node *a;
 	struct Node *b;
 	int i;
-	
+
 	memset(&c_addr, '\0', sizeof(IP));
 	memset(buf, '\0', sizeof(buf));
 	addrlen_ret = sizeof(IP);
@@ -620,7 +620,7 @@ void client_handle( int rc, int sock, time_t now ) {
 		printf("Invalid packet size received.\n");
 		return;
 	}
-	
+
 	if( msg.own_id == own_id ) {
 		return;
 	}
@@ -640,7 +640,7 @@ void client_handle( int rc, int sock, time_t now ) {
 			break;
 		case PING:
 			add_node(msg.own_id, &c_addr);
-			
+
 			msg.type = PONG;
 			msg.own_id = own_id;
 			memcpy( &msg.addr, &c_addr, sizeof(IP) );
@@ -649,15 +649,15 @@ void client_handle( int rc, int sock, time_t now ) {
 			break;
 		case PUNCH_NOW:
 			memcpy(&punch_addr, &msg.addr, sizeof(IP));
-			
+
 			unsigned short port = 0;
 			get_port(&punch_addr, &port);
-			
+
 			/* The actual hole punching.
-				We don't know on what port the other router will expect our packets.
-				So we test several ports starting from the port that the server is allowed
-				to use to contact the other peer.
-			*/
+			   We don't know on what port the other router will expect our packets.
+			   So we test several ports starting from the port that the server is allowed
+			   to use to contact the other peer.
+			   */
 			for(i = 0; i < 10; i++) {
 				set_port(&punch_addr, port + i);
 				send_ping( sock, &punch_addr );
@@ -668,7 +668,7 @@ void client_handle( int rc, int sock, time_t now ) {
 			//the server must have a and b in his own record
 			a = find_node_by_addr(&msg.addr);
 			b = find_node_by_id(msg.own_id);
-			
+
 			if( a == NULL ) {
 				printf("(E) sender addr not found!\n");
 				break;
@@ -678,7 +678,7 @@ void client_handle( int rc, int sock, time_t now ) {
 				printf("(E) own id not found!\n");
 				break;
 			}
-			
+
 			if( b->id == a->id ) {
 				printf("(E) Id is the same\n");
 				break;
@@ -701,11 +701,11 @@ void cmd_handle( int rc, int sock, time_t now ) {
 	if( rc <= 0 ) {
 		return;
 	}
-	
+
 	fgets( request, sizeof(request), stdin );
-	
+
 	cmd_to_args( request, &argc, &argv[0], 32 );
-	
+
 	if( argc == 1 && strcmp(argv[0], "q") == 0 ) {
 		//quiet
 		printf("exit now\n");
@@ -738,40 +738,41 @@ void cmd_handle( int rc, int sock, time_t now ) {
 		}
 	} else {
 		printf(
-			"Usage:\n"
-			"[p]ing <ip_addr>:[port]\n"
-			"[c]onnect <ip_addr>:[port]\n"
-			"[d]ebug\n"
-			"[q]uit\n\n"
-		);
+				"Usage:\n"
+				"[p]ing <ip_addr>:[port]\n"
+				"[c]onnect <ip_addr>:[port]\n"
+				"[d]ebug\n"
+				"[q]uit\n\n"
+		      );
 	}
 }
 
 int main(int argc, char **argv) {
-	
+
 	char addrbuf[128];
 	int rc;
 	int i;
 	IP c_addr;
 
 	srand (time(NULL));
-	
+
 	own_id = rand() % 1000;
 	printf("own_id %d\n", own_id);
 
-	sockfd = net_bind( "client", "0.0.0.0", DEFAULT_PORT, NULL, IPPROTO_UDP, AF_INET );
+	//sockfd = net_bind( "client", "0.0.0.0", DEFAULT_PORT, NULL, IPPROTO_UDP, AF_INET );
+	sockfd = net_bind( "client", "0.0.0.0", argv[1], NULL, IPPROTO_UDP, AF_INET );
 	task_add( sockfd, &client_handle );
-	
+
 	task_add( STDIN_FILENO, &cmd_handle );
-	
+
 	pthread_t run_thread;
 	pthread_attr_t attr;
 
 	pthread_attr_init( &attr );
 	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
 	pthread_create( &run_thread, &attr, &run_loop, NULL );
-	
+
 	pthread_join( run_thread, NULL );
-	
+
 	return 0;
 }
