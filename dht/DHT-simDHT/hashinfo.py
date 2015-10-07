@@ -74,13 +74,15 @@ def wget_get(url):
 		print e
 		traceback.print_exc()
 
-	return data
+	if data:
+		bt_to_magnet2(data)
+
+
 
 def get_torrent(hash):
 	url = url_base + hash + '.torrent'
-	data = wget_get(url)
-	if data:
-		bt_to_magnet2(data)
+	wget_get(url)
+
 
 if __name__ == "__main__":
 	print sys.argv
