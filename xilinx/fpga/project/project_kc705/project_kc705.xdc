@@ -1,7 +1,8 @@
 # Sys Clock Pins
 set_property PACKAGE_PIN AD11 [get_ports EXT_SYS_CLK_clk_n]
-set_property PACKAGE_PIN AD12 [get_ports EXT_SYS_CLK_clk_p]
 set_property IOSTANDARD DIFF_SSTL15 [get_ports EXT_SYS_CLK_clk_n]
+
+set_property PACKAGE_PIN AD12 [get_ports EXT_SYS_CLK_clk_p]
 set_property IOSTANDARD DIFF_SSTL15 [get_ports EXT_SYS_CLK_clk_p]
 
 # Sys Reset Pins
@@ -32,22 +33,25 @@ set_property PACKAGE_PIN U7 [get_ports EXT_PCIE_REFCLK_N]
 
 # LED Pins
 set_property PACKAGE_PIN AB8 [get_ports {EXT_LEDS[0]}]
-set_property PACKAGE_PIN AA8 [get_ports {EXT_LEDS[1]}]
-set_property PACKAGE_PIN AC9 [get_ports {EXT_LEDS[2]}]
-set_property PACKAGE_PIN AB9 [get_ports {EXT_LEDS[3]}]
-set_property PACKAGE_PIN AE26 [get_ports {EXT_LEDS[4]}]
-set_property PACKAGE_PIN G19 [get_ports {EXT_LEDS[5]}]
-set_property PACKAGE_PIN E18 [get_ports {EXT_LEDS[6]}]
-set_property PACKAGE_PIN F16 [get_ports {EXT_LEDS[7]}]
-set_property PACKAGE_PIN AB25 [get_ports {gpio_1_tri_io[0]}]
-set_property PACKAGE_PIN AA25 [get_ports {gpio2_tri_io[0]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[0]}]
+
+set_property PACKAGE_PIN AA8 [get_ports {EXT_LEDS[1]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[1]}]
+
+set_property PACKAGE_PIN AC9 [get_ports {EXT_LEDS[2]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[2]}]
+
+set_property PACKAGE_PIN AB9 [get_ports {EXT_LEDS[3]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[3]}]
+
+set_property PACKAGE_PIN AE26 [get_ports {EXT_LEDS[4]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {EXT_LEDS[4]}]
+
+set_property PACKAGE_PIN G19 [get_ports {EXT_LEDS[5]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {EXT_LEDS[5]}]
+
+set_property PACKAGE_PIN E18 [get_ports {EXT_LEDS[6]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {EXT_LEDS[6]}]
+
+set_property PACKAGE_PIN F16 [get_ports {EXT_LEDS[7]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {EXT_LEDS[7]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {gpio_1_tri_io[0]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {gpio2_tri_io[0]}]

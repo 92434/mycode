@@ -1,6 +1,7 @@
 	module axi4_imp_v1_0_S00_AXI #
 	(
 		// Users to add parameters here
+		parameter integer TSP_FILTER_NUM = 32,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -24,6 +25,10 @@
 	)
 	(
 		// Users to add ports here
+		input wire [7:0] mpeg_data,
+		input wire mpeg_clk,
+		input wire mpeg_valid,
+		input wire mpeg_sync,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -533,7 +538,8 @@
 			.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
 			.ADDR_LSB(ADDR_LSB),
 			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
-			.USER_NUM_MEM(USER_NUM_MEM)
+			.USER_NUM_MEM(USER_NUM_MEM),
+			.TSP_FILTER_NUM(TSP_FILTER_NUM)
 		) ram_wapper_inst (
 			.S_AXI_ACLK(S_AXI_ACLK),
 			.S_AXI_WVALID(S_AXI_WVALID),
@@ -545,7 +551,12 @@
 			.axi_awv_awr_flag(axi_awv_awr_flag),
 			.axi_araddr(axi_araddr),
 			.axi_awaddr(axi_awaddr),
-			.axi_rdata(axi_rdata)
+			.axi_rdata(axi_rdata),
+			.mpeg_data(mpeg_data),
+			.mpeg_clk(mpeg_clk),
+			.mpeg_valid(mpeg_valid),
+			.mpeg_sync(mpeg_sync),
+			.rst(S_AXI_ARESETN)
 		);
 
 	// User logic ends

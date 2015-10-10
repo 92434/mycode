@@ -11,7 +11,7 @@ int setup_pcie_dma_dev(pcie_dma_t *dma, char *nameformat, ...);
 void uninstall_pcie_dma_dev(pcie_dma_t *dma);
 int setup_kc705_dev(kc705_pci_dev_t *kc705_pci_dev, char *namefmt, ...);
 void uninstall_kc705_dev(kc705_pci_dev_t *kc705_pci_dev);
-void *kc705_add_gpio_chip(uint8_t *base_addr, char *namefmt, ...);
+void *kc705_add_gpio_chip(uint8_t *base_addr, int ngpios, int *pngpio, char *namefmt, ...);
 void kc705_remove_gpio_chip(void *ppara);
 
 /**
@@ -86,9 +86,40 @@ static dma_static_config_info_t dma_info[] = {
 #define DMA_MAX (sizeof(dma_info) / sizeof(dma_static_config_info_t))
 #define MAX_TEST_THREAD 10
 
-static int gpio_lite_offset[GPIOCHIP_MAX] = {
-	OFFSET_AXI_GPIO_LITE,
+typedef struct {
+	int chip_addr_offset;
+	int ngpios;
+	int ngpio[2];
+} gpio_chip_info_t;
+
+static gpio_chip_info_t gpio_chip_info[] = {
+	{
+		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_0,
+		.ngpios = 2,
+		.ngpio = {32, 32},
+
+	},
+	{
+		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_1,
+		.ngpios = 2,
+		.ngpio = {32, 32},
+
+	},
+	{
+		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_2,
+		.ngpios = 2,
+		.ngpio = {32, 32},
+
+	},
+	{
+		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_3,
+		.ngpios = 1,
+		.ngpio = {5, 0},
+
+	},
 };
+
+#define GPIOCHIP_MAX (sizeof(gpio_chip_info) / sizeof(gpio_chip_info_t))
 
 static void read_pci_configuration(struct pci_dev * pdev) {
 	int i;
@@ -579,12 +610,18 @@ static int test_thread(void *ppara) {
 	return ret;
 }
 
+int create_gpio_proc_dir(void);
 static void add_local_device(void) {
 	int i;
 
 	for(i = 0; i < GPIOCHIP_MAX; i++) {
-		kc705_pci_dev->gpiochip[i] = kc705_add_gpio_chip(kc705_pci_dev->bar_info[0].base_vaddr + gpio_lite_offset[i], "gpiochip%d", i);
+		int gpio_chip_base_addr = kc705_pci_dev->bar_info[0].base_vaddr + gpio_chip_info[i].chip_addr_offset;
+		int ngpios = gpio_chip_info[i].ngpios;
+		int *pngpio = gpio_chip_info[i].ngpio;
+		kc705_pci_dev->gpiochip[i] = kc705_add_gpio_chip(gpio_chip_base_addr, ngpios, pngpio, "gpiochip%d", i);
 	}
+
+	create_gpio_proc_dir();
 
 	setup_kc705_dev(kc705_pci_dev, "%s", "kc705_pcie");
 
@@ -594,6 +631,7 @@ static void add_local_device(void) {
 	}
 }
 
+void remove_gpio_proc_dir(void);
 static void remove_local_device(void) {
 	int i;
 
@@ -604,6 +642,8 @@ static void remove_local_device(void) {
 	}
 
 	uninstall_kc705_dev(kc705_pci_dev);
+
+	remove_gpio_proc_dir();
 
 	for(i = 0; i < GPIOCHIP_MAX; i++) {
 		if(kc705_pci_dev->gpiochip[i] != NULL) {
@@ -836,10 +876,17 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	}
 
 	kc705_pci_dev->dma = (pcie_dma_t *)vzalloc(sizeof(pcie_dma_t) * DMA_MAX);
-	if(kc705_pci_dev == NULL) {
+	if(kc705_pci_dev->dma == NULL) {
 		mydebug("alloc kc705_pci_dev->dma failed.\n");
 		ret = -1;
 		goto alloc_kc705_pci_dma_failed;
+	}
+
+	kc705_pci_dev->gpiochip = (void **)vzalloc(sizeof(void *) * GPIOCHIP_MAX);
+	if(kc705_pci_dev->gpiochip == NULL) {
+		mydebug("alloc kc705_pci_dev->dma failed.\n");
+		ret = -1;
+		goto alloc_kc705_pci_gpiochip_failed;
 	}
 
 	ret = prepare_dma_memory(kc705_pci_dev, pdev);
@@ -941,6 +988,8 @@ free_dma_resource:
 init_pcie_tr_failed:
 	uninit_dma_memory(kc705_pci_dev, pdev);
 free_pcie_resource:
+	vfree(kc705_pci_dev->gpiochip);
+alloc_kc705_pci_gpiochip_failed:
 	vfree(kc705_pci_dev->dma);
 alloc_kc705_pci_dma_failed:
 	vfree(kc705_pci_dev);
@@ -977,6 +1026,8 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 		uninit_pcie_tr(kc705_pci_dev);
 
 		uninit_dma_memory(kc705_pci_dev, pdev);
+
+		vfree(kc705_pci_dev->gpiochip);
 
 		vfree(kc705_pci_dev->dma);
 

@@ -5,7 +5,8 @@ module axi4_logic_ram_wrap #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer ADDR_LSB = 2,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
-		parameter integer USER_NUM_MEM = 1
+		parameter integer USER_NUM_MEM = 1,
+		parameter integer TSP_FILTER_NUM = 32
 	)
 	(
 		input wire S_AXI_ACLK,
@@ -18,7 +19,12 @@ module axi4_logic_ram_wrap #(
 		input wire axi_awv_awr_flag,
 		input wire [C_S_AXI_ADDR_WIDTH-1 : 0] axi_araddr,
 		input wire [C_S_AXI_ADDR_WIDTH-1 : 0] axi_awaddr,
-		output reg [C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata
+		output reg [C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata,
+		input wire [7:0] mpeg_data,
+		input wire mpeg_clk,
+		input wire mpeg_valid,
+		input wire mpeg_sync,
+		input wire rst
 	);
 
 	//----------------------------------------------
@@ -47,7 +53,8 @@ module axi4_logic_ram_wrap #(
 
 			logic_ram #(
 					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
-					.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS)
+					.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
+					.FILTER_MAX_NUM(TSP_FILTER_NUM)
 				) logic_ram_inst(
 					.S_AXI_ACLK(S_AXI_ACLK),
 					.S_AXI_WSTRB(S_AXI_WSTRB),
@@ -55,7 +62,12 @@ module axi4_logic_ram_wrap #(
 					.mem_rden(mem_rden),
 					.mem_wren(mem_wren),
 					.mem_address(mem_address),
-					.axi_rdata(mem_data_out[i])
+					.axi_rdata(mem_data_out[i]),
+					.mpeg_data(mpeg_data),
+					.mpeg_clk(mpeg_clk),
+					.mpeg_valid(mpeg_valid),
+					.mpeg_sync(mpeg_sync),
+					.rst(rst)
 				);
 
 		end

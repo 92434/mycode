@@ -24,8 +24,11 @@
 #define BASE_AXI_DMA_LITE_0 0x81001000
 #define BASE_AXI_DMA_LITE_1 0x81002000
 #define BASE_Translation_BRAM 0x81003000
-#define BASE_AXI_GPIO_LITE 0x81004000
-#define BASE_AXI_TSP_LITE 0x81006000
+#define BASE_AXI_TSP_LITE 0x81004000
+#define BASE_AXI_GPIO_LITE_0 0x81005000
+#define BASE_AXI_GPIO_LITE_1 0x81006000
+#define BASE_AXI_GPIO_LITE_2 0x81007000
+#define BASE_AXI_GPIO_LITE_3 0x81008000
 //memory
 #define BASE_AXI_DDR_ADDR 0x00000000
 #define BASE_AXI_PCIe_BAR0 0x80000000
@@ -38,8 +41,11 @@
 #define OFFSET_AXI_DMA_LITE_0 (BASE_AXI_DMA_LITE_0 - BASE_AXI_PCIe)
 #define OFFSET_AXI_DMA_LITE_1 (BASE_AXI_DMA_LITE_1 - BASE_AXI_PCIe)
 #define OFFSET_Translation_BRAM (BASE_Translation_BRAM - BASE_AXI_PCIe)
-#define OFFSET_AXI_GPIO_LITE (BASE_AXI_GPIO_LITE - BASE_AXI_PCIe)
 #define OFFSET_AXI_TSP_LITE (BASE_AXI_TSP_LITE - BASE_AXI_PCIe)
+#define OFFSET_AXI_GPIO_LITE_0 (BASE_AXI_GPIO_LITE_0 - BASE_AXI_PCIe)
+#define OFFSET_AXI_GPIO_LITE_1 (BASE_AXI_GPIO_LITE_1 - BASE_AXI_PCIe)
+#define OFFSET_AXI_GPIO_LITE_2 (BASE_AXI_GPIO_LITE_2 - BASE_AXI_PCIe)
+#define OFFSET_AXI_GPIO_LITE_3 (BASE_AXI_GPIO_LITE_3 - BASE_AXI_PCIe)
 
 //Address Map for the AXI to PCIe Address Translation Registers
 #define AXIBAR2PCIEBAR_0U 0x208 //default be set to 0
@@ -63,11 +69,6 @@
 #define MAX_BAR_MAP_MEMORY 512
 
 #define DMA_BLOCK_SIZE 0x1000
-
-typedef enum {
-	GPIOCHIP_0 = 0,
-	GPIOCHIP_MAX,
-} gpiochip_index_t;
 
 typedef irqreturn_t (*process_isr_t)(void *ppara);
 typedef int (*init_dma_t)(void *ppara);
@@ -127,7 +128,7 @@ typedef struct {
 	int msi_enable;
 	struct work_struct work;
 	pcie_dma_t *dma;
-	void *gpiochip[GPIOCHIP_MAX];
+	void **gpiochip;
 	struct task_struct *pcie_tr_thread;
 	struct task_struct *test_thread[10];
 	timer_data_t *ptimer_data;

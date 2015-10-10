@@ -1,6 +1,7 @@
 	module axi4_wapper_v1_0 #
 	(
 		// Users to add parameters here
+		parameter integer TSP_FILTER_NUM = 32,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -18,6 +19,10 @@
 	)
 	(
 		// Users to add ports here
+		input wire [7:0] mpeg_data,
+		input wire mpeg_clk,
+		input wire mpeg_valid,
+		input wire mpeg_sync,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -80,7 +85,8 @@
 		.C_S_AXI_ARUSER_WIDTH(C_S00_AXI_ARUSER_WIDTH),
 		.C_S_AXI_WUSER_WIDTH(C_S00_AXI_WUSER_WIDTH),
 		.C_S_AXI_RUSER_WIDTH(C_S00_AXI_RUSER_WIDTH),
-		.C_S_AXI_BUSER_WIDTH(C_S00_AXI_BUSER_WIDTH)
+		.C_S_AXI_BUSER_WIDTH(C_S00_AXI_BUSER_WIDTH),
+		.TSP_FILTER_NUM(TSP_FILTER_NUM)
 	) axi4_imp_v1_0_S00_AXI_inst (
 		.S_AXI_ACLK(s00_axi_aclk),
 		.S_AXI_ARESETN(s00_axi_aresetn),
@@ -127,7 +133,11 @@
 		.S_AXI_RLAST(s00_axi_rlast),
 		.S_AXI_RUSER(s00_axi_ruser),
 		.S_AXI_RVALID(s00_axi_rvalid),
-		.S_AXI_RREADY(s00_axi_rready)
+		.S_AXI_RREADY(s00_axi_rready),
+		.mpeg_data(mpeg_data),
+		.mpeg_clk(mpeg_clk),
+		.mpeg_valid(mpeg_valid),
+		.mpeg_sync(mpeg_sync)
 	);
 
 	// Add user logic here

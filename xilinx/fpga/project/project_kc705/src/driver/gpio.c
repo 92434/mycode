@@ -11,14 +11,9 @@
 #define IP_IER 0x128 //IP Interrupt Enable Register (IP IER).
 #define IP_ISR 0x120 //IP Interrupt Status Register.
 
-#define CHANNEL_PIN_NUMBER 1
+#define DEFAULT_CHANNEL_PIN_NUMBER 32
 #define NAME_SIZE 20
-
-typedef enum {
-	channel_0 = 0,
-	channel_1,
-	channel_size,
-} channel_t;
+#define GPIO_CHIP_CHANNEL_SIZE 2
 
 typedef struct {
 	char name[NAME_SIZE];
@@ -29,7 +24,7 @@ typedef struct {
 } kc705_gpio_chip_channel_t;
 
 typedef struct {
-	kc705_gpio_chip_channel_t gpio_channel[channel_size];
+	kc705_gpio_chip_channel_t gpio_channel[GPIO_CHIP_CHANNEL_SIZE];
 } kc705_gpio_chip_t;
 
 static int gpio_channel_get(uint8_t *gpio_bank_base, unsigned int channel_index, unsigned int offset) {
@@ -213,11 +208,10 @@ static struct gpio_chip chip_example = {
 	.set = kc705_gpio_set,
 	//.dbg_show = dbg_show,
 	//.to_irq = to_irq,
-	.ngpio = CHANNEL_PIN_NUMBER,
+	.ngpio = DEFAULT_CHANNEL_PIN_NUMBER,
 };
 
-int create_gpio_proc_dir(void);
-void *kc705_add_gpio_chip(uint8_t *base_addr, char *namefmt, ...) {
+void *kc705_add_gpio_chip(uint8_t *base_addr, int ngpios, int *pngpio, char *namefmt, ...) {
 	void *ret;
 	int i;
 	char base_name[NAME_SIZE] = {0};
@@ -235,12 +229,13 @@ void *kc705_add_gpio_chip(uint8_t *base_addr, char *namefmt, ...) {
 		return ret;
 	}
 
-	for(i = 0; i < channel_size; i++) {
+	for(i = 0; i < ngpios; i++) {
 		kc705_gpio_chip->gpio_channel[i].base_addr = base_addr;
 		kc705_gpio_chip->gpio_channel[i].channel_index = i;
 		snprintf(kc705_gpio_chip->gpio_channel[i].name, sizeof(kc705_gpio_chip->gpio_channel[i].name), "%s_channel%d", base_name, i);
 		kc705_gpio_chip->gpio_channel[i].chip = chip_example;
 		kc705_gpio_chip->gpio_channel[i].chip.label = kc705_gpio_chip->gpio_channel[i].name;
+		kc705_gpio_chip->gpio_channel[i].chip.ngpio = pngpio[i];
 		if(gpiochip_add(&(kc705_gpio_chip->gpio_channel[i].chip)) != 0) {
 			mydebug("gpiochip_add %d failed.\n", i);
 		} else {
@@ -249,20 +244,15 @@ void *kc705_add_gpio_chip(uint8_t *base_addr, char *namefmt, ...) {
 		mydebug("kc705_gpio_chip->gpio_channel[i].chip.base:%d\n", kc705_gpio_chip->gpio_channel[i].chip.base);
 	}
 	
-	create_gpio_proc_dir();
-
 	ret = (void *)kc705_gpio_chip;
 	return ret;
 }
 
-void remove_gpio_proc_dir(void);
 void kc705_remove_gpio_chip(void *ppara) {
 	kc705_gpio_chip_t *kc705_gpio_chip = (kc705_gpio_chip_t *)ppara;
 	int i;
 	
-	remove_gpio_proc_dir();
-
-	for(i = 0; i < channel_size; i++) {
+	for(i = 0; i < GPIO_CHIP_CHANNEL_SIZE; i++) {
 		if(kc705_gpio_chip->gpio_channel[i].initilized) {
 			gpiochip_remove(&(kc705_gpio_chip->gpio_channel[i].chip));
 		}

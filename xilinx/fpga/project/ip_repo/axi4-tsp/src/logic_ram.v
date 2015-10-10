@@ -1,39 +1,136 @@
 
-`timescale 1ns / 1ps
-
+`include "MatchReplace.v"
+`include "ts_to_asi.v"
 module logic_ram #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
-		parameter integer OPT_MEM_ADDR_BITS = 10
+		parameter integer OPT_MEM_ADDR_BITS = 3,
+		parameter FILTER_MAX_NUM = 32
 	)
 	(
-		input wire S_AXI_ACLK,
-		input wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] S_AXI_WSTRB,
-		input wire [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA,
-		input wire mem_rden,
-		input wire mem_wren,
-		input wire [OPT_MEM_ADDR_BITS:0] mem_address,
-		output reg [C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata
+		input [7:0] mpeg_data,
+		input mpeg_clk,
+		input mpeg_valid,
+		input mpeg_sync,
+		input rst,
+		input S_AXI_ACLK,
+		input [(C_S_AXI_DATA_WIDTH/8)-1 : 0] S_AXI_WSTRB,
+		input [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA,
+		input mem_rden,
+		input mem_wren,
+		input [OPT_MEM_ADDR_BITS:0] mem_address,
+		output[C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata
 	);
-
+		
+	parameter PACK_BYTE_SIZE = 188;
+    //mem addr define
+    parameter INPUT_PARAM_OFFSET=0;
+    parameter REPLACE_TS_OFFSET=INPUT_PARAM_OFFSET+4;
+    parameter MONITOR_READY_OFFSET=REPLACE_TS_OFFSET+PACK_BYTE_SIZE;
+    parameter MONITOR_TS_OFFSET=MONITOR_READY_OFFSET+128;
+	
 	// implement Block RAM(s)
-	reg [C_S_AXI_DATA_WIDTH-1:0] byte_ram [0 : 1024 * 2];
+	reg [8-1:0] byte_ram [0 : 1024 * 8];
+	reg replace_add,replace_del,monitor_add,monitor_del;
+	reg [12:0] pid_in;
+	reg [7:0] slot_idx,input_cursor;
+	reg [7:0] monitor_cursor[FILTER_MAX_NUM-1:0] ,monitor_slot;
+	
+	wire[FILTER_MAX_NUM-1:0] dump_flag;
+	wire[7:0] ts_out,dump_data;
+	wire ts_out_clk,ts_out_valid,ts_out_sync;
 	integer i;
-
-	//assigning 8 bit data
+	reg[FILTER_MAX_NUM-1:0] start_recv_monitor;
+	
+	reg [FILTER_MAX_NUM-1:0] begin_read;
+	wire [7:0] copy_data[FILTER_MAX_NUM-1:0];
+	wire df_ready[FILTER_MAX_NUM-1:0];
+	
+	
+	
 	always @(posedge S_AXI_ACLK) begin
 		if (mem_wren) begin
-			for(i = 0; i < (C_S_AXI_DATA_WIDTH / 8); i = i + 1) begin
-				if(S_AXI_WSTRB[i] == 1) begin
-					byte_ram[mem_address][(8 * i + 7) -: 8] <= S_AXI_WDATA[(8 * i + 7) -: 8];
+			case(mem_address)
+				INPUT_PARAM_OFFSET:begin
+					replace_add=S_AXI_WDATA[0];
+					replace_del=S_AXI_WDATA[1];
+					monitor_add=S_AXI_WDATA[2];
+					monitor_del=S_AXI_WDATA[3];
+					slot_idx=S_AXI_WDATA[27:20];
+					if(monitor_add) begin
+						pid_in=S_AXI_WDATA[16:4];
+						start_recv_monitor[slot_idx]=0;
+						byte_ram[MONITOR_READY_OFFSET+slot_idx]=0;
+					end
+					input_cursor=0;
 				end
+				REPLACE_TS_OFFSET:begin
+					//byte_ram[REPLACE_TS_OFFSET+input_cursor]=S_AXI_WDATA[7:0];
+					pid_in[7:0]=S_AXI_WDATA[7:0];
+					input_cursor=input_cursor+1;
+					if(input_cursor>=PACK_BYTE_SIZE) begin
+						input_cursor=0;
+					end
+				end
+			endcase
+		end
+	end
+	
+	always @(posedge ts_out_clk) begin
+		if(dump_flag>0&&ts_out_valid==1&&ts_out_sync==1) begin
+			for(i=0;i<=FILTER_MAX_NUM-1;i=i+1) begin
+				if(dump_flag[i]) monitor_slot=i;
+			end
+			monitor_cursor[monitor_slot]=0;
+			if(byte_ram[MONITOR_READY_OFFSET+monitor_slot]==0)
+				start_recv_monitor[monitor_slot]=1;
+		end
+		  
+		if(start_recv_monitor[monitor_slot]) begin	 
+			byte_ram[MONITOR_TS_OFFSET+monitor_slot*PACK_BYTE_SIZE+monitor_cursor[monitor_slot]] = dump_data;
+			$display("[logic_ram dump]monitor_slot:%d :%h", monitor_slot,byte_ram[MONITOR_TS_OFFSET+monitor_slot*PACK_BYTE_SIZE+monitor_cursor[monitor_slot]]);
+			monitor_cursor[monitor_slot]=monitor_cursor[monitor_slot]+1;
+			if(monitor_cursor[monitor_slot]>=PACK_BYTE_SIZE) begin
+				monitor_cursor[monitor_slot]=0;
+				byte_ram[MONITOR_READY_OFFSET+monitor_slot]=1;
+				start_recv_monitor[monitor_slot]=0;
 			end
 		end
 	end
-
-	always @(posedge S_AXI_ACLK) begin
-		if (mem_rden) begin
-			axi_rdata <= byte_ram[mem_address];
-		end
-	end
-
+	
+	match_replace_module#(.FILTER_MAX_NUM( FILTER_MAX_NUM)) A1(
+    .mpeg_data(mpeg_data),
+    .mpeg_clk(mpeg_clk),
+    .mpeg_valid(mpeg_valid),
+    .mpeg_sync(mpeg_sync),
+    .rst(rst),
+    .axi_clk(S_AXI_ACLK),
+    .axi_wren(mem_wren),
+    .replace_add(replace_add),
+    .replace_del(replace_del),
+    .monitor_add(monitor_add),
+    .monitor_del(monitor_del),
+    .pid_in(pid_in),
+    .slot_idx(slot_idx),
+    .ts_clk(ts_out_clk),
+    .ts_valid(ts_out_valid),
+    .ts_sync(ts_out_sync),
+    .ts_out(ts_out),
+    .dump_flag(dump_flag),
+    .dump_data(dump_data)
+    );
+  
+  reg asi_rst;
+  //reg[7:0] ts_asi_in;
+  wire[7:0] ts_asi_out;
+  sim_ts_to_asi A3(
+    .clk(mpeg_clk),
+    .rst(asi_rst),
+    .din(ts_out),
+    .dout(ts_asi_out)
+    );   
+  initial begin
+    asi_rst=1;
+    #20 asi_rst=0;
+  end
+	
 endmodule

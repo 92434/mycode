@@ -449,8 +449,8 @@
         <xilinx:taxonomy>/UserIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>kc705_ts2asi</xilinx:displayName>
-      <xilinx:coreRevision>11</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2015-09-02T07:14:21Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>12</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2015-09-30T03:35:40Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="user.org:user:serializer_10b1b:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/kc705_ts2asi</xilinx:tag>
         <xilinx:tag xilinx:name="(none):user:serializer_10b1b:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/kc705_ts2asi</xilinx:tag>
