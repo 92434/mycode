@@ -40,21 +40,28 @@ static int gpio_channel_get(uint8_t *gpio_bank_base, unsigned int channel_index,
 			break;
 	}
 
-	return (value >> offset) & 1;
+	mydebug("gpio_bank_base :%p, channel_index:%u, offset:%u, value:%d\n", gpio_bank_base, channel_index, offset, ((value >> offset) & 1));
+	return ((value >> offset) & 1);
 }
 
 static void gpio_channel_set(uint8_t *gpio_bank_base, unsigned int channel_index, unsigned int offset, bool high) {
-	uint32_t value;
+	uint32_t value = 0;
 
 	if(high) {
 		switch(channel_index) {
 			case 0:
 				value = readl(gpio_bank_base + GPIO_DATA) | BITMASK(offset);
+				mydebug("value:%x\n", value);
 				writel(value, gpio_bank_base + GPIO_DATA);
+				value = readl(gpio_bank_base + GPIO_DATA);
+				mydebug("value:%x\n", value);
 				break;
 			case 1:
 				value = readl(gpio_bank_base + GPIO2_DATA) | BITMASK(offset);
+				mydebug("value:%x\n", value);
 				writel(value, gpio_bank_base + GPIO2_DATA);
+				value = readl(gpio_bank_base + GPIO2_DATA);
+				mydebug("value:%x\n", value);
 				break;
 			default:
 				break;
@@ -63,52 +70,73 @@ static void gpio_channel_set(uint8_t *gpio_bank_base, unsigned int channel_index
 		switch(channel_index) {
 			case 0:
 				value = readl(gpio_bank_base + GPIO_DATA) & ~(BITMASK(offset));
+				mydebug("value:%x\n", value);
 				writel(value, gpio_bank_base + GPIO_DATA);
+				value = readl(gpio_bank_base + GPIO_DATA);
+				mydebug("value:%x\n", value);
 				break;
 			case 1:
 				value = readl(gpio_bank_base + GPIO2_DATA) & ~(BITMASK(offset));
+				mydebug("value:%x\n", value);
 				writel(value, gpio_bank_base + GPIO2_DATA);
+				value = readl(gpio_bank_base + GPIO2_DATA);
+				mydebug("value:%x\n", value);
 				break;
 			default:
 				break;
 		}
 	}
+	mydebug("gpio_bank_base :%p, channel_index:%u, offset:%u, value:%d\n", gpio_bank_base, channel_index, offset, high ? 1 : 0);
 
 }
 
 static int gpio_channel_set_input(uint8_t *gpio_bank_base, unsigned int channel_index, unsigned int offset) {
-	uint32_t value;
+	uint32_t value = 0;
 	switch(channel_index) {
 		case 0:
 			value = readl(gpio_bank_base + GPIO_TRI) | BITMASK(offset);
+			mydebug("value:%x\n", value);
 			writel(value, gpio_bank_base + GPIO_TRI);
+			value = readl(gpio_bank_base + GPIO_TRI);
+			mydebug("value:%x\n", value);
 			break;
 		case 1:
 			value = readl(gpio_bank_base + GPIO2_TRI) | BITMASK(offset);
+			mydebug("value:%x\n", value);
 			writel(value, gpio_bank_base + GPIO2_TRI);
+			value = readl(gpio_bank_base + GPIO2_TRI);
+			mydebug("value:%x\n", value);
 			break;
 		default:
 			break;
 	}
 
+	mydebug("gpio_bank_base :%p, channel_index:%u, offset:%u, direction:%s\n", gpio_bank_base, channel_index, offset, "in");
 	return 0;
 }
 
 static int gpio_channel_set_output(uint8_t *gpio_bank_base, unsigned int channel_index, unsigned int offset) {
-	uint32_t value;
+	uint32_t value = 0;
 	switch(channel_index) {
 		case 0:
 			value = readl(gpio_bank_base + GPIO_TRI) & ~(BITMASK(offset));
+			mydebug("value:%x\n", value);
 			writel(value, gpio_bank_base + GPIO_TRI);
+			value = readl(gpio_bank_base + GPIO_TRI);
+			mydebug("value:%x\n", value);
 			break;
 		case 1:
 			value = readl(gpio_bank_base + GPIO2_TRI) & ~(BITMASK(offset));
+			mydebug("value:%x\n", value);
 			writel(value, gpio_bank_base + GPIO2_TRI);
+			value = readl(gpio_bank_base + GPIO2_TRI);
+			mydebug("value:%x\n", value);
 			break;
 		default:
 			break;
 	}
 
+	mydebug("gpio_bank_base :%p, channel_index:%u, offset:%u, direction:%s\n", gpio_bank_base, channel_index, offset, "out");
 	return 0;
 }
 
@@ -125,44 +153,45 @@ static int gpio_channel_get_direction(uint8_t *gpio_bank_base, unsigned int chan
 			break;
 	}
 
+	mydebug("gpio_bank_base :%p, channel_index:%u, offset:%u, direction:%s\n", gpio_bank_base, channel_index, offset, ((value >> offset) & 1) ? "in": "out");
 	return ((value >> offset) & 1);
 }
 
-//static int gpio_bank_set_global_interrupt(uint8_t *gpio_bank_base, bool enable) {
-//	uint32_t value = 0;
-//
-//	if(enable) {
-//		value = BITMASK(31);
-//	}
-//	
-//	writel(value, gpio_bank_base + GIER);
-//
-//	return 0;
-//}
-//
-//static int gpio_channel_set_interrupt(uint8_t *gpio_bank_base, unsigned int channel_index, bool enable) {
-//	uint32_t value;
-//
-//	value = readl(gpio_bank_base + IP_IER);
-//
-//	switch(channel_index) {
-//		case 0:
-//		case 1:
-//			break;
-//		default:
-//			return -1;
-//			break;
-//	}
-//
-//	if(enable) {
-//		value |= BITMASK(channel_index);
-//	} else {
-//		value &= !(BITMASK(channel_index));
-//	}
-//	writel(value, gpio_bank_base + IP_IER);
-//
-//	return 0;
-//}
+////static int gpio_bank_set_global_interrupt(uint8_t *gpio_bank_base, bool enable) {
+////	uint32_t value = 0;
+////
+////	if(enable) {
+////		value = BITMASK(31);
+////	}
+////	
+////	writel(value, gpio_bank_base + GIER);
+////
+////	return 0;
+////}
+////
+////static int gpio_channel_set_interrupt(uint8_t *gpio_bank_base, unsigned int channel_index, bool enable) {
+////	uint32_t value;
+////
+////	value = readl(gpio_bank_base + IP_IER);
+////
+////	switch(channel_index) {
+////		case 0:
+////		case 1:
+////			break;
+////		default:
+////			return -1;
+////			break;
+////	}
+////
+////	if(enable) {
+////		value |= BITMASK(channel_index);
+////	} else {
+////		value &= !(BITMASK(channel_index));
+////	}
+////	writel(value, gpio_bank_base + IP_IER);
+////
+////	return 0;
+////}
 
 static int kc705_gpio_get(struct gpio_chip *chip, unsigned offset) {
 	kc705_gpio_chip_channel_t *gpio = container_of(chip, kc705_gpio_chip_channel_t, chip);

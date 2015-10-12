@@ -284,3 +284,8 @@ function get_net_data() {
 	shift
 	sudo tcpdump -i "$interface" -An $*
 }
+
+function gen_number_sequence() {
+	local sequence=$(for i in {1..100..1};do echo $i;done);
+	echo $sequence
+}

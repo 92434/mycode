@@ -33,9 +33,10 @@ static struct i2c_gpio_platform_data i2c_gpio_data = {
 };
 
 void gpio_free(unsigned gpio);
-static void release_gpio(void) {
-	gpio_free(SDA0);
-	gpio_free(SCL0);
+static void release_gpio(struct device *dev) {
+	struct i2c_gpio_platform_data *data = dev->platform_data;
+	gpio_free(data->sda_pin);
+	gpio_free(data->scl_pin);
 }
 
 static struct platform_device i2c_gpio_device = {

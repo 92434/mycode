@@ -24,7 +24,7 @@ typedef struct {
 #define BASE_DIR "gpio_test"
 
 static struct proc_dir_entry *gpio_proc_dir; /* /proc/sal dir entry */
-static DEFINE_SPINLOCK(data_lock);
+//static DEFINE_SPINLOCK(data_lock);
 //spin_lock(&data_lock);
 //spin_unlock(&data_lock);
 

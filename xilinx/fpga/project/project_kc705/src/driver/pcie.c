@@ -615,7 +615,7 @@ static void add_local_device(void) {
 	int i;
 
 	for(i = 0; i < GPIOCHIP_MAX; i++) {
-		int gpio_chip_base_addr = kc705_pci_dev->bar_info[0].base_vaddr + gpio_chip_info[i].chip_addr_offset;
+		uint8_t *gpio_chip_base_addr = kc705_pci_dev->bar_info[0].base_vaddr + gpio_chip_info[i].chip_addr_offset;
 		int ngpios = gpio_chip_info[i].ngpios;
 		int *pngpio = gpio_chip_info[i].ngpio;
 		kc705_pci_dev->gpiochip[i] = kc705_add_gpio_chip(gpio_chip_base_addr, ngpios, pngpio, "gpiochip%d", i);
@@ -927,7 +927,8 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	if(ret != 0) {
 		goto remap_pcie_bars_failed;
 	}
-
+	
+	mydebug("txp addr:%p\n", kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE);
 	write_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
 	dump_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
 

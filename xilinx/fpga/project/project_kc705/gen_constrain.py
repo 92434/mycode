@@ -279,6 +279,9 @@ def gen_port_constrain():
 	#print ports
 	#print len(ports)
 
+	for i in package_pins.items():
+		print '封装pin:%-20s网络:%-20s' %(i[0], i[1])
+
 	for i in unsupport_loc:
 		unsupport_package_pins.append([i, package_pins.get(i)])
 		package_pins.pop(i)
@@ -379,6 +382,25 @@ def gpio_pins_gpio_key(x):
 		info.insert(1, '0')
 	return int(info[1]), info[0], int(info[4])
 
+def get_gpios_pin_no(gpios):
+	gpio_bank_base = [148, 116, 84, 52, 20, 0, 15]
+	pattern = re.compile(r'_|\[|\]')
+	for i in gpios:
+		gpio = pattern.sub(r' ', i)
+		gpio = gpio.split()
+		if len(gpio) == 4:
+			gpio.insert(1, '0')
+		chip = int(gpio[1])
+		channel = 0 if gpio[0] == 'gpio' else 1
+		pin = int(gpio[4])
+		index = chip * 2 + channel
+		if gpio_bank_base[index] == 0:
+			#print 'invalid gpio %s' %(i)
+			continue
+		pin_no = gpio_bank_base[index] + pin
+
+		print "%d" %(pin_no)
+
 def get_nc_info():
 	content = ''
 
@@ -439,6 +461,7 @@ def get_nc_info():
 	#输出fmc板上电阻与gpio的映射关系
 	print '-' * 200
 	used_packagepin = []
+	gpios_sequence = []
 	for i in pins_list:
 		for j in i:
 			if not int(j) in result_dict.keys():
@@ -448,7 +471,12 @@ def get_nc_info():
 			v = result_dict.get(int(j))
 			for k in v:
 				used_packagepin.append(k[1][0])
+				gpios_sequence.append(k[0])
 				print k
+	
+	#打印pin号
+	print '-' * 200
+	get_gpios_pin_no(gpios_sequence)
 
 	#哪些package_pin没有用上？
 	for i, j in package_pins.items():
