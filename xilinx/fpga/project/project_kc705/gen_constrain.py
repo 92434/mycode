@@ -382,24 +382,35 @@ def gpio_pins_gpio_key(x):
 		info.insert(1, '0')
 	return int(info[1]), info[0], int(info[4])
 
-def get_gpios_pin_no(gpios):
+def print_gpio_pin_no(gpio):
 	gpio_bank_base = [148, 116, 84, 52, 20, 0, 15]
 	pattern = re.compile(r'_|\[|\]')
-	for i in gpios:
-		gpio = pattern.sub(r' ', i)
-		gpio = gpio.split()
-		if len(gpio) == 4:
-			gpio.insert(1, '0')
-		chip = int(gpio[1])
-		channel = 0 if gpio[0] == 'gpio' else 1
-		pin = int(gpio[4])
-		index = chip * 2 + channel
-		if gpio_bank_base[index] == 0:
-			#print 'invalid gpio %s' %(i)
-			continue
-		pin_no = gpio_bank_base[index] + pin
+	gpio = pattern.sub(r' ', gpio)
+	gpio = gpio.split()
+	if len(gpio) == 4:
+		gpio.insert(1, '0')
+	chip = int(gpio[1])
+	channel = 0 if gpio[0] == 'gpio' else 1
+	pin = int(gpio[4])
+	index = chip * 2 + channel
+	if gpio_bank_base[index] == 0:
+		return
+	pin_no = gpio_bank_base[index] + pin
 
-		print "%d" %(pin_no)
+	print "%d" %(pin_no)
+
+def get_gpios_pin_no(gpios):
+	for i in gpios.get('HPC'):
+		print i
+	print '-' * 200
+	for i in gpios.get('HPC'):
+		print_gpio_pin_no(i)
+	print '-' * 200
+	for i in gpios.get('LPC'):
+		print i
+	print '-' * 200
+	for i in gpios.get('LPC'):
+		print_gpio_pin_no(i)
 
 def get_nc_info():
 	content = ''
@@ -415,6 +426,9 @@ def get_nc_info():
 	pin_resistor_map = {}
 	for i in fmc_pins:
 		pin_resistor_map[i[5]] = i[1] + '.' + i[2]
+	pin_resistor_map.update({'F1': 'R113.1'})
+	pin_resistor_map.update({'H2': 'R62.1'})
+	#print pin_resistor_map
 
 	#从网表中提取kc705的pin脚与网络的关系
 	with open('kc705.txt') as f:
@@ -422,8 +436,14 @@ def get_nc_info():
 	pattern = re.compile(r'\*SIGNAL\* (.*) \d+ \d+\r\n\s*([^\-\s]+)-([^\.]+)\.([^\s]+)')
 	result = pattern.findall(content)
 	kc705_pins = sorted(result, key = lambda x:(kc705_pins_key(x)))
+	kc705_pins.append(('FMC_LPC_PRSNT_M2C_B_LS', 'J2', 'E', 'H2'))
+	kc705_pins.append(('FMC_HPC_PRSNT_M2C_B_LS', 'J22', 'I', 'H2'))
+	kc705_pins.append(('FMC_HPC_PG_M2C_LS', 'J22', 'F', 'F1'))
+	kc705_pins.append(('FMC_C2M_PG_LS', 'J22', 'D', 'D1'))
+	#print kc705_pins
 
 	#建立板上fmc端口与package_pins之间的关联
+	#print pin_gpio_map
 	result = []
 	for i in kc705_pins:
 		if not i[1] in ['J2', 'J22']:
@@ -461,7 +481,9 @@ def get_nc_info():
 	#输出fmc板上电阻与gpio的映射关系
 	print '-' * 200
 	used_packagepin = []
-	gpios_sequence = []
+	gpios_sequence = {}
+	gpios_sequence['HPC'] = []
+	gpios_sequence['LPC'] = []
 	for i in pins_list:
 		for j in i:
 			if not int(j) in result_dict.keys():
@@ -471,7 +493,12 @@ def get_nc_info():
 			v = result_dict.get(int(j))
 			for k in v:
 				used_packagepin.append(k[1][0])
-				gpios_sequence.append(k[0])
+				if k[1][1] == 'J22':
+					gpios_sequence['HPC'].append(k[0])
+				elif k[1][1] == 'J2':
+					gpios_sequence['LPC'].append(k[0])
+				else:
+					print 'ERROR!!!'
 				print k
 	
 	#打印pin号
