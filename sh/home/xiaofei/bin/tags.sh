@@ -61,29 +61,26 @@ ignore="( $ignore )"
 echo "type:$type"
 echo "ignore:$ignore"
 
-tags_src_dir="${tags_src_dir:=$(pwd)}"
+tags_src_dir=${tags_src_dir// /&}
+tags_src_dir=${tags_src_dir//:/ }
+tags_src_dir="${tags_src_dir:=( $(pwd) )}"
 cscopedb="$(pwd)/cscope"
 
 prepare()
 {
-	if [ ! -d $tags_src_dir ]; then
-		echo "no tags_src_dir set"
-		echo "please set tags_src_dir at your .bashrc file"
-		exit 1
-	else
-		echo "tags_src_dir:$tags_src_dir"
-		if [ -d $cscopedb ]; then
-			echo "$cscopedb exist already"
-			if [ -e $cscopedb/cscope.files ]; then
-				echo "file $cscopedb/cscope.files exist"
-				#rm $cscopedb/cscope.files
-				
-			fi
-		else
-			mkdir $cscopedb
-			echo "make directory $cscopedb"
+	echo "tags_src_dir:$tags_src_dir"
+	if [ -d $cscopedb ]; then
+		echo "$cscopedb exist already"
+		if [ -e $cscopedb/cscope.files ]; then
+			echo "file $cscopedb/cscope.files exist"
+			#rm $cscopedb/cscope.files
+			
 		fi
+	else
+		mkdir $cscopedb
+		echo "make directory $cscopedb"
 	fi
+
 	all_source | sort | uniq > $cscopedb/cscope.files
 	cat $cscopedb/cscope.files | sed 's/"//g' > $cscopedb/ctags.files
 	lines=$(wc -l $cscopedb/cscope.files | awk '{ printf $1 }')
@@ -92,7 +89,18 @@ prepare()
 
 all_source()
 {
-	find -H $tags_src_dir $ignore -prune -o $type -printf "\"%p\"\n"
+	local src_dir
+
+	for src_dir in $tags_src_dir;do
+		src_dir="${src_dir//&/ }"
+		if [ ! -d $tags_src_dir ]; then
+			echo "no tags_src_dir set"
+			echo "please set tags_src_dir at your .bashrc file"
+			exit 1
+		fi
+		find -H $src_dir $ignore -prune -o $type -printf "\"%p\"\n"
+
+	done
 }
  
 docscope()
