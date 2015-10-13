@@ -374,7 +374,7 @@ function process_cmd() {
 		test1
 		return 0
 	else
-		echo -en "\rGet command: $(red $c), So "
+		echo -en "Get command: $(red $c), So "
 		if [ $c = "q" ];then
 			echo -e "$(red exit)!!!"
 			return 1
@@ -389,16 +389,20 @@ function process_cmd() {
 }
 
 function test1() {
-	local c=
+	echo -e "Press $(red q) to $(red end) this test!"
 
+	local c=
 	while [ ! "$c" = "q" ];do
+		if [ "x$c" = "x" ];then
+			echo "do sths"
+			sleep 3
+		else
+			:
+		fi
+		
 		read -n1 -t 0.01 c
-		echo do test!!!
-		sleep 3
 	done
 	echo
-
-	echo -e $(red exit test1)
 }
 
 function red() {
