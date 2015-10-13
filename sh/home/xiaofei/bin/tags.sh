@@ -61,17 +61,17 @@ ignore="( $ignore )"
 echo "type:$type"
 echo "ignore:$ignore"
 
-SRC_DIR=$(pwd)
-SUB_DIRS=$(ls)
-cscopedb=$SRC_DIR/cscope
+tags_src_dir="${tags_src_dir:=$(pwd)}"
+cscopedb="$(pwd)/cscope"
+
 prepare()
 {
-	if [ ! -d $SRC_DIR ]; then
-		echo "no SRC_DIR set"
-		echo "please set SRC_DIR at your .bashrc file"
+	if [ ! -d $tags_src_dir ]; then
+		echo "no tags_src_dir set"
+		echo "please set tags_src_dir at your .bashrc file"
 		exit 1
 	else
-		echo "SRC_DIR:$SRC_DIR"
+		echo "tags_src_dir:$tags_src_dir"
 		if [ -d $cscopedb ]; then
 			echo "$cscopedb exist already"
 			if [ -e $cscopedb/cscope.files ]; then
@@ -92,10 +92,7 @@ prepare()
 
 all_source()
 {
-	for SUB_DIR in $SUB_DIRS
-	do
-		find -H $SRC_DIR/$SUB_DIR $ignore -prune -o $type -printf "\"%p\"\n"
-	done
+	find -H $tags_src_dir $ignore -prune -o $type -printf "\"%p\"\n"
 }
  
 docscope()
