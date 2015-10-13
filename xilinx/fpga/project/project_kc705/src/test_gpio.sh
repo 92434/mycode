@@ -362,6 +362,7 @@ function test_all() {
 }
 
 function process_cmd() {
+	local c
 	echo -e "Press $(red s) to start test $(red ${gpio_str[$i]})!"
 	echo -e "Press $(red k) to $(red skip)!"
 	echo -e "Press $(red q) to $(red exit)!"
@@ -370,6 +371,7 @@ function process_cmd() {
 
 	if [ $c = "S" -o $c = "s" ];then
 		echo -e "start test ${gpio_str[$i]}..."
+		test1
 		return 0
 	else
 		echo -en "\rGet command: $(red $c), So "
@@ -384,6 +386,19 @@ function process_cmd() {
 			return 3
 		fi
 	fi
+}
+
+function test1() {
+	local c=
+
+	while [ ! "$c" = "q" ];do
+		read -n1 -t 0.01 c
+		echo do test!!!
+		sleep 3
+	done
+	echo
+
+	echo -e $(red exit test1)
 }
 
 function red() {
