@@ -12,6 +12,13 @@ gpio_groups = [
 	'gpio2_3_tri_io',
 ]
 
+def gen_gpio_ports(gpio_groups):
+	ports = []
+	for i in gpio_groups:
+		for j in range(32):
+			ports.append(i + '[' + str(j) + ']')
+	return ports
+
 package_pins = {
 	'H29': 'FMC_C2M_PG_LS',
 	'C27': 'FMC_HPC_CLK0_M2C_N',
@@ -267,36 +274,32 @@ unsupport_loc = [
 	'D1',
 ]
 
-pin_gpio_map = {}
-unsupport_package_pins = []
-
-def gen_port_constrain():
-	ports = []
-	for i in gpio_groups:
-		for j in range(32):
-			ports.append(i + '[' + str(j) + ']')
-	ports = ports[:197]
-	#print ports
-	#print len(ports)
-
+def gen_support_package_pins(package_pins, unsupport_loc):
+	print '-' * 100
+	print 'all package_pins'
+	print '-' * 100
 	for i in package_pins.items():
 		print '封装pin:%-20s网络:%-20s' %(i[0], i[1])
 
-	for i in unsupport_loc:
-		unsupport_package_pins.append([i, package_pins.get(i)])
-		package_pins.pop(i)
-	#print len(package_pins)
-
-	if len(package_pins) != len(ports):
-		print "pin count error!"
-		return
-
-	print '-' * 200
+	pins = {}
 	for i, j in package_pins.items():
-		port = ports.pop(0)
-		pin_gpio_map[j] = port
-		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(j, i, port)
-		print 'set_property IOSTANDARD LVCMOS18 [get_ports {%s}]' %(port)
+		if not i in unsupport_loc:
+			pins.update({i:j})
+	return pins
+
+def constrain_key_gpio(x):
+	io, pin, gpio = x
+
+	pattern = re.compile(r'_|\[|\]')
+	gpio = pattern.sub(r' ', gpio)
+	gpio = gpio.split()
+	if len(gpio) == 4:
+		gpio.insert(1, '0')
+	chip = int(gpio[1])
+	channel = 0 if gpio[0] == 'gpio' else 1
+	pin = int(gpio[4])
+	return chip, channel, pin
+
 
 line_no = [
 	95,
@@ -366,56 +369,67 @@ def fmc_pins_key(x):
 	return r[0], int(r[1])
 
 def gpio_pins_resistor_key(x):
-	info = x[2]
+	info = x[1]
 	pattern = re.compile(r'([^\d]+)(\d+)')
 	g = pattern.match(info)
 	r = g.groups()
 	return r[0], int(r[1])
 
-def gpio_pins_gpio_key(x):
-	info = x[0]
-	info = info.replace('_', ' ')
-	info = info.replace('[', ' ')
-	info = info.replace(']', ' ')
-	info = info.split()
-	if len(info) == 4:
-		info.insert(1, '0')
-	return int(info[1]), info[0], int(info[4])
+def get_gpio_pin_no(gpio, start):
+	chip_offset = start / (32 * 2)
+	channel_offset = (start / 32) % 2
 
-def print_gpio_pin_no(gpio):
-	gpio_bank_base = [148, 116, 84, 52, 20, 0, 15]
+	gpio_bank_base = [32, 64, 96, 128]
+
 	pattern = re.compile(r'_|\[|\]')
 	gpio = pattern.sub(r' ', gpio)
 	gpio = gpio.split()
 	if len(gpio) == 4:
 		gpio.insert(1, '0')
-	chip = int(gpio[1])
+
+	chip = int(gpio[1]) - chip_offset
 	channel = 0 if gpio[0] == 'gpio' else 1
+	channel = channel - channel_offset
 	pin = int(gpio[4])
+
 	index = chip * 2 + channel
 	if gpio_bank_base[index] == 0:
 		return
+
 	pin_no = gpio_bank_base[index] + pin
 
-	print "%d" %(pin_no)
+	return pin_no
 
-def get_gpios_pin_no(gpios):
-	for i in gpios.get('HPC'):
-		print i
-	print '-' * 200
-	for i in gpios.get('HPC'):
-		print_gpio_pin_no(i)
-	print '-' * 200
-	for i in gpios.get('LPC'):
-		print i
-	print '-' * 200
-	for i in gpios.get('LPC'):
-		print_gpio_pin_no(i)
+def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_registor_map, fmc_type, start):
+	print '-' * 100
+	print '%s gpio pin number for driver' %(fmc_type)
+	print '-' * 100
 
-def get_nc_info():
+	print 'start', start
+	if (start % 32) != 0:
+		start = 32 * ((start / 32) + 1)
+
+	pins_registor = hpc_lpc_pins_registor_map.get(fmc_type)
+
+	io_pin_no_map = {}
+	for io, pin, gpio in constrain:
+		pin_no = get_gpio_pin_no(gpio, start)
+		io_pin_no_map.update({io: pin_no})
+
+	for i in pins_registor:
+		print '%s\t%s\t%s' %(io_pin_no_map.get(i[0][0]), i[1], str(i))
+
+def kc705_pins_resistor_key_resistor(x):
+	r = x[1]
+
+	pattern = re.compile(r'R|\.')
+	r = pattern.sub(r' ', r)
+	r = r.split()
+	return int(r[0])
+
+def gen_fmc_pin_resistor():
 	content = ''
 
-	#从网表中提取fmc的pin脚与网络的关系
 	with open('kc705FMC.txt') as f:
 		content = f.read()
 	pattern = re.compile(r'\*SIGNAL\* (.*) \d+ \d+\r\n(R[^\.]+)\.(\d+)\s+([^\-\s]+)-([^\.]+)\.([^\s]+)')
@@ -423,14 +437,16 @@ def get_nc_info():
 	pattern = re.compile(r'\*SIGNAL\* (.*) \d+ \d+\r\n([^\-\s]+)-([^\.]+)\.([^\s]+)\s+(R[^\.]+)\.(\d+)')
 	result.extend([(x[0], x[4], x[5], x[1], x[2], x[3]) for x in pattern.findall(content)])
 	fmc_pins = sorted(result, key = lambda x:(fmc_pins_key(x)))
-	pin_resistor_map = {}
+	fmc_pin_resistor = []
 	for i in fmc_pins:
-		pin_resistor_map[i[5]] = i[1] + '.' + i[2]
-	pin_resistor_map.update({'F1': 'R113.1'})
-	pin_resistor_map.update({'H2': 'R62.1'})
-	#print pin_resistor_map
+		fmc_pin_resistor.append((i[5], i[1] + '.' + i[2]))
+	fmc_pin_resistor.append(('F1', 'R113.1'))
+	fmc_pin_resistor.append(('H2', 'R62.1'))
+	return fmc_pin_resistor
 
-	#从网表中提取kc705的pin脚与网络的关系
+def gen_kc705_pins():
+	content = ''
+
 	with open('kc705.txt') as f:
 		content = f.read()
 	pattern = re.compile(r'\*SIGNAL\* (.*) \d+ \d+\r\n\s*([^\-\s]+)-([^\.]+)\.([^\s]+)')
@@ -441,81 +457,167 @@ def get_nc_info():
 	kc705_pins.append(('FMC_HPC_PG_M2C_LS', 'J22', 'F', 'F1'))
 	kc705_pins.append(('FMC_C2M_PG_LS', 'J22', 'D', 'D1'))
 	#print kc705_pins
+	return kc705_pins
 
-	#建立板上fmc端口与package_pins之间的关联
-	#print pin_gpio_map
-	result = []
+def gen_kc705_pins_resistor(support_package_pins, kc705_pins, pin_resistor_map):
+	kc705_pins_resistor = []
 	for i in kc705_pins:
-		if not i[1] in ['J2', 'J22']:
+		if not i[0] in support_package_pins.values():
+			#print '%s can not be controled!' %(str(i))
 			continue
-		if i[0] in package_pins.values():
-			result.append(
-				(pin_gpio_map[i[0]] if i[0] in pin_gpio_map.keys() else '?' * 200, i, pin_resistor_map[i[3]] if i[3] in pin_resistor_map.keys() else '!' * 200)
+		if not i[1] in ['J2', 'J22']:
+			#print '%s is not for fmc!' %(str(i))
+			continue
+		if not i[3] in pin_resistor_map.keys():
+			#print '%s can not find resistor!' %(str(i))
+			continue
+
+		kc705_pins_resistor.append(
+			(
+				i,
+				pin_resistor_map.get(i[3])
 			)
+		)
 
-	#result = sorted(result, key = lambda x:(gpio_pins_resistor_key(x)))
-	#for i in result:
-	#	print i
-	#print '-' * 200
-	#result = sorted(result, key = lambda x:(gpio_pins_gpio_key(x)))
-	#for i in result:
-	#	print i
+	kc705_pins_resistor = sorted(kc705_pins_resistor, key = lambda x:(gpio_pins_resistor_key(x)), reverse = True)
+	print '-' * 100
+	print 'kc705 package pins info'
+	print '-' * 100
+	for i in kc705_pins_resistor:
+		print i
+	print 'total:', len(kc705_pins_resistor)
 
+	return kc705_pins_resistor
+
+def gen_resistor_kc705_pins_resistor_map(kc705_pins_resistor):
 	#建立电阻id与fmc的package_pins之间的映射关系
-	result_dict = {}
-	for i in result:
-		r = i[2]
+	resistor_kc705_pins_resistor_map = {}
+	for i in kc705_pins_resistor:
+		r = i[1]
 		pattern = re.compile(r'R(\d+).*')
 		m = pattern.match(r)
 		key = m.group(1)
 
-		if not result_dict.has_key(int(key)):
-			result_dict[int(key)] = []
+		if not resistor_kc705_pins_resistor_map.has_key(int(key)):
+			resistor_kc705_pins_resistor_map.update({int(key): []})
 
-		result_dict[int(key)].append(i)
+		resistor_kc705_pins_resistor_map.get(int(key)).append(i)
+
+	return resistor_kc705_pins_resistor_map
+
+def gen_hpc_lpc_pins_registor_map(resistor_kc705_pins_resistor_map):
+	hpc_lpc_pins_registor_map = {}
+	hpc_lpc_pins_registor_map.update({'HPC': []})
+	hpc_lpc_pins_registor_map.update({'LPC': []})
+	hpc_lpc_pins_registor_map.update({'unused_resistor': []})
 
 	pins_list = []
 	for i in fmc_board_pins.strip().splitlines():
 		pins_list.append(i.strip().split())
 
-	#输出fmc板上电阻与gpio的映射关系
-	print '-' * 200
-	used_packagepin = []
-	gpios_sequence = {}
-	gpios_sequence['HPC'] = []
-	gpios_sequence['LPC'] = []
 	for i in pins_list:
 		for j in i:
-			if not int(j) in result_dict.keys():
+			if not int(j) in resistor_kc705_pins_resistor_map.keys():
 				#输出fmc板上用不到的pin(电阻)
 				#print j, 'is not valid pin!!!'
+				hpc_lpc_pins_registor_map.get('unused_resistor').append(int(j))
 				continue
-			v = result_dict.get(int(j))
-			for k in v:
-				used_packagepin.append(k[1][0])
-				if k[1][1] == 'J22':
-					gpios_sequence['HPC'].append(k[0])
-				elif k[1][1] == 'J2':
-					gpios_sequence['LPC'].append(k[0])
+			v = resistor_kc705_pins_resistor_map.get(int(j))
+			for vv in v:
+				if vv[0][1] == 'J22':
+					hpc_lpc_pins_registor_map.get('HPC').append(vv)
+				elif vv[0][1] == 'J2':
+					hpc_lpc_pins_registor_map.get('LPC').append(vv)
 				else:
-					print 'ERROR!!!'
-				print k
-	
-	#打印pin号
-	print '-' * 200
-	get_gpios_pin_no(gpios_sequence)
+					print 'ERROR:pin %s is not for hpc or lpc!' %(str(vv))
+	return hpc_lpc_pins_registor_map
+
+
+def gen_constrain(hpc_lpc_pins_registor_map, fmc_type, start):
+	pins_registor = hpc_lpc_pins_registor_map.get(fmc_type)
+	ports = gen_gpio_ports(gpio_groups)
+
+	if (start % 32) != 0:
+		start = 32 * ((start / 32) + 1)
+
+	ports = ports[start:]
+
+	if len(pins_registor) <= len(ports):
+		ports = ports[:len(pins_registor)]
+	else:
+		print "gpio bank is not enough!"
+		return
+
+	io_pin_map = {}
+	for pin, io in package_pins.items():
+		io_pin_map.update({io: pin})
+
+	constrain = []
+	for i in range(len(ports)):
+		gpio = ports[i]
+		pin_registor = pins_registor[i]
+		io = pin_registor[0][0]
+		pin = io_pin_map.get(io)
+
+		constrain.append((io, pin, gpio))
+
+	print '-' * 100
+	print 'generator constrain for %s' %(fmc_type)
+	print '-' * 100
+	constrain = sorted(constrain, key = lambda x:(constrain_key_gpio(x)))
+	for i in constrain:
+		io, pin, gpio = i
+		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, gpio)
+		print 'set_property IOSTANDARD LVCMOS18 [get_ports {%s}]' %(gpio)
+
+	return constrain
+
+
+def gen_unused_pin_io(support_package_pins, kc705_pins_resistor):
+	print '-' * 100
+	print 'package pins for unused'
+	print '-' * 100
+	for i, j in package_pins.items():
+		if not j in support_package_pins.values():
+			print '封装pin:%-20s网络:%-20s' %(i, j)
+	ios = [ x[0][0] for x in kc705_pins_resistor ]
+	for i, j in support_package_pins.items():
+		if not j in ios:
+			print '封装pin:%-20s网络:%-20s' %(i, j)
+
+def gen_kc705_constrain():
+	#从网表中提取kc705的pin脚与网络的关系
+	kc705_pins = gen_kc705_pins()
+	#print kc705_pins
+
+	#从网表中提取fmc的pin脚与网络的关系
+	fmc_pin_resistor = gen_fmc_pin_resistor()
+	#print fmc_pin_resistor
+
+	pin_resistor_map = {}
+	for i in fmc_pin_resistor:
+		pin_resistor_map.update({i[0]: i[1]})
+
+	support_package_pins = gen_support_package_pins(package_pins, unsupport_loc)
+
+	#建立板上package_pins与fmc端口之间的关联
+	kc705_pins_resistor = gen_kc705_pins_resistor(support_package_pins, kc705_pins, pin_resistor_map)
 
 	#哪些package_pin没有用上？
-	for i, j in package_pins.items():
-		if not j in used_packagepin:
-			unsupport_package_pins.append([i, j])
+	gen_unused_pin_io(support_package_pins, kc705_pins_resistor)
 
-	print '-' * 200
-	for i in unsupport_package_pins:
-		print '封装pin:%-20s网络:%-20s' %(i[0], i[1])
-		
+	resistor_kc705_pins_resistor_map = gen_resistor_kc705_pins_resistor_map(kc705_pins_resistor)
+	hpc_lpc_pins_registor_map = gen_hpc_lpc_pins_registor_map(resistor_kc705_pins_resistor_map)
 	
+	#输出fmc板上电阻与kc705的映射关系
+	hpc_constrain = gen_constrain(hpc_lpc_pins_registor_map, 'HPC', 0)
+	lpc_constrain = gen_constrain(hpc_lpc_pins_registor_map, 'LPC', len(hpc_constrain))
+
+	get_gpios_pin_no_for_driver(hpc_constrain, hpc_lpc_pins_registor_map, 'HPC', 0)
+	get_gpios_pin_no_for_driver(lpc_constrain, hpc_lpc_pins_registor_map, 'LPC', len(hpc_constrain))
+	print 'total', len(hpc_constrain) + len(lpc_constrain)
+
+	#打印pin号
 
 if __name__ == "__main__":
-	gen_port_constrain()
-	get_nc_info()
+	gen_kc705_constrain()
