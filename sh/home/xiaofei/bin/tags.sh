@@ -61,29 +61,29 @@ ignore="( $ignore )"
 echo "type:$type"
 echo "ignore:$ignore"
 
+tags_src_dir="${tags_src_dir:=$(pwd)}"
 tags_src_dir=${tags_src_dir// /&}
 tags_src_dir=${tags_src_dir//:/ }
-tags_src_dir="${tags_src_dir:=( $(pwd) )}"
 cscopedb="$(pwd)/cscope"
 
 prepare()
 {
-	echo "tags_src_dir:$tags_src_dir"
-	if [ -d $cscopedb ]; then
+	if [ -d "$cscopedb" ]; then
 		echo "$cscopedb exist already"
-		if [ -e $cscopedb/cscope.files ]; then
+		if [ -e "$cscopedb/cscope.files" ]; then
 			echo "file $cscopedb/cscope.files exist"
-			#rm $cscopedb/cscope.files
+			#rm "$cscopedb/cscope.files"
 			
 		fi
 	else
-		mkdir $cscopedb
+		mkdir "$cscopedb"
 		echo "make directory $cscopedb"
 	fi
 
-	all_source | sort | uniq > $cscopedb/cscope.files
-	cat $cscopedb/cscope.files | sed 's/"//g' > $cscopedb/ctags.files
-	lines=$(wc -l $cscopedb/cscope.files | awk '{ printf $1 }')
+	all_source | sort | uniq > "$cscopedb/cscope.files"
+	all_source > "$cscopedb/cscope.files"
+	cat "$cscopedb/cscope.files" | sed 's/"//g' > "$cscopedb/ctags.files"
+	lines=$(wc -l "$cscopedb/cscope.files" | awk '{ printf $1 }')
 	echo "find $lines files totaly"
 }
 
@@ -93,13 +93,13 @@ all_source()
 
 	for src_dir in $tags_src_dir;do
 		src_dir="${src_dir//&/ }"
-		if [ ! -d $tags_src_dir ]; then
-			echo "no tags_src_dir set"
-			echo "please set tags_src_dir at your .bashrc file"
+		if [ ! -d "$src_dir" ]; then
+			echo "no $src_dir exist!"
+			echo "please check tags_src_dir setting!"
 			exit 1
 		fi
-		find -H $src_dir $ignore -prune -o $type -printf "\"%p\"\n"
 
+		find -H "$src_dir" $ignore -prune -o $type -printf "\"%p\"\n"
 	done
 }
  
@@ -107,12 +107,12 @@ docscope()
 {
 	echo "Now begin build cscope cross-index file"
 	start=`date +%s`
-	cscope -b -k -q -i $cscopedb/cscope.files -f $cscopedb/cscope.out
+	cscope -b -k -q -i "$cscopedb/cscope.files" -f "$cscopedb/cscope.out"
 	end=`date +%s`
 	let "elapse=$end-$start"
 	if [ $? -eq 0 ]; then
 		echo "make cscope database file with total time ($elapse) seconds"
-		size=$(du $cscopedb/cscope.out -h | awk '{ printf $1 }')
+		size=$(du "$cscopedb/cscope.out" -h | awk '{ printf $1 }')
 		echo "($cscopedb/cscope.out):$size"
 	fi  
 }
@@ -121,12 +121,12 @@ dotags()
 {
 	echo "Now begin build tags file"
 	start=`date +%s`
-	ctags --fields=+afiKlmnsSzt --c++-kinds=+p --extra=+q -L $cscopedb/ctags.files -f $cscopedb/tags
+	ctags --fields=+afiKlmnsSzt --c++-kinds=+p --extra=+q -L "$cscopedb/ctags.files" -f "$cscopedb/tags"
 	end=`date +%s`
 	let "elapse=$end-$start"
 	if [ $? -eq 0 ]; then
 		echo "make ctags database file with total time ($elapse) seconds"
-		size=$(du $cscopedb/tags -h | awk '{ printf $1 }')
+		size=$(du "$cscopedb/tags" -h | awk '{ printf $1 }')
 		echo "($cscopedb/tags):$size"
 	fi  
 }
@@ -145,8 +145,8 @@ usage()
 
 write_env()
 {
-	echo export CSCOPE_DB=$cscopedb/cscope.out >e_cs
-	echo export CTAGS_DB=$cscopedb/tags >>e_cs
+	echo export CSCOPE_DB="$cscopedb/cscope.out" >e_cs
+	echo export CTAGS_DB="$cscopedb/tags" >>e_cs
 } 
  
 case $1 in
