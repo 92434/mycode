@@ -207,16 +207,23 @@ function test_option {
 
 	echo --------------------------
 
+	OPTIND=0
+	OPTERR=1
 	while getopts xyz: arguments 2>/dev/null; do
+		echo "\$arguments is $arguments"
+		echo "\$OPTIND is $OPTIND;\$OPTARG is $OPTARG;\$OPTERR is $OPTERR"
 		case $arguments in
 			x) echo "option x";;
 			y) echo "option y";;
-			z) echo "option z with arg. $OPTARG";;
-			/?) echo "Usage: optdemo [-xy] [-z argment]"; exit 1;;
+			z) echo "option z = $OPTARG";;
+			?) echo "Usage: optdemo [-xy] [-z argment]";;
 		esac
-		echo "\$OPTIND is $OPTIND \$OPTERR is $OPTERR"
+		echo
+		echo
 	done
-	OPTIND=0
+	echo "\$OPTIND is $OPTIND;\$OPTARG is $OPTARG;\$OPTERR is $OPTERR"
+	shift $(($OPTIND - 1))
+	echo $@
 }
 #test_option -x -y -z xiaofei -k
 
