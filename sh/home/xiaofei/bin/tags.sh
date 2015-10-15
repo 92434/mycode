@@ -4,49 +4,56 @@
 #author: wikijone@gmail.com
 #date: 20110527
  
+function red() {
+	echo -ne "\033[31m$@\033[0m"
+}
+
 mode=0
 ignore=
 type=
-while read line
-do
-	if [ -z "$line" ]; then
-		continue
-	fi
 
-	if [ "$line" = ":ignore" ]; then
-		mode=1
-		continue
-	fi
-
-	if [ "$line" = ":type" ]; then
-		mode=2
-		continue
-	fi
-
-	case $mode in
-		1)
-		if [ -z "$ignore" ]; then
-			ignore="$line"
-		else
-			ignore="$ignore -o $line"
+if [ -f .filetype ]; then
+	while read line
+	do
+		if [ -z "$line" ]; then
+			continue
 		fi
-		;;
 
-		"")
-		;;
-
-		2)
-		if [ -z "$type" ]; then
-			type="$line"
-		else
-			type="$type -o $line"
+		if [ "$line" = ":ignore" ]; then
+			mode=1
+			continue
 		fi
-		;;
 
-		"")
-		;;
-	esac
-done < .filetype
+		if [ "$line" = ":type" ]; then
+			mode=2
+			continue
+		fi
+
+		case $mode in
+			1)
+			if [ -z "$ignore" ]; then
+				ignore="$line"
+			else
+				ignore="$ignore -o $line"
+			fi
+			;;
+
+			"")
+			;;
+
+			2)
+			if [ -z "$type" ]; then
+				type="$line"
+			else
+				type="$type -o $line"
+			fi
+			;;
+
+			"")
+			;;
+		esac
+	done < .filetype
+fi
 
 if [ -z "$type" ]; then
 	type="-name *.java -o -name *.cpp -o -name *.cc -o -name *.[ch] -o -name *.xml -o -name *.aidl -o -name *.py"
@@ -58,20 +65,39 @@ if [ -z "$ignore" ]; then
 fi
 ignore="( $ignore )"
 
-echo "type:$type"
-echo "ignore:$ignore"
+echo "type:$(red $type)"
+echo "ignore:$(red $ignore)"
 
 tags_src_dir="${tags_src_dir:=$(pwd)}"
+echo "tags_src_dir:$(red $tags_src_dir)"
 tags_src_dir=${tags_src_dir// /&}
 tags_src_dir=${tags_src_dir//:/ }
 cscopedb="$(pwd)/cscope"
 
-prepare()
-{
+function all_source() {
+	local src_dir
+
+	for src_dir in $tags_src_dir;do
+		if [ "x" != "x$(echo "$src_dir" | grep "&")" ]; then
+			src_dir="${src_dir//&/ }"
+			echo "directory $(red \"$src_dir\") is not a valid path as space in it!" 1>&2
+			continue
+		fi
+
+		if [ ! -d "$src_dir" ]; then
+			echo "directory $(red \"$src_dir\") is not exist!" 1>&2
+			continue
+		fi
+
+		find -L "$src_dir" $ignore -prune -o $type -printf "\"%p\"\n"
+	done
+}
+ 
+function prepare() {
 	if [ -d "$cscopedb" ]; then
-		echo "$cscopedb exist already"
+		echo "$(red $cscopedb) exist already"
 		if [ -e "$cscopedb/cscope.files" ]; then
-			echo "file $cscopedb/cscope.files exist"
+			echo "file $(red $cscopedb/cscope.files) exist"
 			#rm "$cscopedb/cscope.files"
 			
 		fi
@@ -81,30 +107,12 @@ prepare()
 	fi
 
 	all_source | sort | uniq > "$cscopedb/cscope.files"
-	all_source > "$cscopedb/cscope.files"
 	cat "$cscopedb/cscope.files" | sed 's/"//g' > "$cscopedb/ctags.files"
 	lines=$(wc -l "$cscopedb/cscope.files" | awk '{ printf $1 }')
-	echo "find $lines files totaly"
+	echo "find $(red $lines) files totaly"
 }
 
-all_source()
-{
-	local src_dir
-
-	for src_dir in $tags_src_dir;do
-		src_dir="${src_dir//&/ }"
-		if [ ! -d "$src_dir" ]; then
-			echo "no $src_dir exist!"
-			echo "please check tags_src_dir setting!"
-			exit 1
-		fi
-
-		find -H "$src_dir" $ignore -prune -o $type -printf "\"%p\"\n"
-	done
-}
- 
-docscope()
-{
+function docscope() {
 	echo "Now begin build cscope cross-index file"
 	start=`date +%s`
 	cscope -b -k -q -i "$cscopedb/cscope.files" -f "$cscopedb/cscope.out"
@@ -117,8 +125,7 @@ docscope()
 	fi  
 }
 
-dotags()
-{
+function dotags() {
 	echo "Now begin build tags file"
 	start=`date +%s`
 	ctags --fields=+afiKlmnsSzt --c++-kinds=+p --extra=+q -L "$cscopedb/ctags.files" -f "$cscopedb/tags"
@@ -131,8 +138,7 @@ dotags()
 	fi  
 }
  
-usage() 
-{
+usage() {
 	echo "Usages:"
 	echo "$0 [option]"
 	echo "[option] can be this:"
@@ -143,10 +149,9 @@ usage()
 	echo "	  env	 : make environment"
 }
 
-write_env()
-{
-	echo export CSCOPE_DB="$cscopedb/cscope.out" >e_cs
-	echo export CTAGS_DB="$cscopedb/tags" >>e_cs
+write_env() {
+	echo export CSCOPE_DB="\"$cscopedb/cscope.out\"" >e_cs
+	echo export CTAGS_DB="\"$cscopedb/tags\"" >>e_cs
 } 
  
 case $1 in
@@ -177,4 +182,5 @@ case $1 in
 	usage
 	;;
 esac	 
+
 
