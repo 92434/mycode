@@ -29,6 +29,9 @@
 		input wire mpeg_clk,
 		input wire mpeg_valid,
 		input wire mpeg_sync,
+		output [7:0] ts_out,
+		output ts_out_clk,
+		output ts_out_valid,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -556,7 +559,10 @@
 			.mpeg_clk(mpeg_clk),
 			.mpeg_valid(mpeg_valid),
 			.mpeg_sync(mpeg_sync),
-			.rst(S_AXI_ARESETN)
+			.rst(S_AXI_ARESETN),
+			.ts_out(ts_out),
+			.ts_out_clk(ts_out_clk),
+			.ts_out_valid(ts_out_valid)
 		);
 
 	// User logic ends

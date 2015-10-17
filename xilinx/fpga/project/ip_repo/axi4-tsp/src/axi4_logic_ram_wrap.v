@@ -24,7 +24,10 @@ module axi4_logic_ram_wrap #(
 		input wire mpeg_clk,
 		input wire mpeg_valid,
 		input wire mpeg_sync,
-		input wire rst
+		input wire rst,
+		output [7:0] ts_out,
+		output ts_out_clk,
+		output ts_out_valid
 	);
 
 	//----------------------------------------------
@@ -67,7 +70,10 @@ module axi4_logic_ram_wrap #(
 					.mpeg_clk(mpeg_clk),
 					.mpeg_valid(mpeg_valid),
 					.mpeg_sync(mpeg_sync),
-					.rst(rst)
+					.rst(rst),
+					.ts_out(ts_out),
+					.ts_out_clk(ts_out_clk),
+					.ts_out_valid(ts_out_valid)
 				);
 
 		end

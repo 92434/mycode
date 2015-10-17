@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import copy
 
 gpio_groups = [
 	'gpio_tri_io',
@@ -638,6 +639,54 @@ def gen_constrain(hpc_lpc_pins_registor_map, fmc_type, start):
 
 	return constrain
 
+def gen_myip_constrain(constrain):
+	otherconstrain = [
+		('XADC_GPIO_3', 'AA27', ''),
+		('XADC_GPIO_2', 'AB28', ''),
+		('XADC_GPIO_1', 'AA25', ''),
+		('XADC_GPIO_0', 'AB25', ''),
+		('USER_SMA_GPIO_N', 'Y24', ''),
+	]
+
+	signal = [
+		'i2s_receiver_bclk',
+		'i2s_receiver_lrclk',
+		'i2s_receiver_sdata',
+		'mpeg_clk',
+		'mpeg_valid',
+		'mpeg_data[0]',
+		'mpeg_data[1]',
+		'mpeg_data[2]',
+		'mpeg_data[3]',
+		'mpeg_data[4]',
+		'mpeg_data[5]',
+		'mpeg_data[6]',
+		'mpeg_data[7]',
+		'mpeg_sync',
+		'i2s_sender_bclk',
+		'i2s_sender_lrclk',
+		'i2s_sender_sdata',
+		'asi_out',
+		'clk_out1',
+	]
+
+	if len(constrain) + len(otherconstrain) < len(signal):
+		print 'ERROR: no enough pins for signal!!!'
+		return
+
+	print '#', '-' * 100
+	print '#', 'generator constrain for ip signals'
+	print '#', '-' * 100
+	constrain.extend(otherconstrain)
+	constrain = constrain[-(len(signal)):]
+	for index in range(len(signal)):
+		i = constrain[index]
+		io, pin, gpio = i
+		gpio = signal[index]
+		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, gpio)
+		print 'set_property IOSTANDARD LVCMOS18 [get_ports {%s}]' %(gpio)
+
+
 
 def gen_unused_pin_io(support_package_pins, kc705_pins_resistor):
 	print '-' * 100
@@ -681,6 +730,8 @@ def gen_kc705_constrain():
 	#输出fmc板上电阻与kc705的映射关系
 	hpc_constrain = gen_constrain(hpc_lpc_pins_registor_map, 'HPC', 0)
 	lpc_constrain = gen_constrain(hpc_lpc_pins_registor_map, 'LPC', len(hpc_constrain))
+	
+	gen_myip_constrain(copy.copy(lpc_constrain))
 
 	get_gpios_pin_no_for_driver(hpc_constrain, hpc_lpc_pins_registor_map, 'HPC', 0)
 	get_gpios_pin_no_for_driver(lpc_constrain, hpc_lpc_pins_registor_map, 'LPC', len(hpc_constrain))
