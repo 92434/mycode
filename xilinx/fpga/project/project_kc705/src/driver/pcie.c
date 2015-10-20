@@ -102,21 +102,21 @@ static gpio_chip_info_t gpio_chip_info[] = {
 	{
 		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_1,
 		.ngpios = 2,
-		.ngpio = {32, 32},
+		.ngpio = {32, 27},
 
 	},
-	{
-		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_2,
-		.ngpios = 2,
-		.ngpio = {32, 32},
+	//{
+	//	.chip_addr_offset = OFFSET_AXI_GPIO_LITE_2,
+	//	.ngpios = 2,
+	//	.ngpio = {32, 32},
 
-	},
-	{
-		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_3,
-		.ngpios = 1,
-		.ngpio = {5, 0},
+	//},
+	//{
+	//	.chip_addr_offset = OFFSET_AXI_GPIO_LITE_3,
+	//	.ngpios = 1,
+	//	.ngpio = {9, 0},
 
-	},
+	//},
 };
 
 #define GPIOCHIP_MAX (sizeof(gpio_chip_info) / sizeof(gpio_chip_info_t))
@@ -929,8 +929,8 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	}
 	
 	mydebug("txp addr:%p\n", kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE);
-	write_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
-	dump_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
+	//write_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
+	//dump_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
 
 	kc705_pci_dev->pdev = pdev;
 
