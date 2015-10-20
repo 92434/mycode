@@ -1,6 +1,3 @@
-
-`include "MatchReplace.v"
-`include "ts_to_asi.v"
 module logic_ram #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 3,
@@ -18,7 +15,10 @@ module logic_ram #(
 		input mem_rden,
 		input mem_wren,
 		input [OPT_MEM_ADDR_BITS:0] mem_address,
-		output[C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata
+		output reg [C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata,
+		output [7:0] ts_out,
+		output ts_out_clk,
+		output ts_out_valid
 	);
 		
 	parameter PACK_BYTE_SIZE = 188;
@@ -26,30 +26,29 @@ module logic_ram #(
     parameter INPUT_PARAM_OFFSET=0;
     parameter REPLACE_TS_OFFSET=INPUT_PARAM_OFFSET+4;
     parameter MONITOR_READY_OFFSET=REPLACE_TS_OFFSET+PACK_BYTE_SIZE;
-    parameter MONITOR_TS_OFFSET=MONITOR_READY_OFFSET+128;
+    parameter MONITOR_TS_OFFSET=MONITOR_READY_OFFSET+FILTER_MAX_NUM*4*2;
 	
 	// implement Block RAM(s)
-	reg [8-1:0] byte_ram [0 : 1024 * 8];
+	reg [C_S_AXI_DATA_WIDTH-1:0] byte_ram [0 : 1024*2 - 1];
 	reg replace_add,replace_del,monitor_add,monitor_del;
 	reg [12:0] pid_in;
 	reg [7:0] slot_idx,input_cursor;
 	reg [7:0] monitor_cursor[FILTER_MAX_NUM-1:0] ,monitor_slot;
 	
 	wire[FILTER_MAX_NUM-1:0] dump_flag;
-	wire[7:0] ts_out,dump_data;
-	wire ts_out_clk,ts_out_valid,ts_out_sync;
-	integer i;
+	wire[7:0] dump_data;
+	wire ts_out_sync;
+	integer i,j;
 	reg[FILTER_MAX_NUM-1:0] start_recv_monitor;
 	
 	reg [FILTER_MAX_NUM-1:0] begin_read;
 	wire [7:0] copy_data[FILTER_MAX_NUM-1:0];
 	wire df_ready[FILTER_MAX_NUM-1:0];
 	
-	
-	
+	//set filter param and replace data
 	always @(posedge S_AXI_ACLK) begin
 		if (mem_wren) begin
-			case(mem_address)
+			case(mem_address*4)
 				INPUT_PARAM_OFFSET:begin
 					replace_add=S_AXI_WDATA[0];
 					replace_del=S_AXI_WDATA[1];
@@ -58,14 +57,11 @@ module logic_ram #(
 					slot_idx=S_AXI_WDATA[27:20];
 					if(monitor_add) begin
 						pid_in=S_AXI_WDATA[16:4];
-						start_recv_monitor[slot_idx]=0;
-						byte_ram[MONITOR_READY_OFFSET+slot_idx]=0;
 					end
 					input_cursor=0;
 				end
 				REPLACE_TS_OFFSET:begin
-					//byte_ram[REPLACE_TS_OFFSET+input_cursor]=S_AXI_WDATA[7:0];
-					pid_in[7:0]=S_AXI_WDATA[7:0];
+					pid_in[7:0]=S_AXI_WDATA[7:0];//only use low 8bit each clk
 					input_cursor=input_cursor+1;
 					if(input_cursor>=PACK_BYTE_SIZE) begin
 						input_cursor=0;
@@ -75,7 +71,8 @@ module logic_ram #(
 		end
 	end
 	
-	always @(posedge ts_out_clk) begin
+	always	@(posedge mpeg_clk) begin
+		//read dump data here
 		if(dump_flag>0&&ts_out_valid==1&&ts_out_sync==1) begin
 			for(i=0;i<=FILTER_MAX_NUM-1;i=i+1) begin
 				if(dump_flag[i]) monitor_slot=i;
@@ -85,9 +82,10 @@ module logic_ram #(
 				start_recv_monitor[monitor_slot]=1;
 		end
 		  
-		if(start_recv_monitor[monitor_slot]) begin	 
-			byte_ram[MONITOR_TS_OFFSET+monitor_slot*PACK_BYTE_SIZE+monitor_cursor[monitor_slot]] = dump_data;
-			$display("[logic_ram dump]monitor_slot:%d :%h", monitor_slot,byte_ram[MONITOR_TS_OFFSET+monitor_slot*PACK_BYTE_SIZE+monitor_cursor[monitor_slot]]);
+		if(start_recv_monitor[monitor_slot]) begin
+			j=MONITOR_TS_OFFSET+monitor_slot*PACK_BYTE_SIZE+monitor_cursor[monitor_slot];
+			byte_ram[j/4][((j%4)*8 + 7) -: 8]= dump_data;
+			$display("[logic_ram dump]monitor_slot:%d :%h", monitor_slot,byte_ram[j/4][((j%4)*8 + 7) -: 8]);
 			monitor_cursor[monitor_slot]=monitor_cursor[monitor_slot]+1;
 			if(monitor_cursor[monitor_slot]>=PACK_BYTE_SIZE) begin
 				monitor_cursor[monitor_slot]=0;
@@ -96,6 +94,7 @@ module logic_ram #(
 			end
 		end
 	end
+
 	
 	match_replace_module#(.FILTER_MAX_NUM( FILTER_MAX_NUM)) A1(
     .mpeg_data(mpeg_data),
@@ -118,19 +117,13 @@ module logic_ram #(
     .dump_flag(dump_flag),
     .dump_data(dump_data)
     );
-  
-  reg asi_rst;
-  //reg[7:0] ts_asi_in;
-  wire[7:0] ts_asi_out;
-  sim_ts_to_asi A3(
-    .clk(mpeg_clk),
-    .rst(asi_rst),
-    .din(ts_out),
-    .dout(ts_asi_out)
-    );   
-  initial begin
-    asi_rst=1;
-    #20 asi_rst=0;
-  end
+    
+	always @(posedge S_AXI_ACLK) begin
+		if (mem_rden) begin
+			axi_rdata <= byte_ram[mem_address];
+		end
+	end
+
+
 	
 endmodule
