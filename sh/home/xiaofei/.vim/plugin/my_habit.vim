@@ -6,16 +6,17 @@
 "set ic
 
 
-if $CSCOPE_DB == ""
-	"shiftwidth
-	"set sw=2
+"shiftwidth
+"set sw=2
 
-	"expandtab
-	"set et
+"set width of table
+set ts=8
 
-	"smarttab
-	"set sta
-endif
+"table to space||||retab!
+"set et
+
+"smarttab
+"set sta
 
 "set filetype indent
 :filetype indent on

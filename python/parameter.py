@@ -1,6 +1,5 @@
 import traceback
 import argparse
-import utils.log as log
 
 def main():
 
@@ -27,10 +26,4 @@ def sub_parser_handler():
 
 if '__main__' == __name__:
 	main()
-	log.debug('debug')
-	log.info('info')
-	log.warning('warning')
-	log.error('error')
-	log.critical('critical')
-	log.exception('exception')
 

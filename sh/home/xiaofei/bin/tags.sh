@@ -89,7 +89,7 @@ function all_source() {
 			continue
 		fi
 
-		find -L "$src_dir" $ignore -prune -o $type -printf "\"%p\"\n"
+		find -H "$src_dir" $ignore -prune -o $type -printf "\"%p\"\n"
 	done
 }
  
@@ -119,9 +119,9 @@ function docscope() {
 	end=`date +%s`
 	let "elapse=$end-$start"
 	if [ $? -eq 0 ]; then
-		echo "make cscope database file with total time ($elapse) seconds"
+		echo "make cscope database file with total time ($(red $elapse)) seconds"
 		size=$(du "$cscopedb/cscope.out" -h | awk '{ printf $1 }')
-		echo "($cscopedb/cscope.out):$size"
+		echo "($cscopedb/cscope.out):$(red $size)"
 	fi  
 }
 
@@ -132,9 +132,9 @@ function dotags() {
 	end=`date +%s`
 	let "elapse=$end-$start"
 	if [ $? -eq 0 ]; then
-		echo "make ctags database file with total time ($elapse) seconds"
+		echo "make ctags database file with total time ($(red $elapse)) seconds"
 		size=$(du "$cscopedb/tags" -h | awk '{ printf $1 }')
-		echo "($cscopedb/tags):$size"
+		echo "($cscopedb/tags):$(red $size)"
 	fi  
 }
  

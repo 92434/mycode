@@ -106,7 +106,7 @@ static int gpio_direction_open(struct inode *inode, struct file *file) {
 		return -1;
 	}
 
-	mydebug("\n");
+	//mydebug("\n");
 	//if(!capable(CAP_SYS_ADMIN))
 	//	return -EPERM;
 
@@ -122,7 +122,7 @@ static int gpio_direction_release(struct inode *inode, struct file *file) {
 		return 0;
 	}
 
-	mydebug("\n");
+	//mydebug("\n");
 	data->open = 0;
 	return 0;
 }
@@ -171,7 +171,7 @@ static ssize_t gpio_direction_write(struct file *file, const char __user *buffer
 	//printk("\n");
 	//
 	if (sscanf(cmd, "%d", &value) == 1) {
-		printk("gpio:%d, value:%d\n", data->gpio, value);
+		//printk("gpio:%d, value:%d\n", data->gpio, value);
 
 		switch(value) {
 			case 0:
@@ -210,7 +210,7 @@ static ssize_t gpio_export_write(struct file *file, const char __user *buffer, s
 	size_t size;
 	int gpio;
 
-	mydebug("\n");
+	//mydebug("\n");
 	size = sizeof(cmd);
 	if (count < size)
 		size = count;
@@ -220,7 +220,7 @@ static ssize_t gpio_export_write(struct file *file, const char __user *buffer, s
 
 	if (sscanf(cmd, "%d", &gpio) == 1) {
 		gpio_proc_t *data;
-		mydebug("export pin:%d\n", gpio);
+		//mydebug("export pin:%d\n", gpio);
 		if(gpio_request(gpio, NULL) != 0) {
 			mydebug("export pin error:%d\n", gpio);
 			return count;
@@ -254,7 +254,7 @@ static ssize_t gpio_unexport_write(struct file *file, const char __user *buffer,
 	size_t size;
 	int gpio;
 
-	mydebug("\n");
+	//mydebug("\n");
 	size = sizeof(cmd);
 	if (count < size)
 		size = count;
@@ -263,7 +263,7 @@ static ssize_t gpio_unexport_write(struct file *file, const char __user *buffer,
 		return -EFAULT;
 
 	if (sscanf(cmd, "%d", &gpio) == 1) {
-		mydebug("unexport pin:%d\n", gpio);
+		//mydebug("unexport pin:%d\n", gpio);
 		gpio_free(gpio);
 
 		snprintf(cmd, sizeof(cmd), "%d", gpio);
