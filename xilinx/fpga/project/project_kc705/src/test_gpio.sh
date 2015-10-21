@@ -8,6 +8,10 @@ function export_gpio() {
 	if [ ! -f $proc_path/$gpio ]; then
 		echo $gpio > $proc_path/export 
 	fi
+
+	if [ -f $proc_path/$gpio ]; then
+		echo 1 > $proc_path/$gpio;
+	fi
 }
 
 function unexport_gpio() {
@@ -160,7 +164,6 @@ function all() {
 80	R21.1	FMC_HPC_LA01_CC_N
 81	R20.1	FMC_HPC_LA01_CC_P
 82	R6.1	FMC_HPC_LA06_N
-83	R17.1	FMC_C2M_PG_LS
 	"
 	gpio_str=( $gpios )
 
@@ -172,6 +175,15 @@ function all() {
 		filename="report_$(date +%Y%m%d%H%M%S).txt"
 	fi
 	echo -e "save test report to $(red $filename)"
+
+	for((i=0;i<${#gpio_str[@]};i+=3));do
+		local gpio=${gpio_str[i]}
+		local resistor=${gpio_str[i+1]}
+		local io=${gpio_str[i+2]}
+
+		export_gpio $gpio
+		unexport_gpio $gpio
+	done
 
 	for((i=0;i<${#gpio_str[@]};i+=3));do
 		local gpio=${gpio_str[i]}

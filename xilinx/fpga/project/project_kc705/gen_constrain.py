@@ -376,11 +376,9 @@ def gpio_pins_resistor_key(x):
 	r = g.groups()
 	return r[0], int(r[1])
 
-def get_gpio_pin_no(gpio, start):
+def get_gpio_pin_no(gpio, start, gpio_bank_base):
 	chip_offset = start / (32 * 2)
 	channel_offset = (start / 32) % 2
-
-	gpio_bank_base = [148, 116, 84, 57]
 
 	pattern = re.compile(r'_|\[|\]')
 	gpio = pattern.sub(r' ', gpio)
@@ -412,9 +410,15 @@ def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, 
 
 	pins_resistor = hpc_lpc_pins_resistor_map.get(fmc_type)
 
+        gpio_bank_base = [0, 0, 0, 0]
+        if fmc_type == 'HPC':
+	    gpio_bank_base = [148, 116, 84, 57]
+        elif fmc_type == 'LPC':
+	    gpio_bank_base = [0, 0, 0, 0]
+
 	io_pin_no_map = {}
 	for io, pin, gpio in constrain:
-		pin_no = get_gpio_pin_no(gpio, start)
+		pin_no = get_gpio_pin_no(gpio, start, gpio_bank_base)
 		io_pin_no_map.update({io: pin_no})
 
 	for i in pins_resistor:
@@ -457,7 +461,7 @@ def gen_kc705_pins():
 	kc705_pins.append(('FMC_LPC_PRSNT_M2C_B_LS', 'J2', 'E', 'H2'))
 	kc705_pins.append(('FMC_HPC_PRSNT_M2C_B_LS', 'J22', 'I', 'H2'))
 	kc705_pins.append(('FMC_HPC_PG_M2C_LS', 'J22', 'F', 'F1'))
-	kc705_pins.append(('FMC_C2M_PG_LS', 'J22', 'D', 'D1'))
+	kc705_pins.append(('FMC_C2M_PG_LS', 'J22', 'D', 'D1'))#not valid
 	#print kc705_pins
 	return kc705_pins
 
