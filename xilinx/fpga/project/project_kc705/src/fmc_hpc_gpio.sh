@@ -33,9 +33,11 @@ function test_gpio() {
 
 	for((i=0;i<1;i++));do
 		echo 0 > $proc_path/$gpio;
-		sleep 0.2;
+		#sleep 0.1;
+		read -t 0.1
 		echo 1 > $proc_path/$gpio;
-		sleep 0.2;
+		#sleep 0.1;
+		read -t 0.1
 	done
 }
 
@@ -182,7 +184,6 @@ function all() {
 		local io=${gpio_str[i+2]}
 
 		export_gpio $gpio
-		unexport_gpio $gpio
 	done
 
 	for((i=0;i<${#gpio_str[@]};i+=3));do
@@ -192,11 +193,12 @@ function all() {
 		local rtn=1
 
 		repeat_print 100 "*"
-		echo -e "Is LED($(red $((i/3 + 1)))) on $(red $resistor) blinking?($(red y)/$(red n))"
+		local len=${#gpio_str[@]}
+		let len=$len/3
+		echo -e "Is LED($(red $((i/3 + 1))/$len)) on $(red $resistor) blinking?($(red y)/$(red n))"
 		echo -e "Goback to test Prev LED?($(red p))"
 		echo -e "Exit Test?($(red Q))"
 
-		export_gpio $gpio
 		while [ ! $rtn -eq 0 ];do
 			process_cmd "$gpio" "$resistor" "$io"
 			rtn=$?
@@ -217,13 +219,19 @@ function all() {
 				break
 			fi
 		done
-		unexport_gpio $gpio
 		if [ $rtn -eq 2 ];then
 			break
 		fi	
 	done
-	python process_data.py "$filename"
-	rm $filename
+	python process_data.py "$filename" "$filename"
+
+	for((i=0;i<${#gpio_str[@]};i+=3));do
+		local gpio=${gpio_str[i]}
+		local resistor=${gpio_str[i+1]}
+		local io=${gpio_str[i+2]}
+
+		unexport_gpio $gpio
+	done
 }
 
 function process_cmd() {
