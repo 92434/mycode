@@ -605,8 +605,40 @@ set_property IOSTANDARD LVCMOS18 [get_ports {EXT_LEDS[7]}]
 	print '#', '-' * 100
 	print txt
 
+myip_fmc_signal = [
+	('FMC_HPC_LA30_P', 'mpeg_clk'),
+	('FMC_HPC_LA22_N', 'mpeg_valid'),
+	('FMC_HPC_LA28_P', 'mpeg_data[0]'),
+	('FMC_HPC_LA28_N', 'mpeg_data[1]'),
+	('FMC_HPC_LA24_P', 'mpeg_data[2]'),
+	('FMC_HPC_LA16_P', 'mpeg_data[3]'),
+	('FMC_HPC_LA16_N', 'mpeg_data[4]'),
+	('FMC_HPC_LA20_P', 'mpeg_data[5]'),
+	('FMC_HPC_LA20_N', 'mpeg_data[6]'),
+	('FMC_HPC_LA22_P', 'mpeg_data[7]'),
+	('FMC_HPC_LA30_N', 'mpeg_sync'),
+]
+
+#myip_fmc_signal = []
+	
 def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
+	constrain = []
+
 	pins_resistor = hpc_lpc_pins_resistor_map.get(fmc_type)
+	myip_fmc_ios = []
+	for io, signal in myip_fmc_signal:
+		myip_fmc_ios.append(io)
+	
+	signal_index = []
+	for i in range(len(pins_resistor)):
+		pin, resistor = pins_resistor[i]
+		io = pin[0]
+		if io in myip_fmc_ios:
+			signal_index.append(i)
+	signal_index.reverse()
+	for i in signal_index:
+		pins_resistor.pop(i)
+
 	ports = gen_gpio_ports(gpio_groups)
 
 	if (start % 32) != 0:
@@ -618,13 +650,12 @@ def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 		ports = ports[:len(pins_resistor)]
 	else:
 		print "gpio bank is not enough!"
-		return
+		return constrain
 
 	io_pin_map = {}
 	for pin, io in package_pins.items():
 		io_pin_map.update({io: pin})
 
-	constrain = []
 	for i in range(len(ports)):
 		gpio = ports[i]
 		pin_resistor = pins_resistor[i]
@@ -644,63 +675,44 @@ def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 
 	return constrain
 
-def gen_myip_constrain(constrain):
-	otherconstrain = [
-		('XADC_GPIO_3', 'AA27', ''),
-		('XADC_GPIO_2', 'AB28', ''),
-		('XADC_GPIO_1', 'AA25', ''),
-		('XADC_GPIO_0', 'AB25', ''),
-		('USER_SMA_GPIO_N', 'Y24', ''),
+def gen_myip_constrain():
+	myip_extra_signal = [
+		('XADC_GPIO_0', 'AB25', 'clk_out1'),
+		('USER_SMA_GPIO_P', 'Y23', 'asi_out'),
 	]
 
-	signal = [
-		'i2s_receiver_bclk',
-		'i2s_receiver_lrclk',
-		'i2s_receiver_sdata',
-		'mpeg_clk',
-		'mpeg_valid',
-		'mpeg_data[0]',
-		'mpeg_data[1]',
-		'mpeg_data[2]',
-		'mpeg_data[3]',
-		'mpeg_data[4]',
-		'mpeg_data[5]',
-		'mpeg_data[6]',
-		'mpeg_data[7]',
-		'mpeg_sync',
-		'i2s_sender_bclk',
-		'i2s_sender_lrclk',
-		'i2s_sender_sdata',
-		'asi_out',
-		'clk_out1',
-	]
-	
 	extra_property = {
-		'i2s_receiver_bclk': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'i2s_receiver_bclk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	}
 
 
-	if len(constrain) + len(otherconstrain) < len(signal):
-		print 'ERROR: no enough pins for signal!!!'
-		return
-
 	print '#', '-' * 100
 	print '#', 'generator constrain for ip signals'
 	print '#', '-' * 100
-	constrain.extend(otherconstrain)
-	constrain = constrain[-(len(signal)):]
-	for index in range(len(signal)):
-		i = constrain[index]
-		io, pin, gpio = i
-		gpio = signal[index]
-		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, gpio)
-		print 'set_property IOSTANDARD LVCMOS18 [get_ports {%s}]' %(gpio)
-		extra_list = extra_property.get(gpio)
+
+	io_pin_map = {}
+	for pin, io in package_pins.items():
+		io_pin_map.update({io: pin})
+
+	for io, signal in myip_fmc_signal:
+		pin = io_pin_map.get(io)
+		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, signal)
+		print 'set_property IOSTANDARD LVCMOS18 [get_ports {%s}]' %(signal)
+		extra_list = extra_property.get(signal)
 		if not extra_list:
 			continue
 		for p in extra_list:
-			print 'set_property %s [get_nets {%s}]' %(p, gpio)
+			print 'set_property %s [get_nets {%s}]' %(p, signal)
+
+	for io, pin, signal in myip_extra_signal:
+		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, signal)
+		print 'set_property IOSTANDARD LVCMOS18 [get_ports {%s}]' %(signal)
+		extra_list = extra_property.get(signal)
+		if not extra_list:
+			continue
+		for p in extra_list:
+			print 'set_property %s [get_nets {%s}]' %(p, signal)
 
 
 def gen_unused_pin_io(support_package_pins, kc705_pins_resistor):
@@ -746,7 +758,7 @@ def gen_kc705_constrain():
 	hpc_constrain = gen_constrain(hpc_lpc_pins_resistor_map, 'HPC', 0)
 	lpc_constrain = gen_constrain(hpc_lpc_pins_resistor_map, 'LPC', len(hpc_constrain))
 	
-	gen_myip_constrain(copy.copy(lpc_constrain))
+	gen_myip_constrain()
 
 	get_gpios_pin_no_for_driver(hpc_constrain, hpc_lpc_pins_resistor_map, 'HPC', 0)
 	get_gpios_pin_no_for_driver(lpc_constrain, hpc_lpc_pins_resistor_map, 'LPC', len(hpc_constrain))
