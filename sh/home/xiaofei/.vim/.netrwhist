@@ -1,9 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =7
-let g:netrw_dirhist_1='/home/xiaofei/workspace/source/mycode/django_learn/learn/jquery/static/easy_ui'
-let g:netrw_dirhist_2='/home/xiaofei/workspace/source/mycode/django_learn/learn/jquery/templates'
-let g:netrw_dirhist_3='/home/xiaofei/workspace/source/mycode/django_learn/learn/jquery'
-let g:netrw_dirhist_4='/home/xiaofei/workspace/source/mycode/django_learn/learn/jquery/static'
-let g:netrw_dirhist_5='/home/xiaofei/workspace/source/mycode/django_learn/learn/jquery/static/easy_ui'
-let g:netrw_dirhist_6='/home/xiaofei/workspace/source/mycode/django_learn/learn/jquery/static/easy_ui/themes'
-let g:netrw_dirhist_7='/home/xiaofei/workspace/source/mycode/django_learn/learn/jquery/static/easy_ui/themes/metro'
