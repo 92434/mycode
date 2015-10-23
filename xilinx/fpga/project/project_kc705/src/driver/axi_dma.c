@@ -208,7 +208,7 @@ static int dma_tr(void *ppara) {
 	int tx_size = tr->tx_size;
 	int rx_size = tr->rx_size;
 	uint8_t *tx_data = tr->tx_data;
-	uint8_t *rx_data = tr->rx_data;
+	//uint8_t *rx_data = tr->rx_data;
 	struct completion *tr_cmp = tr->tr_cmp;
 
 	buffer_node_t write;
@@ -251,7 +251,7 @@ static int dma_tr(void *ppara) {
 		dma->dma_op.init_dma(dma);
 	}
 
-	get_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size, rx_data);
+	//get_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size, rx_data);
 	write_buffer(NULL, rx_size, dma->list);
 	//read_buffer(NULL, rx_size, dma->list);
 	inc_dma_op_tx_count(dma, tx_size);

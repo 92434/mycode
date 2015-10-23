@@ -62,7 +62,7 @@ int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
 	ui0 = ui1 = *pre_value;
 
 	for(i = 0; i < count; i++) {
-		ui1 = pdata[i] & 0x7fffffff;
+		ui1 = pdata[i] & 0xffffff;
 		
 		if(ui1 == ui0 + 1) {
 		} else if(ui1 == 0) {
@@ -188,8 +188,8 @@ static read_buffer(int fd, int sock_fd, unsigned char *read_buf) {
 				int i;
 				static unsigned int pre_value = 0;
 
-				//nread = read(fd, read_buf, BUFSIZE);
-				nread = read(fd, NULL, BUFSIZE);
+				nread = read(fd, read_buf, BUFSIZE);
+				//nread = read(fd, NULL, BUFSIZE);
 				//printf("nread:%d\n", nread);
 				if(nread <= 0) {
 					continue;
@@ -197,14 +197,16 @@ static read_buffer(int fd, int sock_fd, unsigned char *read_buf) {
 
 				//udp_send_data(sock_fd, read_buf, nread);
 				//tcp_send_data(sock_fd, read_buf, nread);
-				//for(i = 0; i < nread / sizeof(unsigned int); i++) {
+				//for(i = 0; i < /*nread / sizeof(unsigned int)*/4; i++) {
 				//	if(i % 16 == 0) {
 				//		printf("\n");
 				//	}
-				//	printf("%02x ", (pdata[i] >> 8) & 0xff);
+				//	//printf("%02x ", (pdata[i] >> 8) & 0xff);
+
+				//	//printf("channel:%d, lr:%d, data:%08x\n", pdata[i] >> 27, (pdata[i] & 0x01000000) >> 24, pdata[i] & 0x00ffffff);
 				//}
 				//printf("\n");
-				//check_buffer(pdata, nread / sizeof(unsigned int), &pre_value);
+				check_buffer(pdata, nread / sizeof(unsigned int), &pre_value);
 			}
 		}
 	}

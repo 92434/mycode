@@ -41,18 +41,13 @@ extern dma_op_t axi_dma_op;
 extern dma_op_t axi_cdma_op;
 extern dma_op_t pseudo_dma_op;
 
-typedef enum {
-	AXI_DMA = 0,
-	AXI_CDMA,
-	PSEUDO_DMA,
-} dma_type_t;
-
 typedef struct dma_static_config {
 	int dma_lite_offset;
 	int pcie_bar_map_ctl_offset;
 	int pcie_map_bar_axi_addr_0;
 	int pcie_map_bar_axi_addr_1;
 	int dma_bar_map_num;
+	uint64_t target_axi_addr_base;
 	dma_type_t dma_type;
 } dma_static_config_info_t;
 
@@ -72,6 +67,7 @@ static dma_static_config_info_t dma_info[] = {
 		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR3,
 		.dma_bar_map_num = 3,
 		.dma_type = AXI_CDMA,
+		.target_axi_addr_base = BASE_AXI_DDR_ADDR,
 	},
 	{
 		.dma_lite_offset = 0,
@@ -80,6 +76,7 @@ static dma_static_config_info_t dma_info[] = {
 		.pcie_map_bar_axi_addr_1 = 0,
 		.dma_bar_map_num = 3,
 		.dma_type = PSEUDO_DMA,
+		.target_axi_addr_base = OFFSET_AXI_TSP_LITE,
 	},
 };
 
@@ -93,18 +90,20 @@ typedef struct {
 } gpio_chip_info_t;
 
 static gpio_chip_info_t gpio_chip_info[] = {
-	//{
-	//	.chip_addr_offset = OFFSET_AXI_GPIO_LITE_0,
-	//	.ngpios = 2,
-	//	.ngpio = {32, 32},
+#if !defined(TEST_FMC_LPC_GPIOS)
+	{
+		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_0,
+		.ngpios = 2,
+		.ngpio = {32, 32},
 
-	//},
-	//{
-	//	.chip_addr_offset = OFFSET_AXI_GPIO_LITE_1,
-	//	.ngpios = 2,
-	//	.ngpio = {32, 27},
+	},
+	{
+		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_1,
+		.ngpios = 2,
+		.ngpio = {32, 27},
 
-	//},
+	},
+#else
 	{
 		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_2,
 		.ngpios = 2,
@@ -117,6 +116,7 @@ static gpio_chip_info_t gpio_chip_info[] = {
 		.ngpio = {9, 0},
 
 	},
+#endif
 };
 
 #define GPIOCHIP_MAX (sizeof(gpio_chip_info) / sizeof(gpio_chip_info_t))
@@ -532,7 +532,7 @@ static int pcie_tr_thread(void *ppara) {
 			tr.dma = dma;
 			tr.tx_dest_axi_addr = 0;
 			tr.rx_src_axi_addr = 0;
-			tr.tx_size = DMA_BLOCK_SIZE;
+			tr.tx_size = 0;
 			tr.rx_size = DMA_BLOCK_SIZE;
 			tr.tx_data = NULL;
 			tr.rx_data = NULL;
@@ -557,10 +557,10 @@ static int test_thread(void *ppara) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + 1;
 
 		set_current_state(TASK_UNINTERRUPTIBLE);  
-		schedule_timeout(msecs_to_jiffies(1000)); 
+		schedule_timeout(msecs_to_jiffies(100)); 
 
 
-		put_pcie_tr(dma, BASE_AXI_DDR_ADDR + 0, BASE_AXI_DDR_ADDR + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
+		put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
 
 		dma++;
 
@@ -583,10 +583,10 @@ static int test_thread(void *ppara) {
 		//mydebug("%p:tx_data:%p\n", current, tx_data);
 		//mydebug("%p:rx_data:%p\n", current, rx_data);
 
-		//put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 0, tx_data, NULL, true);
-		//put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 0, 189, NULL, rx_data, true);
-		put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 189, tx_data, rx_data, true);
-		//put_pcie_tr(dma, OFFSET_AXI_TSP_LITE + 0, OFFSET_AXI_TSP_LITE + 0, 189, 189, NULL, NULL, true);
+		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 0, tx_data, NULL, true);
+		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 0, 189, NULL, rx_data, true);
+		put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 189, tx_data, rx_data, true);
+		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 189, NULL, NULL, true);
 		//tr.dma = dma;
 		//tr.tx_dest_axi_addr = 0;
 		//tr.rx_src_axi_addr = 0;
@@ -717,6 +717,8 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 		dma->pcie_map_bar_axi_addr_0 = dma_info[i].pcie_map_bar_axi_addr_0;
 		dma->pcie_map_bar_axi_addr_1 = dma_info[i].pcie_map_bar_axi_addr_1;
 		dma->dma_bar_map_num = dma_info[i].dma_bar_map_num;
+		dma->dma_type = dma_info[i].dma_type;
+		dma->target_axi_addr_base = dma_info[i].target_axi_addr_base;
 		dma->dma_op = (dma_info[i].dma_type == AXI_DMA) ? axi_dma_op :
 					(dma_info[i].dma_type == AXI_CDMA) ? axi_cdma_op :
 					(dma_info[i].dma_type == PSEUDO_DMA) ? pseudo_dma_op :
@@ -929,8 +931,8 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	}
 	
 	mydebug("txp addr:%p\n", kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE);
-	//write_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
-	//dump_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
+	write_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
+	dump_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
 
 	kc705_pci_dev->pdev = pdev;
 
@@ -973,7 +975,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 
 
 	add_local_device();
-	//start_dma();
+	start_dma();
 
 	return 0;
 
