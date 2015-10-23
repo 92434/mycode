@@ -70,6 +70,12 @@
 
 #define DMA_BLOCK_SIZE 0x1000
 
+typedef enum {
+	AXI_DMA = 0,
+	AXI_CDMA,
+	PSEUDO_DMA,
+} dma_type_t;
+
 typedef irqreturn_t (*process_isr_t)(void *ppara);
 typedef int (*init_dma_t)(void *ppara);
 typedef int (*dma_tr_t)(void *ppara);
@@ -92,6 +98,8 @@ typedef struct {
 	int pcie_map_bar_axi_addr_1;
 	int dma_bar_map_num;
 	list_buffer_t *list;
+	uint64_t target_axi_addr_base;
+	dma_type_t dma_type;
 	dma_op_t dma_op;
 	struct completion tx_cmp;
 	struct completion rx_cmp;
