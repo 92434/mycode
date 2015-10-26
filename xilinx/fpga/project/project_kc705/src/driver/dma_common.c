@@ -36,34 +36,31 @@ int write_addr_to_reg(uint32_t *reg, uint64_t addr) {
 }
 
 void prepare_test_data(uint8_t *tx_memory, int tx_size, uint8_t *rx_memory, int rx_size, uint8_t *tx_data) {
-	uint8_t *tx_addr = tx_memory;
-	uint8_t *rx_addr = rx_memory;
 	int i;
 
 	if(tx_data != NULL) {
-		memcpy(tx_addr, tx_data, tx_size);
+		if(tx_data != tx_memory) {
+			memcpy(tx_memory, tx_data, tx_size);
+		}
 	} else {
 		for(i = 0; i < tx_size; i++) {
-			tx_addr[i] = 8 + i;
+			tx_memory[i] = 8 + i;
 		}
 	}
 
 	for(i = 0; i < rx_size; i++) {
-		rx_addr[i] = 0;
+		rx_memory[i] = 0;
 	}
 }
 
-void get_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_size, uint8_t *rx_data) {
-	uint8_t *tx_addr = memory_tx;
-	uint8_t *rx_addr = memory_rx;
-
+void test_result(uint8_t *tx_memory, int tx_size, uint8_t *rx_memory, int rx_size) {
 	int i;
 	bool success = true;
 	int pos;
 
 	for(i = 0; i < rx_size; i++) {
-		if(rx_addr[i] != tx_addr[i]) {
-			mydebug("%d:%d\n", tx_addr[i], rx_addr[i]);
+		if(rx_memory[i] != tx_memory[i]) {
+			mydebug("%d:%d\n", tx_memory[i], rx_memory[i]);
 			success = false;
 			pos = i;
 			break;
@@ -77,20 +74,25 @@ void get_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_size
 			if((i != 0) && (i % 16 == 0)) {
 				printk("\n");
 			}
-			printk("%02x ", tx_addr[i]);
+			printk("%02x ", tx_memory[i]);
 		}
 		printk("\n");
 		for(i = pos; i < pos + 8; i++) {
 			if((i != 0) && (i % 16 == 0)) {
 				printk("\n");
 			}
-			printk("%02x ", rx_addr[i]);
+			printk("%02x ", rx_memory[i]);
 		}
 		printk("\n");
 	}
 
+}
+
+void get_result(uint8_t *rx_memory, int rx_size, uint8_t *rx_data) {
 	if(rx_data != NULL) {
-		memcpy(rx_data, rx_addr, rx_size);
+		if(rx_data != rx_memory) {
+			memcpy(rx_data, rx_memory, rx_size);
+		}
 	}
 
 }

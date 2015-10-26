@@ -585,7 +585,8 @@ static int test_thread(void *ppara) {
 
 		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 0, tx_data, NULL, true);
 		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 0, 189, NULL, rx_data, true);
-		put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 189, tx_data, rx_data, true);
+		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 189, tx_data, rx_data, true);
+		put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 189, NULL, NULL, true);
 		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 189, NULL, NULL, true);
 		//tr.dma = dma;
 		//tr.tx_dest_axi_addr = 0;

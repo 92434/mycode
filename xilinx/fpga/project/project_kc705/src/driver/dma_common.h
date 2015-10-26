@@ -6,5 +6,6 @@
 int wait_for_iostatus_timeout(unsigned long count, uint8_t *paddr, uint32_t mask, uint32_t expection);
 int write_addr_to_reg(uint32_t *reg, uint64_t addr);
 void prepare_test_data(uint8_t *tx_memory, int tx_size, uint8_t *rx_memory, int rx_size, uint8_t *tx_data);
-void get_result(uint8_t *memory_tx, int tx_size, uint8_t *memory_rx, int rx_size, uint8_t *rx_data);
+void test_result(uint8_t *tx_memory, int tx_size, uint8_t *rx_memory, int rx_size);
+void get_result(uint8_t *rx_memory, int rx_size, uint8_t *rx_data);
 #endif //#define _DMA_COMMON_H
