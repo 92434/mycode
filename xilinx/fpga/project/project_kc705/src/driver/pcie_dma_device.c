@@ -114,12 +114,19 @@ static int pcie_dma_mmap(struct file *filp, struct vm_area_struct *vma) {
 	return 0;
 }
 
+int put_pcie_tr(pcie_dma_t *dma,
+		uint64_t tx_dest_axi_addr,
+		uint64_t rx_src_axi_addr,
+		int tx_size,
+		int rx_size,
+		uint8_t *tx_data,
+		uint8_t *rx_data,
+		bool wait);
 static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
 	list_buffer_t *list = dma->list;
 
-	mydebug("\n");
 	switch (cmd) {
 		case PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE:
 			{
@@ -143,6 +150,68 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 				info.base_addr_of_list_buffer = read.base_addr_of_list_buffer;
 				if (copy_to_user((int *)arg, &info, sizeof(node_info_t))) {
 					ret = -EFAULT;
+				}
+			}
+			break;
+		case PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR:
+			{
+				uint8_t *tx_data = NULL;
+				uint8_t *rx_data = NULL;
+
+				pseudo_dma_tr_t pseudo_dma_tr;
+
+				if(copy_from_user(&pseudo_dma_tr, (pseudo_dma_tr_t __user *) arg, sizeof(pseudo_dma_tr_t __user))) {
+					mydebug("%p\n", current);
+					ret = -EFAULT;
+					return ret;
+				}
+
+				//mydebug("%p:tx_data:%p\n", current, tx_data);
+				//mydebug("%p:rx_data:%p\n", current, rx_data);
+				if(pseudo_dma_tr.tx_data != NULL) {
+					tx_data = (uint8_t *)vzalloc(pseudo_dma_tr.tx_size);
+					if(tx_data == NULL) {
+						mydebug("alloc tx_data failed.\n");
+						ret = -EFAULT;
+						return ret;
+					} else {
+						copy_from_user(tx_data, pseudo_dma_tr.tx_data, pseudo_dma_tr.tx_size);
+					}
+				}
+
+				if(pseudo_dma_tr.rx_data != NULL) {
+					rx_data = (uint8_t *)vzalloc(pseudo_dma_tr.rx_size);
+					if(rx_data == NULL) {
+						mydebug("alloc rx_data failed.\n");
+						ret = -EFAULT;
+						return ret;
+					}
+				}
+
+				put_pcie_tr(
+					dma,
+					dma->target_axi_addr_base + pseudo_dma_tr.tx_dest_offset,
+					dma->target_axi_addr_base + pseudo_dma_tr.rx_src_offset,
+					pseudo_dma_tr.tx_size,
+					pseudo_dma_tr.rx_size,
+					tx_data,
+					rx_data,
+					true
+				);
+
+				if(pseudo_dma_tr.rx_data != NULL) {
+					if (copy_to_user(pseudo_dma_tr.rx_data, rx_data, pseudo_dma_tr.rx_size)) {
+						mydebug("%p\n", current);
+						ret = -EFAULT;
+						return ret;
+					}
+				}
+
+				if(tx_data != NULL) {
+					vfree(tx_data);
+				}
+				if(rx_data != NULL) {
+					vfree(rx_data);
 				}
 			}
 			break;

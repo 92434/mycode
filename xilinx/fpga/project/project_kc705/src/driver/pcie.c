@@ -507,9 +507,13 @@ static int get_pcie_tr(kc705_pci_dev_t *kc705_pci_dev, pcie_tr_t *tr) {
 	return ret;
 }
 
+int tr_wakeup(struct completion *tr_cmp);
 static int pcie_tr_thread(void *ppara) {
 	int ret = 0;
 	int i;
+	int size;
+	pcie_tr_t tr;
+
 
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
 
@@ -519,9 +523,6 @@ static int pcie_tr_thread(void *ppara) {
 	}
 
 	while(!kthread_should_stop()) {
-		int size;
-		pcie_tr_t tr;
-
 		set_current_state(TASK_UNINTERRUPTIBLE);  
 		//schedule_timeout(1*HZ); 
 		
@@ -542,14 +543,19 @@ static int pcie_tr_thread(void *ppara) {
 		tr.dma->dma_op.dma_tr(&tr);
 	 }
 
+	size = get_pcie_tr(kc705_pci_dev, &tr);
+	while(size != 0) {
+		struct completion *tr_cmp = tr.tr_cmp;
+		tr_wakeup(tr_cmp);
+		size = get_pcie_tr(kc705_pci_dev, &tr);
+	}
+
 	return ret;
 }
 
 static int test_thread(void *ppara) {
 	int ret = 0;
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
-	uint8_t *tx_data = NULL;
-	uint8_t *rx_data = NULL;
 
 	while(!kthread_should_stop()) {
 		//pcie_tr_t tr;
@@ -561,51 +567,8 @@ static int test_thread(void *ppara) {
 
 
 		put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
-
-		dma++;
-
-		//mydebug("%p:tx_data:%p\n", current, tx_data);
-		//mydebug("%p:rx_data:%p\n", current, rx_data);
-		if(tx_data == NULL) {
-			tx_data = (uint8_t *)vzalloc(DMA_BLOCK_SIZE);
-			if(tx_data == NULL) {
-				mydebug("alloc tx_data failed.\n");
-			}
-		}
-
-		if(rx_data == NULL) {
-			rx_data = (uint8_t *)vzalloc(DMA_BLOCK_SIZE);
-			if(rx_data == NULL) {
-				mydebug("alloc rx_data failed.\n");
-			}
-		}
-
-		//mydebug("%p:tx_data:%p\n", current, tx_data);
-		//mydebug("%p:rx_data:%p\n", current, rx_data);
-
-		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 0, tx_data, NULL, true);
-		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 0, 189, NULL, rx_data, true);
-		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 189, tx_data, rx_data, true);
-		put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 189, NULL, NULL, true);
-		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, 189, 189, NULL, NULL, true);
-		//tr.dma = dma;
-		//tr.tx_dest_axi_addr = 0;
-		//tr.rx_src_axi_addr = 0;
-		//tr.tx_size = 189;
-		//tr.rx_size = 189;
-		//tr.tx_data = tx_data;
-		//tr.rx_data = rx_data;
-		//tr.tr_cmp = NULL;
-		//tr.dma->dma_op.dma_tr(&tr);
-
 	}
 
-	if(tx_data != NULL) {
-		vfree(tx_data);
-	}
-	if(rx_data != NULL) {
-		vfree(rx_data);
-	}
 	mydebug("\n");
 
 	return ret;

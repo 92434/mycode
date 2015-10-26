@@ -13,11 +13,13 @@ install:
 	sudo insmod driver/kc705-module.ko
 #	sudo insmod driver/kc705_i2c_device.ko
 	sudo ./app/pcie_dma_device /dev/pciedma_0 &
+	sudo ./app/pcie_pseudo_dma_device /dev/pciedma_2 &
 	dmesg
 
 uninstall:
+	make start_dma
 	-sudo killall -9 pcie_dma_device
-	while test -n "$(ps -elf | grep pcie_dma_device 2>/dev/null)"; do sleep 1;done
+	-sudo killall -9 pcie_pseudo_dma_device
 	-sudo rmmod i2c-dev
 #	-sudo rmmod kc705_i2c_device
 	-sudo rmmod i2c_gpio
@@ -25,6 +27,7 @@ uninstall:
 	-sudo rmmod spi_gpio_all
 	-sudo rmmod kc705-module
 	sudo dmesg -c
+
 start_dma:
 	sudo dmesg -c
 	sudo ./app/kc705_device /dev/kc705_pcie start 
