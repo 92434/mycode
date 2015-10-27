@@ -26,7 +26,7 @@ void  RBTreeInit(RBTree* T)
 }
 
 
-void LEFT_ROTATE(struct RBTree *T,struct RBTreeNode *x)//×óĞı×ª
+void LEFT_ROTATE(struct RBTree *T,struct RBTreeNode *x)//å·¦æ—‹è½¬
 {
     struct RBTreeNode *y ;
     y = x->right;
@@ -43,7 +43,7 @@ void LEFT_ROTATE(struct RBTree *T,struct RBTreeNode *x)//×óĞı×ª
 
 }
 
-void RIGHT_ROTATE(struct RBTree*T, struct RBTreeNode *x)//ÓÒĞı×ª
+void RIGHT_ROTATE(struct RBTree*T, struct RBTreeNode *x)//å³æ—‹è½¬
 {
     struct RBTreeNode *y ;
     y = x->left;
@@ -59,7 +59,7 @@ void RIGHT_ROTATE(struct RBTree*T, struct RBTreeNode *x)//ÓÒĞı×ª
     x->p = y ;
 }
 
-void RB_INSERT_FIXUP(struct RBTree *T,struct RBTreeNode *z)//µ÷Õû
+void RB_INSERT_FIXUP(struct RBTree *T,struct RBTreeNode *z)//è°ƒæ•´
 {
     struct RBTreeNode *y ;
     while (z->p->color == 'r')
@@ -113,13 +113,13 @@ void RB_INSERT_FIXUP(struct RBTree *T,struct RBTreeNode *z)//µ÷Õû
     T->root->color = 'b';
 }
 
-void RB_INSERT(struct RBTree *T, struct RBTreeNode *z)//²åÈë
+void RB_INSERT(struct RBTree *T, struct RBTreeNode *z)//æ’å…¥
 {
     struct RBTreeNode *y ;
     y = &T->nil ;
     struct RBTreeNode *x ;
     x = T->root;
-    while ( x != &T->nil ) // ²éÕÒºÏÊÊµÄÎ»ÖÃ²åÈë½Úµã
+    while ( x != &T->nil ) // æŸ¥æ‰¾åˆé€‚çš„ä½ç½®æ’å…¥èŠ‚ç‚¹
     {
         y = x ;
         if (z->key<x->key)
@@ -137,7 +137,7 @@ void RB_INSERT(struct RBTree *T, struct RBTreeNode *z)//²åÈë
     z->left = &T->nil ;
     z->right = &T->nil ;
     z->color = 'r';
-    RB_INSERT_FIXUP(T,z);//²åÈëµ÷Õû
+    RB_INSERT_FIXUP(T,z);//æ’å…¥è°ƒæ•´
     T->num ++;
 }
 
@@ -149,7 +149,7 @@ void PrintInOrder (struct RBTree *Tree,struct RBTreeNode*T)
         PrintInOrder(Tree,T->left);
         PrintInOrder(Tree,T->right);
     }
-}//ÖĞĞò´òÓ¡
+}//ä¸­åºæ‰“å°
 
 int main ()
 {
