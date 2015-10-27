@@ -1,17 +1,15 @@
 include $(default_rules)
 
-local_lib_src := $(top)/utils
-
-CFLAGS += -I$(local_lib_src)
-
 LDFLAGS += -static
-LDFLAGS += -L$(local_lib_src)/$(out_dir)/lib
-LDFLAGS += -lxiaofei
-
 LDFLAGS += -lrt
 LDFLAGS += -lpthread
 
 c_files := poll_test.cpp
+local_lib_src := $(top)/c/utils
+poll_test.cpp.LOCAL_CFLAGS := -I$(local_lib_src)
+poll_test.cpp.LOCAL_LDFLAGS := -L$(local_lib_src)/$(out_dir)/lib
+poll_test.cpp.LOCAL_LDFLAGS += -lxiaofei
+
 include $(BUILD_BINS)
 
 include $(ADD_TARGET)
