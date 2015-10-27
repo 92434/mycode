@@ -4,23 +4,23 @@ module logic_ram #(
 		parameter FILTER_MAX_NUM = 32
 	)
 	(
-		input [7:0] mpeg_data,
-		input mpeg_clk,
-		input mpeg_valid,
-		input mpeg_sync,
-		input rst,
-		input S_AXI_ACLK,
-		input [(C_S_AXI_DATA_WIDTH/8)-1 : 0] S_AXI_WSTRB,
-		input [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA,
-		input mem_rden,
-		input mem_wren,
-		input [OPT_MEM_ADDR_BITS:0] mem_address,
+		input wire [7:0] mpeg_data,
+		input wire mpeg_clk,
+		input wire mpeg_valid,
+		input wire mpeg_sync,
+		input wire rst,
+		input wire S_AXI_ACLK,
+		input wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] S_AXI_WSTRB,
+		input wire [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA,
+		input wire mem_rden,
+		input wire mem_wren,
+		input wire [OPT_MEM_ADDR_BITS:0] mem_address,
 		output reg [C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata,
-		output [7:0] ts_out,
-		output ts_out_clk,
-		output ts_out_valid,
-		output ts_out_sync,
-		output slot0_out_dump_flag
+		output wire [7:0] ts_out,
+		output wire ts_out_clk,
+		output wire ts_out_valid,
+		output wire ts_out_sync,
+		output wire slot0_out_dump_flag
 	);
 		
 	parameter PACK_BYTE_SIZE = 188;
