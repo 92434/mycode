@@ -18,7 +18,9 @@ module logic_ram #(
 		output reg [C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata,
 		output [7:0] ts_out,
 		output ts_out_clk,
-		output ts_out_valid
+		output ts_out_valid,
+		output ts_out_sync,
+		output slot0_out_dump_flag
 	);
 		
 	parameter PACK_BYTE_SIZE = 188;
@@ -37,7 +39,7 @@ module logic_ram #(
 	
 	wire[FILTER_MAX_NUM-1:0] dump_flag;
 	wire[7:0] dump_data;
-	wire ts_out_sync;
+	//wire ts_out_sync;
 	integer i,j;
 	reg[FILTER_MAX_NUM-1:0] start_recv_monitor;
 	
@@ -45,9 +47,16 @@ module logic_ram #(
 	wire [7:0] copy_data[FILTER_MAX_NUM-1:0];
 	wire df_ready[FILTER_MAX_NUM-1:0];
 	
+	assign slot0_out_dump_flag=dump_flag[0];
 	//set filter param and replace data
-	always @(posedge S_AXI_ACLK) begin
-		if (mem_wren) begin
+	always @(posedge S_AXI_ACLK or posedge mpeg_clk) begin
+		if (S_AXI_ACLK&mem_wren) begin
+			for(i = 0; i < (C_S_AXI_DATA_WIDTH / 8); i = i + 1) begin
+				if(S_AXI_WSTRB[i] == 1) begin
+					byte_ram[mem_address][(8 * i + 7) -: 8] <= S_AXI_WDATA[(8 * i + 7) -: 8];
+				end
+			end
+			
 			case(mem_address*4)
 				INPUT_PARAM_OFFSET:begin
 					replace_add=S_AXI_WDATA[0];
@@ -69,31 +78,36 @@ module logic_ram #(
 				end
 			endcase
 		end
+		
+		if(mpeg_clk) begin
+			//read dump data here
+			if(dump_flag>0&&ts_out_valid==1&&ts_out_sync==1) begin
+				for(i=0;i<=FILTER_MAX_NUM-1;i=i+1) begin
+					if(dump_flag[i]) monitor_slot=i;
+				end
+				monitor_cursor[monitor_slot]=0;
+				if(byte_ram[MONITOR_READY_OFFSET+monitor_slot]==0)
+					start_recv_monitor[monitor_slot]=1;
+			end
+			  
+			if(start_recv_monitor[monitor_slot]) begin
+				j=MONITOR_TS_OFFSET+monitor_slot*PACK_BYTE_SIZE+monitor_cursor[monitor_slot];
+				byte_ram[j/4][((j%4)*8 + 7) -: 8]= dump_data;
+				$display("[logic_ram dump]monitor_slot:%d :%h", monitor_slot,byte_ram[j/4][((j%4)*8 + 7) -: 8]);
+				monitor_cursor[monitor_slot]=monitor_cursor[monitor_slot]+1;
+				if(monitor_cursor[monitor_slot]>=PACK_BYTE_SIZE) begin
+					monitor_cursor[monitor_slot]=0;
+					byte_ram[MONITOR_READY_OFFSET+monitor_slot]=1;
+					start_recv_monitor[monitor_slot]=0;
+				end
+			end
+		end
 	end
 	
-	always	@(posedge mpeg_clk) begin
-		//read dump data here
-		if(dump_flag>0&&ts_out_valid==1&&ts_out_sync==1) begin
-			for(i=0;i<=FILTER_MAX_NUM-1;i=i+1) begin
-				if(dump_flag[i]) monitor_slot=i;
-			end
-			monitor_cursor[monitor_slot]=0;
-			if(byte_ram[MONITOR_READY_OFFSET+monitor_slot]==0)
-				start_recv_monitor[monitor_slot]=1;
-		end
-		  
-		if(start_recv_monitor[monitor_slot]) begin
-			j=MONITOR_TS_OFFSET+monitor_slot*PACK_BYTE_SIZE+monitor_cursor[monitor_slot];
-			byte_ram[j/4][((j%4)*8 + 7) -: 8]= dump_data;
-			$display("[logic_ram dump]monitor_slot:%d :%h", monitor_slot,byte_ram[j/4][((j%4)*8 + 7) -: 8]);
-			monitor_cursor[monitor_slot]=monitor_cursor[monitor_slot]+1;
-			if(monitor_cursor[monitor_slot]>=PACK_BYTE_SIZE) begin
-				monitor_cursor[monitor_slot]=0;
-				byte_ram[MONITOR_READY_OFFSET+monitor_slot]=1;
-				start_recv_monitor[monitor_slot]=0;
-			end
-		end
-	end
+	//always	@(posedge mpeg_clk) begin
+		
+		
+	//end
 
 	
 	match_replace_module#(.FILTER_MAX_NUM( FILTER_MAX_NUM)) A1(
