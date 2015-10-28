@@ -152,7 +152,7 @@ public:
 	poll_thread(poll_wapper *p) : thread_wapper(p) {
 		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		printf("\n");
-		fds = (struct pollfd *)realloc(fds, sizeof(struct pollfd) * POLL_FDS_MAX_COUNT_EACH_THREAD);
+		fds = (struct pollfd *)realloc(NULL, sizeof(struct pollfd) * POLL_FDS_MAX_COUNT_EACH_THREAD);
 		//printf("fds:%p, size:%d\n", fds, sizeof(struct pollfd) * POLL_FDS_MAX_COUNT_EACH_THREAD);
 		fds_count = 0;
 		set_timeout();
