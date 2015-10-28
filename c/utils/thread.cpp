@@ -88,7 +88,12 @@ int Thread::run(int prio, int policy)
 
 Thread::~Thread()
 {
-	kill();
+	if (the_thread)
+	{
+		/* Warn about this class' design being borked */
+		printf("Destroyed thread without joining it, this usually means your thread is now running with a halfway destroyed object\n");
+		kill();
+	}
 }
 
 int Thread::sync(void)
@@ -123,8 +128,11 @@ void Thread::kill(bool sendcancel)
 		printf("send cancel to thread\n");
 		pthread_cancel(the_thread);
 	}
-	printf("thread joined %d\n", pthread_join(the_thread, 0));
+	
+	int ret = pthread_join(the_thread, NULL);
 	the_thread = 0;
+	if (ret)
+		printf("pthread_join failed, code: %d\n", ret);
 }
 
 void Thread::hasStarted()
