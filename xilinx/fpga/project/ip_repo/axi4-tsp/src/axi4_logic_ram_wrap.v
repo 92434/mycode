@@ -27,7 +27,9 @@ module axi4_logic_ram_wrap #(
 		input wire rst,
 		output [7:0] ts_out,
 		output ts_out_clk,
-		output ts_out_valid
+		output ts_out_valid,
+		output ts_out_sync,
+		output slot0_out_dump_flag
 	);
 
 	//----------------------------------------------
@@ -73,7 +75,9 @@ module axi4_logic_ram_wrap #(
 					.rst(rst),
 					.ts_out(ts_out),
 					.ts_out_clk(ts_out_clk),
-					.ts_out_valid(ts_out_valid)
+					.ts_out_valid(ts_out_valid),
+					.ts_out_sync(ts_out_sync),
+					.slot0_out_dump_flag(slot0_out_dump_flag)
 				);
 
 		end

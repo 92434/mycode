@@ -251,7 +251,8 @@ static int dma_tr(void *ppara) {
 		dma->dma_op.init_dma(dma);
 	}
 
-	//get_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size, rx_data);
+	//test_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size);
+
 	write_buffer(NULL, rx_size, dma->list);
 	//read_buffer(NULL, rx_size, dma->list);
 	inc_dma_op_tx_count(dma, tx_size);

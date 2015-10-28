@@ -15,12 +15,15 @@ template<class T>
 class test_case {
 	std::vector<pipe_fd_t *> vector_pipe_fd;
 	int size;
+	T t;
 public:
 	test_case(int n = 5) : size(n) {
 		vector_pipe_fd.clear();
 		create_pipes(size);
 	}
+
 	~test_case() {
+		t.remove_all_fds();
 		release_pipes();
 	}
 
@@ -52,7 +55,7 @@ public:
 		return ret;
 	}
 
-	int add_pipes_fd0_to_poll(T &t, unsigned int events) {
+	int add_pipes_fd0_to_poll(unsigned int events) {
 		int ret = 0;
 
 		for(int i = 0; i < size; i++) {
@@ -118,6 +121,7 @@ class my_epoll : public epoll_poll {
 
 int main(int argc, char **argv) {
 	int ret = 0;
+	bool stop = false;
 
 	if(argc < 3) {
 		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -125,35 +129,32 @@ int main(int argc, char **argv) {
 		return ret;
 	}
 
-	printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	printf("\n====================================test select\n");
-
 	if(strtod(argv[1], NULL) == 0) {
-		test_case<my_select> test(strtod(argv[2], NULL));
-		while(true) {
-			my_select select;
+		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		printf("\n====================================test select\n");
 
-			test.add_pipes_fd0_to_poll(select, 0xffffffff);
+		while(!stop) {
+			test_case<my_select> test(strtod(argv[2], NULL));
+			test.add_pipes_fd0_to_poll(0xffffffff);
 
 			int i = 0;
 
-			while(i < 2) {
+			while(i < 1) {
 				test.write_pipes_fd1();
 				usleep(100000);
 				i++;
 			}
+			stop = true;
 		}
 	}
-
-	printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	printf("\n====================================test poll\n");
 
 	if(strtod(argv[1], NULL) == 1) {
-		test_case<my_poll> test(strtod(argv[2], NULL));
-		while(true) {
-			my_poll poll;
+		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		printf("\n====================================test poll\n");
 
-			test.add_pipes_fd0_to_poll(poll, POLLIN | POLLOUT);
+		while(!stop) {
+			test_case<my_poll> test(strtod(argv[2], NULL));
+			test.add_pipes_fd0_to_poll(POLLIN | POLLOUT);
 
 			int i = 0;
 
@@ -162,18 +163,17 @@ int main(int argc, char **argv) {
 				usleep(100000);
 				i++;
 			}
+			stop = true;
 		}
 	}
 
-	printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	printf("\n====================================test epoll\n");
-
 	if(strtod(argv[1], NULL) == 2) {
-		test_case<my_epoll> test(strtod(argv[2], NULL));
-		while(true) {
-			my_epoll epoll;
+		printf("[%s:%s:%d]", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		printf("\n====================================test epoll\n");
 
-			test.add_pipes_fd0_to_poll(epoll, EPOLLIN | EPOLLOUT);
+		while(!stop) {
+			test_case<my_epoll> test(strtod(argv[2], NULL));
+			test.add_pipes_fd0_to_poll(EPOLLIN | EPOLLOUT);
 
 			int i = 0;
 
@@ -182,6 +182,7 @@ int main(int argc, char **argv) {
 				usleep(100000);
 				i++;
 			}
+			stop = true;
 		}
 	}
 

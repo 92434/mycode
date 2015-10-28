@@ -327,9 +327,10 @@ static int dma_tr(void *ppara) {
 	}
 
 	//write_buffer(NULL, rx_size, dma->list);
-	get_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size, rx_data);//id
-
 	//read_buffer(NULL, rx_size, dma->list);
+	
+	get_result(rx_dest_bar_map_memory, rx_size, rx_data);//id
+	test_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size);
 	inc_dma_op_tx_count(dma, tx_size);
 	inc_dma_op_rx_count(dma, rx_size);
 	

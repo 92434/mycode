@@ -8,6 +8,7 @@
 
 #KBUILD_CFLAGS += -Dtest_timer
 KBUILD_CFLAGS += -Dtest_buffer_list
+#KBUILD_CFLAGS += -DTEST_FMC_LPC_GPIOS
 
 #kc705-dma-objs := kc705_pcie_xdma.o
 #KERNEL-OBJS += kc705-dma.o

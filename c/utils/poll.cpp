@@ -33,7 +33,6 @@ int poll_wapper::add_fd(int fd, unsigned int events) {
 		   ) {
 			pt = *it_vector_poll_thread;
 			if(pt->add_poll_fd(fd, events) == 0) {
-				pt->start();
 				return ret;
 			}
 		}
@@ -134,6 +133,10 @@ int thread_wapper::add_poll_fd(int fd, unsigned int events) {
 	}
 	map_poll_thread_fds[fd] = events;
 	add_poll_fd_ext(fd, events);
+
+	if(map_poll_thread_fds.size() == 1) {
+		start();
+	}
 
 	return ret;
 }

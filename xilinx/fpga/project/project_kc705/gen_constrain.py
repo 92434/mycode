@@ -617,6 +617,8 @@ myip_fmc_signal = [
 	('FMC_HPC_LA20_N', 'mpeg_data[6]'),
 	('FMC_HPC_LA22_P', 'mpeg_data[7]'),
 	('FMC_HPC_LA30_N', 'mpeg_sync'),
+	('FMC_HPC_HA23_N', 'ts_out_sync'),
+	('FMC_HPC_HA23_P', 'slot0_out_dump_flag'),
 ]
 
 #myip_fmc_signal = []
