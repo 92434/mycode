@@ -196,11 +196,25 @@ function test_quota() {
 }
 #test_quota echo "xiaofei" "is"
 
-function test_option {
-	for xi do
-		echo $xi
-	done
 
+function test_para() {
+	echo "test \$*----------------"
+	test2 $*
+	echo "test \"\$*\"----------------"
+	test2 "$*"
+	echo "test \$@----------------"
+	test2 $@
+	echo "test \"\$@\"----------------"
+	test2 "$@"
+}
+
+function parse_para() {
+	for i do
+		echo $i
+	done
+}
+
+function test_option {
 	for xi do
 		echo `expr $xi : "xiao\(.*\)"`
 	done
