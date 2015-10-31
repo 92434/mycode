@@ -13,36 +13,36 @@ module monitor #(
 
 		output reg [C_S_AXI_DATA_WIDTH-1:0] out_data = 0,
 		output reg [C_S_AXI_DATA_WIDTH-1:0] out_data_index = 0,
-		output reg ready_for_read = 0;
+		output reg ready_for_read = 0,
 
+		input wire [C_S_AXI_DATA_WIDTH-1:0] pid,
 		input wire [7:0] mpeg_data,
 		input wire mpeg_clk,
 		input wire mpeg_valid,
-		input wire mpeg_sync,
-
-		output reg matched_state = 0
+		input wire mpeg_sync
 	);
 
 	localparam integer PACK_BYTE_SIZE = 188;
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data_0 [0 : (PACK_BYTE_SIZE / (C_S_AXI_DATA_WIDTH / 8)) - 1];
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data_1 [0 : (PACK_BYTE_SIZE / (C_S_AXI_DATA_WIDTH / 8)) - 1];
+	localparam integer PACK_WORD_SIZE = PACK_BYTE_SIZE / (C_S_AXI_DATA_WIDTH / 8);
+
+	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data_0 [0 : PACK_WORD_SIZE - 1];
+	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data_1 [0 : PACK_WORD_SIZE - 1];
 	reg [C_S_AXI_DATA_WIDTH-1:0] data_index = 0;
-	reg [C_S_AXI_DATA_WIDTH-1:0] working_ram_index = 0;
+	reg [C_S_AXI_DATA_WIDTH-1:0] caching_ram_index = 0;
 	wire [C_S_AXI_DATA_WIDTH-1:0] cached_ram_index;
 
-	assign cached_ram_index = (working_ram_index == 0) ? 1 : 0;
+	assign cached_ram_index = (caching_ram_index == 0) ? 1 : 0;
 
 	always @(posedge S_AXI_ACLK) begin
 		if(S_AXI_ARESETN == 0) begin
-			data_index <= 0;
-
 			ready_for_read <= 0;
+			data_index <= 0;
 			out_data_index <= 0;
 		end
 		else begin
 			ready_for_read <= 0;
 			if(pump_data_enable == 1) begin
-				if((data_index >= 0)) && (data_index < PACK_BYTE_SIZE)) begin
+				if((data_index >= 0) && (data_index < PACK_WORD_SIZE)) begin
 					out_data_index <= data_index;
 
 					case(cached_ram_index)
@@ -67,7 +67,6 @@ module monitor #(
 			end
 		end
 	end
-
 
 	reg mpeg_sync_d1 = 0;
 	reg mpeg_sync_d2 = 0;
@@ -100,24 +99,22 @@ module monitor #(
 	end
 
 	reg pid_matched = 0;
-	reg [C_S_AXI_DATA_WIDTH-1:0] ts_cache_index = 0;
+	reg [C_S_AXI_DATA_WIDTH-1:0] matched_index = 0;
 
 	always @(posedge mpeg_clk) begin
 		if(S_AXI_ARESETN == 0) begin
 			pid_matched <= 0;
-			matched_state <= 0;
-			ts_cache_index <= 0;
-			working_ram_index <= 0;
+			matched_index <= 0;
+			caching_ram_index <= 0;
 		end
 		else begin
-			matched_state <= pid_matched;
 			if(mpeg_valid == 1) begin
 				if(mpeg_sync_d2 == 1) begin
 					if(mpeg_data_d2 == 8'h47) begin
-						if({16{1'b0}, (mpeg_data_d1 & 8'h1f), mpeg_data} == pid) begin
+						if({mpeg_data_d1[5 - 1 : 0], mpeg_data} == pid[13 - 1 : 0]) begin
 							pid_matched <= 1;
-							ts_cache_index <= 0;
-							working_ram_index <= (working_ram_index == 0) ? 1 : 0;
+							matched_index <= 0;
+							caching_ram_index <= (caching_ram_index == 0) ? 1 : 0;
 						end
 						else begin
 							pid_matched <= 0;
@@ -132,24 +129,29 @@ module monitor #(
 			else begin
 			end
 
-			if((pid_matched == 1) && (mpeg_valid == 1)) begin
-				if((ts_cache_index >= 0) && (ts_cache_index < PACK_BYTE_SIZE)) begin
-					case(working_ram_index)
-						0: begin
-							ram_for_data_0[ts_cache_index / 4][(8 * (ts_cache_index % 4) + 7) -: 8] = mpeg_data_d3;
-						end
-						1: begin
-							ram_for_data_1[ts_cache_index / 4][(8 * (ts_cache_index % 4) + 7) -: 8] = mpeg_data_d3;
-						end
-						default: begin
-						end
-					endcase
-					ts_cache_index <= ts_cache_index + 1;
+			if(pid_matched == 1) begin
+				if(mpeg_valid == 1) begin
+					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
+						case(caching_ram_index)
+							0: begin
+								ram_for_data_0[matched_index / 4][(8 * (matched_index % 4) + 7) -: 8] = mpeg_data_d3;
+							end
+							1: begin
+								ram_for_data_1[matched_index / 4][(8 * (matched_index % 4) + 7) -: 8] = mpeg_data_d3;
+							end
+							default: begin
+							end
+						endcase
+						matched_index <= matched_index + 1;
+					end
+					else begin
+					end
 				end
 				else begin
 				end
 			end
 			else begin
+				matched_index <= 0;
 			end
 		end
 	end

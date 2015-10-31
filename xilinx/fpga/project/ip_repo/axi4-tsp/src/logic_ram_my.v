@@ -22,11 +22,12 @@ module logic_ram #(
 
 		output reg [C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata,
 		output wire ts_out_clk,
-		output wire ts_out_valid
-		output wire [7:0] ts_out,
+		output wire ts_out_valid,
+		output wire [7:0] ts_out
 	);
 
 	localparam integer PACK_BYTE_SIZE = 188;
+	localparam integer PACK_WORD_SIZE = PACK_BYTE_SIZE / (C_S_AXI_DATA_WIDTH / 8);
 
 	localparam integer ADDR_INDEX = 0;
 
@@ -39,7 +40,7 @@ module logic_ram #(
 	localparam integer ADDR_STATUS = ADDR_CMD + 1;
 
 	localparam integer ADDR_TS_DATA_BASE = 128;
-	localparam integer ADDR_TS_DATA_END = ADDR_TS_DATA_BASE + PACK_BYTE_SIZE;
+	localparam integer ADDR_TS_DATA_END = ADDR_TS_DATA_BASE + PACK_WORD_SIZE;
 
 	localparam integer MONITOR_PID_BASE = 0;
 	localparam integer REPLACER_PID_BASE = MONITOR_PID_BASE + MONITOR_FILTER_NUM;
@@ -48,16 +49,17 @@ module logic_ram #(
 	// implement Block RAM(s)
 	// for write command
 	//
-	reg [OPT_MEM_ADDR_BITS:0] current_write_address;
-	reg [C_S_AXI_DATA_WIDTH-1:0] current_write_data;
+	reg [OPT_MEM_ADDR_BITS:0] current_write_address = 0;
+	reg [C_S_AXI_DATA_WIDTH-1:0] current_write_data = 0;
 	reg current_mem_wren = 0;
 
 	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_pid [0 : ALL_FILTERS_NUM - 1];
-	reg [ALL_FILTERS_NUM - 1 : 0] write_data_enable = 0;
 	reg [ALL_FILTERS_NUM - 1 : 0] read_data_enable = 0;
-	wire [ALL_FILTERS_NUM - 1 : 0] read_data_ready = 0;
+	wire [ALL_FILTERS_NUM - 1 : 0] read_data_ready;
 
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_replace_data [0 : (PACK_BYTE_SIZE / (C_S_AXI_DATA_WIDTH / 8)) - 1];
+	reg [ALL_FILTERS_NUM - 1 : 0] write_data_enable = 0;
+
+	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data [0 : PACK_WORD_SIZE - 1];
 
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_slot = 0;
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_data_index = 0;
@@ -65,7 +67,6 @@ module logic_ram #(
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_cmd = 0;
 
 	integer index_wstrb;
-
 	//assigning 8 bit data
 	always @(posedge S_AXI_ACLK) begin
 		if (mem_wren) begin
@@ -94,7 +95,7 @@ module logic_ram #(
 				if((current_write_address >= ADDR_TS_DATA_BASE) && (current_write_address < ADDR_TS_DATA_END)) begin
 				end
 				else begin
-						write_data_enable <= 0;
+					write_data_enable <= 0;
 				end
 
 				case(current_write_address)
@@ -150,11 +151,11 @@ module logic_ram #(
 				ADDR_STATUS:
 					axi_rdata <= read_data_ready[current_slot];
 				default: begin
-					if((mem_address >= ADDR_TS_DATA_BASE) && (mem_address < ADDR_TS_DATA_END) begin
-						axi_rdata <= ram_for_replace_data[mem_address - ADDR_TS_DATA_BASE];
+					if((mem_address >= ADDR_TS_DATA_BASE) && (mem_address < ADDR_TS_DATA_END)) begin
+						axi_rdata <= ram_for_data[mem_address - ADDR_TS_DATA_BASE];
 					end
 					else begin
-						axi_rdata <= {(C_S_AXI_DATA_WIDTH / 4){1'b1}, (C_S_AXI_DATA_WIDTH / 4){1'b0}, (C_S_AXI_DATA_WIDTH / 4){1'b1}, (C_S_AXI_DATA_WIDTH / 4){1'b0}};
+						axi_rdata <= {{(C_S_AXI_DATA_WIDTH / 4){1'b1}}, {(C_S_AXI_DATA_WIDTH / 4){1'b0}}, {(C_S_AXI_DATA_WIDTH / 4){1'b1}}, {(C_S_AXI_DATA_WIDTH / 4){1'b0}}};
 					end
 				end
 			endcase
@@ -162,69 +163,162 @@ module logic_ram #(
 	end
 
 
+	//for input assign
+	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_read_data_enable;
+	wire [C_S_AXI_DATA_WIDTH-1:0] ram_for_monitors_pid [0 : REPLACER_FILTER_NUM - 1];
+
+	//for output
+	wire [C_S_AXI_DATA_WIDTH-1:0] monitors_out_data[0 : MONITOR_FILTER_NUM - 1];
+	wire [C_S_AXI_DATA_WIDTH-1:0] monitors_out_data_index[0 : MONITOR_FILTER_NUM - 1];
+	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_read_data_ready;
+
+	//output assign
+	assign read_data_ready[MONITOR_FILTER_NUM - 1 : 0] = monitors_read_data_ready;
+
 	genvar i;
 	generate for (i = 0; i < MONITOR_FILTER_NUM; i = i + 1)
 		begin : monitors
+
+			//input assign
+			assign monitors_read_data_enable[i] = read_data_enable[i];
+			assign ram_for_monitors_pid[i] = ram_for_pid[i];
+
 			monitor # 
-			()
-			monitor_inst (
-			);
+				(
+					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
+					.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
+					.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM)
+				)
+				monitor_inst (
+					.S_AXI_ARESETN(S_AXI_ARESETN),
+					.S_AXI_ACLK(S_AXI_ACLK),
+
+					.pump_data_enable(monitors_read_data_enable[i]),
+
+					.out_data(monitors_out_data[i]),
+					.out_data_index(monitors_out_data_index[i]),
+					.ready_for_read(monitors_read_data_ready[i]),
+
+					.pid(ram_for_monitors_pid[i]),
+					.mpeg_data(mpeg_data),
+					.mpeg_clk(mpeg_clk),
+					.mpeg_valid(mpeg_valid),
+					.mpeg_sync(mpeg_sync)
+				);
 		end
 	endgenerate
 
+	//for input assign
+	wire [REPLACER_FILTER_NUM : 0] replacers_read_data_enable;
+	wire [REPLACER_FILTER_NUM : 0] replacers_write_data_enable;
+	wire [C_S_AXI_DATA_WIDTH-1:0] ram_for_replacers_pid [0 : REPLACER_FILTER_NUM];
+
+	//for output
+	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_data[0 : REPLACER_FILTER_NUM];
+	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_data_index[0 : REPLACER_FILTER_NUM];
+	wire [REPLACER_FILTER_NUM : 0] replacers_read_data_ready;
+	wire [REPLACER_FILTER_NUM : 0] replacers_matched_state;
+	wire [REPLACER_FILTER_NUM : 0] replacers_base_data;
+	wire [REPLACER_FILTER_NUM : 0] replacers_ts_out_valid;
+	wire [7:0] replacers_ts_out[0 : REPLACER_FILTER_NUM];
+
+	assign replacers_base_data = {{(REPLACER_FILTER_NUM){1'b0}}, 1'b1};
+
+	//output assign
+	assign read_data_ready[ALL_FILTERS_NUM - 1 : REPLACER_PID_BASE] = replacers_read_data_ready[REPLACER_FILTER_NUM : 1];
+	
 	genvar j;
-	generate for (j=MONITOR_FILTER_NUM; j < MONITOR_FILTER_NUM + REPLACER_FILTER_NUM; j = j + 1)
+	generate for (j=0; j <= REPLACER_FILTER_NUM; j = j + 1)
 		begin : replacers
 
-		wire [C_S_AXI_DATA_WIDTH-1:0] out_data;
-		wire [C_S_AXI_DATA_WIDTH-1:0] out_data_index;
-		reg pump_data_enable_d1 = 0;
+			//input assign
+			assign replacers_read_data_enable[j] = (j == 0) ? 0 : read_data_enable[REPLACER_PID_BASE + j - 1];
+			assign replacers_write_data_enable[j] = (j == 0) ? 0 : write_data_enable[REPLACER_PID_BASE + j - 1];
+			assign ram_for_replacers_pid[j] = (j == 0) ? 0 : ram_for_pid[REPLACER_PID_BASE + j - 1];
 
-		replacer # 
-			(
-				.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
-				.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
-				.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM)
-			)
-			replacer_inst (
-				S_AXI_ARESETN(S_AXI_ARESETN),
-				S_AXI_ACLK(S_AXI_ACLK),
+			replacer # 
+				(
+					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
+					.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
+					.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM)
+				)
+				replacer_inst (
+					.S_AXI_ARESETN(S_AXI_ARESETN),
+					.S_AXI_ACLK(S_AXI_ACLK),
 
-				pump_data_enable(read_data_enable[j]),
-				save_replace_data_enable(write_data_enable[j]),
+					.base_data(replacers_base_data[j]),
+					.pump_data_enable(replacers_read_data_enable[j]),
 
-				in_data(current_data),
-				in_data_index(current_data_index),
+					.save_replace_data_enable(replacers_write_data_enable[j]),
+					.in_data(current_data),
+					.in_data_index(current_data_index),
 
-				out_data(out_data),
-				out_data_index(out_data_index),
-				ready_for_read(read_data_ready[j]),
+					.out_data(replacers_out_data[j]),
+					.out_data_index(replacers_out_data_index[j]),
+					.ready_for_read(replacers_read_data_ready[j]),
 
-				pid(ram_for_pid[j]),
-				mpeg_data(mpeg_data),
-				mpeg_clk(mpeg_clk),
-				mpeg_valid(mpeg_valid),
-				mpeg_sync(mpeg_sync),
+					.pid(ram_for_replacers_pid[j]),
+					.mpeg_data(mpeg_data),
+					.mpeg_clk(mpeg_clk),
+					.mpeg_valid(mpeg_valid),
+					.mpeg_sync(mpeg_sync),
 
-				ts_out_clk(ts_out_clk),
-				ts_out_valid(ts_out_valid),
-				ts_out(ts_out),
-				matched_state()
-			);
+					.ts_out_valid(replacers_ts_out_valid[j]),
+					.ts_out(replacers_ts_out[j]),
+					.matched_state(replacers_matched_state[j])
+				);
+		end
+	endgenerate
 
-			always @(posedge S_AXI_ACLK) begin
-				if(S_AXI_ARESETN == 0) begin
-				end
-				else
-					pump_data_enable_d1 <= read_data_enable[j];
-					if(pump_data_enable_d1 == 1) begin
-						ram_for_replace_data[out_data_index] <= out_data;
+	//write back ram_for_data
+	reg [ALL_FILTERS_NUM - 1 : 0] read_data_enable_d1 = 0;
+	reg [7 : 0] write_back_index = 0;
+	always @(posedge S_AXI_ACLK) begin
+		if(S_AXI_ARESETN == 0) begin
+			write_back_index <= 0;
+		end
+		else begin
+			read_data_enable_d1 <= read_data_enable;
+			for(write_back_index = 0; write_back_index < ALL_FILTERS_NUM; write_back_index = write_back_index + 1) begin
+				if(read_data_enable_d1[write_back_index] == 1) begin
+					if((write_back_index >= 0) && (write_back_index < MONITOR_FILTER_NUM)) begin
+						ram_for_data[monitors_out_data_index[write_back_index]] <= monitors_out_data[write_back_index];
+					end
+					else if((write_back_index >= REPLACER_PID_BASE) && (write_back_index < ALL_FILTERS_NUM)) begin
+						ram_for_data[replacers_out_data_index[write_back_index - REPLACER_PID_BASE + 1]] <= replacers_out_data[write_back_index - REPLACER_PID_BASE + 1];
 					end
 					else begin
 					end
 				end
+				else begin
+				end
 			end
 		end
-	endgenerate
+	end
+
+	//process ts out
+	reg [7 : 0] ts_out_index = 0;
+	reg my_ts_out_valid = 0;
+	reg [7:0] my_ts_out = 0;
+
+	assign ts_out_clk = mpeg_clk;
+	assign ts_out_valid = my_ts_out_valid;
+	assign ts_out = my_ts_out;
+
+	always @(posedge mpeg_clk) begin
+		if(S_AXI_ARESETN == 0) begin
+			ts_out_index <= 0;
+			my_ts_out_valid <= 0;
+			my_ts_out <= 0;
+		end
+		else begin
+			for(ts_out_index = 0; ts_out_index <= REPLACER_FILTER_NUM; ts_out_index = ts_out_index + 1) begin
+				if(replacers_matched_state[ts_out_index] == 1) begin
+					my_ts_out_valid <= replacers_ts_out_valid[ts_out_index];
+					my_ts_out <= replacers_ts_out[ts_out_index];
+				end
+			end
+		end
+	end
 
 endmodule

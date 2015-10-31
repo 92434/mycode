@@ -9,9 +9,11 @@ module replacer #(
 		input wire S_AXI_ARESETN,
 		input wire S_AXI_ACLK,
 
-		input wire pump_data_enable,
-		input wire save_replace_data_enable,
+		input wire base_data,
 
+		input wire pump_data_enable,
+
+		input wire save_replace_data_enable,
 		input wire [C_S_AXI_DATA_WIDTH-1:0] in_data,
 		input wire [C_S_AXI_DATA_WIDTH-1:0] in_data_index,
 
@@ -26,14 +28,15 @@ module replacer #(
 		input wire mpeg_valid,
 		input wire mpeg_sync,
 
-		output wire ts_out_clk,
-		output reg ts_out_valid,
-		output reg [7:0] ts_out,
+		output reg ts_out_valid = 0,
+		output reg [7:0] ts_out = 0,
 		output reg matched_state = 0
 	);
 
 	localparam integer PACK_BYTE_SIZE = 188;
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data [0 : (PACK_BYTE_SIZE / (C_S_AXI_DATA_WIDTH / 8)) - 1];
+	localparam integer PACK_WORD_SIZE = PACK_BYTE_SIZE / (C_S_AXI_DATA_WIDTH / 8);
+
+	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data [0 : PACK_WORD_SIZE - 1];
 	reg [C_S_AXI_DATA_WIDTH-1:0] data_index = 0;
 
 	always @(posedge S_AXI_ACLK) begin
@@ -57,7 +60,7 @@ module replacer #(
 		else begin
 			ready_for_read <= 0;
 			if(pump_data_enable == 1) begin
-				if((data_index >= 0) && (data_index < (PACK_BYTE_SIZE / (C_S_AXI_DATA_WIDTH / 8)))) begin
+				if((data_index >= 0) && (data_index < PACK_WORD_SIZE)) begin
 					out_data_index <= data_index;
 					out_data <= ram_for_data[data_index];
 
@@ -104,24 +107,26 @@ module replacer #(
 	end
 
 	reg pid_matched = 0;
-	reg [C_S_AXI_DATA_WIDTH-1:0] replace_index = 0;
+	reg [C_S_AXI_DATA_WIDTH-1:0] matched_index = 0;
 
-	assign ts_out_clk = mpeg_clk;
-
+	reg ts_out_valid_d1 = 0;
+	reg ts_out_valid_d2 = 0;
+	reg ts_out_valid_d3 = 0;
 	always @(posedge mpeg_clk) begin
 		if(S_AXI_ARESETN == 0) begin
 			pid_matched <= 0;
 			matched_state <= 0;
-			replace_index <= 0;
+			matched_index <= 0;
+			ts_out_valid <= 0;
 		end
 		else begin
 			matched_state <= pid_matched;
 			if(mpeg_valid == 1) begin
 				if(mpeg_sync_d2 == 1) begin
 					if(mpeg_data_d2 == 8'h47) begin
-						if({16{1'b0}, (mpeg_data_d1 & 8'h1f), mpeg_data} == pid) begin
+						if({mpeg_data_d1[5 - 1 : 0], mpeg_data} == pid[13 - 1 : 0]) begin
 							pid_matched <= 1;
-							replace_index <= 0;
+							matched_index <= 0;
 						end
 						else begin
 							pid_matched <= 0;
@@ -136,17 +141,34 @@ module replacer #(
 			else begin
 			end
 
-			if(pid_matched == 1) begin
-				if((replace_index >= 0) && (replace_index < PACK_BYTE_SIZE)) begin
-					ts_out_valid <= 1;
-					ts_out <= ram_for_data[replace_index / 4][(8 * (replace_index % 4) + 7) -: 8];
-					replace_index <= replace_index + 1;
+			if(base_data == 1) begin
+				matched_state <= 1;
+
+				if(mpeg_valid == 1) begin
+					ts_out_valid_d1 <= 1;
+					ts_out_valid_d2 <= ts_out_valid_d1;
+					ts_out_valid_d3 <= ts_out_valid_d2;
+					ts_out_valid <= ts_out_valid_d3;
+					ts_out <= mpeg_data_d3;
 				end
 				else begin
 					ts_out_valid <= 0;
 				end
 			end
 			else begin
+				if(pid_matched == 1) begin
+					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
+						ts_out_valid <= 1;
+						ts_out <= ram_for_data[matched_index / 4][(8 * (matched_index % 4) + 7) -: 8];
+						matched_index <= matched_index + 1;
+					end
+					else begin
+						ts_out_valid <= 0;
+					end
+				end
+				else begin
+					matched_index <= 0;
+				end
 			end
 		end
 	end
