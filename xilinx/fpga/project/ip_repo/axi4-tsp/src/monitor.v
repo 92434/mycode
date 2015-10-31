@@ -114,7 +114,11 @@ module monitor #(
 						if({mpeg_data_d1[5 - 1 : 0], mpeg_data} == pid[13 - 1 : 0]) begin
 							pid_matched <= 1;
 							matched_index <= 0;
-							caching_ram_index <= (caching_ram_index == 0) ? 1 : 0;
+							if(pump_data_enable == 1) begin
+							end
+							else begin
+								caching_ram_index <= (caching_ram_index == 0) ? 1 : 0;
+							end
 						end
 						else begin
 							pid_matched <= 0;
