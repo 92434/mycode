@@ -167,7 +167,6 @@ module replacer #(
 					end
 				end
 				else begin
-					matched_index <= 0;
 				end
 			end
 		end

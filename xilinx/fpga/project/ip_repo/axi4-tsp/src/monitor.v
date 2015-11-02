@@ -133,8 +133,8 @@ module monitor #(
 			else begin
 			end
 
-			if(pid_matched == 1) begin
-				if(mpeg_valid == 1) begin
+			if(mpeg_valid == 1) begin
+				if(pid_matched == 1) begin
 					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
 						case(caching_ram_index)
 							0: begin
