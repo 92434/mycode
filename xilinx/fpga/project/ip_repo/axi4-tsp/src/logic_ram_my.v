@@ -33,7 +33,9 @@ module logic_ram #(
 
 	localparam integer ADDR_PID = ADDR_INDEX + 1;
 
-	localparam integer ADDR_CMD = ADDR_PID + 1;
+	localparam integer ADDR_RUN_ENABLE = ADDR_PID + 1;
+
+	localparam integer ADDR_CMD = ADDR_RUN_ENABLE + 1;
 	localparam integer CMD_WRITE_REPLACE_DATA = 1;
 	localparam integer CMD_READ_REQUEST = 2;
 
@@ -54,6 +56,9 @@ module logic_ram #(
 	reg current_mem_wren = 0;
 
 	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_pid [0 : ALL_FILTERS_NUM - 1];
+
+	reg [ALL_FILTERS_NUM - 1 : 0] run_enable = 0;
+
 	reg [ALL_FILTERS_NUM - 1 : 0] read_data_enable = 0;
 	wire [ALL_FILTERS_NUM - 1 : 0] read_data_ready;
 
@@ -109,6 +114,17 @@ module logic_ram #(
 					ADDR_PID: begin
 						ram_for_pid[current_slot] <= current_write_data;
 					end
+					ADDR_RUN_ENABLE: begin
+						if(current_write_data == 1) begin
+							run_enable[current_slot] <= 1;
+						end
+						else if(current_write_data == 0) begin
+							run_enable[current_slot] <= 0;
+						end
+						else begin
+							run_enable[current_slot] <= 0;
+						end
+					end
 					ADDR_CMD: begin
 						current_cmd <= current_write_data;
 						if(current_write_data == CMD_WRITE_REPLACE_DATA) begin
@@ -146,6 +162,8 @@ module logic_ram #(
 					axi_rdata <= current_slot;
 				ADDR_PID:
 					axi_rdata <= ram_for_pid[current_slot];
+				ADDR_RUN_ENABLE:
+					axi_rdata <= run_enable[current_slot];
 				ADDR_CMD:
 					axi_rdata <= current_cmd;
 				ADDR_STATUS:
@@ -164,6 +182,7 @@ module logic_ram #(
 
 
 	//for input assign
+	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_run_enable;
 	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_read_data_enable;
 	wire [C_S_AXI_DATA_WIDTH-1:0] ram_for_monitors_pid [0 : REPLACER_FILTER_NUM - 1];
 
@@ -180,6 +199,7 @@ module logic_ram #(
 		begin : monitors
 
 			//input assign
+			assign monitors_run_enable[i] = run_enable[i];
 			assign monitors_read_data_enable[i] = read_data_enable[i];
 			assign ram_for_monitors_pid[i] = ram_for_pid[i];
 
@@ -203,12 +223,16 @@ module logic_ram #(
 					.mpeg_data(mpeg_data),
 					.mpeg_clk(mpeg_clk),
 					.mpeg_valid(mpeg_valid),
-					.mpeg_sync(mpeg_sync)
+					.mpeg_sync(mpeg_sync),
+
+					.run_enable(monitors_run_enable[i])
 				);
 		end
 	endgenerate
 
 	//for input assign
+	wire [REPLACER_FILTER_NUM : 0] replacers_run_enable;
+
 	wire [REPLACER_FILTER_NUM : 0] replacers_read_data_enable;
 	wire [REPLACER_FILTER_NUM : 0] replacers_write_data_enable;
 	wire [C_S_AXI_DATA_WIDTH-1:0] ram_for_replacers_pid [0 : REPLACER_FILTER_NUM];
@@ -232,6 +256,8 @@ module logic_ram #(
 		begin : replacers
 
 			//input assign
+			assign replacers_run_enable[j] = (j == 0) ? 0 : run_enable[REPLACER_PID_BASE + j - 1];
+
 			assign replacers_read_data_enable[j] = (j == 0) ? 0 : read_data_enable[REPLACER_PID_BASE + j - 1];
 			assign replacers_write_data_enable[j] = (j == 0) ? 0 : write_data_enable[REPLACER_PID_BASE + j - 1];
 			assign ram_for_replacers_pid[j] = (j == 0) ? 0 : ram_for_pid[REPLACER_PID_BASE + j - 1];
@@ -265,7 +291,9 @@ module logic_ram #(
 
 					.ts_out_valid(replacers_ts_out_valid[j]),
 					.ts_out(replacers_ts_out[j]),
-					.matched_state(replacers_matched_state[j])
+					.matched_state(replacers_matched_state[j]),
+
+					.run_enable(replacers_run_enable[j])
 				);
 		end
 	endgenerate

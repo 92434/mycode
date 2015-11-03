@@ -1,7 +1,8 @@
 	module axi4_wapper_v1_0 #
 	(
 		// Users to add parameters here
-		parameter integer TSP_FILTER_NUM = 32,
+		parameter integer MONITOR_FILTER_NUM = 32,
+		parameter integer REPLACER_FILTER_NUM = 32,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -26,8 +27,6 @@
 		output ts_out_clk,
 		output ts_out_valid,
 		output [7:0] ts_out,
-		output ts_out_sync,
-		output slot0_out_dump_flag,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -91,7 +90,8 @@
 		.C_S_AXI_WUSER_WIDTH(C_S00_AXI_WUSER_WIDTH),
 		.C_S_AXI_RUSER_WIDTH(C_S00_AXI_RUSER_WIDTH),
 		.C_S_AXI_BUSER_WIDTH(C_S00_AXI_BUSER_WIDTH),
-		.TSP_FILTER_NUM(TSP_FILTER_NUM)
+		.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
+		.REPLACER_FILTER_NUM(MONITOR_FILTER_NUM)
 	) axi4_imp_v1_0_S00_AXI_inst (
 		.S_AXI_ACLK(s00_axi_aclk),
 		.S_AXI_ARESETN(s00_axi_aresetn),
@@ -143,11 +143,10 @@
 		.mpeg_clk(mpeg_clk),
 		.mpeg_valid(mpeg_valid),
 		.mpeg_sync(mpeg_sync),
-		.ts_out(ts_out),
 		.ts_out_clk(ts_out_clk),
 		.ts_out_valid(ts_out_valid),
 		.ts_out_sync(ts_out_sync),
-		.slot0_out_dump_flag(slot0_out_dump_flag)
+		.ts_out(ts_out)
 	);
 
 	// Add user logic here

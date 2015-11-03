@@ -30,7 +30,9 @@ module replacer #(
 
 		output reg ts_out_valid = 0,
 		output reg [7:0] ts_out = 0,
-		output reg matched_state = 0
+		output reg matched_state = 0,
+
+		input wire run_enable
 	);
 
 	localparam integer PACK_BYTE_SIZE = 188;
@@ -121,25 +123,6 @@ module replacer #(
 		end
 		else begin
 			matched_state <= pid_matched;
-			if(mpeg_valid == 1) begin
-				if(mpeg_sync_d2 == 1) begin
-					if(mpeg_data_d2 == 8'h47) begin
-						if({mpeg_data_d1[5 - 1 : 0], mpeg_data} == pid[13 - 1 : 0]) begin
-							pid_matched <= 1;
-							matched_index <= 0;
-						end
-						else begin
-							pid_matched <= 0;
-						end
-					end
-					else begin
-					end
-				end
-				else begin
-				end
-			end
-			else begin
-			end
 
 			if(base_data == 1) begin
 				matched_state <= 1;
@@ -169,6 +152,27 @@ module replacer #(
 				else begin
 				end
 			end
+
+			if(mpeg_valid == 1) begin
+				if(mpeg_sync_d2 == 1) begin
+					if(mpeg_data_d2 == 8'h47) begin
+						if(({mpeg_data_d1[5 - 1 : 0], mpeg_data} == pid[13 - 1 : 0]) && (run_enable == 1)) begin
+							pid_matched <= 1;
+							matched_index <= 0;
+						end
+						else begin
+							pid_matched <= 0;
+						end
+					end
+					else begin
+					end
+				end
+				else begin
+				end
+			end
+			else begin
+			end
+
 		end
 	end
 

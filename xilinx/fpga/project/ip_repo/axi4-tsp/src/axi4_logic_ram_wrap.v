@@ -6,9 +6,11 @@ module axi4_logic_ram_wrap #(
 		parameter integer ADDR_LSB = 2,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
 		parameter integer USER_NUM_MEM = 1,
-		parameter integer TSP_FILTER_NUM = 32
+		parameter integer MONITOR_FILTER_NUM = 32,
+		parameter integer REPLACER_FILTER_NUM = 32
 	)
 	(
+		input wire S_AXI_ARESETN,
 		input wire S_AXI_ACLK,
 		input wire S_AXI_WVALID,
 		input wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] S_AXI_WSTRB,
@@ -24,12 +26,10 @@ module axi4_logic_ram_wrap #(
 		input wire mpeg_clk,
 		input wire mpeg_valid,
 		input wire mpeg_sync,
-		input wire rst,
-		output [7:0] ts_out,
+
 		output ts_out_clk,
 		output ts_out_valid,
-		output ts_out_sync,
-		output slot0_out_dump_flag
+		output [7:0] ts_out
 	);
 
 	//----------------------------------------------
@@ -59,25 +59,26 @@ module axi4_logic_ram_wrap #(
 			logic_ram #(
 					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
 					.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
-					.FILTER_MAX_NUM(TSP_FILTER_NUM)
+					.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
+					.REPLACER_FILTER_NUM(MONITOR_FILTER_NUM)
 				) logic_ram_inst(
+					.S_AXI_ARESETN(S_AXI_ARESETN),
 					.S_AXI_ACLK(S_AXI_ACLK),
 					.S_AXI_WSTRB(S_AXI_WSTRB),
 					.S_AXI_WDATA(S_AXI_WDATA),
 					.mem_rden(mem_rden),
 					.mem_wren(mem_wren),
 					.mem_address(mem_address),
-					.axi_rdata(mem_data_out[i]),
+
 					.mpeg_data(mpeg_data),
 					.mpeg_clk(mpeg_clk),
 					.mpeg_valid(mpeg_valid),
 					.mpeg_sync(mpeg_sync),
-					.rst(rst),
-					.ts_out(ts_out),
+
+					.axi_rdata(mem_data_out[i]),
 					.ts_out_clk(ts_out_clk),
 					.ts_out_valid(ts_out_valid),
-					.ts_out_sync(ts_out_sync),
-					.slot0_out_dump_flag(slot0_out_dump_flag)
+					.ts_out(ts_out)
 				);
 
 		end

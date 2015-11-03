@@ -169,7 +169,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi4_tsp_0, and set properties
   set axi4_tsp_0 [ create_bd_cell -type ip -vlnv xiaofei:user:axi4_tsp:1.0 axi4_tsp_0 ]
-  set_property -dict [ list CONFIG.C_S00_AXI_ADDR_WIDTH {13} CONFIG.C_S00_AXI_ARUSER_WIDTH {0} CONFIG.C_S00_AXI_AWUSER_WIDTH {0} CONFIG.C_S00_AXI_BUSER_WIDTH {0} CONFIG.C_S00_AXI_RUSER_WIDTH {0} CONFIG.C_S00_AXI_WUSER_WIDTH {0}  ] $axi4_tsp_0
+  set_property -dict [ list CONFIG.C_S00_AXI_ADDR_WIDTH {13} CONFIG.C_S00_AXI_ARUSER_WIDTH {0} CONFIG.C_S00_AXI_AWUSER_WIDTH {0} CONFIG.C_S00_AXI_BUSER_WIDTH {0} CONFIG.C_S00_AXI_RUSER_WIDTH {0} CONFIG.C_S00_AXI_WUSER_WIDTH {0} CONFIG.MONITOR_FILTER_NUM {32} CONFIG.REPLACER_FILTER_NUM {32}  ] $axi4_tsp_0
 
   # Create instance: axi_bram_ctrl_0, and set properties
   set axi_bram_ctrl_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.0 axi_bram_ctrl_0 ]
@@ -223,7 +223,7 @@ proc create_root_design { parentCell } {
   set_property -dict [ list CONFIG.C_M00_AXIS_START_COUNT {1} CONFIG.NUMBER_OF_OUTPUT_WORDS {256}  ] $kc705_i2s_receiver_0
 
   # Create instance: kc705_pcie_ext_0, and set properties
-  set kc705_pcie_ext_0 [ create_bd_cell -type ip -vlnv vendor:user:kc705_pcie_ext:1.0 kc705_pcie_ext_0 ]
+  set kc705_pcie_ext_0 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_pcie_ext:1.0 kc705_pcie_ext_0 ]
 
   # Create instance: kc705_ts2asi_0, and set properties
   set kc705_ts2asi_0 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_ts2asi:1.0 kc705_ts2asi_0 ]
