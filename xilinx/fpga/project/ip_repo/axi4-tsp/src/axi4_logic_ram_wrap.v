@@ -29,6 +29,7 @@ module axi4_logic_ram_wrap #(
 
 		output ts_out_clk,
 		output ts_out_valid,
+		output ts_out_sync,
 		output [7:0] ts_out
 	);
 
@@ -60,7 +61,7 @@ module axi4_logic_ram_wrap #(
 					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
 					.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
 					.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
-					.REPLACER_FILTER_NUM(MONITOR_FILTER_NUM)
+					.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM)
 				) logic_ram_inst(
 					.S_AXI_ARESETN(S_AXI_ARESETN),
 					.S_AXI_ACLK(S_AXI_ACLK),
@@ -78,6 +79,7 @@ module axi4_logic_ram_wrap #(
 					.axi_rdata(mem_data_out[i]),
 					.ts_out_clk(ts_out_clk),
 					.ts_out_valid(ts_out_valid),
+					.ts_out_sync(ts_out_sync),
 					.ts_out(ts_out)
 				);
 

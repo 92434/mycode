@@ -76,7 +76,18 @@ module my_tp #(
 	wire [C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata;
 	wire ts_out_clk;
 	wire ts_out_valid;
+	wire ts_out_sync;
 	wire [7:0] ts_out;
+
+	reg [C_S_AXI_DATA_WIDTH-1 : 0] send_valid = 0;
+	always @(posedge mpeg_clk) begin
+		if((send_valid >= 0) && (send_valid < 3)) begin
+			send_valid <= send_valid + 1;
+		end
+		else begin
+			send_valid <= 0;
+		end
+	end
 
 	//send ts
 	reg [C_S_AXI_DATA_WIDTH-1 : 0] ts_index = 0;
@@ -89,15 +100,21 @@ module my_tp #(
 		end
 		else begin
 			if((ts_index >= 0) && (ts_index < MPEG_LENGTH)) begin
-				mpeg_data <= mpeg_in[ts_index];
-				if((ts_index % PACK_BYTE_SIZE) == 0) begin
-					mpeg_sync <= 1;
+				if((send_valid == 3)) begin
+					mpeg_valid <= 1;
+
+					mpeg_data <= mpeg_in[ts_index];
+					if((ts_index % PACK_BYTE_SIZE) == 0) begin
+						mpeg_sync <= 1;
+					end
+					else begin
+						mpeg_sync <= 0;
+					end
+					ts_index <= ts_index + 1;
 				end
 				else begin
-					mpeg_sync <= 0;
+					mpeg_valid <= 0;
 				end
-				mpeg_valid <= 1;
-				ts_index <= ts_index + 1;
 			end
 			else begin
 				ts_index <= 0;
@@ -231,7 +248,7 @@ module my_tp #(
 					end
 					1: begin
 						mem_address <= ADDR_INDEX;
-						S_AXI_WDATA <= 32;
+						S_AXI_WDATA <= REPLACER_PID_BASE;
 
 						state_read_replacer <= 2;
 					end
@@ -266,7 +283,7 @@ module my_tp #(
 					end
 					6: begin
 						mem_address <= ADDR_INDEX;
-						S_AXI_WDATA <= 33;
+						S_AXI_WDATA <= REPLACER_PID_BASE + 1;
 
 						state_read_replacer <= 7;
 					end
@@ -458,7 +475,7 @@ module my_tp #(
 					end
 					33: begin
 						mem_address <= ADDR_INDEX;
-						S_AXI_WDATA <= 0;
+						S_AXI_WDATA <= 1;
 						state_read_replacer <= 34;
 					end
 					34: begin
@@ -537,6 +554,7 @@ module my_tp #(
 			.axi_rdata(axi_rdata),
 			.ts_out_clk(ts_out_clk),
 			.ts_out_valid(ts_out_valid),
+			.ts_out_sync(ts_out_sync),
 			.ts_out(ts_out)
 		);
 

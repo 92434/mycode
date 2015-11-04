@@ -26,6 +26,7 @@
 		input wire mpeg_sync,
 		output ts_out_clk,
 		output ts_out_valid,
+		output ts_out_sync,
 		output [7:0] ts_out,
 
 		// User ports ends
@@ -91,7 +92,7 @@
 		.C_S_AXI_RUSER_WIDTH(C_S00_AXI_RUSER_WIDTH),
 		.C_S_AXI_BUSER_WIDTH(C_S00_AXI_BUSER_WIDTH),
 		.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
-		.REPLACER_FILTER_NUM(MONITOR_FILTER_NUM)
+		.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM)
 	) axi4_imp_v1_0_S00_AXI_inst (
 		.S_AXI_ACLK(s00_axi_aclk),
 		.S_AXI_ARESETN(s00_axi_aresetn),

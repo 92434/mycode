@@ -30,6 +30,7 @@ module replacer #(
 
 		output reg ts_out_valid = 0,
 		output reg [7:0] ts_out = 0,
+		output reg ts_out_sync = 0,
 		output reg matched_state = 0,
 
 		input wire run_enable
@@ -127,21 +128,20 @@ module replacer #(
 			if(base_data == 1) begin
 				matched_state <= 1;
 
-				if(mpeg_valid == 1) begin
-					ts_out_valid_d1 <= 1;
-					ts_out_valid_d2 <= ts_out_valid_d1;
-					ts_out_valid_d3 <= ts_out_valid_d2;
-					ts_out_valid <= ts_out_valid_d3;
-					ts_out <= mpeg_data_d3;
-				end
-				else begin
-					ts_out_valid <= 0;
-				end
+				ts_out_valid_d1 <= mpeg_valid;
+				ts_out_valid_d2 <= ts_out_valid_d1;
+				ts_out_valid_d3 <= ts_out_valid_d2;
+				ts_out_valid <= ts_out_valid_d3;
+
+				ts_out_sync <= mpeg_sync_d3;
+				ts_out <= mpeg_data_d3;
 			end
 			else begin
 				if(pid_matched == 1) begin
 					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
 						ts_out_valid <= 1;
+
+						ts_out_sync <= mpeg_sync_d3;
 						ts_out <= ram_for_data[matched_index / 4][(8 * (matched_index % 4) + 7) -: 8];
 						matched_index <= matched_index + 1;
 					end

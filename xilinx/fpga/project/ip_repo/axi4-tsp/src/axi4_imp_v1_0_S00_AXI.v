@@ -33,6 +33,7 @@
 		output [7:0] ts_out,
 		output ts_out_clk,
 		output ts_out_valid,
+		output ts_out_sync,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -544,7 +545,7 @@
 			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
 			.USER_NUM_MEM(USER_NUM_MEM),
 			.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
-			.REPLACER_FILTER_NUM(MONITOR_FILTER_NUM)
+			.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM)
 		) ram_wapper_inst (
 			.S_AXI_ARESETN(S_AXI_ARESETN),
 			.S_AXI_ACLK(S_AXI_ACLK),
@@ -564,6 +565,7 @@
 			.mpeg_sync(mpeg_sync),
 			.ts_out_clk(ts_out_clk),
 			.ts_out_valid(ts_out_valid),
+			.ts_out_sync(ts_out_sync),
 			.ts_out(ts_out)
 		);
 

@@ -23,6 +23,7 @@ module logic_ram #(
 		output reg [C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata,
 		output wire ts_out_clk,
 		output wire ts_out_valid,
+		output wire ts_out_sync,
 		output wire [7:0] ts_out
 	);
 
@@ -244,6 +245,7 @@ module logic_ram #(
 	wire [REPLACER_FILTER_NUM : 0] replacers_matched_state;
 	wire [REPLACER_FILTER_NUM : 0] replacers_base_data;
 	wire [REPLACER_FILTER_NUM : 0] replacers_ts_out_valid;
+	wire [REPLACER_FILTER_NUM : 0] replacers_ts_out_sync;
 	wire [7:0] replacers_ts_out[0 : REPLACER_FILTER_NUM];
 
 	assign replacers_base_data = {{(REPLACER_FILTER_NUM){1'b0}}, 1'b1};
@@ -291,6 +293,7 @@ module logic_ram #(
 
 					.ts_out_valid(replacers_ts_out_valid[j]),
 					.ts_out(replacers_ts_out[j]),
+					.ts_out_sync(replacers_ts_out_sync[j]),
 					.matched_state(replacers_matched_state[j]),
 
 					.run_enable(replacers_run_enable[j])
@@ -328,10 +331,12 @@ module logic_ram #(
 	reg [7 : 0] ts_out_index = 0;
 	reg my_ts_out_valid = 0;
 	reg [7:0] my_ts_out = 0;
+	reg my_ts_out_sync = 0;
 
 	assign ts_out_clk = mpeg_clk;
 	assign ts_out_valid = my_ts_out_valid;
 	assign ts_out = my_ts_out;
+	assign ts_out_sync = my_ts_out_sync;
 
 	always @(posedge mpeg_clk) begin
 		if(S_AXI_ARESETN == 0) begin
@@ -344,6 +349,7 @@ module logic_ram #(
 				if(replacers_matched_state[ts_out_index] == 1) begin
 					my_ts_out_valid <= replacers_ts_out_valid[ts_out_index];
 					my_ts_out <= replacers_ts_out[ts_out_index];
+					my_ts_out_sync <= replacers_ts_out_sync[ts_out_index];
 				end
 			end
 		end
