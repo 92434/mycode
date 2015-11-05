@@ -3,6 +3,7 @@
 import urllib2
 import htmllib
 import formatter  
+import coding_detect
 
 class LinksExtractor(htmllib.HTMLParser):  
   
@@ -63,7 +64,10 @@ def get_page(url, proxy_ip, proxy_port):
 
 	#opener = urllib2.build_opener()  
 	request = build_request_header(url)
-	page = urllib2.urlopen(request).read()
+	conn = urllib2.urlopen(request)
+	print coding_detect.get_encoding_by_conn(conn)
+	page = conn.read()
+	print coding_detect.get_encoding_chardet(page)
 	return page
 	
 def get_page_links(url, proxy_ip, proxy_port):

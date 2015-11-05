@@ -9,6 +9,6 @@ def get_encoding_by_conn(conn):
 	return info.getparam('charset')
 
 def get_encoding_chardet(page):
-	chardict = chardet.detect(data1)
+	chardict = chardet.detect(page)
 	return chardict.get('encoding')
 
