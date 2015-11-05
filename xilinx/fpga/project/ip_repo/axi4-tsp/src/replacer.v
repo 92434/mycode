@@ -2,8 +2,6 @@
 
 module replacer #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
-		parameter integer MONITOR_FILTER_NUM = 32,
-		parameter integer REPLACER_FILTER_NUM = 32
 	)
 	(
 		input wire S_AXI_ARESETN,

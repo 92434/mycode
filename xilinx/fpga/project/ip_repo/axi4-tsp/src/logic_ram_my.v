@@ -4,7 +4,7 @@ module logic_ram #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
 		parameter integer MONITOR_FILTER_NUM = 32,
-		parameter integer REPLACER_FILTER_NUM = 32
+		parameter integer REPLACER_FILTER_NUM = 32,
 	)
 	(
 		input wire S_AXI_ARESETN,
@@ -207,8 +207,6 @@ module logic_ram #(
 			monitor # 
 				(
 					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
-					.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
-					.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM)
 				)
 				monitor_inst (
 					.S_AXI_ARESETN(S_AXI_ARESETN),
@@ -267,8 +265,6 @@ module logic_ram #(
 			replacer # 
 				(
 					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
-					.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
-					.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM)
 				)
 				replacer_inst (
 					.S_AXI_ARESETN(S_AXI_ARESETN),
