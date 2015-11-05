@@ -5,6 +5,8 @@ module logic_ram #(
 		parameter integer OPT_MEM_ADDR_BITS = 10,
 		parameter integer MONITOR_FILTER_NUM = 32,
 		parameter integer REPLACER_FILTER_NUM = 32,
+		parameter integer REPLACE_MATCH_PID_COUNT = 32,
+		parameter integer REPLACE_DATA_GROUPS = 1
 	)
 	(
 		input wire S_AXI_ARESETN,
@@ -43,7 +45,7 @@ module logic_ram #(
 	localparam integer ADDR_STATUS = ADDR_CMD + 1;
 
 	localparam integer ADDR_TS_DATA_BASE = 128;
-	localparam integer ADDR_TS_DATA_END = ADDR_TS_DATA_BASE + PACK_WORD_SIZE;
+	localparam integer ADDR_TS_DATA_END = ADDR_TS_DATA_BASE + PACK_WORD_SIZE * REPLACE_DATA_GROUPS;
 
 	localparam integer MONITOR_PID_BASE = 0;
 	localparam integer REPLACER_PID_BASE = MONITOR_PID_BASE + MONITOR_FILTER_NUM;
@@ -65,7 +67,9 @@ module logic_ram #(
 
 	reg [ALL_FILTERS_NUM - 1 : 0] write_data_enable = 0;
 
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data [0 : PACK_WORD_SIZE - 1];
+	reg [ALL_FILTERS_NUM - 1 : 0] pid_changing = 0;
+
+	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data [0 : PACK_WORD_SIZE * REPLACE_DATA_GROUPS - 1];
 
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_slot = 0;
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_data_index = 0;
@@ -90,11 +94,13 @@ module logic_ram #(
 		if(S_AXI_ARESETN == 0) begin
 			write_data_enable <= 0;
 			read_data_enable <= 0;
+			pid_changing <= 0;
 		end
 		else begin
 			if(current_mem_wren) begin
 
 				read_data_enable <= 0;
+				pid_changing <= 0;
 
 				//写数据时，维持write_data_enable状态,否则复位
 				//状态
@@ -114,6 +120,7 @@ module logic_ram #(
 					end
 					ADDR_PID: begin
 						ram_for_pid[current_slot] <= current_write_data;
+						pid_changing[current_slot] <= 1;
 					end
 					ADDR_RUN_ENABLE: begin
 						if(current_write_data == 1) begin
@@ -156,13 +163,20 @@ module logic_ram #(
 		end
 	end
 
+	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_pid [0 : REPLACER_FILTER_NUM];
+
 	always @(posedge S_AXI_ACLK) begin
 		if (mem_rden) begin
 			case(mem_address)
 				ADDR_INDEX:
 					axi_rdata <= current_slot;
 				ADDR_PID:
-					axi_rdata <= ram_for_pid[current_slot];
+					if((current_slot >= 0) && (current_slot < MONITOR_FILTER_NUM)) begin
+						axi_rdata <= ram_for_pid[current_slot];
+					end
+					else begin
+						axi_rdata <= replacers_out_pid[current_slot - REPLACER_PID_BASE + 1];
+					end
 				ADDR_RUN_ENABLE:
 					axi_rdata <= run_enable[current_slot];
 				ADDR_CMD:
@@ -206,7 +220,7 @@ module logic_ram #(
 
 			monitor # 
 				(
-					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
+					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH)
 				)
 				monitor_inst (
 					.S_AXI_ARESETN(S_AXI_ARESETN),
@@ -234,11 +248,16 @@ module logic_ram #(
 
 	wire [REPLACER_FILTER_NUM : 0] replacers_read_data_enable;
 	wire [REPLACER_FILTER_NUM : 0] replacers_write_data_enable;
+
+	wire [REPLACER_FILTER_NUM : 0] replacers_update_pid_enable;
+
 	wire [C_S_AXI_DATA_WIDTH-1:0] ram_for_replacers_pid [0 : REPLACER_FILTER_NUM];
+
 
 	//for output
 	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_data[0 : REPLACER_FILTER_NUM];
 	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_data_index[0 : REPLACER_FILTER_NUM];
+
 	wire [REPLACER_FILTER_NUM : 0] replacers_read_data_ready;
 	wire [REPLACER_FILTER_NUM : 0] replacers_matched_state;
 	wire [REPLACER_FILTER_NUM : 0] replacers_base_data;
@@ -261,10 +280,13 @@ module logic_ram #(
 			assign replacers_read_data_enable[j] = (j == 0) ? 0 : read_data_enable[REPLACER_PID_BASE + j - 1];
 			assign replacers_write_data_enable[j] = (j == 0) ? 0 : write_data_enable[REPLACER_PID_BASE + j - 1];
 			assign ram_for_replacers_pid[j] = (j == 0) ? 0 : ram_for_pid[REPLACER_PID_BASE + j - 1];
+			assign replacers_update_pid_enable[j] = (j == 0) ? 0 : pid_changing[REPLACER_PID_BASE + j - 1];
 
 			replacer # 
 				(
 					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
+					.REPLACE_MATCH_PID_COUNT(REPLACE_MATCH_PID_COUNT),
+					.REPLACE_DATA_GROUPS(REPLACE_DATA_GROUPS)
 				)
 				replacer_inst (
 					.S_AXI_ARESETN(S_AXI_ARESETN),
@@ -281,7 +303,10 @@ module logic_ram #(
 					.out_data_index(replacers_out_data_index[j]),
 					.ready_for_read(replacers_read_data_ready[j]),
 
-					.pid(ram_for_replacers_pid[j]),
+					.update_pid_enable(replacers_update_pid_enable[j]),
+					.in_pid(ram_for_replacers_pid[j]),
+					.out_pid(replacers_out_pid[j]),
+
 					.mpeg_data(mpeg_data),
 					.mpeg_clk(mpeg_clk),
 					.mpeg_valid(mpeg_valid),

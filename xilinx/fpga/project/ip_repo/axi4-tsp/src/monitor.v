@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module monitor #(
-		parameter integer C_S_AXI_DATA_WIDTH = 32,
+		parameter integer C_S_AXI_DATA_WIDTH = 32
 	)
 	(
 		input wire S_AXI_ARESETN,
