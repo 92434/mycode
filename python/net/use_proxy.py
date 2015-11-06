@@ -40,41 +40,40 @@ class LinksExtractor(htmllib.HTMLParser):
 	def get_links(self) :   
 		return self.links  
 
-def add_proxy_opener(http_type, ip, port):
-#设置使用代理
+def get_proxy_opener(http_type, ip, port):
 	proxy = {http_type : '%s:%d' %(ip, port)}
-	print proxy
 
 	proxy_support = urllib2.ProxyHandler(proxy)
 	opener = urllib2.build_opener(proxy_support)
 
+	return opener
+
+def set_default_proxy(opener):
 	urllib2.install_opener(opener)
 
-def build_request_header(url):
+def get_request_header(url):
 	#get html source  
-	#headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.48'}
-	#request = urllib2.Request(url, headers=headers)
 	request = urllib2.Request(url)  
 	request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.48')  
+	#request.add_header('Accept-encoding', 'gzip,deflate')	# 向服务器请求压缩数据
 	return request
 
-def get_page(url, proxy_ip, proxy_port):
-	add_proxy_opener('https', proxy_ip, proxy_port)
-	#add_proxy_opener('http', proxy_ip, proxy_port)
-
-	#opener = urllib2.build_opener()  
-	request = build_request_header(url)
-	conn = urllib2.urlopen(request)
-	print coding_detect.get_encoding_by_conn(conn)
+def proxy_get_page(url, proxy_ip, proxy_port):
+	opener = get_proxy_opener('https', proxy_ip, proxy_port)  
+	request = get_request_header(url)
+	conn = opener.open(request)
+	encode = coding_detect.get_encoding_by_conn(conn)
 	page = conn.read()
-	print coding_detect.get_encoding_chardet(page)
+	encode = coding_detect.get_encoding_chardet(page)
+	print encode
 	return page
 	
 def get_page_links(url, proxy_ip, proxy_port):
 	format = formatter.NullFormatter()			
 	htmlparser = LinksExtractor(format)		  
+	page = proxy_get_page(url, proxy_ip, proxy_port)
 	  
-	htmlparser.feed(get_page(url, proxy_ip, proxy_port))		
+	htmlparser.feed(page)		
 	htmlparser.close()  
 	  
 	links = htmlparser.get_links()	
