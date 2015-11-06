@@ -3,6 +3,9 @@
 import urllib2
 import htmllib
 import formatter  
+import cookielib
+import os
+
 import coding_detect
 
 class LinksExtractor(htmllib.HTMLParser):  
@@ -19,12 +22,12 @@ class LinksExtractor(htmllib.HTMLParser):
 		self.cur_items = {}
 
 		for attr in attrs :  
-			print 'attr:%s' %('|'.join(attr))
+			#print 'attr:%s' %('|'.join(attr))
 			if attr[0] == "href" :   
 				if not self.cur_items.get('link'):
 					self.cur_items.update({'link': []})
 				self.cur_items.get('link').append(attr[1])
-				print 'add link:%s' %(attr[1])
+				#print 'add link:%s' %(attr[1])
 	  
 	def end_a(self):  
 		self.in_anchor = 0  
@@ -35,16 +38,27 @@ class LinksExtractor(htmllib.HTMLParser):
 			if not self.cur_items.get('text'):
 				self.cur_items.update({'text': []})
 			self.cur_items.get('text').append(text)
-			print 'add text:%s' %(text)
+			#print 'add text:%s' %(text)
 	  
 	def get_links(self) :   
 		return self.links  
+
+cookie_file = 'cookie.txt'
+#cookie = cookielib.CookieJar()
+if os.path.exists(cookie_file):
+	cookie = cookielib.MozillaCookieJar()
+	cookie.load(cookie_file, ignore_discard=True, ignore_expires=True)
+else:
+	cookie = cookielib.MozillaCookieJar(cookie_file)
 
 def get_proxy_opener(http_type, ip, port):
 	proxy = {http_type : '%s:%d' %(ip, port)}
 
 	proxy_support = urllib2.ProxyHandler(proxy)
-	opener = urllib2.build_opener(proxy_support)
+
+	cookie_support = urllib2.HTTPCookieProcessor(cookie)
+
+	opener = urllib2.build_opener(proxy_support, cookie_support)
 
 	return opener
 
@@ -79,12 +93,16 @@ def get_page_links(url, proxy_ip, proxy_port):
 	  
 	links = htmlparser.get_links()	
 
-	for i in range(len(htmlparser.links)):  
-		temp = htmlparser.links[i]  
-		if temp.get('url') and temp.get('text'):
-			print 'url: %s' %('|'.join(temp.get('url')))
-			print 'text: %s' %('|'.join(temp.get('text')))
+	#for i in range(len(htmlparser.links)):  
+	#	temp = htmlparser.links[i]  
+	#	if temp.get('url') and temp.get('text'):
+	#		print 'url: %s' %('|'.join(temp.get('url')))
+	#		print 'text: %s' %('|'.join(temp.get('text')))
 
 
 if '__main__' == __name__:
 	get_page_links('https://www.google.com.hk/?gws_rd=ssl', '192.168.1.211', 8580)
+	for i in cookie:
+		print i
+	if not os.path.exists(cookie_file):
+		cookie.save(ignore_discard=True, ignore_expires=True)
