@@ -65,6 +65,7 @@ def proxy_get_page(url, proxy_ip, proxy_port):
 	encode = coding_detect.get_encoding_by_conn(conn)
 	page = conn.read()
 	encode = coding_detect.get_encoding_chardet(page)
+	conn.close()
 	print encode
 	return page
 	
