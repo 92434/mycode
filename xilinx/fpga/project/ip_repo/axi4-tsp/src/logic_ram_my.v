@@ -3,10 +3,13 @@
 module logic_ram #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
-		parameter integer MONITOR_FILTER_NUM = 32,
-		parameter integer REPLACER_FILTER_NUM = 32,
-		parameter integer REPLACE_MATCH_PID_COUNT = 32,
-		parameter integer REPLACE_DATA_GROUPS = 1
+		parameter integer MONITOR_FILTER_NUM = 2,
+		parameter integer REPLACER_FILTER_NUM = 17,
+		parameter integer REPLACE_MATCH_PID_COUNT = 1,
+		parameter integer REPLACE_DATA_GROUPS = 1,
+		parameter integer COMMON_REPLACER_FILTER_NUM = 1,
+		parameter integer COMMON_REPLACE_MATCH_PID_COUNT = 16,
+		parameter integer COMMON_REPLACE_DATA_GROUPS = 2
 	)
 	(
 		input wire S_AXI_ARESETN,
@@ -45,7 +48,7 @@ module logic_ram #(
 	localparam integer ADDR_STATUS = ADDR_CMD + 1;
 
 	localparam integer ADDR_TS_DATA_BASE = 128;
-	localparam integer ADDR_TS_DATA_END = ADDR_TS_DATA_BASE + PACK_WORD_SIZE * REPLACE_DATA_GROUPS;
+	localparam integer ADDR_TS_DATA_END = ADDR_TS_DATA_BASE + PACK_WORD_SIZE * COMMON_REPLACE_DATA_GROUPS;
 
 	localparam integer MONITOR_PID_BASE = 0;
 	localparam integer REPLACER_PID_BASE = MONITOR_PID_BASE + MONITOR_FILTER_NUM;
@@ -69,7 +72,7 @@ module logic_ram #(
 
 	reg [ALL_FILTERS_NUM - 1 : 0] pid_changing = 0;
 
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data [0 : PACK_WORD_SIZE * REPLACE_DATA_GROUPS - 1];
+	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data [0 : PACK_WORD_SIZE * COMMON_REPLACE_DATA_GROUPS - 1];
 
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_slot = 0;
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_data_index = 0;
@@ -260,12 +263,12 @@ module logic_ram #(
 
 	wire [REPLACER_FILTER_NUM : 0] replacers_read_data_ready;
 	wire [REPLACER_FILTER_NUM : 0] replacers_matched_state;
-	wire [REPLACER_FILTER_NUM : 0] replacers_base_data;
+	wire [REPLACER_FILTER_NUM : 0] replacers_basic_data;
 	wire [REPLACER_FILTER_NUM : 0] replacers_ts_out_valid;
 	wire [REPLACER_FILTER_NUM : 0] replacers_ts_out_sync;
 	wire [7:0] replacers_ts_out[0 : REPLACER_FILTER_NUM];
 
-	assign replacers_base_data = {{(REPLACER_FILTER_NUM){1'b0}}, 1'b1};
+	assign replacers_basic_data = {{(REPLACER_FILTER_NUM){1'b0}}, 1'b1};
 
 	//output assign
 	assign read_data_ready[ALL_FILTERS_NUM - 1 : REPLACER_PID_BASE] = replacers_read_data_ready[REPLACER_FILTER_NUM : 1];
@@ -281,18 +284,21 @@ module logic_ram #(
 			assign replacers_write_data_enable[j] = (j == 0) ? 0 : write_data_enable[REPLACER_PID_BASE + j - 1];
 			assign ram_for_replacers_pid[j] = (j == 0) ? 0 : ram_for_pid[REPLACER_PID_BASE + j - 1];
 			assign replacers_update_pid_enable[j] = (j == 0) ? 0 : pid_changing[REPLACER_PID_BASE + j - 1];
+			localparam integer CUR_REPLACE_MATCH_PID_COUNT = (j > REPLACER_FILTER_NUM - COMMON_REPLACER_FILTER_NUM) ? COMMON_REPLACE_MATCH_PID_COUNT : REPLACE_MATCH_PID_COUNT;
+
+			localparam integer CUR_REPLACE_DATA_GROUPS = (j > REPLACER_FILTER_NUM - COMMON_REPLACER_FILTER_NUM) ? COMMON_REPLACE_DATA_GROUPS : REPLACE_DATA_GROUPS;
 
 			replacer # 
 				(
 					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
-					.REPLACE_MATCH_PID_COUNT(REPLACE_MATCH_PID_COUNT),
-					.REPLACE_DATA_GROUPS(REPLACE_DATA_GROUPS)
+					.REPLACE_MATCH_PID_COUNT(CUR_REPLACE_MATCH_PID_COUNT),
+					.REPLACE_DATA_GROUPS(CUR_REPLACE_DATA_GROUPS)
 				)
 				replacer_inst (
 					.S_AXI_ARESETN(S_AXI_ARESETN),
 					.S_AXI_ACLK(S_AXI_ACLK),
 
-					.base_data(replacers_base_data[j]),
+					.base_data(replacers_basic_data[j]),
 					.pump_data_enable(replacers_read_data_enable[j]),
 
 					.save_replace_data_enable(replacers_write_data_enable[j]),

@@ -6,8 +6,13 @@ module axi4_logic_ram_wrap #(
 		parameter integer ADDR_LSB = 2,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
 		parameter integer USER_NUM_MEM = 1,
-		parameter integer MONITOR_FILTER_NUM = 32,
-		parameter integer REPLACER_FILTER_NUM = 32
+		parameter integer MONITOR_FILTER_NUM = 2,
+		parameter integer REPLACER_FILTER_NUM = 17,
+		parameter integer REPLACE_MATCH_PID_COUNT = 1,
+		parameter integer REPLACE_DATA_GROUPS = 1,
+		parameter integer COMMON_REPLACER_FILTER_NUM = 1,
+		parameter integer COMMON_REPLACE_MATCH_PID_COUNT = 16,
+		parameter integer COMMON_REPLACE_DATA_GROUPS = 2
 	)
 	(
 		input wire S_AXI_ARESETN,
@@ -61,7 +66,12 @@ module axi4_logic_ram_wrap #(
 					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
 					.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
 					.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
-					.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM)
+					.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM),
+					.REPLACE_MATCH_PID_COUNT(REPLACE_MATCH_PID_COUNT),
+					.REPLACE_DATA_GROUPS(REPLACE_DATA_GROUPS),
+					.COMMON_REPLACER_FILTER_NUM(COMMON_REPLACER_FILTER_NUM),
+					.COMMON_REPLACE_MATCH_PID_COUNT(COMMON_REPLACE_MATCH_PID_COUNT),
+					.COMMON_REPLACE_DATA_GROUPS(COMMON_REPLACE_DATA_GROUPS)
 				) logic_ram_inst(
 					.S_AXI_ARESETN(S_AXI_ARESETN),
 					.S_AXI_ACLK(S_AXI_ACLK),

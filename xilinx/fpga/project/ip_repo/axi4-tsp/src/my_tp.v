@@ -4,9 +4,12 @@ module my_tp #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
 		parameter integer MONITOR_FILTER_NUM = 32,
-		parameter integer REPLACER_FILTER_NUM = 32,
-		parameter integer REPLACE_MATCH_PID_COUNT = 32,
-		parameter integer REPLACE_DATA_GROUPS = 2
+		parameter integer REPLACER_FILTER_NUM = 33,
+		parameter integer REPLACE_MATCH_PID_COUNT = 1,
+		parameter integer REPLACE_DATA_GROUPS = 1,
+		parameter integer COMMON_REPLACER_FILTER_NUM = 1,
+		parameter integer COMMON_REPLACE_MATCH_PID_COUNT = 32,
+		parameter integer COMMON_REPLACE_DATA_GROUPS = 2
 	)
 	(
 	);
@@ -51,12 +54,7 @@ module my_tp #(
 	assign S_AXI_WSTRB = {(C_S_AXI_DATA_WIDTH/8){1'b1}};
 
 	reg [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA = 0;
-	reg start_test_monitor = 0;
 	reg start_test_replacer = 0;
-
-	reg write_replacer_ts_enable = 0;
-
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] read_data_index = 0;
 
 	initial begin
 		$readmemh("/home/action/vivadoworkspace/ip_repo/axi4-tsp/src/filter1.txt", filter1, 0);
@@ -65,11 +63,9 @@ module my_tp #(
 		#2;
 		S_AXI_ARESETN = 1;
 
-		//start_test_monitor = 1;
 		start_test_replacer = 1;
 	end
 	
-	//write monitor pid
 	reg [7:0] mpeg_data = 0;
 	wire mpeg_clk;
 	reg mpeg_valid = 0;
@@ -125,110 +121,112 @@ module my_tp #(
 	end
 
 	reg [C_S_AXI_DATA_WIDTH-1 : 0] read_delay = 0;
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] state_read_replacer = 0;
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] write_replace_data_index = 0;
+	reg [C_S_AXI_DATA_WIDTH-1 : 0] state_test = 0;
+	reg [C_S_AXI_DATA_WIDTH-1 : 0] write_data_index = 0;
+	reg [C_S_AXI_DATA_WIDTH-1 : 0] read_data_index = 0;
+
 
 	always @(posedge S_AXI_ACLK) begin
 		if(S_AXI_ARESETN == 0) begin
-			state_read_replacer <= 0;
-			write_replace_data_index <= 0;
+			state_test <= 0;
+			write_data_index <= 0;
 		end
 		else begin
 			if(start_test_replacer == 1) begin
-				case(state_read_replacer)
+				case(state_test)
 					0: begin
 						mem_wren <= 1;
-						state_read_replacer <= 1;
+						state_test <= 1;
 					end
 					1: begin
 						mem_address <= ADDR_INDEX;
-						S_AXI_WDATA <= REPLACER_PID_BASE;
+						S_AXI_WDATA <= REPLACER_PID_BASE + 32;
 
-						state_read_replacer <= 2;
+						state_test <= 2;
 					end
 					2: begin
 						mem_address <= ADDR_PID;
 						S_AXI_WDATA <= {{8{1'b0}}, 1'b1, 8'h00, 13'h157f};
 
-						state_read_replacer <= 3;
+						state_test <= 3;
 					end
 					3: begin
 						mem_address <= ADDR_CMD;
 						S_AXI_WDATA <= CMD_WRITE_REPLACE_DATA;
-						write_replace_data_index <= 0;
+						write_data_index <= 0;
 
-						state_read_replacer <= 4;
+						state_test <= 4;
 					end
 					4: begin
-						if((write_replace_data_index >= 0) && (write_replace_data_index < PACK_BYTE_SIZE)) begin
-							mem_address <= ADDR_TS_DATA_BASE + write_replace_data_index / 4;
-							S_AXI_WDATA <= {filter1[write_replace_data_index + 3], filter1[write_replace_data_index + 2], filter1[write_replace_data_index + 1], filter1[write_replace_data_index + 0]};
-							write_replace_data_index = write_replace_data_index + 4;
+						if((write_data_index >= 0) && (write_data_index < PACK_BYTE_SIZE)) begin
+							mem_address <= ADDR_TS_DATA_BASE + write_data_index / 4;
+							S_AXI_WDATA <= {filter1[write_data_index + 3], filter1[write_data_index + 2], filter1[write_data_index + 1], filter1[write_data_index + 0]};
+							write_data_index = write_data_index + 4;
 						end
 						else begin
-							state_read_replacer <= 5;
+							state_test <= 5;
 						end
 					end
 					5: begin
 						mem_address <= ADDR_RUN_ENABLE;
 						S_AXI_WDATA <= 1;
 
-						state_read_replacer <= 6;
+						state_test <= 6;
 					end
 					6: begin
 						mem_address <= ADDR_INDEX;
-						S_AXI_WDATA <= REPLACER_PID_BASE;
+						S_AXI_WDATA <= REPLACER_PID_BASE + 32;
 
-						state_read_replacer <= 7;
+						state_test <= 7;
 					end
 					7: begin
 						mem_address <= ADDR_PID;
 						S_AXI_WDATA <= {{8{1'b0}}, 1'b1, 8'h01, 13'h0191};
 
-						state_read_replacer <= 8;
+						state_test <= 8;
 					end
 					8: begin
 						mem_address <= ADDR_CMD;
 						S_AXI_WDATA <= CMD_WRITE_REPLACE_DATA;
-						write_replace_data_index <= 0;
+						write_data_index <= 0;
 
-						state_read_replacer <= 9;
+						state_test <= 9;
 					end
 					9: begin
-						if((write_replace_data_index >= 0) && (write_replace_data_index < PACK_BYTE_SIZE)) begin
-							mem_address <= ADDR_TS_DATA_BASE + PACK_BYTE_SIZE / 4 + write_replace_data_index / 4;
-							S_AXI_WDATA <= {filter2[write_replace_data_index + 3], filter2[write_replace_data_index + 2], filter2[write_replace_data_index + 1], filter2[write_replace_data_index + 0]};
-							write_replace_data_index = write_replace_data_index + 4;
+						if((write_data_index >= 0) && (write_data_index < PACK_BYTE_SIZE)) begin
+							mem_address <= ADDR_TS_DATA_BASE + PACK_BYTE_SIZE / 4 + write_data_index / 4;
+							S_AXI_WDATA <= {filter2[write_data_index + 3], filter2[write_data_index + 2], filter2[write_data_index + 1], filter2[write_data_index + 0]};
+							write_data_index = write_data_index + 4;
 						end
 						else begin
-							state_read_replacer <= 10;
+							state_test <= 10;
 						end
 					end
 					10: begin
 						mem_address <= ADDR_RUN_ENABLE;
 						S_AXI_WDATA <= 1;
 
-						state_read_replacer <= 11;
+						state_test <= 11;
 					end
 					11: begin
 						mem_address <= ADDR_INDEX;
-						S_AXI_WDATA <= REPLACER_PID_BASE;
-						state_read_replacer <= 12;
+						S_AXI_WDATA <= REPLACER_PID_BASE + 32;
+						state_test <= 12;
 					end
 					12: begin
 						mem_address <= ADDR_CMD;
 						S_AXI_WDATA <= CMD_READ_REQUEST;
-						state_read_replacer <= 13;
+						state_test <= 13;
 					end
 					13: begin
 						mem_wren <= 0;
 						mem_rden <= 1;
 						mem_address <= ADDR_STATUS;
-						state_read_replacer <= 14;
+						state_test <= 14;
 					end
 					14: begin
 						if(axi_rdata == 1) begin
-							state_read_replacer <= 15;
+							state_test <= 15;
 						end
 						else begin
 						end
@@ -242,29 +240,29 @@ module my_tp #(
 							mem_wren <= 1;
 							mem_rden <= 0;
 
-							state_read_replacer <= 16;
+							state_test <= 16;
 							read_data_index <= 0;
 						end
 					end
 					16: begin
 						mem_address <= ADDR_INDEX;
-						S_AXI_WDATA <= REPLACER_PID_BASE;
-						state_read_replacer <= 17;
+						S_AXI_WDATA <= REPLACER_PID_BASE + 32;
+						state_test <= 17;
 					end
 					17: begin
 						mem_address <= ADDR_CMD;
 						S_AXI_WDATA <= CMD_READ_REQUEST;
-						state_read_replacer <= 18;
+						state_test <= 18;
 					end
 					18: begin
 						mem_wren <= 0;
 						mem_rden <= 1;
 						mem_address <= ADDR_STATUS;
-						state_read_replacer <= 19;
+						state_test <= 19;
 					end
 					19: begin
 						if(axi_rdata == 1) begin
-							state_read_replacer <= 20;
+							state_test <= 20;
 						end
 						else begin
 						end
@@ -278,7 +276,7 @@ module my_tp #(
 							mem_wren <= 1;
 							mem_rden <= 0;
 
-							state_read_replacer <= 21;
+							state_test <= 21;
 							read_data_index <= 0;
 						end
 					end
@@ -286,47 +284,47 @@ module my_tp #(
 						mem_address <= ADDR_INDEX;
 						S_AXI_WDATA <= 0;
 
-						state_read_replacer <= 22;
+						state_test <= 22;
 					end
 					22: begin
 						mem_address <= ADDR_PID;
 						S_AXI_WDATA <= 32'h0000157f;
 
-						state_read_replacer <= 23;
+						state_test <= 23;
 					end
 					23: begin
 						mem_address <= ADDR_RUN_ENABLE;
 						S_AXI_WDATA <= 1;
 
-						state_read_replacer <= 24;
+						state_test <= 24;
 					end
 					24: begin
 						mem_address <= ADDR_INDEX;
 						S_AXI_WDATA <= 1;
 
-						state_read_replacer <= 25;
+						state_test <= 25;
 					end
 					25: begin
 						mem_address <= ADDR_PID;
 						S_AXI_WDATA <= 32'h00000191;
 
-						state_read_replacer <= 26;
+						state_test <= 26;
 					end
 					26: begin
 						mem_address <= ADDR_RUN_ENABLE;
 						S_AXI_WDATA <= 1;
 
-						state_read_replacer <= 27;
+						state_test <= 27;
 					end
 					27: begin//start
 						mem_address <= ADDR_INDEX;
 						S_AXI_WDATA <= 0;
-						state_read_replacer <= 28;
+						state_test <= 28;
 					end
 					28: begin
 						if(mpeg_sync == 1) begin
 							read_delay <= 0;
-							state_read_replacer <= 29;
+							state_test <= 29;
 						end
 						else begin
 						end
@@ -335,7 +333,7 @@ module my_tp #(
 						if(read_delay == 20) begin
 							mem_address <= ADDR_CMD;
 							S_AXI_WDATA <= CMD_READ_REQUEST;
-							state_read_replacer <= 30;
+							state_test <= 30;
 						end
 						else begin
 							read_delay <= read_delay + 1;
@@ -345,11 +343,11 @@ module my_tp #(
 						mem_wren <= 0;
 						mem_rden <= 1;
 						mem_address <= ADDR_STATUS;
-						state_read_replacer <= 31;
+						state_test <= 31;
 					end
 					31: begin
 						if(axi_rdata == 1) begin
-							state_read_replacer <= 32;
+							state_test <= 32;
 						end
 						else begin
 						end
@@ -363,19 +361,19 @@ module my_tp #(
 							mem_wren <= 1;
 							mem_rden <= 0;
 
-							state_read_replacer <= 33;
+							state_test <= 33;
 							read_data_index <= 0;
 						end
 					end
 					33: begin
 						mem_address <= ADDR_INDEX;
 						S_AXI_WDATA <= 1;
-						state_read_replacer <= 34;
+						state_test <= 34;
 					end
 					34: begin
 						if(mpeg_sync == 1) begin
 							read_delay <= 0;
-							state_read_replacer <= 35;
+							state_test <= 35;
 						end
 						else begin
 						end
@@ -384,7 +382,7 @@ module my_tp #(
 						if(read_delay == 20) begin
 							mem_address <= ADDR_CMD;
 							S_AXI_WDATA <= CMD_READ_REQUEST;
-							state_read_replacer <= 36;
+							state_test <= 36;
 						end
 						else begin
 							read_delay <= read_delay + 1;
@@ -394,11 +392,11 @@ module my_tp #(
 						mem_wren <= 0;
 						mem_rden <= 1;
 						mem_address <= ADDR_STATUS;
-						state_read_replacer <= 37;
+						state_test <= 37;
 					end
 					37: begin
 						if(axi_rdata == 1) begin
-							state_read_replacer <= 38;
+							state_test <= 38;
 						end
 						else begin
 						end
@@ -412,7 +410,7 @@ module my_tp #(
 							mem_wren <= 1;
 							mem_rden <= 0;
 
-							state_read_replacer <= 27;
+							state_test <= 27;
 							read_data_index <= 0;
 						end
 					end
@@ -431,7 +429,10 @@ module my_tp #(
 			.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
 			.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM),
 			.REPLACE_MATCH_PID_COUNT(REPLACE_MATCH_PID_COUNT),
-			.REPLACE_DATA_GROUPS(REPLACE_DATA_GROUPS)
+			.REPLACE_DATA_GROUPS(REPLACE_DATA_GROUPS),
+			.COMMON_REPLACER_FILTER_NUM(COMMON_REPLACER_FILTER_NUM),
+			.COMMON_REPLACE_MATCH_PID_COUNT(COMMON_REPLACE_MATCH_PID_COUNT),
+			.COMMON_REPLACE_DATA_GROUPS(COMMON_REPLACE_DATA_GROUPS)
 		)
 		ram_inst (
 			.S_AXI_ARESETN(S_AXI_ARESETN),

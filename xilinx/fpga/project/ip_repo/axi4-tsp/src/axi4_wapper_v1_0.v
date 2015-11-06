@@ -1,8 +1,13 @@
 	module axi4_wapper_v1_0 #
 	(
 		// Users to add parameters here
-		parameter integer MONITOR_FILTER_NUM = 32,
-		parameter integer REPLACER_FILTER_NUM = 32,
+		parameter integer MONITOR_FILTER_NUM = 2,
+		parameter integer REPLACER_FILTER_NUM = 17,
+		parameter integer REPLACE_MATCH_PID_COUNT = 1,
+		parameter integer REPLACE_DATA_GROUPS = 1,
+		parameter integer COMMON_REPLACER_FILTER_NUM = 1,
+		parameter integer COMMON_REPLACE_MATCH_PID_COUNT = 16,
+		parameter integer COMMON_REPLACE_DATA_GROUPS = 2,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -92,7 +97,12 @@
 		.C_S_AXI_RUSER_WIDTH(C_S00_AXI_RUSER_WIDTH),
 		.C_S_AXI_BUSER_WIDTH(C_S00_AXI_BUSER_WIDTH),
 		.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
-		.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM)
+		.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM),
+		.REPLACE_MATCH_PID_COUNT(REPLACE_MATCH_PID_COUNT),
+		.REPLACE_DATA_GROUPS(REPLACE_DATA_GROUPS),
+		.COMMON_REPLACER_FILTER_NUM(COMMON_REPLACER_FILTER_NUM),
+		.COMMON_REPLACE_MATCH_PID_COUNT(COMMON_REPLACE_MATCH_PID_COUNT),
+		.COMMON_REPLACE_DATA_GROUPS(COMMON_REPLACE_DATA_GROUPS)
 	) axi4_imp_v1_0_S00_AXI_inst (
 		.S_AXI_ACLK(s00_axi_aclk),
 		.S_AXI_ARESETN(s00_axi_aresetn),
