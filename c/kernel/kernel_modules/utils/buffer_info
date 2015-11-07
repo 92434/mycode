@@ -1,0 +1,14 @@
+srw                    end
+s         rw           end
+s                    rwend
+
+sr         w           end
+s    r         w       end
+s          r          wend
+sr                    wend
+
+
+sw         r           end
+s    w         r       end
+s          w          rend
+sw                    rend

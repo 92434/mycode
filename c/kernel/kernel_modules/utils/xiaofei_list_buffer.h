@@ -4,6 +4,7 @@
 
 typedef struct _buffer_node {
 	struct list_head list;
+	bool used;
 	int size;
 	int read_offset;
 	int write_offset;

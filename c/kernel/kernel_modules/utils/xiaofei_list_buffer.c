@@ -112,42 +112,42 @@ release_list:
 int read_buffer(char *buffer, int size, list_buffer_t *list) {
 	char *data;
 	buffer_node_t *node;
-	int end_offset;
+	bool used;
 	int read_count = 0;
+	int read_start, read_end;
 	int read_offset, write_offset;
 
 	node = list_entry(list->read, buffer_node_t, list);
 	read_offset = node->read_offset;
 	write_offset = node->write_offset;
+	used = node->used;
 
-	if(read_offset == write_offset) {
+	if(read_offset == node->size) {
 		goto exit;
 	}
 
-	end_offset = read_offset + size;
+	read_start = read_offset;
+	read_end = read_start + size;
 
-	if(end_offset > node->size) {
-		end_offset = node->size;
+	if(read_end > node->size) {
+		read_end = node->size;
 	}
 
-	if((read_offset < write_offset) && (write_offset < end_offset)) {
-		end_offset = write_offset;
+	if((read_start <= write_offset) && (write_offset < read_end)) {
+		read_end = write_offset;
 	}
 
-	//myprintf("node:%p\n", (void *)node);
-	//myprintf("end_offset:%d\n", end_offset);
-	//myprintf("node->read_offset:%d\n\n", node->read_offset);
+	myprintf("read node:%p(%d-%d)\n", (void *)node, read_start, read_end);
 
-	data = node->buffer + read_offset;
+	data = node->buffer + read_start;
 
-	read_count = end_offset - read_offset;
+	read_count = read_end - read_start;
 
-	if(buffer != NULL) {
+	if((buffer != NULL) && (read_count != 0)) {
 		memcpy(buffer, data, read_count);
 	}
 
-	read_offset += read_count;
-	node->read_offset = read_offset;
+	node->read_offset = read_end;
 
 exit:
 	if(read_offset == node->size) {
@@ -160,66 +160,55 @@ exit:
 int write_buffer(char *buffer, int size, list_buffer_t *list) {
 	char *data;
 	buffer_node_t *node;
-	int end_offset;
 	int write_count = 0;
+	bool used;
+	int write_start, write_end;
 	int read_offset, write_offset;
 
 	node = list_entry(list->write, buffer_node_t, list);
-
 	read_offset = node->read_offset;
+	write_offset = node->write_offset;
+	used = node->used;
 
-	if(node->write_offset == node->size) {
-		node->write_offset = 0;
-		if(read_offset == 0) {
-			buffer_node_t *node1;
+	if(write_offset == node->size) {
+		write_start = 0;
+	} else {
+		write_start = write_offset;
+	}
 
-			node1 = list_entry(list->read, buffer_node_t, list);
-			myprintf("overwrite from %p!\n", (void *)(node->buffer + read_offset));
-			myprintf("overwrite:node->read_offset:%x\n", node->read_offset);
-			myprintf("overwrite:node1->buffer:%p\n", node1->buffer);
-			myprintf("overwrite:node1->read_offset:%x\n", node1->read_offset);
-			myprintf("overwrite:node1->write_offset:%x\n", node1->write_offset);
+	write_end = write_start + size;
+	if(write_end > node->size) {
+		write_end = node->size;
+	}
+
+	if((write_start <= read_offset) && (read_offset < write_end) && used) {
+		if(list->write == list->first) {
+			myprintf("overwrite node %p(%d-%d-%d)!\n", (void *)node, write_start, read_offset, write_end);
 		}
 	}
 
-	write_offset = node->write_offset;
-	
-	end_offset = write_offset + size;
-	if(end_offset > node->size) {
-		end_offset = node->size;
-	}
+	data = node->buffer + write_start;
 
-	if((write_offset < read_offset) && (read_offset <= end_offset)) {
-		buffer_node_t *node1;
+	myprintf("write node:%p(%d-%d)\n", (void *)node, write_start, write_end);
 
-		node1 = list_entry(list->read, buffer_node_t, list);
-		myprintf("overwrite from %p!\n", (void *)(node->buffer + read_offset));
-		myprintf("overwrite:node->read_offset:%x\n", node->read_offset);
-		myprintf("overwrite:node1->buffer:%p\n", node1->buffer);
-		myprintf("overwrite:node1->read_offset:%x\n", node1->read_offset);
-		myprintf("overwrite:node1->write_offset:%x\n", node1->write_offset);
-	}
+	write_count = write_end - write_start;
 
-	data = node->buffer + write_offset;
-
-	//myprintf("node:%p\n", (void *)node);
-	//myprintf("end_offset:%d\n", end_offset);
-	//myprintf("write_offset:%d\n\n", write_offset);
-
-	write_count = end_offset - write_offset;
-
-	if(buffer != NULL) {
+	if((buffer != NULL) && (write_count != 0)) {
 		memcpy(data, buffer, write_count);
 	}
 
-	write_offset += write_count;
-	if(write_offset == node->size) {
-		list->write = list->write->next;
+	if(!used) {
+		node->used = true;
 	}
 
-	node->write_offset = write_offset;
+	node->write_offset = write_end;
+
 	if(read_offset == node->size) {
 		node->read_offset = 0;
+	}
+
+	if(write_end == node->size) {
+		list->write = list->write->next;
 	}
 
 	return write_count;

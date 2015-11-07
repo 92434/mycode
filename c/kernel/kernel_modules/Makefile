@@ -6,9 +6,9 @@
 #modules-name-objs := obj1.o obj2.o obj3.o
 #KERNEL-OBJS += modules-name.o
 
-KBUILD_CFLAGS += -Dtest_timer
-#KBUILD_CFLAGS += -Dtest_buffer_list
-KBUILD_CFLAGS += -Dtest_kthread
+#KBUILD_CFLAGS += -Dtest_timer
+KBUILD_CFLAGS += -Dtest_buffer_list
+#KBUILD_CFLAGS += -Dtest_kthread
 
 KERNEL-OBJS += pmodoled-gpio.o
 KERNEL-OBJS += mod_info.o
