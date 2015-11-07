@@ -122,10 +122,6 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 	write_offset = node->write_offset;
 	used = node->used;
 
-	if(read_offset == node->size) {
-		goto exit;
-	}
-
 	read_start = read_offset;
 	read_end = read_start + size;
 
@@ -147,12 +143,11 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 		memcpy(buffer, data, read_count);
 	}
 
-	node->read_offset = read_end;
-
-exit:
-	if(read_offset == node->size) {
+	if(read_end == node->size) {
 		list->read = list->read->next;
 	}
+
+	node->read_offset = read_end;
 
 	return read_count;
 }
@@ -182,8 +177,10 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 	}
 
 	if((write_start <= read_offset) && (read_offset < write_end) && used) {
-		if(list->write == list->first) {
-			myprintf("overwrite node %p(%d-%d-%d)!\n", (void *)node, write_start, read_offset, write_end);
+		buffer_node_t *read_node;
+		read_node = list_entry(list->read, buffer_node_t, list);
+		if(read_node == node) {
+			myprintf("overwrite node:%p(%d-%d-%d)!\n", (void *)node, write_start, read_offset, write_end);
 		}
 	}
 
@@ -197,19 +194,19 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 		memcpy(data, buffer, write_count);
 	}
 
+	if(write_end == node->size) {
+		list->write = list->write->next;
+	}
+
 	if(!used) {
 		node->used = true;
 	}
-
-	node->write_offset = write_end;
 
 	if(read_offset == node->size) {
 		node->read_offset = 0;
 	}
 
-	if(write_end == node->size) {
-		list->write = list->write->next;
-	}
+	node->write_offset = write_end;
 
 	return write_count;
 }
@@ -238,7 +235,7 @@ int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, li
 		end_offset = write_node->size;
 		write_count = end_offset - write_offset;
 		write_node->avail_for_write = write_count;
-		//printk("write_node->avail_for_write:%d\n", write_node->avail_for_write);
+		//myprintf("write_node->avail_for_write:%d\n", write_node->avail_for_write);
 	}
 
 
@@ -256,7 +253,7 @@ int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, li
 		read_count = end_offset - read_offset;
 
 		read_node->avail_for_read = read_count;
-		//printk("read_node->avail_for_read:%d\n", read_node->avail_for_read);
+		//myprintf("read_node->avail_for_read:%d\n", read_node->avail_for_read);
 	}
 
 	return ret;

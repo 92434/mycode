@@ -19,7 +19,7 @@ static unsigned long count = 0;
 
 #ifdef test_buffer_list
 #include "utils/xiaofei_list_buffer.h"
-#define BUFFER_COUNT 1
+#define BUFFER_COUNT 2
 #define BUFFER_SIZE 24
 static char *buffers[BUFFER_COUNT];
 
@@ -28,7 +28,6 @@ static void start_test_buffer_list(void) {
 	list_buffer_t *list;
 	char *data_buffer;
 	char *data;
-	int loop;
 	buffer_node_t read, write;
 
 	for(i = 0; i < BUFFER_COUNT; i++) {
@@ -49,48 +48,32 @@ static void start_test_buffer_list(void) {
 		add_list_buffer_item(buffers[i], 0, BUFFER_SIZE, list);
 	}
 
-	//write large data continuely
 	data_buffer = (char *)vzalloc(BUFFER_COUNT * BUFFER_SIZE);
 	for(i = 1; i <= BUFFER_COUNT * BUFFER_SIZE; i++) {
 		data_buffer[i] = i;
 	}
 
-	i = BUFFER_COUNT * BUFFER_SIZE;
-	data = data_buffer;
-	loop = 0;
-	while(i > 0) {
-		int n;
-		get_buffer_node_info(&write, &read, list);
-		n = write_buffer(data, 1, list);
-		data += n;
-		i -= n;
-	}
-	get_buffer_node_info(&write, &read, list);
-	read_buffer(data_buffer + 0, 2, list);
-	//write_buffer(data_buffer + 8, 2, list);
-	//write_buffer(data_buffer + 10, 2, list);
-	get_buffer_node_info(&write, &read, list);
-	read_buffer(data_buffer + 2, 2, list);
-	//write_buffer(data_buffer + 12, 2, list);
-	//write_buffer(data_buffer + 14, 2, list);
-	//write large data continuely
+	write_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
+	write_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
+	write_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
+	write_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
+	//read_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
 
-	//read large data continuely
-	i = BUFFER_COUNT * BUFFER_SIZE - 4;
-	data = data_buffer + 4;
-	loop = 0;
-	while(i > 0) {
-		int n;
-		get_buffer_node_info(&write, &read, list);
-		n = read_buffer(data, 1, list);
-		data += n;
-		i -= n;
-	}
+	write_buffer(data_buffer + 2, 9, list);
+	write_buffer(data_buffer + 2, 9, list);
+	write_buffer(data_buffer + 2, 9, list);
+	write_buffer(data_buffer + 2, 9, list);
+	read_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
+	//get_buffer_node_info(&write, &read, list);
+	read_buffer(data_buffer + BUFFER_SIZE, BUFFER_COUNT * BUFFER_SIZE, list);
+	write_buffer(data_buffer + 2, 18, list);
+	read_buffer(data_buffer + BUFFER_SIZE, BUFFER_COUNT * BUFFER_SIZE, list);
+	write_buffer(data_buffer + 2, 1, list);
+	read_buffer(data_buffer + 2, 1, list);
+	write_buffer(data_buffer + BUFFER_SIZE, BUFFER_COUNT * BUFFER_SIZE, list);
+	write_buffer(data_buffer + BUFFER_SIZE, BUFFER_COUNT * BUFFER_SIZE, list);
+	write_buffer(data_buffer + BUFFER_SIZE, BUFFER_COUNT * BUFFER_SIZE, list);
 
-	get_buffer_node_info(&write, &read, list);
-	write_buffer(data_buffer + 10, 2, list);
-	get_buffer_node_info(&write, &read, list);
-	read_buffer(data_buffer, 2, list);
 
 	printk("\n");
 	for(i = 0; i < BUFFER_COUNT * BUFFER_SIZE; i++) {
@@ -100,7 +83,6 @@ static void start_test_buffer_list(void) {
 		printk("%02x ", data_buffer[i]);
 	}
 	printk("\n");
-	//read large data continuely
 
 	vfree(data_buffer);
 
