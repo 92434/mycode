@@ -53,11 +53,17 @@ static void start_test_buffer_list(void) {
 		data_buffer[i] = i;
 	}
 
-	write_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
+	write_buffer(data_buffer, BUFFER_COUNT, list);
 	write_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
 	write_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
 	write_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
 	//read_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
+
+	write_buffer(data_buffer + 2, 2, list);
+	read_buffer(data_buffer + 2, 2, list);
+
+	write_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
+	write_buffer(data_buffer, BUFFER_COUNT * BUFFER_SIZE, list);
 
 	write_buffer(data_buffer + 2, 9, list);
 	write_buffer(data_buffer + 2, 9, list);
