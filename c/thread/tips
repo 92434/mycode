@@ -1,0 +1,13 @@
+pthread_setschedparam pthread_getschedparam - set/get scheduling policy and parameters of a thread
+
+pthread_attr_init, pthread_attr_destroy - initialize and destroy thread attributes object
+
+pthread_attr_setinheritsched,  pthread_attr_getinheritsched  - set/get inherit-scheduler attribute in thread attributes object
+
+pthread_attr_setschedpolicy,  pthread_attr_getschedpolicy  -  set/get  scheduling policy attribute in thread attributes object
+
+pthread_attr_setschedparam,  pthread_attr_getschedparam  - set/get scheduling parameter attributes in thread attributes object
+
+pthread_create - create a new thread
+
+pthread_join - join with a terminated thread
