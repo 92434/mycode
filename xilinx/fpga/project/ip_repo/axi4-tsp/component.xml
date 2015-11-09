@@ -422,8 +422,8 @@
       <spirit:addressBlock>
         <spirit:name>reg0</spirit:name>
         <spirit:baseAddress spirit:format="bitString" spirit:resolve="user" spirit:bitStringLength="32">0</spirit:baseAddress>
-        <spirit:range spirit:format="long" spirit:resolve="dependent" spirit:dependency="pow(2,(spirit:decode(id(&apos;MODELPARAM_VALUE.C_S00_AXI_ADDR_WIDTH&apos;)) - 1) + 1)">8192</spirit:range>
-        <spirit:width spirit:format="long" spirit:resolve="dependent" spirit:dependency="(spirit:decode(id(&apos;MODELPARAM_VALUE.C_S00_AXI_DATA_WIDTH&apos;)) - 1) + 1">32</spirit:width>
+        <spirit:range spirit:format="long" spirit:resolve="dependent" spirit:dependency="pow(2,(C_S00_AXI_ADDR_WIDTH - 1) + 1)">8192</spirit:range>
+        <spirit:width spirit:format="long" spirit:resolve="dependent" spirit:dependency="(C_S00_AXI_DATA_WIDTH - 1) + 1">32</spirit:width>
         <spirit:usage>register</spirit:usage>
       </spirit:addressBlock>
     </spirit:memoryMap>
@@ -442,7 +442,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>4cb6f135</spirit:value>
+            <spirit:value>86152bce</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -458,7 +458,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>4cb6f135</spirit:value>
+            <spirit:value>86152bce</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -472,7 +472,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>86b2f1e5</spirit:value>
+            <spirit:value>d028a7e2</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -480,14 +480,14 @@
         <spirit:name>xilinx_testbench</spirit:name>
         <spirit:displayName>Test Bench</spirit:displayName>
         <spirit:envIdentifier>:vivado.xilinx.com:simulation.testbench</spirit:envIdentifier>
-        <spirit:modelName>myip_testbench</spirit:modelName>
+        <spirit:modelName>my_tp</spirit:modelName>
         <spirit:fileSetRef>
           <spirit:localName>xilinx_testbench_view_fileset</spirit:localName>
         </spirit:fileSetRef>
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>be028d32</spirit:value>
+            <spirit:value>a2783236</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -550,23 +550,6 @@
         </spirit:wire>
       </spirit:port>
       <spirit:port>
-        <spirit:name>ts_out</spirit:name>
-        <spirit:wire>
-          <spirit:direction>out</spirit:direction>
-          <spirit:vector>
-            <spirit:left spirit:format="long" spirit:resolve="immediate">7</spirit:left>
-            <spirit:right spirit:format="long" spirit:resolve="immediate">0</spirit:right>
-          </spirit:vector>
-          <spirit:wireTypeDefs>
-            <spirit:wireTypeDef>
-              <spirit:typeName>std_logic_vector</spirit:typeName>
-              <spirit:viewNameRef>xilinx_verilogsynthesis</spirit:viewNameRef>
-              <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
-            </spirit:wireTypeDef>
-          </spirit:wireTypeDefs>
-        </spirit:wire>
-      </spirit:port>
-      <spirit:port>
         <spirit:name>ts_out_clk</spirit:name>
         <spirit:wire>
           <spirit:direction>out</spirit:direction>
@@ -586,6 +569,36 @@
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
               <spirit:typeName>std_logic</spirit:typeName>
+              <spirit:viewNameRef>xilinx_verilogsynthesis</spirit:viewNameRef>
+              <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
+            </spirit:wireTypeDef>
+          </spirit:wireTypeDefs>
+        </spirit:wire>
+      </spirit:port>
+      <spirit:port>
+        <spirit:name>ts_out_sync</spirit:name>
+        <spirit:wire>
+          <spirit:direction>out</spirit:direction>
+          <spirit:wireTypeDefs>
+            <spirit:wireTypeDef>
+              <spirit:typeName>std_logic</spirit:typeName>
+              <spirit:viewNameRef>xilinx_verilogsynthesis</spirit:viewNameRef>
+              <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
+            </spirit:wireTypeDef>
+          </spirit:wireTypeDefs>
+        </spirit:wire>
+      </spirit:port>
+      <spirit:port>
+        <spirit:name>ts_out</spirit:name>
+        <spirit:wire>
+          <spirit:direction>out</spirit:direction>
+          <spirit:vector>
+            <spirit:left spirit:format="long" spirit:resolve="immediate">7</spirit:left>
+            <spirit:right spirit:format="long" spirit:resolve="immediate">0</spirit:right>
+          </spirit:vector>
+          <spirit:wireTypeDefs>
+            <spirit:wireTypeDef>
+              <spirit:typeName>std_logic_vector</spirit:typeName>
               <spirit:viewNameRef>xilinx_verilogsynthesis</spirit:viewNameRef>
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
@@ -633,9 +646,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -653,9 +663,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -673,9 +680,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -710,9 +714,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>1</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -726,9 +727,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -746,9 +744,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>3</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -766,9 +761,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -786,9 +778,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -806,9 +795,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -826,9 +812,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -842,9 +825,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -875,9 +855,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -908,9 +885,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -928,9 +902,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -944,9 +915,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1037,9 +1005,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1057,9 +1022,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1077,9 +1039,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1097,9 +1056,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1134,9 +1090,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>1</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1150,9 +1103,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1170,9 +1120,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>3</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1190,9 +1137,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1210,9 +1154,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1230,9 +1171,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1250,9 +1188,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1266,9 +1201,6 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
       <spirit:port>
@@ -1389,14 +1321,46 @@
               <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
             </spirit:wireTypeDef>
           </spirit:wireTypeDefs>
-          <spirit:driver>
-            <spirit:defaultValue>0</spirit:defaultValue>
-          </spirit:driver>
         </spirit:wire>
       </spirit:port>
     </spirit:ports>
     <spirit:modelParameters>
       <spirit:modelParameter xsi:type="spirit:nameValueTypeType" spirit:dataType="integer">
+        <spirit:name>MONITOR_FILTER_NUM</spirit:name>
+        <spirit:displayName>Monitor Filter Num</spirit:displayName>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.MONITOR_FILTER_NUM">2</spirit:value>
+      </spirit:modelParameter>
+      <spirit:modelParameter spirit:dataType="integer">
+        <spirit:name>REPLACER_FILTER_NUM</spirit:name>
+        <spirit:displayName>Replacer Filter Num</spirit:displayName>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.REPLACER_FILTER_NUM">17</spirit:value>
+      </spirit:modelParameter>
+      <spirit:modelParameter spirit:dataType="integer">
+        <spirit:name>REPLACE_MATCH_PID_COUNT</spirit:name>
+        <spirit:displayName>Replace Match Pid Count</spirit:displayName>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.REPLACE_MATCH_PID_COUNT">1</spirit:value>
+      </spirit:modelParameter>
+      <spirit:modelParameter spirit:dataType="integer">
+        <spirit:name>REPLACE_DATA_GROUPS</spirit:name>
+        <spirit:displayName>Replace Data Groups</spirit:displayName>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.REPLACE_DATA_GROUPS">1</spirit:value>
+      </spirit:modelParameter>
+      <spirit:modelParameter spirit:dataType="integer">
+        <spirit:name>COMMON_REPLACER_FILTER_NUM</spirit:name>
+        <spirit:displayName>Common Replacer Filter Num</spirit:displayName>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.COMMON_REPLACER_FILTER_NUM">1</spirit:value>
+      </spirit:modelParameter>
+      <spirit:modelParameter spirit:dataType="integer">
+        <spirit:name>COMMON_REPLACE_MATCH_PID_COUNT</spirit:name>
+        <spirit:displayName>Common Replace Match Pid Count</spirit:displayName>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.COMMON_REPLACE_MATCH_PID_COUNT">16</spirit:value>
+      </spirit:modelParameter>
+      <spirit:modelParameter spirit:dataType="integer">
+        <spirit:name>COMMON_REPLACE_DATA_GROUPS</spirit:name>
+        <spirit:displayName>Common Replace Data Groups</spirit:displayName>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.COMMON_REPLACE_DATA_GROUPS">2</spirit:value>
+      </spirit:modelParameter>
+      <spirit:modelParameter spirit:dataType="integer">
         <spirit:name>C_S00_AXI_ID_WIDTH</spirit:name>
         <spirit:displayName>C S00 Axi Id Width</spirit:displayName>
         <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.C_S00_AXI_ID_WIDTH">1</spirit:value>
@@ -1436,11 +1400,6 @@
         <spirit:displayName>C S00 Axi Buser Width</spirit:displayName>
         <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.C_S00_AXI_BUSER_WIDTH">0</spirit:value>
       </spirit:modelParameter>
-      <spirit:modelParameter spirit:dataType="integer">
-        <spirit:name>TSP_FILTER_NUM</spirit:name>
-        <spirit:displayName>Tsp Filter Num</spirit:displayName>
-        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.TSP_FILTER_NUM">32</spirit:value>
-      </spirit:modelParameter>
     </spirit:modelParameters>
   </spirit:model>
   <spirit:choices>
@@ -1454,48 +1413,68 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>src/MatchReplace.v</spirit:name>
+        <spirit:name>src/monitor.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/logic_ram.v</spirit:name>
+        <spirit:name>src/logic_ram_my.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/axi4_logic_ram_wrap.v</spirit:name>
+        <spirit:name>src/replacer.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>src/axi4_imp_v1_0_S00_AXI.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
         <spirit:name>src/axi4_wapper_v1_0.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_4ffceac3</spirit:userFileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>src/axi4_imp_v1_0_S00_AXI.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>src/axi4_logic_ram_wrap.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:userFileType>CHECKSUM_26984fe1</spirit:userFileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>src/MatchReplace.v</spirit:name>
+        <spirit:name>src/monitor.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/logic_ram.v</spirit:name>
+        <spirit:name>src/logic_ram_my.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/axi4_logic_ram_wrap.v</spirit:name>
+        <spirit:name>src/replacer.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>src/axi4_imp_v1_0_S00_AXI.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
         <spirit:name>src/axi4_wapper_v1_0.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>src/axi4_imp_v1_0_S00_AXI.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>src/axi4_logic_ram_wrap.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -1504,23 +1483,28 @@
         <spirit:name>xgui/axi4_tsp_v1_0.tcl</spirit:name>
         <spirit:fileType>tclSource</spirit:fileType>
         <spirit:userFileType>XGUI_VERSION_2</spirit:userFileType>
-        <spirit:userFileType>CHECKSUM_86b2f1e5</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_d028a7e2</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
       <spirit:name>xilinx_testbench_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>src/clock.v</spirit:name>
+        <spirit:name>src/my_tp.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/testbench.v</spirit:name>
+        <spirit:name>src/clock.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
     </spirit:fileSet>
   </spirit:fileSets>
   <spirit:description>axi4_tsp</spirit:description>
   <spirit:parameters>
+    <spirit:parameter>
+      <spirit:name>Component_Name</spirit:name>
+      <spirit:displayName>Component Name</spirit:displayName>
+      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">my_tp_v1_0</spirit:value>
+    </spirit:parameter>
     <spirit:parameter>
       <spirit:name>C_S00_AXI_BUSER_WIDTH</spirit:name>
       <spirit:displayName>C S00 Axi Buser Width</spirit:displayName>
@@ -1562,14 +1546,39 @@
       <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.C_S00_AXI_ID_WIDTH" spirit:order="1800">1</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
-      <spirit:name>Component_Name</spirit:name>
-      <spirit:displayName>Component Name</spirit:displayName>
-      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">axi4_wapper_v1_0_v1_0</spirit:value>
+      <spirit:name>COMMON_REPLACE_DATA_GROUPS</spirit:name>
+      <spirit:displayName>Common Replace Data Groups</spirit:displayName>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.COMMON_REPLACE_DATA_GROUPS" spirit:order="1900">2</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
-      <spirit:name>TSP_FILTER_NUM</spirit:name>
-      <spirit:displayName>Tsp Filter Num</spirit:displayName>
-      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.TSP_FILTER_NUM">32</spirit:value>
+      <spirit:name>COMMON_REPLACE_MATCH_PID_COUNT</spirit:name>
+      <spirit:displayName>Common Replace Match Pid Count</spirit:displayName>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.COMMON_REPLACE_MATCH_PID_COUNT" spirit:order="2000">16</spirit:value>
+    </spirit:parameter>
+    <spirit:parameter>
+      <spirit:name>COMMON_REPLACER_FILTER_NUM</spirit:name>
+      <spirit:displayName>Common Replacer Filter Num</spirit:displayName>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.COMMON_REPLACER_FILTER_NUM" spirit:order="2100">1</spirit:value>
+    </spirit:parameter>
+    <spirit:parameter>
+      <spirit:name>REPLACE_DATA_GROUPS</spirit:name>
+      <spirit:displayName>Replace Data Groups</spirit:displayName>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.REPLACE_DATA_GROUPS" spirit:order="2200">1</spirit:value>
+    </spirit:parameter>
+    <spirit:parameter>
+      <spirit:name>REPLACE_MATCH_PID_COUNT</spirit:name>
+      <spirit:displayName>Replace Match Pid Count</spirit:displayName>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.REPLACE_MATCH_PID_COUNT" spirit:order="2300">1</spirit:value>
+    </spirit:parameter>
+    <spirit:parameter>
+      <spirit:name>REPLACER_FILTER_NUM</spirit:name>
+      <spirit:displayName>REPLACER_FILTER_NUM</spirit:displayName>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.REPLACER_FILTER_NUM" spirit:order="2400" spirit:configGroups="0 UnGrouped radioGroup" spirit:minimum="2" spirit:maximum="32" spirit:rangeType="long">17</spirit:value>
+    </spirit:parameter>
+    <spirit:parameter>
+      <spirit:name>MONITOR_FILTER_NUM</spirit:name>
+      <spirit:displayName>MONITOR_FILTER_NUM</spirit:displayName>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.MONITOR_FILTER_NUM" spirit:order="2500" spirit:configGroups="0 UnGrouped radioGroup" spirit:minimum="1" spirit:maximum="32" spirit:rangeType="long">2</spirit:value>
     </spirit:parameter>
   </spirit:parameters>
   <spirit:vendorExtensions>
@@ -1578,30 +1587,29 @@
         <xilinx:family xilinx:lifeCycle="Production">kintex7</xilinx:family>
       </xilinx:supportedFamilies>
       <xilinx:taxonomies>
-        <xilinx:taxonomy>/UserIP</xilinx:taxonomy>
+        <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>axi4_tsp</xilinx:displayName>
-      <xilinx:coreRevision>36</xilinx:coreRevision>
+      <xilinx:coreRevision>22</xilinx:coreRevision>
       <xilinx:upgrades>
-        <xilinx:canUpgradeFrom>xiaofei:user:axi4_wapper:1.0</xilinx:canUpgradeFrom>
+        <xilinx:canUpgradeFrom>user.org:user:my_tp:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2015-10-15T07:15:52Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2015-11-06T05:07:40Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
-        <xilinx:tag xilinx:name="user.org:user:axi4_wapper_v1_0:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/axi4-tsp/axi4-tsp.srcs</xilinx:tag>
-        <xilinx:tag xilinx:name="(none):user:axi4_wapper_v1_0:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/axi4-tsp/axi4-tsp.srcs</xilinx:tag>
-        <xilinx:tag xilinx:name="xiaofei:user:axi4_wapper_v1_0:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/axi4-tsp/axi4-tsp.srcs</xilinx:tag>
-        <xilinx:tag xilinx:name="xiaofei:user:axi4_wapper:1.0_ARCHIVE_LOCATION">/home/action/workspace</xilinx:tag>
-        <xilinx:tag xilinx:name="xiaofei:user:axi4_tsp:1.0_ARCHIVE_LOCATION">/home/action/workspace</xilinx:tag>
+        <xilinx:tag xilinx:name="nopcore"/>
+        <xilinx:tag xilinx:name="user.org:user:my_tp:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/axi4-tsp</xilinx:tag>
+        <xilinx:tag xilinx:name="xiaofei:user:my_tp:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/axi4-tsp</xilinx:tag>
+        <xilinx:tag xilinx:name="xiaofei:user:axi4_tsp:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/axi4-tsp</xilinx:tag>
       </xilinx:tags>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2014.3</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="f6459b64"/>
-      <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="81044ad3"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="29bf7dc4"/>
-      <xilinx:checksum xilinx:scope="ports" xilinx:value="4401be4e"/>
-      <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="5896d289"/>
-      <xilinx:checksum xilinx:scope="parameters" xilinx:value="8f54cf77"/>
+      <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="df79664e"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="4924e35a"/>
+      <xilinx:checksum xilinx:scope="ports" xilinx:value="bdb78dc8"/>
+      <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="5508dd27"/>
+      <xilinx:checksum xilinx:scope="parameters" xilinx:value="34e54dd7"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>
 </spirit:component>

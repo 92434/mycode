@@ -5,7 +5,7 @@ module receive_data_from_i2s #
 		parameter integer I2S_DATA_BIT_WIDTH = 24
 	)
 	(
-		input wire rst,
+		input wire rst_n,
 		input wire bclk,
 		input wire lrclk,
 		input wire sdata,
@@ -19,37 +19,34 @@ module receive_data_from_i2s #
 	integer count = I2S_DATA_BIT_WIDTH;
 	reg lrstate = 0;
 
-	//lock i2s_received_data at negedge of bclk
 	always @(posedge bclk) begin
-		if(rst == 0'b0) begin
+		if(rst_n == 0'b0) begin
+			s_data_valid <= 0;
 			lrstate <= lrclk;
 			i2s_received_data[I2S_DATA_BIT_WIDTH] <= lrclk;
-			s_data_valid <= 0;
-			i2s_received_data = 0;
 			count <= I2S_DATA_BIT_WIDTH - 1;
 		end
 		else begin
 			if(lrstate != lrclk) begin
+				s_data_valid <= 0;
 				lrstate <= lrclk;
 				i2s_received_data[I2S_DATA_BIT_WIDTH] <= lrclk;
-				s_data_valid <= 0;
-				i2s_received_data = 0;
 				count <= I2S_DATA_BIT_WIDTH - 1;
 			end
 			else begin
-				if(count < I2S_DATA_BIT_WIDTH) begin
+				if(s_data_valid == 0) begin
 					i2s_received_data[count] <= sdata;
 
-					if(count == 0) begin
-						s_data_valid <= 1;
-						count <= I2S_DATA_BIT_WIDTH;
+					if((count > 0) && (count < I2S_DATA_BIT_WIDTH)) begin
+						count <= count - 1;
 					end
 					else begin
-						count <= count - 1;
-					end	
+						s_data_valid <= 1;
+					end
+				end
+				else begin
 				end
 			end
-
 		end
 	end
 
