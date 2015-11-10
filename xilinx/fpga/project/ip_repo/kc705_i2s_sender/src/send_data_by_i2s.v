@@ -99,7 +99,7 @@ module send_data_by_i2s #
 				data_buffer <= {data_source[I2S_SENDER_TEST_DATA_WIDTH - 2 : 0], 1'b0};
 			end
 			else if((bclk_count >= 2) && (bclk_count <= I2S_SENDER_TEST_DATA_WIDTH)) begin
-				sdata <= data_source[I2S_SENDER_TEST_DATA_WIDTH - 1]; // shift output
+				sdata <= data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 1]; // shift output
 				data_buffer <= {data_buffer[I2S_SENDER_TEST_DATA_WIDTH - 2 : 0], 1'b0};
 			end
 			else begin

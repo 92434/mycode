@@ -9,6 +9,7 @@ module myip_i2s_sender_v1_0 #
 	(
 		input wire rst_n,
 		input wire clk,
+
 		output wire [I2S_RECEIVER_NUM - 1 : 0] i2s_sender_bclk,
 		output wire [I2S_RECEIVER_NUM - 1 : 0] i2s_sender_lrclk,
 		output wire [I2S_RECEIVER_NUM - 1 : 0] i2s_sender_sdata,
