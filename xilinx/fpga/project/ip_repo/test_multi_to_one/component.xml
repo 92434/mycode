@@ -63,7 +63,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>f76a09b8</spirit:value>
+            <spirit:value>e9677b63</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -187,11 +187,11 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogtestbench_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>src/clock.v</spirit:name>
+        <spirit:name>src/testbench.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/testbench.v</spirit:name>
+        <spirit:name>../common/src/clock.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
     </spirit:fileSet>
@@ -218,8 +218,8 @@
         <xilinx:taxonomy>/UserIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>multi_to_one</xilinx:displayName>
-      <xilinx:coreRevision>34</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2015-09-30T03:36:49Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>36</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2015-11-11T07:26:58Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="user.org:user:multi_to_one:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/test_multi_to_one/test_multi_to_one.srcs/sources_1/new</xilinx:tag>
         <xilinx:tag xilinx:name="(none):user:multi_to_one:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/test_multi_to_one/test_multi_to_one.srcs/sources_1/new</xilinx:tag>
@@ -228,7 +228,7 @@
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2014.3</xilinx:xilinxVersion>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="b5dddd22"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="21f3f875"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="024e709b"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="86cb8d8e"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="6ccd42ec"/>

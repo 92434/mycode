@@ -27,7 +27,7 @@ module testbench #(
 	(
 	);
 
-	reg rst;
+	reg rst_n;
 	wire clk;
 	wire din_clk;
 	reg valid;
@@ -38,18 +38,20 @@ module testbench #(
 	wire [FIFO_DATA_WIDTH - 1 : 0] dout;
 	wire ce;
 	wire [4 : 0] ce_sr;
-	wire output_ready;
+	wire r_enable;
+	wire error_full;
+	wire error_empty;
 	wire start;
 	wire [9:0] sout_data;
 	wire [9:0] sout_data_1;
 	wire [7:0] din_8b_R_debug;
 
-	reg [2 : 0] i;
+	reg [2 : 0] i = 0;
 
 	initial begin
-		rst = 0;
+		rst_n = 0;
 		#9
-		rst = 1;
+		rst_n = 1;
 	end
 
 	assign sout_data_1 = {
@@ -70,15 +72,15 @@ module testbench #(
 	clkgen #(.clk_period(1)) xiaofeiclk_rd(.clk(clk));
 
 	data_gen_counter #(
-			.I2S_SENDER_TEST_DATA_WIDTH(DATA_WIDTH)
+			.DATA_WIDTH(DATA_WIDTH)
 		) data_gen(
-			.rst(rst),
+			.rst_n(rst_n),
 			.clk(din_clk),
 			.data_source(din_8b)
 		);
 	
 	always @(posedge din_clk) begin
-		if(rst == 0) begin
+		if(rst_n == 0) begin
 			i <= 0;
 			valid <= 0;
 		end
@@ -96,18 +98,24 @@ module testbench #(
 	ts2asi #(
 			.FIFO_DATA_WIDTH(9)
 		) ts2asi_inst (
-			.rst(rst),
+			.rst_n(rst_n),
 			.clk(clk),
+
 			.din_clk(din_clk),
 			.valid(valid),
 			.din_8b(din_8b),
+
 			.asi_out(asi_out),
+
 			.din(din),
 			.rdata(rdata),
 			.dout(dout),
+			.r_enable(r_enable),
+			.error_full(error_full),
+			.error_empty(error_empty),
+
 			.ce(ce),
 			.ce_sr(ce_sr),
-			.output_ready(output_ready),
 			.start(start),
 			.sout_data(sout_data),
 			.din_8b_R_debug(din_8b_R_debug)

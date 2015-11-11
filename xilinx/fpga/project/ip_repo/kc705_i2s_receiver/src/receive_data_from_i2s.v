@@ -10,7 +10,7 @@ module receive_data_from_i2s #
 		input wire lrclk,
 		input wire sdata,
 		//output wire i2s_din,
-		output reg [I2S_DATA_BIT_WIDTH:0] i2s_received_data = 0,
+		output reg [I2S_DATA_BIT_WIDTH : 0] i2s_received_data = 0,
 		output reg s_data_valid = 0
 	);
 

@@ -195,7 +195,7 @@ module replacer #(
 			end
 			else begin
 				if(pid_matched == 1) begin
-					if((matched_index >= (ts_out_group_index * PACK_BYTE_SIZE)) && (matched_index < (ts_out_group_index * PACK_BYTE_SIZE) + PACK_BYTE_SIZE)) begin
+					if((matched_index >= ts_out_group_index * PACK_BYTE_SIZE) && (matched_index < ts_out_group_index * PACK_BYTE_SIZE + PACK_BYTE_SIZE)) begin
 						ts_out_valid <= 1;
 
 						ts_out_sync <= mpeg_sync_d3;

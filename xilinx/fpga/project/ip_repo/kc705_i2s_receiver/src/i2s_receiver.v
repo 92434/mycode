@@ -24,7 +24,7 @@ module i2s_receiver # (
 	);
 
 	wire s_data_valid;
-	wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] i2s_received_data;
+	wire [I2S_DATA_BIT_WIDTH : 0] i2s_received_data;
  	receive_data_from_i2s # (
 			.I2S_DATA_BIT_WIDTH(I2S_DATA_BIT_WIDTH)
 		) receiver (
@@ -49,11 +49,11 @@ module i2s_receiver # (
 	//localparam integer PACKAGE_BYTE_COUNT = 174;
 	localparam integer PACKAGE_BYTE_COUNT = 42;
 
-	reg [DATA_WIDTH * DATA_BYTE_COUNT - 1 : 0] i2s_data;
-	reg [DATA_WIDTH * DATA_BYTE_COUNT - 1 : 0] i2s_data_prev;
+	reg [DATA_WIDTH * DATA_BYTE_COUNT - 1 : 0] i2s_data = 0;
+	reg [DATA_WIDTH * DATA_BYTE_COUNT - 1 : 0] i2s_data_prev = 0;
+
 	wire [DATA_WIDTH * HEADER_BYTE_COUNT - 1 : 0]header;
 	wire [I2S_DATA_VALID_BIT_WIDTH - 1 : 0]data;
-
 	assign header = {8'h0B, 8'h77, 8'hA1, 8'hDD, 8'h42, 8'h40, 8'h2F, 8'h84, 8'h2B, 8'h03};
 	assign data = i2s_received_data[DATA_WIDTH * 3 - 1 -: I2S_DATA_VALID_BIT_WIDTH];
 
@@ -77,24 +77,24 @@ module i2s_receiver # (
 					end
 
 					if(header == i2s_data[DATA_WIDTH * HEADER_BYTE_COUNT - 1 : 0]) begin
-						i <= HEADER_BYTE_COUNT + I2S_DATA_VALID_BIT_WIDTH;
+						i <= HEADER_BYTE_COUNT + I2S_DATA_VALID_BYTE_WIDTH;
 						match_state <= 1;
 					end
 					else begin
 					end
 				end
 				1: begin
-					if((i >= HEADER_BYTE_COUNT + I2S_DATA_VALID_BIT_WIDTH) && (i < PACKAGE_BYTE_COUNT)) begin
-						i <= i + I2S_DATA_VALID_BIT_WIDTH;
+					if((i >= HEADER_BYTE_COUNT + I2S_DATA_VALID_BYTE_WIDTH) && (i < PACKAGE_BYTE_COUNT)) begin
+						i <= i + I2S_DATA_VALID_BYTE_WIDTH;
 					end
 					else begin// hit 174 bytes
 						if(i2s_data == i2s_data_prev) begin
 						end
 						else begin
 							i2s_data_prev <= i2s_data;
+							need_cache_i2s_data <= 1;
 						end
 
-						need_cache_i2s_data <= 1;
 						match_state <= 0;
 					end
 				end
@@ -125,14 +125,14 @@ module i2s_receiver # (
 					w_enable <= 0;
 
 					if(need_cache_i2s_data == 1) begin
-						data_index <= 15;
+						data_index <= DATA_BYTE_COUNT;
 						cache_state <= 1;
 					end
 					else begin
 					end
 				end
 				1: begin
-					if((data_index > 0) && (data_index <= 15)) begin
+					if((data_index > 0) && (data_index <= DATA_BYTE_COUNT)) begin
 						w_enable <= 1;
 						fifo_data <= i2s_data_prev[DATA_WIDTH * data_index - 1 -: DATA_WIDTH];
 						data_index <= data_index - 1;
@@ -169,7 +169,7 @@ module i2s_receiver # (
 			.DATA_WIDTH(FIFO_DATA_WIDTH),
 			.BULK_OF_DATA(BULK_OF_DATA),
 			.BULK_DEPTH(BULK_DEPTH)
-		) xiaofei_fifo (
+		) i2s_fifo (
 			.rst_n(rst_n),
 			.wclk(clk),
 			.rclk(clk),

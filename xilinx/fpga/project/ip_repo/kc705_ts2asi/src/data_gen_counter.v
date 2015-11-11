@@ -2,18 +2,18 @@
 
 module data_gen_counter #
 	(
-		parameter I2S_SENDER_TEST_DATA_WIDTH = 24
+		parameter integer DATA_WIDTH = 24
 	)
 	(
-		input wire rst,
+		input wire rst_n,
 		input wire clk,
-		output reg [I2S_SENDER_TEST_DATA_WIDTH - 1:0] data_source = 0
+		output reg [DATA_WIDTH - 1:0] data_source = 0
 	);
 
-	reg [I2S_SENDER_TEST_DATA_WIDTH - 1:0] index = 0;
+	reg [DATA_WIDTH - 1:0] index = 0;
 
 	always @(posedge clk) begin
-		if(rst == 0) begin
+		if(rst_n == 0) begin
 			data_source <= 0;
 		end
 		else begin

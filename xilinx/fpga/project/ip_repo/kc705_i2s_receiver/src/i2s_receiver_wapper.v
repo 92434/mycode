@@ -77,17 +77,19 @@ module i2s_receiver_wapper #(
 
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
-			i2s_index <= 0;
 			cache_state <= 0;
+			local_r_enable <= 0;
+			i2s_index <= 0;
 			local_rdata_count <= 0;
 		end
 		else begin
 			case(cache_state)
 				0: begin
 					local_r_enable <= 0;
+
 					if(local_r_ready[i2s_index] == 1) begin
-						local_r_enable[i2s_index] <= 1;
 						local_rdata_count <= 0;
+						local_r_enable[i2s_index] <= 1;
 						cache_state <= 1;
 					end
 					else begin
@@ -103,6 +105,12 @@ module i2s_receiver_wapper #(
 					if((local_rdata_count >= 0) && (local_rdata_count < LOCAL_BULK_OF_DATA)) begin
 						w_enable <= 1;
 						wdata <= local_rdata[i2s_index];
+
+						if(local_rdata_count == LOCAL_BULK_OF_DATA - 1) begin
+							local_r_enable <= 0;
+						end
+						else begin
+						end
 
 						local_rdata_count <= local_rdata_count + 1;
 					end
@@ -133,7 +141,7 @@ module i2s_receiver_wapper #(
 			.DATA_WIDTH(FIFO_DATA_WIDTH),
 			.BULK_OF_DATA(BULK_OF_DATA),
 			.BULK_DEPTH(BULK_DEPTH)
-		) xiaofei_fifo (
+		) receiver_fifo (
 			.rst_n(rst_n),
 			.wclk(clk),
 			.rclk(clk),

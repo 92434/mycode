@@ -28,7 +28,7 @@ module ts2asi #(
 	)
 	(
 		// Inputs
-		input wire rst, //Synchronous reset
+		input wire rst_n, //Synchronous reset
 		input wire clk, //half-bit rate clock, 
 
 		input wire din_clk,
@@ -41,7 +41,9 @@ module ts2asi #(
 		output wire [FIFO_DATA_WIDTH - 1 : 0] din,
 		output wire [FIFO_DATA_WIDTH - 1 : 0] rdata,
 		output wire [FIFO_DATA_WIDTH - 1 : 0] dout,
-		output wire output_ready,
+		output wire r_enable,
+		output wire error_full,
+		output wire error_empty,
 
 		output reg ce, //Clock enable for parallel domain
 		output reg [4 : 0] ce_sr,
@@ -55,7 +57,7 @@ module ts2asi #(
 
 	// Tx clock enable generation
 	always @(posedge clk) begin
-		if (rst == 0) begin
+		if (rst_n == 0) begin
 			ce <= 1'b0;
 			ce_sr <= 5'b00001;
 		end
@@ -69,27 +71,28 @@ module ts2asi #(
 	assign dout = (output_ready_R == 0) ? {1'b1, 8'hBC} : rdata;
 
 	always @(negedge ce) begin
-		if (rst == 0) begin
+		if (rst_n == 0) begin
 			output_ready_R <= 0;
 		end
 		else begin
-			output_ready_R <= output_ready;
+			output_ready_R <= r_enable;
 		end
 	end
 
 	my_fifo #(
 			.DATA_WIDTH(FIFO_DATA_WIDTH),
-			.NUMBER_OF_OUTPUT_WORDS(1)
+			.BULK_OF_DATA(1)
 		) xiaofei_fifo (
-			.rst(rst),
+			.rst_n(rst_n),
 			.wclk(din_clk),
 			.rclk(ce),
 			.wdata(din),
 			.rdata(rdata),
-			.read_enable(output_ready),
-			.output_ready(output_ready),
-			.buffer_full_error(buffer_full_error),
-			.buffer_empty_error(buffer_empty_error)
+			.w_enable(1),
+			.r_enable(r_enable),
+			.r_ready(r_enable),
+			.error_full(error_full),
+			.error_empty(error_empty)
 		);
 
 	//reg kchar_in_R = 1'b0;
@@ -126,7 +129,7 @@ module ts2asi #(
 		.sclk_0(clk),
 		.sclk_180(~clk),
 		.ce(ce),
-		.reset(~rst),
+		.reset(~rst_n),
 		.din_10b(data_enc10b),
 		.sdout(asi_out));
 

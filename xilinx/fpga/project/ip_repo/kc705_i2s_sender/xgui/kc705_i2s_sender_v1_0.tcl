@@ -1,15 +1,5 @@
 # Definitional proc to organize widgets for parameters.
 proc init_gui { IPINST } {
-  set Component_Name  [  ipgui::add_param $IPINST -name "Component_Name" -display_name {Component Name}]
-  set_property tooltip {Component Name} ${Component_Name}
-  #Adding Page
-  set Page_0  [  ipgui::add_page $IPINST -name "Page 0" -display_name {Page 0}]
-  set_property tooltip {Page 0} ${Page_0}
-  set I2S_RECEIVER_NUM  [  ipgui::add_param $IPINST -name "I2S_RECEIVER_NUM" -parent ${Page_0} -display_name {I2S_RECEIVER_NUM}]
-  set_property tooltip {I2S_RECEIVER_NUM} ${I2S_RECEIVER_NUM}
-  set I2S_SENDER_TEST_DATA_WIDTH  [  ipgui::add_param $IPINST -name "I2S_SENDER_TEST_DATA_WIDTH" -parent ${Page_0} -display_name {I2s Sender Test Data Width}]
-  set_property tooltip {I2s Sender Test Data Width} ${I2S_SENDER_TEST_DATA_WIDTH}
-
 
 }
 
