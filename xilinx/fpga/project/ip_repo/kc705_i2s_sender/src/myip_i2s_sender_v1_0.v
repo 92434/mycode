@@ -16,6 +16,36 @@ module myip_i2s_sender_v1_0 #
 		output wire [I2S_SENDER_TEST_DATA_WIDTH - 1 :0] data_source
 	);
 
+	reg clk1 = 0;
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
+			clk1 <= 0;
+		end
+		else begin
+			clk1 <= ~clk1;
+		end
+	end
+
+	reg clk2 = 0;
+	always @(posedge clk1) begin
+		if(rst_n == 0) begin
+			clk2 <= 0;
+		end
+		else begin
+			clk2 <= ~clk2;
+		end
+	end
+
+	reg clk3 = 0;
+	always @(posedge clk2) begin
+		if(rst_n == 0) begin
+			clk3 <= 0;
+		end
+		else begin
+			clk3 <= ~clk3;
+		end
+	end
+
 // Add user logic here
 
 	wire [I2S_RECEIVER_NUM - 1 : 0] data_source_clk;
@@ -38,7 +68,7 @@ module myip_i2s_sender_v1_0 #
 			send_data_by_i2s # (
 					.I2S_SENDER_TEST_DATA_WIDTH(I2S_SENDER_TEST_DATA_WIDTH)
 				) sender (
-					.clk(clk),
+					.clk(clk3),
 					.rst_n(rst_n),
 					.read_sync(read_sync[i]),
 

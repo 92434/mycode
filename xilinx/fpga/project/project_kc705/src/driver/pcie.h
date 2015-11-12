@@ -66,7 +66,7 @@
 /**< Maximum number of BARs */
 #define MAX_BARS 6
 /**< Maximum number of MAX_BAR_MAP_MEMORY */
-#define MAX_BAR_MAP_MEMORY 512
+#define MAX_BAR_MAP_MEMORY 1024
 
 #define DMA_BLOCK_SIZE 0x1000
 

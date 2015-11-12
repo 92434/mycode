@@ -131,7 +131,7 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 		read_end = write_offset;
 	}
 
-	myprintf("read node:%p(%d-%d)\n", (void *)node, read_start, read_end);
+	//myprintf("read node:%p(%d-%d)\n", (void *)node, read_start, read_end);
 
 	data = node->buffer + read_start;
 
@@ -181,19 +181,19 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 				&& (write_start < read_offset)
 				&& (read_offset <= write_end)
 				) {
-			myprintf("will overwrite at:%p(%d)!\n", (void *)read_node, read_offset);
+			myprintf("will overwrite at:%p(%d-%d)-%p(%d)!\n", (void *)node, write_start, write_end, (void *)read_node, read_offset);
 		} else if(
 				(list->read == list->write->next)
 				&& (write_end == node->size)
 				&& (read_node->read_offset == 0)
 				) {
-			myprintf("will overwrite at:%p(%d)!\n", (void *)read_node, read_node->read_offset);
+			myprintf("will overwrite at:%p(%d-%d)-%p(%d)!\n", (void *)node, write_start, write_end, (void *)read_node, read_node->read_offset);
 		}
 	}
 
 	data = node->buffer + write_start;
 
-	myprintf("write node:%p(%d-%d)\n", (void *)node, write_start, write_end);
+	//myprintf("write node:%p(%d-%d)\n", (void *)node, write_start, write_end);
 
 	write_count = write_end - write_start;
 

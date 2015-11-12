@@ -46,8 +46,7 @@ module i2s_receiver # (
 
 	localparam integer HEADER_BYTE_COUNT = 10;
 	localparam integer DATA_BYTE_COUNT = 15;
-	//localparam integer PACKAGE_BYTE_COUNT = 174;
-	localparam integer PACKAGE_BYTE_COUNT = 42;
+	localparam integer PACKAGE_BYTE_COUNT = 174;
 
 	reg [DATA_WIDTH * DATA_BYTE_COUNT - 1 : 0] i2s_data = 0;
 	reg [DATA_WIDTH * DATA_BYTE_COUNT - 1 : 0] i2s_data_prev = 0;

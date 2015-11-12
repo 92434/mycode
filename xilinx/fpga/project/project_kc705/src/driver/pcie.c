@@ -534,7 +534,8 @@ static int pcie_tr_thread(void *ppara) {
 			tr.tx_dest_axi_addr = 0;
 			tr.rx_src_axi_addr = 0;
 			tr.tx_size = 0;
-			tr.rx_size = DMA_BLOCK_SIZE;
+			//tr.rx_size = DMA_BLOCK_SIZE;
+			tr.rx_size = 128;
 			tr.tx_data = NULL;
 			tr.rx_data = NULL;
 			tr.tr_cmp = NULL;

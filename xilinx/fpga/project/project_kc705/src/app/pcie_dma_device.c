@@ -56,27 +56,17 @@ int catch_signal(sig_action_t sig_action) {
 
 int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
 	int ret = 0;
+
 	int i;
-	unsigned int ui0, ui1;
-
-	ui0 = ui1 = *pre_value;
-
-	for(i = 0; i < count; i++) {
-		ui1 = pdata[i] & 0xffffff;
-		
-		if(ui1 == ui0 + 1) {
-		} else if(ui1 == 0) {
-		} else if(ui0 == 0) {
-		} else {
-			ret = -1;
-			printf("!!!failed!!!(%d)\n", i);
-			printf("ui0:%010d ui1:%010d\n", ui0, ui1);
+	for(i = 0; i < 30; i++) {
+		if(i % 16 == 0) {
+			printf("\n");
 		}
 
-		ui0 = ui1;
+		printf("%04x ", pdata[i] & 0xffff);
 	}
+	printf("\n");
 
-	*pre_value = ui0;
 	return ret;
 }
 

@@ -64,8 +64,8 @@ module i2s_receiver_wapper #(
 	endgenerate
 
 
-	localparam integer BULK_OF_DATA = 15;
-	localparam integer BULK_DEPTH = 128;
+	localparam integer BULK_OF_DATA = 16;
+	localparam integer BULK_DEPTH = 256;
 
 	localparam integer LOCAL_BULK_OF_DATA = 15;
 

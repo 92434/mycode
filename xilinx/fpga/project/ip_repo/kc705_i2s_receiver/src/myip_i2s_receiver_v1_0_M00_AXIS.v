@@ -59,7 +59,7 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	// WAIT_COUNT_BITS is the width of the wait counter.
 	localparam integer WAIT_COUNT_BITS = clogb2(C_M_START_COUNT-1);
 
-	localparam integer NUMBER_OF_OUTPUT_WORDS = 15;
+	localparam integer NUMBER_OF_OUTPUT_WORDS = 16;
 
 	// bit_num gives the minimum number of bits needed to address 'depth' size of FIFO.
 	localparam bit_num = clogb2(NUMBER_OF_OUTPUT_WORDS);

@@ -29,11 +29,11 @@ module data_gen_counter #
 				data_source <= {header[(HEADER_WIDTH - (index * DATA_WIDTH)) - 1 -: DATA_WIDTH], 8'h00};
 				index <= index + 1;
 			end
-			else if((index >= 5) && (index < 20)) begin
+			else if((index >= 5) && (index < (174 / 2 - 1))) begin
 				data_source <= {index[DATA_WIDTH - 1 -: DATA_WIDTH], 8'h00};
 				index <= index + 1;
 			end
-			else if(index == 20) begin
+			else if(index == (174 / 2 - 1)) begin
 				data_source <= {count[DATA_WIDTH - 1 -: DATA_WIDTH], 8'h00};
 				index <= index + 1;
 				count <= count + 1;

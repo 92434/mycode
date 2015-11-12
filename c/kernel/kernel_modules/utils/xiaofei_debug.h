@@ -3,7 +3,7 @@
 #include <linux/version.h>
 
 #define mydebug(format, ...) printk(KERN_DEBUG "[%s:%s:%d]:" format, __FILE__, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__)
-#define myprintf(format, ...) printk(KERN_ERR format, ## __VA_ARGS__)
+#define myprintf(format, ...) printk(KERN_DEBUG format, ## __VA_ARGS__)
 
 #define BITMASK(loc) (1 << loc)
 
