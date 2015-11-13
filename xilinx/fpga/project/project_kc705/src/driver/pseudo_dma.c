@@ -62,6 +62,7 @@ static int dma_tr(void *ppara) {
 	if(tx_size != 0) {
 		for(i = 0; i + 4 <= tx_size; i += 4) {
 			writel(*((uint32_t *)(tx_src_memory + i)), tx_dest_memory + i);
+			myprintf("%08x->%p\n", *((uint32_t *)(tx_src_memory + i)), (void *)(tx_dest_memory + i));
 		}
 		pos = i;
 		for(i = pos; i + 2 <= tx_size; i += 2) {

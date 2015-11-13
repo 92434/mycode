@@ -535,7 +535,7 @@ static int pcie_tr_thread(void *ppara) {
 			tr.rx_src_axi_addr = 0;
 			tr.tx_size = 0;
 			//tr.rx_size = DMA_BLOCK_SIZE;
-			tr.rx_size = 128;
+			tr.rx_size = 64;
 			tr.tx_data = NULL;
 			tr.rx_data = NULL;
 			tr.tr_cmp = NULL;
@@ -567,7 +567,8 @@ static int test_thread(void *ppara) {
 		schedule_timeout(msecs_to_jiffies(100)); 
 
 
-		put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
+		dma = dma;
+		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
 	}
 
 	mydebug("\n");

@@ -172,48 +172,86 @@ static int tcp_send_data(int fd, unsigned char *buffer, unsigned int len) {
 int tr_test(int fd) {
 	int ret;
 	int i;
+	int tx_size = 1024;
+	int rx_size = 1024;
+	uint8_t *tx_data = NULL;
+	uint8_t *rx_data = NULL;
+	int tx_dest_offset = 0;
+	int rx_src_offset = 0;
+	pseudo_dma_tr_t *pseudo_dma_tr = NULL;
+
+	tx_data = (uint8_t *)malloc(tx_size);
+	if(tx_data == 0) {
+		printf("err: no memory for pseudo_dma_tr!\n");
+		ret = -1;
+		stop = 1;
+	} else {
+		for(i = 0; i < tx_size; i++) {
+			tx_data[i] = i;
+		}
+	}
+
+	rx_data = (uint8_t *)malloc(rx_size);
+	if(rx_data == 0) {
+		printf("err: no memory for pseudo_dma_tr!\n");
+		ret = -1;
+		stop = 1;
+	} else {
+		for(i = 0; i < rx_size; i++) {
+			rx_data[i] = 0;
+		}
+	}
+
+	pseudo_dma_tr = (pseudo_dma_tr_t *)malloc(sizeof(pseudo_dma_tr_t));
+	if(pseudo_dma_tr == 0) {
+		printf("err: no memory for pseudo_dma_tr!\n");
+		ret = -1;
+		stop = 1;
+	} else {
+		pseudo_dma_tr->tx_data = 0;
+		pseudo_dma_tr->rx_data = 0;
+		pseudo_dma_tr->tx_size = 0;
+		pseudo_dma_tr->rx_size = 0;
+		pseudo_dma_tr->tx_dest_offset = 0;
+		pseudo_dma_tr->rx_src_offset = 0;
+	}
 
 	while(stop == 0) {
-		int tx_size = 1024;
-		int rx_size = 1024;
-		uint8_t *tx_data = NULL;
-		uint8_t *rx_data = NULL;
-		int tx_dest_offset = 0;
-		int rx_src_offset = 0;
-		pseudo_dma_tr_t *pseudo_dma_tr = NULL;
+		uint32_t *wdata = (uint32_t *)tx_data;
+		uint32_t *rdata = (uint32_t *)rx_data;
 
-		tx_data = (uint8_t *)malloc(tx_size);
-		if(tx_data == 0) {
-			printf("err: no memory for pseudo_dma_tr!\n");
-			ret = -1;
-		} else {
-			for(i = 0; i < tx_size; i++) {
-				tx_data[i] = i;
-			}
-		}
+		pseudo_dma_tr->tx_data = 0;
+		pseudo_dma_tr->rx_data = 0;
+		pseudo_dma_tr->tx_size = 0;
+		pseudo_dma_tr->rx_size = 0;
+		pseudo_dma_tr->tx_dest_offset = 0;
+		pseudo_dma_tr->rx_src_offset = 0;
 
-		rx_data = (uint8_t *)malloc(rx_size);
-		if(rx_data == 0) {
-			printf("err: no memory for pseudo_dma_tr!\n");
-			ret = -1;
-		} else {
-			for(i = 0; i < rx_size; i++) {
-				rx_data[i] = 0;
-			}
-		}
-
-		pseudo_dma_tr = (pseudo_dma_tr_t *)malloc(sizeof(pseudo_dma_tr_t));
-		if(pseudo_dma_tr == 0) {
-			printf("err: no memory for pseudo_dma_tr!\n");
-			ret = -1;
-		} else {
-			pseudo_dma_tr->tx_size = tx_size;
-			pseudo_dma_tr->rx_size = rx_size;
+		for(i = 0; i < 19; i ++) {
+			*wdata = i;//
 			pseudo_dma_tr->tx_data = tx_data;
-			pseudo_dma_tr->rx_data = rx_data;
-			pseudo_dma_tr->tx_dest_offset = tx_dest_offset;
-			pseudo_dma_tr->rx_src_offset = rx_src_offset;
+			pseudo_dma_tr->tx_size = 4;
+			pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 0;//ADDR_INDEX
+			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+			if (ret != 0) {
+				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+				break;
+			}
 
+			*wdata = 0x00000000;
+			pseudo_dma_tr->tx_data = tx_data;
+			pseudo_dma_tr->tx_size = 4;
+			pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 4;//ADDR_PID
+			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+			if (ret != 0) {
+				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+				break;
+			}
+
+			*wdata = 0;//
+			pseudo_dma_tr->tx_data = tx_data;
+			pseudo_dma_tr->tx_size = 4;
+			pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 8;//ADDR_RUN_ENABLE
 			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
 			if (ret != 0) {
 				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -221,17 +259,188 @@ int tr_test(int fd) {
 			}
 		}
 
-		if(pseudo_dma_tr != NULL) {
-			free(pseudo_dma_tr);
-		}
-		if(rx_data != NULL) {
-			free(rx_data);
-		}
-		if(tx_data != NULL) {
-			free(tx_data);
+		*wdata = 2 + 16 + 0;//replacer #17
+		pseudo_dma_tr->tx_data = tx_data;
+		pseudo_dma_tr->tx_size = 4;
+		pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 0;//ADDR_INDEX
+		ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+		if (ret != 0) {
+			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+			break;
 		}
 
+		*wdata = (0x00000001 << 21)/*match enable*/ + (0x00000000 << 13)/*index*/ + 0x0000157f;
+		pseudo_dma_tr->tx_data = tx_data;
+		pseudo_dma_tr->tx_size = 4;
+		pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 4;//ADDR_PID
+		ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+		if (ret != 0) {
+			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+			break;
+		}
+
+		*wdata = 1;//CMD_WRITE_REPLACE_DATA
+		pseudo_dma_tr->tx_data = tx_data;
+		pseudo_dma_tr->tx_size = 4;
+		pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 12;//ADDR_CMD
+		ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+		if (ret != 0) {
+			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+			break;
+		}
+
+		for(i = 0; i < 188 * 2; i++) {
+			tx_data[i] = i;
+		}
+
+		//pseudo_dma_tr->tx_data = tx_data;
+		//pseudo_dma_tr->tx_size = 188 * 2;
+		//pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 128 * 4;//ADDR_TS_DATA_BASE 
+		//ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+		//if (ret != 0) {
+		//	printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		//	break;
+		//}
+
+		for(i = 0; i < 188 * 2; i += 4) {
+			pseudo_dma_tr->tx_data = tx_data + i;
+			pseudo_dma_tr->tx_size = 4;
+			pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 128 * 4 + i;//ADDR_TS_DATA_BASE 
+			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+			if (ret != 0) {
+				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+				break;
+			}
+	
+			usleep(1000);
+		}
+
+		*wdata = 1;//
+		pseudo_dma_tr->tx_data = tx_data;
+		pseudo_dma_tr->tx_size = 4;
+		pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 8;//ADDR_RUN_ENABLE
+		ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+		if (ret != 0) {
+			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+			break;
+		}
+
+
+		*wdata = 2;//CMD_READ_REQUEST
+		pseudo_dma_tr->tx_data = tx_data;
+		pseudo_dma_tr->tx_size = 4;
+		pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 12;//ADDR_CMD
+		ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+		if (ret != 0) {
+			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+			break;
+		}
+
+		pseudo_dma_tr->tx_data = 0;
+		pseudo_dma_tr->rx_data = 0;
+		pseudo_dma_tr->tx_size = 0;
+		pseudo_dma_tr->rx_size = 0;
+		pseudo_dma_tr->tx_dest_offset = 0;
+		pseudo_dma_tr->rx_src_offset = 0;
+
+		*rdata = 0;
+		while(*rdata == 0) {
+			pseudo_dma_tr->rx_data = rx_data;
+			pseudo_dma_tr->rx_size = 4;
+			pseudo_dma_tr->rx_src_offset = rx_src_offset + 16;//ADDR_STATUS
+			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+			if (ret != 0) {
+				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+				break;
+			}
+		}
+
+		pseudo_dma_tr->rx_data = rx_data;
+		pseudo_dma_tr->rx_size = 188 * 2;
+		pseudo_dma_tr->rx_src_offset = rx_src_offset + 128 * 4;//ADDR_TS_DATA_BASE
+		ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+		if (ret != 0) {
+			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+			break;
+		}
+
+		for(i = 0; i < 188 * 2; i++) {
+			if((i != 0) && (i % 16 == 0)) {
+				printf("\n");
+			}
+			printf("%02x ", rx_data[i]);
+		}
+		printf("\n");
+
+		pseudo_dma_tr->tx_data = 0;
+		pseudo_dma_tr->rx_data = 0;
+		pseudo_dma_tr->tx_size = 0;
+		pseudo_dma_tr->rx_size = 0;
+		pseudo_dma_tr->tx_dest_offset = 0;
+		pseudo_dma_tr->rx_src_offset = 0;
+
+		for(i = 0; i < 19; i++) {
+			*wdata = i;//
+			pseudo_dma_tr->tx_data = tx_data;
+			pseudo_dma_tr->tx_size = 4;
+			pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 0;//ADDR_INDEX
+			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+			if (ret != 0) {
+				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+				break;
+			}
+
+			pseudo_dma_tr->tx_data = 0;
+			pseudo_dma_tr->rx_data = 0;
+			pseudo_dma_tr->tx_size = 0;
+			pseudo_dma_tr->rx_size = 0;
+			pseudo_dma_tr->tx_dest_offset = 0;
+			pseudo_dma_tr->rx_src_offset = 0;
+
+			pseudo_dma_tr->rx_data = rx_data;
+			pseudo_dma_tr->rx_size = 4;
+			pseudo_dma_tr->rx_src_offset = rx_src_offset + 4;//ADDR_PID
+			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+			if (ret != 0) {
+				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+				break;
+			}
+			printf("pid:%08x\n", *rdata);
+
+			pseudo_dma_tr->rx_data = rx_data;
+			pseudo_dma_tr->rx_size = 4;
+			pseudo_dma_tr->rx_src_offset = rx_src_offset + 8;//ADDR_RUN_ENABLE
+			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+			if (ret != 0) {
+				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+				break;
+			}
+			printf("enable:%s\n", *rdata == 1 ? "true" : *rdata == 0 ? "false" : "other");
+
+			pseudo_dma_tr->rx_data = rx_data;
+			pseudo_dma_tr->rx_size = 4;
+			pseudo_dma_tr->rx_src_offset = rx_src_offset + 0;//ADDR_INDEX
+			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
+			if (ret != 0) {
+				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+				break;
+			}
+			printf("slot:%d\n", *rdata);
+		}
+
+		break;
+
 		usleep(1000);
+	}
+
+	if(pseudo_dma_tr != NULL) {
+		free(pseudo_dma_tr);
+	}
+	if(rx_data != NULL) {
+		free(rx_data);
+	}
+	if(tx_data != NULL) {
+		free(tx_data);
 	}
 
 	return ret;

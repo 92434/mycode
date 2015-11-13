@@ -146,7 +146,7 @@ module my_tp #(
 					end
 					2: begin
 						mem_address <= ADDR_PID;
-						S_AXI_WDATA <= {{8{1'b0}}, 1'b1, 8'h00, 13'h157f};
+						S_AXI_WDATA <= {{10{1'b0}}, 1'b1, 8'h00, 13'h157f};
 
 						state_test <= 3;
 					end
@@ -181,7 +181,7 @@ module my_tp #(
 					end
 					7: begin
 						mem_address <= ADDR_PID;
-						S_AXI_WDATA <= {{8{1'b0}}, 1'b1, 8'h01, 13'h0191};
+						S_AXI_WDATA <= {{10{1'b0}}, 1'b1, 8'h01, 13'h0191};
 
 						state_test <= 8;
 					end

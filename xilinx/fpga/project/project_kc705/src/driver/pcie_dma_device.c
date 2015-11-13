@@ -168,7 +168,7 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 
 				//mydebug("%p:tx_data:%p\n", current, tx_data);
 				//mydebug("%p:rx_data:%p\n", current, rx_data);
-				if(pseudo_dma_tr.tx_data != NULL) {
+				if((pseudo_dma_tr.tx_data != NULL) && (pseudo_dma_tr.tx_size != 0)) {
 					tx_data = (uint8_t *)vzalloc(pseudo_dma_tr.tx_size);
 					if(tx_data == NULL) {
 						mydebug("alloc tx_data failed.\n");
@@ -179,7 +179,7 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 					}
 				}
 
-				if(pseudo_dma_tr.rx_data != NULL) {
+				if((pseudo_dma_tr.rx_data != NULL) && (pseudo_dma_tr.rx_size != 0)) {
 					rx_data = (uint8_t *)vzalloc(pseudo_dma_tr.rx_size);
 					if(rx_data == NULL) {
 						mydebug("alloc rx_data failed.\n");
@@ -187,6 +187,8 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 						return ret;
 					}
 				}
+
+				//myprintf("tx_size:%d, rx_size:%d\n", pseudo_dma_tr.tx_size, pseudo_dma_tr.rx_size);
 
 				put_pcie_tr(
 					dma,

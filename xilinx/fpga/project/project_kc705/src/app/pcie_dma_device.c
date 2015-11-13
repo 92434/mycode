@@ -58,8 +58,8 @@ int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
 	int ret = 0;
 
 	int i;
-	for(i = 0; i < 30; i++) {
-		if(i % 16 == 0) {
+	for(i = 0; i < count; i++) {
+		if((i != 0) && (i % 16 == 0)) {
 			printf("\n");
 		}
 

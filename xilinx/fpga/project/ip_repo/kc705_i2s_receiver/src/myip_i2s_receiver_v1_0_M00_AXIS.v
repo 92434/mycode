@@ -97,13 +97,14 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 	reg tx_done;
 
 	wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] rdata;
+	reg [C_M_AXIS_TDATA_WIDTH - 1 : 0] rdata_R = 0;
 	wire read_enable;
 
 	// I/O Connections assignments
 
 	assign M_AXIS_TVALID = axis_tvalid_R;
 	//assign M_AXIS_TDATA = stream_data_out;
-	assign M_AXIS_TDATA = rdata;
+	assign M_AXIS_TDATA = rdata_R;
 	assign M_AXIS_TLAST = axis_tlast_R;
 	assign M_AXIS_TSTRB = {(C_M_AXIS_TDATA_WIDTH/8){1'b1}};
 
@@ -185,11 +186,13 @@ module myip_i2s_receiver_v1_0_M00_AXIS #
 			begin
 				axis_tvalid_R <= 1'b0;
 				axis_tlast_R <= 1'b0;
+				rdata_R <= 1'b0;
 			end
 		else
 			begin
 				axis_tvalid_R <= axis_tvalid;
 				axis_tlast_R <= axis_tlast;
+				rdata_R <= rdata;
 			end
 	end
 
