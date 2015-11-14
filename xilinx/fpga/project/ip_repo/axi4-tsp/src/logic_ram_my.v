@@ -37,15 +37,13 @@ module logic_ram #(
 
 	localparam integer ADDR_INDEX = 0;
 
-	localparam integer ADDR_PID = ADDR_INDEX + 1;
+	localparam integer ADDR_PID_INDEX = ADDR_INDEX + 1;
 
-	localparam integer ADDR_RUN_ENABLE = ADDR_PID + 1;
+	localparam integer ADDR_PID = ADDR_PID_INDEX + 1;//{{15{1'b0}}, 1'b(pid_enable), {3{1'b0}}, 13'b(pid)}
 
-	localparam integer ADDR_CMD = ADDR_RUN_ENABLE + 1;
-	localparam integer CMD_WRITE_REPLACE_DATA = 1;
-	localparam integer CMD_READ_REQUEST = 2;
+	localparam integer ADDR_MATCH_ENABLE = ADDR_PID + 1;
 
-	localparam integer ADDR_STATUS = ADDR_CMD + 1;
+	localparam integer ADDR_READ_REQUEST = ADDR_MATCH_ENABLE + 1;
 
 	localparam integer ADDR_TS_DATA_BASE = 128;
 	localparam integer ADDR_TS_DATA_END = ADDR_TS_DATA_BASE + PACK_WORD_SIZE * COMMON_REPLACE_DATA_GROUPS;
@@ -61,23 +59,25 @@ module logic_ram #(
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_write_data = 0;
 	reg current_mem_wren = 0;
 
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_pid [0 : ALL_FILTERS_NUM - 1];
-
-	reg [ALL_FILTERS_NUM - 1 : 0] run_enable = 0;
-
-	reg [ALL_FILTERS_NUM - 1 : 0] read_data_enable = 0;
-	wire [ALL_FILTERS_NUM - 1 : 0] read_data_ready;
-
-	reg [ALL_FILTERS_NUM - 1 : 0] write_data_enable = 0;
-
-	reg [ALL_FILTERS_NUM - 1 : 0] pid_changing = 0;
-
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data [0 : PACK_WORD_SIZE * COMMON_REPLACE_DATA_GROUPS - 1];
-
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_slot = 0;
+	reg [C_S_AXI_DATA_WIDTH-1:0] current_pid_index = 0;
+
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_data_index = 0;
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_data = 0;
-	reg [C_S_AXI_DATA_WIDTH-1:0] current_cmd = 0;
+
+	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_pid_index [0 : ALL_FILTERS_NUM - 1];
+	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_pid [0 : ALL_FILTERS_NUM - 1];
+
+	reg [ALL_FILTERS_NUM - 1 : 0] match_enable = 0;
+
+	reg [ALL_FILTERS_NUM - 1 : 0] pump_data_request = 0;
+	wire [ALL_FILTERS_NUM - 1 : 0] pump_data_request_ready;
+	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data [0 : PACK_WORD_SIZE * COMMON_REPLACE_DATA_GROUPS - 1];
+
+
+	reg [ALL_FILTERS_NUM - 1 : 0] update_data_request = 0;
+
+	reg [ALL_FILTERS_NUM - 1 : 0] update_pid_request = 0;
 
 	integer index_wstrb;
 	//assigning 8 bit data
@@ -95,24 +95,16 @@ module logic_ram #(
 
 	always @(posedge S_AXI_ACLK) begin
 		if(S_AXI_ARESETN == 0) begin
-			write_data_enable <= 0;
-			read_data_enable <= 0;
-			pid_changing <= 0;
+			update_pid_request <= 0;
+			pump_data_request <= 0;
+			update_data_request <= 0;
 		end
 		else begin
+			update_pid_request <= 0;
+			pump_data_request <= 0;
+			update_data_request <= 0;
+
 			if(current_mem_wren) begin
-
-				read_data_enable <= 0;
-				pid_changing <= 0;
-
-				//写数据时，维持write_data_enable状态,否则复位
-				//状态
-				if((current_write_address >= ADDR_TS_DATA_BASE) && (current_write_address < ADDR_TS_DATA_END)) begin
-				end
-				else begin
-					write_data_enable <= 0;
-				end
-
 				case(current_write_address)
 					ADDR_INDEX: begin
 						if((current_write_data >= 0) && (current_write_data < ALL_FILTERS_NUM)) begin
@@ -121,40 +113,28 @@ module logic_ram #(
 						else begin
 						end
 					end
+					ADDR_PID_INDEX: begin
+						if((current_write_data >= 0) && (current_write_data < COMMON_REPLACE_MATCH_PID_COUNT)) begin
+							current_pid_index <= current_write_data;
+						end
+						else begin
+						end
+					end
 					ADDR_PID: begin
 						ram_for_pid[current_slot] <= current_write_data;
-						pid_changing[current_slot] <= 1;
+						update_pid_request[current_slot] <= 1;
 					end
-					ADDR_RUN_ENABLE: begin
-						if(current_write_data == 1) begin
-							run_enable[current_slot] <= 1;
-						end
-						else if(current_write_data == 0) begin
-							run_enable[current_slot] <= 0;
-						end
-						else begin
-							run_enable[current_slot] <= 0;
-						end
+					ADDR_MATCH_ENABLE: begin
+						match_enable[current_slot] <= (current_write_data == 1) ? 1 : 0;
 					end
-					ADDR_CMD: begin
-						current_cmd <= current_write_data;
-						if(current_write_data == CMD_WRITE_REPLACE_DATA) begin
-							if((current_slot >= REPLACER_PID_BASE) && (current_slot < ALL_FILTERS_NUM)) begin
-								write_data_enable[current_slot] <= 1;
-							end
-							else begin
-							end
-						end
-						else if(current_write_data == CMD_READ_REQUEST) begin
-							read_data_enable[current_slot] <= 1;
-						end
-						else begin
-						end
+					ADDR_READ_REQUEST: begin
+						pump_data_request[current_slot] <= 1;
 					end
 					default: begin
 						if((current_write_address >= ADDR_TS_DATA_BASE) && (current_write_address < ADDR_TS_DATA_END)) begin
 							current_data_index <= current_write_address - ADDR_TS_DATA_BASE;
 							current_data <= current_write_data;
+							update_data_request[current_slot] <= 1;
 						end
 						else begin
 						end
@@ -166,26 +146,22 @@ module logic_ram #(
 		end
 	end
 
-	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_pid [0 : REPLACER_FILTER_NUM];
+	wire [C_S_AXI_DATA_WIDTH-1:0] out_pid [0 : ALL_FILTERS_NUM - 1];
 
 	always @(posedge S_AXI_ACLK) begin
 		if (mem_rden) begin
 			case(mem_address)
 				ADDR_INDEX:
 					axi_rdata <= current_slot;
+				ADDR_PID_INDEX: begin
+					axi_rdata <= current_pid_index;
+				end
 				ADDR_PID:
-					if((current_slot >= 0) && (current_slot < MONITOR_FILTER_NUM)) begin
-						axi_rdata <= ram_for_pid[current_slot];
-					end
-					else begin
-						axi_rdata <= replacers_out_pid[current_slot - REPLACER_PID_BASE + 1];
-					end
-				ADDR_RUN_ENABLE:
-					axi_rdata <= run_enable[current_slot];
-				ADDR_CMD:
-					axi_rdata <= current_cmd;
-				ADDR_STATUS:
-					axi_rdata <= read_data_ready[current_slot];
+					axi_rdata <= out_pid[current_slot];
+				ADDR_MATCH_ENABLE:
+					axi_rdata <= match_enable[current_slot];
+				ADDR_READ_REQUEST:
+					axi_rdata <= pump_data_request_ready[current_slot];
 				default: begin
 					if((mem_address >= ADDR_TS_DATA_BASE) && (mem_address < ADDR_TS_DATA_END)) begin
 						axi_rdata <= ram_for_data[mem_address - ADDR_TS_DATA_BASE];
@@ -200,26 +176,29 @@ module logic_ram #(
 
 
 	//for input assign
-	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_run_enable;
-	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_read_data_enable;
-	wire [C_S_AXI_DATA_WIDTH-1:0] ram_for_monitors_pid [0 : REPLACER_FILTER_NUM - 1];
+	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_match_enable;
+	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_udpate_pid_request;
+	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_pump_data_request;
+	wire [C_S_AXI_DATA_WIDTH-1:0] monitors_ram_for_pid [0 : MONITOR_FILTER_NUM - 1];
 
 	//for output
+	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_pump_data_request_ready;
 	wire [C_S_AXI_DATA_WIDTH-1:0] monitors_out_data[0 : MONITOR_FILTER_NUM - 1];
 	wire [C_S_AXI_DATA_WIDTH-1:0] monitors_out_data_index[0 : MONITOR_FILTER_NUM - 1];
-	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_read_data_ready;
+	wire [C_S_AXI_DATA_WIDTH-1:0] monitors_out_pid [0 : MONITOR_FILTER_NUM - 1];
 
 	//output assign
-	assign read_data_ready[MONITOR_FILTER_NUM - 1 : 0] = monitors_read_data_ready;
+	assign pump_data_request_ready[MONITOR_FILTER_NUM - 1 : 0] = monitors_pump_data_request_ready;
 
 	genvar i;
 	generate for (i = 0; i < MONITOR_FILTER_NUM; i = i + 1)
 		begin : monitors
 
 			//input assign
-			assign monitors_run_enable[i] = run_enable[i];
-			assign monitors_read_data_enable[i] = read_data_enable[i];
-			assign ram_for_monitors_pid[i] = ram_for_pid[i];
+			assign monitors_match_enable[i] = match_enable[i];
+			assign monitors_udpate_pid_request[i] = update_pid_request[i];
+			assign monitors_pump_data_request[i] = pump_data_request[i];
+			assign monitors_ram_for_pid[i] = ram_for_pid[i];
 
 			monitor # 
 				(
@@ -229,39 +208,42 @@ module logic_ram #(
 					.S_AXI_ARESETN(S_AXI_ARESETN),
 					.S_AXI_ACLK(S_AXI_ACLK),
 
-					.pump_data_enable(monitors_read_data_enable[i]),
+					.match_enable(monitors_match_enable[i]),
 
+					.update_pid_request(monitors_udpate_pid_request[i]),
+					.pid_index(current_pid_index),
+					.pid(monitors_ram_for_pid[i]),
+
+					.out_pid(monitors_out_pid[i]),
+
+					.pump_data_request(monitors_pump_data_request[i]),
+
+					.pump_data_request_ready(monitors_pump_data_request_ready[i]),
 					.out_data(monitors_out_data[i]),
 					.out_data_index(monitors_out_data_index[i]),
-					.ready_for_read(monitors_read_data_ready[i]),
 
-					.pid(ram_for_monitors_pid[i]),
 					.mpeg_data(mpeg_data),
 					.mpeg_clk(mpeg_clk),
 					.mpeg_valid(mpeg_valid),
-					.mpeg_sync(mpeg_sync),
-
-					.run_enable(monitors_run_enable[i])
+					.mpeg_sync(mpeg_sync)
 				);
 		end
 	endgenerate
 
 	//for input assign
-	wire [REPLACER_FILTER_NUM : 0] replacers_run_enable;
-
-	wire [REPLACER_FILTER_NUM : 0] replacers_read_data_enable;
-	wire [REPLACER_FILTER_NUM : 0] replacers_write_data_enable;
-
-	wire [REPLACER_FILTER_NUM : 0] replacers_update_pid_enable;
-
-	wire [C_S_AXI_DATA_WIDTH-1:0] ram_for_replacers_pid [0 : REPLACER_FILTER_NUM];
+	wire [REPLACER_FILTER_NUM : 0] replacers_match_enable;
+	wire [REPLACER_FILTER_NUM : 0] replacers_update_pid_request;
+	wire [REPLACER_FILTER_NUM : 0] replacers_update_data_request;
+	wire [REPLACER_FILTER_NUM : 0] replacers_pump_data_request;
+	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_ram_for_pid [0 : REPLACER_FILTER_NUM];
 
 
 	//for output
+	wire [REPLACER_FILTER_NUM : 0] replacers_data_request_ready;
 	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_data[0 : REPLACER_FILTER_NUM];
 	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_data_index[0 : REPLACER_FILTER_NUM];
+	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_pid[0 : REPLACER_FILTER_NUM];
 
-	wire [REPLACER_FILTER_NUM : 0] replacers_read_data_ready;
 	wire [REPLACER_FILTER_NUM : 0] replacers_matched_state;
 	wire [REPLACER_FILTER_NUM : 0] replacers_basic_data;
 	wire [REPLACER_FILTER_NUM : 0] replacers_ts_out_valid;
@@ -271,22 +253,22 @@ module logic_ram #(
 	assign replacers_basic_data = {{(REPLACER_FILTER_NUM){1'b0}}, 1'b1};
 
 	//output assign
-	assign read_data_ready[ALL_FILTERS_NUM - 1 : REPLACER_PID_BASE] = replacers_read_data_ready[REPLACER_FILTER_NUM : 1];
+	assign pump_data_request_ready[ALL_FILTERS_NUM - 1 : REPLACER_PID_BASE] = replacers_data_request_ready[REPLACER_FILTER_NUM : 1];
 	
 	genvar j;
 	generate for (j=0; j <= REPLACER_FILTER_NUM; j = j + 1)
 		begin : replacers
 
-			//input assign
-			assign replacers_run_enable[j] = (j == 0) ? 0 : run_enable[REPLACER_PID_BASE + j - 1];
-
-			assign replacers_read_data_enable[j] = (j == 0) ? 0 : read_data_enable[REPLACER_PID_BASE + j - 1];
-			assign replacers_write_data_enable[j] = (j == 0) ? 0 : write_data_enable[REPLACER_PID_BASE + j - 1];
-			assign ram_for_replacers_pid[j] = (j == 0) ? 0 : ram_for_pid[REPLACER_PID_BASE + j - 1];
-			assign replacers_update_pid_enable[j] = (j == 0) ? 0 : pid_changing[REPLACER_PID_BASE + j - 1];
 			localparam integer CUR_REPLACE_MATCH_PID_COUNT = (j > REPLACER_FILTER_NUM - COMMON_REPLACER_FILTER_NUM) ? COMMON_REPLACE_MATCH_PID_COUNT : REPLACE_MATCH_PID_COUNT;
 
 			localparam integer CUR_REPLACE_DATA_GROUPS = (j > REPLACER_FILTER_NUM - COMMON_REPLACER_FILTER_NUM) ? COMMON_REPLACE_DATA_GROUPS : REPLACE_DATA_GROUPS;
+
+			//input assign
+			assign replacers_match_enable[j] = (j == 0) ? 0 : match_enable[REPLACER_PID_BASE + j - 1];
+			assign replacers_update_pid_request[j] = (j == 0) ? 0 : update_pid_request[REPLACER_PID_BASE + j - 1];
+			assign replacers_update_data_request[j] = (j == 0) ? 0 : update_data_request[REPLACER_PID_BASE + j - 1];
+			assign replacers_pump_data_request[j] = (j == 0) ? 0 : pump_data_request[REPLACER_PID_BASE + j - 1];
+			assign replacers_ram_for_pid[j] = (j == 0) ? 0 : ram_for_pid[REPLACER_PID_BASE + j - 1];
 
 			replacer # 
 				(
@@ -298,85 +280,98 @@ module logic_ram #(
 					.S_AXI_ARESETN(S_AXI_ARESETN),
 					.S_AXI_ACLK(S_AXI_ACLK),
 
-					.base_data(replacers_basic_data[j]),
-					.pump_data_enable(replacers_read_data_enable[j]),
+					.match_enable(replacers_match_enable[j]),
 
-					.save_replace_data_enable(replacers_write_data_enable[j]),
+					.base_data(replacers_basic_data[j]),
+
+					.update_pid_request(replacers_update_pid_request[j]),
+					.pid_index(current_pid_index),
+					.pid(replacers_ram_for_pid[j]),
+
+					.out_pid(replacers_out_pid[j]),
+
+					.update_data_request(replacers_update_data_request[j]),
 					.in_data(current_data),
 					.in_data_index(current_data_index),
 
+					.pump_data_request(replacers_pump_data_request[j]),
+
+					.pump_data_request_ready(replacers_data_request_ready[j]),
 					.out_data(replacers_out_data[j]),
 					.out_data_index(replacers_out_data_index[j]),
-					.ready_for_read(replacers_read_data_ready[j]),
-
-					.update_pid_enable(replacers_update_pid_enable[j]),
-					.in_pid(ram_for_replacers_pid[j]),
-					.out_pid(replacers_out_pid[j]),
 
 					.mpeg_data(mpeg_data),
 					.mpeg_clk(mpeg_clk),
 					.mpeg_valid(mpeg_valid),
 					.mpeg_sync(mpeg_sync),
 
+					.matched_state(replacers_matched_state[j]),
 					.ts_out_valid(replacers_ts_out_valid[j]),
 					.ts_out(replacers_ts_out[j]),
-					.ts_out_sync(replacers_ts_out_sync[j]),
-					.matched_state(replacers_matched_state[j]),
-
-					.run_enable(replacers_run_enable[j])
+					.ts_out_sync(replacers_ts_out_sync[j])
 				);
 		end
 	endgenerate
 
-	//write back ram_for_data
-	reg [ALL_FILTERS_NUM - 1 : 0] read_data_enable_d1 = 0;
-	reg [7 : 0] write_back_index = 0;
+	//pump data to ram_for_data
+	integer pump_data_state = 0;
 	always @(posedge S_AXI_ACLK) begin
 		if(S_AXI_ARESETN == 0) begin
-			write_back_index <= 0;
+			pump_data_state <= 0;
 		end
 		else begin
-			read_data_enable_d1 <= read_data_enable;
-			for(write_back_index = 0; write_back_index < ALL_FILTERS_NUM; write_back_index = write_back_index + 1) begin
-				if(read_data_enable_d1[write_back_index] == 1) begin
-					if((write_back_index >= 0) && (write_back_index < MONITOR_FILTER_NUM)) begin
-						ram_for_data[monitors_out_data_index[write_back_index]] <= monitors_out_data[write_back_index];
-					end
-					else if((write_back_index >= REPLACER_PID_BASE) && (write_back_index < ALL_FILTERS_NUM)) begin
-						ram_for_data[replacers_out_data_index[write_back_index - REPLACER_PID_BASE + 1]] <= replacers_out_data[write_back_index - REPLACER_PID_BASE + 1];
+			case(pump_data_state)
+				0: begin
+					if(pump_data_request[current_slot] == 1) begin
+						pump_data_state <= 1;
 					end
 					else begin
 					end
 				end
-				else begin
+				1: begin
+					if(pump_data_request_ready[current_slot] == 0) begin
+						if((current_slot >= 0) && (current_slot < REPLACER_PID_BASE)) begin
+							ram_for_data[(monitors_out_data_index[current_slot])] <= monitors_out_data[current_slot];
+						end
+						else if((current_slot >= REPLACER_PID_BASE) && (current_slot < ALL_FILTERS_NUM)) begin
+							ram_for_data[(replacers_out_data_index[current_slot - REPLACER_PID_BASE + 1])] <= replacers_out_data[current_slot - REPLACER_PID_BASE + 1];
+						end
+						else begin
+							pump_data_state <= 0;
+						end
+					end
+					else begin
+					end
 				end
-			end
+				default: begin
+				end
+			endcase
 		end
 	end
 
 	//process ts out
 	reg [7 : 0] ts_out_index = 0;
-	reg my_ts_out_valid = 0;
-	reg [7:0] my_ts_out = 0;
-	reg my_ts_out_sync = 0;
+	reg ts_out_valid_reg = 0;
+	reg [7:0] ts_out_reg = 0;
+	reg ts_out_sync_reg = 0;
 
 	assign ts_out_clk = mpeg_clk;
-	assign ts_out_valid = my_ts_out_valid;
-	assign ts_out = my_ts_out;
-	assign ts_out_sync = my_ts_out_sync;
+	assign ts_out_valid = ts_out_valid_reg;
+	assign ts_out = ts_out_reg;
+	assign ts_out_sync = ts_out_sync_reg;
 
 	always @(posedge mpeg_clk) begin
 		if(S_AXI_ARESETN == 0) begin
 			ts_out_index <= 0;
-			my_ts_out_valid <= 0;
-			my_ts_out <= 0;
+			ts_out_valid_reg <= 0;
+			ts_out_reg <= 0;
 		end
 		else begin
 			for(ts_out_index = 0; ts_out_index <= REPLACER_FILTER_NUM; ts_out_index = ts_out_index + 1) begin
 				if(replacers_matched_state[ts_out_index] == 1) begin
-					my_ts_out_valid <= replacers_ts_out_valid[ts_out_index];
-					my_ts_out <= replacers_ts_out[ts_out_index];
-					my_ts_out_sync <= replacers_ts_out_sync[ts_out_index];
+					ts_out_valid_reg <= replacers_ts_out_valid[ts_out_index];
+					ts_out_reg <= replacers_ts_out[ts_out_index];
+					ts_out_sync_reg <= replacers_ts_out_sync[ts_out_index];
 				end
 			end
 		end
