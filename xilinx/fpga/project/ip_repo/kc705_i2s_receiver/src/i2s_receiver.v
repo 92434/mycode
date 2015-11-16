@@ -38,7 +38,7 @@ module i2s_receiver # (
 		);
 
 	localparam integer BULK_OF_DATA = 15;
-	localparam integer BULK_DEPTH = 8;
+	localparam integer BULK_DEPTH = 32;
 
 	localparam integer DATA_WIDTH = 8;
 	localparam integer I2S_DATA_VALID_BYTE_WIDTH = 2;

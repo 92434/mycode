@@ -568,7 +568,7 @@ static int test_thread(void *ppara) {
 
 
 		dma = dma;
-		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
+		put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
 	}
 
 	mydebug("\n");

@@ -11,8 +11,8 @@ install:
 	sudo insmod driver/spi-gpio-all.ko
 	sudo insmod driver/spidev.ko
 	sudo insmod driver/kc705-module.ko
-#	sudo insmod driver/kc705_i2c_device.ko
-	sudo ./app/pcie_dma_device /dev/pciedma_0 &
+	sudo insmod driver/kc705_i2c_device.ko
+	sudo ./app/pcie_dma_device /dev/pciedma_0 2>&1 > data1 &
 	sudo ./app/pcie_pseudo_dma_device /dev/pciedma_2 &
 	dmesg
 
@@ -21,7 +21,7 @@ uninstall:
 	-sudo killall -9 pcie_dma_device
 	-sudo killall -9 pcie_pseudo_dma_device
 	-sudo rmmod i2c-dev
-#	-sudo rmmod kc705_i2c_device
+	-sudo rmmod kc705_i2c_device
 	-sudo rmmod i2c_gpio
 	-sudo rmmod spidev
 	-sudo rmmod spi_gpio_all
