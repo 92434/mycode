@@ -13,7 +13,7 @@ install:
 	sudo insmod driver/kc705-module.ko
 	sudo insmod driver/kc705_i2c_device.ko
 	sudo ./app/pcie_dma_device /dev/pciedma_0 2>&1 > data1 &
-	sudo ./app/pcie_pseudo_dma_device /dev/pciedma_2 &
+	sudo ./app/pcie_pseudo_dma_device /dev/pciedma_2 2>&1 > data2 &
 	dmesg
 
 uninstall:

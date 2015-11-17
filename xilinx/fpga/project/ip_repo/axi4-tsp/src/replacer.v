@@ -87,7 +87,11 @@ module replacer #(
 		end
 		else begin
 			if(update_data_request == 1) begin
-				ram_for_data[in_data_index] <= in_data;
+				if((in_data_index >= 0) && (in_data_index < PACK_WORD_SIZE * REPLACE_DATA_GROUPS)) begin
+					ram_for_data[in_data_index] <= in_data;
+				end
+				else begin
+				end
 			end
 			else begin
 			end

@@ -1,4 +1,4 @@
-close_hw
+#close_hw
 open_hw
 connect_hw_server
 open_hw_target [lindex [get_hw_targets -of_objects [get_hw_servers localhost]] 0]
@@ -13,7 +13,9 @@ open_hw_target [lindex [get_hw_targets -of_objects [get_hw_servers localhost]] 0
 #set bitstream_file /home/action/vivadoworkspace/xapp1171/project_1/project_1.runs/impl_1/design_1_wrapper.bit
 #set bitstream_file /home/action/vivadoworkspace/test_kc705/project_1/project_1.runs/impl_1/design_1_wrapper.bit
 #set bitstream_file /home/action/vivadoworkspace/project_kc705_cdma/project_kc705_cdma.runs/impl_1/design_1_wrapper.bit
-set bitstream_file /home/action/vivadoworkspace/project_kc705_dma/project_kc705_dma.runs/impl_1/design_1_wrapper.bit
+set bitstream_file /home/action/vivadoworkspace/kc705/kc705.runs/impl_1/design_1_wrapper.bit
+#set bitstream_file /home/action/vivadoworkspace/test_fmc_gpios.bit
+#set bitstream_file /home/action/vivadoworkspace/test_tsp_i2c.bit
 set mcs_file /home/action/vivadoworkspace/kc705.mcs
 set cfgmem_part_name 28f00ap30t-bpi-x16
 
