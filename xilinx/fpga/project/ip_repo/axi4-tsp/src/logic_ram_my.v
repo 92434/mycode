@@ -342,10 +342,10 @@ module logic_ram #(
 							ram_for_data[(replacers_out_data_index[current_slot - REPLACER_PID_BASE + 1])] <= replacers_out_data[current_slot - REPLACER_PID_BASE + 1];
 						end
 						else begin
-							pump_data_state <= 0;
 						end
 					end
 					else begin
+						pump_data_state <= 0;
 					end
 				end
 				default: begin
