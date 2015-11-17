@@ -241,7 +241,7 @@ int tr_test(int fd) {
 			*wdata = 0x00000000;
 			pseudo_dma_tr->tx_data = tx_data;
 			pseudo_dma_tr->tx_size = 4;
-			pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 1 * 4;//ADDR_PID
+			pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 2 * 4;//ADDR_PID
 			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
 			if (ret != 0) {
 				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -269,7 +269,7 @@ int tr_test(int fd) {
 			break;
 		}
 
-		*wdata = 0;//replacer #17
+		*wdata = 0;
 		pseudo_dma_tr->tx_data = tx_data;
 		pseudo_dma_tr->tx_size = 4;
 		pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 1 * 4;//ADDR_PID_INDEX
@@ -282,7 +282,7 @@ int tr_test(int fd) {
 		*wdata = (0x00000001 << 16)/*match enable*/ + 0x0000157f;
 		pseudo_dma_tr->tx_data = tx_data;
 		pseudo_dma_tr->tx_size = 4;
-		pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 1 * 4;//ADDR_PID
+		pseudo_dma_tr->tx_dest_offset = tx_dest_offset + 2 * 4;//ADDR_PID
 		ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
 		if (ret != 0) {
 			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -400,7 +400,7 @@ int tr_test(int fd) {
 
 			pseudo_dma_tr->rx_data = rx_data;
 			pseudo_dma_tr->rx_size = 4;
-			pseudo_dma_tr->rx_src_offset = rx_src_offset + 1 * 4;//ADDR_PID
+			pseudo_dma_tr->rx_src_offset = rx_src_offset + 2 * 4;//ADDR_PID
 			ret = ioctl(fd, PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR, pseudo_dma_tr);
 			if (ret != 0) {
 				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));

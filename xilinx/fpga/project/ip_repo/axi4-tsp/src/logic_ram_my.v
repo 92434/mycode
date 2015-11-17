@@ -146,8 +146,6 @@ module logic_ram #(
 		end
 	end
 
-	wire [C_S_AXI_DATA_WIDTH-1:0] out_pid [0 : ALL_FILTERS_NUM - 1];
-
 	always @(posedge S_AXI_ACLK) begin
 		if (mem_rden) begin
 			case(mem_address)
@@ -157,7 +155,14 @@ module logic_ram #(
 					axi_rdata <= current_pid_index;
 				end
 				ADDR_PID:
-					axi_rdata <= out_pid[current_slot];
+					if((current_slot >= 0) && (current_slot < REPLACER_PID_BASE)) begin
+						axi_rdata <= monitors_out_pid[current_slot];
+					end
+					else if((current_slot >= REPLACER_PID_BASE) && (current_slot < ALL_FILTERS_NUM))begin
+						axi_rdata <= replacers_out_pid[current_slot - REPLACER_PID_BASE + 1];
+					end
+					else begin
+					end
 				ADDR_MATCH_ENABLE:
 					axi_rdata <= match_enable[current_slot];
 				ADDR_READ_REQUEST:
