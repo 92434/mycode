@@ -36,7 +36,7 @@ module kc705_pcie_ext #
 
 		input wire EXT_PCIE_REFCLK_P,
 		input wire EXT_PCIE_REFCLK_N,
-		output wire pcie_refclk_100MHz,
+		output wire [0:0] pcie_refclk_100MHz,
 
 		output wire [7:0] EXT_LEDS
 	);
