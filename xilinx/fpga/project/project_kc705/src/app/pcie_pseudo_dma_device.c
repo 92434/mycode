@@ -321,7 +321,8 @@ int test_pid_op(int fd, pseudo_dma_tr_t *pseudo_dma_tr, uint8_t *tx_data, uint8_
 	uint32_t *wdata = (uint32_t *)tx_data;
 	uint32_t *rdata = (uint32_t *)rx_data;
 	int i;
-	int pid = 0x1570;
+	//int pid = 0x1570;
+	int pid = 0x0;
 
 	for(i = 0; i < 2 + 16 + 1; i ++) {
 		int j;
@@ -344,7 +345,7 @@ int test_pid_op(int fd, pseudo_dma_tr_t *pseudo_dma_tr, uint8_t *tx_data, uint8_
 			}
 
 			*wdata = PID_INFO(1, pid);
-			pid++;
+			//pid++;
 			ret = write_tr(fd, pseudo_dma_tr, tx_data, 4, ADDR_OFFSET(ADDR_PID));
 			if (ret != 0) {
 				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -353,7 +354,8 @@ int test_pid_op(int fd, pseudo_dma_tr_t *pseudo_dma_tr, uint8_t *tx_data, uint8_
 
 		}
 
-		*wdata = i % 2;//
+		//*wdata = i % 2;
+		*wdata = 0;//
 		ret = write_tr(fd, pseudo_dma_tr, tx_data, 4, ADDR_OFFSET(ADDR_MATCH_ENABLE));
 		if (ret != 0) {
 			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
