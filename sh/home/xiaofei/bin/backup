@@ -20,6 +20,11 @@ gen_flist(){
 /home/xiaofei/bin
 /home/xiaofei/eclipse.desktop
 #/var/cache/apt/archives
+#/home/xiaofei/.vim/.netrwbook
+#/home/xiaofei/.vim/.netrwhist
+#/home/xiaofei/.vim/.netrwhist~
+#/home/xiaofei/bin/aclocal-1.10
+#/home/xiaofei/bin/automake-1.10
 EOF
 }
 
