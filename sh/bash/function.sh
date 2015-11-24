@@ -199,13 +199,13 @@ function test_quota() {
 
 function test_para() {
 	echo "test \$*----------------"
-	test2 $*
+	parse_para $*
 	echo "test \"\$*\"----------------"
-	test2 "$*"
+	parse_para "$*"
 	echo "test \$@----------------"
-	test2 $@
+	parse_para $@
 	echo "test \"\$@\"----------------"
-	test2 "$@"
+	parse_para "$@"
 }
 
 function parse_para() {
