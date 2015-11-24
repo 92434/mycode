@@ -1,4 +1,5 @@
 include $(default_rules)
+include /home/xiaofei/workspace/code/mycode/make_test/inc.mk
 
 c_files := 
 include $(BUILD_BINS)
