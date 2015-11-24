@@ -1,4 +1,4 @@
-include $(default_rules)
+$(info MAKEFILE_LIST: $(MAKEFILE_LIST))
 
 define my-dir
 $(strip \
