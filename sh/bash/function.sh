@@ -308,7 +308,7 @@ function get_net_data() {
 
 function gen_number_sequence() {
 	local sequence=$(for i in {1..100..1};do echo $i;done);
-	echo $sequence
+	echo $sequence;
 }
 
 function print_color() {
@@ -327,3 +327,18 @@ function print_color() {
 	# Reset
 	echo -e "\033[0m"
 }
+
+
+function get_cvt_mode() {
+	cvt "$@" | awk '/Modeline /' | sed 's/Modeline //g'
+}
+
+function xrandr_addmode() {
+	local mode="$(get_cvt_mode "$@")"
+	local name=$(echo $mode | awk '{print $1}')
+
+	sudo xrandr --newmode "$mode"
+	sudo xrandr --addmode VGA1 "$name"
+	sudo xrandr --output VGA1 --mode "$name"
+}
+#xrandr_addmode 1920 1280
