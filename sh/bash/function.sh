@@ -330,7 +330,7 @@ function print_color() {
 
 
 function get_cvt_mode() {
-	cvt "$@" | awk '/Modeline /' | sed 's/Modeline //g'
+	cvt "$@" | awk '/Modeline /' | sed 's/Modeline //g' | sed 's/_60\.00//g'
 }
 
 function xrandr_addmode() {
