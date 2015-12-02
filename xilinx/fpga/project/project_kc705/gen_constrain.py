@@ -588,16 +588,16 @@ set_property PACKAGE_PIN AB9 [get_ports {EXT_LEDS[3]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[3]}]
 
 set_property PACKAGE_PIN AE26 [get_ports {EXT_LEDS[4]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {EXT_LEDS[4]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[4]}]
 
 set_property PACKAGE_PIN G19 [get_ports {EXT_LEDS[5]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {EXT_LEDS[5]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[5]}]
 
 set_property PACKAGE_PIN E18 [get_ports {EXT_LEDS[6]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {EXT_LEDS[6]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[6]}]
 
 set_property PACKAGE_PIN F16 [get_ports {EXT_LEDS[7]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {EXT_LEDS[7]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[7]}]
 	"""
 
 	print '#', '-' * 100
@@ -673,14 +673,16 @@ def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 	for i in constrain:
 		io, pin, gpio = i
 		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, gpio)
-		print 'set_property IOSTANDARD LVCMOS18 [get_ports {%s}]' %(gpio)
+		print 'set_property IOSTANDARD LVCMOS15 [get_ports {%s}]' %(gpio)
 
 	return constrain
 
 def gen_myip_constrain():
 	myip_extra_signal = [
-		('XADC_GPIO_0', 'AB25', 'clk_out1'),
-		('USER_SMA_GPIO_P', 'Y23', 'asi_out'),
+		('XADC_GPIO_0', 'AB25', 'clk_out1', 'LVCMOS15'),
+		#('USER_SMA_GPIO_P', 'Y23', 'asi_out', 'LVCMOS15'),
+		#('LCD_DB4_LS', 'AA13', 'asi_out', 'LVCMOS15'),
+		('GPIO_SW_E', 'AG5', 'asi_out', 'LVCMOS15'),
 	]
 
 	extra_property = {
@@ -700,16 +702,16 @@ def gen_myip_constrain():
 	for io, signal in myip_fmc_signal:
 		pin = io_pin_map.get(io)
 		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, signal)
-		print 'set_property IOSTANDARD LVCMOS18 [get_ports {%s}]' %(signal)
+		print 'set_property IOSTANDARD LVCMOS15 [get_ports {%s}]' %(signal)
 		extra_list = extra_property.get(signal)
 		if not extra_list:
 			continue
 		for p in extra_list:
 			print 'set_property %s [get_nets {%s}]' %(p, signal)
 
-	for io, pin, signal in myip_extra_signal:
+	for io, pin, signal, level in myip_extra_signal:
 		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, signal)
-		print 'set_property IOSTANDARD LVCMOS18 [get_ports {%s}]' %(signal)
+		print 'set_property IOSTANDARD %s [get_ports {%s}]' %(level, signal)
 		extra_list = extra_property.get(signal)
 		if not extra_list:
 			continue

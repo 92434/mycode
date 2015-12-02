@@ -153,8 +153,8 @@ output reg [9:0] sout_data;
 
 
    // DDR primitive instantiation
-   //ODDR2 #(
-   oddr_2 #(
+   ODDR2 #(
+   //oddr_2 #(
       .DDR_ALIGNMENT("NONE"), // Sets output alignment to "NONE", "C0" or "C1
       .INIT(1'b0),            // Sets initial state of the Q output to 1'b0 or 1'b1
       .SRTYPE("SYNC")         // Specifies "SYNC" or "ASYNC" set/reset

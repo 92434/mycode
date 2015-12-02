@@ -355,7 +355,7 @@ int test_pid_op(int fd, pseudo_dma_tr_t *pseudo_dma_tr, uint8_t *tx_data, uint8_
 		}
 
 		//*wdata = i % 2;
-		*wdata = 0;//
+		*wdata = (i == 0 || i == 1) ? 1 : 0;//
 		ret = write_tr(fd, pseudo_dma_tr, tx_data, 4, ADDR_OFFSET(ADDR_MATCH_ENABLE));
 		if (ret != 0) {
 			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
