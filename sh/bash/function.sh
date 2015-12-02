@@ -337,7 +337,7 @@ function xrandr_addmode() {
 	local mode="$(get_cvt_mode "$@")"
 	local name=$(echo $mode | awk '{print $1}')
 
-	sudo xrandr --newmode "$mode"
+	sudo xrandr --newmode $mode
 	sudo xrandr --addmode VGA1 "$name"
 	sudo xrandr --output VGA1 --mode "$name"
 }
