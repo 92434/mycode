@@ -2,6 +2,7 @@
 open_hw
 connect_hw_server
 open_hw_target [lindex [get_hw_targets -of_objects [get_hw_servers localhost]] 0]
+
 #set bitstream_file D:/xf/fpga/ip_repo/download/xapp1171/design_1_wrapper.bit
 #set mcs_file D:/xf/fpga/ip_repo/download/xapp1171/KC705.mcs
 #set bitstream_file D:/xf/fpga/ip_repo/download/dma_performance_demo/pcie_7x_0_example/pcie_7x_0_example.runs/impl_1/xilinx_pcie_2_1_ep_7x.bit
@@ -56,5 +57,10 @@ if {
 }
 
 program_hw_cfgmem -hw_cfgmem [get_property PROGRAM.HW_CFGMEM [lindex [get_hw_devices] 0 ]]
+
+set nky_file /home/action/vivadoworkspace/kc705/kc705.runs/impl_1/design_1_wrapper.nky
+set_property ENCRYPTION.FILE $nky_file [get_property PROGRAM.HW_BITSTREAM [lindex [get_hw_devices] 0]]
+program_hw_devices -key {bbr} [lindex [get_hw_devices] 0]
+
 
 file delete $mcs_file

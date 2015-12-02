@@ -862,3 +862,14 @@ set_property IOSTANDARD LVCMOS15 [get_ports {clk_out1}]
 #GPIO_SW_E
 set_property PACKAGE_PIN AG5 [get_ports {asi_out}]
 set_property IOSTANDARD LVCMOS15 [get_ports {asi_out}]
+# ----------------------------------------------------------------------------------------------------
+# bitstream encryption
+# ----------------------------------------------------------------------------------------------------
+
+#Encryption Settings
+
+set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]
+set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT BBRAM [current_design]
+#set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT eFUSE [current_design]
+set_property BITSTREAM.ENCRYPTION.KEY0 256'h12345678ABCDDCBA1234578ABCDDCBA1234578ABCDDCBA1234578ABCDDCBA [current_design]
+	

@@ -410,11 +410,11 @@ def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, 
 
 	pins_resistor = hpc_lpc_pins_resistor_map.get(fmc_type)
 
-        gpio_bank_base = [0, 0, 0, 0]
-        if fmc_type == 'HPC':
-	    gpio_bank_base = [148, 116, 84, 57]
-        elif fmc_type == 'LPC':
-	    gpio_bank_base = [148, 116, 107, 0]
+	gpio_bank_base = [0, 0, 0, 0]
+	if fmc_type == 'HPC':
+		gpio_bank_base = [148, 116, 84, 57]
+	elif fmc_type == 'LPC':
+		gpio_bank_base = [148, 116, 107, 0]
 
 	io_pin_no_map = {}
 	for io, pin, gpio in constrain:
@@ -718,6 +718,22 @@ def gen_myip_constrain():
 		for p in extra_list:
 			print 'set_property %s [get_nets {%s}]' %(p, signal)
 
+def gen_encryption_constrain():
+	txt = """
+#Encryption Settings
+
+set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]
+set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT BBRAM [current_design]
+#set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT eFUSE [current_design]
+set_property BITSTREAM.ENCRYPTION.KEY0 256'h12345678ABCDDCBA1234578ABCDDCBA1234578ABCDDCBA1234578ABCDDCBA [current_design]
+	"""
+
+	print '#', '-' * 100
+	print '#', 'bitstream encryption'
+	print '#', '-' * 100
+	print txt
+
+
 
 def gen_unused_pin_io(support_package_pins, kc705_pins_resistor):
 	print '-' * 100
@@ -763,6 +779,8 @@ def gen_kc705_constrain():
 	lpc_constrain = gen_constrain(hpc_lpc_pins_resistor_map, 'LPC', len(hpc_constrain))
 	
 	gen_myip_constrain()
+
+	gen_encryption_constrain()
 
 	get_gpios_pin_no_for_driver(hpc_constrain, hpc_lpc_pins_resistor_map, 'HPC', 0)
 	get_gpios_pin_no_for_driver(lpc_constrain, hpc_lpc_pins_resistor_map, 'LPC', len(hpc_constrain))
