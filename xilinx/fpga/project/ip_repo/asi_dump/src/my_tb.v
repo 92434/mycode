@@ -1,7 +1,7 @@
 `timescale 1ns / 1ns
 
 module my_tb #(
-		parameter integer MPEG_DATA_WIDTH = 8,
+		parameter integer MPEG_DATA_WIDTH = 10,
 
 		parameter integer C_M00_AXIS_TDATA_WIDTH = 32
 	)
@@ -16,13 +16,12 @@ module my_tb #(
 	reg [7:0] filter2[PACK_BYTE_SIZE - 1 : 0];
 	reg[7:0] mpeg_in[MPEG_LENGTH - 1 : 0];
 
-	wire S_AXI_ACLK;
 	reg S_AXI_ARESETN = 0;
 
 	wire ts_clk;
 	reg ts_valid = 0;
 	reg ts_sync = 0;
-	reg [7:0] ts_data = 0;
+	reg [MPEG_DATA_WIDTH - 1 : 0] ts_data = 0;
 
 	clkgen #(.clk_period(2)) xiaofeiclk2(.clk(ts_clk));
 
@@ -50,7 +49,7 @@ module my_tb #(
 				if((send_valid == 3)) begin
 					ts_valid <= 1;
 
-					ts_data <= mpeg_in[ts_index];
+					ts_data <= {2'b11, mpeg_in[ts_index]};
 					if((ts_index % PACK_BYTE_SIZE) == 0) begin
 						ts_sync <= 1;
 					end
@@ -82,16 +81,22 @@ module my_tb #(
 	wire m00_axis_tlast;
 	reg m00_axis_tready = 1;
 
+	wire [7 : 0] data1;
+	wire [7 : 0] data2;
+	wire [7 : 0] data3;
+
+	assign data1 = m00_axis_tdata[7 -: 8];
+	assign data2 = m00_axis_tdata[17 -: 8];
+	assign data3 = m00_axis_tdata[27 -: 8];
+
 	clkgen #(.clk_period(1)) xiaofeiclk1(.clk(m00_axis_aclk));
 
-	tsp_dump_axi4_stream_v1_0 # ( 
+	asi_dump_axi4_stream_v1_0 # ( 
 		.MPEG_DATA_WIDTH(MPEG_DATA_WIDTH),
 
 		.C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH)
-	) tsp_dump_axi4_stream_v1_0_inst (
-		.ts_clk(ts_clk),
-		.ts_valid(ts_valid),
-		.ts_sync(ts_sync),
+	) asi_dump_axi4_stream_v1_0_inst (
+		.ts_clk(ts_valid),
 		.ts_data(ts_data),
 
 		.r_ready(r_ready),

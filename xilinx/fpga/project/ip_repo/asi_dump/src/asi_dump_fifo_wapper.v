@@ -1,7 +1,7 @@
 `timescale 1 ns / 1 ps
 
-module fifo_wapper #(
-		parameter integer MPEG_DATA_WIDTH = 8,
+module asi_dump_fifo_wapper #(
+		parameter integer MPEG_DATA_WIDTH = 10,
 		parameter integer C_M_AXIS_TDATA_WIDTH = 32
 	)
 	(
@@ -9,8 +9,6 @@ module fifo_wapper #(
 		input wire clk,
 
 		input wire ts_clk,
-		input wire ts_valid,
-		input wire ts_sync,
 		input wire [MPEG_DATA_WIDTH - 1 : 0] ts_data,
 
 		output wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] rdata,
@@ -48,20 +46,16 @@ module fifo_wapper #(
 		end
 		else begin
 			buffer_valid <= 0;
-			if(ts_valid == 1) begin
-				ts_data_R1 <= ts_data;
-				buffer_index_R1 <= buffer_index;
-				buffer_ts_data[current_endpos -: MPEG_DATA_WIDTH] <= ts_data_R1;
+			ts_data_R1 <= ts_data;
+			buffer_index_R1 <= buffer_index;
+			buffer_ts_data[current_endpos -: MPEG_DATA_WIDTH] <= ts_data_R1;
 
-				if((buffer_index >= 0) && (buffer_index < TS_DATA_NUM_PER_WFIFO - 1) && (ts_sync == 0)) begin
-					buffer_index <= buffer_index + 1;
-				end
-				else begin
-					buffer_index <= 0;
-					buffer_valid <= 1;
-				end
+			if((buffer_index >= 0) && (buffer_index < TS_DATA_NUM_PER_WFIFO - 1)) begin
+				buffer_index <= buffer_index + 1;
 			end
 			else begin
+				buffer_index <= 0;
+				buffer_valid <= 1;
 			end
 		end
 	end
@@ -89,9 +83,6 @@ module fifo_wapper #(
 					end
 					2: begin
 						wdata <= {{(C_M_AXIS_TDATA_WIDTH - 3 * MPEG_DATA_WIDTH){1'b0}}, buffer_ts_data[( 3 * MPEG_DATA_WIDTH - 1) : 0]};
-					end
-					3: begin
-						wdata <= buffer_ts_data;
 					end
 					default: begin
 					end

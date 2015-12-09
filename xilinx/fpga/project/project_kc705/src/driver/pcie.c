@@ -56,19 +56,35 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_lite_offset = OFFSET_AXI_DMA_LITE_0,
 		.pcie_bar_map_ctl_offset = AXIBAR2PCIEBAR_0U,
 		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0,
-		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1,
+		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR0,
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 		.dma_type = AXI_DMA,
 	},
 	{
 		.dma_lite_offset = OFFSET_AXI_DMA_LITE_1,
+		.pcie_bar_map_ctl_offset = AXIBAR2PCIEBAR_1U,
+		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR1,
+		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1,
+		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
+		.dma_type = AXI_DMA,
+	},
+	{
+		.dma_lite_offset = OFFSET_AXI_DMA_LITE_2,
 		.pcie_bar_map_ctl_offset = AXIBAR2PCIEBAR_2U,
 		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR2,
-		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR3,
-		.dma_bar_map_num = 3,
-		.dma_type = AXI_CDMA,
-		.target_axi_addr_base = BASE_AXI_DDR_ADDR,
+		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR2,
+		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
+		.dma_type = AXI_DMA,
 	},
+	//{
+	//	.dma_lite_offset = OFFSET_AXI_DMA_LITE_1,
+	//	.pcie_bar_map_ctl_offset = AXIBAR2PCIEBAR_2U,
+	//	.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR2,
+	//	.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR3,
+	//	.dma_bar_map_num = 3,
+	//	.dma_type = AXI_CDMA,
+	//	.target_axi_addr_base = BASE_AXI_DDR_ADDR,
+	//},
 	{
 		.dma_lite_offset = 0,
 		.pcie_bar_map_ctl_offset = 0,
@@ -522,23 +538,36 @@ static int pcie_tr_thread(void *ppara) {
 		dma->dma_op.init_dma(dma);
 	}
 
+	uint32_t tx_size_config[] = {
+		64,
+		64,
+		64,
+	};
+
 	while(!kthread_should_stop()) {
 		set_current_state(TASK_UNINTERRUPTIBLE);  
 		//schedule_timeout(1*HZ); 
 		
 		size = get_pcie_tr(kc705_pci_dev, &tr);
 		if(size == 0) {
-			pcie_dma_t *dma = kc705_pci_dev->dma;
+			static int index = 0;
+
+			pcie_dma_t *dma = kc705_pci_dev->dma + index;
 
 			tr.dma = dma;
 			tr.tx_dest_axi_addr = 0;
 			tr.rx_src_axi_addr = 0;
 			tr.tx_size = 0;
 			//tr.rx_size = DMA_BLOCK_SIZE;
-			tr.rx_size = 64;
+			tr.rx_size = tx_size_config[index];
 			tr.tx_data = NULL;
 			tr.rx_data = NULL;
 			tr.tr_cmp = NULL;
+
+			index++;
+			if(index >= (sizeof(tx_size_config) / sizeof(uint32_t))) {
+				index = 0;
+			}
 		}
 
 		tr.dma->dma_op.dma_tr(&tr);

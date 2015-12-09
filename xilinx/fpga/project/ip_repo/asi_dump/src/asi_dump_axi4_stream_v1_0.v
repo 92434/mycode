@@ -1,10 +1,10 @@
 
 `timescale 1 ns / 1 ps
 
-module axi4_stream_v1_0 #
+module asi_dump_axi4_stream_v1_0 #
 	(
 		// Users to add parameters here
-		parameter integer MPEG_DATA_WIDTH = 8,
+		parameter integer MPEG_DATA_WIDTH = 10,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -17,8 +17,6 @@ module axi4_stream_v1_0 #
 	(
 		// Users to add ports here
 		input wire ts_clk,
-		input wire ts_valid,
-		input wire ts_sync,
 		input wire [MPEG_DATA_WIDTH - 1 : 0] ts_data,
 
 		output wire r_ready,
@@ -39,15 +37,13 @@ module axi4_stream_v1_0 #
 		input wire m00_axis_tready
 	);
 	// Instantiation of Axi Bus Interface M00_AXIS
-	axi4_stream_v1_0_M00_AXIS # ( 
+	asi_dump_axi4_stream_v1_0_M00_AXIS # ( 
 		.MPEG_DATA_WIDTH(MPEG_DATA_WIDTH),
 
 		.C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
 		.C_M_START_COUNT(C_M00_AXIS_START_COUNT)
-	) axi4_stream_v1_0_M00_AXIS_inst (
+	) asi_dump_axi4_stream_v1_0_M00_AXIS_inst (
 		.ts_clk(ts_clk),
-		.ts_valid(ts_valid),
-		.ts_sync(ts_sync),
 		.ts_data(ts_data),
 
 		.r_ready(r_ready),

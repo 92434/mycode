@@ -66,8 +66,8 @@ module serializer_10b1b(/*AUTOARG*/
    input reset;         // Synchronous reset for clk domain
    input [9:0] din_10b;     // 10-bit parallel data
    output      sdout;       // Serial data at sclk*2 rate (uses DDR)
-output wire start;
-output reg [9:0] sout_data;
+   output wire start;
+   output wire [9:0] sout_data;
    // Parameters for gray code counter
    parameter [2:0]
 		CNT_RESET   = 3'b000,
@@ -104,12 +104,13 @@ output reg [9:0] sout_data;
 
   assign start = start_bit;
 
+  assign sout_data = din_10b;
+
   // Synchronous process for serial half bit-rate clock
    // gray code counter.
    always @(posedge sclk_0)
      begin
 	sdata_slice_R <= sdata_slice;
-	sout_data <= din_10b_R;
 	if (reset) 
 	   cnt_curr_state <= CNT_RESET;
 	else

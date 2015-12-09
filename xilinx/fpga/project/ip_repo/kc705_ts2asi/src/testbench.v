@@ -32,6 +32,9 @@ module testbench #(
 	wire din_clk;
 	reg valid;
 	wire [DATA_WIDTH - 1 : 0] din_8b;
+	wire ts_clk;
+	wire ts_valid;
+	wire [DATA_WIDTH - 1 : 0] ts_data;
 	wire asi_out;
 	wire [FIFO_DATA_WIDTH - 1 : 0] din;
 	wire [FIFO_DATA_WIDTH - 1 : 0] rdata;
@@ -110,6 +113,11 @@ module testbench #(
 			.din(din),
 			.rdata(rdata),
 			.dout(dout),
+
+			.ts_clk(ts_clk),
+			.ts_valid(ts_valid),
+			.ts_data(ts_data),
+
 			.r_enable(r_enable),
 			.error_full(error_full),
 			.error_empty(error_empty),

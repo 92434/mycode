@@ -33,6 +33,7 @@ module ts2asi #(
 
 		input wire din_clk,
 		input wire valid,
+		input wire sync,
 		input wire [7:0] din_8b, // 8-bit input data to be encoded, serialized, transmitted
 
 		output wire asi_out, //1-bit serialized output data. 8b10b encoded.
@@ -41,6 +42,12 @@ module ts2asi #(
 		output wire [FIFO_DATA_WIDTH - 1 : 0] din,
 		output wire [FIFO_DATA_WIDTH - 1 : 0] rdata,
 		output wire [FIFO_DATA_WIDTH - 1 : 0] dout,
+
+		output wire ts_clk,
+		output wire ts_valid,
+		output wire ts_sync,
+		output wire [7:0] ts_data,
+
 		output wire r_enable,
 		output wire error_full,
 		output wire error_empty,
@@ -51,9 +58,6 @@ module ts2asi #(
  		output wire [9:0] sout_data,
 		output wire [7:0] din_8b_R_debug
 	);
-
-	reg output_ready_R;
-
 
 	// Tx clock enable generation
 	always @(posedge clk) begin
@@ -67,6 +71,12 @@ module ts2asi #(
 		end
 	end 
 
+	assign ts_clk = din_clk;
+	assign ts_valid = valid;
+	assign ts_sync = sync;
+	assign ts_data = din_8b;
+
+	reg output_ready_R;
 	assign din = (valid == 0) ? {1'b1, 8'hBC} : {1'b0, din_8b};
 	assign dout = (output_ready_R == 0) ? {1'b1, 8'hBC} : rdata;
 

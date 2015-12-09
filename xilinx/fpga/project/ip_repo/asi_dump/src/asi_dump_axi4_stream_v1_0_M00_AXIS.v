@@ -1,9 +1,9 @@
 `timescale 1 ns / 1 ps
 
-module axi4_stream_v1_0_M00_AXIS #
+module asi_dump_axi4_stream_v1_0_M00_AXIS #
 	(
 		// Users to add parameters here
-		parameter integer MPEG_DATA_WIDTH = 8,
+		parameter integer MPEG_DATA_WIDTH = 10,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -16,8 +16,6 @@ module axi4_stream_v1_0_M00_AXIS #
 	(
 		// Users to add ports here
 		input wire ts_clk,
-		input wire ts_valid,
-		input wire ts_sync,
 		input wire [MPEG_DATA_WIDTH - 1 : 0] ts_data,
 
 		output wire r_ready,
@@ -245,17 +243,15 @@ module axi4_stream_v1_0_M00_AXIS #
 	// Add user logic here
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
-	fifo_wapper #(
+	asi_dump_fifo_wapper #(
 			.MPEG_DATA_WIDTH(MPEG_DATA_WIDTH),
 
 			.C_M_AXIS_TDATA_WIDTH(C_M_AXIS_TDATA_WIDTH)
-		) fifo_wapper_inst (
+		) asi_dump_fifo_wapper_inst (
 			.rst_n(M_AXIS_ARESETN),
 			.clk(M_AXIS_ACLK),
 
 			.ts_clk(ts_clk),
-			.ts_valid(ts_valid),
-			.ts_sync(ts_sync),
 			.ts_data(ts_data),
 
 			.rdata(rdata),

@@ -542,11 +542,11 @@ def gen_hpc_lpc_pins_resistor_map(resistor_kc705_pins_resistor_map):
 def gen_default_contrain():
 	txt = """
 # Sys Clock Pins
-set_property PACKAGE_PIN AD11 [get_ports EXT_SYS_CLK_clk_n]
-set_property IOSTANDARD DIFF_SSTL15 [get_ports EXT_SYS_CLK_clk_n]
+#set_property PACKAGE_PIN AD11 [get_ports EXT_SYS_CLK_clk_n]
+#set_property IOSTANDARD DIFF_SSTL15 [get_ports EXT_SYS_CLK_clk_n]
 
-set_property PACKAGE_PIN AD12 [get_ports EXT_SYS_CLK_clk_p]
-set_property IOSTANDARD DIFF_SSTL15 [get_ports EXT_SYS_CLK_clk_p]
+#set_property PACKAGE_PIN AD12 [get_ports EXT_SYS_CLK_clk_p]
+#set_property IOSTANDARD DIFF_SSTL15 [get_ports EXT_SYS_CLK_clk_p]
 
 # Sys Reset Pins
 set_property PACKAGE_PIN AB7 [get_ports reset]
