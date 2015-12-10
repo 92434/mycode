@@ -315,7 +315,7 @@ module axi4_mm_v1_0_S00_AXI #
 					2'b10: begin
 					// The write address wraps when the address reaches wrap boundary 
 						if(aw_wrap_en)begin
-						axi_awaddr <= (axi_awaddr - aw_wrap_size); 
+							axi_awaddr <= (axi_awaddr - aw_wrap_size); 
 						end
 						else begin
 							axi_awaddr[C_S_AXI_ADDR_WIDTH - 1:ADDR_LSB] <= axi_awaddr[C_S_AXI_ADDR_WIDTH - 1:ADDR_LSB] + 1;
@@ -509,7 +509,8 @@ module axi4_mm_v1_0_S00_AXI #
 	// -- Example code to access user logic memory region
 	// ------------------------------------------
 	// Add user logic here
-	assign wen = axi_wready && S_AXI_WVALID;
+	//assign wen = axi_wready && S_AXI_WVALID;
+	assign wen = axi_wready;
 	assign wdata = S_AXI_WDATA;
 
 	assign ren = axi_arv_arr_flag ; //& ~axi_rvalid

@@ -2,29 +2,29 @@
 
 module axi_lite_v1_0_wrap #(
 		parameter integer C_S00_AXI_DATA_WIDTH	= 32,
-		parameter integer C_S00_AXI_ADDR_WIDTH	= 4
+		parameter integer C_S00_AXI_ADDR_WIDTH	= 3
 
 	)
 	(
 		// Ports of Axi Slave Bus Interface S00_AXI
 		input wire s00_axi_aclk,
 		input wire s00_axi_aresetn,
-		input wire [C_S00_AXI_ADDR_WIDTH-1 : 0] s00_axi_awaddr,
+		input wire [C_S00_AXI_ADDR_WIDTH - 1 : 0] s00_axi_awaddr,
 		input wire [2 : 0] s00_axi_awprot,
 		input wire s00_axi_awvalid,
 		output wire s00_axi_awready,
-		input wire [C_S00_AXI_DATA_WIDTH-1 : 0] s00_axi_wdata,
-		input wire [(C_S00_AXI_DATA_WIDTH/8)-1 : 0] s00_axi_wstrb,
+		input wire [C_S00_AXI_DATA_WIDTH - 1 : 0] s00_axi_wdata,
+		input wire [(C_S00_AXI_DATA_WIDTH / 8) - 1 : 0] s00_axi_wstrb,
 		input wire s00_axi_wvalid,
 		output wire s00_axi_wready,
 		output wire [1 : 0] s00_axi_bresp,
 		output wire s00_axi_bvalid,
 		input wire s00_axi_bready,
-		input wire [C_S00_AXI_ADDR_WIDTH-1 : 0] s00_axi_araddr,
+		input wire [C_S00_AXI_ADDR_WIDTH - 1 : 0] s00_axi_araddr,
 		input wire [2 : 0] s00_axi_arprot,
 		input wire s00_axi_arvalid,
 		output wire s00_axi_arready,
-		output wire [C_S00_AXI_DATA_WIDTH-1 : 0] s00_axi_rdata,
+		output wire [C_S00_AXI_DATA_WIDTH - 1 : 0] s00_axi_rdata,
 		output wire [1 : 0] s00_axi_rresp,
 		output wire s00_axi_rvalid,
 		input wire s00_axi_rready
@@ -32,7 +32,7 @@ module axi_lite_v1_0_wrap #(
 
 	function integer clogb2(input integer bit_depth);
 		begin
-			for(clogb2=0; bit_depth>0; clogb2=clogb2+1)
+			for(clogb2 = 0; bit_depth > 0; clogb2 = clogb2 + 1)
 				bit_depth = bit_depth >> 1;
 		end
 	endfunction

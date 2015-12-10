@@ -26,10 +26,10 @@ module axi4_mm_v1_0 #
 		output wire rst_n,
 
 		output wire wen,
-		output wire [C_S_AXI_DATA_WIDTH-1 : 0] wdata,
+		output wire [C_S00_AXI_DATA_WIDTH-1 : 0] wdata,
 
 		output wire ren,
-		input wire [C_S_AXI_DATA_WIDTH-1 : 0] rdata,
+		input wire [C_S00_AXI_DATA_WIDTH-1 : 0] rdata,
 
 		output wire [OPT_MEM_ADDR_BITS:0] addr,
 
@@ -98,7 +98,7 @@ module axi4_mm_v1_0 #
 			.C_S_AXI_ARUSER_WIDTH(C_S00_AXI_ARUSER_WIDTH),
 			.C_S_AXI_WUSER_WIDTH(C_S00_AXI_WUSER_WIDTH),
 			.C_S_AXI_RUSER_WIDTH(C_S00_AXI_RUSER_WIDTH),
-			.C_S_AXI_BUSER_WIDTH(C_S00_AXI_BUSER_WIDTH),
+			.C_S_AXI_BUSER_WIDTH(C_S00_AXI_BUSER_WIDTH)
 		) axi4_mm_v1_0_S00_AXI_inst (
 			.wen(wen),
 			.wdata(wdata),
@@ -153,7 +153,7 @@ module axi4_mm_v1_0 #
 			.S_AXI_RLAST(s00_axi_rlast),
 			.S_AXI_RUSER(s00_axi_ruser),
 			.S_AXI_RVALID(s00_axi_rvalid),
-			.S_AXI_RREADY(s00_axi_rready),
+			.S_AXI_RREADY(s00_axi_rready)
 		);
 
 	// Add user logic here

@@ -11,8 +11,8 @@ module axi_lite_v1_0_S00_AXI #
 		// Width of S_AXI data bus
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		// Width of S_AXI address bus
-		parameter integer C_S_AXI_ADDR_WIDTH = 4,
-		parameter integer OPT_MEM_ADDR_BITS = 1,
+		parameter integer C_S_AXI_ADDR_WIDTH = 3,
+		parameter integer OPT_MEM_ADDR_BITS = 0,
 		parameter integer ADDR_LSB = 2
 	)
 	(

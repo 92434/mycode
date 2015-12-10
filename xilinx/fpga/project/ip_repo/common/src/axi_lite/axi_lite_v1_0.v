@@ -4,7 +4,7 @@
 module axi_lite_v1_0 #
 	(
 		// Users to add parameters here
-		parameter integer OPT_MEM_ADDR_BITS = 1,
+		parameter integer OPT_MEM_ADDR_BITS = 0,
 		parameter integer ADDR_LSB = 2,
 
 		// User parameters ends
@@ -13,7 +13,7 @@ module axi_lite_v1_0 #
 
 		// Parameters of Axi Slave Bus Interface S00_AXI
 		parameter integer C_S00_AXI_DATA_WIDTH	= 32,
-		parameter integer C_S00_AXI_ADDR_WIDTH	= 4
+		parameter integer C_S00_AXI_ADDR_WIDTH	= 3
 	)
 	(
 		// Users to add ports here

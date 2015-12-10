@@ -1,22 +1,22 @@
 `timescale 1 ns / 1 ps
 
 module tb #(
-		parameter integer C_S_AXI_DATA_WIDTH	= 32,
-		parameter integer C_S_AXI_ADDR_WIDTH	= 4
+		parameter integer C_S00_AXI_DATA_WIDTH	= 32,
+		parameter integer C_S00_AXI_ADDR_WIDTH	= 3
 	)
 	();
 
 	wire s00_axi_aclk;
 	reg s00_axi_aresetn = 0;
 
-	reg [C_S_AXI_ADDR_WIDTH-1 : 0] s00_axi_awaddr = 0;
+	reg [C_S00_AXI_ADDR_WIDTH-1 : 0] s00_axi_awaddr = 0;
 	reg [2 : 0] s00_axi_awprot = 0;//unused
 	reg s00_axi_awvalid = 0;
 	wire s00_axi_awready;
 
 
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] s00_axi_wdata = 0;
-	reg [(C_S_AXI_DATA_WIDTH/8)-1 : 0] s00_axi_wstrb = 0;
+	reg [C_S00_AXI_DATA_WIDTH-1 : 0] s00_axi_wdata = 0;
+	reg [(C_S00_AXI_DATA_WIDTH/8)-1 : 0] s00_axi_wstrb = 0;
 	reg s00_axi_wvalid = 0;
 	wire s00_axi_wready;
 
@@ -24,13 +24,13 @@ module tb #(
 	wire s00_axi_bvalid;// axi_awready && axi_wready
 	reg s00_axi_bready = 0;//response for resetting s00_axi_bvalid;
 
-	reg [C_S_AXI_ADDR_WIDTH-1 : 0] s00_axi_araddr = 0;
+	reg [C_S00_AXI_ADDR_WIDTH-1 : 0] s00_axi_araddr = 0;
 	reg [2 : 0] s00_axi_arprot = 0;//unused
 	reg s00_axi_arvalid = 0;
 	wire s00_axi_arready;
 
 	reg s00_axi_rready = 0;
-	wire [C_S_AXI_DATA_WIDTH-1 : 0] s00_axi_rdata;
+	wire [C_S00_AXI_DATA_WIDTH-1 : 0] s00_axi_rdata;
 	wire [1 : 0] s00_axi_rresp;
 	wire s00_axi_rvalid;
 
@@ -38,8 +38,8 @@ module tb #(
 	clkgen #(.clk_period(1)) xiaofeiclk(.clk(s00_axi_aclk));
 
 	axi_lite_v1_0_wrap #(
-			.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
-			.C_S_AXI_ADDR_WIDTH(C_S_AXI_ADDR_WIDTH)
+			.C_S00_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
+			.C_S00_AXI_ADDR_WIDTH(C_S00_AXI_ADDR_WIDTH)
 		)
 		axi_lite_v1_0_wrap_inst (
 			.s00_axi_aclk(s00_axi_aclk),
@@ -102,51 +102,49 @@ module tb #(
 					state <= 2;
 				end
 				2: begin
-					s00_axi_wdata <= {32'h12345678};
+					//s00_axi_awvalid <= 0;
 					state <= 3;
 				end
 				3: begin
+					s00_axi_wdata <= {32'h12345678};
 					s00_axi_wstrb <= {4'b1111};
-					s00_axi_wvalid <= 1;
 					state <= 4;
 				end
 				4: begin
+					s00_axi_wvalid <= 1;
 					state <= 5;
 				end
 				5: begin
-					s00_axi_wvalid <= 0;
-					s00_axi_wstrb <= 0;
 					state <= 6;
 				end
 				6: begin
-					s00_axi_wdata <= {32'h00000000};
+					s00_axi_wvalid <= 0;
 					state <= 7;
 				end
 				7: begin
+					s00_axi_wdata <= {32'h00000000};
 					s00_axi_wstrb <= {4'b1000};
-					s00_axi_wvalid <= 1;
 					state <= 8;
 				end
 				8: begin
+					s00_axi_wvalid <= 1;
 					state <= 9;
 				end
 				9: begin
-					s00_axi_wvalid <= 0;
-					s00_axi_wstrb <= 0;
 					state <= 10;
 				end
 				10: begin
+					s00_axi_wvalid <= 0;
 					state <= 11;
 				end
 				11: begin
+					s00_axi_awvalid <= 0;
 					state <= 12;
 				end
 				12: begin
-					s00_axi_awvalid <= 0;
 					state <= 13;
 				end
 				13: begin
-					s00_axi_awaddr <= 0;
 					state <= 14;
 				end
 				14: begin

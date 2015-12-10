@@ -88,15 +88,22 @@ module axi4_mm_v1_0_wrap #
 	wire clk;
 	wire rst_n;
 
+	wire [(C_S00_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb;
 	wire wen;
-	wire [C_S_AXI_DATA_WIDTH-1 : 0] wdata;
+	wire [C_S00_AXI_DATA_WIDTH-1 : 0] wdata;
 
 	wire ren;
-	wire [C_S_AXI_DATA_WIDTH-1 : 0] rdata;
+	wire [C_S00_AXI_DATA_WIDTH-1 : 0] rdata;
 
 	wire [OPT_MEM_ADDR_BITS:0] addr;
 
-// Instantiation of Axi Bus Interface S00_AXI
+
+	assign clk = s00_axi_aclk;
+	assign rst_n = s00_axi_aresetn;
+
+	assign wstrb = s00_axi_wstrb;
+
+	// Instantiation of Axi Bus Interface S00_AXI
 	axi4_mm_v1_0 # ( 
 			.ADDR_LSB(ADDR_LSB),
 			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
@@ -121,61 +128,62 @@ module axi4_mm_v1_0_wrap #
 
 			.addr(addr),
 
-			.S_AXI_ACLK(s00_axi_aclk),
-			.S_AXI_ARESETN(s00_axi_aresetn),
-			.S_AXI_AWID(s00_axi_awid),
-			.S_AXI_AWADDR(s00_axi_awaddr),
-			.S_AXI_AWLEN(s00_axi_awlen),
-			.S_AXI_AWSIZE(s00_axi_awsize),
-			.S_AXI_AWBURST(s00_axi_awburst),
-			.S_AXI_AWLOCK(s00_axi_awlock),
-			.S_AXI_AWCACHE(s00_axi_awcache),
-			.S_AXI_AWPROT(s00_axi_awprot),
-			.S_AXI_AWQOS(s00_axi_awqos),
-			.S_AXI_AWREGION(s00_axi_awregion),
-			.S_AXI_AWUSER(s00_axi_awuser),
-			.S_AXI_AWVALID(s00_axi_awvalid),
-			.S_AXI_AWREADY(s00_axi_awready),
-			.S_AXI_WDATA(s00_axi_wdata),
-			.S_AXI_WSTRB(s00_axi_wstrb),
-			.S_AXI_WLAST(s00_axi_wlast),
-			.S_AXI_WUSER(s00_axi_wuser),
-			.S_AXI_WVALID(s00_axi_wvalid),
-			.S_AXI_WREADY(s00_axi_wready),
-			.S_AXI_BID(s00_axi_bid),
-			.S_AXI_BRESP(s00_axi_bresp),
-			.S_AXI_BUSER(s00_axi_buser),
-			.S_AXI_BVALID(s00_axi_bvalid),
-			.S_AXI_BREADY(s00_axi_bready),
-			.S_AXI_ARID(s00_axi_arid),
-			.S_AXI_ARADDR(s00_axi_araddr),
-			.S_AXI_ARLEN(s00_axi_arlen),
-			.S_AXI_ARSIZE(s00_axi_arsize),
-			.S_AXI_ARBURST(s00_axi_arburst),
-			.S_AXI_ARLOCK(s00_axi_arlock),
-			.S_AXI_ARCACHE(s00_axi_arcache),
-			.S_AXI_ARPROT(s00_axi_arprot),
-			.S_AXI_ARQOS(s00_axi_arqos),
-			.S_AXI_ARREGION(s00_axi_arregion),
-			.S_AXI_ARUSER(s00_axi_aruser),
-			.S_AXI_ARVALID(s00_axi_arvalid),
-			.S_AXI_ARREADY(s00_axi_arready),
-			.S_AXI_RID(s00_axi_rid),
-			.S_AXI_RDATA(s00_axi_rdata),
-			.S_AXI_RRESP(s00_axi_rresp),
-			.S_AXI_RLAST(s00_axi_rlast),
-			.S_AXI_RUSER(s00_axi_ruser),
-			.S_AXI_RVALID(s00_axi_rvalid),
-			.S_AXI_RREADY(s00_axi_rready)
+			.s00_axi_aclk(s00_axi_aclk),
+			.s00_axi_aresetn(s00_axi_aresetn),
+			.s00_axi_awid(s00_axi_awid),
+			.s00_axi_awaddr(s00_axi_awaddr),
+			.s00_axi_awlen(s00_axi_awlen),
+			.s00_axi_awsize(s00_axi_awsize),
+			.s00_axi_awburst(s00_axi_awburst),
+			.s00_axi_awlock(s00_axi_awlock),
+			.s00_axi_awcache(s00_axi_awcache),
+			.s00_axi_awprot(s00_axi_awprot),
+			.s00_axi_awqos(s00_axi_awqos),
+			.s00_axi_awregion(s00_axi_awregion),
+			.s00_axi_awuser(s00_axi_awuser),
+			.s00_axi_awvalid(s00_axi_awvalid),
+			.s00_axi_awready(s00_axi_awready),
+			.s00_axi_wdata(s00_axi_wdata),
+			.s00_axi_wstrb(s00_axi_wstrb),
+			.s00_axi_wlast(s00_axi_wlast),
+			.s00_axi_wuser(s00_axi_wuser),
+			.s00_axi_wvalid(s00_axi_wvalid),
+			.s00_axi_wready(s00_axi_wready),
+			.s00_axi_bid(s00_axi_bid),
+			.s00_axi_bresp(s00_axi_bresp),
+			.s00_axi_buser(s00_axi_buser),
+			.s00_axi_bvalid(s00_axi_bvalid),
+			.s00_axi_bready(s00_axi_bready),
+			.s00_axi_arid(s00_axi_arid),
+			.s00_axi_araddr(s00_axi_araddr),
+			.s00_axi_arlen(s00_axi_arlen),
+			.s00_axi_arsize(s00_axi_arsize),
+			.s00_axi_arburst(s00_axi_arburst),
+			.s00_axi_arlock(s00_axi_arlock),
+			.s00_axi_arcache(s00_axi_arcache),
+			.s00_axi_arprot(s00_axi_arprot),
+			.s00_axi_arqos(s00_axi_arqos),
+			.s00_axi_arregion(s00_axi_arregion),
+			.s00_axi_aruser(s00_axi_aruser),
+			.s00_axi_arvalid(s00_axi_arvalid),
+			.s00_axi_arready(s00_axi_arready),
+			.s00_axi_rid(s00_axi_rid),
+			.s00_axi_rdata(s00_axi_rdata),
+			.s00_axi_rresp(s00_axi_rresp),
+			.s00_axi_rlast(s00_axi_rlast),
+			.s00_axi_ruser(s00_axi_ruser),
+			.s00_axi_rvalid(s00_axi_rvalid),
+			.s00_axi_rready(s00_axi_rready)
 		);
 
 	axi_mm_mem_wrap #(
-			.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
+			.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
 			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS)
 		) axi_mm_mem_wrap_inst(
 			.clk(clk),
 			.rst_n(rst_n),
 
+			.wstrb(wstrb),
 			.wen(wen),
 			.wdata(wdata),
 
