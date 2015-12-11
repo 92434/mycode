@@ -16,15 +16,15 @@ module axi4_mm_v1_0_S00_AXI #
 		// Width of S_AXI address bus
 		parameter integer C_S_AXI_ADDR_WIDTH = 13,
 		// Width of optional user defined signal in write address channel
-		parameter integer C_S_AXI_AWUSER_WIDTH = 0,
+		parameter integer C_S_AXI_AWUSER_WIDTH = 1,
 		// Width of optional user defined signal in read address channel
-		parameter integer C_S_AXI_ARUSER_WIDTH = 0,
+		parameter integer C_S_AXI_ARUSER_WIDTH = 1,
 		// Width of optional user defined signal in write data channel
-		parameter integer C_S_AXI_WUSER_WIDTH = 0,
+		parameter integer C_S_AXI_WUSER_WIDTH = 1,
 		// Width of optional user defined signal in read data channel
-		parameter integer C_S_AXI_RUSER_WIDTH = 0,
+		parameter integer C_S_AXI_RUSER_WIDTH = 1,
 		// Width of optional user defined signal in write response channel
-		parameter integer C_S_AXI_BUSER_WIDTH = 0
+		parameter integer C_S_AXI_BUSER_WIDTH = 1
 	)
 	(
 		// Users to add ports here
