@@ -43,7 +43,8 @@ extern dma_op_t pseudo_dma_op;
 
 typedef struct dma_static_config {
 	int dma_lite_offset;
-	int pcie_bar_map_ctl_offset;
+	int pcie_bar_map_ctl_offset_0;
+	int pcie_bar_map_ctl_offset_1;
 	int pcie_map_bar_axi_addr_0;
 	int pcie_map_bar_axi_addr_1;
 	int dma_bar_map_num;
@@ -54,40 +55,45 @@ typedef struct dma_static_config {
 static dma_static_config_info_t dma_info[] = {
 	{
 		.dma_lite_offset = OFFSET_AXI_DMA_LITE_0,
-		.pcie_bar_map_ctl_offset = AXIBAR2PCIEBAR_0U,
+		.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
+		.pcie_bar_map_ctl_offset_1 = AXIBAR2PCIEBAR_0U,
 		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0,
 		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR0,
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 		.dma_type = AXI_DMA,
 	},
-	{
-		.dma_lite_offset = OFFSET_AXI_DMA_LITE_1,
-		.pcie_bar_map_ctl_offset = AXIBAR2PCIEBAR_1U,
-		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR1,
-		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1,
-		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
-		.dma_type = AXI_DMA,
-	},
-	{
-		.dma_lite_offset = OFFSET_AXI_DMA_LITE_2,
-		.pcie_bar_map_ctl_offset = AXIBAR2PCIEBAR_2U,
-		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR2,
-		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR2,
-		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
-		.dma_type = AXI_DMA,
-	},
 	//{
 	//	.dma_lite_offset = OFFSET_AXI_DMA_LITE_1,
-	//	.pcie_bar_map_ctl_offset = AXIBAR2PCIEBAR_2U,
+	//	.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_1U,
+	//	.pcie_bar_map_ctl_offset_1 = AXIBAR2PCIEBAR_1U,
+	//	.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR1,
+	//	.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1,
+	//	.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
+	//	.dma_type = AXI_DMA,
+	//},
+	//{
+	//	.dma_lite_offset = OFFSET_AXI_DMA_LITE_2,
+	//	.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_2U,
+	//	.pcie_bar_map_ctl_offset_1 = AXIBAR2PCIEBAR_2U,
 	//	.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR2,
-	//	.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR3,
+	//	.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR2,
+	//	.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
+	//	.dma_type = AXI_DMA,
+	//},
+	//{
+	//	.dma_lite_offset = OFFSET_AXI_DMA_LITE_1,
+	//	.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_3U,
+	//	.pcie_bar_map_ctl_offset_1 = AXIBAR2PCIEBAR_4U,
+	//	.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR3,
+	//	.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR4,
 	//	.dma_bar_map_num = 3,
 	//	.dma_type = AXI_CDMA,
 	//	.target_axi_addr_base = BASE_AXI_DDR_ADDR,
 	//},
 	{
-		.dma_lite_offset = 0,
-		.pcie_bar_map_ctl_offset = 0,
+		.dma_lite_offset = OFFSET_AXI_TSP_LITE,
+		.pcie_bar_map_ctl_offset_0 = 0,
+		.pcie_bar_map_ctl_offset_1 = 0,
 		.pcie_map_bar_axi_addr_0 = 0,
 		.pcie_map_bar_axi_addr_1 = 0,
 		.dma_bar_map_num = 3,
@@ -530,19 +536,12 @@ static int pcie_tr_thread(void *ppara) {
 	int size;
 	pcie_tr_t tr;
 
-
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
 
 	for(i = 0; i < DMA_MAX; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
 		dma->dma_op.init_dma(dma);
 	}
-
-	uint32_t tx_size_config[] = {
-		64,
-		64,
-		64,
-	};
 
 	while(!kthread_should_stop()) {
 		set_current_state(TASK_UNINTERRUPTIBLE);  
@@ -559,13 +558,13 @@ static int pcie_tr_thread(void *ppara) {
 			tr.rx_src_axi_addr = 0;
 			tr.tx_size = 0;
 			//tr.rx_size = DMA_BLOCK_SIZE;
-			tr.rx_size = tx_size_config[index];
+			tr.rx_size = 64;
 			tr.tx_data = NULL;
 			tr.rx_data = NULL;
 			tr.tr_cmp = NULL;
 
 			index++;
-			if(index >= (sizeof(tx_size_config) / sizeof(uint32_t))) {
+			if(index >= DMA_MAX - 1) {
 				index = 0;
 			}
 		}
@@ -585,19 +584,19 @@ static int pcie_tr_thread(void *ppara) {
 
 static int test_thread(void *ppara) {
 	int ret = 0;
-	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
+	//kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
 
 	while(!kthread_should_stop()) {
 		//pcie_tr_t tr;
 
-		pcie_dma_t *dma = kc705_pci_dev->dma + 1;
+		//pcie_dma_t *dma = kc705_pci_dev->dma + 1;
 
 		set_current_state(TASK_UNINTERRUPTIBLE);  
 		schedule_timeout(msecs_to_jiffies(100)); 
 
 
-		dma = dma;
-		put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
+		//dma = dma;
+		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
 	}
 
 	mydebug("\n");
@@ -708,7 +707,8 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 		}
 
 		dma->dma_lite_offset = dma_info[i].dma_lite_offset;
-		dma->pcie_bar_map_ctl_offset = dma_info[i].pcie_bar_map_ctl_offset;
+		dma->pcie_bar_map_ctl_offset_1 = dma_info[i].pcie_bar_map_ctl_offset_0;
+		dma->pcie_bar_map_ctl_offset_1 = dma_info[i].pcie_bar_map_ctl_offset_1;
 		dma->pcie_map_bar_axi_addr_0 = dma_info[i].pcie_map_bar_axi_addr_0;
 		dma->pcie_map_bar_axi_addr_1 = dma_info[i].pcie_map_bar_axi_addr_1;
 		dma->dma_bar_map_num = dma_info[i].dma_bar_map_num;

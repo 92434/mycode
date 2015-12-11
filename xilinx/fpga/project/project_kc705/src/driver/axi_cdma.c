@@ -224,7 +224,7 @@ static int prepare_bars_map(pcie_dma_t *dma, uint64_t tx_src_bar_map_addr, uint6
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint32_t *bram_vddr_reg = (uint32_t *)(base_vaddr + OFFSET_Translation_BRAM);
-	uint32_t *bar_vddr_map_ctrl_reg = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset);
+	uint32_t *bar_vddr_map_ctrl_reg = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_0);
 
 	//bind sg 
 	write_addr_to_reg(bar_vddr_map_ctrl_reg, (uint64_t)dma->bar_map_addr[0]);
@@ -284,7 +284,7 @@ static int dma_tr(void *ppara) {
 
 	if(tx_size != 0) {
 		ret = alloc_sg_des_item(BASE_Translation_BRAM + offset,
-				BASE_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset + sizeof(uint64_t),
+				BASE_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_1,
 				sizeof(uint64_t),
 				&sg_descripter_list);
 		if(ret != 0) {
@@ -301,7 +301,7 @@ static int dma_tr(void *ppara) {
 
 	if(rx_size != 0) {
 		ret = alloc_sg_des_item(BASE_Translation_BRAM + offset,
-				BASE_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset + sizeof(uint64_t),
+				BASE_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_1,
 				sizeof(uint64_t),
 				&sg_descripter_list);
 		if(ret != 0) {

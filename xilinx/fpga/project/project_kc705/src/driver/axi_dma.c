@@ -122,11 +122,11 @@ static irqreturn_t process_isr(void *ppara) {
 static int prepare_bars_map(pcie_dma_t *dma, uint64_t tx_src_bar_map_addr, uint64_t rx_dest_bar_map_addr) {
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint32_t *bar_vddr_map_ctrl_reg = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset);
+	uint32_t *bar_vddr_map_ctrl_reg_0 = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_0);
+	uint32_t *bar_vddr_map_ctrl_reg_1 = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_1);
 
-	write_addr_to_reg(bar_vddr_map_ctrl_reg, tx_src_bar_map_addr);
-	bar_vddr_map_ctrl_reg += 2;
-	write_addr_to_reg(bar_vddr_map_ctrl_reg, rx_dest_bar_map_addr);
+	write_addr_to_reg(bar_vddr_map_ctrl_reg_0, tx_src_bar_map_addr);
+	write_addr_to_reg(bar_vddr_map_ctrl_reg_1, rx_dest_bar_map_addr);
 
 	return 0;
 }

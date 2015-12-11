@@ -60,12 +60,12 @@ int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
 	int i;
 	for(i = 0; i < count; i++) {
 		if((i != 0) && (i % 16 == 0)) {
-			//printf("\n");
+			printf("\n");
 		}
 
-		//printf("%04x ", pdata[i] & 0xffff);
+		printf("%04x ", pdata[i] & 0xffff);
 	}
-	//printf("\n");
+	printf("\n");
 
 	return ret;
 }

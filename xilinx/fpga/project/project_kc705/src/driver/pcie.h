@@ -96,7 +96,8 @@ typedef struct {
 	void *bar_map_memory[MAX_BAR_MAP_MEMORY];
 	dma_addr_t bar_map_addr[MAX_BAR_MAP_MEMORY];
 	int dma_lite_offset;
-	int pcie_bar_map_ctl_offset;
+	int pcie_bar_map_ctl_offset_0;
+	int pcie_bar_map_ctl_offset_1;
 	int pcie_map_bar_axi_addr_0;
 	int pcie_map_bar_axi_addr_1;
 	int dma_bar_map_num;
