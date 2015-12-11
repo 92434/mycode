@@ -1,6 +1,6 @@
 `timescale 1 ns / 1 ps
 
-module asi_dump_fifo_wapper #(
+module asi_dump_fifo_wrap #(
 		parameter integer MPEG_DATA_WIDTH = 10,
 		parameter integer C_M_AXIS_TDATA_WIDTH = 32
 	)
@@ -11,24 +11,17 @@ module asi_dump_fifo_wapper #(
 		input wire ts_clk,
 		input wire [MPEG_DATA_WIDTH - 1 : 0] ts_data,
 
-		output wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] rdata,
-		input wire r_enable,
-
-		output wire r_ready,
-		output wire error_full,
-		output wire error_empty
+		output wire wclk,
+		output reg wen = 0,
+		output reg [C_M_AXIS_TDATA_WIDTH - 1 : 0] wdata = 0
 	);
 	
-	localparam integer FIFO_DATA_WIDTH = C_M_AXIS_TDATA_WIDTH;
-	localparam integer BULK_OF_DATA = 16;
-	localparam integer BULK_DEPTH = 512;
-
 	localparam integer TS_DATA_NUM_PER_WFIFO = C_M_AXIS_TDATA_WIDTH / MPEG_DATA_WIDTH;
 
 
 	integer buffer_index = 0;
 	integer buffer_index_R1 = 0;
-	reg [FIFO_DATA_WIDTH - 1 : 0] buffer_ts_data = 0;
+	reg [C_M_AXIS_TDATA_WIDTH - 1 : 0] buffer_ts_data = 0;
 	reg [MPEG_DATA_WIDTH - 1 : 0] ts_data_R1 = 0;
 	reg buffer_valid = 0;
 
@@ -61,16 +54,13 @@ module asi_dump_fifo_wapper #(
 	end
 
 
-	reg w_enable = 0;
-	reg [FIFO_DATA_WIDTH - 1 : 0] wdata = 0;
-
 	always @(posedge ts_clk) begin
 		if(rst_n == 0) begin
-			w_enable <= 0;
+			wen <= 0;
 			wdata <= 0;
 		end
 		else begin
-			w_enable <= 0;
+			wen <= 0;
 			wdata <= 0;
 
 			if(buffer_valid == 1) begin
@@ -88,27 +78,12 @@ module asi_dump_fifo_wapper #(
 					end
 				endcase
 
-				w_enable <= 1;
+				wen <= 1;
 			end
 			else begin
 			end
 		end
 	end
 
-	my_fifo # (
-			.DATA_WIDTH(FIFO_DATA_WIDTH),
-			.BULK_OF_DATA(BULK_OF_DATA),
-			.BULK_DEPTH(BULK_DEPTH)
-		) my_fifo_inst (
-			.rst_n(rst_n),
-			.wclk(ts_clk),
-			.rclk(clk),
-			.wdata(wdata),
-			.rdata(rdata),
-			.w_enable(w_enable),
-			.r_enable(r_enable),
-			.r_ready(r_ready),
-			.error_full(error_full),
-			.error_empty(error_empty)
-		);
+	assign wclk = ts_clk;
 endmodule

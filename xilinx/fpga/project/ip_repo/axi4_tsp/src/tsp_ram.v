@@ -1,8 +1,9 @@
 `timescale 1ns / 1ps
 
-module logic_ram #(
+module tsp_ram #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
+
 		parameter integer MONITOR_FILTER_NUM = 2,
 		parameter integer REPLACER_FILTER_NUM = 17,
 		parameter integer REPLACE_MATCH_PID_COUNT = 1,
@@ -12,20 +13,23 @@ module logic_ram #(
 		parameter integer COMMON_REPLACE_DATA_GROUPS = 2
 	)
 	(
-		input wire S_AXI_ARESETN,
-		input wire S_AXI_ACLK,
-		input wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] S_AXI_WSTRB,
-		input wire [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA,
-		input wire mem_rden,
-		input wire mem_wren,
-		input wire [OPT_MEM_ADDR_BITS:0] mem_address,
+		input wire clk,
+		input wire rst_n,
+
+		input wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] wstrb,
+		input wire wen,
+		input wire [C_S_AXI_DATA_WIDTH-1 : 0] wdata,
+
+		input wire ren,
+		output reg [C_S_AXI_DATA_WIDTH-1 : 0] rdata,
+
+		input wire [OPT_MEM_ADDR_BITS:0] addr,
 
 		input wire [7:0] mpeg_data,
 		input wire mpeg_clk,
 		input wire mpeg_valid,
 		input wire mpeg_sync,
 
-		output reg [C_S_AXI_DATA_WIDTH-1 : 0] axi_rdata,
 		output wire ts_out_clk,
 		output wire ts_out_valid,
 		output wire ts_out_sync,
@@ -81,20 +85,20 @@ module logic_ram #(
 
 	integer index_wstrb;
 	//assigning 8 bit data
-	always @(posedge S_AXI_ACLK) begin
-		if (mem_wren) begin
-			current_write_address <= mem_address;
+	always @(posedge clk) begin
+		if (wen == 1) begin
+			current_write_address <= addr;
 			for(index_wstrb = 0; index_wstrb < (C_S_AXI_DATA_WIDTH / 8); index_wstrb = index_wstrb + 1) begin
-				if(S_AXI_WSTRB[index_wstrb] == 1) begin
-					current_write_data[(8 * index_wstrb + 7) -: 8] <= S_AXI_WDATA[(8 * index_wstrb + 7) -: 8];
+				if(wstrb[index_wstrb] == 1) begin
+					current_write_data[(8 * index_wstrb + 7) -: 8] <= wdata[(8 * index_wstrb + 7) -: 8];
 				end
 			end
 		end
-		current_mem_wren <= mem_wren;
+		current_mem_wren <= wen;
 	end
 
-	always @(posedge S_AXI_ACLK) begin
-		if(S_AXI_ARESETN == 0) begin
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
 			update_pid_request <= 0;
 			pump_data_request <= 0;
 			update_data_request <= 0;
@@ -104,7 +108,7 @@ module logic_ram #(
 			pump_data_request <= 0;
 			update_data_request <= 0;
 
-			if(current_mem_wren) begin
+			if(current_mem_wren == 1) begin
 				case(current_write_address)
 					ADDR_INDEX: begin
 						if((current_write_data >= 0) && (current_write_data < ALL_FILTERS_NUM)) begin
@@ -146,33 +150,33 @@ module logic_ram #(
 		end
 	end
 
-	always @(posedge S_AXI_ACLK) begin
-		if (mem_rden) begin
-			case(mem_address)
+	always @(posedge clk) begin
+		if (ren == 1) begin
+			case(addr)
 				ADDR_INDEX:
-					axi_rdata <= current_slot;
+					rdata <= current_slot;
 				ADDR_PID_INDEX: begin
-					axi_rdata <= current_pid_index;
+					rdata <= current_pid_index;
 				end
 				ADDR_PID:
 					if((current_slot >= 0) && (current_slot < REPLACER_PID_BASE)) begin
-						axi_rdata <= monitors_out_pid[current_slot];
+						rdata <= monitors_out_pid[current_slot];
 					end
 					else if((current_slot >= REPLACER_PID_BASE) && (current_slot < ALL_FILTERS_NUM))begin
-						axi_rdata <= replacers_out_pid[current_slot - REPLACER_PID_BASE + 1];
+						rdata <= replacers_out_pid[current_slot - REPLACER_PID_BASE + 1];
 					end
 					else begin
 					end
 				ADDR_MATCH_ENABLE:
-					axi_rdata <= match_enable[current_slot];
+					rdata <= match_enable[current_slot];
 				ADDR_READ_REQUEST:
-					axi_rdata <= pump_data_request_ready[current_slot];
+					rdata <= pump_data_request_ready[current_slot];
 				default: begin
-					if((mem_address >= ADDR_TS_DATA_BASE) && (mem_address < ADDR_TS_DATA_END)) begin
-						axi_rdata <= ram_for_data[mem_address - ADDR_TS_DATA_BASE];
+					if((addr >= ADDR_TS_DATA_BASE) && (addr < ADDR_TS_DATA_END)) begin
+						rdata <= ram_for_data[addr - ADDR_TS_DATA_BASE];
 					end
 					else begin
-						axi_rdata <= {{(C_S_AXI_DATA_WIDTH / 4){1'b1}}, {(C_S_AXI_DATA_WIDTH / 4){1'b0}}, {(C_S_AXI_DATA_WIDTH / 4){1'b1}}, {(C_S_AXI_DATA_WIDTH / 4){1'b0}}};
+						rdata <= {{(C_S_AXI_DATA_WIDTH / 4){1'b1}}, {(C_S_AXI_DATA_WIDTH / 4){1'b0}}, {(C_S_AXI_DATA_WIDTH / 4){1'b1}}, {(C_S_AXI_DATA_WIDTH / 4){1'b0}}};
 					end
 				end
 			endcase
@@ -210,8 +214,8 @@ module logic_ram #(
 					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH)
 				)
 				monitor_inst (
-					.S_AXI_ARESETN(S_AXI_ARESETN),
-					.S_AXI_ACLK(S_AXI_ACLK),
+					.rst_n(rst_n),
+					.clk(clk),
 
 					.match_enable(monitors_match_enable[i]),
 
@@ -282,8 +286,8 @@ module logic_ram #(
 					.REPLACE_DATA_GROUPS(CUR_REPLACE_DATA_GROUPS)
 				)
 				replacer_inst (
-					.S_AXI_ARESETN(S_AXI_ARESETN),
-					.S_AXI_ACLK(S_AXI_ACLK),
+					.rst_n(rst_n),
+					.clk(clk),
 
 					.match_enable(replacers_match_enable[j]),
 
@@ -320,8 +324,8 @@ module logic_ram #(
 
 	//pump data to ram_for_data
 	integer pump_data_state = 0;
-	always @(posedge S_AXI_ACLK) begin
-		if(S_AXI_ARESETN == 0) begin
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
 			pump_data_state <= 0;
 		end
 		else begin
@@ -366,7 +370,7 @@ module logic_ram #(
 	assign ts_out_sync = ts_out_sync_reg;
 
 	always @(posedge mpeg_clk) begin
-		if(S_AXI_ARESETN == 0) begin
+		if(rst_n == 0) begin
 			ts_out_index <= 0;
 			ts_out_valid_reg <= 0;
 			ts_out_reg <= 0;

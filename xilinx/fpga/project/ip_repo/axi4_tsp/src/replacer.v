@@ -6,8 +6,8 @@ module replacer #(
 		parameter integer REPLACE_DATA_GROUPS = 1
 	)
 	(
-		input wire S_AXI_ARESETN,
-		input wire S_AXI_ACLK,
+		input wire rst_n,
+		input wire clk,
 
 		input wire match_enable,
 
@@ -59,8 +59,8 @@ module replacer #(
 	assign out_pid = {{(PID_PAD1_WIDTH){1'b0}}, pid_match_enable[pid_index], {(PID_PAD0_WIDTH){1'b0}}, ram_for_pid[pid_index]};
 
 	integer index = 0;
-	always @(posedge S_AXI_ACLK) begin
-		if(S_AXI_ARESETN == 0) begin
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
 			for(index = 0; index < REPLACE_MATCH_PID_COUNT; index = index + 1) begin
 				ram_for_pid[index] <= 0;
 				pid_match_enable[index] <= 0;
@@ -82,8 +82,8 @@ module replacer #(
 
 	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data[0 : PACK_WORD_SIZE * REPLACE_DATA_GROUPS - 1];
 
-	always @(posedge S_AXI_ACLK) begin
-		if(S_AXI_ARESETN == 0) begin
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
 		end
 		else begin
 			if(update_data_request == 1) begin
@@ -100,8 +100,8 @@ module replacer #(
 
 	integer pump_data_state = 0;
 	reg [C_S_AXI_DATA_WIDTH-1:0] pump_data_index = 0;
-	always @(posedge S_AXI_ACLK) begin
-		if(S_AXI_ARESETN == 0) begin
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
 			pump_data_request_ready <= 0;
 			out_data_index <= 0;
 			out_data <= 0;
@@ -147,7 +147,7 @@ module replacer #(
 	reg [7:0] mpeg_data_d3 = 0;
 
 	always @(posedge mpeg_clk) begin
-		if(S_AXI_ARESETN == 0) begin
+		if(rst_n == 0) begin
 			mpeg_sync_d1 <= 0;
 			mpeg_sync_d2 <= 0;
 			mpeg_sync_d3 <= 0;
@@ -187,7 +187,7 @@ module replacer #(
 	reg ts_out_valid_d3 = 0;
 
 	always @(posedge mpeg_clk) begin
-		if(S_AXI_ARESETN == 0) begin
+		if(rst_n == 0) begin
 			pid_matched <= 0;
 			matched_state <= 0;
 			matched_index <= 0;

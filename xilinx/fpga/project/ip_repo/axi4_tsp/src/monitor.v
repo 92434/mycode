@@ -4,8 +4,8 @@ module monitor #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32
 	)
 	(
-		input wire S_AXI_ARESETN,
-		input wire S_AXI_ACLK,
+		input wire rst_n,
+		input wire clk,
 
 		input wire match_enable,
 
@@ -50,8 +50,8 @@ module monitor #(
 	assign cur_pid_match_enable = pid[PID_PID_WIDTH + PID_PAD0_WIDTH + PID_MATCH_ENABLE_WIDTH - 1 : PID_PID_WIDTH + PID_PAD0_WIDTH];
 	assign out_pid = {{(PID_PAD1_WIDTH){1'b0}}, pid_match_enable, {(PID_PAD0_WIDTH){1'b0}}, ram_for_pid};
 
-	always @(posedge S_AXI_ACLK) begin
-		if(S_AXI_ARESETN == 0) begin
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
 			ram_for_pid <= 0;
 			pid_match_enable <= 0;
 		end
@@ -73,8 +73,8 @@ module monitor #(
 
 	integer pump_data_state = 0;
 	reg [C_S_AXI_DATA_WIDTH-1:0] pump_data_index = 0;
-	always @(posedge S_AXI_ACLK) begin
-		if(S_AXI_ARESETN == 0) begin
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
 			pump_data_request_ready <= 0;
 			out_data_index <= 0;
 			out_data <= 0;
@@ -129,7 +129,7 @@ module monitor #(
 	reg [7:0] mpeg_data_d3 = 0;
 
 	always @(posedge mpeg_clk) begin
-		if(S_AXI_ARESETN == 0) begin
+		if(rst_n == 0) begin
 			mpeg_sync_d1 <= 0;
 			mpeg_sync_d2 <= 0;
 			mpeg_sync_d3 <= 0;
@@ -158,7 +158,7 @@ module monitor #(
 	assign match_states = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid) && (pid_match_enable == 1)) ? 1 : 0;
 
 	always @(posedge mpeg_clk) begin
-		if(S_AXI_ARESETN == 0) begin
+		if(rst_n == 0) begin
 			pid_matched <= 0;
 			matched_index <= 0;
 			caching_ram_index <= 0;

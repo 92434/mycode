@@ -1,9 +1,15 @@
 `timescale 1ns / 1ns
 
-module my_tb #(
+module tb #(
+		// Users to add parameters here
 		parameter integer MPEG_DATA_WIDTH = 10,
+		// User parameters ends
+		// Do not modify the parameters beyond this line
 
-		parameter integer C_M00_AXIS_TDATA_WIDTH = 32
+
+		// Parameters of Axi Master Bus Interface M00_AXIS
+		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
+		parameter integer C_M00_AXIS_START_COUNT = 32
 	)
 	(
 	);
@@ -81,21 +87,22 @@ module my_tb #(
 	wire m00_axis_tlast;
 	reg m00_axis_tready = 1;
 
-	wire [7 : 0] data1;
-	wire [7 : 0] data2;
-	wire [7 : 0] data3;
+	wire [9 : 0] data1;
+	wire [9 : 0] data2;
+	wire [9 : 0] data3;
 
-	assign data1 = m00_axis_tdata[7 -: 8];
-	assign data2 = m00_axis_tdata[17 -: 8];
-	assign data3 = m00_axis_tdata[27 -: 8];
+	assign data1 = m00_axis_tdata[9 -: 10];
+	assign data2 = m00_axis_tdata[19 -: 10];
+	assign data3 = m00_axis_tdata[29 -: 10];
 
 	clkgen #(.clk_period(1)) xiaofeiclk1(.clk(m00_axis_aclk));
 
-	asi_dump_axi4_stream_v1_0 # ( 
+	asi_dump_wrap # ( 
 		.MPEG_DATA_WIDTH(MPEG_DATA_WIDTH),
 
-		.C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH)
-	) asi_dump_axi4_stream_v1_0_inst (
+		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
+		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
+	) asi_dump_wrap_inst (
 		.ts_clk(ts_valid),
 		.ts_data(ts_data),
 
@@ -124,5 +131,4 @@ module my_tb #(
 		m00_axis_aresetn = 1;
 		m00_axis_tready = 1;
 	end
-	
 endmodule

@@ -109,14 +109,14 @@
         <spirit:displayName>Verilog Synthesis</spirit:displayName>
         <spirit:envIdentifier>verilogSource:vivado.xilinx.com:synthesis</spirit:envIdentifier>
         <spirit:language>verilog</spirit:language>
-        <spirit:modelName>myip_i2s_receiver_v1_0</spirit:modelName>
+        <spirit:modelName>i2s_wrap</spirit:modelName>
         <spirit:fileSetRef>
           <spirit:localName>xilinx_verilogsynthesis_view_fileset</spirit:localName>
         </spirit:fileSetRef>
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>7d246b71</spirit:value>
+            <spirit:value>3494d0ef</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -125,14 +125,14 @@
         <spirit:displayName>Verilog Simulation</spirit:displayName>
         <spirit:envIdentifier>verilogSource:vivado.xilinx.com:simulation</spirit:envIdentifier>
         <spirit:language>verilog</spirit:language>
-        <spirit:modelName>myip_i2s_receiver_v1_0</spirit:modelName>
+        <spirit:modelName>i2s_wrap</spirit:modelName>
         <spirit:fileSetRef>
           <spirit:localName>xilinx_verilogbehavioralsimulation_view_fileset</spirit:localName>
         </spirit:fileSetRef>
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>7d246b71</spirit:value>
+            <spirit:value>3494d0ef</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -154,14 +154,14 @@
         <spirit:name>xilinx_testbench</spirit:name>
         <spirit:displayName>Test Bench</spirit:displayName>
         <spirit:envIdentifier>:vivado.xilinx.com:simulation.testbench</spirit:envIdentifier>
-        <spirit:modelName>myip_testbench</spirit:modelName>
+        <spirit:modelName>tb</spirit:modelName>
         <spirit:fileSetRef>
           <spirit:localName>xilinx_testbench_view_fileset</spirit:localName>
         </spirit:fileSetRef>
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>3791e774</spirit:value>
+            <spirit:value>6c7ce08c</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -437,17 +437,27 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>src/myip_i2s_receiver_v1_0.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>src/myip_i2s_receiver_v1_0_M00_AXIS.v</spirit:name>
+        <spirit:name>src/i2s_wrap.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
         <spirit:name>src/i2s_receiver_wapper.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>../common/src/fifo.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>../common/src/axi_stream/axi4_stream_v1_0.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>../common/src/axi_stream/axi4_stream_v1_0_M00_AXIS.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
@@ -459,30 +469,34 @@
       <spirit:file>
         <spirit:name>src/receive_data_from_i2s.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_b33ad3e7</spirit:userFileType>
-        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>../common/src/fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_315cc7d1</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_396c8470</spirit:userFileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>src/myip_i2s_receiver_v1_0.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>src/myip_i2s_receiver_v1_0_M00_AXIS.v</spirit:name>
+        <spirit:name>src/i2s_wrap.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
         <spirit:name>src/i2s_receiver_wapper.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>../common/src/fifo.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>../common/src/axi_stream/axi4_stream_v1_0.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>../common/src/axi_stream/axi4_stream_v1_0_M00_AXIS.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
@@ -493,11 +507,6 @@
       </spirit:file>
       <spirit:file>
         <spirit:name>src/receive_data_from_i2s.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>../common/src/fifo.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
@@ -518,6 +527,10 @@
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
+        <spirit:name>src/my_tb.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+      </spirit:file>
+      <spirit:file>
         <spirit:name>../kc705_i2s_sender/src/data_gen_counter.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
@@ -527,10 +540,6 @@
       </spirit:file>
       <spirit:file>
         <spirit:name>../kc705_i2s_sender/src/myip_i2s_sender_v1_0.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>src/myip_i2s_reciever_testbench.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
     </spirit:fileSet>
@@ -567,11 +576,11 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>kc705_i2s_receiver</xilinx:displayName>
-      <xilinx:coreRevision>41</xilinx:coreRevision>
+      <xilinx:coreRevision>47</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:myip_i2s_receiver_v1_0:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2015-12-04T08:20:53Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2015-12-11T10:10:13Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
         <xilinx:tag xilinx:name="user.org:user:myip_i2s_receiver_v1_0:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/kc705_i2s_receiver</xilinx:tag>
@@ -582,7 +591,7 @@
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2014.3</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="7466925a"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="936225ef"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="29d46d66"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="02c9497c"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="07254acb"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="9886c0a0"/>

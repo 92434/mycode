@@ -1,9 +1,8 @@
 `timescale 1 ns / 1 ps
 
-module myip_testbench #
+module tb #
 	(
 		parameter integer I2S_RECEIVER_NUM = 32,
-		parameter I2S_DATA_BIT_WIDTH = 24,
 
 		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
 		parameter integer C_M00_AXIS_START_COUNT = 1
@@ -11,9 +10,11 @@ module myip_testbench #
 	(
 	);
 
-	wire [I2S_RECEIVER_NUM - 1 : 0] i2s_receiver_bclk;
-	wire [I2S_RECEIVER_NUM - 1 : 0] i2s_receiver_lrclk;
-	wire [I2S_RECEIVER_NUM - 1 : 0] i2s_receiver_sdata;
+	localparam integer I2S_DATA_BIT_WIDTH = 24;
+
+	wire [I2S_RECEIVER_NUM - 1 : 0] bclk;
+	wire [I2S_RECEIVER_NUM - 1 : 0] lrclk;
+	wire [I2S_RECEIVER_NUM - 1 : 0] sdata;
 
 	wire r_ready;
 	wire error_full;
@@ -41,12 +42,12 @@ module myip_testbench #
 	end
 
 	// Instantiation of Axi Bus Interface M00_AXIS
-	myip_i2s_receiver_v1_0 # ( 
+	i2s_wrap # ( 
 		.I2S_RECEIVER_NUM(I2S_RECEIVER_NUM)
-	) myreceiver (
-		.i2s_receiver_bclk(i2s_receiver_bclk),
- 		.i2s_receiver_lrclk(i2s_receiver_lrclk),
- 		.i2s_receiver_sdata(i2s_receiver_sdata),
+	) i2s_wrap_inst (
+		.bclk(bclk),
+ 		.lrclk(lrclk),
+ 		.sdata(sdata),
 
 		.r_ready(r_ready),
 		.error_full(error_full),
@@ -76,9 +77,9 @@ module myip_testbench #
 			.rst_n(m00_axis_aresetn),
 			.clk(m00_axis_aclk),
 			
-			.i2s_sender_bclk(i2s_receiver_bclk),
-			.i2s_sender_lrclk(i2s_receiver_lrclk),
-			.i2s_sender_sdata(i2s_receiver_sdata),
+			.i2s_sender_bclk(bclk),
+			.i2s_sender_lrclk(lrclk),
+			.i2s_sender_sdata(sdata),
 			.data_source(data_source)
 		);
 
