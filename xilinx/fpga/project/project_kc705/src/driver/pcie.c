@@ -48,7 +48,6 @@ typedef struct dma_static_config {
 	int pcie_map_bar_axi_addr_0;
 	int pcie_map_bar_axi_addr_1;
 	int dma_bar_map_num;
-	uint64_t target_axi_addr_base;
 	dma_type_t dma_type;
 } dma_static_config_info_t;
 
@@ -88,7 +87,6 @@ static dma_static_config_info_t dma_info[] = {
 	//	.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR4,
 	//	.dma_bar_map_num = 3,
 	//	.dma_type = AXI_CDMA,
-	//	.target_axi_addr_base = BASE_AXI_DDR_ADDR,
 	//},
 	{
 		.dma_lite_offset = OFFSET_AXI_TSP_LITE,
@@ -98,7 +96,6 @@ static dma_static_config_info_t dma_info[] = {
 		.pcie_map_bar_axi_addr_1 = 0,
 		.dma_bar_map_num = 3,
 		.dma_type = PSEUDO_DMA,
-		.target_axi_addr_base = OFFSET_AXI_TSP_LITE,
 	},
 };
 
@@ -122,7 +119,7 @@ static gpio_chip_info_t gpio_chip_info[] = {
 	{
 		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_1,
 		.ngpios = 2,
-		.ngpio = {32, 27},
+		.ngpio = {32, 16},
 
 	},
 #else
@@ -596,7 +593,7 @@ static int test_thread(void *ppara) {
 
 
 		//dma = dma;
-		//put_pcie_tr(dma, dma->target_axi_addr_base + 0, dma->target_axi_addr_base + 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
+		//put_pcie_tr(dma, 0, 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
 	}
 
 	mydebug("\n");
@@ -713,7 +710,6 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 		dma->pcie_map_bar_axi_addr_1 = dma_info[i].pcie_map_bar_axi_addr_1;
 		dma->dma_bar_map_num = dma_info[i].dma_bar_map_num;
 		dma->dma_type = dma_info[i].dma_type;
-		dma->target_axi_addr_base = dma_info[i].target_axi_addr_base;
 		dma->dma_op = (dma_info[i].dma_type == AXI_DMA) ? axi_dma_op :
 					(dma_info[i].dma_type == AXI_CDMA) ? axi_cdma_op :
 					(dma_info[i].dma_type == PSEUDO_DMA) ? pseudo_dma_op :
@@ -925,9 +921,9 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		goto remap_pcie_bars_failed;
 	}
 	
-	mydebug("txp addr:%p\n", kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE);
-	write_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
-	dump_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 47);
+	mydebug("tsp addr:%p\n", kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE);
+	write_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 12);
+	dump_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 12);
 
 	kc705_pci_dev->pdev = pdev;
 

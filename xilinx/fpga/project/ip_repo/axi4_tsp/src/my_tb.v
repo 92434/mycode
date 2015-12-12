@@ -44,7 +44,8 @@ module tb #(
 
 	reg ren = 0;
 	reg wen = 0;
-	reg [OPT_MEM_ADDR_BITS:0] addr = 0;
+	reg [OPT_MEM_ADDR_BITS:0] waddr = 0;
+	reg [OPT_MEM_ADDR_BITS:0] raddr = 0;
 
 
 	wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] wstrb;
@@ -136,7 +137,7 @@ module tb #(
 						state_test <= 1;
 					end
 					1: begin
-						addr <= ADDR_INDEX;
+						waddr <= ADDR_INDEX;
 						wdata <= REPLACER_PID_BASE + 32;
 						wen <= 1;
 						ren <= 0;
@@ -144,13 +145,13 @@ module tb #(
 						state_test <= 2;
 					end
 					2: begin
-						addr <= ADDR_PID_INDEX;
+						waddr <= ADDR_PID_INDEX;
 						wdata <= 0;
 
 						state_test <= 3;
 					end
 					3: begin
-						addr <= ADDR_PID;
+						waddr <= ADDR_PID;
 						wdata <= {{15{1'b0}}, 1'b1, {3{1'b0}}, 13'h157f};
 
 						write_data_index <= 0;
@@ -158,7 +159,7 @@ module tb #(
 					end
 					4: begin
 						if((write_data_index >= 0) && (write_data_index < PACK_BYTE_SIZE)) begin
-							addr <= ADDR_TS_DATA_BASE + write_data_index / 4;
+							waddr <= ADDR_TS_DATA_BASE + write_data_index / 4;
 							wdata <= {filter1[write_data_index + 3], filter1[write_data_index + 2], filter1[write_data_index + 1], filter1[write_data_index + 0]};
 							write_data_index <= write_data_index + 4;
 						end
@@ -167,25 +168,25 @@ module tb #(
 						end
 					end
 					5: begin
-						addr <= ADDR_MATCH_ENABLE;
+						waddr <= ADDR_MATCH_ENABLE;
 						wdata <= 1;
 
 						state_test <= 6;
 					end
 					6: begin
-						addr <= ADDR_INDEX;
+						waddr <= ADDR_INDEX;
 						wdata <= REPLACER_PID_BASE + 32;
 
 						state_test <= 7;
 					end
 					7: begin
-						addr <= ADDR_PID_INDEX;
+						waddr <= ADDR_PID_INDEX;
 						wdata <= 1;
 
 						state_test <= 8;
 					end
 					8: begin
-						addr <= ADDR_PID;
+						waddr <= ADDR_PID;
 						wdata <= {{15{1'b0}}, 1'b1, {3{1'b0}}, 13'h0191};
 
 						write_data_index <= 0;
@@ -193,7 +194,7 @@ module tb #(
 					end
 					9: begin
 						if((write_data_index >= 0) && (write_data_index < PACK_BYTE_SIZE)) begin
-							addr <= ADDR_TS_DATA_BASE + PACK_BYTE_SIZE / 4 + write_data_index / 4;
+							waddr <= ADDR_TS_DATA_BASE + PACK_BYTE_SIZE / 4 + write_data_index / 4;
 							wdata <= {filter2[write_data_index + 3], filter2[write_data_index + 2], filter2[write_data_index + 1], filter2[write_data_index + 0]};
 							write_data_index <= write_data_index + 4;
 						end
@@ -202,23 +203,23 @@ module tb #(
 						end
 					end
 					10: begin
-						addr <= ADDR_MATCH_ENABLE;
+						waddr <= ADDR_MATCH_ENABLE;
 						wdata <= 1;
 
 						state_test <= 11;
 					end
 					11: begin
-						addr <= ADDR_INDEX;
+						waddr <= ADDR_INDEX;
 						wdata <= REPLACER_PID_BASE + 32;
 						state_test <= 12;
 					end
 					12: begin
-						addr <= ADDR_READ_REQUEST;
+						waddr <= ADDR_READ_REQUEST;
 						wdata <= 0;
 						state_test <= 13;
 					end
 					13: begin
-						addr <= ADDR_READ_REQUEST;
+						raddr <= ADDR_READ_REQUEST;
 						wen <= 0;
 						ren <= 1;
 
@@ -227,7 +228,7 @@ module tb #(
 					end
 					14: begin
 						if(read_delay == 5) begin
-							addr <= ADDR_READ_REQUEST;
+							raddr <= ADDR_READ_REQUEST;
 							state_test <= 15;
 						end
 						else begin
@@ -243,7 +244,7 @@ module tb #(
 					end
 					16: begin
 						if((read_data_index >= 0) && (read_data_index < PACK_WORD_SIZE)) begin
-							addr <= ADDR_TS_DATA_BASE + read_data_index;
+							raddr <= ADDR_TS_DATA_BASE + read_data_index;
 							read_data_index <= read_data_index + 1;
 						end
 						else begin
@@ -254,25 +255,25 @@ module tb #(
 					17: begin
 						wen <= 1;
 						ren <= 0;
-						addr <= ADDR_INDEX;
+						waddr <= ADDR_INDEX;
 						wdata <= REPLACER_PID_BASE + 32;
 						state_test <= 18;
 					end
 					18: begin
-						addr <= ADDR_READ_REQUEST;
+						waddr <= ADDR_READ_REQUEST;
 						wdata <= 0;
 						state_test <= 19;
 					end
 					19: begin
 						wen <= 0;
 						ren <= 1;
-						addr <= ADDR_READ_REQUEST;
+						raddr <= ADDR_READ_REQUEST;
 						state_test <= 20;
 						read_delay <= 0;
 					end
 					20: begin
 						if(read_delay == 5) begin
-							addr <= ADDR_READ_REQUEST;
+							raddr <= ADDR_READ_REQUEST;
 							state_test <= 21;
 						end
 						else begin
@@ -288,7 +289,7 @@ module tb #(
 					end
 					22: begin
 						if((read_data_index >= 0) && (read_data_index < PACK_WORD_SIZE)) begin
-							addr <= ADDR_TS_DATA_BASE + PACK_BYTE_SIZE / 4 + read_data_index;
+							raddr <= ADDR_TS_DATA_BASE + PACK_BYTE_SIZE / 4 + read_data_index;
 							read_data_index <= read_data_index + 1;
 						end
 						else begin
@@ -299,49 +300,49 @@ module tb #(
 					23: begin
 						wen <= 1;
 						ren <= 0;
-						addr <= ADDR_INDEX;
+						waddr <= ADDR_INDEX;
 						wdata <= 0;
 
 						state_test <= 24;
 					end
 					24: begin
-						addr <= ADDR_PID_INDEX;
+						waddr <= ADDR_PID_INDEX;
 						wdata <= 0;
 
 						state_test <= 25;
 					end
 					25: begin
-						addr <= ADDR_PID;
+						waddr <= ADDR_PID;
 						wdata <= {{15{1'b0}}, 1'b1, {3{1'b0}}, 13'h157f};
 
 						state_test <= 26;
 					end
 					26: begin
-						addr <= ADDR_MATCH_ENABLE;
+						waddr <= ADDR_MATCH_ENABLE;
 						wdata <= 1;
 
 						state_test <= 27;
 					end
 					27: begin
-						addr <= ADDR_INDEX;
+						waddr <= ADDR_INDEX;
 						wdata <= 1;
 
 						state_test <= 28;
 					end
 					28: begin
-						addr <= ADDR_PID_INDEX;
+						waddr <= ADDR_PID_INDEX;
 						wdata <= 0;
 
 						state_test <= 29;
 					end
 					29: begin
-						addr <= ADDR_PID;
+						waddr <= ADDR_PID;
 						wdata <= {{15{1'b0}}, 1'b1, {3{1'b0}}, 13'h0191};
 
 						state_test <= 30;
 					end
 					30: begin
-						addr <= ADDR_MATCH_ENABLE;
+						waddr <= ADDR_MATCH_ENABLE;
 						wdata <= 1;
 
 						state_test <= 31;
@@ -350,7 +351,7 @@ module tb #(
 						wen <= 1;
 						ren <= 0;
 
-						addr <= ADDR_INDEX;
+						waddr <= ADDR_INDEX;
 						wdata <= 0;
 						state_test <= 32;
 					end
@@ -364,7 +365,7 @@ module tb #(
 					end
 					33: begin
 						if(read_delay == 20) begin
-							addr <= ADDR_READ_REQUEST;
+							waddr <= ADDR_READ_REQUEST;
 							wdata <= 0;
 							state_test <= 34;
 						end
@@ -375,13 +376,13 @@ module tb #(
 					34: begin
 						wen <= 0;
 						ren <= 1;
-						addr <= ADDR_READ_REQUEST;
+						raddr <= ADDR_READ_REQUEST;
 						state_test <= 35;
 						read_delay <= 0;
 					end
 					35: begin
 						if(read_delay == 5) begin
-							addr <= ADDR_READ_REQUEST;
+							raddr <= ADDR_READ_REQUEST;
 							state_test <= 36;
 						end
 						else begin
@@ -397,7 +398,7 @@ module tb #(
 					end
 					37: begin
 						if((read_data_index >= 0) && (read_data_index < PACK_WORD_SIZE)) begin
-							addr <= ADDR_TS_DATA_BASE + read_data_index;
+							raddr <= ADDR_TS_DATA_BASE + read_data_index;
 							read_data_index <= read_data_index + 1;
 						end
 						else begin
@@ -408,7 +409,7 @@ module tb #(
 					38: begin
 						wen <= 1;
 						ren <= 0;
-						addr <= ADDR_INDEX;
+						waddr <= ADDR_INDEX;
 						wdata <= 1;
 						state_test <= 39;
 					end
@@ -422,7 +423,7 @@ module tb #(
 					end
 					40: begin
 						if(read_delay == 20) begin
-							addr <= ADDR_READ_REQUEST;
+							waddr <= ADDR_READ_REQUEST;
 							wdata <= 0;
 							state_test <= 41;
 						end
@@ -433,13 +434,13 @@ module tb #(
 					41: begin
 						wen <= 0;
 						ren <= 1;
-						addr <= ADDR_READ_REQUEST;
+						raddr <= ADDR_READ_REQUEST;
 						state_test <= 42;
 						read_delay <= 0;
 					end
 					42: begin
 						if(read_delay == 5) begin
-							addr <= ADDR_READ_REQUEST;
+							raddr <= ADDR_READ_REQUEST;
 							state_test <= 43;
 						end
 						else begin
@@ -455,7 +456,7 @@ module tb #(
 					end
 					44: begin
 						if((read_data_index >= 0) && (read_data_index < PACK_WORD_SIZE)) begin
-							addr <= ADDR_TS_DATA_BASE + read_data_index;
+							raddr <= ADDR_TS_DATA_BASE + read_data_index;
 							read_data_index <= read_data_index + 1;
 						end
 						else begin
@@ -490,11 +491,11 @@ module tb #(
 			.wstrb(wstrb),
 			.wen(wen),
 			.wdata(wdata),
+			.waddr(waddr),
 
 			.ren(ren),
 			.rdata(rdata),
-
-			.addr(addr),
+			.raddr(raddr),
 
 			.mpeg_data(mpeg_data),
 			.mpeg_clk(mpeg_clk),

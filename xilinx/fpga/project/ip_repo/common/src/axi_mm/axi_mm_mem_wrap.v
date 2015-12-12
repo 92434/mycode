@@ -12,11 +12,11 @@ module axi_mm_mem_wrap #(
 		input wire [(C_S_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		input wire wen,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] wdata,
+		input wire [OPT_MEM_ADDR_BITS : 0] waddr,
 
 		input wire ren,
 		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] rdata = 0,
-
-		input wire [OPT_MEM_ADDR_BITS : 0] addr
+		input wire [OPT_MEM_ADDR_BITS : 0] raddr
 	);
 
 	// implement Block RAM(s)
@@ -34,7 +34,7 @@ module axi_mm_mem_wrap #(
 			if (wen == 1) begin
 				for(byte_index = 0; byte_index < (C_S_AXI_DATA_WIDTH / 8); byte_index = byte_index + 1) begin
 					if(wstrb[byte_index] == 1) begin
-						data[addr][(byte_index * 8) +: 8] <= wdata[(byte_index * 8) +: 8];
+						data[waddr][(byte_index * 8) +: 8] <= wdata[(byte_index * 8) +: 8];
 					end
 				end
 			end
@@ -45,8 +45,8 @@ module axi_mm_mem_wrap #(
 
 	always @(posedge clk) begin
 		if (ren == 1) begin
-			if((addr >= 0) && (addr < MEMSIZE)) begin
-				rdata <= data[addr];
+			if((raddr >= 0) && (raddr < MEMSIZE)) begin
+				rdata <= data[raddr];
 			end
 			else begin
 				rdata <= 0;

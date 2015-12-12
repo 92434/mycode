@@ -22,16 +22,13 @@ module axi4_mm_v1_0 #
 	)
 	(
 		// Users to add ports here
-		output wire clk,
-		output wire rst_n,
-
 		output wire wen,
 		output wire [C_S00_AXI_DATA_WIDTH-1 : 0] wdata,
+		output wire [OPT_MEM_ADDR_BITS:0] waddr,
 
 		output wire ren,
 		input wire [C_S00_AXI_DATA_WIDTH-1 : 0] rdata,
-
-		output wire [OPT_MEM_ADDR_BITS:0] addr,
+		output wire [OPT_MEM_ADDR_BITS:0] raddr,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -102,11 +99,12 @@ module axi4_mm_v1_0 #
 		) axi4_mm_v1_0_S00_AXI_inst (
 			.wen(wen),
 			.wdata(wdata),
+			.waddr(waddr),
 
 			.ren(ren),
 			.rdata(rdata),
+			.raddr(raddr),
 
-			.addr(addr),
 
 			.S_AXI_ACLK(s00_axi_aclk),
 			.S_AXI_ARESETN(s00_axi_aresetn),
@@ -157,8 +155,6 @@ module axi4_mm_v1_0 #
 		);
 
 	// Add user logic here
-	assign clk = s00_axi_aclk;
-	assign rst_n = s00_axi_aresetn;
 
 	// User logic ends
 

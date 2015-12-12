@@ -19,11 +19,11 @@ module tsp_ram #(
 		input wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] wstrb,
 		input wire wen,
 		input wire [C_S_AXI_DATA_WIDTH-1 : 0] wdata,
+		input wire [OPT_MEM_ADDR_BITS:0] waddr,
 
 		input wire ren,
 		output reg [C_S_AXI_DATA_WIDTH-1 : 0] rdata,
-
-		input wire [OPT_MEM_ADDR_BITS:0] addr,
+		input wire [OPT_MEM_ADDR_BITS:0] raddr,
 
 		input wire [7:0] mpeg_data,
 		input wire mpeg_clk,
@@ -87,7 +87,7 @@ module tsp_ram #(
 	//assigning 8 bit data
 	always @(posedge clk) begin
 		if (wen == 1) begin
-			current_write_address <= addr;
+			current_write_address <= waddr;
 			for(index_wstrb = 0; index_wstrb < (C_S_AXI_DATA_WIDTH / 8); index_wstrb = index_wstrb + 1) begin
 				if(wstrb[index_wstrb] == 1) begin
 					current_write_data[(8 * index_wstrb + 7) -: 8] <= wdata[(8 * index_wstrb + 7) -: 8];
@@ -152,7 +152,7 @@ module tsp_ram #(
 
 	always @(posedge clk) begin
 		if (ren == 1) begin
-			case(addr)
+			case(raddr)
 				ADDR_INDEX:
 					rdata <= current_slot;
 				ADDR_PID_INDEX: begin
@@ -172,11 +172,11 @@ module tsp_ram #(
 				ADDR_READ_REQUEST:
 					rdata <= pump_data_request_ready[current_slot];
 				default: begin
-					if((addr >= ADDR_TS_DATA_BASE) && (addr < ADDR_TS_DATA_END)) begin
-						rdata <= ram_for_data[addr - ADDR_TS_DATA_BASE];
+					if((raddr >= ADDR_TS_DATA_BASE) && (raddr < ADDR_TS_DATA_END)) begin
+						rdata <= ram_for_data[raddr - ADDR_TS_DATA_BASE];
 					end
 					else begin
-						rdata <= {{(C_S_AXI_DATA_WIDTH / 4){1'b1}}, {(C_S_AXI_DATA_WIDTH / 4){1'b0}}, {(C_S_AXI_DATA_WIDTH / 4){1'b1}}, {(C_S_AXI_DATA_WIDTH / 4){1'b0}}};
+						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS - 1){1'b0}}, raddr};
 					end
 				end
 			endcase

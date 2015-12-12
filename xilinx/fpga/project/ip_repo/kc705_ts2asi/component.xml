@@ -423,10 +423,6 @@
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>/home/action/vivadoworkspace/ip_repo/common/src/fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>src/ts2asi.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>CHECKSUM_4ad7a4a2</spirit:userFileType>
@@ -451,10 +447,6 @@
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>/home/action/vivadoworkspace/ip_repo/common/src/fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>src/ts2asi.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
@@ -462,10 +454,6 @@
     </spirit:fileSet>
     <spirit:fileSet>
       <spirit:name>xilinx_verilogtestbench_view_fileset</spirit:name>
-      <spirit:file>
-        <spirit:name>/home/action/vivadoworkspace/ip_repo/common/src/clock.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
       <spirit:file>
         <spirit:name>src/data_gen_counter.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
@@ -511,8 +499,8 @@
         <xilinx:taxonomy>/UserIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>kc705_ts2asi</xilinx:displayName>
-      <xilinx:coreRevision>24</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2015-12-08T04:12:05Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>25</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2015-12-12T02:40:25Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="user.org:user:serializer_10b1b:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/kc705_ts2asi</xilinx:tag>
         <xilinx:tag xilinx:name="(none):user:serializer_10b1b:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/kc705_ts2asi</xilinx:tag>

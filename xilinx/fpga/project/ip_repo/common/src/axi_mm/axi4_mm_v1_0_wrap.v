@@ -90,12 +90,12 @@ module axi4_mm_v1_0_wrap #
 
 	wire [(C_S00_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb;
 	wire wen;
-	wire [C_S00_AXI_DATA_WIDTH-1 : 0] wdata;
+	wire [C_S00_AXI_DATA_WIDTH - 1 : 0] wdata;
+	wire [OPT_MEM_ADDR_BITS : 0] waddr;
 
 	wire ren;
-	wire [C_S00_AXI_DATA_WIDTH-1 : 0] rdata;
-
-	wire [OPT_MEM_ADDR_BITS:0] addr;
+	wire [C_S00_AXI_DATA_WIDTH - 1 : 0] rdata;
+	wire [OPT_MEM_ADDR_BITS : 0] raddr;
 
 
 	assign clk = s00_axi_aclk;
@@ -117,16 +117,13 @@ module axi4_mm_v1_0_wrap #
 			.C_S00_AXI_RUSER_WIDTH(C_S00_AXI_RUSER_WIDTH),
 			.C_S00_AXI_BUSER_WIDTH(C_S00_AXI_BUSER_WIDTH)
 		) axi4_mm_v1_0_inst (
-			.clk(clk),
-			.rst_n(rst_n),
-
 			.wen(wen),
 			.wdata(wdata),
+			.waddr(waddr),
 
 			.ren(ren),
 			.rdata(rdata),
-
-			.addr(addr),
+			.raddr(raddr),
 
 			.s00_axi_aclk(s00_axi_aclk),
 			.s00_axi_aresetn(s00_axi_aresetn),
@@ -186,11 +183,11 @@ module axi4_mm_v1_0_wrap #
 			.wstrb(wstrb),
 			.wen(wen),
 			.wdata(wdata),
+			.waddr(waddr),
 
 			.ren(ren),
 			.rdata(rdata),
-
-			.addr(addr)
+			.raddr(raddr)
 		);
 
 	// Add user logic here

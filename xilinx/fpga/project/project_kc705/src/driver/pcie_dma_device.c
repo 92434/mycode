@@ -192,8 +192,8 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 
 				put_pcie_tr(
 					dma,
-					dma->target_axi_addr_base + pseudo_dma_tr.tx_dest_offset,
-					dma->target_axi_addr_base + pseudo_dma_tr.rx_src_offset,
+					pseudo_dma_tr.tx_dest_offset,
+					pseudo_dma_tr.rx_src_offset,
 					pseudo_dma_tr.tx_size,
 					pseudo_dma_tr.rx_size,
 					tx_data,

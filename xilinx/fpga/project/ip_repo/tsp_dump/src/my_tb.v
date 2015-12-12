@@ -3,7 +3,8 @@
 module my_tb #(
 		parameter integer MPEG_DATA_WIDTH = 8,
 
-		parameter integer C_M00_AXIS_TDATA_WIDTH = 32
+		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
+		parameter integer C_M00_AXIS_START_COUNT = 32
 	)
 	(
 	);
@@ -84,11 +85,12 @@ module my_tb #(
 
 	clkgen #(.clk_period(1)) xiaofeiclk1(.clk(m00_axis_aclk));
 
-	tsp_dump_axi4_stream_v1_0 # ( 
+	tsp_dump_wrap # ( 
 		.MPEG_DATA_WIDTH(MPEG_DATA_WIDTH),
 
-		.C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH)
-	) tsp_dump_axi4_stream_v1_0_inst (
+		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
+		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
+	) tsp_dump_wrap_inst (
 		.ts_clk(ts_clk),
 		.ts_valid(ts_valid),
 		.ts_sync(ts_sync),

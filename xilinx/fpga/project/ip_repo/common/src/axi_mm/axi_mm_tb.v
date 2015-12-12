@@ -36,7 +36,7 @@ module tp #(
 	wire s00_axi_wready;//output
 	wire [C_S00_AXI_ID_WIDTH - 1 : 0] s00_axi_bid;//output equal to s00_axi_awid
 	wire [1 : 0] s00_axi_bresp;//output
-	wire [C_S00_AXI_BUSER_WIDTH - 1 : 0] s00_axi_buser;//output Z
+	wire [C_S00_AXI_BUSER_WIDTH - 1 : 0] s00_axi_buser;//output X
 	wire s00_axi_bvalid;//output
 	reg s00_axi_bready = 0;//input for reset axi_bvalid
 	reg [C_S00_AXI_ID_WIDTH - 1 : 0] s00_axi_arid = 0;//const
@@ -56,7 +56,7 @@ module tp #(
 	wire [C_S00_AXI_DATA_WIDTH - 1 : 0] s00_axi_rdata;//output
 	wire [1 : 0] s00_axi_rresp;//output
 	wire s00_axi_rlast;//output
-	wire [C_S00_AXI_RUSER_WIDTH - 1 : 0] s00_axi_ruser;//output equal to s00_axi_aruser
+	wire [C_S00_AXI_RUSER_WIDTH - 1 : 0] s00_axi_ruser;//output X
 	wire s00_axi_rvalid;//output
 	reg s00_axi_rready = 0;//input for reset axi_arv_arr_flag
 
