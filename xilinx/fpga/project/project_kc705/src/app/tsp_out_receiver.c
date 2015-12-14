@@ -54,26 +54,49 @@ int catch_signal(sig_action_t sig_action) {
 	return ret;
 }
 
+FILE *get_logger(char *name) {
+	FILE * ret = fopen((const char *)name, "wb+");
+
+	if(ret == NULL) {
+		printf("error: %m\n");
+		ret = fopen((const char *)name, "wb");
+	}
+
+	if(ret == NULL) {
+		printf("error: %m\n");
+		exit(-1);
+	}
+
+	return ret;
+}
+
+static FILE *logfile = NULL;
+
 int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
 	int ret = 0;
 
 	int i;
+
+	if(logfile == NULL) {
+		logfile = get_logger("tsp.bin");
+	}
+
 	for(i = 0; i < count; i++) {
-		int v1 = (pdata[i] >> 0) & 0xff;
-		int v2 = (pdata[i] >> 8) & 0xff;
-		int v3 = (pdata[i] >> 16) & 0xff;
-		int v4 = (pdata[i] >> 24) & 0xff;
+		unsigned int v1 = (pdata[i] >> 0) & 0xff;
+		unsigned int v2 = (pdata[i] >> 8) & 0xff;
+		unsigned int v3 = (pdata[i] >> 16) & 0xff;
+		unsigned int v4 = (pdata[i] >> 24) & 0xff;
 
 		if((i != 0) && (i % 4 == 0)) {
-			printf("\n");
+			fprintf(logfile, "\n");
 		}
 
-		printf("%02x ", v1);
-		printf("%02x ", v2);
-		printf("%02x ", v3);
-		printf("%02x ", v4);
+		ret = fprintf(logfile, "%02x ", v1);
+		ret = fprintf(logfile, "%02x ", v2);
+		ret = fprintf(logfile, "%02x ", v3);
+		ret = fprintf(logfile, "%02x ", v4);
 	}
-	printf("\n");
+	fprintf(logfile, "\n");
 
 	return ret;
 }
@@ -242,6 +265,14 @@ static read_buffer(int fd, int sock_fd, unsigned char *read_buf) {
 }
 #endif
 
+void closelog(void) {
+	if(logfile != NULL) {
+		fclose(logfile);
+	}
+
+	printf("error: %m\n");
+}
+
 int main(int argc, char **argv) {
 	int ret = 0;
 	int fd, sock_fd;
@@ -297,6 +328,8 @@ int main(int argc, char **argv) {
 		ret = -1;
 		return ret;
 	}
+
+	atexit(closelog);
 
 	read_buffer(fd, sock_fd, read_buf);
 

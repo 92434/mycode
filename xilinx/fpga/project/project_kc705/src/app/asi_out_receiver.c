@@ -54,26 +54,44 @@ int catch_signal(sig_action_t sig_action) {
 	return ret;
 }
 
-int printf_bit(int v) {
+FILE *get_logger(char *name) {
+	FILE * ret = fopen((const char *)name, "wb+");
+
+	if(ret == NULL) {
+		printf("error: %m\n");
+		ret = fopen((const char *)name, "wb");
+	}
+
+	if(ret == NULL) {
+		printf("error: %m\n");
+		exit(-1);
+	}
+
+	return ret;
+}
+
+static FILE *logfile = NULL;
+
+int printf_bit(unsigned int v) {
 	int ret = 0;
-	char v0 = '0';
-	char v1 = '1';
-	char buffer[11];
+	unsigned char v0 = '0';
+	unsigned char v1 = '1';
+	unsigned char buffer[11];
 	int i;
 	int mask = 1;
 	
 	for(i = 0; i < 10; i++) {
-		if((v & mask) == 1) {
-			buffer[i] = v1;
-		} else {
+		if((v & mask) == 0) {
 			buffer[i] = v0;
+		} else {
+			buffer[i] = v1;
 		}
 
 		mask <<= 1;
 	}
 	buffer[10] = 0;
 
-	ret = printf("%s ", buffer);
+	ret = fprintf(logfile, "%s ", buffer);
 
 	return ret;
 }
@@ -82,19 +100,24 @@ int check_buffer(unsigned int *pdata, int count, unsigned int *pre_value) {
 	int ret = 0;
 
 	int i;
+
+	if(logfile == NULL) {
+		logfile = get_logger("asi.bin");
+	}
+
 	for(i = 0; i < count; i++) {
-		int v1 = (pdata[i] >> 0) & 0x3ff;
-		int v2 = (pdata[i] >> 10) & 0x3ff;
-		int v3 = (pdata[i] >> 20) & 0x3ff;
-		if((i != 0) && (i % 16 == 0)) {
-			printf("\n");
+		unsigned int v1 = (pdata[i] >> 0) & 0x3ff;
+		unsigned int v2 = (pdata[i] >> 10) & 0x3ff;
+		unsigned int v3 = (pdata[i] >> 20) & 0x3ff;
+		if((i != 0) && (i % 2 == 0)) {
+			fprintf(logfile, "\n");
 		}
 
 		printf_bit(v1);
 		printf_bit(v2);
 		printf_bit(v3);
 	}
-	printf("\n");
+	fprintf(logfile, "\n");
 
 	return ret;
 }
@@ -263,6 +286,14 @@ static read_buffer(int fd, int sock_fd, unsigned char *read_buf) {
 }
 #endif
 
+void closelog(void) {
+	if(logfile != NULL) {
+		fclose(logfile);
+	}
+
+	printf("error: %m\n");
+}
+
 int main(int argc, char **argv) {
 	int ret = 0;
 	int fd, sock_fd;
@@ -318,6 +349,8 @@ int main(int argc, char **argv) {
 		ret = -1;
 		return ret;
 	}
+
+	atexit(closelog);
 
 	read_buffer(fd, sock_fd, read_buf);
 
