@@ -619,6 +619,42 @@ myip_fmc_signal = [
 	('FMC_HPC_LA30_N', 'mpeg_sync'),
 	#('FMC_HPC_HA23_N', 'ts_out_sync'),
 	#('FMC_HPC_HA23_P', 'slot0_out_dump_flag'),
+
+	('FMC_LPC_LA10_P', 'symbol_2x_oe'),
+		
+	('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
+	('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
+	('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
+	('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
+	('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
+	('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
+	('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
+	('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
+	('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
+	('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
+	('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
+	('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
+	('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
+	('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
+	('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
+	('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
+
+	('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
+	('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
+	('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
+	('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
+	('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
+	('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
+	('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
+	('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
+	('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
+	('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
+	('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
+	('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
+	('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
+	('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
+	('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
+	('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
 ]
 
 #myip_fmc_signal = []
@@ -682,7 +718,7 @@ def gen_myip_constrain():
 		('XADC_GPIO_0', 'AB25', 'clk_out1', 'LVCMOS15'),
 		#('USER_SMA_GPIO_P', 'Y23', 'asi_out', 'LVCMOS15'),
 		#('LCD_DB4_LS', 'AA13', 'asi_out', 'LVCMOS15'),
-		('GPIO_SW_E', 'AG5', 'asi_out', 'LVCMOS15'),
+		#('GPIO_SW_E', 'AG5', 'asi_out', 'LVCMOS15'),
 	]
 
 	extra_property = {

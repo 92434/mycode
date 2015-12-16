@@ -35,9 +35,9 @@ output 		reg							symbol_1x_oe,
 output 	    reg 	signed [15:0]			symbol_1x_re_out,
 output 		reg    signed [15:0]			symbol_1x_im_out,
 
-output 									symbol_2x_oe,
-output 		signed [15:0]			symbol_2x_re_out,
-output 		signed [15:0]			symbol_2x_im_out
+output 		reg							symbol_2x_oe,
+output 		reg signed [15:0]			symbol_2x_re_out,
+output 		reg signed [15:0]			symbol_2x_im_out
 );
 
 

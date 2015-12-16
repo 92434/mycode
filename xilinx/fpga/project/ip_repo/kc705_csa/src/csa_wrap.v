@@ -196,10 +196,10 @@ module csa_wrap #
 			.MAX_CAL_TIMES(MAX_CAL_TIMES),
 
 			.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
-			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
+			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS)
 		) csa_ram_inst(
-			.clk(clk),
-			.rst_n(rst_n),
+			.S_AXI_ACLK(clk),
+			.rst(~rst_n),
 
 			.S_AXI_WSTRB(wstrb),
 			.wen(wen),
@@ -338,7 +338,7 @@ module csa_wrap #
 
 	// Instantiation of Axi Bus Interface M00_AXIS
 	axi4_stream_v1_0 # (
-		.C_M00_AXIS_TDATA_WIDTH(C_S00_AXI_DATA_WIDTH),
+		.C_M00_AXIS_TDATA_WIDTH(C_S00_AXI_DATA_WIDTH)
 		//.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
 	) axi4_stream_v1_0_inst (
 		.wclk(stream_wclk),

@@ -21,6 +21,11 @@ module dvb_s2_wrap #
 		// Users to add ports here
 		input wire hard_rst_n,
 
+		input wire ts_clk_h264out,// clock from h.264 encoder
+		input wire [7 : 0] ts_din_h264out,// @ ts_clk_out
+		input wire ts_syn_h264out,// @ ts_clk_out ts stream head
+		input wire ts_valid_h264out,// @ ts_clk_out
+
 		input wire sys_clk,
 		output wire ts_clk,// @ sys_clk
 		input wire fs_en_outer,
@@ -195,7 +200,7 @@ module dvb_s2_wrap #
 	// Add user logic here
 	dvb_s2_ram #(
 			.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
-			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
+			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS)
 		) dvb_s2_ram_inst(
 			.clk(clk),
 			.rst_n(rst_n),
@@ -210,6 +215,11 @@ module dvb_s2_wrap #
 			.raddr(raddr),
 
 			.hard_rst_n(hard_rst_n),// modified by 2014.09.22
+
+			.ts_clk_h264out(ts_clk_h264out),// clock from h.264 encoder
+			.ts_din_h264out(ts_din_h264out),// @ ts_clk_out
+			.ts_syn_h264out(ts_syn_h264out),// @ ts_clk_out ts stream head
+			.ts_valid_h264out(ts_valid_h264out),// @ ts_clk_out
 
 			.sys_clk(sys_clk),
 			.ts_clk(ts_clk),// @ sys_clk

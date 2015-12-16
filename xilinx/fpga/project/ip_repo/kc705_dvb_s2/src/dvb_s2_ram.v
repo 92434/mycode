@@ -19,6 +19,11 @@ module dvb_s2_ram #(
 
 		input wire hard_rst_n,
 
+		input wire ts_clk_h264out,// clock from h.264 encoder
+		input wire [7 : 0] ts_din_h264out,// @ ts_clk_out
+		input wire ts_syn_h264out,// @ ts_clk_out ts stream head
+		input wire ts_valid_h264out,// @ ts_clk_out
+
 		input wire sys_clk,
 		output wire ts_clk,// @ sys_clk
 		input wire fs_en_outer,
@@ -40,8 +45,6 @@ module dvb_s2_ram #(
 	reg [OPT_MEM_ADDR_BITS : 0] current_write_address = 0;
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] current_write_data = 0;
 	reg current_mem_wren = 0;
-
-
 
 	// implement Block RAM(s)
 	// for write command
@@ -67,15 +70,31 @@ module dvb_s2_ram #(
 	//09
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] Freq_Inv_mode_reg = 0;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 	//10
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ts_clk_h264out_reg = 0;// clock from h.264 encoder
-	//11
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ts_din_h264out_reg = 0;// @ ts_clk_out
-	//12
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ts_syn_h264out_reg = 0;// @ ts_clk_out ts stream head
-	//13
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ts_valid_h264out_reg = 0;// @ ts_clk_out
-	//14
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en_switch_reg = 0;
+
+	wire [1 : 0] mod_mode_cfg;
+	wire [3 : 0] ldpc_mode_cfg;
+	wire frame_mode_cfg;
+	wire pilot_mode_cfg;
+	wire [1 : 0] srrc_mode;//00:0.35; 01:0.25; 10:0.20(default) 
+	wire [2 : 0] dvb_s_convolution_mode;
+	wire dvb_s_mode;// 0:dvb-s; 1:dvb-s2
+	wire [1 : 0] TS_Source_mode;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
+	wire [31 : 0] SYS_Baud_Num;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
+	wire Freq_Inv_mode;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
+	wire fs_en_switch;
+
+	assign mod_mode_cfg = mod_mode_cfg_reg[1 : 0];
+	assign ldpc_mode_cfg = ldpc_mode_cfg_reg[3 : 0];
+	assign frame_mode_cfg = frame_mode_cfg_reg[0];
+	assign pilot_mode_cfg = pilot_mode_cfg_reg[0];
+	assign srrc_mode = srrc_mode_reg[1 : 0];
+	assign dvb_s_convolution_mode = dvb_s_convolution_mode_reg[2 : 0];
+	assign dvb_s_mode = dvb_s_mode_reg[0];
+	assign TS_Source_mode = TS_Source_mode_reg[1 : 0];
+	assign SYS_Baud_Num = SYS_Baud_Num_reg;
+	assign Freq_Inv_mode = Freq_Inv_mode_reg[0];
+	assign fs_en_switch = fs_en_switch_reg[0];
 
 	integer index_wstrb;
 	//assigning 8 bit data
@@ -111,10 +130,6 @@ module dvb_s2_ram #(
 			TS_Source_mode_reg <= 0;
 			SYS_Baud_Num_reg <= 0;
 			Freq_Inv_mode_reg <= 0;
-			ts_clk_h264out_reg <= 0;
-			ts_din_h264out_reg <= 0;
-			ts_syn_h264out_reg <= 0;
-			ts_valid_h264out_reg <= 0;
 			fs_en_switch_reg <= 0;
 		end
 		else begin
@@ -151,18 +166,6 @@ module dvb_s2_ram #(
 						Freq_Inv_mode_reg <= current_write_data;
 					end
 					10: begin
-						ts_clk_h264out_reg <= current_write_data;
-					end
-					11: begin
-						ts_din_h264out_reg <= current_write_data;
-					end
-					12: begin
-						ts_syn_h264out_reg <= current_write_data;
-					end
-					13: begin
-						ts_valid_h264out_reg <= current_write_data;
-					end
-					14: begin
 						fs_en_switch_reg <= current_write_data;
 					end
 					default: begin
@@ -211,18 +214,6 @@ module dvb_s2_ram #(
 						rdata <= Freq_Inv_mode;
 					end
 					10: begin
-						rdata <= ts_clk_h264out;
-					end
-					11: begin
-						rdata <= ts_din_h264out;
-					end
-					12: begin
-						rdata <= ts_syn_h264out;
-					end
-					13: begin
-						rdata <= ts_valid_h264out;
-					end
-					14: begin
 						rdata <= fs_en_switch;
 					end
 					default: begin
@@ -233,39 +224,8 @@ module dvb_s2_ram #(
 		end
 	end
 
-	wire [1 : 0] mod_mode_cfg;
-	wire [3 : 0] ldpc_mode_cfg;
-	wire frame_mode_cfg;
-	wire pilot_mode_cfg;
-	wire [1 : 0] srrc_mode;//00:0.35; 01:0.25; 10:0.20(default) 
-	wire [2 : 0] dvb_s_convolution_mode;
-	wire dvb_s_mode;// 0:dvb-s; 1:dvb-s2
-	wire [1 : 0] TS_Source_mode;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
-	wire [31 : 0] SYS_Baud_Num;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
-	wire Freq_Inv_mode;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
-	wire ts_clk_h264out;// clock from h.264 encoder
-	wire [7 : 0] ts_din_h264out;// @ ts_clk_out
-	wire ts_syn_h264out;// @ ts_clk_out ts stream head
-	wire ts_valid_h264out;// @ ts_clk_out
-	wire fs_en_switch;
-
-	assign mod_mode_cfg = mod_mode_cfg_reg[1 : 0];
-	assign ldpc_mode_cfg = ldpc_mode_cfg_reg[3 : 0];
-	assign frame_mode_cfg = frame_mode_cfg_reg[0];
-	assign pilot_mode_cfg = pilot_mode_cfg_reg[0];
-	assign srrc_mode = srrc_mode_reg[1 : 0];
-	assign dvb_s_convolution_mode = dvb_s_convolution_mode_reg[2 : 0];
-	assign dvb_s_mode = dvb_s_mode_reg[0];
-	assign TS_Source_mode = TS_Source_mode_reg[1 : 0];
-	assign SYS_Baud_Num = SYS_Baud_Num_reg;
-	assign Freq_Inv_mode = Freq_Inv_mode_reg[0];
-	assign ts_clk_h264out = ts_clk_h264out_reg[0];
-	assign ts_din_h264out = ts_din_h264out_reg[1 : 0];
-	assign ts_syn_h264out = ts_syn_h264out_reg[0];
-	assign ts_valid_h264out = ts_valid_h264out_reg[0];
-	assign fs_en_switch = fs_en_switch_reg[0];
-
 	dvb_s2_system_top #(
+		) dvb_s2_system_top_inst(
 			.hard_rst_n(hard_rst_n),// modified by 2014.09.22
 			.mod_mode_cfg(mod_mode_cfg),
 			.ldpc_mode_cfg(ldpc_mode_cfg),
@@ -300,7 +260,6 @@ module dvb_s2_ram #(
 			.symbol_2x_oe(symbol_2x_oe),
 			.symbol_2x_re_out(symbol_2x_re_out),
 			.symbol_2x_im_out(symbol_2x_im_out)
-		) dvb_s2_system_top_inst(
 		);
 
 endmodule
