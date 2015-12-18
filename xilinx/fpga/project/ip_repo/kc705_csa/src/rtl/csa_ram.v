@@ -15,6 +15,10 @@ module csa_ram #(
 		input wire [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA,
 		input wire [OPT_MEM_ADDR_BITS:0] waddr,
 
+		input wire ren,
+		output reg [C_S_AXI_DATA_WIDTH-1 : 0] rdata,
+		input wire [OPT_MEM_ADDR_BITS:0] raddr,
+
 		input wire fpga_clk,
 		output reg [48-1:0] byte_ram_out,
 		output wire ready
@@ -36,6 +40,7 @@ module csa_ram #(
 	reg [8*8-1:0] ck;
 	reg [8*8-1:0] sb;
 	wire [8*8-1:0] cb;
+	integer current_end_pos = 0;
 	
 	assign ready=output_ready;
 	
@@ -43,6 +48,7 @@ module csa_ram #(
 		if(rst) begin
 			read_cursor<=0;
 			ck<=0;
+			current_end_pos <= 0;
 		end
 		else begin
 			if (wen) begin
@@ -51,9 +57,11 @@ module csa_ram #(
 						stuff_cursor<=0;
 						csa_begin_calc<=0;
 						calc_item_total<=0;
+						current_end_pos <= 0;
 					end
 					STEP_STUFFING_DATA:begin
 						byte_ram_in[stuff_cursor]<=S_AXI_WDATA;
+						current_end_pos <= stuff_cursor;
 						stuff_cursor<=stuff_cursor+1;
 					end
 					STEP_FIN_STUFF:begin
@@ -72,6 +80,21 @@ module csa_ram #(
 				end
 			end
 			*/
+		end
+	end
+
+	always @(posedge S_AXI_ACLK) begin
+		if(rst == 1) begin
+		end
+		else begin
+			if (ren == 1) begin
+				if((raddr >= 0) && (raddr <= current_end_pos)) begin
+					rdata <= byte_ram_in[raddr];
+				end
+				else begin
+					rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS - 1){1'b0}}, raddr};
+				end
+			end
 		end
 	end
 	

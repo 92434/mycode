@@ -255,11 +255,20 @@ module dvb_s2_ram #(
 
 			.symbol_1x_oe(symbol_1x_oe),
 			.symbol_1x_re_out(symbol_1x_re_out),
+			.symbol_1x_im_out(symbol_1x_im_out)
+		);
+
+	dvb_s2_srrc_filter dvb_s2_srrc_filter_inst(
+			.hard_rst_n(hard_rst_n),// modified by 2014.09.22
+
+			.sys_clk(sys_clk),
+
+			.symbol_1x_oe(symbol_1x_oe),
+			.symbol_1x_re_out(symbol_1x_re_out),
 			.symbol_1x_im_out(symbol_1x_im_out),
 
 			.symbol_2x_oe(symbol_2x_oe),
 			.symbol_2x_re_out(symbol_2x_re_out),
 			.symbol_2x_im_out(symbol_2x_im_out)
 		);
-
 endmodule

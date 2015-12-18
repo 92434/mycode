@@ -5,6 +5,12 @@ proc init_gui { IPINST } {
   #Adding Page
   set Page_0  [  ipgui::add_page $IPINST -name "Page 0" -display_name {Page 0}]
   set_property tooltip {Page 0} ${Page_0}
+  set MAX_CAL_TIMES  [  ipgui::add_param $IPINST -name "MAX_CAL_TIMES" -parent ${Page_0} -display_name {MAX_CAL_TIMES}]
+  set_property tooltip {MAX_CAL_TIMES} ${MAX_CAL_TIMES}
+  set C_S00_AXI_DATA_WIDTH  [  ipgui::add_param $IPINST -name "C_S00_AXI_DATA_WIDTH" -parent ${Page_0} -display_name {C_S00_AXI_DATA_WIDTH}]
+  set_property tooltip {C_S00_AXI_DATA_WIDTH} ${C_S00_AXI_DATA_WIDTH}
+  set C_S00_AXI_ADDR_WIDTH  [  ipgui::add_param $IPINST -name "C_S00_AXI_ADDR_WIDTH" -parent ${Page_0} -display_name {C_S00_AXI_ADDR_WIDTH}]
+  set_property tooltip {C_S00_AXI_ADDR_WIDTH} ${C_S00_AXI_ADDR_WIDTH}
 
 
 }

@@ -206,6 +206,10 @@ module csa_wrap #
 			.S_AXI_WDATA(wdata),
 			.waddr(waddr),
 
+			.ren(ren),
+			.rdata(rdata),
+			.raddr(raddr),
+
 			.fpga_clk(wclk_48),
 			.ready(wen_48),
 			.byte_ram_out(wdata_48)
