@@ -178,8 +178,9 @@ static int dma_trans_sync(pcie_dma_t *dma, int tx_size, int rx_size) {
 		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->tx_cmp, tmo);
 		if (0 == tmo) {
-			myprintf("%s:tx transfer timed out!\n", dma->dev_name);
+			myprintf_once((0 == tmo), "%s:tx transfer timed out!\n", dma->dev_name);
 			ret = -1;
+			return ret;
 		}
 	}
 
@@ -187,8 +188,9 @@ static int dma_trans_sync(pcie_dma_t *dma, int tx_size, int rx_size) {
 		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->rx_cmp, tmo);
 		if (0 == tmo) {
-			myprintf("%s:rx transfer timed out!\n", dma->dev_name);
+			myprintf_once((0 == tmo), "%s:rx transfer timed out!\n", dma->dev_name);
 			ret = -1;
+			return ret;
 		}
 	}
 
@@ -249,12 +251,12 @@ static int dma_tr(void *ppara) {
 	ret = dma_trans_sync(dma, tx_size, rx_size);
 	if(ret != 0) {
 		dma->dma_op.init_dma(dma);
+	} else {
+		//test_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size);
+
+		write_buffer(NULL, rx_size, dma->list);
+		inc_dma_op_tx_count(dma, rx_size);
 	}
-
-	//test_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size);
-
-	write_buffer(NULL, rx_size, dma->list);
-	inc_dma_op_tx_count(dma, rx_size);
 
 	tr_wakeup(tr_cmp);
 	
