@@ -1,6 +1,6 @@
 `timescale 1 ns / 1 ps
 
-module axi4_stream_v1_0_M00_AXIS #
+module axi4_stream_master_v1_0_M00_AXIS #
 	(
 		// Users to add parameters here
 

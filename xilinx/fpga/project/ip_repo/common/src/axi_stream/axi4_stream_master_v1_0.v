@@ -1,7 +1,7 @@
 
 `timescale 1 ns / 1 ps
 
-module axi4_stream_v1_0_wrap #
+module axi4_stream_master_v1_0 #
 	(
 		// Users to add parameters here
 
@@ -37,10 +37,10 @@ module axi4_stream_v1_0_wrap #
 		input wire m00_axis_tready
 	);
 	// Instantiation of Axi Bus Interface M00_AXIS
-	axi4_stream_v1_0 # (
-		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
-		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
-	) axi4_stream_v1_0_inst (
+	axi4_stream_master_v1_0_M00_AXIS # (
+		.C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
+		.C_M_START_COUNT(C_M00_AXIS_START_COUNT)
+	) axi4_stream_master_v1_0_M00_AXIS_inst (
 		.wclk(wclk),
 		.wen(wen),
 		.wdata(wdata),
@@ -49,13 +49,13 @@ module axi4_stream_v1_0_wrap #
 		.error_full(error_full),
 		.error_empty(error_empty),
 
-		.m00_axis_aclk(m00_axis_aclk),
-		.m00_axis_aresetn(m00_axis_aresetn),
-		.m00_axis_tvalid(m00_axis_tvalid),
-		.m00_axis_tdata(m00_axis_tdata),
-		.m00_axis_tstrb(m00_axis_tstrb),
-		.m00_axis_tlast(m00_axis_tlast),
-		.m00_axis_tready(m00_axis_tready)
+		.M_AXIS_ACLK(m00_axis_aclk),
+		.M_AXIS_ARESETN(m00_axis_aresetn),
+		.M_AXIS_TVALID(m00_axis_tvalid),
+		.M_AXIS_TDATA(m00_axis_tdata),
+		.M_AXIS_TSTRB(m00_axis_tstrb),
+		.M_AXIS_TLAST(m00_axis_tlast),
+		.M_AXIS_TREADY(m00_axis_tready)
 	);
 
 	// Add user logic here
