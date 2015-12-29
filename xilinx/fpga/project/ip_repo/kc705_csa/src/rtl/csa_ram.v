@@ -33,9 +33,9 @@ module csa_ram #(
 	// implement Block RAM(s)
 	reg [C_S_AXI_DATA_WIDTH-1:0] byte_ram_in [0 : 1];//(CAL_DATA_ITEM_NUM*5)/4-1];
 	integer i,j,stuff_cursor,calc_item_cursor,calc_item_total,loop_times;
-	reg csa_begin_calc,ck_valid;
+	reg csa_begin_calc,cb_valid;
 	reg output_ready;
-	reg [8*8-1:0] ck;
+	reg [8*8-1:0] ck,cb_bakup;
 	reg [8*8-1:0] sb;
 	wire [8*8-1:0] cb;
 	integer current_end_pos = 0;
@@ -122,7 +122,7 @@ module csa_ram #(
 	assign k5=((cb[39:32]^8'hB0)+loop_times)%256;
 	assign k6=((cb[47:40]^8'hD7)+loop_times)%256;
 	assign k7=k4+k5+k6;
-	*/
+	
 	always @(posedge fpga_clk) begin
 		if(rst) begin
 			`ifdef CSA_DEBUG
@@ -186,8 +186,8 @@ module csa_ram #(
 			end
 		end
 	end
-	
-/*
+*/	
+
 `ifdef CSA_DEBUG
 	always @(posedge fpga_clk) begin
 		if(rst) begin
@@ -199,42 +199,61 @@ module csa_ram #(
 			ck[47:40]<=8'h69;
 			ck[55:48]<=0;
 			ck[63:56]<=8'hb0;
+			cb_bakup<=0;
 			loop_times<=0;
 			calc_item_cursor<=0;
 			output_ready<=0;
-			ck_valid<=0;
+			cb_valid<=0;
 			sb <=64'hE613DB6DC11C4524;
 			`ifdef CSA_DEBUG
 				sta_cursor<=0;
 			`endif
 		end
 		else if(csa_begin_calc) begin
-				if((sta_cursor + 3) <= DEBUG_BUF_SIZE) begin
-					status_out[sta_cursor]<=sta_cursor;
-					status_out[sta_cursor+1][7:0]  <=ck[7:0]  ;
-					status_out[sta_cursor+1][15:8] <=ck[31:24];
-					status_out[sta_cursor+1][23:16]<=ck[39:32];
-					status_out[sta_cursor+1][31:24]<=ck[63:56];
-					status_out[sta_cursor+2][7:0]  <=cb[7:0]  ;
-					status_out[sta_cursor+2][15:8] <=cb[31:24];
-					status_out[sta_cursor+2][23:16]<=cb[39:32];
-					status_out[sta_cursor+2][31:24]<=cb[63:56];
-					sta_cursor<=sta_cursor+3;
-				end
-				else begin
-					sta_cursor<=0;
-				end
-				byte_ram_out[7:0]  <=cb[7:0];
-				byte_ram_out[15:8] <=cb[15:8];
-				byte_ram_out[23:16]<=cb[23:16];
-				byte_ram_out[31:24]<=cb[31:24];
-				byte_ram_out[39:32]<=cb[39:32];
-				byte_ram_out[47:40]<=cb[47:40];
+			if((sta_cursor + 2) >= DEBUG_BUF_SIZE) begin
+				sta_cursor<=0;
+			end
+			else begin
+				sta_cursor<=sta_cursor+2;
+			end
+			
+			$display("ck:%h,cb=%h,cb_bakup=%h\n",ck,cb,cb_bakup);
+			status_out[sta_cursor]<=loop_times;
+			status_out[sta_cursor+1][7:0]  <=ck[7:0]  ;
+			status_out[sta_cursor+1][15:8] <=ck[63:56];
+			status_out[sta_cursor+1][23:16]<=cb[7:0];
+			status_out[sta_cursor+1][31:24]<=cb[63:56];
+			
+						
+			cb_bakup<=cb;
+			byte_ram_out[7:0]  <=cb_bakup[7:0];
+			byte_ram_out[15:8] <=cb_bakup[15:8];
+			byte_ram_out[23:16]<=cb_bakup[23:16];
+			byte_ram_out[31:24]<=cb_bakup[31:24];
+			byte_ram_out[39:32]<=cb_bakup[39:32];
+			byte_ram_out[47:40]<=cb_bakup[47:40];
+			
+			if(loop_times+1<MAX_CAL_TIMES) begin
+				loop_times<=loop_times+1;
+				ck <=cb_bakup;
+				output_ready<=0;
+			end
+			else begin
+				loop_times<=0;
 				output_ready<=1;
+				ck[7:0]  <=8'h1a;
+				ck[15:8] <=8'h91;
+				ck[23:16]<=8'h01;
+				ck[31:24]<=8'hac;
+				ck[39:32]<=8'h47;
+				ck[47:40]<=8'h69;
+				ck[55:48]<=0;
+				ck[63:56]<=8'hb0;
+			end
 		end
 	end
 `endif
-*/	
+
 	
 	stream_cypher b(
 	.sb   (sb)

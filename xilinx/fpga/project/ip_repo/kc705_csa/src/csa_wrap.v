@@ -3,7 +3,7 @@
 module csa_wrap #
 	(
 		// Users to add parameters here
-		parameter integer MAX_CAL_TIMES = 2,
+		parameter integer MAX_CAL_TIMES = 3,
 		// User parameters ends
 		// Do not modify the parameters beyond this line
 

@@ -17,12 +17,7 @@
     <Option Name="ManageIP" Val="TRUE"/>
     <Option Name="IPRepoPath" Val="$PPRDIR/../../ip_repo"/>
     <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_i2s_sender"/>
-    <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_ts2asi"/>
-    <Option Name="IPRepoPath" Val="$PPRDIR/../axi4-tsp"/>
-    <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_intr_hub"/>
-    <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_i2s_receiver"/>
-    <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_ext"/>
-    <Option Name="IPRepoPath" Val="$PPRDIR/../test_multi_to_one"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_csa"/>
   </Configuration>
   <FileSets Version="1" Minor="31">
     <FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
