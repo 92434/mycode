@@ -18,7 +18,6 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 		output wire r_ready,
 		output wire error_full,
 		output wire error_empty,
-		output wire fifo_wren,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -52,7 +51,7 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	// Total number of input data.
 	localparam NUMBER_OF_INPUT_WORDS = 16;
 	// bit_num gives the minimum number of bits needed to address 'NUMBER_OF_INPUT_WORDS' size of FIFO.
-	localparam bit_num = clogb2(NUMBER_OF_INPUT_WORDS);
+	localparam bit_num = clogb2(NUMBER_OF_INPUT_WORDS - 1);
 	// Define the states of state machine
 	// The control state machine oversees the writing of input streaming data to the FIFO,
 	// and outputs the streaming data from the FIFO
@@ -69,7 +68,7 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	// FIFO write pointer
 	reg [bit_num - 1 : 0] write_pointer;
 	// sink has accepted all the streaming data and stored in FIFO
-	reg writes_done;
+	wire writes_done;
 	// I/O Connections assignments
 
 	assign S_AXIS_TREADY = axis_tready;
@@ -119,31 +118,40 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	// the FIFO is not filled with NUMBER_OF_INPUT_WORDS number of input words.
 	assign axis_tready = ((mst_exec_state == WRITE_FIFO) && (write_pointer <= NUMBER_OF_INPUT_WORDS - 1));
 
+	wire axis_tready_tvalid;
+	assign axis_tready_tvalid = S_AXIS_TVALID && axis_tready;
+	reg axis_tready_tvalid_R = 0;
+	always @(posedge S_AXIS_ACLK) begin
+		if(S_AXIS_ARESETN == 0) begin
+			axis_tready_tvalid_R <= 0;
+		end
+		else begin
+			axis_tready_tvalid_R <= axis_tready_tvalid;
+		end
+	end
+
+	wire wen;
+	assign wen = (axis_tready_tvalid == 1) && (axis_tready_tvalid_R == 1) ? 1 : 0;
+
+	assign writes_done = ((write_pointer == NUMBER_OF_INPUT_WORDS - 1) || (S_AXIS_TLAST == 1)) ? 1 : 0;
+
 	always@(posedge S_AXIS_ACLK) begin
 		if(!S_AXIS_ARESETN) begin
 			write_pointer <= 0;
-			writes_done <= 1'b0;
 		end
 		else  begin
-			writes_done <= 1'b0;
-			if (fifo_wren) begin
+			if (wen) begin
 				// write pointer is incremented after every write to the FIFO
 				// when FIFO write signal is enabled.
 				write_pointer <= write_pointer + 1;
 			end
-
-			if ((write_pointer == NUMBER_OF_INPUT_WORDS - 1) || (S_AXIS_TLAST == 1)) begin
-				// reads_done is asserted when NUMBER_OF_INPUT_WORDS numbers of streaming data 
-				// has been written to the FIFO which is also marked by S_AXIS_TLAST(kept for optional usage).
-				writes_done <= 1'b1;
-				write_pointer <= 0;
+			else begin
 			end
-
 		end
 	end
 
-	// FIFO write enable generation
-	assign fifo_wren = S_AXIS_TVALID && axis_tready;
+	//// FIFO write enable generation
+	//assign fifo_wren = S_AXIS_TVALID && axis_tready;
 
 	//// FIFO Implementation
 	//generate for(byte_index = 0; byte_index<= (C_S_AXIS_TDATA_WIDTH / 8 - 1); byte_index = byte_index + 1)
@@ -160,19 +168,6 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	//endgenerate
 
 	// Add user logic here
-	reg fifo_wren_R = 0;
-	always @(posedge S_AXIS_ACLK) begin
-		if(S_AXIS_ARESETN == 0) begin
-			fifo_wren_R <= 0;
-		end
-		else begin
-			fifo_wren_R <= fifo_wren;
-		end
-	end
-
-	wire wen;
-	assign wen = (fifo_wren == 1) && (fifo_wren_R == 1) ? 1 : 0;
-
 	my_fifo #(
 			.DATA_WIDTH(C_S_AXIS_TDATA_WIDTH),
 			.BULK_OF_DATA(NUMBER_OF_INPUT_WORDS),

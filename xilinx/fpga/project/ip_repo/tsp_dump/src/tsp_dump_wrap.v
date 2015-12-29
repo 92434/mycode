@@ -43,10 +43,10 @@ module tsp_dump_wrap #
 	wire [C_M00_AXIS_TDATA_WIDTH - 1 : 0] wdata;
 
 	// Instantiation of Axi Bus Interface M00_AXIS
-	axi4_stream_v1_0 # (
+	axi4_stream_master_v1_0 # (
 		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
 		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
-	) axi4_stream_v1_0_inst (
+	) axi4_stream_master_v1_0_inst (
 		.wclk(wclk),
 		.wen(wen),
 		.wdata(wdata),

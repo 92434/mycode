@@ -19,7 +19,6 @@ module axi4_stream_slave_v1_0 #
 		output wire r_ready,
 		output wire error_full,
 		output wire error_empty,
-		output wire fifo_wren,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -45,7 +44,6 @@ module axi4_stream_slave_v1_0 #
 			.r_ready(r_ready),
 			.error_full(error_full),
 			.error_empty(error_empty),
-			.fifo_wren(fifo_wren),
 
 			.S_AXIS_ACLK(s00_axis_aclk),
 			.S_AXIS_ARESETN(s00_axis_aresetn),

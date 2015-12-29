@@ -115,7 +115,6 @@ module tb #(
 		end
 	end
 
-	wire fifo_wren;
 	axi4_stream_slave_v1_0 #(
 			.C_S00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH)
 		) axi4_stream_slave_v1_0_inst (
@@ -125,7 +124,6 @@ module tb #(
 			.r_ready(r_ready_slave),
 			.error_full(error_full_slave),
 			.error_empty(error_empty_slave),
-			.fifo_wren(fifo_wren),
 
 			.s00_axis_aclk(m00_axis_aclk),
 			.s00_axis_aresetn(m00_axis_aresetn),

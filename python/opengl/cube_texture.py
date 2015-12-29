@@ -68,7 +68,7 @@ def display():
 
 def idle():
     global ANG
-    #ANG+=1.0
+    ANG+=1.0
     sleep(0.01)
     glutPostRedisplay()
 
@@ -87,7 +87,7 @@ def reshape(Width,Height):
     gluPerspective(80.0,1.0,1.0,80.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-    gluLookAt(0.0,0.0,far, 0.0,0.0,0.0, 0.0,1.0,far)
+    gluLookAt(0.0,0.0,far, 0.0,0.0,0.0, 0.0,1.0,0.0)
    
 def hitkey(key,mousex,mousey):
     global winid,ANGX

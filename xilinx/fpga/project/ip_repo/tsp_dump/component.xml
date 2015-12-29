@@ -54,6 +54,28 @@
       </spirit:portMaps>
     </spirit:busInterface>
     <spirit:busInterface>
+      <spirit:name>m00_axis_signal_reset</spirit:name>
+      <spirit:busType spirit:vendor="xilinx.com" spirit:library="signal" spirit:name="reset" spirit:version="1.0"/>
+      <spirit:abstractionType spirit:vendor="xilinx.com" spirit:library="signal" spirit:name="reset_rtl" spirit:version="1.0"/>
+      <spirit:slave/>
+      <spirit:portMaps>
+        <spirit:portMap>
+          <spirit:logicalPort>
+            <spirit:name>RST</spirit:name>
+          </spirit:logicalPort>
+          <spirit:physicalPort>
+            <spirit:name>m00_axis_aresetn</spirit:name>
+          </spirit:physicalPort>
+        </spirit:portMap>
+      </spirit:portMaps>
+      <spirit:parameters>
+        <spirit:parameter>
+          <spirit:name>POLARITY</spirit:name>
+          <spirit:value spirit:format="string" spirit:resolve="immediate" spirit:id="BUSIFPARAM_VALUE.M00_AXIS_SIGNAL_RESET.POLARITY" spirit:choiceRef="choices_1">ACTIVE_LOW</spirit:value>
+        </spirit:parameter>
+      </spirit:parameters>
+    </spirit:busInterface>
+    <spirit:busInterface>
       <spirit:name>m00_axis_signal_clock</spirit:name>
       <spirit:busType spirit:vendor="xilinx.com" spirit:library="signal" spirit:name="clock" spirit:version="1.0"/>
       <spirit:abstractionType spirit:vendor="xilinx.com" spirit:library="signal" spirit:name="clock_rtl" spirit:version="1.0"/>
@@ -73,23 +95,11 @@
           <spirit:name>ASSOCIATED_BUSIF</spirit:name>
           <spirit:value spirit:format="string" spirit:resolve="immediate" spirit:id="BUSIFPARAM_VALUE.M00_AXIS_SIGNAL_CLOCK.ASSOCIATED_BUSIF">m00_axis</spirit:value>
         </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>ASSOCIATED_RESET</spirit:name>
+          <spirit:value spirit:format="string" spirit:resolve="immediate" spirit:id="BUSIFPARAM_VALUE.M00_AXIS_SIGNAL_CLOCK.ASSOCIATED_RESET">m00_axis_aresetn</spirit:value>
+        </spirit:parameter>
       </spirit:parameters>
-    </spirit:busInterface>
-    <spirit:busInterface>
-      <spirit:name>ts_signal_clock</spirit:name>
-      <spirit:busType spirit:vendor="xilinx.com" spirit:library="signal" spirit:name="clock" spirit:version="1.0"/>
-      <spirit:abstractionType spirit:vendor="xilinx.com" spirit:library="signal" spirit:name="clock_rtl" spirit:version="1.0"/>
-      <spirit:slave/>
-      <spirit:portMaps>
-        <spirit:portMap>
-          <spirit:logicalPort>
-            <spirit:name>CLK</spirit:name>
-          </spirit:logicalPort>
-          <spirit:physicalPort>
-            <spirit:name>ts_clk</spirit:name>
-          </spirit:physicalPort>
-        </spirit:portMap>
-      </spirit:portMaps>
     </spirit:busInterface>
   </spirit:busInterfaces>
   <spirit:model>
@@ -106,7 +116,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>50c94bd7</spirit:value>
+            <spirit:value>1ea882b9</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -122,7 +132,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>50c94bd7</spirit:value>
+            <spirit:value>1ea882b9</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -376,6 +386,11 @@
       <spirit:enumeration>ACTIVE_HIGH</spirit:enumeration>
       <spirit:enumeration>ACTIVE_LOW</spirit:enumeration>
     </spirit:choice>
+    <spirit:choice>
+      <spirit:name>choices_1</spirit:name>
+      <spirit:enumeration>ACTIVE_HIGH</spirit:enumeration>
+      <spirit:enumeration>ACTIVE_LOW</spirit:enumeration>
+    </spirit:choice>
   </spirit:choices>
   <spirit:fileSets>
     <spirit:fileSet>
@@ -395,14 +410,14 @@
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>../common/src/axi_stream/axi4_stream_v1_0.v</spirit:name>
+        <spirit:name>../common/src/axi_stream/axi4_stream_master_v1_0.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>../common/src/axi_stream/axi4_stream_v1_0_M00_AXIS.v</spirit:name>
+        <spirit:name>../common/src/axi_stream/axi4_stream_master_v1_0_M00_AXIS.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_5a6da556</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_81efab10</spirit:userFileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
@@ -422,12 +437,12 @@
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>../common/src/axi_stream/axi4_stream_v1_0.v</spirit:name>
+        <spirit:name>../common/src/axi_stream/axi4_stream_master_v1_0.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>../common/src/axi_stream/axi4_stream_v1_0_M00_AXIS.v</spirit:name>
+        <spirit:name>../common/src/axi_stream/axi4_stream_master_v1_0_M00_AXIS.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
@@ -458,7 +473,7 @@
     <spirit:parameter>
       <spirit:name>Component_Name</spirit:name>
       <spirit:displayName>Component Name</spirit:displayName>
-      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">axi4_stream_v1_0_v1_0</spirit:value>
+      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">axi4_stream_master_v1_0_v1_0</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>C_M00_AXIS_START_COUNT</spirit:name>
@@ -485,25 +500,25 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>tsp_dump</xilinx:displayName>
-      <xilinx:coreRevision>13</xilinx:coreRevision>
+      <xilinx:coreRevision>15</xilinx:coreRevision>
       <xilinx:upgrades>
-        <xilinx:canUpgradeFrom>user.org:user:axi4_stream_v1_0:1.0</xilinx:canUpgradeFrom>
+        <xilinx:canUpgradeFrom>user.org:user:axi4_stream_master_v1_0:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2015-12-12T02:13:17Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2015-12-28T13:45:57Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
-        <xilinx:tag xilinx:name="user.org:user:axi4_stream_v1_0:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/tsp_dump</xilinx:tag>
-        <xilinx:tag xilinx:name="xiaofei:user:axi4_stream_v1_0:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/tsp_dump</xilinx:tag>
+        <xilinx:tag xilinx:name="user.org:user:axi4_stream_master_v1_0:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/tsp_dump</xilinx:tag>
+        <xilinx:tag xilinx:name="xiaofei:user:axi4_stream_master_v1_0:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/tsp_dump</xilinx:tag>
         <xilinx:tag xilinx:name="xiaofei:user:tsp_dump:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/tsp_dump</xilinx:tag>
       </xilinx:tags>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2014.3</xilinx:xilinxVersion>
-      <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="88f2a175"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="fc4068c0"/>
+      <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="193e6132"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="8f56c583"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="ee0b5a75"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="7bb65c4f"/>
-      <xilinx:checksum xilinx:scope="parameters" xilinx:value="c7183fbc"/>
+      <xilinx:checksum xilinx:scope="parameters" xilinx:value="81b75521"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>
 </spirit:component>

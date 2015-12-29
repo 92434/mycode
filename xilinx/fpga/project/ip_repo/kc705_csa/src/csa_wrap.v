@@ -3,7 +3,7 @@
 module csa_wrap #
 	(
 		// Users to add parameters here
-		parameter integer MAX_CAL_TIMES = 10,
+		parameter integer MAX_CAL_TIMES = 2,
 		// User parameters ends
 		// Do not modify the parameters beyond this line
 
@@ -191,6 +191,8 @@ module csa_wrap #
 	wire wen_48;
 	wire [48 - 1 : 0] wdata_48;
 
+	assign wclk_48 = clk; 
+
 	// Add user logic here
 	csa_ram #(
 			.MAX_CAL_TIMES(MAX_CAL_TIMES),
@@ -215,139 +217,62 @@ module csa_wrap #
 			.byte_ram_out(wdata_48)
 		);
 
-	wire r_enable;
-	wire [48 - 1 : 0] rdata_48 = 0;
-	my_fifo #(
-			.DATA_WIDTH(48),
-			.BULK_OF_DATA(1),
-			.BULK_DEPTH(256)
-		) my_fifo_inst (
-			.rst_n(s00_axi_aresetn),
-			.wclk(wclk_48),
-			.rclk(s00_axi_aclk),
-			.wdata(wdata_48),
-			.rdata(rdata_48),
-			.w_enable(wen_48),
-			.r_enable(r_enable),
+	//wire wclk_48;
+	//assign wclk_48 = clk; 
 
-			.r_ready(r_enable),
-			.error_full(),
-			.error_empty()
+	//reg [48 - 1 : 0] i = 48'h123456789012;
+	//integer count = 0;
+	//reg wen_48 = 0;
+	//reg [48 - 1 : 0] wdata_48 = 0;
+	//always @(posedge wclk_48) begin
+	//	if(rst_n == 0) begin
+	//		i <= 48'h123456789012;
+	//		count <= 0;
+	//		wdata_48 <= 0;
+	//		wen_48 <= 0;
+	//	end
+	//	else begin
+	//		wen_48 <= 0;
+
+	//		if(count == 5) begin
+	//			count <= 0;
+	//			wdata_48 <= i;
+	//			wen_48 <= 1;
+
+	//			i <= i + 1;
+	//		end
+	//		else begin
+	//			count <= count + 1;
+	//		end
+
+	//	end
+	//end
+
+	wire wclk_32;
+	wire wen_32;
+	wire [C_S00_AXI_DATA_WIDTH - 1 : 0] wdata_32;
+
+	convert_48_to_3x32 convert_48_to_3x32_inst(
+			.clk(clk),
+			.rst_n(rst_n),
+
+			.wclk_48(wclk_48),
+			.wen_48(wen_48),
+			.wdata_48(wdata_48),
+
+			.wclk_32(wclk_32),
+			.wen_32(wen_32),
+			.wdata_32(wdata_32)
 		);
 
-	reg ren_48 = 0;
-	always @(negedge s00_axi_aclk) begin
-		if(s00_axi_aresetn == 0) begin
-			ren_48 <= 0;
-		end
-		else begin
-			ren_48 <= r_enable;
-		end
-	end
-
-	reg [C_S00_AXI_DATA_WIDTH - 1 : 0] wdata_32_0 = 0;
-	reg [C_S00_AXI_DATA_WIDTH - 1 : 0] wdata_32_1 = 0;
-	reg [C_S00_AXI_DATA_WIDTH - 1 : 0] wdata_32_2 = 0;
-	reg start_stream_data48 = 0;
-	reg end_stream_data48 = 1;
-
-	integer get_data48_state = 0;
-	always @(posedge s00_axi_aclk) begin
-		if(s00_axi_aresetn == 0) begin
-			get_data48_state <= 0;
-			wdata_32_0 <= 0;
-			wdata_32_1 <= 0;
-			wdata_32_2 <= 0;
-			start_stream_data48 <= 0;
-		end
-		else begin
-			case(get_data48_state)
-				0: begin
-					if(end_stream_data48 == 1) begin
-						if(ren_48 == 1) begin
-							wdata_32_0 <= rdata_48[16 * 1 - 1 : 16 * 0];
-							wdata_32_1 <= rdata_48[16 * 2 - 1 : 16 * 1];
-							wdata_32_0 <= rdata_48[16 * 3 - 1 : 16 * 2];
-							start_stream_data48 <= 1;
-							get_data48_state <= 1;
-						end
-						else begin
-							get_data48_state <= 0;
-						end
-					end
-					else begin
-						get_data48_state <= 0;
-					end
-				end
-				1: begin
-					start_stream_data48 <= 0;
-					get_data48_state <= 0;
-				end
-				default: begin
-				end
-			endcase
-		end
-	end
-
-
-	wire stream_wclk;
-	reg stream_wen = 0;
-	reg [C_S00_AXI_DATA_WIDTH - 1 : 0] stream_wdata = 0;
-
-	assign stream_wclk = s00_axi_aclk;
-
-	integer stream_data48_state = 0;
-	always @(posedge s00_axi_aclk) begin
-		if(s00_axi_aresetn == 0) begin
-			stream_wen = 0;
-			stream_data48_state <= 0;
-			end_stream_data48 = 1;
-		end
-		else begin
-			case(stream_data48_state)
-				0: begin
-					if(start_stream_data48 == 1) begin
-						end_stream_data48 <= 0;
-						stream_data48_state <= 1;
-					end
-					else begin
-						stream_data48_state <= 0;
-					end
-				end
-				1: begin
-					stream_wen <= 1;
-					stream_wdata <= wdata_32_0;
-					stream_data48_state <= 2;
-				end
-				2: begin
-					stream_wen <= 1;
-					stream_wdata <= wdata_32_1;
-					stream_data48_state <= 3;
-				end
-				3: begin
-					stream_wen <= 1;
-					stream_wdata <= wdata_32_2;
-					stream_data48_state <= 4;
-				end
-				4: begin
-					stream_wen <= 0;
-					end_stream_data48 <= 1;
-					stream_data48_state <= 0;
-				end
-				default: begin
-				end
-			endcase
-		end
-	end
-
 	// Instantiation of Axi Bus Interface M00_AXIS
-	axi4_stream_v1_0 # (
+	axi4_stream_master_v1_0 # (
 		.C_M00_AXIS_TDATA_WIDTH(C_S00_AXI_DATA_WIDTH)
 		//.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
-	) axi4_stream_v1_0_inst (
-		.wclk(stream_wclk),
-		.wen(stream_wen),
-		.wdata(stream_wdata),
+	) axi4_stream_master_v1_0_inst (
+		.wclk(wclk_32),
+		.wen(wen_32),
+		.wdata(wdata_32),
 
 		.r_ready(r_ready),
 		.error_full(error_full),
