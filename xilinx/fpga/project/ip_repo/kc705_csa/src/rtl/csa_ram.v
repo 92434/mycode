@@ -29,11 +29,12 @@ module csa_ram #(
 	localparam integer STEP_REQ_STUFF=0;
 	localparam integer STEP_STUFFING_DATA=1;
 	localparam integer STEP_FIN_STUFF=2;
-
+	
+	integer cal_times_limit=1;
 	// implement Block RAM(s)
-	reg [C_S_AXI_DATA_WIDTH-1:0] byte_ram_in [0 : 1];//(CAL_DATA_ITEM_NUM*5)/4-1];
+	reg [C_S_AXI_DATA_WIDTH-1:0] byte_ram_in [0 : 9];//(CAL_DATA_ITEM_NUM*5)/4-1];
 	integer i,j,stuff_cursor,calc_item_cursor,calc_item_total,loop_times;
-	reg csa_begin_calc,cb_valid;
+	reg csa_begin_calc,ck_valid;
 	reg output_ready;
 	reg [8*8-1:0] ck,cb_bakup;
 	reg [8*8-1:0] sb;
@@ -41,7 +42,7 @@ module csa_ram #(
 	integer current_end_pos = 0;
 	
 	assign ready=output_ready;
-	/*
+	
 	always @(posedge S_AXI_ACLK) begin
 		if(rst) begin
 			current_end_pos <= 0;
@@ -62,30 +63,23 @@ module csa_ram #(
 					end
 					STEP_FIN_STUFF:begin
 						csa_begin_calc<=1;
+						cal_times_limit<=S_AXI_WDATA;
 						calc_item_total<=(stuff_cursor*4)/5;
 					end
 				endcase
 			end
 		end
 	end
-	*/
+	/**/
 	`define CSA_DEBUG
 	`ifdef CSA_DEBUG
-		localparam integer DEBUG_BUF_SIZE = 6;//300;
+		localparam integer DEBUG_BUF_SIZE = 300;
 		reg [C_S_AXI_DATA_WIDTH-1:0] status_out[0:DEBUG_BUF_SIZE-1];
 		reg [C_S_AXI_DATA_WIDTH-1:0] sta_cursor = 0;
 	`endif
 	
 	always @(posedge S_AXI_ACLK) begin
 		if(rst == 1) begin
-			calc_item_total<=1;
-			csa_begin_calc<=1;
-			current_end_pos<=5;
-			byte_ram_in[0][7:0]  <=8'h1a  ;
-			byte_ram_in[0][15:8] <=8'h91 ;
-			byte_ram_in[0][23:16]<=8'h01;
-			byte_ram_in[0][31:24]<=8'h47;
-			byte_ram_in[1][7:0]  <=8'h69;
 		end
 		else begin
 			if (ren == 1) begin
@@ -168,7 +162,7 @@ module csa_ram #(
 						sta_cursor<=0;
 					end
 				`endif
-				if(loop_times+1<MAX_CAL_TIMES) begin
+				if(loop_times+1<cal_times_limit) begin
 					sb <=64'hE613DB6DC11C4524;
 					ck <=cb;
 					loop_times<=loop_times+1;
@@ -187,69 +181,67 @@ module csa_ram #(
 		end
 	end
 */	
-
+reg do_csa;
 `ifdef CSA_DEBUG
 	always @(posedge fpga_clk) begin
 		if(rst) begin
-			ck[7:0]  <=8'h1a;
-			ck[15:8] <=8'h91;
-			ck[23:16]<=8'h01;
-			ck[31:24]<=8'hac;
-			ck[39:32]<=8'h47;
-			ck[47:40]<=8'h69;
-			ck[55:48]<=0;
-			ck[63:56]<=8'hb0;
-			cb_bakup<=0;
 			loop_times<=0;
 			calc_item_cursor<=0;
 			output_ready<=0;
-			cb_valid<=0;
+			ck_valid<=0;
 			sb <=64'hE613DB6DC11C4524;
+			ck<=0;
+			do_csa<=1;
+			cb_bakup<=0;
 			`ifdef CSA_DEBUG
 				sta_cursor<=0;
 			`endif
 		end
 		else if(csa_begin_calc) begin
-			if((sta_cursor + 2) >= DEBUG_BUF_SIZE) begin
-				sta_cursor<=0;
+			if(do_csa)begin
+				if((sta_cursor + 2) >= DEBUG_BUF_SIZE) begin
+					sta_cursor<=0;
+				end
+				else begin
+					sta_cursor<=sta_cursor+2;
+				end
+				status_out[sta_cursor]<=loop_times;
+				status_out[sta_cursor+1][7:0]  <=ck[7:0]  ;
+				status_out[sta_cursor+1][15:8] <=ck[63:56];
+				status_out[sta_cursor+1][23:16]<=cb[7:0]  ;
+				status_out[sta_cursor+1][31:24]<=cb[63:56];
+				$display("ck:%h,cb=%h,cb_bakup=%h\n",ck,cb,cb_bakup);
+				
+				
+				if(loop_times+1<cal_times_limit) begin
+					loop_times<=loop_times+1;
+					ck <=cb_bakup;
+				end
+				else begin
+					loop_times<=0;
+					output_ready<=1;
+					byte_ram_out[7:0]  <=cb[7:0];
+				  byte_ram_out[15:8] <=cb[15:8];
+				  byte_ram_out[23:16]<=cb[23:16];
+				  byte_ram_out[31:24]<=cb[31:24];
+				  byte_ram_out[39:32]<=cb[39:32];
+				  byte_ram_out[47:40]<=cb[47:40];
+					ck[7:0]  <=byte_ram_in[0][7:0]  ;
+					ck[15:8] <=byte_ram_in[0][15:8] ;
+					ck[23:16]<=byte_ram_in[0][23:16];
+					ck[31:24]<=byte_ram_in[0][31:24];
+					ck[39:32]<=byte_ram_in[1][7:0]  ;
+					ck[47:40]<=byte_ram_in[1][15:8] ;
+					ck[55:48]<=byte_ram_in[1][23:16];
+					ck[63:56]<=byte_ram_in[1][31:24];
+				end
 			end
 			else begin
-				sta_cursor<=sta_cursor+2;
-			end
-			
-			$display("ck:%h,cb=%h,cb_bakup=%h\n",ck,cb,cb_bakup);
-			status_out[sta_cursor]<=loop_times;
-			status_out[sta_cursor+1][7:0]  <=ck[7:0]  ;
-			status_out[sta_cursor+1][15:8] <=ck[63:56];
-			status_out[sta_cursor+1][23:16]<=cb[7:0];
-			status_out[sta_cursor+1][31:24]<=cb[63:56];
-			
-						
-			cb_bakup<=cb;
-			byte_ram_out[7:0]  <=cb_bakup[7:0];
-			byte_ram_out[15:8] <=cb_bakup[15:8];
-			byte_ram_out[23:16]<=cb_bakup[23:16];
-			byte_ram_out[31:24]<=cb_bakup[31:24];
-			byte_ram_out[39:32]<=cb_bakup[39:32];
-			byte_ram_out[47:40]<=cb_bakup[47:40];
-			
-			if(loop_times+1<MAX_CAL_TIMES) begin
-				loop_times<=loop_times+1;
-				ck <=cb_bakup;
+				cb_bakup<=cb;
 				output_ready<=0;
+				
 			end
-			else begin
-				loop_times<=0;
-				output_ready<=1;
-				ck[7:0]  <=8'h1a;
-				ck[15:8] <=8'h91;
-				ck[23:16]<=8'h01;
-				ck[31:24]<=8'hac;
-				ck[39:32]<=8'h47;
-				ck[47:40]<=8'h69;
-				ck[55:48]<=0;
-				ck[63:56]<=8'hb0;
-			end
+			do_csa=~do_csa;
 		end
 	end
 `endif

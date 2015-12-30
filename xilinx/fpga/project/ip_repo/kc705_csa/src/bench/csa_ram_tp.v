@@ -4,7 +4,7 @@
 module logic_ram_tp #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 3,
-		parameter integer CAL_DATA_ITEM_NUM = 1,
+		parameter integer CAL_DATA_ITEM_NUM = 2,
 		
 		parameter integer STEP_REQ_STUFF=0,
 		parameter integer STEP_STUFFING_DATA=1,
@@ -15,7 +15,7 @@ module logic_ram_tp #(
   reg [(C_S_AXI_DATA_WIDTH/8)-1 : 0] S_AXI_WSTRB;
   reg [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA;
   reg mem_rden,mem_wren;
-  reg [OPT_MEM_ADDR_BITS:0] waddr;
+  reg [12:0] waddr;
   reg [12:0]raddr;
   wire ready;
   reg rst;
@@ -43,7 +43,7 @@ module logic_ram_tp #(
 		.ready(ready)
 	);
   initial begin
-	$readmemh("../test_dat/in_data.copy",in_data);
+	$readmemh("/home/action/vivadoworkspace/ip_repo/kc705_csa/src/test_dat/in_data.copy",in_data);
     axi_clk=0;
     fpga_clk=0;
 	init_step=0;
@@ -55,8 +55,8 @@ module logic_ram_tp #(
 	
 	
   
-  localparam integer DEBUG_BUF_SIZE = 6;
-/*
+  localparam integer DEBUG_BUF_SIZE = 300;
+
 	always @(negedge axi_clk) begin
 		if(rst==0) begin
 			if(init_step==0) begin
@@ -79,7 +79,7 @@ module logic_ram_tp #(
 				end	
 			end
 			else if(init_step==2) begin  
-				S_AXI_WDATA=0;
+				S_AXI_WDATA=4;//loop times
 				waddr=STEP_FIN_STUFF;
 				mem_wren=1;
 				init_step=init_step+1;
@@ -95,10 +95,10 @@ module logic_ram_tp #(
 		  end
 		end
 	end	
-	*/
+	
 	always @(negedge axi_clk) begin
 	 if(rst==0) begin
-		if(init_step==0) begin
+		if(init_step==4) begin
 			if(ready==1) begin
 				ram_out[read_cursor]=byte_ram_out[7:0];
 				ram_out[read_cursor+1]=byte_ram_out[15:8];
@@ -110,22 +110,26 @@ module logic_ram_tp #(
 				read_cursor=read_cursor+6;
 				if(read_cursor>=CAL_DATA_ITEM_NUM*6) begin
 					read_cursor=0;
-					init_step=init_step+1;
+					//init_step=init_step+1;
 					mem_rden<=1;
 				end
-				
+			end
+			$display("rdata[%d]:%h",raddr,rdata);
+			raddr=raddr+1;
+			if(raddr>=256+DEBUG_BUF_SIZE) begin
+			  raddr=256;
 			end
 		end
-		else if(init_step==1) begin
+		else if(init_step==5) begin
 			mem_rden=1;
-			$display("rdata[%d]:%h",raddr,rdata);
+			//$display("rdata[%d]:%h",raddr,rdata);
 			raddr=raddr+1;
 			if(raddr>=256+DEBUG_BUF_SIZE) begin
 			  raddr=256;
 			  //init_step=init_step+1;
 			end
 		end
-		else if(init_step==2) begin
+		else if(init_step==6) begin
 			mem_rden=0;
 			#20 $finish;
 		end
