@@ -29,7 +29,7 @@ module csa_ram #(
 	localparam integer STEP_REQ_STUFF=0;
 	localparam integer STEP_STUFFING_DATA=1;
 	localparam integer STEP_FIN_STUFF=2;
-	
+	localparam integer SET_RUN_FLAG=3;
 	integer cal_times_limit=1;
 	// implement Block RAM(s)
 	reg [C_S_AXI_DATA_WIDTH-1:0] byte_ram_in [0 : 9];//(CAL_DATA_ITEM_NUM*5)/4-1];
@@ -40,6 +40,8 @@ module csa_ram #(
 	reg [8*8-1:0] sb;
 	wire [8*8-1:0] cb;
 	integer current_end_pos = 0;
+	reg do_csa;
+	reg run_falg,run_set;
 	
 	assign ready=output_ready;
 	
@@ -48,6 +50,7 @@ module csa_ram #(
 			current_end_pos <= 0;
 		end
 		else begin
+			run_set<=0;
 			if (wen) begin
 				case(waddr)
 					STEP_REQ_STUFF:begin
@@ -65,6 +68,9 @@ module csa_ram #(
 						csa_begin_calc<=1;
 						cal_times_limit<=S_AXI_WDATA;
 						calc_item_total<=(stuff_cursor*4)/5;
+					end
+					SET_RUN_FLAG:begin
+						run_set<=1;
 					end
 				endcase
 			end
@@ -181,9 +187,11 @@ module csa_ram #(
 		end
 	end
 */	
-reg do_csa;
+
 `ifdef CSA_DEBUG
 	always @(posedge fpga_clk) begin
+		if(run_set)
+			run_falg<=1;
 		if(rst) begin
 			loop_times<=0;
 			calc_item_cursor<=0;
@@ -197,7 +205,7 @@ reg do_csa;
 				sta_cursor<=0;
 			`endif
 		end
-		else if(csa_begin_calc) begin
+		else if(csa_begin_calc&&run_falg) begin
 			if(do_csa)begin
 				if((sta_cursor + 2) >= DEBUG_BUF_SIZE) begin
 					sta_cursor<=0;
@@ -221,11 +229,11 @@ reg do_csa;
 					loop_times<=0;
 					output_ready<=1;
 					byte_ram_out[7:0]  <=cb[7:0];
-				  byte_ram_out[15:8] <=cb[15:8];
-				  byte_ram_out[23:16]<=cb[23:16];
-				  byte_ram_out[31:24]<=cb[31:24];
-				  byte_ram_out[39:32]<=cb[39:32];
-				  byte_ram_out[47:40]<=cb[47:40];
+					byte_ram_out[15:8] <=cb[15:8];
+					byte_ram_out[23:16]<=cb[23:16];
+					byte_ram_out[31:24]<=cb[31:24];
+					byte_ram_out[39:32]<=cb[39:32];
+					byte_ram_out[47:40]<=cb[47:40];
 					ck[7:0]  <=byte_ram_in[0][7:0]  ;
 					ck[15:8] <=byte_ram_in[0][15:8] ;
 					ck[23:16]<=byte_ram_in[0][23:16];
@@ -239,7 +247,7 @@ reg do_csa;
 			else begin
 				cb_bakup<=cb;
 				output_ready<=0;
-				
+				run_falg<=0;
 			end
 			do_csa=~do_csa;
 		end

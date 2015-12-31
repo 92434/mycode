@@ -2,13 +2,6 @@
 
 module csa_wrap #
 	(
-		// Users to add parameters here
-		parameter integer MAX_CAL_TIMES = 3,
-		// User parameters ends
-		// Do not modify the parameters beyond this line
-
-
-		// Parameters of Axi Slave Bus Interface S00_AXI
 		parameter integer C_S00_AXI_ID_WIDTH = 1,
 		parameter integer C_S00_AXI_DATA_WIDTH = 32,
 		parameter integer C_S00_AXI_ADDR_WIDTH = 13,
@@ -16,15 +9,16 @@ module csa_wrap #
 		parameter integer C_S00_AXI_ARUSER_WIDTH = 1,
 		parameter integer C_S00_AXI_WUSER_WIDTH = 1,
 		parameter integer C_S00_AXI_RUSER_WIDTH = 1,
-		parameter integer C_S00_AXI_BUSER_WIDTH = 1
+		parameter integer C_S00_AXI_BUSER_WIDTH = 1,
+
+		parameter integer C_S00_AXIS_TDATA_WIDTH = 32,
+
+		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
+		parameter integer C_M00_AXIS_START_COUNT = 1,
+
+		parameter integer CSA_CALC_TIMES = 5
 	)
 	(
-		// Users to add ports here
-		// User ports ends
-		// Do not modify the ports beyond this line
-
-
-		// Ports of Axi Slave Bus Interface S00_AXI
 		input wire s00_axi_aclk,
 		input wire s00_axi_aresetn,
 		input wire [C_S00_AXI_ID_WIDTH - 1 : 0] s00_axi_awid,
@@ -72,9 +66,14 @@ module csa_wrap #
 		output wire s00_axi_rvalid,
 		input wire s00_axi_rready,
 
-		output wire r_ready,
-		output wire error_full,
-		output wire error_empty,
+
+		input wire s00_axis_aclk,
+		input wire s00_axis_aresetn,
+		output wire s00_axis_tready,
+		input wire [C_S00_AXIS_TDATA_WIDTH - 1 : 0] s00_axis_tdata,
+		input wire [(C_S00_AXIS_TDATA_WIDTH / 8) - 1 : 0] s00_axis_tstrb,
+		input wire s00_axis_tlast,
+		input wire s00_axis_tvalid,
 
 		input wire m00_axis_aclk,
 		input wire m00_axis_aresetn,
@@ -96,23 +95,17 @@ module csa_wrap #
 
 	localparam integer OPT_MEM_ADDR_BITS = C_S00_AXI_ADDR_WIDTH - ADDR_LSB - 1;
 
-	wire clk;
-	wire rst_n;
 
-	wire [(C_S00_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb;
-	wire wen;
-	wire [C_S00_AXI_DATA_WIDTH-1 : 0] wdata;
-	wire [OPT_MEM_ADDR_BITS:0] waddr;
+	wire [(C_S00_AXI_DATA_WIDTH / 8) - 1 : 0] axi_wstrb;
+	wire axi_wen;
+	wire [C_S00_AXI_DATA_WIDTH-1 : 0] axi_wdata;
+	wire [OPT_MEM_ADDR_BITS:0] axi_waddr;
 
-	wire ren;
-	wire [C_S00_AXI_DATA_WIDTH-1 : 0] rdata;
-	wire [OPT_MEM_ADDR_BITS:0] raddr;
+	wire axi_ren;
+	wire [C_S00_AXI_DATA_WIDTH-1 : 0] axi_rdata;
+	wire [OPT_MEM_ADDR_BITS:0] axi_raddr;
 
-
-	assign clk = s00_axi_aclk;
-	assign rst_n = s00_axi_aresetn;
-
-	assign wstrb = s00_axi_wstrb;
+	assign axi_wstrb = s00_axi_wstrb;
 
 	// Instantiation of Axi Bus Interface S00_AXI
 	axi4_mm_v1_0 # ( 
@@ -128,13 +121,13 @@ module csa_wrap #
 			.C_S00_AXI_RUSER_WIDTH(C_S00_AXI_RUSER_WIDTH),
 			.C_S00_AXI_BUSER_WIDTH(C_S00_AXI_BUSER_WIDTH)
 		) axi4_mm_v1_0_inst (
-			.wen(wen),
-			.wdata(wdata),
-			.waddr(waddr),
+			.wen(axi_wen),
+			.wdata(axi_wdata),
+			.waddr(axi_waddr),
 
-			.ren(ren),
-			.rdata(rdata),
-			.raddr(raddr),
+			.ren(axi_ren),
+			.rdata(axi_rdata),
+			.raddr(axi_raddr),
 
 			.s00_axi_aclk(s00_axi_aclk),
 			.s00_axi_aresetn(s00_axi_aresetn),
@@ -184,91 +177,59 @@ module csa_wrap #
 			.s00_axi_rready(s00_axi_rready)
 		);
 
+	wire axis_s_rclk;
+	wire axis_s_ren;
+	wire axis_s_rdata;
 
+	wire axis_s_r_ready;
+	wire axis_s_error_full;
+	wire axis_s_error_empty;
 
+	localparam NUMBER_OF_INPUT_WORDS = 5;
 
-	wire wclk_48;
-	wire wen_48;
-	wire [48 - 1 : 0] wdata_48;
+	axi4_stream_slave_v1_0 #(
+			.NUMBER_OF_INPUT_WORDS(NUMBER_OF_INPUT_WORDS),
+			.C_S00_AXIS_TDATA_WIDTH(C_S00_AXIS_TDATA_WIDTH)
+		) axi4_stream_slave_v1_0_inst (
+			.rclk(axis_s_rclk),
+			.ren(axis_s_ren),
+			.rdata(axis_s_rdata),
 
-	assign wclk_48 = clk; 
+			.r_ready(axis_s_r_ready),
+			.error_full(axis_s_error_full),
+			.error_empty(axis_s_error_empty),
 
-	// Add user logic here
-	csa_ram #(
-			.MAX_CAL_TIMES(MAX_CAL_TIMES),
-
-			.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
-			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS)
-		) csa_ram_inst(
-			.S_AXI_ACLK(clk),
-			.rst(~rst_n),
-
-			.S_AXI_WSTRB(wstrb),
-			.wen(wen),
-			.S_AXI_WDATA(wdata),
-			.waddr(waddr),
-
-			.ren(ren),
-			.rdata(rdata),
-			.raddr(raddr),
-
-			.fpga_clk(wclk_48),
-			.ready(wen_48),
-			.byte_ram_out(wdata_48)
+			.s00_axis_aclk(s00_axis_aclk),
+			.s00_axis_aresetn(s00_axis_aresetn),
+			.s00_axis_tready(s00_axis_tready),
+			.s00_axis_tdata(s00_axis_tdata),
+			.s00_axis_tstrb(s00_axis_tstrb),
+			.s00_axis_tlast(s00_axis_tlast),
+			.s00_axis_tvalid(s00_axis_tvalid)
 		);
 
-	//wire wclk_48;
-	//assign wclk_48 = clk; 
-
-	//reg [48 - 1 : 0] i = 48'h123456789012;
-	//integer count = 0;
-	//reg wen_48 = 0;
-	//reg [48 - 1 : 0] wdata_48 = 0;
-	//always @(posedge wclk_48) begin
-	//	if(rst_n == 0) begin
-	//		i <= 48'h123456789012;
-	//		count <= 0;
-	//		wdata_48 <= 0;
-	//		wen_48 <= 0;
-	//	end
-	//	else begin
-	//		wen_48 <= 0;
-
-	//		if(count == 5) begin
-	//			count <= 0;
-	//			wdata_48 <= i;
-	//			wen_48 <= 1;
-
-	//			i <= i + 1;
-	//		end
-	//		else begin
-	//			count <= count + 1;
-	//		end
-
-	//	end
-	//end
-
-	wire wclk_32;
-	wire wen_32;
-	wire [C_S00_AXI_DATA_WIDTH - 1 : 0] wdata_32;
-
-	convert_48_to_3x32 convert_48_to_3x32_inst(
+	convert_32_to_40 convert_32_to_40_inst(
 			.clk(clk),
 			.rst_n(rst_n),
 
-			.wclk_48(wclk_48),
-			.wen_48(wen_48),
-			.wdata_48(wdata_48),
+			.r_ready(r_ready),
+			.ren(ren_32),
+			.rdata(rdata_32),
 
-			.wclk_32(wclk_32),
-			.wen_32(wen_32),
-			.wdata_32(wdata_32)
+			.wen(wen),
+			.wdata(wdata)
 		);
 
-	// Instantiation of Axi Bus Interface M00_AXIS
+	wire axis_m_wclk;
+	wire axis_m_wen;
+	wire [C_S00_AXI_DATA_WIDTH - 1 : 0] axis_m_wdata;
+
+	localparam NUMBER_OF_OUTPUT_WORDS = 5;
+
 	axi4_stream_master_v1_0 # (
+		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
 		.C_M00_AXIS_TDATA_WIDTH(C_S00_AXI_DATA_WIDTH)
-		//.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
+		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
 	) axi4_stream_master_v1_0_inst (
 		.wclk(wclk_32),
 		.wen(wen_32),
@@ -286,6 +247,7 @@ module csa_wrap #
 		.m00_axis_tlast(m00_axis_tlast),
 		.m00_axis_tready(m00_axis_tready)
 	);
+
 	// User logic ends
 
 endmodule

@@ -1,6 +1,9 @@
 `timescale 1ns / 1ns
 
 module tb #(
+		parameter integer NUMBER_OF_OUTPUT_WORDS = 5,
+		parameter integer NUMBER_OF_INPUT_WORDS = 5,
+
 		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
 		parameter integer C_M00_AXIS_START_COUNT = 1,
 		parameter integer C_S00_AXIS_TDATA_WIDTH = 32
@@ -53,6 +56,7 @@ module tb #(
 	clkgen #(.clk_period(1)) xiaofeiclk2(.clk(m00_axis_aclk));
 
 	axi4_stream_master_v1_0 # ( 
+		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
 		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
 		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
 	) axi4_stream_master_v1_0_inst (
@@ -101,7 +105,7 @@ module tb #(
 					end
 				end
 				1: begin
-					if((rcount >= 0) && (rcount <= 16 - 1)) begin
+					if((rcount >= 0) && (rcount <= 5 - 1)) begin
 						ren <= 1;
 						rcount <= rcount + 1;
 					end
@@ -116,6 +120,7 @@ module tb #(
 	end
 
 	axi4_stream_slave_v1_0 #(
+			.NUMBER_OF_INPUT_WORDS(NUMBER_OF_INPUT_WORDS),
 			.C_S00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH)
 		) axi4_stream_slave_v1_0_inst (
 			.rclk(m00_axis_aclk),

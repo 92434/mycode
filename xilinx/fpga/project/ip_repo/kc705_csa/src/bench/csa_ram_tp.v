@@ -5,10 +5,12 @@ module logic_ram_tp #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 3,
 		parameter integer CAL_DATA_ITEM_NUM = 2,
+		parameter integer LOOP_TIMES=2,
 		
 		parameter integer STEP_REQ_STUFF=0,
 		parameter integer STEP_STUFFING_DATA=1,
-		parameter integer STEP_FIN_STUFF=2
+		parameter integer STEP_FIN_STUFF=2,
+		parameter integer SET_RUN_FLAG=3
 	);
   //parameter PACK_BYTE_SIZE = 8'hBC;
   reg axi_clk,fpga_clk; 
@@ -42,6 +44,7 @@ module logic_ram_tp #(
 		.byte_ram_out(byte_ram_out),
 		.ready(ready)
 	);
+	integer run_flag_cursor=0;
   initial begin
 	$readmemh("/home/action/vivadoworkspace/ip_repo/kc705_csa/src/test_dat/in_data.copy",in_data);
     axi_clk=0;
@@ -50,13 +53,14 @@ module logic_ram_tp #(
 	read_cursor=0;
 	raddr=256;
     rst=1;
+	run_flag_cursor=0;
     #20 rst=0;
 	end
 	
 	
   
-  localparam integer DEBUG_BUF_SIZE = 300;
-
+	localparam integer DEBUG_BUF_SIZE = 300;
+	
 	always @(negedge axi_clk) begin
 		if(rst==0) begin
 			if(init_step==0) begin
@@ -79,62 +83,63 @@ module logic_ram_tp #(
 				end	
 			end
 			else if(init_step==2) begin  
-				S_AXI_WDATA=4;//loop times
+				S_AXI_WDATA=LOOP_TIMES;//loop times
 				waddr=STEP_FIN_STUFF;
 				mem_wren=1;
 				init_step=init_step+1;
 				$display("STEP_FIN_STUFF\n");
 			end
 			else if(init_step==3) begin
-			 mem_wren=0;
-			 if(ready==1) begin
+				mem_wren=0;
 				mem_rden=1;
 				init_step=init_step+1;
 				raddr=256;
-			 end
 		  end
 		end
 	end	
 	
 	always @(negedge axi_clk) begin
-	 if(rst==0) begin
-		if(init_step==4) begin
-			if(ready==1) begin
-				ram_out[read_cursor]=byte_ram_out[7:0];
-				ram_out[read_cursor+1]=byte_ram_out[15:8];
-				ram_out[read_cursor+2]=byte_ram_out[23:16];
-				ram_out[read_cursor+3]=byte_ram_out[31:24];
-				ram_out[read_cursor+4]=byte_ram_out[39:32];
-				ram_out[read_cursor+5]=byte_ram_out[47:40];
-				$display("ram_out[%d]:%h,%h,%h,%h,%h,%h\n",read_cursor,ram_out[read_cursor],ram_out[read_cursor+1],ram_out[read_cursor+2],ram_out[read_cursor+3],ram_out[read_cursor+4],ram_out[read_cursor+5]);
-				read_cursor=read_cursor+6;
-				if(read_cursor>=CAL_DATA_ITEM_NUM*6) begin
-					read_cursor=0;
-					//init_step=init_step+1;
-					mem_rden<=1;
+		if(rst==0) begin
+			if(init_step==4) begin
+				if(ready==1) begin
+					ram_out[read_cursor]=byte_ram_out[7:0];
+					ram_out[read_cursor+1]=byte_ram_out[15:8];
+					ram_out[read_cursor+2]=byte_ram_out[23:16];
+					ram_out[read_cursor+3]=byte_ram_out[31:24];
+					ram_out[read_cursor+4]=byte_ram_out[39:32];
+					ram_out[read_cursor+5]=byte_ram_out[47:40];
+					$display("ram_out[%d]:%h,%h,%h,%h,%h,%h\n",read_cursor,ram_out[read_cursor],ram_out[read_cursor+1],ram_out[read_cursor+2],ram_out[read_cursor+3],ram_out[read_cursor+4],ram_out[read_cursor+5]);
+					read_cursor=read_cursor+6;
+					if(read_cursor>=CAL_DATA_ITEM_NUM*6) begin
+						read_cursor=0;
+						//init_step=init_step+1;
+						mem_rden<=1;
+					end
 				end
+				
+				$display("run_flag_cursor:[%d]",run_flag_cursor);
+				if(run_flag_cursor%LOOP_TIMES==0) begin
+					mem_wren=1;
+					waddr=SET_RUN_FLAG;
+					if(run_flag_cursor>LOOP_TIMES) begin
+					 $display("rdata[%d]:%h",raddr,rdata);
+				    raddr=raddr+1;
+				    if(raddr>=256+DEBUG_BUF_SIZE) begin
+				      raddr=256;
+				    end
+				  end
+				end
+				else begin
+					mem_wren=0;
+				end
+				run_flag_cursor=run_flag_cursor+1;
 			end
-			$display("rdata[%d]:%h",raddr,rdata);
-			raddr=raddr+1;
-			if(raddr>=256+DEBUG_BUF_SIZE) begin
-			  raddr=256;
+			else if(init_step==5) begin
+				mem_rden=0;
+				#20 $finish;
 			end
-		end
-		else if(init_step==5) begin
-			mem_rden=1;
-			//$display("rdata[%d]:%h",raddr,rdata);
-			raddr=raddr+1;
-			if(raddr>=256+DEBUG_BUF_SIZE) begin
-			  raddr=256;
-			  //init_step=init_step+1;
-			end
-		end
-		else if(init_step==6) begin
-			mem_rden=0;
-			#20 $finish;
 		end
 	end
-end
 	
 	
 endmodule

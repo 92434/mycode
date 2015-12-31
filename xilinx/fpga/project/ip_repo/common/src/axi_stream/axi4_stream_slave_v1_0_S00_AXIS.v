@@ -3,7 +3,7 @@
 module axi4_stream_slave_v1_0_S00_AXIS #
 	(
 		// Users to add parameters here
-
+		parameter integer NUMBER_OF_INPUT_WORDS = 16,
 		// User parameters ends
 		// Do not modify the parameters beyond this line
 
@@ -49,7 +49,7 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	endfunction
 
 	// Total number of input data.
-	localparam NUMBER_OF_INPUT_WORDS = 16;
+	//localparam NUMBER_OF_INPUT_WORDS = 16;
 	// bit_num gives the minimum number of bits needed to address 'NUMBER_OF_INPUT_WORDS' size of FIFO.
 	localparam bit_num = clogb2(NUMBER_OF_INPUT_WORDS - 1);
 	// Define the states of state machine
@@ -143,7 +143,12 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 			if (wen) begin
 				// write pointer is incremented after every write to the FIFO
 				// when FIFO write signal is enabled.
-				write_pointer <= write_pointer + 1;
+				if(write_pointer == (NUMBER_OF_INPUT_WORDS - 1)) begin
+					write_pointer <= 0;
+				end
+				else begin
+					write_pointer <= write_pointer + 1;
+				end
 			end
 			else begin
 			end

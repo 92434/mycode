@@ -876,7 +876,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	}
 
 	kc705_pci_dev->gpiochip = (void **)vzalloc(sizeof(void *) * GPIOCHIP_MAX);
-	if(kc705_pci_dev->gpiochip == NULL) {
+	if((kc705_pci_dev->gpiochip == NULL) && (GPIOCHIP_MAX != 0)) {
 		mydebug("alloc kc705_pci_dev->dma failed.\n");
 		ret = -1;
 		goto alloc_kc705_pci_gpiochip_failed;
@@ -921,9 +921,9 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		goto remap_pcie_bars_failed;
 	}
 	
-	mydebug("tsp addr:%p\n", kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE);
-	write_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 12);
-	dump_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 12);
+	//mydebug("tsp addr:%p\n", kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE);
+	//write_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 12);
+	//dump_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 12);
 
 	kc705_pci_dev->pdev = pdev;
 
