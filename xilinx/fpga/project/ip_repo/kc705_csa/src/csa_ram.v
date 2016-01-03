@@ -185,6 +185,8 @@ module csa_ram #(
 					.csa_calc_logic_in(csa_calc_logic_in),
 					.csa_calc_logic_out(csa_calc_logic_out),
 					.csa_calc_logic_calc_request(csa_calc_logic_calc_request[i]),
+					.csa_calc_logic_calc_release(),
+					.csa_calc_logic_calc_inuse(),
 					.csa_calc_logic_calc_ready(csa_calc_logic_calc_ready[i])
 				);
 		end
@@ -225,7 +227,7 @@ module csa_ram #(
 						csa_in_data_2 <= {(C_S_AXI_DATA_WIDTH - 8){1'b0}, csa_in_data_rdata[(2 * 8) +: 8]};
 						csa_in_data_3 <= {(C_S_AXI_DATA_WIDTH - 8){1'b0}, csa_in_data_rdata[(3 * 8) +: 8]};
 						csa_in_data_4 <= {(C_S_AXI_DATA_WIDTH - 8){1'b0}, csa_in_data_rdata[(4 * 8) +: 8]};
-						csa_in_data_changed <= 0;
+						csa_in_data_changed <= 1;
 					end
 					else begin
 					end
