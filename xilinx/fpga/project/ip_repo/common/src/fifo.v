@@ -16,8 +16,8 @@ module my_fifo #
 		input wire w_enable,
 		input wire r_enable,
 		output wire r_ready,
-		output reg error_full = 0,
-		output reg error_empty = 0
+		output wire error_full,
+		output wire error_empty
 	);
 
 	integer r_index = 0;
@@ -26,25 +26,19 @@ module my_fifo #
 
 	reg [DATA_WIDTH - 1 : 0] buffer[(BULK_OF_DATA * BULK_DEPTH) - 1 : 0];
 
-	assign r_ready = (w_index >= r_index) ?
+	assign r_ready = (w_index > r_index) ?
 				((w_index >= r_index + BULK_OF_DATA) ? 1 : 0)
-				: ((w_index + BUFFER_SIZE >= r_index + BULK_OF_DATA) ? 1 : 0);
+				: ((w_index < r_index) ? ((w_index + BUFFER_SIZE >= r_index + BULK_OF_DATA) ? 1 : 0) : 0);
+	assign error_full = (w_index < r_index) ? ((w_index + 2 >= r_index) ? 1 : 0)
+				: ((w_index > r_index) ? ((w_index + 2 >= r_index + BUFFER_SIZE) ? 1 : 0) : 0);
+	assign error_empty = (r_index == w_index) ? 1 : 0;
 
 	always @(posedge wclk) begin
 		if(rst_n == 0) begin
 			w_index <= 0;
-			error_full <= 0;
 		end
 		else begin
 			if(w_enable == 1) begin
-				if((w_index + 1 == r_index) || ((r_index == 0) && (w_index == BUFFER_SIZE - 1))) begin
-					error_full <= 1;
-				end
-				else begin
-					error_full <= 0;
-				end
-
-
 				buffer[w_index] <= wdata;
 
 				if((w_index >= 0) && ((w_index < BUFFER_SIZE - 1))) begin
@@ -62,17 +56,9 @@ module my_fifo #
 	always @(negedge rclk) begin
 		if(rst_n == 0) begin
 			r_index <= 0;
-			error_empty <= 0;
 		end
 		else begin
 			if(r_enable == 1) begin
-				if((r_index + 1 == w_index) || ((w_index == 0) && (r_index == BUFFER_SIZE - 1))) begin
-					error_empty <= 1;
-				end
-				else begin
-					error_empty <= 0;
-				end
-
 				rdata <= buffer[r_index];
 
 				if((r_index >= 0) && ((r_index < BUFFER_SIZE - 1))) begin
