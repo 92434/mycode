@@ -177,6 +177,7 @@ module csa_wrap #
 			.s00_axi_rready(s00_axi_rready)
 		);
 
+	wire convert_clk;
 	wire axis_s_rclk;
 	wire axis_s_ren;
 	wire axis_s_rdata;
@@ -208,16 +209,41 @@ module csa_wrap #
 			.s00_axis_tvalid(s00_axis_tvalid)
 		);
 
-	convert_32_to_40 convert_32_to_40_inst(
-			.clk(clk),
+	assign convert_clk = s00_axis_aclk;
+
+	localparam integer BYTE_WIDTH = 8;
+	localparam integer CSA_IN_DATA_WIDTH_BY_BYTE = 5;
+	localparam integer OUT_DATA_WIDTH = BYTE_WIDTH * CSA_IN_DATA_WIDTH_BY_BYTE;
+
+	wire csa_in_rclk;
+	wire csa_in_ren;
+	wire [OUT_DATA_WIDTH - 1 : 0] csa_in_rdata;
+
+	wire csa_in_r_ready;
+	wire csa_in_error_full;
+	wire csa_in_error_empty;
+
+	convert_32_to_40 #(
+			.BYTE_WIDTH(BYTE_WIDTH),
+			.CSA_IN_DATA_WIDTH_BY_BYTE(CSA_IN_DATA_WIDTH_BY_BYTE),
+			.OUT_DATA_WIDTH(OUT_DATA_WIDTH)
+		) convert_32_to_40_inst (
+			.clk(convert_clk),
 			.rst_n(rst_n),
 
-			.r_ready(r_ready),
-			.ren(ren_32),
-			.rdata(rdata_32),
+			.axis_s_r_ready(axis_s_r_ready),
 
-			.wen(wen),
-			.wdata(wdata)
+			.axis_s_rclk(axis_s_rclk),
+			.axis_s_ren(axis_s_ren),
+			.axis_s_rdata(axis_s_rdata),
+
+			.csa_in_rclk(csa_in_rclk),
+			.csa_in_ren(csa_in_ren),
+			.csa_in_rdata(csa_in_rdata),
+
+			.csa_in_r_ready(csa_in_r_ready),
+			.csa_in_error_full(csa_in_error_full),
+			.csa_in_error_empty(csa_in_error_empty)
 		);
 
 	wire axis_m_wclk;
