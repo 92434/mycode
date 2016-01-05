@@ -4,7 +4,7 @@ module convert_32_to_40 #(
 		parameter integer AXI_DATA_WIDTH = 32,
 		parameter integer BYTE_WIDTH = 8,
 		parameter integer CSA_IN_DATA_WIDTH_BY_BYTE = 5,
-		parameter integer OUT_DATA_WIDTH = BYTE_WIDTH * CSA_IN_DATA_WIDTH_BY_BYTE
+		parameter integer CSA_IN_OUT_DATA_WIDTH = BYTE_WIDTH * CSA_IN_DATA_WIDTH_BY_BYTE
 	)(
 		input wire clk,
 		input wire rst_n,
@@ -17,7 +17,7 @@ module convert_32_to_40 #(
 
 		input wire csa_in_rclk,
 		input wire csa_in_ren,
-		output wire [OUT_DATA_WIDTH - 1 : 0] csa_in_rdata,
+		output wire [CSA_IN_OUT_DATA_WIDTH - 1 : 0] csa_in_rdata,
 
 		output wire csa_in_r_ready,
 		output wire csa_in_error_full,
@@ -89,14 +89,14 @@ module convert_32_to_40 #(
 		end
 	end
 
-	reg [OUT_DATA_WIDTH - 1 : 0] wdata_0 = 0;
-	reg [OUT_DATA_WIDTH - 1 : 0] wdata_1 = 0;
-	reg [OUT_DATA_WIDTH - 1 : 0] wdata_2 = 0;
-	reg [OUT_DATA_WIDTH - 1 : 0] wdata_3 = 0;
+	reg [CSA_IN_OUT_DATA_WIDTH - 1 : 0] wdata_0 = 0;
+	reg [CSA_IN_OUT_DATA_WIDTH - 1 : 0] wdata_1 = 0;
+	reg [CSA_IN_OUT_DATA_WIDTH - 1 : 0] wdata_2 = 0;
+	reg [CSA_IN_OUT_DATA_WIDTH - 1 : 0] wdata_3 = 0;
 
 	wire csa_in_wclk;
 	reg csa_in_wen = 0;
-	reg [OUT_DATA_WIDTH - 1 : 0] csa_in_wdata = 0;
+	reg [CSA_IN_OUT_DATA_WIDTH - 1 : 0] csa_in_wdata = 0;
 
 	assign csa_in_wclk = clk;
 
@@ -118,10 +118,10 @@ module convert_32_to_40 #(
 					0: begin
 						if(buffer_filled == 1) begin
 							csa_in_data_ready <= 0;
-							wdata_0 <= buffer[(0 * OUT_DATA_WIDTH) +: OUT_DATA_WIDTH];
-							wdata_1 <= buffer[(1 * OUT_DATA_WIDTH) +: OUT_DATA_WIDTH];
-							wdata_2 <= buffer[(2 * OUT_DATA_WIDTH) +: OUT_DATA_WIDTH];
-							wdata_3 <= buffer[(3 * OUT_DATA_WIDTH) +: OUT_DATA_WIDTH];
+							wdata_0 <= buffer[(0 * CSA_IN_OUT_DATA_WIDTH) +: CSA_IN_OUT_DATA_WIDTH];
+							wdata_1 <= buffer[(1 * CSA_IN_OUT_DATA_WIDTH) +: CSA_IN_OUT_DATA_WIDTH];
+							wdata_2 <= buffer[(2 * CSA_IN_OUT_DATA_WIDTH) +: CSA_IN_OUT_DATA_WIDTH];
+							wdata_3 <= buffer[(3 * CSA_IN_OUT_DATA_WIDTH) +: CSA_IN_OUT_DATA_WIDTH];
 
 							w_state <= 1;
 						end

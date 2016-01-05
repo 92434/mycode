@@ -52,21 +52,21 @@ module dvb_s2_ram #(
 	//00
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] mod_mode_cfg_reg = 0;
 	//01
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ldpc_mode_cfg_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ldpc_mode_cfg_reg = 6;
 	//02
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] frame_mode_cfg_reg = 0;
 	//03
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] pilot_mode_cfg_reg = 0;
 	//04
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] srrc_mode_reg = 0;//00:0.35; 01:0.25; 10:0.20(default) 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] srrc_mode_reg = 2;//00:0.35; 01:0.25; 10:0.20(default) 
 	//05
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] dvb_s_convolution_mode_reg = 0;
 	//06
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] dvb_s_mode_reg = 0;// 0:dvb-s; 1:dvb-s2
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] dvb_s_mode_reg = 1;// 0:dvb-s; 1:dvb-s2
 	//07
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] TS_Source_mode_reg = 0;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] TS_Source_mode_reg = 2;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
 	//08
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Baud_Num_reg = 0;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Baud_Num_reg = 2500;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
 	//09
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] Freq_Inv_mode_reg = 0;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 	//10
@@ -121,14 +121,14 @@ module dvb_s2_ram #(
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			mod_mode_cfg_reg <= 0;
-			ldpc_mode_cfg_reg <= 0;
+			ldpc_mode_cfg_reg <= 6;
 			frame_mode_cfg_reg <= 0;
 			pilot_mode_cfg_reg <= 0;
-			srrc_mode_reg <= 0;
+			srrc_mode_reg <= 2;
 			dvb_s_convolution_mode_reg <= 0;
-			dvb_s_mode_reg <= 0;
-			TS_Source_mode_reg <= 0;
-			SYS_Baud_Num_reg <= 0;
+			dvb_s_mode_reg <= 1;
+			TS_Source_mode_reg <= 2;
+			SYS_Baud_Num_reg <= 2500;
 			Freq_Inv_mode_reg <= 0;
 			fs_en_switch_reg <= 0;
 		end

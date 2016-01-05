@@ -5,7 +5,6 @@ module csa_ram #(
 		parameter integer OPT_MEM_ADDR_BITS = 10,
 
 
-		parameter integer CSA_CALC_TIMES = 50000,
 		parameter integer CSA_CALC_INST_NUM = 5,
 		parameter integer CSA_CALC_IN_WIDTH = 8 * 5,
 		parameter integer CSA_CALC_OUT_WIDTH = 8 * 6
@@ -24,19 +23,18 @@ module csa_ram #(
 		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] rdata,
 		input wire [OPT_MEM_ADDR_BITS : 0] raddr,
 
-		input wire axis_s_aclk,
-
 		input wire csa_in_r_ready,
-
-		output wire csa_in_rclk,
-		output wire csa_in_ren,
-		input wire [CSA_CALC_IN_WIDTH - 1 : 0] csa_in_rdata,
 
 		input wire csa_calc_clk,
 
+		output wire csa_in_rclk,
+		output reg csa_in_ren,
+		input wire [CSA_CALC_IN_WIDTH - 1 : 0] csa_in_rdata,
+
+		input wire csa_out_error_full,
 		output wire csa_out_wclk,
-		output wire csa_out_wen,
-		output wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_out_wdata
+		output reg csa_out_wen,
+		output reg [CSA_CALC_OUT_WIDTH - 1 : 0] csa_out_wdata = 0
 	);
 
 	localparam integer ADDR_CHANNEL_INDEX = 0;
@@ -81,11 +79,13 @@ module csa_ram #(
 
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_times = 50000;
 
 	always @(posedge axi_mm_clk) begin
 		if(rst_n == 0) begin
 			csa_current_channel <= 0;
 			csa_current_channel_changed <= 0;
+			csa_calc_logic_times <= 50000;
 		end
 		else begin
 			csa_current_channel_changed <= 0;
@@ -97,6 +97,14 @@ module csa_ram #(
 							csa_current_channel_changed <= 1;
 						end
 						else begin
+						end
+					end
+					ADDR_CALC_TIMES: begin
+						if(current_write_data <= 0) begin
+							csa_calc_logic_times <= 50000;
+						end
+						else begin
+							csa_calc_logic_times <= current_write_data;
 						end
 					end
 					default: begin
@@ -161,6 +169,9 @@ module csa_ram #(
 					ADDR_OUT_DATA_2: begin
 						rdata <= csa_out_2;
 					end
+					ADDR_CALC_TIMES: begin
+						rdata <= csa_calc_logic_times;
+					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS - 1){1'b0}}, raddr};
 					end
@@ -170,11 +181,11 @@ module csa_ram #(
 	end
 	
 	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in = 0;
-	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_calc_logic_out;
-	reg csa_calc_logic_request [0 : CSA_CALC_INST_NUM - 1] = 0;
-	wire csa_calc_logic_inuse [0 : CSA_CALC_INST_NUM - 1];
-	reg csa_calc_logic_release [0 : CSA_CALC_INST_NUM - 1] = 0;
-	wire csa_calc_logic_ready [0 : CSA_CALC_INST_NUM - 1];
+	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_calc_logic_out [0 : CSA_CALC_INST_NUM - 1];
+	reg [CSA_CALC_INST_NUM - 1 : 0] csa_calc_logic_request = 0;
+	wire [CSA_CALC_INST_NUM - 1 : 0] csa_calc_logic_inuse;
+	reg [CSA_CALC_INST_NUM - 1 : 0] csa_calc_logic_release = 0;
+	wire [CSA_CALC_INST_NUM - 1 : 0] csa_calc_logic_ready;
 
 	genvar i;
 	generate for (i = 0; i < CSA_CALC_INST_NUM; i = i + 1)
@@ -183,42 +194,48 @@ module csa_ram #(
 
 			csa_calc_logic #(
 					.ID(id),
-					.CSA_CALC_TIMES(CSA_CALC_TIMES)
 				) csa_calc_logic_inst(
 					.clk(csa_calc_clk),
 					.rst_n(rst_n),
 
+					.csa_calc_logic_times(csa_calc_logic_times),
 					.csa_calc_logic_in(csa_calc_logic_in),
-					.csa_calc_logic_out(csa_calc_logic_out),
+					.csa_calc_logic_out(csa_calc_logic_out[i]),
 					.csa_calc_logic_request(csa_calc_logic_request[i]),
-					.csa_calc_logic_inuse(),
-					.csa_calc_logic_release(),
+					.csa_calc_logic_inuse(csa_calc_logic_inuse[i]),
+					.csa_calc_logic_release(csa_calc_logic_release[i]),
 					.csa_calc_logic_ready(csa_calc_logic_ready[i])
 				);
 		end
 	endgenerate
 
-	assign csa_in_rclk = axis_s_aclk;
+	assign csa_in_rclk = csa_calc_clk;
+	assign csa_out_wclk = csa_calc_clk;
 
 	integer csa_channel_in_index = 0;
 	integer csa_in_state = 0;
 	reg csa_in_changed = 0;
 	always @(posedge csa_in_rclk) begin
 		if(rst_n == 0) begin
-			csa_calc_logic_calc_request <= 0;
+			csa_calc_logic_in <= 0;
+			csa_calc_logic_request <= 0;
+
+			csa_in_ren <= 0;
+
 			csa_channel_in_index <= 0;
 			csa_in_state <= 0;
-			csa_calc_logic_in <= 0;
+
 			csa_in_changed <= 0;
 		end
 		else begin
+			csa_calc_logic_request <= 0;
 			csa_in_ren <= 0;
-			csa_calc_logic_calc_request <= 0;
+
+			csa_in_changed <= 0;
 
 			case(csa_in_state)
 				0: begin
-					if(csa_in_r_ready == 1) begin
-						csa_in_ren <= 1;
+					if(csa_calc_logic_inuse[csa_channel_in_index] == 0) begin
 
 						csa_in_state <= 1;
 					end
@@ -226,8 +243,17 @@ module csa_ram #(
 					end
 				end
 				1: begin
+					if(csa_in_r_ready == 1) begin
+						csa_in_ren <= 1;
+
+						csa_in_state <= 2;
+					end
+					else begin
+					end
+				end
+				2: begin
 					csa_calc_logic_in <= csa_in_rdata;
-					csa_calc_logic_calc_request[csa_channel_in_index] <= 1;
+					csa_calc_logic_request[csa_channel_in_index] <= 1;
 
 					if(csa_channel_in_index == csa_current_channel) begin
 						csa_in_0 <= {(C_S_AXI_DATA_WIDTH - 8){1'b0}, csa_in_rdata[(0 * 8) +: 8]};
@@ -235,7 +261,7 @@ module csa_ram #(
 						csa_in_2 <= {(C_S_AXI_DATA_WIDTH - 8){1'b0}, csa_in_rdata[(2 * 8) +: 8]};
 						csa_in_3 <= {(C_S_AXI_DATA_WIDTH - 8){1'b0}, csa_in_rdata[(3 * 8) +: 8]};
 						csa_in_4 <= {(C_S_AXI_DATA_WIDTH - 8){1'b0}, csa_in_rdata[(4 * 8) +: 8]};
-						csa_in_changed <= 1;
+						csa_in_changed <= 0;
 					end
 					else begin
 					end
@@ -255,61 +281,60 @@ module csa_ram #(
 		end
 	end
 
-	assign csa_out_wclk = csa_calc_clk;
 	integer csa_channel_out_index = 0;
+	integer csa_out_state = 0;
+	reg csa_out_changed = 0;
 	always @(posedge csa_out_wclk) begin
 		if(rst_n == 0) begin
-			csa_channel_out_index <= 0;
+			csa_calc_logic_release <= 0;
 
 			csa_out_wen <= 0;
 			csa_out_wdata <= 0;
+
+			csa_channel_out_index <= 0;
+			csa_out_state <= 0;
+
+			csa_out_changed <= 0;
 		end
 		else begin
+			csa_calc_logic_release <= 0;
 			csa_out_wen <= 0;
-			for(csa_channel_out_index = 0; csa_channel_out_index <= CSA_CALC_INST_NUM; csa_channel_out_index = csa_channel_out_index + 1) begin
-				if(csa_calc_logic_calc_ready[csa_channel_out_index] == 1) begin
-					csa_out_wdata <= csa_calc_logic_out;
-					csa_out_wen <= 1;
-				end
-				else begin
-				end
-			end
-		end
-	end
 
-	integer csa_data_valid_state = 0
-	always @(posedge csa_out_wclk) begin
-		if(rst_n == 0) begin
-			csa_data_valid_state <= 1;
-			csa_in_valid <= 0;
-			csa_out_valid <= 0;
-		end
-		else begin
-			case(csa_data_valid_state)
+			csa_out_changed <= 0;
+
+			case(csa_out_state)
 				0: begin
-					if(csa_current_channel_changed == 1) begin
-						csa_in_valid <= 0;
-						csa_out_valid <= 0;
+					if(csa_out_error_full == 0) begin
 
-						csa_data_valid_state <= 1;
+						csa_out_state <= 1;
 					end
 					else begin
 					end
 				end
 				1: begin
-					if(csa_in_changed == 1) begin
-						csa_in_valid <= 1;
+					if(csa_calc_logic_ready[csa_channel_out_index] == 1) begin
+						
+						csa_out_wen <= 1;
+						csa_out_wdata <= csa_calc_logic_out[csa_channel_out_index];
+						csa_calc_logic_release[csa_channel_out_index] <= 1;
 
-						csa_data_valid_state <= 2;
-					end
-					else begin
-					end
-				end
-				2: begin
-					if(csa_out_changed == 1) begin
-						csa_out_valid <= 1;
+						if(csa_channel_out_index == csa_current_channel) begin
+							csa_out_0 <= {(C_S_AXI_DATA_WIDTH - 16){1'b0}, csa_calc_logic_out[csa_channel_out_index][(0 * 16) +: 16]};
+							csa_out_1 <= {(C_S_AXI_DATA_WIDTH - 16){1'b0}, csa_calc_logic_out[csa_channel_out_index][(1 * 16) +: 16]};
+							csa_out_2 <= {(C_S_AXI_DATA_WIDTH - 16){1'b0}, csa_calc_logic_out[csa_channel_out_index][(2 * 16) +: 16]};
+							csa_out_changed <= 1;
+						end
+						else begin
+						end
 
-						csa_data_valid_state <= 0;
+						if((csa_channel_out_index >= 0) && (csa_channel_out_index < CSA_CALC_INST_NUM - 1)) begin
+							csa_channel_out_index <= csa_channel_out_index + 1;
+						end
+						else begin
+							csa_channel_out_index <= 0;
+						end
+
+						csa_out_state <= 0;
 					end
 					else begin
 					end
@@ -320,4 +345,47 @@ module csa_ram #(
 		end
 	end
 
+	integer csa_valid_state = 0
+	always @(posedge csa_calc_clk) begin
+		if(rst_n == 0) begin
+			csa_in_valid <= 0;
+			csa_out_valid <= 0;
+
+			csa_valid_state <= 0;
+		end
+		else begin
+			case(csa_valid_state)
+				0: begin
+					if(csa_current_channel_changed == 1) begin
+						csa_in_valid <= 0;
+						csa_out_valid <= 0;
+
+						csa_valid_state <= 1;
+					end
+					else begin
+					end
+				end
+				1: begin
+					if(csa_in_changed == 1) begin
+						csa_in_valid <= 1;
+
+						csa_valid_state <= 2;
+					end
+					else begin
+					end
+				end
+				2: begin
+					if(csa_out_changed == 1) begin
+						csa_out_valid <= 1;
+
+						csa_valid_state <= 0;
+					end
+					else begin
+					end
+				end
+				default: begin
+				end
+			endcase
+		end
+	end
 endmodule

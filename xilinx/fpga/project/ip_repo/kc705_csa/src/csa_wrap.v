@@ -16,7 +16,9 @@ module csa_wrap #
 		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
 		parameter integer C_M00_AXIS_START_COUNT = 1,
 
-		parameter integer CSA_CALC_TIMES = 5
+		parameter integer CSA_CALC_INST_NUM = 5,
+		parameter integer CSA_CALC_IN_WIDTH = 8 * 5,
+		parameter integer CSA_CALC_OUT_WIDTH = 8 * 6
 	)
 	(
 		input wire s00_axi_aclk,
@@ -177,7 +179,6 @@ module csa_wrap #
 			.s00_axi_rready(s00_axi_rready)
 		);
 
-	wire convert_clk;
 	wire axis_s_rclk;
 	wire axis_s_ren;
 	wire axis_s_rdata;
@@ -187,6 +188,7 @@ module csa_wrap #
 	wire axis_s_error_empty;
 
 	localparam NUMBER_OF_INPUT_WORDS = 5;
+	localparam integer BYTE_WIDTH = 8;
 
 	axi4_stream_slave_v1_0 #(
 			.NUMBER_OF_INPUT_WORDS(NUMBER_OF_INPUT_WORDS),
@@ -209,15 +211,12 @@ module csa_wrap #
 			.s00_axis_tvalid(s00_axis_tvalid)
 		);
 
-	assign convert_clk = s00_axis_aclk;
-
-	localparam integer BYTE_WIDTH = 8;
 	localparam integer CSA_IN_DATA_WIDTH_BY_BYTE = 5;
-	localparam integer OUT_DATA_WIDTH = BYTE_WIDTH * CSA_IN_DATA_WIDTH_BY_BYTE;
+	localparam integer CSA_IN_OUT_DATA_WIDTH = BYTE_WIDTH * CSA_IN_DATA_WIDTH_BY_BYTE;
 
 	wire csa_in_rclk;
 	wire csa_in_ren;
-	wire [OUT_DATA_WIDTH - 1 : 0] csa_in_rdata;
+	wire [CSA_IN_OUT_DATA_WIDTH - 1 : 0] csa_in_rdata;
 
 	wire csa_in_r_ready;
 	wire csa_in_error_full;
@@ -226,9 +225,9 @@ module csa_wrap #
 	convert_32_to_40 #(
 			.BYTE_WIDTH(BYTE_WIDTH),
 			.CSA_IN_DATA_WIDTH_BY_BYTE(CSA_IN_DATA_WIDTH_BY_BYTE),
-			.OUT_DATA_WIDTH(OUT_DATA_WIDTH)
+			.CSA_IN_OUT_DATA_WIDTH(CSA_IN_OUT_DATA_WIDTH)
 		) convert_32_to_40_inst (
-			.clk(convert_clk),
+			.clk(s00_axis_aclk),
 			.rst_n(rst_n),
 
 			.axis_s_r_ready(axis_s_r_ready),
@@ -246,23 +245,92 @@ module csa_wrap #
 			.csa_in_error_empty(csa_in_error_empty)
 		);
 
+	wire csa_calc_clk;
+
+	wire error_full_48;
+	wire csa_out_wclk;
+	wire csa_out_wen;
+	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_out_wdata;
+
+	assign csa_calc_clk = s00_axi_aclk;
+
+	csa_ram #(
+			.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
+			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
+
+			.CSA_CALC_INST_NUM(CSA_CALC_INST_NUM),
+			.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
+			.CSA_CALC_OUT_WIDTH(CSA_CALC_OUT_WIDTH)
+		) csa_ram_inst (
+			.axi_mm_clk(s00_axi_aclk),
+			.rst_n(rst_n),
+
+			.wstrb(axi_wstrb),
+			.wen(axi_wen),
+			.wdata(axi_wdata),
+			.waddr(axi_waddr),
+
+			.ren(axi_ren),
+			.rdata(axi_rdata),
+			.raddr(axi_raddr),
+
+			.csa_in_r_ready(csa_in_r_ready),
+
+			.csa_calc_clk(csa_calc_clk),
+
+			.csa_in_rclk(csa_in_rclk),
+			.csa_in_ren(csa_in_ren),
+			.csa_in_rdata(csa_in_rdata),
+
+			.csa_out_error_full(error_full_48),
+			.csa_out_wclk(csa_out_wclk),
+			.csa_out_wen(csa_out_wen),
+			.csa_out_wdata(csa_out_wdata)
+		);
+
+	localparam integer CSA_OUT_DATA_WIDTH_BY_BYTE = 6;
+	localparam integer CSA_OUT_OUT_DATA_WIDTH = BYTE_WIDTH * CSA_OUT_DATA_WIDTH_BY_BYTE;
+
 	wire axis_m_wclk;
 	wire axis_m_wen;
-	wire [C_S00_AXI_DATA_WIDTH - 1 : 0] axis_m_wdata;
+	wire [C_S00_AXIS_TDATA_WIDTH - 1 : 0] axis_m_wdata;
+
+	wire axis_m_error_full;
+
+	convert_48_to_3x32 #(
+			.CSA_OUT_DATA_WIDTH_BY_BYTE(CSA_OUT_DATA_WIDTH_BY_BYTE),
+			.CSA_OUT_OUT_DATA_WIDTH(CSA_OUT_OUT_DATA_WIDTH)
+		) convert_48_to_3x32_inst(
+			.clk(m00_axis_aclk),
+			.rst_n(rst_n),
+
+			.error_full_48(error_full_48),
+			.wclk_48(csa_out_wclk),
+			.wen_48(csa_out_wen),
+			.wdata_48(csa_out_wdata),
+
+			.error_full_32(axis_m_error_full),
+			.wclk_32(axis_m_wclk),
+			.wen_32(axis_m_wen),
+			.wdata_32(axis_m_wdata)
+		);
+
+	wire axis_m_r_ready;
+	wire axis_m_error_empty;
 
 	localparam NUMBER_OF_OUTPUT_WORDS = 5;
 
 	axi4_stream_master_v1_0 # (
 		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
-		.C_M00_AXIS_TDATA_WIDTH(C_S00_AXI_DATA_WIDTH)
+		.C_M00_AXIS_TDATA_WIDTH(C_S00_AXIS_TDATA_WIDTH)
 		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
 	) axi4_stream_master_v1_0_inst (
-		.wclk(wclk_32),
-		.wen(wen_32),
-		.wdata(wdata_32),
+		.wclk(axis_m_wclk),
+		.wen(axis_m_wen),
+		.wdata(axis_m_wdata),
 
-		.r_ready(r_ready),
-		.error_full(error_full),
+		.r_ready(axis_m_r_ready),
+		.error_full(axis_m_error_full),
 		.error_empty(error_empty),
 
 		.m00_axis_aclk(m00_axis_aclk),

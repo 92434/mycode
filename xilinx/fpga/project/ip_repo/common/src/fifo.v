@@ -4,7 +4,7 @@ module my_fifo #
 	(
 		parameter integer DATA_WIDTH = 32,
 		parameter integer BULK_OF_DATA = 8,
-		parameter integer BULK_DEPTH = 64
+		parameter integer BULK_DEPTH = 8
 	)
 
 	(
@@ -20,17 +20,30 @@ module my_fifo #
 		output wire error_empty
 	);
 
+	localparam integer BULK_DEPTH_VALUE = (BULK_DEPTH < 8) ? 8 : BULK_DEPTH;
+	localparam integer BUFFER_SIZE = BULK_OF_DATA * BULK_DEPTH_VALUE;
+
 	integer r_index = 0;
 	integer w_index = 0;
-	integer BUFFER_SIZE = BULK_OF_DATA * BULK_DEPTH;
 
-	reg [DATA_WIDTH - 1 : 0] buffer[(BULK_OF_DATA * BULK_DEPTH) - 1 : 0];
+	reg [DATA_WIDTH - 1 : 0] buffer[BUFFER_SIZE - 1 : 0];
 
 	assign r_ready = (w_index > r_index) ?
-				((w_index >= r_index + BULK_OF_DATA) ? 1 : 0)
-				: ((w_index < r_index) ? ((w_index + BUFFER_SIZE >= r_index + BULK_OF_DATA) ? 1 : 0) : 0);
-	assign error_full = (w_index < r_index) ? ((w_index + 2 >= r_index) ? 1 : 0)
-				: ((w_index > r_index) ? ((w_index + 2 >= r_index + BUFFER_SIZE) ? 1 : 0) : 0);
+		((w_index >= r_index + BULK_OF_DATA) ? 1 : 0)
+		: ((w_index < r_index) ?
+			((w_index + BUFFER_SIZE >= r_index + BULK_OF_DATA) ?
+				1
+				: 0)
+			: 0);
+
+	assign error_full = (w_index < r_index) ?
+		((w_index + 2 >= r_index) ? 1 : 0)
+		: ((w_index > r_index) ?
+			((w_index + 2 >= r_index + BUFFER_SIZE) ?
+				1
+				: 0)
+			: 0);
+
 	assign error_empty = (r_index == w_index) ? 1 : 0;
 
 	always @(posedge wclk) begin
