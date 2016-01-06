@@ -2,9 +2,11 @@
 
 module csa_wrap #
 	(
+		parameter integer CSA_CALC_INST_NUM = 4,
+	
 		parameter integer C_S00_AXI_ID_WIDTH = 1,
 		parameter integer C_S00_AXI_DATA_WIDTH = 32,
-		parameter integer C_S00_AXI_ADDR_WIDTH = 13,
+		parameter integer C_S00_AXI_ADDR_WIDTH = 12,
 		parameter integer C_S00_AXI_AWUSER_WIDTH = 1,
 		parameter integer C_S00_AXI_ARUSER_WIDTH = 1,
 		parameter integer C_S00_AXI_WUSER_WIDTH = 1,
@@ -14,11 +16,7 @@ module csa_wrap #
 		parameter integer C_S00_AXIS_TDATA_WIDTH = 32,
 
 		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
-		parameter integer C_M00_AXIS_START_COUNT = 1,
-
-		parameter integer CSA_CALC_INST_NUM = 5,
-		parameter integer CSA_CALC_IN_WIDTH = 8 * 5,
-		parameter integer CSA_CALC_OUT_WIDTH = 8 * 6
+		parameter integer C_M00_AXIS_START_COUNT = 1
 	)
 	(
 		input wire s00_axi_aclk,
@@ -245,6 +243,9 @@ module csa_wrap #
 			.csa_in_error_empty(csa_in_error_empty)
 		);
 
+	localparam integer CSA_CALC_IN_WIDTH = 8 * 5;
+	localparam integer CSA_CALC_OUT_WIDTH = 8 * 6;
+
 	wire csa_calc_clk;
 
 	wire error_full_48;
@@ -252,7 +253,7 @@ module csa_wrap #
 	wire csa_out_wen;
 	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_out_wdata;
 
-	assign csa_calc_clk = s00_axi_aclk;
+	assign csa_calc_clk = s00_axis_aclk;
 
 	csa_ram #(
 			.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
@@ -274,10 +275,9 @@ module csa_wrap #
 			.rdata(axi_rdata),
 			.raddr(axi_raddr),
 
-			.csa_in_r_ready(csa_in_r_ready),
-
 			.csa_calc_clk(csa_calc_clk),
 
+			.csa_in_r_ready(csa_in_r_ready),
 			.csa_in_rclk(csa_in_rclk),
 			.csa_in_ren(csa_in_ren),
 			.csa_in_rdata(csa_in_rdata),
@@ -318,11 +318,11 @@ module csa_wrap #
 	wire axis_m_r_ready;
 	wire axis_m_error_empty;
 
-	localparam NUMBER_OF_OUTPUT_WORDS = 5;
+	localparam NUMBER_OF_OUTPUT_WORDS = 12;
 
 	axi4_stream_master_v1_0 # (
 		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
-		.C_M00_AXIS_TDATA_WIDTH(C_S00_AXIS_TDATA_WIDTH)
+		.C_M00_AXIS_TDATA_WIDTH(C_S00_AXIS_TDATA_WIDTH),
 		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
 	) axi4_stream_master_v1_0_inst (
 		.wclk(axis_m_wclk),
