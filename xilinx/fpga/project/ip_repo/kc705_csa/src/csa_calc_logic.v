@@ -23,85 +23,77 @@ module csa_calc_logic #(
 
 	localparam integer CYPHER_DATA_WIDTH = 8 * 8;
 
-	integer state = 0;
+	reg request_fetch = 0;
 
-	wire prepare_csa_calc_ready;
-	reg prepare_csa_calc_reset = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] times_reg = 0;
 
-	reg csa_calc_logic_impl_request = 0;
-	wire csa_calc_logic_impl_ready;
-	reg csa_calc_logic_impl_reset = 0;
-
-	wire [CYPHER_DATA_WIDTH - 1 : 0] ck;
+	reg [CYPHER_DATA_WIDTH - 1 : 0] ck = 0;
 	wire [CYPHER_DATA_WIDTH - 1 : 0] cb;
 
-	reg [CYPHER_DATA_WIDTH - 1 : 0] ck_in = 0;
+	wire [CYPHER_DATA_WIDTH - 1 : 0] ck_out;
+	reg [CYPHER_DATA_WIDTH - 1 : 0] ck_reg = 0;
 
+	integer calc_state = 0;
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			csa_calc_logic_inuse <= 0;
+			request_fetch <= 0;
 
-			prepare_csa_calc_reset <= 0;
+			times_reg <= 50000;
 
-			csa_calc_logic_impl_request <= 0;
-			csa_calc_logic_impl_reset <= 0;
+			ck <= 0;
 
 			csa_calc_logic_ready <= 0;
 			csa_calc_logic_out <= 0;
 
-			ck_in <= 0;
-
-			state <= 0;
+			calc_state <= 0;
 		end
 		else begin
-			prepare_csa_calc_reset <= 0;
+			request_fetch <= 0;
 
-			csa_calc_logic_impl_request <= 0;
-			csa_calc_logic_impl_reset <= 0;
-
-			case(state)
+			case(calc_state)
 				0: begin
 					if(csa_calc_logic_request == 1) begin
 						csa_calc_logic_inuse <= 1;
+						if(csa_calc_logic_times < 2) begin
+							times_reg <= 2;
+						end
+						else begin
+							times_reg <= csa_calc_logic_times;
+						end
+						request_fetch <= 1;
 
-						state <= 1;
+						calc_state <= 1;
 					end
 					else begin
 					end
 				end
-				1: begin//wait for prepare_csa_calc
-					if(prepare_csa_calc_ready == 1) begin
-						ck_in <= ck;
-						prepare_csa_calc_reset <= 1;
+				1: begin
+					if(times_reg <= 1) begin
+						csa_calc_logic_out <= cb;
+						csa_calc_logic_ready <= 1;
 
-						csa_calc_logic_impl_request <= 1;
-
-						state <= 2;
+						calc_state <= 2;
 					end
 					else begin
+						ck <= ck_reg;
+						request_fetch <= 1;
+
+						calc_state <= 1;
 					end
+					
+					times_reg <= times_reg - 1;
 				end
 				2: begin
-					if(csa_calc_logic_impl_ready == 1) begin
-						csa_calc_logic_impl_reset <= 1;
-
-						csa_calc_logic_ready <= 1;
-						csa_calc_logic_out <= cb[CSA_CALC_OUT_WIDTH - 1 : 0];
-
-						state <= 3;
-					end
-					else begin
-					end
-				end
-				3: begin
 					if(csa_calc_logic_reset == 1) begin
 						csa_calc_logic_ready <= 0;
 						csa_calc_logic_inuse <= 0;
 
-						state <= 0;
+						calc_state <= 0;
 					end
 					else begin
 					end
+
 				end
 				default: begin
 				end
@@ -109,33 +101,42 @@ module csa_calc_logic #(
 		end
 	end
 
-	prepare_csa_ck #(
-			.ID(ID),
-			.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
-			.CYPHER_DATA_WIDTH(CYPHER_DATA_WIDTH)
-		) prepare_csa_ck_inst(
-			.clk(clk),//input
-			.rst_n(rst_n),//input
+	always @(negedge clk) begin
+		if(rst_n == 0) begin
+			ck_reg <= 0;
+		end
+		else begin
+			if(request_fetch == 1) begin
+				ck_reg <= ck_out;
+			end
+			else begin 
+			end
+		end
+	end
 
-			.request(csa_calc_logic_request),//input
-			.in(csa_calc_logic_in),//input
-			.ready(prepare_csa_calc_ready),//output --default is 0
-			.ck(ck),//output
-			.reset(prepare_csa_calc_reset)//input
+	wire [CYPHER_DATA_WIDTH - 1 : 0] sb;
+
+	assign sb = 64'hE613DB6DC11C4524;
+
+	stream_cypher stream_cypher_inst(
+			.ck(ck),//input
+			.sb(sb),//input fixed!
+			.cb(cb)//output
 		);
 
-	csa_calc_logic_impl #(
-			.AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-			.CYPHER_DATA_WIDTH(CYPHER_DATA_WIDTH)
-		) csa_calc_logic_impl_inst(
-			.clk(clk),//input
-			.rst_n(rst_n),//input
+	wire [AXI_DATA_WIDTH - 1 : 0] loops;
 
-			.request(csa_calc_logic_impl_request),//input
-			.times(csa_calc_logic_times),//input
-			.ck_in(ck_in),//input
-			.ready(csa_calc_logic_impl_ready),//output --default is 0
-			.cb(cb),//output
-			.reset(csa_calc_logic_impl_reset)//input
+	assign loops = csa_calc_logic_times - times_reg;
+
+	ck_processer #(
+			.AXI_DATA_WIDTH(AXI_DATA_WIDTH),
+			.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
+			.CYPHER_DATA_WIDTH(CYPHER_DATA_WIDTH)
+		) ck_processer_inst(
+			.in(csa_calc_logic_in),
+			.cb(cb),
+			.loops(loops),
+
+			.ck_out(ck_out)
 		);
 endmodule

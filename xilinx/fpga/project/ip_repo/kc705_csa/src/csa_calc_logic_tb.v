@@ -22,7 +22,7 @@ module csa_calc_logic_tb #(
 	
 	wire csa_calc_logic_inuse;
 	reg csa_calc_logic_request = 0;
-	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times = 50;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times = 5;
 	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in = 0;
 
 	wire csa_calc_logic_ready;
@@ -73,7 +73,13 @@ module csa_calc_logic_tb #(
 					1: begin
 						if(csa_calc_logic_ready == 1) begin
 							csa_calc_logic_reset <= 1;
-							csa_calc_logic_in <= csa_calc_logic_in + 1;
+
+							if(csa_calc_logic_in <= 0) begin
+								csa_calc_logic_in <= csa_calc_logic_in + 1;
+							end
+							else begin
+								csa_calc_logic_in <= 0;
+							end
 
 							state <= 0;
 						end
