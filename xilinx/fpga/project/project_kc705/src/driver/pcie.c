@@ -49,6 +49,7 @@ typedef struct dma_static_config {
 	int pcie_map_bar_axi_addr_1;
 	int dma_bar_map_num;
 	dma_type_t dma_type;
+	int receive_bulk_size;
 } dma_static_config_info_t;
 
 static dma_static_config_info_t dma_info[] = {
@@ -60,6 +61,7 @@ static dma_static_config_info_t dma_info[] = {
 		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR0,
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 		.dma_type = AXI_DMA,
+		.receive_bulk_size = 4 * 4 * 3;
 	},
 	//{
 	//	.dma_lite_offset = OFFSET_AXI_DMA_LITE_1,
@@ -96,11 +98,11 @@ static dma_static_config_info_t dma_info[] = {
 		.pcie_map_bar_axi_addr_1 = 0,
 		.dma_bar_map_num = 3,
 		.dma_type = PSEUDO_DMA,
+		.receive_bulk_size = 0;
 	},
 };
 
 #define DMA_MAX (sizeof(dma_info) / sizeof(dma_static_config_info_t))
-#define MAX_TEST_THREAD 10
 
 typedef struct {
 	int chip_addr_offset;
@@ -441,6 +443,8 @@ static int init_pcie_tr(kc705_pci_dev_t *kc705_pci_dev) {
 	if(kc705_pci_dev->pcie_tr_list == NULL) {
 		ret = -1;
 		return ret;
+	} else {
+		disable_list_buffer_overwrite(kc705_pci_dev->pcie_tr_list, true);
 	}
 
 	tr = (pcie_tr_t *)vzalloc(sizeof(pcie_tr_t) * 1024);
@@ -456,7 +460,8 @@ static int init_pcie_tr(kc705_pci_dev_t *kc705_pci_dev) {
 
 static void uninit_pcie_tr(kc705_pci_dev_t *kc705_pci_dev) {
 	buffer_node_t *node;
-
+	
+	//only 1 node
 	node = list_entry(kc705_pci_dev->pcie_tr_list->first, buffer_node_t, list);
 	vfree(node->buffer);
 	
@@ -501,10 +506,14 @@ int put_pcie_tr(pcie_dma_t *dma,
 	ret = write_buffer((char *)&tr, sizeof(pcie_tr_t), kc705_pci_dev->pcie_tr_list);
 	spin_unlock(&kc705_pci_dev->alloc_lock);
 
-	//mydebug("tr.tr_cmp:%p\n", tr.tr_cmp);
-	if(tr.tr_cmp != NULL) {
-		tr_wait(tr.dma, tr.tr_cmp);
+	if(ret == -1) {
 		vfree(tr.tr_cmp);
+	} else {
+		//mydebug("tr.tr_cmp:%p\n", tr.tr_cmp);
+		if(tr.tr_cmp != NULL) {
+			tr_wait(tr.dma, tr.tr_cmp);
+			vfree(tr.tr_cmp);
+		}
 	}
 
 exit:
@@ -553,9 +562,8 @@ static int pcie_tr_thread(void *ppara) {
 			tr.dma = dma;
 			tr.tx_dest_axi_addr = 0;
 			tr.rx_src_axi_addr = 0;
-			tr.tx_size = 0;
-			//tr.rx_size = DMA_BLOCK_SIZE;
-			tr.rx_size = 64;
+			tr.tx_size = 4 * 5;
+			tr.rx_size = 4 * 4 * 3;
 			tr.tx_data = NULL;
 			tr.rx_data = NULL;
 			tr.tr_cmp = NULL;
@@ -579,27 +587,37 @@ static int pcie_tr_thread(void *ppara) {
 	return ret;
 }
 
-static int test_thread(void *ppara) {
+static int csa_dma_receiver_thread(void *ppara) {
 	int ret = 0;
-	//kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
+	pcie_dma_t *dma = (pcie_dma_t *)ppara
 
 	while(!kthread_should_stop()) {
-		//pcie_tr_t tr;
-
-		//pcie_dma_t *dma = kc705_pci_dev->dma + 1;
-
 		set_current_state(TASK_UNINTERRUPTIBLE);  
-		schedule_timeout(msecs_to_jiffies(100)); 
+		//schedule_timeout(msecs_to_jiffies(10)); 
 
-
-		//dma = dma;
-		//put_pcie_tr(dma, 0, 0, DMA_BLOCK_SIZE, DMA_BLOCK_SIZE, NULL, NULL, false);
+		put_pcie_tr(dma, 0, 0, 0, 4 * 4 * 3, NULL, NULL, true);
 	}
 
 	mydebug("\n");
 
 	return ret;
 }
+
+typedef static int (*pcie_dma_thread_t)(void *ppara);
+typedef struct _dma_thread_info {
+	pcie_dma_thread_t t;
+	int dma_index;
+} dma_thread_info_t;
+
+
+dma_thread_info_t dma_threads[] = {
+	{
+		.t = &csa_dma_receiver_thread,
+		.dma_index = 0;
+	},
+};
+
+#define MAX_DMA_THREAD (sizeof(dma_threads) / sizeof(dma_thread_info_t))
 
 int create_gpio_proc_dir(void);
 static void add_local_device(void) {
@@ -656,9 +674,9 @@ void start_dma(void) {
 		kc705_pci_dev->pcie_tr_thread = alloc_work_thread(pcie_tr_thread, kc705_pci_dev, "%s", "pcie_tr");
 	}
 
-	for(i = 0; i < MAX_TEST_THREAD; i++) {
-		if(kc705_pci_dev->test_thread[i] == NULL) {
-			kc705_pci_dev->test_thread[i] = alloc_work_thread(test_thread, kc705_pci_dev, "%s_%d", "test", i);
+	for(i = 0; i < MAX_DMA_THREAD; i++) {
+		if(kc705_pci_dev->dma_thread[i] == NULL) {
+			kc705_pci_dev->dma_thread[i] = alloc_work_thread(dma_threads[i].fn, kc705_pci_dev->dma + dma_threads[i].dma_index, "%s_%d", "test", i);
 		}
 	}
 }
@@ -666,10 +684,10 @@ void start_dma(void) {
 void stop_dma(void) {
 	int i;
 
-	for(i = 0; i < MAX_TEST_THREAD; i++) {
-		if(kc705_pci_dev->test_thread[i] != NULL) {
-			free_work_thread(kc705_pci_dev->test_thread[i]);
-			kc705_pci_dev->test_thread[i] = NULL;
+	for(i = 0; i < MAX_DMA_THREAD; i++) {
+		if(kc705_pci_dev->dma_thread[i] != NULL) {
+			free_work_thread(kc705_pci_dev->dma_thread[i]);
+			kc705_pci_dev->dma_thread[i] = NULL;
 		}
 	}
 
@@ -714,6 +732,7 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 					(dma_info[i].dma_type == AXI_CDMA) ? axi_cdma_op :
 					(dma_info[i].dma_type == PSEUDO_DMA) ? pseudo_dma_op :
 					pseudo_dma_op;
+		dma->receive_bulk_size = dma_info[i].receive_bulk_size;
 
 		for(j = 0; j < dma->dma_bar_map_num; j++) {
 			dma->bar_map_memory_size[j] = PCIe_MAP_BAR_SIZE;
@@ -732,7 +751,7 @@ static int prepare_dma_memory(kc705_pci_dev_t *kc705_pci_dev, struct pci_dev *pd
 					//mydebug("dma->bar_map_addr[%d]:%p\n", j, (void *)dma->bar_map_addr[j]);
 					//mydebug("dma->bar_map_memory_size[%d]:%x\n", j, dma->bar_map_memory_size[j]);
 					if(j > DMA_BAR_MEM_START_INDEX) {//
-						add_list_buffer_item((char *)dma->bar_map_memory[j], (void *)dma->bar_map_addr[j], dma->bar_map_memory_size[j], dma->list);
+						add_list_buffer_item((char *)dma->bar_map_memory[j], (void *)dma->bar_map_addr[j], dma->bar_map_memory_size[j] - (dma->bar_map_memory_size[j] % dma->receive_bulk_size), dma->list);
 					}
 				}
 			}
@@ -875,6 +894,13 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		goto alloc_kc705_pci_dma_failed;
 	}
 
+	kc705_pci_dev->dma_thread = (struct task_struct **)vzalloc(sizeof(struct task_struct *) * MAX_DMA_THREAD);
+	if(kc705_pci_dev->dma_thread == NULL) {
+		mydebug("alloc kc705_pci_dev->dma_thread failed.\n");
+		ret = -1;
+		goto alloc_kc705_pci_dma_thread_failed;
+	}
+
 	kc705_pci_dev->gpiochip = (void **)vzalloc(sizeof(void *) * GPIOCHIP_MAX);
 	if((kc705_pci_dev->gpiochip == NULL) && (GPIOCHIP_MAX != 0)) {
 		mydebug("alloc kc705_pci_dev->dma failed.\n");
@@ -984,6 +1010,8 @@ init_pcie_tr_failed:
 free_pcie_resource:
 	vfree(kc705_pci_dev->gpiochip);
 alloc_kc705_pci_gpiochip_failed:
+	vfree(kc705_pci_dev->dma_thread);
+alloc_kc705_pci_dma_thread_failed:
 	vfree(kc705_pci_dev->dma);
 alloc_kc705_pci_dma_failed:
 	vfree(kc705_pci_dev);
@@ -1022,6 +1050,8 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 		uninit_dma_memory(kc705_pci_dev, pdev);
 
 		vfree(kc705_pci_dev->gpiochip);
+
+		vfree(kc705_pci_dev->dma_thread);
 
 		vfree(kc705_pci_dev->dma);
 

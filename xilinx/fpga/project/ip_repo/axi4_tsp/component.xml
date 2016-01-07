@@ -1687,11 +1687,11 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>axi4_tsp</xilinx:displayName>
-      <xilinx:coreRevision>53</xilinx:coreRevision>
+      <xilinx:coreRevision>54</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:my_tp:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2015-12-28T13:40:46Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2016-01-02T06:41:00Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
         <xilinx:tag xilinx:name="user.org:user:my_tp:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/axi4_tsp</xilinx:tag>

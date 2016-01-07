@@ -19,9 +19,11 @@ typedef struct _list_buffer {
 	struct list_head *first;
 	struct list_head *read;
 	struct list_head *write;
+	bool disable_overwrite;
 } list_buffer_t;
 
 list_buffer_t *init_list_buffer(void);
+void disable_list_buffer_overwrite(list_buffer_t *list, bool disable);
 buffer_node_t *add_list_buffer_item(char *buffer, void *buffer_addr, int size, list_buffer_t *list);
 void uninit_list_buffer(list_buffer_t *list);
 int read_buffer(char *buffer, int size, list_buffer_t *list);

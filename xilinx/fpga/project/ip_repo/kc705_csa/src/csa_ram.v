@@ -36,49 +36,23 @@ module csa_ram #(
 		output reg [CSA_CALC_OUT_WIDTH - 1 : 0] csa_out_wdata = 0
 	);
 
-	localparam integer ADDR_CHANNEL_INDEX = 0;
+	localparam integer ADDR_CSA_BUSY = 0;
+
+	localparam integer ADDR_CHANNEL_INDEX = ADDR_CSA_BUSY + 1;
 
 	localparam integer ADDR_IN_DATA_VALID = ADDR_CHANNEL_INDEX + 1;
-	localparam integer ADDR_OUT_DATA_VALID = ADDR_IN_DATA_VALID + 1;
-
-	localparam integer ADDR_IN_DATA_0 = ADDR_OUT_DATA_VALID + 1;
+	localparam integer ADDR_IN_DATA_0 = ADDR_IN_DATA_VALID + 1;
 	localparam integer ADDR_IN_DATA_1 = ADDR_IN_DATA_0 + 1;
 	localparam integer ADDR_IN_DATA_2 = ADDR_IN_DATA_1 + 1;
 	localparam integer ADDR_IN_DATA_3 = ADDR_IN_DATA_2 + 1;
 	localparam integer ADDR_IN_DATA_4 = ADDR_IN_DATA_3 + 1;
 
-	localparam integer ADDR_OUT_DATA_0 = ADDR_IN_DATA_4 + 1;
+	localparam integer ADDR_OUT_DATA_VALID = ADDR_IN_DATA_4 + 1;
+	localparam integer ADDR_OUT_DATA_0 = ADDR_OUT_DATA_VALID + 1;
 	localparam integer ADDR_OUT_DATA_1 = ADDR_OUT_DATA_0 + 1;
 	localparam integer ADDR_OUT_DATA_2 = ADDR_OUT_DATA_1 + 1;
 
 	localparam integer ADDR_CALC_TIMES = ADDR_OUT_DATA_2 + 1;
-
-
-	reg [OPT_MEM_ADDR_BITS : 0] current_write_address = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] current_write_data = 0;
-	reg current_mem_wen = 0;
-
-	integer index_wstrb;
-	//assigning 8 bit data
-	always @(posedge axi_mm_clk) begin
-		if(rst_n == 0) begin
-			current_write_address <= 0;
-			current_write_data <= 0;
-			current_mem_wen <= 0;
-		end
-		else begin
-			if (wen == 1) begin
-				current_write_address <= waddr;
-				for(index_wstrb = 0; index_wstrb < (C_S_AXI_DATA_WIDTH / 8); index_wstrb = index_wstrb + 1) begin
-					if(wstrb[index_wstrb] == 1) begin
-						current_write_data[(8 * index_wstrb + 7) -: 8] <= wdata[(8 * index_wstrb + 7) -: 8];
-					end
-				end
-			end
-			current_mem_wen <= wen;
-		end
-	end
-
 
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
@@ -92,22 +66,22 @@ module csa_ram #(
 		end
 		else begin
 			csa_current_channel_changed <= 0;
-			if(current_mem_wen == 1) begin
-				case(current_write_address)
+			if(wen == 1) begin
+				case(waddr)
 					ADDR_CHANNEL_INDEX: begin
-						if((current_write_data >= 0) && (current_write_data < CSA_CALC_INST_NUM)) begin
-							csa_current_channel <= current_write_data;
+						if((wdata >= 0) && (wdata < CSA_CALC_INST_NUM)) begin
+							csa_current_channel <= wdata;
 							csa_current_channel_changed <= 1;
 						end
 						else begin
 						end
 					end
 					ADDR_CALC_TIMES: begin
-						if(current_write_data <= 0) begin
+						if(wdata <= 0) begin
 							csa_calc_logic_times <= 50000;
 						end
 						else begin
-							csa_calc_logic_times <= current_write_data;
+							csa_calc_logic_times <= wdata;
 						end
 					end
 					default: begin
@@ -139,6 +113,9 @@ module csa_ram #(
 		else begin
 			if (ren == 1) begin
 				case(raddr)
+					ADDR_CSA_BUSY: begin
+						rdata <= {{(C_S_AXI_DATA_WIDTH - 1){1'b0}}, csa_in_r_ready};
+					end
 					ADDR_CHANNEL_INDEX: begin
 						rdata <= csa_current_channel;
 					end
@@ -267,7 +244,7 @@ module csa_ram #(
 						csa_in_2 <= {{(C_S_AXI_DATA_WIDTH - 8){1'b0}}, csa_in_rdata[(2 * 8) +: 8]};
 						csa_in_3 <= {{(C_S_AXI_DATA_WIDTH - 8){1'b0}}, csa_in_rdata[(3 * 8) +: 8]};
 						csa_in_4 <= {{(C_S_AXI_DATA_WIDTH - 8){1'b0}}, csa_in_rdata[(4 * 8) +: 8]};
-						csa_in_changed <= 0;
+						csa_in_changed <= 1;
 					end
 					else begin
 					end

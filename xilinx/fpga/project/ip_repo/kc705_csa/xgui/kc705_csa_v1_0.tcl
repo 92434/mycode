@@ -3,6 +3,33 @@ proc init_gui { IPINST } {
 
 }
 
+proc update_PARAM_VALUE.C_M00_AXIS_START_COUNT { PARAM_VALUE.C_M00_AXIS_START_COUNT } {
+	# Procedure called to update C_M00_AXIS_START_COUNT when any of the dependent parameters in the arguments change
+}
+
+proc validate_PARAM_VALUE.C_M00_AXIS_START_COUNT { PARAM_VALUE.C_M00_AXIS_START_COUNT } {
+	# Procedure called to validate C_M00_AXIS_START_COUNT
+	return true
+}
+
+proc update_PARAM_VALUE.C_M00_AXIS_TDATA_WIDTH { PARAM_VALUE.C_M00_AXIS_TDATA_WIDTH } {
+	# Procedure called to update C_M00_AXIS_TDATA_WIDTH when any of the dependent parameters in the arguments change
+}
+
+proc validate_PARAM_VALUE.C_M00_AXIS_TDATA_WIDTH { PARAM_VALUE.C_M00_AXIS_TDATA_WIDTH } {
+	# Procedure called to validate C_M00_AXIS_TDATA_WIDTH
+	return true
+}
+
+proc update_PARAM_VALUE.C_S00_AXIS_TDATA_WIDTH { PARAM_VALUE.C_S00_AXIS_TDATA_WIDTH } {
+	# Procedure called to update C_S00_AXIS_TDATA_WIDTH when any of the dependent parameters in the arguments change
+}
+
+proc validate_PARAM_VALUE.C_S00_AXIS_TDATA_WIDTH { PARAM_VALUE.C_S00_AXIS_TDATA_WIDTH } {
+	# Procedure called to validate C_S00_AXIS_TDATA_WIDTH
+	return true
+}
+
 proc update_PARAM_VALUE.C_S00_AXI_BUSER_WIDTH { PARAM_VALUE.C_S00_AXI_BUSER_WIDTH } {
 	# Procedure called to update C_S00_AXI_BUSER_WIDTH when any of the dependent parameters in the arguments change
 }
@@ -75,19 +102,19 @@ proc validate_PARAM_VALUE.C_S00_AXI_ID_WIDTH { PARAM_VALUE.C_S00_AXI_ID_WIDTH } 
 	return true
 }
 
-proc update_PARAM_VALUE.MAX_CAL_TIMES { PARAM_VALUE.MAX_CAL_TIMES } {
-	# Procedure called to update MAX_CAL_TIMES when any of the dependent parameters in the arguments change
+proc update_PARAM_VALUE.CSA_CALC_INST_NUM { PARAM_VALUE.CSA_CALC_INST_NUM } {
+	# Procedure called to update CSA_CALC_INST_NUM when any of the dependent parameters in the arguments change
 }
 
-proc validate_PARAM_VALUE.MAX_CAL_TIMES { PARAM_VALUE.MAX_CAL_TIMES } {
-	# Procedure called to validate MAX_CAL_TIMES
+proc validate_PARAM_VALUE.CSA_CALC_INST_NUM { PARAM_VALUE.CSA_CALC_INST_NUM } {
+	# Procedure called to validate CSA_CALC_INST_NUM
 	return true
 }
 
 
-proc update_MODELPARAM_VALUE.MAX_CAL_TIMES { MODELPARAM_VALUE.MAX_CAL_TIMES PARAM_VALUE.MAX_CAL_TIMES } {
+proc update_MODELPARAM_VALUE.CSA_CALC_INST_NUM { MODELPARAM_VALUE.CSA_CALC_INST_NUM PARAM_VALUE.CSA_CALC_INST_NUM } {
 	# Procedure called to set VHDL generic/Verilog parameter value(s) based on TCL parameter value
-	set_property value [get_property value ${PARAM_VALUE.MAX_CAL_TIMES}] ${MODELPARAM_VALUE.MAX_CAL_TIMES}
+	set_property value [get_property value ${PARAM_VALUE.CSA_CALC_INST_NUM}] ${MODELPARAM_VALUE.CSA_CALC_INST_NUM}
 }
 
 proc update_MODELPARAM_VALUE.C_S00_AXI_ID_WIDTH { MODELPARAM_VALUE.C_S00_AXI_ID_WIDTH PARAM_VALUE.C_S00_AXI_ID_WIDTH } {
@@ -128,5 +155,20 @@ proc update_MODELPARAM_VALUE.C_S00_AXI_RUSER_WIDTH { MODELPARAM_VALUE.C_S00_AXI_
 proc update_MODELPARAM_VALUE.C_S00_AXI_BUSER_WIDTH { MODELPARAM_VALUE.C_S00_AXI_BUSER_WIDTH PARAM_VALUE.C_S00_AXI_BUSER_WIDTH } {
 	# Procedure called to set VHDL generic/Verilog parameter value(s) based on TCL parameter value
 	set_property value [get_property value ${PARAM_VALUE.C_S00_AXI_BUSER_WIDTH}] ${MODELPARAM_VALUE.C_S00_AXI_BUSER_WIDTH}
+}
+
+proc update_MODELPARAM_VALUE.C_S00_AXIS_TDATA_WIDTH { MODELPARAM_VALUE.C_S00_AXIS_TDATA_WIDTH PARAM_VALUE.C_S00_AXIS_TDATA_WIDTH } {
+	# Procedure called to set VHDL generic/Verilog parameter value(s) based on TCL parameter value
+	set_property value [get_property value ${PARAM_VALUE.C_S00_AXIS_TDATA_WIDTH}] ${MODELPARAM_VALUE.C_S00_AXIS_TDATA_WIDTH}
+}
+
+proc update_MODELPARAM_VALUE.C_M00_AXIS_TDATA_WIDTH { MODELPARAM_VALUE.C_M00_AXIS_TDATA_WIDTH PARAM_VALUE.C_M00_AXIS_TDATA_WIDTH } {
+	# Procedure called to set VHDL generic/Verilog parameter value(s) based on TCL parameter value
+	set_property value [get_property value ${PARAM_VALUE.C_M00_AXIS_TDATA_WIDTH}] ${MODELPARAM_VALUE.C_M00_AXIS_TDATA_WIDTH}
+}
+
+proc update_MODELPARAM_VALUE.C_M00_AXIS_START_COUNT { MODELPARAM_VALUE.C_M00_AXIS_START_COUNT PARAM_VALUE.C_M00_AXIS_START_COUNT } {
+	# Procedure called to set VHDL generic/Verilog parameter value(s) based on TCL parameter value
+	set_property value [get_property value ${PARAM_VALUE.C_M00_AXIS_START_COUNT}] ${MODELPARAM_VALUE.C_M00_AXIS_START_COUNT}
 }
 

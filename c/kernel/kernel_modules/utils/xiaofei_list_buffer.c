@@ -14,6 +14,9 @@ exit:
 	return list;
 }
 
+void disable_list_buffer_overwrite(list_buffer_t *list, bool disable) {
+	list->disable_overwrite = disable;
+}
 
 static bool buffer_node_exist(char *buffer, list_buffer_t *list) {
 	bool ret = false;
@@ -182,12 +185,20 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 				&& (read_offset <= write_end)
 				) {
 			myprintf("will overwrite at:%p(%d-%d)-%p(%d)!\n", (void *)node, write_start, write_end, (void *)read_node, read_offset);
+			if(list->disable_overwrite) {
+				write_count = -1;
+				return write_count;
+			}
 		} else if(
 				(list->read == list->write->next)
 				&& (write_end == node->size)
 				&& (read_node->read_offset == 0)
 				) {
 			myprintf("will overwrite at:%p(%d-%d)-%p(%d)!\n", (void *)node, write_start, write_end, (void *)read_node, read_node->read_offset);
+			if(list->disable_overwrite) {
+				write_count = -1;
+				return write_count;
+			}
 		}
 	}
 

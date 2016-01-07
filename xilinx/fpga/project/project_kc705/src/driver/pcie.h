@@ -105,6 +105,7 @@ typedef struct {
 	uint64_t target_axi_addr_base;
 	dma_type_t dma_type;
 	dma_op_t dma_op;
+	int receive_bulk_size;
 	struct completion tx_cmp;
 	struct completion rx_cmp;
 	long unsigned int tx_count;
@@ -142,7 +143,7 @@ typedef struct {
 	pcie_dma_t *dma;
 	void **gpiochip;
 	struct task_struct *pcie_tr_thread;
-	struct task_struct *test_thread[10];
+	struct task_struct **dma_thread;
 	timer_data_t *ptimer_data;
 	list_buffer_t *pcie_tr_list;
 	spinlock_t alloc_lock;

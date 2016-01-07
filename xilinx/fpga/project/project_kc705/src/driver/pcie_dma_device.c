@@ -49,7 +49,47 @@ static ssize_t pcie_dma_read(struct file *filp, char __user * buf, size_t len, l
 }
 
 static ssize_t pcie_dma_write(struct file *filp, const char __user * buf, size_t len, loff_t * off) {
-	mydebug("\n");
+	int ret = 0;
+	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
+
+	uint8_t *tx_data = NULL;
+
+	//mydebug("\n");
+	if(len == 0) {
+		ret = -1;
+		return ret;
+	}
+
+	tx_data = (uint8_t *)vzalloc(len);
+	if(tx_data == NULL) {
+		mydebug("alloc tx_data failed.\n");
+		ret = -1;
+		return ret;
+	}
+	
+	if(copy_from_user(tx_data, buf, len)) {
+		mydebug("%p\n", current);
+		ret = -1;
+		return ret;
+	}
+
+	ret = put_pcie_tr(
+			dma,
+			0,
+			0,
+			len,
+			0,
+			tx_data,
+			NULL,
+			true
+		);
+
+	vfree(tx_data);
+
+	if(ret == -1) {
+		return ret;
+	}
+
 	return len;
 }
 
@@ -173,9 +213,12 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 					if(tx_data == NULL) {
 						mydebug("alloc tx_data failed.\n");
 						ret = -EFAULT;
-						return ret;
+						goto tr_buffer_release;
 					} else {
-						copy_from_user(tx_data, pseudo_dma_tr.tx_data, pseudo_dma_tr.tx_size);
+						if(copy_from_user(tx_data, pseudo_dma_tr.tx_data, pseudo_dma_tr.tx_size)) {
+							ret = -EFAULT;
+							goto tr_buffer_release;
+						}
 					}
 				}
 
@@ -184,31 +227,33 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 					if(rx_data == NULL) {
 						mydebug("alloc rx_data failed.\n");
 						ret = -EFAULT;
-						return ret;
+						goto tr_buffer_release;
 					}
 				}
 
 				//myprintf("tx_size:%d, rx_size:%d\n", pseudo_dma_tr.tx_size, pseudo_dma_tr.rx_size);
 
-				put_pcie_tr(
-					dma,
-					pseudo_dma_tr.tx_dest_offset,
-					pseudo_dma_tr.rx_src_offset,
-					pseudo_dma_tr.tx_size,
-					pseudo_dma_tr.rx_size,
-					tx_data,
-					rx_data,
-					true
-				);
-
-				if(pseudo_dma_tr.rx_data != NULL) {
-					if (copy_to_user(pseudo_dma_tr.rx_data, rx_data, pseudo_dma_tr.rx_size)) {
-						mydebug("%p\n", current);
-						ret = -EFAULT;
-						return ret;
-					}
+				ret = put_pcie_tr(
+						dma,
+						pseudo_dma_tr.tx_dest_offset,
+						pseudo_dma_tr.rx_src_offset,
+						pseudo_dma_tr.tx_size,
+						pseudo_dma_tr.rx_size,
+						tx_data,
+						rx_data,
+						true
+					);
+				if(ret == -1) {
+					goto tr_buffer_release;
 				}
 
+				if (copy_to_user(pseudo_dma_tr.rx_data, rx_data, pseudo_dma_tr.rx_size)) {
+					mydebug("%p\n", current);
+					ret = -EFAULT;
+					goto tr_buffer_release;
+				}
+
+tr_buffer_release:
 				if(tx_data != NULL) {
 					vfree(tx_data);
 				}
