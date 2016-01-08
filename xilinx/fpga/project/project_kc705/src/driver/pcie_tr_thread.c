@@ -48,6 +48,8 @@ int alloc_pcie_tr(kc705_pci_dev_t *kc705_pci_dev) {
 	}
 	add_list_buffer_item((char *)tr_buffer, (void *)NULL, sizeof(pcie_tr_t) * 1024, kc705_pci_dev->pcie_tr_list);
 
+	return ret;
+
 alloc_pcie_tr_buffer_failed:
 	uninit_list_buffer(kc705_pci_dev->pcie_tr_list);
 	kc705_pci_dev->pcie_tr_list = NULL;

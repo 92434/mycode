@@ -36,9 +36,11 @@ static int alloc_dma_memory(kc705_pci_dev_t *kc705_pci_dev) {
 					pseudo_dma_op;
 		dma->receive_bulk_size = dma_info[i].receive_bulk_size;
 
+
 		for(j = 0; j < dma->dma_bar_map_num; j++) {
 			dma->bar_map_memory_size[j] = PCIe_MAP_BAR_SIZE;
 		}
+
 
 		//alloc memory cdma
 		for(j = 0; j < MAX_BAR_MAP_MEMORY; j++) {
@@ -51,7 +53,7 @@ static int alloc_dma_memory(kc705_pci_dev_t *kc705_pci_dev) {
 				} else {
 					//mydebug("dma->bar_map_memory[%d]:%p\n", j, dma->bar_map_memory[j]);
 					//mydebug("dma->bar_map_addr[%d]:%p\n", j, (void *)dma->bar_map_addr[j]);
-					//mydebug("dma->bar_map_memory_size[%d]:%x\n", j, dma->bar_map_memory_size[j]);
+					//mydebug("dma->bar_map_memory_size[%d]:%x\n", j, dma->bar_map_memory_size[j] - (dma->bar_map_memory_size[j] % dma->receive_bulk_size));
 					if(j > DMA_BAR_MEM_START_INDEX) {//
 						add_list_buffer_item((char *)dma->bar_map_memory[j], (void *)dma->bar_map_addr[j], dma->bar_map_memory_size[j] - (dma->bar_map_memory_size[j] % dma->receive_bulk_size), dma->list);
 					}
@@ -102,8 +104,11 @@ int alloc_kc705_dma(kc705_pci_dev_t *kc705_pci_dev) {
 
 	ret = alloc_dma_memory(kc705_pci_dev);
 	if(ret != 0) {
+		mydebug("alloc_dma_memory_failed!\n");
 		goto alloc_dma_memory_failed;
 	}
+
+	return ret;
 
 alloc_dma_memory_failed:
 	free_dma_memory(kc705_pci_dev);

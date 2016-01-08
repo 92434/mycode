@@ -57,7 +57,7 @@ static dma_static_config_info_t dma_info[] = {
 		.pcie_map_bar_axi_addr_1 = 0,
 		.dma_bar_map_num = 3,
 		.dma_type = PSEUDO_DMA,
-		.receive_bulk_size = 0,
+		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
 	},
 };
 

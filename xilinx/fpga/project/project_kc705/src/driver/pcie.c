@@ -225,10 +225,6 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		goto remap_pcie_bars_failed;
 	}
 	
-	//mydebug("tsp addr:%p\n", kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE);
-	//write_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 12);
-	//dump_regs(kc705_pci_dev->bar_info[0].base_vaddr + OFFSET_AXI_TSP_LITE, 12);
-
 	/* Returns success if PCI is capable of 32-bit DMA */
 #if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,36)
 	ret = pci_set_dma_mask(kc705_pci_dev->pdev, DMA_32BIT_MASK);
@@ -294,14 +290,13 @@ alloc_kc705_pci_dev_failed:
 static void kc705_remove_pcie(struct pci_dev *pdev) {
 	kc705_pci_dev_t *kc705_pci_dev = pci_get_drvdata(pdev);
 
-	if(kc705_pci_dev != NULL) {
+	if(kc705_pci_dev == NULL) {
 		return;
 	}
 
-	remove_local_device(kc705_pci_dev);
-
 	stop_dma(kc705_pci_dev);
 
+	remove_local_device(kc705_pci_dev);
 
 	if(pdev->irq != 0) {
 		free_irq(pdev->irq, pdev);
@@ -314,6 +309,8 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 	iounmap_pcie_bars(kc705_pci_dev);
 
 	pci_release_regions(pdev);
+	
+	pci_clear_master(pdev);
 
 	pci_disable_device(pdev);
 
@@ -323,9 +320,9 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 
 	free_dma_thread(kc705_pci_dev);
 
-	pci_set_drvdata(pdev, NULL);
-
 	free_kc705_dma(kc705_pci_dev);
+
+	pci_set_drvdata(pdev, NULL);
 
 	vfree(kc705_pci_dev);
 }
