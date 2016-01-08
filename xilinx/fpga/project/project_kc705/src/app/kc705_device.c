@@ -11,7 +11,7 @@
 
 #define BUFSIZE 0x1000
 
-#include "kc705_device.h"
+#include "kc705.h"
 
 typedef void (*sig_action_t)(int, siginfo_t *, void *);
 
