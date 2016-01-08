@@ -4,10 +4,9 @@
 #include <linux/highmem.h>
 #include <linux/poll.h>
 
+#include "kc705.h"
 #include "pcie.h"
-#include "kc705_device.h"
-
-#include "utils/xiaofei_debug.h"
+#include "pcie_device.h"
 
 #define MAX_KC705_DEV_NUM 16
 

@@ -26,7 +26,7 @@ static void default_timer_func(unsigned long __opaque) {
 	add_timer(tl);
 }
 
-timer_data_t *alloc_timer(unsigned long ms, timer_func_t func) {
+timer_data_t *alloc_timer(unsigned long ms, timer_func_t func, struct work_struct *timer_work) {
 	timer_data_t *pdata = NULL;
 	struct timer_list *tl = NULL;
 
@@ -49,6 +49,7 @@ timer_data_t *alloc_timer(unsigned long ms, timer_func_t func) {
 	pdata->tl = tl;
 	pdata->ms = ms;
 	pdata->func = func;
+	pdata->timer_work = timer_work;
 
 	start_timer(pdata);
 
@@ -84,6 +85,6 @@ free_timer_data:
 }
 
 
-//timer_data_t *pdata = alloc_timer(1000, default_timer_func);
+//timer_data_t *pdata = alloc_timer(1000, default_timer_func, timer_work);
 
 //free_timer(pdata);

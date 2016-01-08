@@ -139,14 +139,16 @@ typedef struct {
 		void __iomem * base_vaddr; /**< VA - mapped address */
 	} bar_info[MAX_BARS];
 	int msi_enable;
-	struct work_struct work;
+	struct work_struct timer_work;
 	pcie_dma_t *dma;
+	int dma_count;
 	void **gpiochip;
 	struct task_struct *pcie_tr_thread;
 	struct task_struct **dma_thread;
+	int dma_thread_count;
 	timer_data_t *ptimer_data;
 	list_buffer_t *pcie_tr_list;
-	spinlock_t alloc_lock;
+	spinlock_t pcie_tr_list_lock;
 
 	struct cdev cdev;
 	char dev_name[16];

@@ -7,9 +7,10 @@ typedef struct {
 	struct timer_list *tl;
 	unsigned long ms;
 	timer_func_t func;
+	struct work_struct *timer_work;
 } timer_data_t;
 
-timer_data_t *alloc_timer(unsigned long ms, timer_func_t func);
+timer_data_t *alloc_timer(unsigned long ms, timer_func_t func, struct work_struct *timer_work);
 void free_timer(void *pdata);
 
 #endif//#ifndef _XIAOFEI_TIMER_H

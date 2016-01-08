@@ -2,10 +2,10 @@
 #include <linux/pci.h>
 #include <linux/kthread.h>
 
-#include "utils/xiaofei_debug.h"
-
 #include "pcie.h"
-#include "dma_common.h"
+#include "pcie_dma.h"
+#include "pcie_performance.h"
+#include "pcie_tr_thread.h"
 
 //AXI DMA Register Summary
 #define MM2S_DMACR 0x00 //MM2S DMA Control register
@@ -197,8 +197,6 @@ static int dma_trans_sync(pcie_dma_t *dma, int tx_size, int rx_size) {
 	return ret;
 }
 
-void inc_dma_op_tx_count(pcie_dma_t *dma, long unsigned int count);
-int tr_wakeup(struct completion *tr_cmp);
 static int dma_tr(void *ppara) {
 	int ret = 0;
 
@@ -228,7 +226,9 @@ static int dma_tr(void *ppara) {
 
 	tx_src_bar_map_memory = (uint8_t *)(dma->bar_map_memory[1] + write.write_offset);
 	rx_dest_bar_map_memory = (uint8_t *)(write.buffer + write.write_offset);
-	prepare_test_data(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size, tx_data);
+	if((tx_data != NULL) && (tx_size != 0)) {
+		memcpy(tx_src_bar_map_memory, tx_data, tx_size);
+	}
 
 	tx_src_bar_map_addr = (uint64_t)dma->bar_map_addr[1];
 	rx_dest_bar_map_addr = (uint64_t)write.buffer_addr;
@@ -252,10 +252,9 @@ static int dma_tr(void *ppara) {
 	if(ret != 0) {
 		dma->dma_op.init_dma(dma);
 	} else {
-		//test_result(tx_src_bar_map_memory, tx_size, rx_dest_bar_map_memory, rx_size);
+		inc_dma_op_tx_count(dma, rx_size);
 
 		write_buffer(NULL, rx_size, dma->list);
-		inc_dma_op_tx_count(dma, rx_size);
 	}
 
 	tr_wakeup(tr_cmp);

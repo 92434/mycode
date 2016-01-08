@@ -2,9 +2,10 @@
 #include <linux/pci.h>
 #include <linux/kthread.h>
 
-#include "utils/xiaofei_debug.h"
 #include "pcie.h"
-#include "dma_common.h"
+#include "pcie_dma.h"
+#include "pcie_performance.h"
+#include "pcie_tr_thread.h"
 
 /*
  *dma->bar_map_memory[0]-----------unused
@@ -26,9 +27,6 @@ static irqreturn_t process_isr(void *ppara) {
 	return status;
 }
 
-void inc_dma_op_tx_count(pcie_dma_t *dma, long unsigned int count);
-void inc_dma_op_rx_count(pcie_dma_t *dma, long unsigned int count);
-int tr_wakeup(struct completion *tr_cmp);
 static int dma_tr(void *ppara) {
 	int ret = 0;
 
@@ -57,7 +55,9 @@ static int dma_tr(void *ppara) {
 	tx_dest_memory = (uint8_t *)(dma_base_vaddr + tx_dest_axi_addr);
 	rx_src_memory = (uint8_t *)(dma_base_vaddr + rx_src_axi_addr);
 
-	prepare_test_data(tx_src_memory, tx_size, rx_dest_memory, rx_size, tx_data);
+	if((tx_data != NULL) && (tx_size != 0)) {
+		memcpy(tx_src_memory, tx_data, tx_size);
+	}
 
 	if(tx_size != 0) {
 		for(i = 0; i + 4 <= tx_size; i += 4) {
@@ -72,6 +72,8 @@ static int dma_tr(void *ppara) {
 		for(i = pos; i + 1 <= tx_size; i += 1) {
 			writeb(*((uint8_t *)(tx_src_memory + i)), tx_dest_memory + i);
 		}
+
+		inc_dma_op_tx_count(dma, tx_size);
 	}
 
 	if(rx_size != 0) {
@@ -89,11 +91,11 @@ static int dma_tr(void *ppara) {
 		}
 	}
 
-	//test_result(tx_src_memory, tx_size, rx_dest_memory, rx_size);
-	get_result(rx_dest_memory, rx_size, rx_data);//id
+	if((rx_data != NULL) && (rx_size != 0)) {
+		memcpy(rx_data, rx_dest_memory, rx_size);
+		inc_dma_op_rx_count(dma, rx_size);
+	}
 
-	inc_dma_op_tx_count(dma, tx_size);
-	inc_dma_op_rx_count(dma, rx_size);
 
 	tr_wakeup(tr_cmp);
 
