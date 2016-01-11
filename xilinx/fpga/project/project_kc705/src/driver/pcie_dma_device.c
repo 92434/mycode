@@ -8,9 +8,6 @@
 #include "pcie.h"
 #include "pcie_tr_thread.h"
 
-#define MAX_KC705_DEV_NUM 16
-
-
 static int pcie_dma_open(struct inode *i, struct file *filp) {
 	pcie_dma_t *dma = container_of(i->i_cdev, pcie_dma_t, cdev);
 	filp->private_data = dma;
@@ -24,7 +21,6 @@ static int pcie_dma_close(struct inode *i, struct file *filp) {
 	return 0;
 }
 
-void inc_dma_op_rx_count(pcie_dma_t *dma, long unsigned int count);
 static ssize_t pcie_dma_read(struct file *filp, char __user * buf, size_t len, loff_t * off) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
@@ -79,8 +75,7 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user * buf, size_t
 			len,
 			0,
 			tx_data,
-			NULL,
-			true
+			NULL
 		);
 
 	vfree(tx_data);
@@ -153,14 +148,6 @@ static int pcie_dma_mmap(struct file *filp, struct vm_area_struct *vma) {
 	return 0;
 }
 
-int put_pcie_tr(pcie_dma_t *dma,
-		uint64_t tx_dest_axi_addr,
-		uint64_t rx_src_axi_addr,
-		int tx_size,
-		int rx_size,
-		uint8_t *tx_data,
-		uint8_t *rx_data,
-		bool wait);
 static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
@@ -239,8 +226,7 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 						pseudo_dma_tr.tx_size,
 						pseudo_dma_tr.rx_size,
 						tx_data,
-						rx_data,
-						true
+						rx_data
 					);
 				if(ret == -1) {
 					goto tr_buffer_release;
@@ -279,67 +265,45 @@ static const struct file_operations pcie_dma_fops = {
 	.poll = pcie_dma_poll,
 };
 
-int setup_pcie_dma_dev(pcie_dma_t *dma, char *namefmt, ...) {
-	int status = 0;
+int setup_pcie_dma_dev(pcie_dma_t *dma) {
+	int ret = 0;
 
-	va_list args;
+	kc705_pci_dev_t *kc705_pci_dev = dma->kc705_pci_dev;
 
-	va_start(args, namefmt);
-	vsnprintf(dma->dev_name, sizeof(dma->dev_name), namefmt, args);
-	va_end(args);
-
-	if (dma->pcie_dma_dev_id == 0) {
-		/* Alloc Major & Minor number for char device */
-		status = alloc_chrdev_region(&dma->pcie_dma_dev_id, 0, MAX_KC705_DEV_NUM, dma->dev_name);
-		if (status) {
-			mydebug("\n");
-			goto alloc_chrdev_region_failed;
-		}
-		printk("MAJOR(dma->pcie_dma_dev_id):%d\n", MAJOR(dma->pcie_dma_dev_id));
-	}
-
-	if (dma->pcie_dma_class == NULL) {
-		dma->pcie_dma_class = class_create(THIS_MODULE, dma->dev_name);
-		if (IS_ERR(dma->pcie_dma_class)) {
-			status = PTR_ERR(dma->pcie_dma_class);
-			mydebug("\n");
-			goto class_create_failed;
-		}
+	if(dma->dev_name == NULL) {
+		mydebug("\n");
+		goto no_device_name_failed;
 	}
 
 	cdev_init(&dma->cdev, &pcie_dma_fops);
 
-	status = cdev_add(&dma->cdev, dma->pcie_dma_dev_id, 1);
-	if (status < 0) {
+	ret = cdev_add(&dma->cdev, dma->dev, 1);
+	if (ret < 0) {
 		goto cdev_add_failed;
 	}
 
 	/* Add Device node in system */
-	dma->device = device_create(dma->pcie_dma_class, NULL, dma->pcie_dma_dev_id, NULL, "%s", dma->dev_name);
+	dma->device = device_create(kc705_pci_dev->kc705_class, kc705_pci_dev->device, dma->dev, NULL, "%s", dma->dev_name);
 	if (IS_ERR(dma->device)) {
-		status = PTR_ERR(dma->device);
+		ret = PTR_ERR(dma->device);
 		goto device_create_failed;
 	}
 
-	return status;
+	return ret;
 
-	device_destroy(dma->pcie_dma_class, dma->pcie_dma_dev_id);
+	device_destroy(kc705_pci_dev->kc705_class, dma->dev);
+	dma->device = NULL;
 device_create_failed:
 	cdev_del(&dma->cdev);
 cdev_add_failed:
-	class_destroy(dma->pcie_dma_class);
-class_create_failed:
-	unregister_chrdev_region(dma->pcie_dma_dev_id, MAX_KC705_DEV_NUM);
-alloc_chrdev_region_failed:
-	return status;
+no_device_name_failed:
+	return ret;
 }
 
 void uninstall_pcie_dma_dev(pcie_dma_t *dma) {
 	if(dma->device != NULL) {
 		device_destroy(dma->pcie_dma_class, dma->pcie_dma_dev_id);
-		cdev_del(&dma->cdev);
-		class_destroy(dma->pcie_dma_class);
-		unregister_chrdev_region(dma->pcie_dma_dev_id, MAX_KC705_DEV_NUM);
 		dma->device = NULL;
+		cdev_del(&dma->cdev);
 	}
 }

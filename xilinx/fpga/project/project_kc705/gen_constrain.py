@@ -414,7 +414,7 @@ def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, 
 	if fmc_type == 'HPC':
 		gpio_bank_base = [148, 116, 84, 57]
 	elif fmc_type == 'LPC':
-		gpio_bank_base = [148, 116, 107, 0]
+		gpio_bank_base = [148, 140, 0, 0]
 
 	io_pin_no_map = {}
 	for io, pin, gpio in constrain:

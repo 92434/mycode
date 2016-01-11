@@ -89,12 +89,20 @@ typedef struct _dma_op {
 	dma_tr_t dma_tr; 
 } dma_op_t;
 
+typedef int (*pcie_dma_thread_t)(void *ppara);
+
+typedef struct _dma_thread_info {
+	pcie_dma_thread_t t;
+	char *thread_name;
+} dma_thread_info_t;
+
 typedef struct {
 	void *kc705_pci_dev;
-	int bar_map_memory_num;
+
 	int bar_map_memory_size[MAX_BAR_MAP_MEMORY];
 	void *bar_map_memory[MAX_BAR_MAP_MEMORY];
 	dma_addr_t bar_map_addr[MAX_BAR_MAP_MEMORY];
+
 	int dma_lite_offset;
 	int pcie_bar_map_ctl_offset_0;
 	int pcie_bar_map_ctl_offset_1;
@@ -105,17 +113,21 @@ typedef struct {
 	uint64_t target_axi_addr_base;
 	dma_type_t dma_type;
 	dma_op_t dma_op;
+	dma_thread_info_t *dma_thread;
+	int dma_thread_count;
 	int receive_bulk_size;
+	int send_bulk_size;
+
 	struct completion tx_cmp;
 	struct completion rx_cmp;
 	long unsigned int tx_count;
 	long unsigned int rx_count;
 
-	struct cdev cdev;
-	char dev_name[16];
 	wait_queue_head_t wq;
-	dev_t pcie_dma_dev_id;
-	struct class *pcie_dma_class;
+	struct cdev cdev;
+	char *devname;
+	dev_t dev;
+
 	struct device *device;
 } pcie_dma_t;
 
@@ -139,20 +151,27 @@ typedef struct {
 		void __iomem * base_vaddr; /**< VA - mapped address */
 	} bar_info[MAX_BARS];
 	int msi_enable;
+
+	timer_data_t *ptimer_data;
 	struct work_struct timer_work;
+
 	pcie_dma_t *dma;
 	int dma_count;
-	void **gpiochip;
-	struct task_struct *pcie_tr_thread;
 	struct task_struct **dma_thread;
-	int dma_thread_count;
-	timer_data_t *ptimer_data;
-	list_buffer_t *pcie_tr_list;
+	int total_dma_thread_count;
+
+
 	spinlock_t pcie_tr_list_lock;
+	list_buffer_t *pcie_tr_list;
+	struct task_struct *pcie_tr_thread;
+	char *thread_name;
+
+	void **gpiochip;
 
 	struct cdev cdev;
-	char dev_name[16];
-	dev_t kc705_dev_id;
+	char *devname;
+	dev_t dev;
+
 	struct class *kc705_class;
 	struct device *device;
 } kc705_pci_dev_t;

@@ -7,8 +7,8 @@
 #KERNEL-OBJS += modules-name.o
 
 #KBUILD_CFLAGS += -Dtest_timer
-KBUILD_CFLAGS += -Dtest_buffer_list
-#KBUILD_CFLAGS += -DTEST_FMC_LPC_GPIOS
+#KBUILD_CFLAGS += -Dtest_buffer_list
+KBUILD_CFLAGS += -DTEST_FMC_LPC_GPIOS
 
 #kc705-dma-objs := kc705_pcie_xdma.o
 #KERNEL-OBJS += kc705-dma.o
@@ -19,6 +19,7 @@ KBUILD_CFLAGS += -Dtest_buffer_list
 
 kc705-module-objs := kc705.o \
 	pcie.o \
+	gpio.o \
 	gpio_proc.o \
 	pcie_gpio.o \
 	pcie_device.o \
@@ -37,7 +38,7 @@ kc705-module-objs := kc705.o \
 KERNEL-OBJS += kc705-module.o
 
 spi-gpio-all-objs := spi-gpio.o spi-bitbang.o
-KERNEL-OBJS += i2c-gpio.o i2c-dev.o spi-gpio-all.o spidev.o kc705_i2c_device.o
+KERNEL-OBJS += i2c-gpio.o i2c-dev.o spi-gpio-all.o spidev.o kc705_i2c_master.o kc705_spi_master.o kc705_spi_device.o
 
 include $(BUILD_KO)
 

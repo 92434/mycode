@@ -34,8 +34,10 @@ static int alloc_dma_memory(kc705_pci_dev_t *kc705_pci_dev) {
 					(dma_info[i].dma_type == AXI_CDMA) ? axi_cdma_op :
 					(dma_info[i].dma_type == PSEUDO_DMA) ? pseudo_dma_op :
 					pseudo_dma_op;
+		dma->dma_thread = dma_info[i].dma_thread;
+		dma->dma_thread_count = dma_info[i].dma_thread_count;
 		dma->receive_bulk_size = dma_info[i].receive_bulk_size;
-
+		dma->send_bulk_size = dma_info[i].send_bulk_size;
 
 		for(j = 0; j < dma->dma_bar_map_num; j++) {
 			dma->bar_map_memory_size[j] = PCIe_MAP_BAR_SIZE;
@@ -134,7 +136,7 @@ void add_dma_device(kc705_pci_dev_t *kc705_pci_dev) {
 
 	for(i = 0; i < kc705_pci_dev->dma_count; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
-		setup_pcie_dma_dev(dma, "%s_%d", "pciedma", i);
+		setup_pcie_dma_dev(dma);
 	}
 }
 

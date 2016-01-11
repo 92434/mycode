@@ -10,8 +10,7 @@ int put_pcie_tr(pcie_dma_t *dma,
 		int tx_size,
 		int rx_size,
 		uint8_t *tx_data,
-		uint8_t *rx_data,
-		bool wait);
+		uint8_t *rx_data);
 void alloc_tr_thread(kc705_pci_dev_t *kc705_pci_dev);
 void free_tr_thread(kc705_pci_dev_t *kc705_pci_dev);
 #endif//#ifndef _PCIE_TR_THREAD_H

@@ -32,7 +32,9 @@ static struct pci_device_id ids[] = {
 static void add_local_device(kc705_pci_dev_t *kc705_pci_dev) {
 	add_kc705_gpio(kc705_pci_dev);
 
-	setup_kc705_dev(kc705_pci_dev, "%s", "kc705_pcie");
+	init_kc705_dev_class(kc705_pci_dev);
+
+	setup_kc705_dev(kc705_pci_dev);
 
 	add_dma_device(kc705_pci_dev);
 }
@@ -42,6 +44,8 @@ static void remove_local_device(kc705_pci_dev_t *kc705_pci_dev) {
 	remove_dma_device(kc705_pci_dev);
 
 	uninstall_kc705_dev(kc705_pci_dev);
+
+	uninit_kc705_dev_class(kc705_pci_dev);
 
 	remove_kc705_gpio(kc705_pci_dev);
 }
