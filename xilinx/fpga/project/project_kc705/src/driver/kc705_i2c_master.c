@@ -48,7 +48,7 @@ static struct platform_device i2c_gpio_device = {
 	},
 };
 
-static int __init kc705_i2c_device_init(void)
+static int __init kc705_i2c_master_init(void)
 {
 	int ret = 0;
 	printk("%s\n", __PRETTY_FUNCTION__);
@@ -57,13 +57,13 @@ static int __init kc705_i2c_device_init(void)
 	return ret;
 }
 
-static void __exit kc705_i2c_device_exit(void) {
+static void __exit kc705_i2c_master_exit(void) {
 	printk("%s\n", __PRETTY_FUNCTION__);
 	platform_device_unregister(&i2c_gpio_device);
 }
 
-module_init(kc705_i2c_device_init);
-module_exit(kc705_i2c_device_exit);
+module_init(kc705_i2c_master_init);
+module_exit(kc705_i2c_master_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("xiaofei");
