@@ -252,13 +252,9 @@ static int dma_tr(void *ppara) {
 	if(ret != 0) {
 		dma->dma_op.init_dma(dma);
 	} else {
-		inc_dma_op_tx_count(dma, rx_size);
-
 		write_buffer(NULL, rx_size, dma->list);
 	}
 
-	tr_wakeup(tr_cmp);
-	
 	return ret;
 }
 

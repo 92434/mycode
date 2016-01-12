@@ -95,7 +95,7 @@ int put_pcie_tr(pcie_dma_t *dma,
 	if(tr_cmp == NULL) {
 		mydebug("alloc tr_cmp failed.\n");
 		ret = -1;
-		return ret;
+		goto alloc_tr_cmp_failed;
 	} else {
 		tr.tr_cmp = tr_cmp;
 		init_completion(tr.tr_cmp);
@@ -105,9 +105,13 @@ int put_pcie_tr(pcie_dma_t *dma,
 	ret = write_buffer((char *)&tr, sizeof(pcie_tr_t), kc705_pci_dev->pcie_tr_list);
 	spin_unlock(&kc705_pci_dev->pcie_tr_list_lock);
 
-	tr_wait(tr.dma, tr.tr_cmp);
+	if(ret > 0) {
+		tr_wait(tr.dma, tr.tr_cmp);
+	}
+
 	vfree(tr.tr_cmp);
 
+alloc_tr_cmp_failed:
 	return ret;
 }
 
@@ -145,6 +149,15 @@ static int pcie_tr_thread(void *ppara) {
 		size = get_pcie_tr(kc705_pci_dev, &tr);
 		if(size != 0) {
 			tr.dma->dma_op.dma_tr(&tr);
+			tr_wakeup(tr.tr_cmp);
+			wake_up(&(tr.dma->wq));
+
+			if(tr.tx_size != 0) {
+				inc_dma_op_tx_count(dma, tr.tx_size);
+			}
+			if(tr.rx_size != 0) {
+				inc_dma_op_rx_count(dma, tr.rx_size);
+			}
 		} else {
 			schedule_timeout(msecs_to_jiffies(10)); 
 		}

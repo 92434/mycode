@@ -263,7 +263,7 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 	/* Display PCI information on parent. */
 	read_pci_root_configuration(kc705_pci_dev->pdev);
 
-
+	kc705_pci_dev->devname = "kc705_pcie";
 	add_local_device(kc705_pci_dev);
 	start_dma(kc705_pci_dev);
 

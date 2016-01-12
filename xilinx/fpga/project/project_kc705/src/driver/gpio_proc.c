@@ -302,6 +302,7 @@ int create_gpio_proc_dir(void) {
 	gpio_proc_dir = proc_mkdir(BASE_DIR, NULL);
 	if(gpio_proc_dir == NULL) {
 		ret = -1;
+		mydebug("\n");
 		return ret;
 	}
 

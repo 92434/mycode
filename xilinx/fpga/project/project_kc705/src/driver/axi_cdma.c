@@ -325,18 +325,14 @@ static int dma_tr(void *ppara) {
 		dma->dma_op.init_dma(dma);
 	}
 
-	inc_dma_op_tx_count(dma, tx_size);
 	write_buffer(NULL, rx_size, dma->list);
 
 	if((rx_data != NULL) && (rx_size != 0)) {
 		read_buffer(rx_data, rx_size, dma->list);
-		inc_dma_op_rx_count(dma, rx_size);
 	}
 	
 exit:
 	free_sg_des_items(&sg_descripter_list);
-
-	tr_wakeup(tr_cmp);
 
 	return ret;
 }

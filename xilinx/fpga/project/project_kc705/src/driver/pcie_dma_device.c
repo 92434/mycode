@@ -11,7 +11,6 @@
 static int pcie_dma_open(struct inode *i, struct file *filp) {
 	pcie_dma_t *dma = container_of(i->i_cdev, pcie_dma_t, cdev);
 	filp->private_data = dma;
-	init_waitqueue_head(&dma->wq);
 	mydebug("\n");
 	return 0;
 }
@@ -21,70 +20,128 @@ static int pcie_dma_close(struct inode *i, struct file *filp) {
 	return 0;
 }
 
-static ssize_t pcie_dma_read(struct file *filp, char __user * buf, size_t len, loff_t * off) {
+static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
+	loff_t offset = *off;
+	loff_t end = *off + len;
 
-	//mydebug("\n");
+	mydebug("\n");
 
 	if(len == 0) {
 		return ret;
 	}
 
-	while(!read_available(dma->list)) {
-		if (filp->f_flags & O_NONBLOCK)
-			return -EAGAIN;
-		wait_event_interruptible(dma->wq, (read_available(dma->list)));
+	if(access_ok(VERIFY_WRITE, buf, len)) {
+		return ret;
 	}
 
-	ret = read_buffer(buf, len, dma->list);
-	inc_dma_op_rx_count(dma, ret);
+	while(ret <= len) {
+		int c;
+
+		if(end - offset >= dma->receive_bulk_size) {
+			c = dma->receive_bulk_size;
+		} else {
+			c = end - offset;
+		}
+
+		if(!dma->is_auto_receive) {
+			if(dma->is_ready_for_read != NULL) {
+				if(!dma->is_ready_for_read(dma)) {
+					c = 0;
+				}
+			}
+
+			if(c > 0) {
+				if(put_pcie_tr(
+						dma,
+						0,
+						offset,
+						0,
+						c,
+						NULL,
+						NULL
+					) < 0) {
+					c = 0;
+				}
+			} else {
+				c = 0;
+			}
+		}
+
+		offset += c;
+
+		if((c > 0) && read_available(dma->list)) {
+			ret += read_buffer(buf + ret, c, dma->list);
+		} else {
+			if (filp->f_flags & O_NONBLOCK)
+				return ret;
+
+			if(dma->is_ready_for_read != NULL) {
+				wait_event_interruptible_timeout(dma->wq, dma->is_ready_for_read(dma), HZ);
+			} else {
+				wait_event_interruptible_timeout(dma->wq, false, HZ);
+			}
+		}
+	}
 
 	return ret;
 }
 
-static ssize_t pcie_dma_write(struct file *filp, const char __user * buf, size_t len, loff_t * off) {
+static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t len, loff_t *off) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
+	loff_t offset = *off;
+	loff_t end = *off + len;
 
-	uint8_t *tx_data = NULL;
-
-	//mydebug("\n");
-	if(len == 0) {
-		ret = -1;
+	if(len <= PCIe_MAP_BAR_SIZE) {
+		copy_from_user(dma->bar_map_memory[1], buf, len)
+	} else {
+		ret = -ERANGE;
 		return ret;
 	}
 
-	tx_data = (uint8_t *)vzalloc(len);
-	if(tx_data == NULL) {
-		mydebug("alloc tx_data failed.\n");
-		ret = -1;
-		return ret;
+	while(ret < len) {
+		int c;
+
+		if(end - offset >= dma->send_bulk_size) {
+			c = dma->send_bulk_size;
+		} else {
+			c = end - offset;
+		}
+
+		if((dma->is_ready_for_write != NULL) && (ret = 0)) {
+			if(!dma->is_ready_for_write(dma)) {
+				c = 0;
+			}
+		}
+
+		if(c > 0) {
+			if(put_pcie_tr(
+					dma,
+					offset,
+					0,
+					c,
+					0,
+					NULL,
+					NULL
+				) < 0) {
+				c = 0;
+			}
+		} else {
+			c = 0;
+		}
+
+		if(c > 0) {
+			ret += c;
+		} else {
+			if (filp->f_flags & O_NONBLOCK)
+				return ret;
+			wait_event_interruptible_timeout(dma->wq, false, HZ);
+		}
 	}
-	
-	if(copy_from_user(tx_data, buf, len)) {
-		mydebug("%p\n", current);
-		ret = -1;
-		return ret;
-	}
 
-	ret = put_pcie_tr(
-			dma,
-			0,
-			0,
-			len,
-			0,
-			tx_data,
-			NULL
-		);
-
-	vfree(tx_data);
-
-	if(ret == -1) {
-		return ret;
-	}
-
-	return len;
+	return ret;
 }
 
 static unsigned int pcie_dma_poll(struct file *filp, poll_table *wait) {
@@ -254,6 +311,19 @@ tr_buffer_release:
 	return ret;
 }
 
+static loff_t pcie_dma_llseek(struct file *file, loff_t offset, int whence) {
+	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
+
+	mydebug("dma->devname:%s, offset:%ll, whence:(%d)%s\n", dma->devname, offset, whence, (whence == SEEK_SET) ? "SEEK_SET" : (whence == SEEK_CUR) ? "SEEK_CUR" : "other");
+
+	switch (whence) {
+		case SEEK_SET:
+		case SEEK_CUR:
+			return vfs_setpos(file, offset, PCIe_MAP_BAR_SIZE);
+		default:
+			return -ENXIO;
+	}
+}
 static const struct file_operations pcie_dma_fops = {
 	.owner = THIS_MODULE,
 	.open = pcie_dma_open,
@@ -263,6 +333,7 @@ static const struct file_operations pcie_dma_fops = {
 	.mmap = pcie_dma_mmap,
 	.unlocked_ioctl = pcie_dma_ioctl,
 	.poll = pcie_dma_poll,
+	.llseek = pcie_dma_llseek,
 };
 
 int setup_pcie_dma_dev(pcie_dma_t *dma) {
@@ -288,6 +359,8 @@ int setup_pcie_dma_dev(pcie_dma_t *dma) {
 		ret = PTR_ERR(dma->device);
 		goto device_create_failed;
 	}
+
+	init_waitqueue_head(&dma->wq);
 
 	return ret;
 

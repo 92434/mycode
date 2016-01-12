@@ -90,6 +90,8 @@ typedef struct _dma_op {
 } dma_op_t;
 
 typedef int (*pcie_dma_thread_t)(void *ppara);
+typedef bool (*is_ready_for_write_t)(void *ppara);
+typedef bool (*is_ready_for_read_t)(void *ppara);
 
 typedef struct _dma_thread_info {
 	pcie_dma_thread_t t;
@@ -109,15 +111,20 @@ typedef struct {
 	int pcie_map_bar_axi_addr_0;
 	int pcie_map_bar_axi_addr_1;
 	int dma_bar_map_num;
-	list_buffer_t *list;
-	uint64_t target_axi_addr_base;
+
 	dma_type_t dma_type;
 	dma_op_t dma_op;
 	dma_thread_info_t *dma_thread;
 	int dma_thread_count;
+	bool is_auto_receive;
+	is_ready_for_write_t is_ready_for_write;
+	is_ready_for_read_t is_ready_for_read;
+
 	int receive_bulk_size;
 	int send_bulk_size;
+	char *devname;
 
+	list_buffer_t *list;
 	struct completion tx_cmp;
 	struct completion rx_cmp;
 	long unsigned int tx_count;
@@ -125,7 +132,6 @@ typedef struct {
 
 	wait_queue_head_t wq;
 	struct cdev cdev;
-	char *devname;
 	dev_t dev;
 
 	struct device *device;
@@ -160,7 +166,6 @@ typedef struct {
 	struct task_struct **dma_thread;
 	int total_dma_thread_count;
 
-
 	spinlock_t pcie_tr_list_lock;
 	list_buffer_t *pcie_tr_list;
 	struct task_struct *pcie_tr_thread;
@@ -168,8 +173,8 @@ typedef struct {
 
 	void **gpiochip;
 
-	struct cdev cdev;
 	char *devname;
+	struct cdev cdev;
 	dev_t dev;
 
 	struct class *kc705_class;

@@ -72,8 +72,6 @@ static int dma_tr(void *ppara) {
 		for(i = pos; i + 1 <= tx_size; i += 1) {
 			writeb(*((uint8_t *)(tx_src_memory + i)), tx_dest_memory + i);
 		}
-
-		inc_dma_op_tx_count(dma, tx_size);
 	}
 
 	if(rx_size != 0) {
@@ -93,11 +91,7 @@ static int dma_tr(void *ppara) {
 
 	if((rx_data != NULL) && (rx_size != 0)) {
 		memcpy(rx_data, rx_dest_memory, rx_size);
-		inc_dma_op_rx_count(dma, rx_size);
 	}
-
-
-	tr_wakeup(tr_cmp);
 
 	return ret;
 }
