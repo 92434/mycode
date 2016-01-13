@@ -78,12 +78,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 		} else {
 			if (filp->f_flags & O_NONBLOCK)
 				return ret;
-
-			if(dma->is_ready_for_read != NULL) {
-				wait_event_interruptible_timeout(dma->wq, dma->is_ready_for_read(dma), HZ);
-			} else {
-				wait_event_interruptible_timeout(dma->wq, true, HZ);
-			}
+			wait_event_interruptible_timeout(dma->wq, false, HZ);
 		}
 	}
 
@@ -141,7 +136,7 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 		} else {
 			if (filp->f_flags & O_NONBLOCK)
 				return ret;
-			wait_event_interruptible_timeout(dma->wq, true, HZ);
+			wait_event_interruptible_timeout(dma->wq, flase, HZ);
 		}
 	}
 
