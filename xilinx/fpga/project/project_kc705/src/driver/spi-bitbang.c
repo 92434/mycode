@@ -175,7 +175,7 @@ int spi_bitbang_setup_transfer(struct spi_device *spi, struct spi_transfer *t)
 
 	return 0;
 }
-EXPORT_SYMBOL_GPL(spi_bitbang_setup_transfer);
+//EXPORT_SYMBOL_GPL(spi_bitbang_setup_transfer);
 
 /**
  * spi_bitbang_setup - default setup for per-word I/O loops
@@ -222,7 +222,7 @@ int spi_bitbang_setup(struct spi_device *spi)
 
 	return 0;
 }
-EXPORT_SYMBOL_GPL(spi_bitbang_setup);
+//EXPORT_SYMBOL_GPL(spi_bitbang_setup);
 
 /**
  * spi_bitbang_cleanup - default cleanup for per-word I/O loops
@@ -231,7 +231,7 @@ void spi_bitbang_cleanup(struct spi_device *spi)
 {
 	kfree(spi->controller_state);
 }
-EXPORT_SYMBOL_GPL(spi_bitbang_cleanup);
+//EXPORT_SYMBOL_GPL(spi_bitbang_cleanup);
 
 static int spi_bitbang_bufs(struct spi_device *spi, struct spi_transfer *t)
 {
@@ -461,7 +461,7 @@ int spi_bitbang_start(struct spi_bitbang *bitbang)
 
 	return 0;
 }
-EXPORT_SYMBOL_GPL(spi_bitbang_start);
+//EXPORT_SYMBOL_GPL(spi_bitbang_start);
 
 /**
  * spi_bitbang_stop - stops the task providing spi communication
@@ -471,7 +471,7 @@ int spi_bitbang_stop(struct spi_bitbang *bitbang)
 	spi_unregister_master(bitbang->master);
 	return 0;
 }
-EXPORT_SYMBOL_GPL(spi_bitbang_stop);
+//EXPORT_SYMBOL_GPL(spi_bitbang_stop);
 
 MODULE_LICENSE("GPL");
 

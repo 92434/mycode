@@ -170,7 +170,10 @@ static int start_dma_s2mm(pcie_dma_t *dma, int rx_size) {
 	return 0;
 }
 
-static int dma_trans_sync(pcie_dma_t *dma, int tx_size, int rx_size) {
+static int dma_trans_sync(pcie_tr_t *tr) {
+	pcie_dma_t *dma = tr->dma;
+	int tx_size = tr->tx_size;
+	int rx_size = tr->rx_size;
 	unsigned long tmo;
 	int ret = 0;
 
@@ -178,9 +181,9 @@ static int dma_trans_sync(pcie_dma_t *dma, int tx_size, int rx_size) {
 		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->tx_cmp, tmo);
 		if (0 == tmo) {
-			myprintf_once((0 == tmo), "%s:tx transfer timed out!\n", dma->dev_name);
+			myprintf_once((0 == tmo), "%s:tx transfer timed out!\n", dma->devname);
+			tr->tx_size = 0;
 			ret = -1;
-			return ret;
 		}
 	}
 
@@ -188,9 +191,9 @@ static int dma_trans_sync(pcie_dma_t *dma, int tx_size, int rx_size) {
 		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->rx_cmp, tmo);
 		if (0 == tmo) {
-			myprintf_once((0 == tmo), "%s:rx transfer timed out!\n", dma->dev_name);
+			myprintf_once((0 == tmo), "%s:rx transfer timed out!\n", dma->devname);
+			tr->rx_size = 0;
 			ret = -1;
-			return ret;
 		}
 	}
 
@@ -207,9 +210,8 @@ static int dma_tr(void *ppara) {
 	//uint64_t rx_src_axi_addr = tr->rx_src_axi_addr;
 	int tx_size = tr->tx_size;
 	int rx_size = tr->rx_size;
-	uint8_t *tx_data = tr->tx_data;
+	//uint8_t *tx_data = tr->tx_data;
 	//uint8_t *rx_data = tr->rx_data;
-	struct completion *tr_cmp = tr->tr_cmp;
 
 	buffer_node_t write;
 	uint64_t tx_src_bar_map_addr;
@@ -224,17 +226,14 @@ static int dma_tr(void *ppara) {
 		return ret;
 	}
 
-	tx_src_bar_map_memory = (uint8_t *)(dma->bar_map_memory[1] + write.write_offset);
+	tx_src_bar_map_memory = (uint8_t *)(dma->bar_map_memory[1]);
 	rx_dest_bar_map_memory = (uint8_t *)(write.buffer + write.write_offset);
-	if((tx_data != NULL) && (tx_size != 0)) {
-		memcpy(tx_src_bar_map_memory, tx_data, tx_size);
-	}
 
 	tx_src_bar_map_addr = (uint64_t)dma->bar_map_addr[1];
 	rx_dest_bar_map_addr = (uint64_t)write.buffer_addr;
 	prepare_bars_map(dma, tx_src_bar_map_addr, rx_dest_bar_map_addr);
 
-	tx_src_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_0 + write.write_offset);
+	tx_src_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_0);
 	rx_dest_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_1 + write.write_offset);
 	transfer_des_setting(dma, tx_src_axi_addr, rx_dest_axi_addr);
 
@@ -248,11 +247,9 @@ static int dma_tr(void *ppara) {
 		start_dma_s2mm(dma, rx_size);
 	}
 
-	ret = dma_trans_sync(dma, tx_size, rx_size);
+	ret = dma_trans_sync(tr);
 	if(ret != 0) {
 		dma->dma_op.init_dma(dma);
-	} else {
-		write_buffer(NULL, rx_size, dma->list);
 	}
 
 	return ret;

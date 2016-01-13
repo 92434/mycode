@@ -26,17 +26,18 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 	loff_t offset = *off;
 	loff_t end = *off + len;
 
-	mydebug("\n");
+	//mydebug("len:%d, off:%lld\n", len, *off);
 
 	if(len == 0) {
 		return ret;
 	}
 
-	if(access_ok(VERIFY_WRITE, buf, len)) {
+	if(!access_ok(VERIFY_WRITE, buf, len)) {
+		mydebug("%p\n", current);
 		return ret;
 	}
 
-	while(ret <= len) {
+	while(ret < len) {
 		int c;
 
 		if(end - offset >= dma->receive_bulk_size) {
@@ -60,11 +61,12 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 						0,
 						c,
 						NULL,
-						NULL
-					) < 0) {
+						NULL) < 0) {
+					mydebug("%p\n", current);
 					c = 0;
 				}
 			} else {
+				mydebug("%p\n", current);
 				c = 0;
 			}
 		}
@@ -80,7 +82,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 			if(dma->is_ready_for_read != NULL) {
 				wait_event_interruptible_timeout(dma->wq, dma->is_ready_for_read(dma), HZ);
 			} else {
-				wait_event_interruptible_timeout(dma->wq, false, HZ);
+				wait_event_interruptible_timeout(dma->wq, true, HZ);
 			}
 		}
 	}
@@ -94,8 +96,10 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 	loff_t offset = *off;
 	loff_t end = *off + len;
 
+	//mydebug("len:%d, off:%lld\n", len, *off);
+
 	if(len <= PCIe_MAP_BAR_SIZE) {
-		copy_from_user(dma->bar_map_memory[1], buf, len)
+		copy_from_user(dma->bar_map_memory[1], buf, len);
 	} else {
 		ret = -ERANGE;
 		return ret;
@@ -137,7 +141,7 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 		} else {
 			if (filp->f_flags & O_NONBLOCK)
 				return ret;
-			wait_event_interruptible_timeout(dma->wq, false, HZ);
+			wait_event_interruptible_timeout(dma->wq, true, HZ);
 		}
 	}
 
@@ -148,6 +152,7 @@ static unsigned int pcie_dma_poll(struct file *filp, poll_table *wait) {
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
 	unsigned int mask =0;
 
+	//mydebug("\n");
 
 	/* 把等待队列添加到poll_table */
 	poll_wait(filp, &dma->wq, wait);
@@ -238,9 +243,6 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 			break;
 		case PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR:
 			{
-				uint8_t *tx_data = NULL;
-				uint8_t *rx_data = NULL;
-
 				pseudo_dma_tr_t pseudo_dma_tr;
 
 				if(copy_from_user(&pseudo_dma_tr, (pseudo_dma_tr_t __user *) arg, sizeof(pseudo_dma_tr_t __user))) {
@@ -249,58 +251,38 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 					return ret;
 				}
 
-				//mydebug("%p:tx_data:%p\n", current, tx_data);
-				//mydebug("%p:rx_data:%p\n", current, rx_data);
-				if((pseudo_dma_tr.tx_data != NULL) && (pseudo_dma_tr.tx_size != 0)) {
-					tx_data = (uint8_t *)vzalloc(pseudo_dma_tr.tx_size);
-					if(tx_data == NULL) {
-						mydebug("alloc tx_data failed.\n");
-						ret = -EFAULT;
-						goto tr_buffer_release;
-					} else {
-						if(copy_from_user(tx_data, pseudo_dma_tr.tx_data, pseudo_dma_tr.tx_size)) {
-							ret = -EFAULT;
-							goto tr_buffer_release;
-						}
-					}
-				}
-
-				if((pseudo_dma_tr.rx_data != NULL) && (pseudo_dma_tr.rx_size != 0)) {
-					rx_data = (uint8_t *)vzalloc(pseudo_dma_tr.rx_size);
-					if(rx_data == NULL) {
-						mydebug("alloc rx_data failed.\n");
-						ret = -EFAULT;
-						goto tr_buffer_release;
-					}
-				}
-
 				//myprintf("tx_size:%d, rx_size:%d\n", pseudo_dma_tr.tx_size, pseudo_dma_tr.rx_size);
-
-				ret = put_pcie_tr(
-						dma,
-						pseudo_dma_tr.tx_dest_offset,
-						pseudo_dma_tr.rx_src_offset,
-						pseudo_dma_tr.tx_size,
-						pseudo_dma_tr.rx_size,
-						tx_data,
-						rx_data
-					);
-				if(ret == -1) {
-					goto tr_buffer_release;
+				
+				if(pseudo_dma_tr.tx_size != 0) {
+					copy_from_user(dma->bar_map_memory[1], pseudo_dma_tr.tx_data, pseudo_dma_tr.tx_size);
 				}
 
-				if (copy_to_user(pseudo_dma_tr.rx_data, rx_data, pseudo_dma_tr.rx_size)) {
-					mydebug("%p\n", current);
-					ret = -EFAULT;
-					goto tr_buffer_release;
+				if(pseudo_dma_tr.rx_size != 0) {
+					ret = put_pcie_tr(
+							dma,
+							pseudo_dma_tr.tx_dest_offset,
+							pseudo_dma_tr.rx_src_offset,
+							pseudo_dma_tr.tx_size,
+							pseudo_dma_tr.rx_size,
+							NULL,
+							NULL);
+					if(ret == -1) {
+						pseudo_dma_tr.rx_size = 0;
+					}
 				}
 
-tr_buffer_release:
-				if(tx_data != NULL) {
-					vfree(tx_data);
-				}
-				if(rx_data != NULL) {
-					vfree(rx_data);
+				if(pseudo_dma_tr.rx_size != 0) {
+					if(!access_ok(VERIFY_WRITE, pseudo_dma_tr.rx_data, pseudo_dma_tr.rx_size)) {
+						mydebug("%p\n", current);
+						ret = -EFAULT;
+						return ret;
+					}
+
+					if(read_buffer(pseudo_dma_tr.rx_data, pseudo_dma_tr.rx_size, dma->list) != pseudo_dma_tr.rx_size) {
+						mydebug("%p\n", current);
+						ret = -EFAULT;
+						return ret;
+					}
 				}
 			}
 			break;
@@ -311,15 +293,17 @@ tr_buffer_release:
 	return ret;
 }
 
-static loff_t pcie_dma_llseek(struct file *file, loff_t offset, int whence) {
+static loff_t pcie_dma_llseek(struct file *filp, loff_t offset, int whence) {
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
+	char *whence_str = (whence == SEEK_SET) ? "SEEK_SET" : ((whence == SEEK_CUR) ? "SEEK_CUR" : "other");
 
-	mydebug("dma->devname:%s, offset:%ll, whence:(%d)%s\n", dma->devname, offset, whence, (whence == SEEK_SET) ? "SEEK_SET" : (whence == SEEK_CUR) ? "SEEK_CUR" : "other");
+	//mydebug("dma->devname:%s, offset:%lld, whence:%s(%d)\n", dma->devname, offset, whence_str, whence);
 
 	switch (whence) {
 		case SEEK_SET:
+			return vfs_setpos(filp, offset, PCIe_MAP_BAR_SIZE);
 		case SEEK_CUR:
-			return vfs_setpos(file, offset, PCIe_MAP_BAR_SIZE);
+			return vfs_setpos(filp, filp->f_pos + offset, PCIe_MAP_BAR_SIZE);
 		default:
 			return -ENXIO;
 	}
@@ -341,7 +325,7 @@ int setup_pcie_dma_dev(pcie_dma_t *dma) {
 
 	kc705_pci_dev_t *kc705_pci_dev = dma->kc705_pci_dev;
 
-	if(dma->dev_name == NULL) {
+	if(dma->devname == NULL) {
 		mydebug("\n");
 		goto no_device_name_failed;
 	}
@@ -354,7 +338,7 @@ int setup_pcie_dma_dev(pcie_dma_t *dma) {
 	}
 
 	/* Add Device node in system */
-	dma->device = device_create(kc705_pci_dev->kc705_class, kc705_pci_dev->device, dma->dev, NULL, "%s", dma->dev_name);
+	dma->device = device_create(kc705_pci_dev->kc705_class, &(kc705_pci_dev->pdev->dev), dma->dev, NULL, "%s", dma->devname);
 	if (IS_ERR(dma->device)) {
 		ret = PTR_ERR(dma->device);
 		goto device_create_failed;
@@ -374,8 +358,10 @@ no_device_name_failed:
 }
 
 void uninstall_pcie_dma_dev(pcie_dma_t *dma) {
+	kc705_pci_dev_t *kc705_pci_dev = dma->kc705_pci_dev;
+
 	if(dma->device != NULL) {
-		device_destroy(dma->pcie_dma_class, dma->pcie_dma_dev_id);
+		device_destroy(kc705_pci_dev->kc705_class, dma->dev);
 		dma->device = NULL;
 		cdev_del(&dma->cdev);
 	}

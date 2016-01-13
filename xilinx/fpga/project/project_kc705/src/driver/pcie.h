@@ -1,9 +1,13 @@
 #ifndef _PCIE_H
 #define _PCIE_H
 
+#include <linux/version.h>
+#include <linux/module.h>
 #include <linux/device.h>
 #include <linux/cdev.h>
 #include <linux/mutex.h>
+#include <linux/pci.h>
+#include <linux/interrupt.h>
 
 #include "utils/xiaofei_debug.h"
 #include "utils/xiaofei_timer.h"

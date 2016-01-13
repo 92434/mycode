@@ -4,8 +4,8 @@
 #include <linux/highmem.h>
 #include <linux/poll.h>
 
-#include "kc705.h"
 #include "pcie.h"
+#include "kc705.h"
 #include "pcie_device.h"
 
 #define MAX_KC705_DEV_NUM 16
@@ -220,7 +220,7 @@ int setup_kc705_dev(kc705_pci_dev_t *kc705_pci_dev) {
 	}
 
 	/* Add Device node in system */
-	kc705_pci_dev->device = device_create(kc705_pci_dev->kc705_class, NULL, kc705_pci_dev->dev, NULL, "%s", kc705_pci_dev->devname);
+	kc705_pci_dev->device = device_create(kc705_pci_dev->kc705_class, &(kc705_pci_dev->pdev->dev), kc705_pci_dev->dev, NULL, "%s", kc705_pci_dev->devname);
 	if (IS_ERR(kc705_pci_dev->device)) {
 		status = PTR_ERR(kc705_pci_dev->device);
 		goto device_create_failed;
@@ -239,7 +239,7 @@ no_device_name_failed:
 
 void uninstall_kc705_dev(kc705_pci_dev_t *kc705_pci_dev) {
 	if(kc705_pci_dev->device != NULL) {
-		device_destroy(kc705_pci_dev->kc705_class, kc705_pci_dev->kc705_dev_id);
+		device_destroy(kc705_pci_dev->kc705_class, kc705_pci_dev->dev);
 		kc705_pci_dev->device = NULL;
 		cdev_del(&kc705_pci_dev->cdev);
 	}

@@ -36,9 +36,8 @@ static int dma_tr(void *ppara) {
 	uint64_t rx_src_axi_addr = tr->rx_src_axi_addr;
 	int tx_size = tr->tx_size;
 	int rx_size = tr->rx_size;
-	uint8_t *tx_data = tr->tx_data;
-	uint8_t *rx_data = tr->rx_data;
-	struct completion *tr_cmp = tr->tr_cmp;
+	//uint8_t *tx_data = tr->tx_data;
+	//uint8_t *rx_data = tr->rx_data;
 
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
@@ -55,10 +54,6 @@ static int dma_tr(void *ppara) {
 	tx_dest_memory = (uint8_t *)(dma_base_vaddr + tx_dest_axi_addr);
 	rx_src_memory = (uint8_t *)(dma_base_vaddr + rx_src_axi_addr);
 
-	if((tx_data != NULL) && (tx_size != 0)) {
-		memcpy(tx_src_memory, tx_data, tx_size);
-	}
-
 	if(tx_size != 0) {
 		for(i = 0; i + 4 <= tx_size; i += 4) {
 			writel(*((uint32_t *)(tx_src_memory + i)), tx_dest_memory + i);
@@ -67,10 +62,12 @@ static int dma_tr(void *ppara) {
 		pos = i;
 		for(i = pos; i + 2 <= tx_size; i += 2) {
 			writew(*((uint16_t *)(tx_src_memory + i)), tx_dest_memory + i);
+			myprintf("%04x->%p\n", *((uint16_t *)(tx_src_memory + i)), (void *)(tx_dest_memory + i));
 		}
 		pos = i;
 		for(i = pos; i + 1 <= tx_size; i += 1) {
 			writeb(*((uint8_t *)(tx_src_memory + i)), tx_dest_memory + i);
+			myprintf("%02x->%p\n", *((uint8_t *)(tx_src_memory + i)), (void *)(tx_dest_memory + i));
 		}
 	}
 
@@ -82,15 +79,13 @@ static int dma_tr(void *ppara) {
 		pos = i;
 		for(i = pos; i + 2 <= rx_size; i += 2) {
 			*((uint16_t *)(rx_dest_memory + i)) = readw(rx_src_memory + i);
+			myprintf("%04x<-%p\n", *((uint16_t *)(rx_dest_memory + i)), (void *)(rx_src_memory + i));
 		}
 		pos = i;
 		for(i = pos; i + 1 <= rx_size; i += 1) {
 			*((uint8_t *)(rx_dest_memory + i)) = readb(rx_src_memory + i);
+			myprintf("%02x<-%p\n", *((uint8_t *)(rx_dest_memory + i)), (void *)(rx_src_memory + i));
 		}
-	}
-
-	if((rx_data != NULL) && (rx_size != 0)) {
-		memcpy(rx_data, rx_dest_memory, rx_size);
 	}
 
 	return ret;

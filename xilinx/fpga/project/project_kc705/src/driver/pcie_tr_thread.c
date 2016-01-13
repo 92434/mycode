@@ -1,4 +1,5 @@
 #include "pcie.h"
+#include "pcie_performance.h"
 
 int tr_wait(pcie_dma_t *dma, struct completion *tr_cmp) {
 	int ret = 0;
@@ -115,12 +116,6 @@ alloc_tr_cmp_failed:
 	return ret;
 }
 
-static void reset_pcie_tr(kc705_pci_dev_t *kc705_pci_dev) {
-	spin_lock(&kc705_pci_dev->pcie_tr_list_lock);
-	buffer_reset(kc705_pci_dev->pcie_tr_list);
-	spin_unlock(&kc705_pci_dev->pcie_tr_list_lock);
-}
-
 static int get_pcie_tr(kc705_pci_dev_t *kc705_pci_dev, pcie_tr_t *tr) {
 	int ret;
 
@@ -149,14 +144,16 @@ static int pcie_tr_thread(void *ppara) {
 		size = get_pcie_tr(kc705_pci_dev, &tr);
 		if(size != 0) {
 			tr.dma->dma_op.dma_tr(&tr);
+
 			tr_wakeup(tr.tr_cmp);
 			wake_up(&(tr.dma->wq));
 
 			if(tr.tx_size != 0) {
-				inc_dma_op_tx_count(dma, tr.tx_size);
+				inc_dma_op_tx_count(tr.dma, tr.tx_size);
 			}
 			if(tr.rx_size != 0) {
-				inc_dma_op_rx_count(dma, tr.rx_size);
+				write_buffer(NULL, tr.rx_size, tr.dma->list);
+				inc_dma_op_rx_count(tr.dma, tr.rx_size);
 			}
 		} else {
 			schedule_timeout(msecs_to_jiffies(10)); 
@@ -165,8 +162,8 @@ static int pcie_tr_thread(void *ppara) {
 	 }
 
 	while(get_pcie_tr(kc705_pci_dev, &tr) != 0) {
-		struct completion *tr_cmp = tr.tr_cmp;
-		tr_wakeup(tr_cmp);
+		tr_wakeup(tr.tr_cmp);
+		wake_up(&(tr.dma->wq));
 	}
 
 	return ret;
@@ -184,5 +181,4 @@ void free_tr_thread(kc705_pci_dev_t *kc705_pci_dev) {
 		free_work_thread(kc705_pci_dev->pcie_tr_thread);
 		kc705_pci_dev->pcie_tr_thread = NULL;
 	}
-	reset_pcie_tr(kc705_pci_dev);
 }

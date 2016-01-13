@@ -36,6 +36,8 @@ static struct spi_gpio_platform_data spi_gpio_cfg = {
 };
 
 static void kc705_spi_master_release(struct device *dev) {
+	struct spi_gpio_platform_data *pdata = dev->platform_data;
+	pdata = pdata;
 }
 
 static struct platform_device kc705_spi_master_device = {
@@ -64,4 +66,4 @@ module_exit(kc705_spi_master_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("xiaofei");
-MODULE_DESCRIPTION("kc705 spi-gpio platform driver");
+MODULE_DESCRIPTION("kc705 spi-gpio master");

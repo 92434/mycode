@@ -29,6 +29,7 @@ static int alloc_dma_memory(kc705_pci_dev_t *kc705_pci_dev) {
 		dma->pcie_map_bar_axi_addr_0 = dma_info[i].pcie_map_bar_axi_addr_0;
 		dma->pcie_map_bar_axi_addr_1 = dma_info[i].pcie_map_bar_axi_addr_1;
 		dma->dma_bar_map_num = dma_info[i].dma_bar_map_num;
+
 		dma->dma_type = dma_info[i].dma_type;
 		dma->dma_op = (dma_info[i].dma_type == AXI_DMA) ? axi_dma_op :
 					(dma_info[i].dma_type == AXI_CDMA) ? axi_cdma_op :
@@ -36,8 +37,14 @@ static int alloc_dma_memory(kc705_pci_dev_t *kc705_pci_dev) {
 					pseudo_dma_op;
 		dma->dma_thread = dma_info[i].dma_thread;
 		dma->dma_thread_count = dma_info[i].dma_thread_count;
+		kc705_pci_dev->total_dma_thread_count += dma_info[i].dma_thread_count;
+		dma->is_auto_receive = dma_info[i].is_auto_receive;
+		dma->is_ready_for_write = dma_info[i].is_ready_for_write;
+		dma->is_ready_for_read = dma_info[i].is_ready_for_read;
+
 		dma->receive_bulk_size = dma_info[i].receive_bulk_size;
 		dma->send_bulk_size = dma_info[i].send_bulk_size;
+		dma->devname = dma_info[i].devname;
 
 		for(j = 0; j < dma->dma_bar_map_num; j++) {
 			dma->bar_map_memory_size[j] = PCIe_MAP_BAR_SIZE;

@@ -6,16 +6,7 @@
 #modules-name-objs := obj1.o obj2.o obj3.o
 #KERNEL-OBJS += modules-name.o
 
-#KBUILD_CFLAGS += -Dtest_timer
-#KBUILD_CFLAGS += -Dtest_buffer_list
 KBUILD_CFLAGS += -DTEST_FMC_LPC_GPIOS
-
-#kc705-dma-objs := kc705_pcie_xdma.o
-#KERNEL-OBJS += kc705-dma.o
-#
-#kc705-cdma-objs := kc705_pcie_xcdma.o
-#KERNEL-OBJS += kc705-cdma.o
-#
 
 kc705-module-objs := kc705.o \
 	pcie.o \

@@ -30,5 +30,5 @@ int read_buffer(char *buffer, int size, list_buffer_t *list);
 int write_buffer(char *buffer, int size, list_buffer_t *list);
 int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, list_buffer_t *list);
 bool read_available(list_buffer_t *list);
-void buffer_reset(list_buffer_t *list);
+void reset_list_buffer(list_buffer_t *list);
 #endif//#ifndef _XIAOFEI_LIST_BUFFER_H

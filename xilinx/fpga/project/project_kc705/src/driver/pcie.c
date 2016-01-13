@@ -1,10 +1,5 @@
-#include <linux/module.h>
-#include <linux/pci.h>
-#include <linux/interrupt.h>
-#include <linux/version.h>
-
-#include "kc705.h"
 #include "pcie.h"
+#include "kc705.h"
 
 /**
  * Macro to export pci_device_id to user space to allow hot plug and

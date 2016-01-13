@@ -290,6 +290,22 @@ bool read_available(list_buffer_t *list) {
 	return available;
 }
 
-void buffer_reset(list_buffer_t *list) {
-	list->read = list->write = list->first;
+void reset_list_buffer(list_buffer_t *list) {
+	buffer_node_t *node = NULL, *node_next = NULL;
+
+	if(list == NULL) {
+		return;
+	}
+
+	if(list->first == NULL) {
+		return;
+	}
+
+	list_for_each_entry_safe(node, node_next, list->first, list) {
+		node->write_offset = node->read_offset = 0;
+	}
+
+	node->write_offset = node->read_offset = 0;
+
+	list->write = list->read = list->first;
 }

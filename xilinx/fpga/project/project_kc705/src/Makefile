@@ -6,17 +6,15 @@ SUB_DIRS := driver app
 
 include $(ADD_TARGET)
 install:
-	sudo insmod driver/i2c-gpio.ko
-	sudo insmod driver/i2c-dev.ko
-
-#	sudo insmod driver/spi-gpio-all.ko
-	sudo insmod driver/spidev.ko
-
 	sudo insmod driver/kc705-module.ko
 
+#	sudo insmod driver/i2c-gpio.ko
 #	sudo insmod driver/kc705_i2c_master.ko
+#	sudo insmod driver/i2c-dev.ko
 
+	sudo insmod driver/spi-gpio-all.ko
 	sudo insmod driver/kc705_spi_master.ko
+	sudo insmod driver/spidev.ko
 	sudo insmod driver/kc705_spi_device.ko
 
 	dmesg
@@ -24,23 +22,20 @@ install:
 uninstall:
 #	make start_dma
 
-#	-sudo killall -9 pcie_csa_dma_device
-#	-sudo killall -9 csa_out_receiver
-#	-sudo killall -9 pcie_pseudo_dma_device
-
 	-sudo rmmod kc705_spi_device
+	-sudo rmmod spidev
+	-sudo rmmod spi_bitbang
 	-sudo rmmod kc705_spi_master
+	-sudo rmmod spi_gpio_all
 
+
+#	-sudo rmmod i2c-dev
 #	-sudo rmmod kc705_i2c_master
+#	-sudo rmmod i2c_gpio
 
 	-sudo rmmod kc705-module
+
 	sudo dmesg -c
-
-	-sudo rmmod spidev
-#	-sudo rmmod spi_gpio_all
-
-	-sudo rmmod i2c-dev
-	-sudo rmmod i2c_gpio
 
 start_dma:
 	sudo dmesg -c
