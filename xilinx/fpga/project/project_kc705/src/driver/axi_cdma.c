@@ -1,11 +1,6 @@
-#include <linux/interrupt.h>
-#include <linux/pci.h>
-#include <linux/kthread.h>
-
 #include "pcie.h"
+#include "utils/xiaofei_debug.h"
 #include "pcie_dma.h"
-#include "pcie_performance.h"
-#include "pcie_tr_thread.h"
 
 //AXI CDMA Register Summary
 #define CDMA_CR 0x00 //CDMA Control.
@@ -205,8 +200,8 @@ static int dma_trans_sync(pcie_tr_t *tr) {
 	if(tx_size != 0) {
 		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->tx_cmp, tmo);
+		myprintf_once((0 == tmo), "%s:tx transfer timed out!\n", dma->devname);
 		if (0 == tmo) {
-			myprintf_once((0 == tmo), "%s:tx transfer timed out!\n", dma->devname);
 			tr->tx_size = 0;
 			ret = -1;
 		}
@@ -215,8 +210,8 @@ static int dma_trans_sync(pcie_tr_t *tr) {
 	if(rx_size != 0) {
 		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->rx_cmp, tmo);
+		myprintf_once((0 == tmo), "%s:rx transfer timed out!\n", dma->devname);
 		if (0 == tmo) {
-			myprintf_once((0 == tmo), "%s:rx transfer timed out!\n", dma->devname);
 			tr->rx_size = 0;
 			ret = -1;
 		}

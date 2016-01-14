@@ -414,7 +414,7 @@ def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, 
 	if fmc_type == 'HPC':
 		gpio_bank_base = [148, 116, 84, 57]
 	elif fmc_type == 'LPC':
-		gpio_bank_base = [148, 140, 0, 0]
+		gpio_bank_base = [148, 142, 0, 0]
 
 	io_pin_no_map = {}
 	for io, pin, gpio in constrain:
@@ -655,6 +655,9 @@ myip_fmc_signal = [
 	('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
 	('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
 	('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
+
+	('FMC_LPC_LA22_N', 'clk_out2'),
+	('FMC_LPC_LA21_P', 'clk_out3'),
 ]
 
 #myip_fmc_signal = []

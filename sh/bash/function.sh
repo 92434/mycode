@@ -342,3 +342,7 @@ function xrandr_addmode() {
 	sudo xrandr --output VGA1 --mode "$name"
 }
 #xrandr_addmode 1920 1280
+
+function chcst() {
+	sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtim
+}

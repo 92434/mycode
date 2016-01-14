@@ -1,5 +1,6 @@
 #include "pcie.h"
-#include "kc705.h"
+#include "kc705.h"//MODULE_NAME
+#include "utils/xiaofei_debug.h"
 
 /**
  * Macro to export pci_device_id to user space to allow hot plug and

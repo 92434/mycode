@@ -1,18 +1,18 @@
 #ifndef _PCIE_H
 #define _PCIE_H
 
-#include <linux/version.h>
+//#include <linux/device.h>
 #include <linux/module.h>
-#include <linux/device.h>
 #include <linux/cdev.h>
-#include <linux/mutex.h>
-#include <linux/pci.h>
 #include <linux/interrupt.h>
-
-#include "utils/xiaofei_debug.h"
-#include "utils/xiaofei_timer.h"
-#include "utils/xiaofei_kthread.h"
+#include <linux/pci.h>
+#include <linux/version.h>
+//#include <linux/mutex.h>
+//
+//#include "utils/xiaofei_debug.h"
+//#include "utils/xiaofei_kthread.h"
 #include "utils/xiaofei_list_buffer.h"
+#include "utils/xiaofei_timer.h"
 
 
 /** @name Macros for PCI probing
@@ -24,35 +24,13 @@
 //Base Address
 //regs
 #define BASE_AXI_PCIe 0x81000000
-#define BASE_AXI_PCIe_CTL 0x81000000
-#define BASE_AXI_TSP_LITE 0x81001000
-#define BASE_AXI_GPIO_LITE_0 0x81002000
-#define BASE_AXI_GPIO_LITE_1 0x81003000
-#define BASE_AXI_GPIO_LITE_2 0x81004000
-#define BASE_AXI_GPIO_LITE_3 0x81005000
-#define BASE_AXI_DMA_LITE_0 0x81006000
-#define BASE_AXI_DMA_LITE_1 0x81007000
-#define BASE_AXI_DMA_LITE_2 0x81008000
-#define BASE_Translation_BRAM 0x81009000
 
 //memory
 #define BASE_AXI_DDR_ADDR 0x00000000
 #define BASE_AXI_PCIe_BAR0 0x80000000
 #define BASE_AXI_PCIe_BAR1 0x80010000
 #define BASE_AXI_PCIe_BAR2 0x80020000
-//#define BASE_AXI_PCIe_BAR3 0x80030000
-
-//PCIe:BAR0 Address Offset for the accessible Interfaces
-#define OFFSET_AXI_PCIe_CTL (BASE_AXI_PCIe_CTL - BASE_AXI_PCIe)
-#define OFFSET_AXI_TSP_LITE (BASE_AXI_TSP_LITE - BASE_AXI_PCIe)
-#define OFFSET_AXI_GPIO_LITE_0 (BASE_AXI_GPIO_LITE_0 - BASE_AXI_PCIe)
-#define OFFSET_AXI_GPIO_LITE_1 (BASE_AXI_GPIO_LITE_1 - BASE_AXI_PCIe)
-#define OFFSET_AXI_GPIO_LITE_2 (BASE_AXI_GPIO_LITE_2 - BASE_AXI_PCIe)
-#define OFFSET_AXI_GPIO_LITE_3 (BASE_AXI_GPIO_LITE_3 - BASE_AXI_PCIe)
-#define OFFSET_AXI_DMA_LITE_0 (BASE_AXI_DMA_LITE_0 - BASE_AXI_PCIe)
-#define OFFSET_AXI_DMA_LITE_1 (BASE_AXI_DMA_LITE_1 - BASE_AXI_PCIe)
-#define OFFSET_AXI_DMA_LITE_2 (BASE_AXI_DMA_LITE_2 - BASE_AXI_PCIe)
-#define OFFSET_Translation_BRAM (BASE_Translation_BRAM - BASE_AXI_PCIe)
+#define BASE_AXI_PCIe_BAR3 0x80030000
 
 //Address Map for the AXI to PCIe Address Translation Registers
 #define AXIBAR2PCIEBAR_0U 0x208 //default be set to 0
@@ -72,10 +50,18 @@
 
 /**< Maximum number of BARs */
 #define MAX_BARS 6
+
 /**< Maximum number of MAX_BAR_MAP_MEMORY */
 #define MAX_BAR_MAP_MEMORY 256
+#define MIN_BAR_MAP_MEMORY 3
 
 #define DMA_BLOCK_SIZE 0x1000
+
+#if defined(KC705_DVBS2)
+#include "dvbs2_pcie_config.h"
+#elif defined(KC705_CSA)
+#include "csa_pcie_config.h"
+#endif
 
 typedef enum {
 	AXI_DMA = 0,
@@ -94,13 +80,13 @@ typedef struct _dma_op {
 } dma_op_t;
 
 typedef int (*pcie_dma_thread_t)(void *ppara);
-typedef bool (*is_ready_for_write_t)(void *ppara);
-typedef bool (*is_ready_for_read_t)(void *ppara);
-
 typedef struct _dma_thread_info {
 	pcie_dma_thread_t t;
 	char *thread_name;
 } dma_thread_info_t;
+
+typedef bool (*is_ready_for_write_t)(void *ppara);
+typedef bool (*is_ready_for_read_t)(void *ppara);
 
 typedef struct {
 	void *kc705_pci_dev;
@@ -173,6 +159,7 @@ typedef struct {
 	spinlock_t pcie_tr_list_lock;
 	list_buffer_t *pcie_tr_list;
 	struct task_struct *pcie_tr_thread;
+	wait_queue_head_t tr_wq;
 	char *thread_name;
 
 	void **gpiochip;
@@ -184,5 +171,7 @@ typedef struct {
 	struct class *kc705_class;
 	struct device *device;
 } kc705_pci_dev_t;
+
+extern struct pci_driver kc705_pcie_driver;
 
 #endif //#define _PCIE_H

@@ -1,11 +1,6 @@
-#include <linux/interrupt.h>
-#include <linux/pci.h>
-#include <linux/kthread.h>
-
 #include "pcie.h"
+#include "utils/xiaofei_debug.h"
 #include "pcie_dma.h"
-#include "pcie_performance.h"
-#include "pcie_tr_thread.h"
 
 /*
  *dma->bar_map_memory[0]-----------unused

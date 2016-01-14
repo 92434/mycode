@@ -1,12 +1,11 @@
-#include <linux/device.h>
 #include <linux/fs.h>
 #include <linux/sched.h>
-#include <linux/highmem.h>
 #include <linux/poll.h>
 
-#include "kc705.h"
 #include "pcie.h"
+#include "utils/xiaofei_debug.h"
 #include "pcie_tr_thread.h"
+#include "kc705.h"//PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE
 
 static int pcie_dma_open(struct inode *i, struct file *filp) {
 	pcie_dma_t *dma = container_of(i->i_cdev, pcie_dma_t, cdev);
@@ -66,19 +65,24 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 					c = 0;
 				}
 			} else {
-				mydebug("%p\n", current);
 				c = 0;
 			}
 		}
 
-		offset += c;
-
 		if((c > 0) && read_available(dma->list)) {
-			ret += read_buffer(buf + ret, c, dma->list);
+			c = read_buffer(buf + ret, c, dma->list);
+			ret += c;
+			offset += c;
 		} else {
-			if (filp->f_flags & O_NONBLOCK)
+			if (filp->f_flags & O_NONBLOCK) {
 				return ret;
-			wait_event_interruptible_timeout(dma->wq, false, HZ);
+			}
+
+			if(ret != 0) {
+				return ret;
+			}
+
+			wait_event_interruptible_timeout(dma->wq, read_available(dma->list), HZ);
 		}
 	}
 
@@ -93,9 +97,7 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 
 	//mydebug("len:%d, off:%lld\n", len, *off);
 
-	if(len <= PCIe_MAP_BAR_SIZE) {
-		copy_from_user(dma->bar_map_memory[1], buf, len);
-	} else {
+	if(len > PCIe_MAP_BAR_SIZE) {
 		ret = -ERANGE;
 		return ret;
 	}
@@ -116,6 +118,12 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 		}
 
 		if(c > 0) {
+			if(copy_from_user(dma->bar_map_memory[1], buf + ret, c)) {
+				mydebug("%p\n", current);
+				ret = -EFAULT;
+				return ret;
+			}
+
 			if(put_pcie_tr(
 					dma,
 					offset,
@@ -133,10 +141,11 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 
 		if(c > 0) {
 			ret += c;
+			offset += c;
 		} else {
 			if (filp->f_flags & O_NONBLOCK)
 				return ret;
-			wait_event_interruptible_timeout(dma->wq, flase, HZ);
+			wait_event_interruptible_timeout(dma->wq, true, HZ);
 		}
 	}
 
@@ -293,6 +302,9 @@ static loff_t pcie_dma_llseek(struct file *filp, loff_t offset, int whence) {
 	char *whence_str = (whence == SEEK_SET) ? "SEEK_SET" : ((whence == SEEK_CUR) ? "SEEK_CUR" : "other");
 
 	//mydebug("dma->devname:%s, offset:%lld, whence:%s(%d)\n", dma->devname, offset, whence_str, whence);
+	
+	dma = dma;
+	whence_str = whence_str;
 
 	switch (whence) {
 		case SEEK_SET:

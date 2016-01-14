@@ -1,13 +1,10 @@
-#include <linux/device.h>
 #include <linux/fs.h>
-#include <linux/sched.h>
-#include <linux/highmem.h>
 #include <linux/poll.h>
 
 #include "pcie.h"
-#include "kc705.h"
-#include "pcie_device.h"
-
+#include "utils/xiaofei_debug.h"
+#include "kc705.h"//PCIE_DEVICE_IOCTL_START_DMA_THREAD
+//
 #define MAX_KC705_DEV_NUM 16
 
 void start_dma(void);
@@ -125,9 +122,11 @@ int alloc_kc705_chrdev(kc705_pci_dev_t *kc705_pci_dev) {
 
 	for(i = 0; i < kc705_pci_dev->dma_count; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
-		if(i <= MAX_KC705_DEV_NUM - 1) {
-			dma->dev = MKDEV(major, minor + i);
+
+		if(i < MAX_KC705_DEV_NUM) {
+			dma->dev = MKDEV(major, minor);
 			mydebug("%s minor:%d\n", dma->devname, minor);
+			minor++;
 		}
 	}
 

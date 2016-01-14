@@ -1,8 +1,8 @@
 #include <linux/module.h>
-#include <linux/version.h>
 #include <linux/pci.h>
 #include "kc705.h"
 #include "pcie.h"
+
 #include "utils/xiaofei_debug.h"
 
 /** Driver Module information */
@@ -17,7 +17,6 @@ static int my_pci_device_id = 0;
 module_param(my_pci_device_id, int, 0644);
 MODULE_PARM_DESC(my_pci_device_id, "Xilinx's Device ID");
 
-extern struct pci_driver kc705_pcie_driver;
 static int __init kc705_init(void) {
 	int ret = 0;
 

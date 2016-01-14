@@ -1,19 +1,18 @@
 #ifndef _CSA_DMA_THREAD_CONFIG_H
 #define _CSA_DMA_THREAD_CONFIG_H
+#include "linux/kthread.h"
+
 #include "pcie.h"
 #include "pcie_tr_thread.h"
+#include "utils/xiaofei_debug.h"
+
 static int csa_dma_receiver_thread(void *ppara) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)ppara;
 
 	while(!kthread_should_stop()) {
-		set_current_state(TASK_UNINTERRUPTIBLE);  
+		//set_current_state(TASK_UNINTERRUPTIBLE);  
 		//schedule_timeout(msecs_to_jiffies(10)); 
-
-		if(dma->receive_bulk_size == 0) {
-			schedule_timeout(msecs_to_jiffies(1000)); 
-			mydebug("\n");
-		}
 
 		put_pcie_tr(dma, 0, 0, 0, dma->receive_bulk_size, NULL, NULL);
 	}

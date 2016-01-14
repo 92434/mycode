@@ -1,5 +1,7 @@
 #include "pcie.h"
 #include "pcie_performance.h"
+#include "utils/xiaofei_debug.h"
+#include "utils/xiaofei_kthread.h"
 
 int tr_wait(pcie_dma_t *dma, struct completion *tr_cmp) {
 	int ret = 0;
@@ -105,6 +107,7 @@ int put_pcie_tr(pcie_dma_t *dma,
 	spin_lock(&kc705_pci_dev->pcie_tr_list_lock);
 	ret = write_buffer((char *)&tr, sizeof(pcie_tr_t), kc705_pci_dev->pcie_tr_list);
 	spin_unlock(&kc705_pci_dev->pcie_tr_list_lock);
+	wake_up(&(kc705_pci_dev->tr_wq));
 
 	if(ret > 0) {
 		tr_wait(tr.dma, tr.tr_cmp);
@@ -124,6 +127,10 @@ static int get_pcie_tr(kc705_pci_dev_t *kc705_pci_dev, pcie_tr_t *tr) {
 	return ret;
 }
 
+bool is_tr_list_ready(kc705_pci_dev_t *kc705_pci_dev) {
+	return read_available(kc705_pci_dev->pcie_tr_list);
+}
+
 static int pcie_tr_thread(void *ppara) {
 	int ret = 0;
 	int i;
@@ -131,6 +138,7 @@ static int pcie_tr_thread(void *ppara) {
 	pcie_tr_t tr;
 
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)ppara;
+	init_waitqueue_head(&kc705_pci_dev->tr_wq);
 
 	for(i = 0; i < kc705_pci_dev->dma_count; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;
@@ -156,7 +164,7 @@ static int pcie_tr_thread(void *ppara) {
 				inc_dma_op_rx_count(tr.dma, tr.rx_size);
 			}
 		} else {
-			schedule_timeout(msecs_to_jiffies(10)); 
+			wait_event_interruptible_timeout(kc705_pci_dev->tr_wq, is_tr_list_ready(kc705_pci_dev), msecs_to_jiffies(10));
 		}
 
 	 }

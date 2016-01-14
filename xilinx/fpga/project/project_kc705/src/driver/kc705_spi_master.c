@@ -17,15 +17,14 @@
 #include <linux/slab.h> /* kmalloc, kfree */
 #include <linux/spi/spi.h>
 #include <linux/spi/spi_gpio.h>
-#define MY_NAME "kc705_spi_master"
 
-//171 : s0
-//158 : s1
-//167 : s1
+//169 : s0//FMC_LPC_LA22_P
+//157 : s1//FMC_LPC_LA19_P
+//165 : s2//FMC_LPC_LA19_N
 
-#define MISO 172
-#define MOSI 140
-#define SCK 141
+#define MISO 170//FMC_LPC_LA20_N
+#define MOSI 178//FMC_LPC_LA23_N
+#define SCK 179//FMC_LPC_LA23_P
 #define SPI_BUS_NUM 1
 
 static struct spi_gpio_platform_data spi_gpio_cfg = {

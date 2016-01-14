@@ -1,6 +1,10 @@
 #include "pcie.h"
-
+#if defined(KC705_DVBS2)
+#include "dvbs2_gpio_config.h"
+#elif defined(KC705_CSA)
 #include "csa_gpio_config.h"
+#endif
+#include "utils/xiaofei_debug.h"
 
 int alloc_kc705_gpio(kc705_pci_dev_t *kc705_pci_dev) {
 	int ret = 0;

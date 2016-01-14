@@ -1,11 +1,16 @@
-#include <linux/pci.h>
+#include "linux/kthread.h"
 
 #include "pcie.h"
-#include "pcie_dma.h"
+#include "pcie_tr_thread.h"
+#include "utils/xiaofei_debug.h"
+#if defined(KC705_DVBS2)
+#include "dvbs2_dma_config.h"
+#elif defined(KC705_CSA)
+#include "csa_dma_config.h"
+#endif
 #include "axi_cdma.h"
 #include "axi_dma.h"
 #include "pseudo_dma.h"
-#include "csa_dma_config.h"
 
 #define DMA_BAR_MEM_START_INDEX 1
 static int alloc_dma_memory(kc705_pci_dev_t *kc705_pci_dev) {
@@ -64,7 +69,9 @@ static int alloc_dma_memory(kc705_pci_dev_t *kc705_pci_dev) {
 					//mydebug("dma->bar_map_addr[%d]:%p\n", j, (void *)dma->bar_map_addr[j]);
 					//mydebug("dma->bar_map_memory_size[%d]:%x\n", j, dma->bar_map_memory_size[j] - (dma->bar_map_memory_size[j] % dma->receive_bulk_size));
 					if(j > DMA_BAR_MEM_START_INDEX) {//
-						add_list_buffer_item((char *)dma->bar_map_memory[j], (void *)dma->bar_map_addr[j], dma->bar_map_memory_size[j] - (dma->bar_map_memory_size[j] % dma->receive_bulk_size), dma->list);
+						int unused_size = dma->bar_map_memory_size[j] % dma->receive_bulk_size;
+
+						add_list_buffer_item((char *)dma->bar_map_memory[j], (void *)dma->bar_map_addr[j], dma->bar_map_memory_size[j] - unused_size, dma->list);
 					}
 				}
 			}

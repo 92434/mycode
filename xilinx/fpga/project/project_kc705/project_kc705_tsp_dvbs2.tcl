@@ -156,6 +156,8 @@ proc create_root_design { parentCell } {
   set EXT_PCIE_REFCLK_N [ create_bd_port -dir I EXT_PCIE_REFCLK_N ]
   set EXT_PCIE_REFCLK_P [ create_bd_port -dir I EXT_PCIE_REFCLK_P ]
   set clk_out1 [ create_bd_port -dir O -type clk clk_out1 ]
+  set clk_out2 [ create_bd_port -dir O -type clk clk_out2 ]
+  set clk_out3 [ create_bd_port -dir O -type clk clk_out3 ]
   set mpeg_clk [ create_bd_port -dir I mpeg_clk ]
   set mpeg_data [ create_bd_port -dir I -from 7 -to 0 mpeg_data ]
   set mpeg_sync [ create_bd_port -dir I mpeg_sync ]
@@ -184,7 +186,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi_gpio_2, and set properties
   set axi_gpio_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_2 ]
-  set_property -dict [ list CONFIG.C_GPIO2_WIDTH {8} CONFIG.C_IS_DUAL {1}  ] $axi_gpio_2
+  set_property -dict [ list CONFIG.C_GPIO2_WIDTH {6} CONFIG.C_IS_DUAL {1}  ] $axi_gpio_2
 
   # Create instance: axi_interconnect_0, and set properties
   set axi_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0 ]
@@ -192,11 +194,11 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi_pcie_0, and set properties
   set axi_pcie_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_pcie:2.5 axi_pcie_0 ]
-  set_property -dict [ list CONFIG.AXIBAR2PCIEBAR_0 {0x00000000} CONFIG.AXIBAR_AS_0 {true} CONFIG.AXIBAR_AS_1 {true} CONFIG.AXIBAR_AS_2 {true} CONFIG.AXIBAR_NUM {1} CONFIG.BAR0_ENABLED {true} CONFIG.BAR0_SCALE {Kilobytes} CONFIG.BAR0_SIZE {64} CONFIG.BAR0_TYPE {Memory} CONFIG.BAR1_ENABLED {false} CONFIG.BAR_64BIT {true} CONFIG.DEVICE_ID {0x7012} CONFIG.MAX_LINK_SPEED {2.5_GT/s} CONFIG.M_AXI_DATA_WIDTH {64} CONFIG.NO_OF_LANES {X4} CONFIG.PCIEBAR2AXIBAR_0 {0x81000000} CONFIG.PCIE_CAP_SLOT_IMPLEMENTED {true} CONFIG.S_AXI_DATA_WIDTH {64} CONFIG.XLNX_REF_BOARD {None}  ] $axi_pcie_0
+  set_property -dict [ list CONFIG.AXIBAR2PCIEBAR_0 {0x00000000} CONFIG.AXIBAR_AS_0 {true} CONFIG.AXIBAR_NUM {1} CONFIG.BAR0_ENABLED {true} CONFIG.BAR0_SCALE {Kilobytes} CONFIG.BAR0_SIZE {64} CONFIG.BAR0_TYPE {Memory} CONFIG.BAR1_ENABLED {false} CONFIG.BAR_64BIT {true} CONFIG.DEVICE_ID {0x7012} CONFIG.MAX_LINK_SPEED {2.5_GT/s} CONFIG.M_AXI_DATA_WIDTH {64} CONFIG.NO_OF_LANES {X4} CONFIG.PCIEBAR2AXIBAR_0 {0x81000000} CONFIG.PCIE_CAP_SLOT_IMPLEMENTED {true} CONFIG.S_AXI_DATA_WIDTH {64} CONFIG.XLNX_REF_BOARD {None}  ] $axi_pcie_0
 
   # Create instance: clk_wiz_0, and set properties
   set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.1 clk_wiz_0 ]
-  set_property -dict [ list CONFIG.CLKOUT1_JITTER {122.344} CONFIG.CLKOUT1_PHASE_ERROR {97.646} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {135} CONFIG.PRIMITIVE {MMCM}  ] $clk_wiz_0
+  set_property -dict [ list CONFIG.CLKOUT1_JITTER {117.101} CONFIG.CLKOUT1_PHASE_ERROR {142.582} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {135} CONFIG.CLKOUT2_JITTER {118.930} CONFIG.CLKOUT2_PHASE_ERROR {142.582} CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {122.88} CONFIG.CLKOUT2_USED {true} CONFIG.CLKOUT3_JITTER {118.930} CONFIG.CLKOUT3_PHASE_ERROR {142.582} CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {122.88} CONFIG.CLKOUT3_REQUESTED_PHASE {180.000} CONFIG.CLKOUT3_USED {true} CONFIG.MMCM_CLKFBOUT_MULT_F {27.000} CONFIG.MMCM_CLKOUT0_DIVIDE_F {10.000} CONFIG.MMCM_CLKOUT1_DIVIDE {11} CONFIG.MMCM_CLKOUT2_DIVIDE {11} CONFIG.MMCM_CLKOUT2_PHASE {180.000} CONFIG.MMCM_DIVCLK_DIVIDE {2} CONFIG.NUM_OUT_CLKS {3} CONFIG.PRIMITIVE {MMCM}  ] $clk_wiz_0
 
   # Create instance: intr_hub_0, and set properties
   set intr_hub_0 [ create_bd_cell -type ip -vlnv xiaofei:user:intr_hub:1.0 intr_hub_0 ]
@@ -265,6 +267,8 @@ proc create_root_design { parentCell } {
   connect_bd_net -net axi_pcie_0_axi_ctl_aclk_out [get_bd_pins axi_interconnect_0/M01_ACLK] [get_bd_pins axi_pcie_0/axi_ctl_aclk_out]
   connect_bd_net -net axi_pcie_0_mmcm_lock [get_bd_pins axi_pcie_0/mmcm_lock] [get_bd_pins kc705_pcie_ext_0/pcie_mmcm_locked]
   connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_ports clk_out1] [get_bd_pins clk_wiz_0/clk_out1]
+  connect_bd_net -net clk_wiz_0_clk_out2 [get_bd_ports clk_out2] [get_bd_pins clk_wiz_0/clk_out2]
+  connect_bd_net -net clk_wiz_0_clk_out3 [get_bd_ports clk_out3] [get_bd_pins clk_wiz_0/clk_out3]
   connect_bd_net -net intr_hub_0_int_o [get_bd_pins axi_pcie_0/INTX_MSI_Request] [get_bd_pins intr_hub_0/int_o]
   connect_bd_net -net kc705_dvb_s2_0_symbol_2x_im_out [get_bd_ports symbol_2x_im_out] [get_bd_pins kc705_dvb_s2_0/symbol_2x_im_out]
   connect_bd_net -net kc705_dvb_s2_0_symbol_2x_oe [get_bd_ports symbol_2x_oe] [get_bd_pins kc705_dvb_s2_0/symbol_2x_oe]

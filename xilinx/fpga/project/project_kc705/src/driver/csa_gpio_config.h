@@ -24,13 +24,7 @@ static gpio_chip_info_t gpio_chip_info[] = {
 	{
 		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_2,
 		.ngpios = 2,
-		.ngpio = {32, 32},
-
-	},
-	{
-		.chip_addr_offset = OFFSET_AXI_GPIO_LITE_3,
-		.ngpios = 1,
-		.ngpio = {9, 0},
+		.ngpio = {32, 6},
 
 	},
 #endif

@@ -1,7 +1,5 @@
 #include <linux/proc_fs.h>
 #include <linux/gpio.h>
-//#include <linux/device.h>
-//#include <linux/fs.h>
 #include <linux/uaccess.h>
 
 #include "utils/xiaofei_debug.h"
