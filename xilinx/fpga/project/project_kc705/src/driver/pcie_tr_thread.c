@@ -122,7 +122,9 @@ alloc_tr_cmp_failed:
 static int get_pcie_tr(kc705_pci_dev_t *kc705_pci_dev, pcie_tr_t *tr) {
 	int ret;
 
+	spin_lock(&kc705_pci_dev->pcie_tr_list_lock);
 	ret = read_buffer((char *)tr, sizeof(pcie_tr_t), kc705_pci_dev->pcie_tr_list);
+	spin_unlock(&kc705_pci_dev->pcie_tr_list_lock);
 
 	return ret;
 }

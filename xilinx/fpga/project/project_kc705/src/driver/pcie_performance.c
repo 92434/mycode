@@ -38,6 +38,10 @@ static void test_performance(kc705_pci_dev_t *kc705_pci_dev) {
 		total_tx_speed / SPEED_MB, (1000 * 1000) * (total_tx_speed % SPEED_MB) / SPEED_MB,
 		total_rx_speed / SPEED_MB, (1000 * 1000) * (total_rx_speed % SPEED_MB) / SPEED_MB,
 		(total_tx_speed + total_rx_speed) / SPEED_MB, (1000 * 1000) * ((total_tx_speed + total_rx_speed) % SPEED_MB) / SPEED_MB);
+	{
+		extern unsigned long long i2s_read_count;
+		printk("i2s_read_count:%d\n", i2s_read_count);
+	}
 	printk("\n");
 
 	//do_gettimeofday(&start_time);

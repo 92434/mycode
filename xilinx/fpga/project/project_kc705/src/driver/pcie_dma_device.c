@@ -24,6 +24,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
 	loff_t offset = *off;
 	loff_t end = *off + len;
+	int idle_count = 0;
 
 	//mydebug("len:%d, off:%lld\n", len, *off);
 
@@ -73,12 +74,13 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 			c = read_buffer(buf + ret, c, dma->list);
 			ret += c;
 			offset += c;
+			idle_count = 0;
 		} else {
 			if (filp->f_flags & O_NONBLOCK) {
 				return ret;
 			}
 
-			if(ret != 0) {
+			if(idle_count++ == 1) {
 				return ret;
 			}
 
@@ -94,6 +96,7 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 	pcie_dma_t *dma = (pcie_dma_t *)filp->private_data;
 	loff_t offset = *off;
 	loff_t end = *off + len;
+	int idle_count = 0;
 
 	//mydebug("len:%d, off:%lld\n", len, *off);
 
@@ -120,7 +123,6 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 		if(c > 0) {
 			if(copy_from_user(dma->bar_map_memory[1], buf + ret, c)) {
 				mydebug("%p\n", current);
-				ret = -EFAULT;
 				return ret;
 			}
 
@@ -142,9 +144,15 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 		if(c > 0) {
 			ret += c;
 			offset += c;
+			idle_count = 0;
 		} else {
 			if (filp->f_flags & O_NONBLOCK)
 				return ret;
+
+			if(idle_count++ == 1) {
+				return ret;
+			}
+
 			wait_event_interruptible_timeout(dma->wq, true, HZ);
 		}
 	}

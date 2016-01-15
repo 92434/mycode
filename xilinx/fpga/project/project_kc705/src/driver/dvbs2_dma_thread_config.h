@@ -1,6 +1,8 @@
 #ifndef _DVBS2_DMA_THREAD_CONFIG_H
 #define _DVBS2_DMA_THREAD_CONFIG_H
 
+unsigned long long i2s_read_count = 0;
+
 static int i2s_dma_receiver_thread(void *ppara) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)ppara;
@@ -10,6 +12,7 @@ static int i2s_dma_receiver_thread(void *ppara) {
 		//schedule_timeout(msecs_to_jiffies(10)); 
 
 		put_pcie_tr(dma, 0, 0, 0, dma->receive_bulk_size, NULL, NULL);
+		i2s_read_count++;
 	}
 
 	mydebug("\n");

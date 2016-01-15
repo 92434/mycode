@@ -11,7 +11,7 @@
 #include <pthread.h>
 #include "kc705.h"
 
-#define BUFSIZE 64
+#define BUFSIZE (50 * 15 * 4)
 static int stop = 0;
 
 static void default_sig_action(int signo, siginfo_t *info, void *context) {
@@ -64,7 +64,7 @@ void *read_fn(void *arg) {
 
 					//printf("read %d!\n", nread);
 					for(i = 0; i < nread / sizeof(uint32_t); i++) {
-						if((i != 0) && (i % 16 == 0)) {
+						if((i != 0) && (i % 15 == 0)) {
 							printf("\n");
 						}
 						printf("%04x ", data[i] & 0xffff);
