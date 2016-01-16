@@ -1,10 +1,7 @@
 #ifndef _CSA_DMA_THREAD_CONFIG_H
 #define _CSA_DMA_THREAD_CONFIG_H
-#include "linux/kthread.h"
 
-#include "pcie.h"
-#include "pcie_tr_thread.h"
-#include "utils/xiaofei_debug.h"
+unsigned long long i2s_read_count = 0;
 
 static int csa_dma_receiver_thread(void *ppara) {
 	int ret = 0;
@@ -15,6 +12,8 @@ static int csa_dma_receiver_thread(void *ppara) {
 		//schedule_timeout(msecs_to_jiffies(10)); 
 
 		put_pcie_tr(dma, 0, 0, 0, dma->receive_bulk_size, NULL, NULL);
+
+		i2s_read_count++;
 	}
 
 	mydebug("\n");

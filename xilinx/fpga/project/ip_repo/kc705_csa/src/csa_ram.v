@@ -11,6 +11,12 @@ module csa_ram #(
 
 	)
 	(
+		input wire [32 - 1 : 0] s00_axis_tready_count,
+		input wire [32 - 1 : 0] s00_axis_tvalid_count,
+		input wire [32 - 1 : 0] axis_s_ren_count,
+		input wire [32 - 1 : 0] axis_s_r_ready_count,
+		input wire [160 - 1 : 0] buffer_data,
+
 		input wire axi_mm_clk,
 		input wire rst_n,
 
@@ -33,12 +39,15 @@ module csa_ram #(
 		input wire csa_out_error_full,
 		output wire csa_out_wclk,
 		output reg csa_out_wen,
-		output reg [CSA_CALC_OUT_WIDTH - 1 : 0] csa_out_wdata = 0
+		output reg [CSA_CALC_OUT_WIDTH - 1 : 0] csa_out_wdata = 0,
+
+		input wire axis_m_r_ready
 	);
 
 	localparam integer ADDR_CSA_BUSY = 0;
+	localparam integer ADDR_CSA_READY = ADDR_CSA_BUSY + 1;
 
-	localparam integer ADDR_CHANNEL_INDEX = ADDR_CSA_BUSY + 1;
+	localparam integer ADDR_CHANNEL_INDEX = ADDR_CSA_READY + 1;
 
 	localparam integer ADDR_IN_DATA_VALID = ADDR_CHANNEL_INDEX + 1;
 	localparam integer ADDR_IN_DATA_0 = ADDR_IN_DATA_VALID + 1;
@@ -53,6 +62,18 @@ module csa_ram #(
 	localparam integer ADDR_OUT_DATA_2 = ADDR_OUT_DATA_1 + 1;
 
 	localparam integer ADDR_CALC_TIMES = ADDR_OUT_DATA_2 + 1;
+
+
+	localparam integer ADDR_S00_AXIS_TREADY_COUNT = ADDR_CALC_TIMES + 1;
+	localparam integer ADDR_S00_AXIS_TVALID_COUNT = ADDR_S00_AXIS_TREADY_COUNT + 1;
+	localparam integer ADDR_AXIS_S_REN_COUNT = ADDR_S00_AXIS_TVALID_COUNT + 1;
+	localparam integer ADDR_AXIS_S_R_READY_COUNT = ADDR_AXIS_S_REN_COUNT + 1;
+
+	localparam integer ADDR_BUFFER_DATA0 = ADDR_AXIS_S_R_READY_COUNT + 1;
+	localparam integer ADDR_BUFFER_DATA1 = ADDR_BUFFER_DATA0 + 1;
+	localparam integer ADDR_BUFFER_DATA2 = ADDR_BUFFER_DATA1 + 1;
+	localparam integer ADDR_BUFFER_DATA3 = ADDR_BUFFER_DATA2 + 1;
+	localparam integer ADDR_BUFFER_DATA4 = ADDR_BUFFER_DATA3 + 1;
 
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
@@ -116,6 +137,9 @@ module csa_ram #(
 					ADDR_CSA_BUSY: begin
 						rdata <= {{(C_S_AXI_DATA_WIDTH - 1){1'b0}}, csa_in_r_ready};
 					end
+					ADDR_CSA_READY: begin
+						rdata <= {{(C_S_AXI_DATA_WIDTH - 1){1'b0}}, axis_m_r_ready};
+					end
 					ADDR_CHANNEL_INDEX: begin
 						rdata <= csa_current_channel;
 					end
@@ -151,6 +175,33 @@ module csa_ram #(
 					end
 					ADDR_CALC_TIMES: begin
 						rdata <= csa_calc_logic_times;
+					end
+					ADDR_S00_AXIS_TREADY_COUNT: begin
+						rdata <= s00_axis_tready_count;
+					end
+					ADDR_S00_AXIS_TVALID_COUNT: begin
+						rdata <= s00_axis_tvalid_count;
+					end
+					ADDR_AXIS_S_REN_COUNT: begin
+						rdata <= axis_s_ren_count;
+					end
+					ADDR_AXIS_S_R_READY_COUNT: begin
+						rdata <= axis_s_r_ready_count;
+					end
+					ADDR_BUFFER_DATA0: begin
+						rdata <= buffer_data[(0 * 32) +: 32];
+					end
+					ADDR_BUFFER_DATA1: begin
+						rdata <= buffer_data[(1 * 32) +: 32];
+					end
+					ADDR_BUFFER_DATA2: begin
+						rdata <= buffer_data[(2 * 32) +: 32];
+					end
+					ADDR_BUFFER_DATA3: begin
+						rdata <= buffer_data[(3 * 32) +: 32];
+					end
+					ADDR_BUFFER_DATA4: begin
+						rdata <= buffer_data[(4 * 32) +: 32];
 					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS - 1){1'b0}}, raddr};

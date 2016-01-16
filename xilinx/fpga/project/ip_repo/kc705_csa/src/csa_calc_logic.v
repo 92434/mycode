@@ -118,7 +118,7 @@ module csa_calc_logic #(
 
 	assign sb = 64'hE613DB6DC11C4524;
 
-	assign cb = ck + 1;
+	assign cb = ck;
 	//stream_cypher stream_cypher_inst(
 	//		.ck(ck),//input
 	//		.sb(sb),//input fixed!
@@ -129,7 +129,7 @@ module csa_calc_logic #(
 
 	assign loops = csa_calc_logic_times - times_reg;
 
-	assign ck_out = (loops == 0) ? {16'd0, ID[8 - 1 : 0], csa_calc_logic_in} : cb + 1;
+	assign ck_out = (loops == 0) ? {16'd0, ID[8 - 1 : 0], csa_calc_logic_in} : cb;
 	//ck_processer #(
 	//		.AXI_DATA_WIDTH(AXI_DATA_WIDTH),
 	//		.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),

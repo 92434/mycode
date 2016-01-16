@@ -179,7 +179,7 @@ module csa_wrap #
 
 	wire axis_s_rclk;
 	wire axis_s_ren;
-	wire axis_s_rdata;
+	wire [C_S00_AXIS_TDATA_WIDTH - 1 : 0] axis_s_rdata;
 
 	wire axis_s_r_ready;
 	wire axis_s_error_full;
@@ -209,6 +209,36 @@ module csa_wrap #
 			.s00_axis_tvalid(s00_axis_tvalid)
 		);
 
+	reg [32 - 1 : 0] s00_axis_tready_count = 0;
+	reg [32 - 1 : 0] s00_axis_tvalid_count = 0;
+	reg [32 - 1 : 0] axis_s_r_ready_count = 0;
+	always @(posedge s00_axis_aclk) begin
+		if(s00_axis_aresetn == 0) begin
+			s00_axis_tready_count <= 0;
+			s00_axis_tvalid_count <= 0;
+			axis_s_r_ready_count <= 0;
+		end
+		else begin
+			if(s00_axis_tready == 1) begin
+				s00_axis_tready_count <= s00_axis_tready_count + 1;
+			end
+			else begin
+			end
+
+			if(s00_axis_tvalid == 1) begin
+				s00_axis_tvalid_count <= s00_axis_tvalid_count + 1;
+			end
+			else begin
+			end
+
+			if(axis_s_r_ready == 1) begin
+				axis_s_r_ready_count <= axis_s_r_ready_count + 1;
+			end
+			else begin
+			end
+		end
+	end
+
 	localparam integer CSA_IN_DATA_WIDTH_BY_BYTE = 5;
 	localparam integer CSA_IN_OUT_DATA_WIDTH = BYTE_WIDTH * CSA_IN_DATA_WIDTH_BY_BYTE;
 
@@ -220,13 +250,17 @@ module csa_wrap #
 	wire csa_in_error_full;
 	wire csa_in_error_empty;
 
+	wire [160 - 1 : 0] buffer_data;
+
 	convert_32_to_40 #(
 			.BYTE_WIDTH(BYTE_WIDTH),
 			.CSA_IN_DATA_WIDTH_BY_BYTE(CSA_IN_DATA_WIDTH_BY_BYTE),
 			.CSA_IN_OUT_DATA_WIDTH(CSA_IN_OUT_DATA_WIDTH)
 		) convert_32_to_40_inst (
+			.buffer_data(buffer_data),
+
 			.clk(s00_axis_aclk),
-			.rst_n(rst_n),
+			.rst_n(s00_axis_aresetn),
 
 			.axis_s_r_ready(axis_s_r_ready),
 
@@ -243,6 +277,20 @@ module csa_wrap #
 			.csa_in_error_empty(csa_in_error_empty)
 		);
 
+	reg [32 - 1 : 0] axis_s_ren_count = 0;
+	always @(posedge axis_s_rclk) begin
+		if(s00_axis_aresetn == 0) begin
+			axis_s_ren_count <= 0;
+		end
+		else begin
+			if(axis_s_ren == 1) begin
+				axis_s_ren_count <= axis_s_ren_count + 1;
+			end
+			else begin
+			end
+		end
+	end
+
 	localparam integer CSA_CALC_IN_WIDTH = 8 * 5;
 	localparam integer CSA_CALC_OUT_WIDTH = 8 * 6;
 
@@ -252,6 +300,8 @@ module csa_wrap #
 	wire csa_out_wclk;
 	wire csa_out_wen;
 	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_out_wdata;
+
+	wire axis_m_r_ready;
 
 	assign csa_calc_clk = s00_axis_aclk;
 
@@ -263,8 +313,14 @@ module csa_wrap #
 			.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
 			.CSA_CALC_OUT_WIDTH(CSA_CALC_OUT_WIDTH)
 		) csa_ram_inst (
+			.s00_axis_tvalid_count(s00_axis_tvalid_count),
+			.s00_axis_tready_count(s00_axis_tready_count),
+			.axis_s_ren_count(axis_s_ren_count),
+			.axis_s_r_ready_count(axis_s_r_ready_count),
+			.buffer_data(buffer_data),
+
 			.axi_mm_clk(s00_axi_aclk),
-			.rst_n(rst_n),
+			.rst_n(s00_axi_aresetn),
 
 			.wstrb(axi_wstrb),
 			.wen(axi_wen),
@@ -285,7 +341,9 @@ module csa_wrap #
 			.csa_out_error_full(error_full_48),
 			.csa_out_wclk(csa_out_wclk),
 			.csa_out_wen(csa_out_wen),
-			.csa_out_wdata(csa_out_wdata)
+			.csa_out_wdata(csa_out_wdata),
+
+			.axis_m_r_ready(axis_m_r_ready)
 		);
 
 	localparam integer CSA_OUT_DATA_WIDTH_BY_BYTE = 6;
@@ -302,7 +360,7 @@ module csa_wrap #
 			.CSA_OUT_OUT_DATA_WIDTH(CSA_OUT_OUT_DATA_WIDTH)
 		) convert_48_to_3x32_inst(
 			.clk(m00_axis_aclk),
-			.rst_n(rst_n),
+			.rst_n(m00_axis_aresetn),
 
 			.error_full_48(error_full_48),
 			.wclk_48(csa_out_wclk),
@@ -315,7 +373,6 @@ module csa_wrap #
 			.wdata_32(axis_m_wdata)
 		);
 
-	wire axis_m_r_ready;
 	wire axis_m_error_empty;
 
 	localparam NUMBER_OF_OUTPUT_WORDS = 12;

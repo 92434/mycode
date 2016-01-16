@@ -185,9 +185,8 @@ static int dma_trans_sync(pcie_tr_t *tr) {
 	if(rx_size != 0) {
 		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->rx_cmp, tmo);
-		myprintf_once((0 == tmo), "%s:tx transfer timed out!\n", dma->devname);
+		myprintf_once((0 == tmo), "%s:rx transfer timed out!\n", dma->devname);
 		if (0 == tmo) {
-			myprintf_once((0 == tmo), "%s:rx transfer timed out!\n", dma->devname);
 			tr->rx_size = 0;
 			ret = -1;
 		}

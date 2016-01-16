@@ -6,8 +6,8 @@
 #modules-name-objs := obj1.o obj2.o obj3.o
 #KERNEL-OBJS += modules-name.o
 
-KBUILD_CFLAGS += -DKC705_DVBS2
-#KBUILD_CFLAGS += -DKC705_CSA
+#KBUILD_CFLAGS += -DKC705_DVBS2
+KBUILD_CFLAGS += -DKC705_CSA
 
 kc705-module-objs := kc705.o \
 	pcie.o \

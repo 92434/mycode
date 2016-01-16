@@ -41,11 +41,11 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	// function called clogb2 that returns an integer which has the 
 	// value of the ceiling of the log base 2.
 	function integer clogb2 (input integer bit_depth);
-	begin
-		for(clogb2 = 0; bit_depth > 0; clogb2 = clogb2 + 1) begin
-			bit_depth = bit_depth >> 1;
+		begin
+			for(clogb2 = 0; bit_depth > 0; clogb2 = clogb2 + 1) begin
+				bit_depth = bit_depth >> 1;
+			end
 		end
-	end
 	endfunction
 
 	// Total number of input data.
@@ -55,38 +55,41 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	// Define the states of state machine
 	// The control state machine oversees the writing of input streaming data to the FIFO,
 	// and outputs the streaming data from the FIFO
-	parameter [1 : 0] IDLE = 1'b0, WRITE_FIFO = 1'b1; //This is the initial/idle state In this state FIFO is written with the input stream data S_AXIS_TDATA 
+	localparam [1 : 0] IDLE = 1'b0; //This is the initial/idle state In this state FIFO is written with the input stream data S_AXIS_TDATA 
+	localparam [1 : 0] WRITE_FIFO = 1'b1; //This is the initial/idle state In this state FIFO is written with the input stream data S_AXIS_TDATA 
+
 	wire axis_tready;
 	// State variable
 	reg mst_exec_state;
-	// FIFO implementation signals
-	//genvar byte_index;
-	// FIFO write enable
-	//wire fifo_wren;
-	// FIFO full flag
-	reg fifo_full_flag;
+
 	// FIFO write pointer
 	reg [bit_num - 1 : 0] write_pointer;
 	// sink has accepted all the streaming data and stored in FIFO
+	//
 	wire writes_done;
 	// I/O Connections assignments
 
 	assign S_AXIS_TREADY = axis_tready;
 
 
+	reg wen = 0;
 	// Control state machine implementation
 	always @(posedge S_AXIS_ACLK) begin
 		// Synchronous reset (active low)
 		if (!S_AXIS_ARESETN) begin
 			mst_exec_state <= IDLE;
+			wen <= 0;
 		end
 		else begin
+			wen <= 0;
 			case (mst_exec_state)
 				IDLE: begin
 					// The sink starts accepting tdata when 
 					// there tvalid is asserted to mark the
 					// presence of valid streaming data 
 					if (S_AXIS_TVALID) begin
+						wen <= 1;
+
 						mst_exec_state <= WRITE_FIFO;
 					end
 					else begin
@@ -100,6 +103,10 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 						mst_exec_state <= IDLE;
 					end
 					else begin
+						if(S_AXIS_TVALID == 1) begin
+							wen <= 1;
+						end
+
 						// The sink accepts and stores tdata 
 						// into FIFO
 						mst_exec_state <= WRITE_FIFO;
@@ -111,27 +118,32 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 		end
 	end
 
+	reg wen_R = 0;
+	always@(posedge S_AXIS_ACLK) begin
+		if(!S_AXIS_ARESETN) begin
+			wen_R <= 0;
+		end
+		else  begin
+			wen_R <= wen;
+		end
+	end
+
+	reg [C_S_AXIS_TDATA_WIDTH - 1 : 0] axis_tdata = 0;
+	always@(negedge S_AXIS_ACLK) begin
+		if(!S_AXIS_ARESETN) begin
+			axis_tdata <= 0;
+		end
+		else  begin
+			axis_tdata <= S_AXIS_TDATA;
+		end
+	end
+
 
 	// AXI Streaming Sink 
 	// 
 	// The example design sink is always ready to accept the S_AXIS_TDATA until
 	// the FIFO is not filled with NUMBER_OF_INPUT_WORDS number of input words.
-	assign axis_tready = ((mst_exec_state == WRITE_FIFO) && (write_pointer <= NUMBER_OF_INPUT_WORDS - 1));
-
-	wire axis_tready_tvalid;
-	assign axis_tready_tvalid = S_AXIS_TVALID && axis_tready;
-	reg axis_tready_tvalid_R = 0;
-	always @(posedge S_AXIS_ACLK) begin
-		if(S_AXIS_ARESETN == 0) begin
-			axis_tready_tvalid_R <= 0;
-		end
-		else begin
-			axis_tready_tvalid_R <= axis_tready_tvalid;
-		end
-	end
-
-	wire wen;
-	assign wen = (axis_tready_tvalid == 1) && (axis_tready_tvalid_R == 1) ? 1 : 0;
+	assign axis_tready = ((mst_exec_state == WRITE_FIFO) && (write_pointer < NUMBER_OF_INPUT_WORDS));
 
 	assign writes_done = ((write_pointer == NUMBER_OF_INPUT_WORDS - 1) || (S_AXIS_TLAST == 1)) ? 1 : 0;
 
@@ -140,9 +152,9 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 			write_pointer <= 0;
 		end
 		else  begin
-			if (wen) begin
-				// write pointer is incremented after every write to the FIFO
-				// when FIFO write signal is enabled.
+			// write pointer is incremented after every write to the FIFO
+			// when FIFO write signal is enabled.
+			if(wen == 1) begin
 				if(write_pointer == (NUMBER_OF_INPUT_WORDS - 1)) begin
 					write_pointer <= 0;
 				end
@@ -155,23 +167,6 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 		end
 	end
 
-	//// FIFO write enable generation
-	//assign fifo_wren = S_AXIS_TVALID && axis_tready;
-
-	//// FIFO Implementation
-	//generate for(byte_index = 0; byte_index<= (C_S_AXIS_TDATA_WIDTH / 8 - 1); byte_index = byte_index + 1)
-	//	begin : FIFO_GEN
-	//		reg [(C_S_AXIS_TDATA_WIDTH / 4) - 1 : 0] stream_data_fifo [0 : NUMBER_OF_INPUT_WORDS - 1];
-
-	//		// Streaming input data is stored in FIFO
-	//		always @(posedge S_AXIS_ACLK) begin
-	//			if (fifo_wren) begin // && S_AXIS_TSTRB[byte_index])
-	//				stream_data_fifo[write_pointer] <= S_AXIS_TDATA[(byte_index * 8 + 7) -: 8];
-	//			end
-	//		end
-	//	end
-	//endgenerate
-
 	// Add user logic here
 	my_fifo #(
 			.DATA_WIDTH(C_S_AXIS_TDATA_WIDTH),
@@ -181,9 +176,9 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 			.rst_n(S_AXIS_ARESETN),
 			.wclk(S_AXIS_ACLK),
 			.rclk(rclk),
-			.wdata(S_AXIS_TDATA),
+			.wdata(axis_tdata),
 			.rdata(rdata),
-			.w_enable(wen),
+			.w_enable(wen_R),
 			.r_enable(ren),
 			.r_ready(r_ready),
 			.error_full(error_full),

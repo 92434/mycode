@@ -71,6 +71,9 @@ module csa_ram_tb #(
 	wire csa_out_wclk;//output
 	wire csa_out_wen;//output
 	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_out_wdata;//output
+	wire axis_m_r_ready;
+
+	assign axis_m_r_ready = 1;
 
 	csa_ram #(
 			.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
@@ -102,12 +105,15 @@ module csa_ram_tb #(
 			.csa_out_error_full(csa_out_error_full),
 			.csa_out_wclk(csa_out_wclk),
 			.csa_out_wen(csa_out_wen),
-			.csa_out_wdata(csa_out_wdata)
+			.csa_out_wdata(csa_out_wdata),
+
+			.axis_m_r_ready(axis_m_r_ready)
 		);
 
 	localparam integer ADDR_CSA_BUSY = 0;
+	localparam integer ADDR_CSA_READY = ADDR_CSA_BUSY + 1;
 
-	localparam integer ADDR_CHANNEL_INDEX = ADDR_CSA_BUSY + 1;
+	localparam integer ADDR_CHANNEL_INDEX = ADDR_CSA_READY + 1;
 
 	localparam integer ADDR_IN_DATA_VALID = ADDR_CHANNEL_INDEX + 1;
 	localparam integer ADDR_IN_DATA_0 = ADDR_IN_DATA_VALID + 1;

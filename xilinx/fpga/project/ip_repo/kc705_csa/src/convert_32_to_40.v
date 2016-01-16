@@ -6,6 +6,7 @@ module convert_32_to_40 #(
 		parameter integer CSA_IN_DATA_WIDTH_BY_BYTE = 5,
 		parameter integer CSA_IN_OUT_DATA_WIDTH = BYTE_WIDTH * CSA_IN_DATA_WIDTH_BY_BYTE
 	)(
+		output reg [160 - 1 : 0] buffer_data = 0,
 		input wire clk,
 		input wire rst_n,
 
@@ -45,6 +46,8 @@ module convert_32_to_40 #(
 
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
+			buffer_data <= 0;
+
 			buffer <= 0;
 			rindex <= 0;
 
@@ -80,8 +83,9 @@ module convert_32_to_40 #(
 
 					if((rindex >= 0) && (rindex < CSA_IN_DATA_WIDTH_BY_BYTE - 1)) begin
 						rindex <= rindex + 1;
+						axis_s_ren <= 1;
 
-						state <= 0;
+						state <= 1;
 					end
 					else begin
 						rindex <= 0;
@@ -90,6 +94,8 @@ module convert_32_to_40 #(
 					end
 				end
 				2: begin
+					buffer_data <= buffer;
+
 					wdata_0 <= buffer[(0 * CSA_IN_OUT_DATA_WIDTH) +: CSA_IN_OUT_DATA_WIDTH];
 					wdata_1 <= buffer[(1 * CSA_IN_OUT_DATA_WIDTH) +: CSA_IN_OUT_DATA_WIDTH];
 					wdata_2 <= buffer[(2 * CSA_IN_OUT_DATA_WIDTH) +: CSA_IN_OUT_DATA_WIDTH];
@@ -146,7 +152,7 @@ module convert_32_to_40 #(
 	my_fifo #(
 			.DATA_WIDTH(8 * CSA_IN_DATA_WIDTH_BY_BYTE),
 			.BULK_OF_DATA(1),
-			.BULK_DEPTH(8)
+			.BULK_DEPTH(256)
 		) my_fifo_inst (
 			.rst_n(rst_n),
 			.wclk(csa_in_wclk),

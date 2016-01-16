@@ -46,6 +46,8 @@ static int dma_tr(void *ppara) {
 	int i;
 	int pos;
 
+	reset_list_buffer(dma->list);
+
 	tx_dest_memory = (uint8_t *)(dma_base_vaddr + tx_dest_axi_addr);
 	rx_src_memory = (uint8_t *)(dma_base_vaddr + rx_src_axi_addr);
 
