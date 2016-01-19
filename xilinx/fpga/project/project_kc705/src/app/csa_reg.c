@@ -26,10 +26,6 @@ typedef enum {
 	ADDR_OUT_DATA_1,
 	ADDR_OUT_DATA_2,
 	ADDR_CALC_TIMES,
-	ADDR_S00_AXIS_TREADY_COUNT,
-	ADDR_S00_AXIS_TVALID_COUNT,
-	ADDR_AXIS_S_REN_COUNT,
-	ADDR_AXIS_S_R_READY_COUNT,
 	ADDR_BUFFER_DATA0,
 	ADDR_BUFFER_DATA1,
 	ADDR_BUFFER_DATA2,
@@ -37,6 +33,29 @@ typedef enum {
 	ADDR_BUFFER_DATA4,
 	TOTAL_REGS,
 } addr_t;
+
+char *reg_name[] = {
+	"ADDR_CSA_BUSY",
+	"ADDR_CSA_READY",
+	"ADDR_CHANNEL_INDEX",
+	"ADDR_IN_DATA_VALID",
+	"ADDR_IN_DATA_0",
+	"ADDR_IN_DATA_1",
+	"ADDR_IN_DATA_2",
+	"ADDR_IN_DATA_3",
+	"ADDR_IN_DATA_4",
+	"ADDR_OUT_DATA_VALID",
+	"ADDR_OUT_DATA_0",
+	"ADDR_OUT_DATA_1",
+	"ADDR_OUT_DATA_2",
+	"ADDR_CALC_TIMES",
+	"ADDR_BUFFER_DATA0",
+	"ADDR_BUFFER_DATA1",
+	"ADDR_BUFFER_DATA2",
+	"ADDR_BUFFER_DATA3",
+	"ADDR_BUFFER_DATA4",
+	"TOTAL_REGS",
+};
 
 #define ADDR_OFFSET(addr) (addr * 4)
 
@@ -68,7 +87,6 @@ typedef struct {
 do { \
 	lseek(targ->fd, ADDR_OFFSET(addr), SEEK_SET); \
 	nread = read(targ->fd, targ->buffer, sizeof(uint32_t)); \
-	printf("%d: %08x(%d) \n", addr, data[0], data[0]); \
 } while(0)
 
 void *read_fn(void *arg) {
@@ -91,6 +109,20 @@ void *read_fn(void *arg) {
 
 		for(i = 0; i < TOTAL_REGS; i++) {
 			read_regs(i);
+			printf("%s: %08x(%d)\n", reg_name[i], data[0], data[0]);
+		}
+
+		for(i = TOTAL_REGS; i < TOTAL_REGS + (40 * 2); i++) {
+			if((i - TOTAL_REGS) % 2 == 0) {
+				read_regs(i);
+				printf("data:%08x\n", data[0]);
+			} else {
+				read_regs(i);
+				printf("aresetn:%d\t", (data[0] >> 0) & 0x1);
+				printf("tready:%d\t", (data[0] >> 1) & 0x1);
+				printf("tlast:%d\t", (data[0] >> 2) & 0x1);
+				printf("tvalid:%d\n", (data[0] >> 3) & 0x1);
+			}
 		}
 
 		return NULL;
@@ -104,7 +136,7 @@ void *write_fn(void *arg) {
 	int nwrite;
 
 	printids("write_fn: ");
-	int times = 4;
+	int times = 50000;
 	int channel = 1;
 
 	while(stop == 0) {

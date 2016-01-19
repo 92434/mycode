@@ -37,7 +37,7 @@ module convert_48_to_3x32 #
 	my_fifo #(
 			.DATA_WIDTH(CSA_OUT_OUT_DATA_WIDTH),
 			.BULK_OF_DATA(1),
-			.BULK_DEPTH(32)
+			.BULK_DEPTH(256)
 		) my_fifo_inst (
 			.rst_n(rst_n),
 			.wclk(wclk_48),

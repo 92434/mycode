@@ -105,6 +105,12 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 		return ret;
 	}
 
+	if((dma->is_ready_for_write != NULL) && (ret = 0)) {
+		if(!dma->is_ready_for_write(dma)) {
+			return ret;
+		}
+	}
+
 	while(ret < len) {
 		int c;
 
@@ -112,12 +118,6 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 			c = dma->send_bulk_size;
 		} else {
 			c = end - offset;
-		}
-
-		if((dma->is_ready_for_write != NULL) && (ret = 0)) {
-			if(!dma->is_ready_for_write(dma)) {
-				c = 0;
-			}
 		}
 
 		if(c > 0) {

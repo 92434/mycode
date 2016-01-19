@@ -29,7 +29,7 @@ static int alloc_dma_memory(kc705_pci_dev_t *kc705_pci_dev) {
 		}
 
 		dma->dma_lite_offset = dma_info[i].dma_lite_offset;
-		dma->pcie_bar_map_ctl_offset_1 = dma_info[i].pcie_bar_map_ctl_offset_0;
+		dma->pcie_bar_map_ctl_offset_0 = dma_info[i].pcie_bar_map_ctl_offset_0;
 		dma->pcie_bar_map_ctl_offset_1 = dma_info[i].pcie_bar_map_ctl_offset_1;
 		dma->pcie_map_bar_axi_addr_0 = dma_info[i].pcie_map_bar_axi_addr_0;
 		dma->pcie_map_bar_axi_addr_1 = dma_info[i].pcie_map_bar_axi_addr_1;

@@ -18,7 +18,7 @@
 #include <linux/spi/spi.h>
 #include <linux/spi/spi_gpio.h>
 #define MY_NAME "spidev_device"
-#define CS 168
+#define CS 157
 
 #define SPI_BUS_NUM 1
 

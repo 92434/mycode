@@ -11,10 +11,9 @@ module csa_ram #(
 
 	)
 	(
-		input wire [32 - 1 : 0] s00_axis_tready_count,
-		input wire [32 - 1 : 0] s00_axis_tvalid_count,
-		input wire [32 - 1 : 0] axis_s_ren_count,
-		input wire [32 - 1 : 0] axis_s_r_ready_count,
+		input wire [32 - 1 : 0] cur_debug_data,
+		input wire [32 - 1 : 0] cur_debug_info,
+		output wire [32 - 1 : 0] cur_debug_index,
 		input wire [160 - 1 : 0] buffer_data,
 
 		input wire axi_mm_clk,
@@ -63,17 +62,13 @@ module csa_ram #(
 
 	localparam integer ADDR_CALC_TIMES = ADDR_OUT_DATA_2 + 1;
 
-
-	localparam integer ADDR_S00_AXIS_TREADY_COUNT = ADDR_CALC_TIMES + 1;
-	localparam integer ADDR_S00_AXIS_TVALID_COUNT = ADDR_S00_AXIS_TREADY_COUNT + 1;
-	localparam integer ADDR_AXIS_S_REN_COUNT = ADDR_S00_AXIS_TVALID_COUNT + 1;
-	localparam integer ADDR_AXIS_S_R_READY_COUNT = ADDR_AXIS_S_REN_COUNT + 1;
-
-	localparam integer ADDR_BUFFER_DATA0 = ADDR_AXIS_S_R_READY_COUNT + 1;
+	localparam integer ADDR_BUFFER_DATA0 = ADDR_CALC_TIMES + 1;
 	localparam integer ADDR_BUFFER_DATA1 = ADDR_BUFFER_DATA0 + 1;
 	localparam integer ADDR_BUFFER_DATA2 = ADDR_BUFFER_DATA1 + 1;
 	localparam integer ADDR_BUFFER_DATA3 = ADDR_BUFFER_DATA2 + 1;
 	localparam integer ADDR_BUFFER_DATA4 = ADDR_BUFFER_DATA3 + 1;
+
+	localparam integer ADDR_DEBUG_DATA = ADDR_BUFFER_DATA4 + 1;
 
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
@@ -127,6 +122,8 @@ module csa_ram #(
 	reg csa_in_valid = 0;
 	reg csa_out_valid = 0;
 
+	assign cur_debug_index = ((raddr >= ADDR_DEBUG_DATA) && (raddr < ADDR_DEBUG_DATA + (40 * 2))) ? (raddr - ADDR_DEBUG_DATA) : 0;
+
 	always @(posedge axi_mm_clk) begin
 		if(rst_n == 0) begin
 			rdata <= 0;
@@ -176,18 +173,6 @@ module csa_ram #(
 					ADDR_CALC_TIMES: begin
 						rdata <= csa_calc_logic_times;
 					end
-					ADDR_S00_AXIS_TREADY_COUNT: begin
-						rdata <= s00_axis_tready_count;
-					end
-					ADDR_S00_AXIS_TVALID_COUNT: begin
-						rdata <= s00_axis_tvalid_count;
-					end
-					ADDR_AXIS_S_REN_COUNT: begin
-						rdata <= axis_s_ren_count;
-					end
-					ADDR_AXIS_S_R_READY_COUNT: begin
-						rdata <= axis_s_r_ready_count;
-					end
 					ADDR_BUFFER_DATA0: begin
 						rdata <= buffer_data[(0 * 32) +: 32];
 					end
@@ -204,7 +189,17 @@ module csa_ram #(
 						rdata <= buffer_data[(4 * 32) +: 32];
 					end
 					default: begin
-						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS - 1){1'b0}}, raddr};
+						if((raddr >= ADDR_DEBUG_DATA) && (raddr < ADDR_DEBUG_DATA + (40 * 2))) begin
+							if((cur_debug_index % 2) == 0) begin
+								rdata <= cur_debug_data;
+							end
+							else begin
+								rdata <= cur_debug_info;
+							end
+						end
+						else begin
+							rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS - 1){1'b0}}, raddr};
+						end
 					end
 				endcase
 			end

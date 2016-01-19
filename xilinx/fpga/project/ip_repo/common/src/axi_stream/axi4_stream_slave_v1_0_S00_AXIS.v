@@ -118,27 +118,6 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 		end
 	end
 
-	reg wen_R = 0;
-	always@(posedge S_AXIS_ACLK) begin
-		if(!S_AXIS_ARESETN) begin
-			wen_R <= 0;
-		end
-		else  begin
-			wen_R <= wen;
-		end
-	end
-
-	reg [C_S_AXIS_TDATA_WIDTH - 1 : 0] axis_tdata = 0;
-	always@(negedge S_AXIS_ACLK) begin
-		if(!S_AXIS_ARESETN) begin
-			axis_tdata <= 0;
-		end
-		else  begin
-			axis_tdata <= S_AXIS_TDATA;
-		end
-	end
-
-
 	// AXI Streaming Sink 
 	// 
 	// The example design sink is always ready to accept the S_AXIS_TDATA until
@@ -176,9 +155,9 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 			.rst_n(S_AXIS_ARESETN),
 			.wclk(S_AXIS_ACLK),
 			.rclk(rclk),
-			.wdata(axis_tdata),
+			.wdata(S_AXIS_TDATA),
 			.rdata(rdata),
-			.w_enable(wen_R),
+			.w_enable(wen),
 			.r_enable(ren),
 			.r_ready(r_ready),
 			.error_full(error_full),

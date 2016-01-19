@@ -209,36 +209,6 @@ module csa_wrap #
 			.s00_axis_tvalid(s00_axis_tvalid)
 		);
 
-	reg [32 - 1 : 0] s00_axis_tready_count = 0;
-	reg [32 - 1 : 0] s00_axis_tvalid_count = 0;
-	reg [32 - 1 : 0] axis_s_r_ready_count = 0;
-	always @(posedge s00_axis_aclk) begin
-		if(s00_axis_aresetn == 0) begin
-			s00_axis_tready_count <= 0;
-			s00_axis_tvalid_count <= 0;
-			axis_s_r_ready_count <= 0;
-		end
-		else begin
-			if(s00_axis_tready == 1) begin
-				s00_axis_tready_count <= s00_axis_tready_count + 1;
-			end
-			else begin
-			end
-
-			if(s00_axis_tvalid == 1) begin
-				s00_axis_tvalid_count <= s00_axis_tvalid_count + 1;
-			end
-			else begin
-			end
-
-			if(axis_s_r_ready == 1) begin
-				axis_s_r_ready_count <= axis_s_r_ready_count + 1;
-			end
-			else begin
-			end
-		end
-	end
-
 	localparam integer CSA_IN_DATA_WIDTH_BY_BYTE = 5;
 	localparam integer CSA_IN_OUT_DATA_WIDTH = BYTE_WIDTH * CSA_IN_DATA_WIDTH_BY_BYTE;
 
@@ -277,20 +247,6 @@ module csa_wrap #
 			.csa_in_error_empty(csa_in_error_empty)
 		);
 
-	reg [32 - 1 : 0] axis_s_ren_count = 0;
-	always @(posedge axis_s_rclk) begin
-		if(s00_axis_aresetn == 0) begin
-			axis_s_ren_count <= 0;
-		end
-		else begin
-			if(axis_s_ren == 1) begin
-				axis_s_ren_count <= axis_s_ren_count + 1;
-			end
-			else begin
-			end
-		end
-	end
-
 	localparam integer CSA_CALC_IN_WIDTH = 8 * 5;
 	localparam integer CSA_CALC_OUT_WIDTH = 8 * 6;
 
@@ -305,6 +261,59 @@ module csa_wrap #
 
 	assign csa_calc_clk = s00_axis_aclk;
 
+	reg [32 - 1 : 0] debug_data [0 : 40 - 1];
+	reg [32 - 1 : 0] debug_info [0 : 40 - 1];
+
+	wire [32 - 1 : 0] cur_debug_data;
+	wire [32 - 1 : 0] cur_debug_info;
+	wire [32 - 1 : 0] cur_debug_index;
+	wire [32 - 1 : 0] cur_debug_data_index;
+	wire [32 - 1 : 0] cur_debug_info_index;
+
+	assign cur_debug_data_index = ((cur_debug_index % 2) == 0) ? cur_debug_index / 2 : 0;
+	assign cur_debug_info_index = ((cur_debug_index % 2) == 1) ? cur_debug_index / 2 : 0;
+
+	assign cur_debug_data = debug_data[cur_debug_data_index];
+	assign cur_debug_info = debug_info[cur_debug_info_index];
+
+	integer debug_index = 0;
+	integer debug_state = 0;
+	always @(negedge s00_axis_aclk) begin
+		if(s00_axis_aresetn == 0) begin
+			debug_index <= 0;
+			debug_state <= 0;
+		end
+		else begin
+			case(debug_state)
+				0: begin
+					if(s00_axis_tvalid == 1) begin
+						debug_data[0] <= s00_axis_tdata;
+						debug_info[0] <= {{(32 - 1 - 1 - 1 - 1){1'b0}}, s00_axis_tvalid, s00_axis_tlast, s00_axis_tready, s00_axis_aresetn};
+						debug_index <= 1;
+
+						debug_state <= 1;
+					end
+					else begin
+					end
+				end
+				1: begin
+					if(debug_index < 40) begin
+						debug_data[debug_index] <= s00_axis_tdata;
+						debug_info[debug_index] <= {{(32 - 1 - 1 - 1 - 1){1'b0}}, s00_axis_tvalid, s00_axis_tlast, s00_axis_tready, s00_axis_aresetn};
+						debug_index <= debug_index + 1;
+					end
+					else begin
+						debug_index <= 0;
+
+						debug_state <= 0;
+					end
+				end
+				default: begin
+				end
+			endcase
+		end
+	end
+
 	csa_ram #(
 			.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
 			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
@@ -313,10 +322,9 @@ module csa_wrap #
 			.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
 			.CSA_CALC_OUT_WIDTH(CSA_CALC_OUT_WIDTH)
 		) csa_ram_inst (
-			.s00_axis_tvalid_count(s00_axis_tvalid_count),
-			.s00_axis_tready_count(s00_axis_tready_count),
-			.axis_s_ren_count(axis_s_ren_count),
-			.axis_s_r_ready_count(axis_s_r_ready_count),
+			.cur_debug_data(cur_debug_data),
+			.cur_debug_info(cur_debug_info),
+			.cur_debug_index(cur_debug_index),
 			.buffer_data(buffer_data),
 
 			.axi_mm_clk(s00_axi_aclk),

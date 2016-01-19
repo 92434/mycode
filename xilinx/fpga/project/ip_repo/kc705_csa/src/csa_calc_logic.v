@@ -118,27 +118,27 @@ module csa_calc_logic #(
 
 	assign sb = 64'hE613DB6DC11C4524;
 
-	assign cb = ck;
-	//stream_cypher stream_cypher_inst(
-	//		.ck(ck),//input
-	//		.sb(sb),//input fixed!
-	//		.cb(cb)//output
-	//	);
+	//assign cb = ck;
+	stream_cypher stream_cypher_inst(
+			.ck(ck),//input
+			.sb(sb),//input fixed!
+			.cb(cb)//output
+		);
 
 	wire [AXI_DATA_WIDTH - 1 : 0] loops;
 
 	assign loops = csa_calc_logic_times - times_reg;
 
-	assign ck_out = (loops == 0) ? {16'd0, ID[8 - 1 : 0], csa_calc_logic_in} : cb;
-	//ck_processer #(
-	//		.AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-	//		.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
-	//		.CYPHER_DATA_WIDTH(CYPHER_DATA_WIDTH)
-	//	) ck_processer_inst(
-	//		.in(csa_calc_logic_in),
-	//		.cb(cb),
-	//		.loops(loops),
+	//assign ck_out = (loops == 0) ? {16'd0, ID[8 - 1 : 0], csa_calc_logic_in} : cb;
+	ck_processer #(
+			.AXI_DATA_WIDTH(AXI_DATA_WIDTH),
+			.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
+			.CYPHER_DATA_WIDTH(CYPHER_DATA_WIDTH)
+		) ck_processer_inst(
+			.in(csa_calc_logic_in),
+			.cb(cb),
+			.loops(loops),
 
-	//		.ck_out(ck_out)
-	//	);
+			.ck_out(ck_out)
+		);
 endmodule
