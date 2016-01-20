@@ -10,12 +10,12 @@
 static int pcie_dma_open(struct inode *i, struct file *filp) {
 	pcie_dma_t *dma = container_of(i->i_cdev, pcie_dma_t, cdev);
 	filp->private_data = dma;
-	mydebug("\n");
+	//mydebug("\n");
 	return 0;
 }
 
 static int pcie_dma_close(struct inode *i, struct file *filp) {
-	mydebug("\n");
+	//mydebug("\n");
 	return 0;
 }
 
@@ -84,7 +84,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 				return ret;
 			}
 
-			wait_event_interruptible_timeout(dma->wq, read_available(dma->list), HZ);
+			//wait_event_interruptible_timeout(dma->wq, true, HZ);
 		}
 	}
 
@@ -152,8 +152,6 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 			if(idle_count++ == 1) {
 				return ret;
 			}
-
-			wait_event_interruptible_timeout(dma->wq, true, HZ);
 		}
 	}
 
@@ -183,7 +181,7 @@ static int pcie_dma_mmap(struct file *filp, struct vm_area_struct *vma) {
 	buffer_node_t *node = NULL, *node_next = NULL;
 	list_buffer_t *list = dma->list;
 
-	mydebug("\n");
+	//mydebug("\n");
 
 	if((list == NULL) || (list->read == NULL)) {
 		return -EAGAIN;
@@ -217,7 +215,7 @@ static int pcie_dma_mmap(struct file *filp, struct vm_area_struct *vma) {
 		vma_start += node->size;
 		requested_size -= node->size;
 	}
-	mydebug("requested_size:%lu\n", requested_size);
+	//mydebug("requested_size:%lu\n", requested_size);
 
 	return 0;
 }

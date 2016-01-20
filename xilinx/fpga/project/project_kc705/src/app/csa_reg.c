@@ -26,6 +26,7 @@ typedef enum {
 	ADDR_OUT_DATA_1,
 	ADDR_OUT_DATA_2,
 	ADDR_CALC_TIMES,
+	ADDR_CALC_DELAY,
 	ADDR_BUFFER_DATA0,
 	ADDR_BUFFER_DATA1,
 	ADDR_BUFFER_DATA2,
@@ -49,12 +50,12 @@ char *reg_name[] = {
 	"ADDR_OUT_DATA_1",
 	"ADDR_OUT_DATA_2",
 	"ADDR_CALC_TIMES",
+	"ADDR_CALC_DELAY",
 	"ADDR_BUFFER_DATA0",
 	"ADDR_BUFFER_DATA1",
 	"ADDR_BUFFER_DATA2",
 	"ADDR_BUFFER_DATA3",
 	"ADDR_BUFFER_DATA4",
-	"TOTAL_REGS",
 };
 
 #define ADDR_OFFSET(addr) (addr * 4)
@@ -96,7 +97,7 @@ void *read_fn(void *arg) {
 	fd_set efds;
 	int nread;
 
-	printids("read_fn: ");
+	//printids("read_fn: ");
 
 	tv.tv_sec=1;
 	tv.tv_usec=0;
@@ -105,7 +106,7 @@ void *read_fn(void *arg) {
 		uint32_t *data = (uint32_t *)targ->buffer;
 		int i;
 
-		usleep(1000000);
+		usleep(10);
 
 		for(i = 0; i < TOTAL_REGS; i++) {
 			read_regs(i);
@@ -135,17 +136,20 @@ void *write_fn(void *arg) {
 	targ = targ;
 	int nwrite;
 
-	printids("write_fn: ");
+	//printids("write_fn: ");
 	int times = 50000;
 	int channel = 1;
+	int delay = 0;
 
 	while(stop == 0) {
 		lseek(targ->fd, ADDR_OFFSET(ADDR_CALC_TIMES), SEEK_SET);
 		nwrite = write(targ->fd, &times, sizeof(int));
 
+		lseek(targ->fd, ADDR_OFFSET(ADDR_CALC_DELAY), SEEK_SET);
+		nwrite = write(targ->fd, &delay, sizeof(int));
+
 		lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
 		nwrite = write(targ->fd, &channel, sizeof(int));
-		//usleep(1000000);
 		return NULL;
 	}
 	return NULL;
@@ -166,7 +170,7 @@ int read_write(thread_arg_t *targ) {
 		printf("can't create thread: %s\n", strerror(err));
 	}
 
-	printids("main thread:");
+	//printids("main thread:");
 	pthread_join(rtid,NULL);
 	pthread_join(wtid,NULL);
 
@@ -182,7 +186,7 @@ int main(int argc, char **argv) {
 	int flags;
 
 	int mmap_size;
-	char *mmap_memory;
+	//char *mmap_memory;
 
 	if(argc < 2) {
 		printf("err: para error!:%s\n", strerror(errno));
@@ -207,12 +211,12 @@ int main(int argc, char **argv) {
 	}
 	printf("mmap_size:%d(%x)\n", mmap_size, mmap_size);
 
-	mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, targ.fd, (off_t)0);
-	if(mmap_memory == (void *)-1) {
-		printf("xiaofei: %s:%d: %s\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-		ret = -1;
-		//return ret;
-	}
+	//mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, targ.fd, (off_t)0);
+	//if(mmap_memory == (void *)-1) {
+	//	printf("xiaofei: %s:%d: %s\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+	//	ret = -1;
+	//	return ret;
+	//}
 
 	if(catch_signal(default_sig_action) == -1) {
 		printf("err: can't catch sigio!\n");

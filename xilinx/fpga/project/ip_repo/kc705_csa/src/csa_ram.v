@@ -61,8 +61,9 @@ module csa_ram #(
 	localparam integer ADDR_OUT_DATA_2 = ADDR_OUT_DATA_1 + 1;
 
 	localparam integer ADDR_CALC_TIMES = ADDR_OUT_DATA_2 + 1;
+	localparam integer ADDR_CALC_DELAY = ADDR_CALC_TIMES + 1;
 
-	localparam integer ADDR_BUFFER_DATA0 = ADDR_CALC_TIMES + 1;
+	localparam integer ADDR_BUFFER_DATA0 = ADDR_CALC_DELAY + 1;
 	localparam integer ADDR_BUFFER_DATA1 = ADDR_BUFFER_DATA0 + 1;
 	localparam integer ADDR_BUFFER_DATA2 = ADDR_BUFFER_DATA1 + 1;
 	localparam integer ADDR_BUFFER_DATA3 = ADDR_BUFFER_DATA2 + 1;
@@ -73,12 +74,14 @@ module csa_ram #(
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times = 50000;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_delay = 0;
 
 	always @(posedge axi_mm_clk) begin
 		if(rst_n == 0) begin
 			csa_current_channel <= 0;
 			csa_current_channel_changed <= 0;
 			csa_calc_logic_times <= 50000;
+			csa_calc_logic_delay <= 0;
 		end
 		else begin
 			csa_current_channel_changed <= 0;
@@ -98,6 +101,14 @@ module csa_ram #(
 						end
 						else begin
 							csa_calc_logic_times <= wdata;
+						end
+					end
+					ADDR_CALC_DELAY: begin
+						if(wdata >= 0) begin
+							csa_calc_logic_delay <= wdata;
+						end
+						else begin
+							csa_calc_logic_delay <= 0;
 						end
 					end
 					default: begin
@@ -173,6 +184,9 @@ module csa_ram #(
 					ADDR_CALC_TIMES: begin
 						rdata <= csa_calc_logic_times;
 					end
+					ADDR_CALC_DELAY: begin
+						rdata <= csa_calc_logic_delay;
+					end
 					ADDR_BUFFER_DATA0: begin
 						rdata <= buffer_data[(0 * 32) +: 32];
 					end
@@ -206,12 +220,14 @@ module csa_ram #(
 		end
 	end
 	
-	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in = 0;
-	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_calc_logic_out [0 : CSA_CALC_INST_NUM - 1];
-	reg [CSA_CALC_INST_NUM - 1 : 0] csa_calc_logic_request = 0;
 	wire [CSA_CALC_INST_NUM - 1 : 0] csa_calc_logic_inuse;
-	reg [CSA_CALC_INST_NUM - 1 : 0] csa_calc_logic_reset = 0;
+
+	reg [CSA_CALC_INST_NUM - 1 : 0] csa_calc_logic_request = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in = 0;
+
 	wire [CSA_CALC_INST_NUM - 1 : 0] csa_calc_logic_ready;
+	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_calc_logic_out [0 : CSA_CALC_INST_NUM - 1];
+	reg [CSA_CALC_INST_NUM - 1 : 0] csa_calc_logic_reset = 0;
 
 	genvar i;
 	generate for (i = 0; i < CSA_CALC_INST_NUM; i = i + 1)
@@ -227,13 +243,17 @@ module csa_ram #(
 					.clk(csa_calc_clk),
 					.rst_n(rst_n),
 
+					.csa_calc_logic_delay(csa_calc_logic_delay),
 					.csa_calc_logic_times(csa_calc_logic_times),
-					.csa_calc_logic_in(csa_calc_logic_in),
-					.csa_calc_logic_out(csa_calc_logic_out[i]),
-					.csa_calc_logic_request(csa_calc_logic_request[i]),
+
 					.csa_calc_logic_inuse(csa_calc_logic_inuse[i]),
-					.csa_calc_logic_reset(csa_calc_logic_reset[i]),
-					.csa_calc_logic_ready(csa_calc_logic_ready[i])
+
+					.csa_calc_logic_request(csa_calc_logic_request[i]),
+					.csa_calc_logic_in(csa_calc_logic_in),
+
+					.csa_calc_logic_ready(csa_calc_logic_ready[i]),
+					.csa_calc_logic_out(csa_calc_logic_out[i]),
+					.csa_calc_logic_reset(csa_calc_logic_reset[i])
 				);
 		end
 	endgenerate

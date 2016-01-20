@@ -156,13 +156,13 @@ static int pcie_tr_thread(void *ppara) {
 			tr.dma->dma_op.dma_tr(&tr);
 
 			tr_wakeup(tr.tr_cmp);
-			wake_up(&(tr.dma->wq));
 
 			if(tr.tx_size != 0) {
 				inc_dma_op_tx_count(tr.dma, tr.tx_size);
 			}
 			if(tr.rx_size != 0) {
 				write_buffer(NULL, tr.rx_size, tr.dma->list);
+				wake_up(&(tr.dma->wq));
 				inc_dma_op_rx_count(tr.dma, tr.rx_size);
 			}
 		} else {

@@ -41,10 +41,10 @@ static int csa_dma_receiver_thread(void *ppara) {
 }
 
 dma_thread_info_t csa_dma_threads[] = {
-	{
-		.t = &csa_dma_receiver_thread,
-		.thread_name = "csa_receiver"
-	},
+	//{
+	//	.t = &csa_dma_receiver_thread,
+	//	.thread_name = "csa_receiver"
+	//},
 };
 
 #define CSA_DMA_THREAD (sizeof(csa_dma_threads) / sizeof(dma_thread_info_t))

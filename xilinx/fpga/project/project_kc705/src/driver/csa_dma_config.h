@@ -33,9 +33,9 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_type = AXI_DMA,
 		.dma_thread = csa_dma_threads,
 		.dma_thread_count = CSA_DMA_THREAD, 
-		.is_auto_receive = true,
-		.is_ready_for_write = csa_is_ready_for_write,
-		.is_ready_for_read = csa_is_ready_for_read,
+		.is_auto_receive = false,
+		.is_ready_for_write = NULL,
+		.is_ready_for_read = NULL,
 
 		.receive_bulk_size = (4 * 3) * 4,
 		.send_bulk_size = 5 * 4,

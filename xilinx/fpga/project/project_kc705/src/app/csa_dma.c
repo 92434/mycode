@@ -11,10 +11,23 @@
 #include <pthread.h>
 #include "kc705.h"
 
-unsigned int raw_data[] = {0x00000011, 0x00002200, 0x00330000, 0x44000000, 0x00000000};
+
+//unsigned int raw_data[] = {0x00000011, 0x00002200, 0x00330000, 0x44000000, 0x00000000};
+unsigned int raw_data[] = {
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+};
 #define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
 
-#define BUFSIZE (4 * 3 * 4)
+#define BUFSIZE (4 * 3 * 4 * 10)
 
 static int stop = 0;
 
@@ -45,41 +58,61 @@ void *read_fn(void *arg) {
 	fd_set efds;
 	int nread;
 
-	printids("read_fn: ");
+	//printids("read_fn: ");
 
 	tv.tv_sec=1;
 	tv.tv_usec=0;
 
 	while(stop == 0) {
-		FD_ZERO(&rfds);
-		FD_ZERO(&efds);
-		FD_SET(targ->fd, &rfds);
-		FD_SET(targ->fd, &efds);
+		//FD_ZERO(&rfds);
+		//FD_ZERO(&efds);
+		//FD_SET(targ->fd, &rfds);
+		//FD_SET(targ->fd, &efds);
 
-		if(select(targ->fd + 1, &rfds, NULL, &efds, &tv) > 0) {
-			if(FD_ISSET(targ->fd, &rfds)) {
-				//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-				nread = read(targ->fd, targ->buffer, BUFSIZE);
-				if(nread < 0) {
-					printf("%s\n", strerror(errno));
-				} else {
-					int i;
-					uint32_t *data = (uint32_t *)targ->buffer;
+		//if(select(targ->fd + 1, &rfds, NULL, &efds, &tv) > 0) {
+		//	if(FD_ISSET(targ->fd, &rfds)) {
+		//		//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
+		//		nread = read(targ->fd, targ->buffer, BUFSIZE);
+		//		if(nread < 0) {
+		//			printf("%s\n", strerror(errno));
+		//		} else {
+		//			int i;
+		//			uint32_t *data = (uint32_t *)targ->buffer;
 
-					printf("read %d!\n", nread);
-					for(i = 0; i < nread / sizeof(uint32_t); i++) {
-						if((i != 0) && (i % 12 == 0)) {
-							printf("\n");
-						}
-						printf("%04x ", data[i] & 0xffff);
+		//			printf("read %d!\n", nread);
+		//			for(i = 0; i < nread / sizeof(uint32_t); i++) {
+		//				if((i != 0) && (i % 12 == 0)) {
+		//					printf("\n");
+		//				}
+		//				printf("%04x ", data[i] & 0xffff);
+		//			}
+		//			printf("\n");
+
+		//			//return NULL;
+		//		}
+		//	}
+		//	if(FD_ISSET(targ->fd, &efds)) {
+		//		//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
+		//	}
+		//}
+		{
+			nread = read(targ->fd, targ->buffer, BUFSIZE);
+			if(nread < 0) {
+				printf("%s\n", strerror(errno));
+			} else {
+				int i;
+				uint32_t *data = (uint32_t *)targ->buffer;
+
+				printf("read %d!\n", nread);
+				for(i = 0; i < nread / sizeof(uint32_t); i++) {
+					if((i != 0) && (i % 12 == 0)) {
+						printf("\n");
 					}
-					printf("\n");
-
-					return NULL;
+					printf("%04x ", data[i] & 0xffff);
 				}
-			}
-			if(FD_ISSET(targ->fd, &efds)) {
-				//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
+				printf("\n");
+
+				//return NULL;
 			}
 		}
 	}
@@ -90,16 +123,37 @@ void *write_fn(void *arg) {
 	thread_arg_t *targ = (thread_arg_t *)arg;
 	int nwrite;
 
-	printids("write_fn: ");
+	//printids("write_fn: ");
 
 	while(stop == 0) {
 		nwrite = write(targ->fd, raw_data, RAW_DATA_SIZE);
 		if(nwrite < 0) {
 			printf("%s\n", strerror(errno));
 		} else {
-			printf("write %d!\n", nwrite);
+			//printf("write %d!\n", nwrite);
 		}
-		return NULL;
+		{
+			int nread;
+			nread = read(targ->fd, targ->buffer, BUFSIZE);
+			if(nread < 0) {
+				printf("%s\n", strerror(errno));
+			} else {
+				int i;
+				uint32_t *data = (uint32_t *)targ->buffer;
+
+				//printf("read %d!\n", nread);
+				for(i = 0; i < nread / sizeof(uint32_t); i++) {
+					if((i != 0) && (i % 12 == 0)) {
+						//printf("\n");
+					}
+					//printf("%04x ", data[i] & 0xffff);
+				}
+				//printf("\n");
+
+				//return NULL;
+			}
+		}
+		//return NULL;
 	}
 	return NULL;
 }
@@ -109,18 +163,18 @@ int read_write(thread_arg_t *targ) {
 	pthread_t rtid;
 	pthread_t wtid;
 
-	err = pthread_create(&rtid, NULL, read_fn, targ);
-	if (err != 0) {
-		printf("can't create thread: %s\n", strerror(err));
-	}
+	//err = pthread_create(&rtid, NULL, read_fn, targ);
+	//if (err != 0) {
+	//	printf("can't create thread: %s\n", strerror(err));
+	//}
 
 	err = pthread_create(&wtid, NULL, write_fn, targ);
 	if (err != 0) {
 		printf("can't create thread: %s\n", strerror(err));
 	}
 
-	printids("main thread:");
-	pthread_join(rtid,NULL);
+	//printids("main thread:");
+	//pthread_join(rtid,NULL);
 	pthread_join(wtid,NULL);
 
 	return EXIT_SUCCESS;
@@ -135,7 +189,7 @@ int main(int argc, char **argv) {
 	int flags;
 
 	int mmap_size;
-	char *mmap_memory;
+	//char *mmap_memory;
 
 	if(argc < 2) {
 		printf("err: para error!:%s\n", strerror(errno));
@@ -160,12 +214,12 @@ int main(int argc, char **argv) {
 	}
 	printf("mmap_size:%d(%x)\n", mmap_size, mmap_size);
 
-	mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, targ.fd, (off_t)0);
-	if(mmap_memory == (void *)-1) {
-		printf("xiaofei: %s:%d: %s\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-		ret = -1;
-		//return ret;
-	}
+	//mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, targ.fd, (off_t)0);
+	//if(mmap_memory == (void *)-1) {
+	//	printf("xiaofei: %s:%d: %s\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+	//	ret = -1;
+	//	return ret;
+	//}
 
 	if(catch_signal(default_sig_action) == -1) {
 		printf("err: can't catch sigio!\n");
