@@ -185,7 +185,7 @@ module csa_wrap #
 	wire axis_s_error_full;
 	wire axis_s_error_empty;
 
-	localparam NUMBER_OF_INPUT_WORDS = 5;
+	localparam NUMBER_OF_INPUT_WORDS = 50;
 	localparam integer BYTE_WIDTH = 8;
 
 	axi4_stream_slave_v1_0 #(
@@ -220,15 +220,11 @@ module csa_wrap #
 	wire csa_in_error_full;
 	wire csa_in_error_empty;
 
-	wire [160 - 1 : 0] buffer_data;
-
 	convert_32_to_40 #(
 			.BYTE_WIDTH(BYTE_WIDTH),
 			.CSA_IN_DATA_WIDTH_BY_BYTE(CSA_IN_DATA_WIDTH_BY_BYTE),
 			.CSA_IN_OUT_DATA_WIDTH(CSA_IN_OUT_DATA_WIDTH)
 		) convert_32_to_40_inst (
-			.buffer_data(buffer_data),
-
 			.clk(s00_axis_aclk),
 			.rst_n(s00_axis_aresetn),
 
@@ -261,59 +257,6 @@ module csa_wrap #
 
 	assign csa_calc_clk = s00_axis_aclk;
 
-	reg [32 - 1 : 0] debug_data [0 : 40 - 1];
-	reg [32 - 1 : 0] debug_info [0 : 40 - 1];
-
-	wire [32 - 1 : 0] cur_debug_data;
-	wire [32 - 1 : 0] cur_debug_info;
-	wire [32 - 1 : 0] cur_debug_index;
-	wire [32 - 1 : 0] cur_debug_data_index;
-	wire [32 - 1 : 0] cur_debug_info_index;
-
-	assign cur_debug_data_index = ((cur_debug_index % 2) == 0) ? cur_debug_index / 2 : 0;
-	assign cur_debug_info_index = ((cur_debug_index % 2) == 1) ? cur_debug_index / 2 : 0;
-
-	assign cur_debug_data = debug_data[cur_debug_data_index];
-	assign cur_debug_info = debug_info[cur_debug_info_index];
-
-	integer debug_index = 0;
-	integer debug_state = 0;
-	always @(negedge s00_axis_aclk) begin
-		if(s00_axis_aresetn == 0) begin
-			debug_index <= 0;
-			debug_state <= 0;
-		end
-		else begin
-			case(debug_state)
-				0: begin
-					if(s00_axis_tvalid == 1) begin
-						debug_data[0] <= s00_axis_tdata;
-						debug_info[0] <= {{(32 - 1 - 1 - 1 - 1){1'b0}}, s00_axis_tvalid, s00_axis_tlast, s00_axis_tready, s00_axis_aresetn};
-						debug_index <= 1;
-
-						debug_state <= 1;
-					end
-					else begin
-					end
-				end
-				1: begin
-					if(debug_index < 40) begin
-						debug_data[debug_index] <= s00_axis_tdata;
-						debug_info[debug_index] <= {{(32 - 1 - 1 - 1 - 1){1'b0}}, s00_axis_tvalid, s00_axis_tlast, s00_axis_tready, s00_axis_aresetn};
-						debug_index <= debug_index + 1;
-					end
-					else begin
-						debug_index <= 0;
-
-						debug_state <= 0;
-					end
-				end
-				default: begin
-				end
-			endcase
-		end
-	end
-
 	csa_ram #(
 			.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
 			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
@@ -322,11 +265,6 @@ module csa_wrap #
 			.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
 			.CSA_CALC_OUT_WIDTH(CSA_CALC_OUT_WIDTH)
 		) csa_ram_inst (
-			.cur_debug_data(cur_debug_data),
-			.cur_debug_info(cur_debug_info),
-			.cur_debug_index(cur_debug_index),
-			.buffer_data(buffer_data),
-
 			.axi_mm_clk(s00_axi_aclk),
 			.rst_n(s00_axi_aresetn),
 
@@ -383,7 +321,7 @@ module csa_wrap #
 
 	wire axis_m_error_empty;
 
-	localparam NUMBER_OF_OUTPUT_WORDS = 12;
+	localparam NUMBER_OF_OUTPUT_WORDS = 120;
 
 	axi4_stream_master_v1_0 # (
 		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),

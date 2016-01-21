@@ -43,7 +43,11 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 		if(end - offset >= dma->receive_bulk_size) {
 			c = dma->receive_bulk_size;
 		} else {
-			c = end - offset;
+			if(dma->receive_bulk_size == PCIe_MAP_BAR_SIZE) {
+				c = end - offset;
+			} else {
+				c = 0;
+			}
 		}
 
 		if(!dma->is_auto_receive) {
@@ -65,7 +69,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 		}
 
 		if((c > 0) && read_available(dma->list)) {
-			c = read_buffer(buf + ret, c, dma->list);
+			read_buffer(buf + ret, c, dma->list);
 			ret += c;
 			offset += c;
 			idle_count = 0;
@@ -74,7 +78,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 				return ret;
 			}
 
-			if(idle_count++ == 1) {
+			if(idle_count++ == 10) {
 				return ret;
 			}
 		}
@@ -103,7 +107,11 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 		if(end - offset >= dma->send_bulk_size) {
 			c = dma->send_bulk_size;
 		} else {
-			c = end - offset;
+			if(dma->send_bulk_size == PCIe_MAP_BAR_SIZE) {
+				c = end - offset;
+			} else {
+				c = 0;
+			}
 		}
 
 		if(c > 0) {
@@ -135,7 +143,7 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 			if (filp->f_flags & O_NONBLOCK)
 				return ret;
 
-			if(idle_count++ == 1) {
+			if(idle_count++ == 10) {
 				return ret;
 			}
 		}

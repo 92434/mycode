@@ -155,16 +155,17 @@ static int pcie_tr_thread(void *ppara) {
 		if(size != 0) {
 			tr.dma->dma_op.dma_tr(&tr);
 
-			tr_wakeup(tr.tr_cmp);
-
 			if(tr.tx_size != 0) {
 				inc_dma_op_tx_count(tr.dma, tr.tx_size);
 			}
+
 			if(tr.rx_size != 0) {
 				write_buffer(NULL, tr.rx_size, tr.dma->list);
 				wake_up(&(tr.dma->wq));
 				inc_dma_op_rx_count(tr.dma, tr.rx_size);
 			}
+
+			tr_wakeup(tr.tr_cmp);
 		} else {
 			wait_event_interruptible_timeout(kc705_pci_dev->tr_wq, is_tr_list_ready(kc705_pci_dev), msecs_to_jiffies(10));
 		}

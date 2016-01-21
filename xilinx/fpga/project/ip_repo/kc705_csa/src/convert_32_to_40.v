@@ -6,7 +6,6 @@ module convert_32_to_40 #(
 		parameter integer CSA_IN_DATA_WIDTH_BY_BYTE = 5,
 		parameter integer CSA_IN_OUT_DATA_WIDTH = BYTE_WIDTH * CSA_IN_DATA_WIDTH_BY_BYTE
 	)(
-		output reg [160 - 1 : 0] buffer_data = 0,
 		input wire clk,
 		input wire rst_n,
 
@@ -46,8 +45,6 @@ module convert_32_to_40 #(
 
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
-			buffer_data <= 0;
-
 			buffer <= 0;
 			rindex <= 0;
 
@@ -94,8 +91,6 @@ module convert_32_to_40 #(
 					end
 				end
 				2: begin
-					buffer_data <= buffer;
-
 					wdata_0 <= buffer[(0 * CSA_IN_OUT_DATA_WIDTH) +: CSA_IN_OUT_DATA_WIDTH];
 					wdata_1 <= buffer[(1 * CSA_IN_OUT_DATA_WIDTH) +: CSA_IN_OUT_DATA_WIDTH];
 					wdata_2 <= buffer[(2 * CSA_IN_OUT_DATA_WIDTH) +: CSA_IN_OUT_DATA_WIDTH];
