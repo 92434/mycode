@@ -24,10 +24,87 @@ unsigned int raw_data[] = {
 	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
 	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
 	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
+	0x11111111, 0x11111111, 0x11111111, 0x11111111, 0x11111111,
 };
 #define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
 
-#define BUFSIZE (4 * 3 * 4 * 10)
+#define BUFSIZE (4 * 3 * 4 * 80)
 
 static int stop = 0;
 
@@ -53,15 +130,15 @@ typedef struct {
 
 void *read_fn(void *arg) {
 	thread_arg_t *targ = (thread_arg_t *)arg;
-	struct timeval tv;
-	fd_set rfds;
-	fd_set efds;
-	int nread;
+	//struct timeval tv;
+	//fd_set rfds;
+	//fd_set efds;
+	//int nread;
 
 	//printids("read_fn: ");
 
-	tv.tv_sec=1;
-	tv.tv_usec=0;
+	//tv.tv_sec=1;
+	//tv.tv_usec=0;
 
 	while(stop == 0) {
 		//FD_ZERO(&rfds);
@@ -95,35 +172,36 @@ void *read_fn(void *arg) {
 		//		//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
 		//	}
 		//}
-		{
-			nread = read(targ->fd, targ->buffer, BUFSIZE);
-			if(nread < 0) {
-				printf("%s\n", strerror(errno));
-			} else {
-				int i;
-				uint32_t *data = (uint32_t *)targ->buffer;
 
-				printf("read %d!\n", nread);
-				for(i = 0; i < nread / sizeof(uint32_t); i++) {
-					if((i != 0) && (i % 12 == 0)) {
-						printf("\n");
-					}
-					printf("%04x ", data[i] & 0xffff);
-				}
-				printf("\n");
-
-				//return NULL;
-			}
-		}
+		return NULL;
 	}
 	return NULL;
 }
 
 void *write_fn(void *arg) {
 	thread_arg_t *targ = (thread_arg_t *)arg;
-	int nwrite;
+	//int nwrite;
 
 	//printids("write_fn: ");
+
+	while(stop == 0) {
+		//nwrite = write(targ->fd, raw_data, RAW_DATA_SIZE);
+		//if(nwrite < 0) {
+		//	printf("%s\n", strerror(errno));
+		//} else {
+		//	//printf("write %d!\n", nwrite);
+		//}
+		return NULL;
+	}
+	return NULL;
+}
+
+void main_proc(thread_arg_t *arg) {
+	thread_arg_t *targ = (thread_arg_t *)arg;
+	int nwrite;
+	int nread;
+
+	//printids("main_proc: ");
 
 	while(stop == 0) {
 		nwrite = write(targ->fd, raw_data, RAW_DATA_SIZE);
@@ -132,28 +210,22 @@ void *write_fn(void *arg) {
 		} else {
 			//printf("write %d!\n", nwrite);
 		}
-		{
-			int nread;
-			nread = read(targ->fd, targ->buffer, BUFSIZE);
-			if(nread < 0) {
-				printf("%s\n", strerror(errno));
-			} else {
-				int i;
-				uint32_t *data = (uint32_t *)targ->buffer;
+		nread = read(targ->fd, targ->buffer, BUFSIZE);
+		if(nread < 0) {
+			printf("%s\n", strerror(errno));
+		} else {
+			int i;
+			uint32_t *data = (uint32_t *)targ->buffer;
 
-				//printf("read %d!\n", nread);
-				for(i = 0; i < nread / sizeof(uint32_t); i++) {
-					if((i != 0) && (i % 12 == 0)) {
-						//printf("\n");
-					}
-					//printf("%04x ", data[i] & 0xffff);
+			//printf("read %d!\n", nread);
+			for(i = 0; i < nread / sizeof(uint32_t); i++) {
+				if((i != 0) && (i % 12 == 0)) {
+					printf("\n");
 				}
-				//printf("\n");
-
-				//return NULL;
+				printf("%04x ", data[i] & 0xffff);
 			}
+			printf("\n");
 		}
-		//return NULL;
 	}
 	return NULL;
 }
@@ -163,18 +235,19 @@ int read_write(thread_arg_t *targ) {
 	pthread_t rtid;
 	pthread_t wtid;
 
-	//err = pthread_create(&rtid, NULL, read_fn, targ);
-	//if (err != 0) {
-	//	printf("can't create thread: %s\n", strerror(err));
-	//}
+	err = pthread_create(&rtid, NULL, read_fn, targ);
+	if (err != 0) {
+		printf("can't create thread: %s\n", strerror(err));
+	}
 
 	err = pthread_create(&wtid, NULL, write_fn, targ);
 	if (err != 0) {
 		printf("can't create thread: %s\n", strerror(err));
 	}
 
-	//printids("main thread:");
-	//pthread_join(rtid,NULL);
+	main_proc(targ);
+
+	pthread_join(rtid,NULL);
 	pthread_join(wtid,NULL);
 
 	return EXIT_SUCCESS;
@@ -207,12 +280,12 @@ int main(int argc, char **argv) {
 	////用以下方法将socket设置为非阻塞方式
 	//fcntl(targ.fd, F_SETFL, flags | O_NONBLOCK);
 
-	ret = ioctl(targ.fd, PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE, &mmap_size);
-	if (ret != 0) {
-		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-		return ret;
-	}
-	printf("mmap_size:%d(%x)\n", mmap_size, mmap_size);
+	//ret = ioctl(targ.fd, PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE, &mmap_size);
+	//if (ret != 0) {
+	//	printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+	//	return ret;
+	//}
+	//printf("mmap_size:%d(%x)\n", mmap_size, mmap_size);
 
 	//mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, targ.fd, (off_t)0);
 	//if(mmap_memory == (void *)-1) {

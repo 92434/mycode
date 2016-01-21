@@ -17,8 +17,6 @@ typedef struct dma_static_config {
 	dma_thread_info_t *dma_thread;
 	int dma_thread_count;
 	bool is_auto_receive;
-	is_ready_for_write_t is_ready_for_write;
-	is_ready_for_read_t is_ready_for_read;
 
 	int receive_bulk_size;
 	int send_bulk_size;
@@ -38,8 +36,6 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_thread = NULL,
 		.dma_thread_count = 0, 
 		.is_auto_receive = false,
-		.is_ready_for_write = NULL,
-		.is_ready_for_read = NULL,
 
 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
@@ -57,8 +53,6 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_thread = dvbs2_dma_threads,
 		.dma_thread_count = DVBS2_DMA_THREADS, 
 		.is_auto_receive = true,
-		.is_ready_for_write = NULL,
-		.is_ready_for_read = NULL,
 
 		.receive_bulk_size = 64,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
@@ -76,8 +70,6 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_thread = NULL,
 		.dma_thread_count = 0, 
 		.is_auto_receive = false,
-		.is_ready_for_write = NULL,
-		.is_ready_for_read = NULL,
 
 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,

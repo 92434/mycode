@@ -44,8 +44,6 @@ static int alloc_dma_memory(kc705_pci_dev_t *kc705_pci_dev) {
 		dma->dma_thread_count = dma_info[i].dma_thread_count;
 		kc705_pci_dev->total_dma_thread_count += dma_info[i].dma_thread_count;
 		dma->is_auto_receive = dma_info[i].is_auto_receive;
-		dma->is_ready_for_write = dma_info[i].is_ready_for_write;
-		dma->is_ready_for_read = dma_info[i].is_ready_for_read;
 
 		dma->receive_bulk_size = dma_info[i].receive_bulk_size;
 		dma->send_bulk_size = dma_info[i].send_bulk_size;

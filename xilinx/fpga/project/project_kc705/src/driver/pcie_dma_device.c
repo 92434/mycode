@@ -47,12 +47,6 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 		}
 
 		if(!dma->is_auto_receive) {
-			if(dma->is_ready_for_read != NULL) {
-				if(!dma->is_ready_for_read(dma)) {
-					c = 0;
-				}
-			}
-
 			if(c > 0) {
 				if(put_pcie_tr(
 						dma,
@@ -83,8 +77,6 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 			if(idle_count++ == 1) {
 				return ret;
 			}
-
-			//wait_event_interruptible_timeout(dma->wq, true, HZ);
 		}
 	}
 
@@ -103,12 +95,6 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 	if(len > PCIe_MAP_BAR_SIZE) {
 		ret = -ERANGE;
 		return ret;
-	}
-
-	if((dma->is_ready_for_write != NULL) && (ret = 0)) {
-		if(!dma->is_ready_for_write(dma)) {
-			return ret;
-		}
 	}
 
 	while(ret < len) {
@@ -248,51 +234,6 @@ static long pcie_dma_ioctl(struct file *filp, unsigned int cmd, unsigned long ar
 				info.base_addr_of_list_buffer = read.base_addr_of_list_buffer;
 				if (copy_to_user((int *)arg, &info, sizeof(node_info_t))) {
 					ret = -EFAULT;
-				}
-			}
-			break;
-		case PCIE_DEVICE_IOCTL_PSEUDO_DMA_TR:
-			{
-				pseudo_dma_tr_t pseudo_dma_tr;
-
-				if(copy_from_user(&pseudo_dma_tr, (pseudo_dma_tr_t __user *) arg, sizeof(pseudo_dma_tr_t __user))) {
-					mydebug("%p\n", current);
-					ret = -EFAULT;
-					return ret;
-				}
-
-				//myprintf("tx_size:%d, rx_size:%d\n", pseudo_dma_tr.tx_size, pseudo_dma_tr.rx_size);
-				
-				if(pseudo_dma_tr.tx_size != 0) {
-					copy_from_user(dma->bar_map_memory[1], pseudo_dma_tr.tx_data, pseudo_dma_tr.tx_size);
-				}
-
-				if(pseudo_dma_tr.rx_size != 0) {
-					ret = put_pcie_tr(
-							dma,
-							pseudo_dma_tr.tx_dest_offset,
-							pseudo_dma_tr.rx_src_offset,
-							pseudo_dma_tr.tx_size,
-							pseudo_dma_tr.rx_size,
-							NULL,
-							NULL);
-					if(ret == -1) {
-						pseudo_dma_tr.rx_size = 0;
-					}
-				}
-
-				if(pseudo_dma_tr.rx_size != 0) {
-					if(!access_ok(VERIFY_WRITE, pseudo_dma_tr.rx_data, pseudo_dma_tr.rx_size)) {
-						mydebug("%p\n", current);
-						ret = -EFAULT;
-						return ret;
-					}
-
-					if(read_buffer(pseudo_dma_tr.rx_data, pseudo_dma_tr.rx_size, dma->list) != pseudo_dma_tr.rx_size) {
-						mydebug("%p\n", current);
-						ret = -EFAULT;
-						return ret;
-					}
 				}
 			}
 			break;

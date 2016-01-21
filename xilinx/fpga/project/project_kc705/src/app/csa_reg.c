@@ -113,18 +113,18 @@ void *read_fn(void *arg) {
 			printf("%s: %08x(%d)\n", reg_name[i], data[0], data[0]);
 		}
 
-		for(i = TOTAL_REGS; i < TOTAL_REGS + (40 * 2); i++) {
-			if((i - TOTAL_REGS) % 2 == 0) {
-				read_regs(i);
-				printf("data:%08x\n", data[0]);
-			} else {
-				read_regs(i);
-				printf("aresetn:%d\t", (data[0] >> 0) & 0x1);
-				printf("tready:%d\t", (data[0] >> 1) & 0x1);
-				printf("tlast:%d\t", (data[0] >> 2) & 0x1);
-				printf("tvalid:%d\n", (data[0] >> 3) & 0x1);
-			}
-		}
+		//for(i = TOTAL_REGS; i < TOTAL_REGS + (40 * 2); i++) {
+		//	if((i - TOTAL_REGS) % 2 == 0) {
+		//		read_regs(i);
+		//		printf("data:%08x\n", data[0]);
+		//	} else {
+		//		read_regs(i);
+		//		printf("aresetn:%d\t", (data[0] >> 0) & 0x1);
+		//		printf("tready:%d\t", (data[0] >> 1) & 0x1);
+		//		printf("tlast:%d\t", (data[0] >> 2) & 0x1);
+		//		printf("tvalid:%d\n", (data[0] >> 3) & 0x1);
+		//	}
+		//}
 
 		return NULL;
 	}
@@ -145,11 +145,11 @@ void *write_fn(void *arg) {
 		lseek(targ->fd, ADDR_OFFSET(ADDR_CALC_TIMES), SEEK_SET);
 		nwrite = write(targ->fd, &times, sizeof(int));
 
-		lseek(targ->fd, ADDR_OFFSET(ADDR_CALC_DELAY), SEEK_SET);
-		nwrite = write(targ->fd, &delay, sizeof(int));
+		//lseek(targ->fd, ADDR_OFFSET(ADDR_CALC_DELAY), SEEK_SET);
+		//nwrite = write(targ->fd, &delay, sizeof(int));
 
-		lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
-		nwrite = write(targ->fd, &channel, sizeof(int));
+		//lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
+		//nwrite = write(targ->fd, &channel, sizeof(int));
 		return NULL;
 	}
 	return NULL;

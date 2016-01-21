@@ -85,9 +85,6 @@ typedef struct _dma_thread_info {
 	char *thread_name;
 } dma_thread_info_t;
 
-typedef bool (*is_ready_for_write_t)(void *ppara);
-typedef bool (*is_ready_for_read_t)(void *ppara);
-
 typedef struct {
 	void *kc705_pci_dev;
 
@@ -107,8 +104,6 @@ typedef struct {
 	dma_thread_info_t *dma_thread;
 	int dma_thread_count;
 	bool is_auto_receive;
-	is_ready_for_write_t is_ready_for_write;
-	is_ready_for_read_t is_ready_for_read;
 
 	int receive_bulk_size;
 	int send_bulk_size;
