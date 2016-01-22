@@ -72,13 +72,12 @@ module csa_calc_logic #(
 					if(csa_calc_logic_delay > 0) begin
 						delay_reg <= csa_calc_logic_delay;
 
-						calc_state <= 2;
 					end
 					else begin
 						delay_reg <= 0;
-
-						calc_state <= 3;
 					end
+
+					calc_state <= 2;
 
 				end
 				2: begin

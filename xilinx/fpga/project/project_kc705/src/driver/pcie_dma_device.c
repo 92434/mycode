@@ -39,14 +39,17 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 
 	while(ret < len) {
 		int c;
+		int request_c;
 
 		if(end - offset >= dma->receive_bulk_size) {
 			c = dma->receive_bulk_size;
+			request_c = dma->receive_bulk_size;
 		} else {
+			c = end - offset;
 			if(dma->receive_bulk_size == PCIe_MAP_BAR_SIZE) {
-				c = end - offset;
+				request_c = end - offset;
 			} else {
-				c = 0;
+				request_c = dma->receive_bulk_size;
 			}
 		}
 
@@ -57,7 +60,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 						0,
 						offset,
 						0,
-						c,
+						request_c,
 						NULL,
 						NULL) < 0) {
 					mydebug("%p\n", current);
@@ -70,6 +73,9 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 
 		if((c > 0) && read_available(dma->list)) {
 			read_buffer(buf + ret, c, dma->list);
+			if(request_c != c) {
+				read_buffer(buf + ret, request_c - c, dma->list);
+			}
 			ret += c;
 			offset += c;
 			idle_count = 0;
@@ -78,7 +84,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 				return ret;
 			}
 
-			if(idle_count++ == 10) {
+			if(idle_count++ == 1000) {
 				return ret;
 			}
 		}
@@ -103,14 +109,17 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 
 	while(ret < len) {
 		int c;
+		int request_c;
 
 		if(end - offset >= dma->send_bulk_size) {
 			c = dma->send_bulk_size;
+			request_c = dma->send_bulk_size;
 		} else {
+			c = end - offset;
 			if(dma->send_bulk_size == PCIe_MAP_BAR_SIZE) {
-				c = end - offset;
+				request_c = end - offset;
 			} else {
-				c = 0;
+				request_c = dma->send_bulk_size;
 			}
 		}
 
@@ -124,7 +133,7 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 					dma,
 					offset,
 					0,
-					c,
+					request_c,
 					0,
 					NULL,
 					NULL
@@ -143,7 +152,7 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 			if (filp->f_flags & O_NONBLOCK)
 				return ret;
 
-			if(idle_count++ == 10) {
+			if(idle_count++ == 1000) {
 				return ret;
 			}
 		}

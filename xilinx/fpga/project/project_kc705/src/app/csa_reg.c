@@ -116,14 +116,14 @@ void *write_fn(void *arg) {
 	//printids("write_fn: ");
 	int times = 50000;
 	int channel = 1;
-	int delay = 0;
+	int delay = 1;
 
 	while(stop == 0) {
 		//lseek(targ->fd, ADDR_OFFSET(ADDR_CALC_TIMES), SEEK_SET);
 		//nwrite = write(targ->fd, &times, sizeof(int));
 
-		//lseek(targ->fd, ADDR_OFFSET(ADDR_CALC_DELAY), SEEK_SET);
-		//nwrite = write(targ->fd, &delay, sizeof(int));
+		lseek(targ->fd, ADDR_OFFSET(ADDR_CALC_DELAY), SEEK_SET);
+		nwrite = write(targ->fd, &delay, sizeof(int));
 
 		//lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
 		//nwrite = write(targ->fd, &channel, sizeof(int));

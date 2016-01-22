@@ -185,7 +185,7 @@ module csa_wrap #
 	wire axis_s_error_full;
 	wire axis_s_error_empty;
 
-	localparam NUMBER_OF_INPUT_WORDS = 50;
+	localparam NUMBER_OF_INPUT_WORDS = 5;
 	localparam integer BYTE_WIDTH = 8;
 
 	axi4_stream_slave_v1_0 #(
@@ -321,7 +321,7 @@ module csa_wrap #
 
 	wire axis_m_error_empty;
 
-	localparam NUMBER_OF_OUTPUT_WORDS = 120;
+	localparam NUMBER_OF_OUTPUT_WORDS = 12;
 
 	axi4_stream_master_v1_0 # (
 		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
