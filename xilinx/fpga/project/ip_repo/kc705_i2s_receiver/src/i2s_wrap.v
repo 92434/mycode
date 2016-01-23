@@ -5,6 +5,7 @@ module i2s_wrap #
 	(
 		// Users to add parameters here
 		parameter integer I2S_RECEIVER_NUM = 32,
+		parameter integer NUMBER_OF_OUTPUT_WORDS = 15,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -12,7 +13,7 @@ module i2s_wrap #
 
 		// Parameters of Axi Master Bus Interface M00_AXIS
 		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
-		parameter integer C_M00_AXIS_START_COUNT = 32
+		parameter integer C_M00_AXIS_START_COUNT = 1
 	)
 	(
 		// Users to add ports here
@@ -49,6 +50,7 @@ module i2s_wrap #
 
 	// Instantiation of Axi Bus Interface M00_AXIS
 	axi4_stream_master_v1_0 # (
+		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
 		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
 		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
 	) axi4_stream_master_v1_0_inst (

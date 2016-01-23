@@ -22,9 +22,9 @@ module dvb_s2_wrap #
 		input wire hard_rst_n,
 
 		input wire ts_clk_h264out,// clock from h.264 encoder
-		input wire [7 : 0] ts_din_h264out,// @ ts_clk_out
-		input wire ts_syn_h264out,// @ ts_clk_out ts stream head
 		input wire ts_valid_h264out,// @ ts_clk_out
+		input wire ts_syn_h264out,// @ ts_clk_out ts stream head
+		input wire [7 : 0] ts_din_h264out,// @ ts_clk_out
 
 		input wire sys_clk,
 		output wire ts_clk,// @ sys_clk

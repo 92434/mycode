@@ -147,7 +147,6 @@ proc create_root_design { parentCell } {
   set GPIO [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 GPIO ]
   set GPIO2 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 GPIO2 ]
   set GPIO2_1 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 GPIO2_1 ]
-  set GPIO2_2 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 GPIO2_2 ]
   set GPIO_1 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 GPIO_1 ]
   set GPIO_2 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 GPIO_2 ]
 
@@ -155,6 +154,8 @@ proc create_root_design { parentCell } {
   set EXT_LEDS [ create_bd_port -dir O -from 7 -to 0 EXT_LEDS ]
   set EXT_PCIE_REFCLK_N [ create_bd_port -dir I EXT_PCIE_REFCLK_N ]
   set EXT_PCIE_REFCLK_P [ create_bd_port -dir I EXT_PCIE_REFCLK_P ]
+  set asi_out_n [ create_bd_port -dir O asi_out_n ]
+  set asi_out_p [ create_bd_port -dir O asi_out_p ]
   set clk_out1 [ create_bd_port -dir O -type clk clk_out1 ]
   set clk_out2 [ create_bd_port -dir O -type clk clk_out2 ]
   set clk_out3 [ create_bd_port -dir O -type clk clk_out3 ]
@@ -182,11 +183,11 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi_gpio_1, and set properties
   set axi_gpio_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_1 ]
-  set_property -dict [ list CONFIG.C_ALL_INPUTS {0} CONFIG.C_GPIO2_WIDTH {16} CONFIG.C_IS_DUAL {1}  ] $axi_gpio_1
+  set_property -dict [ list CONFIG.C_ALL_INPUTS {0} CONFIG.C_GPIO2_WIDTH {27} CONFIG.C_IS_DUAL {1}  ] $axi_gpio_1
 
   # Create instance: axi_gpio_2, and set properties
   set axi_gpio_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_2 ]
-  set_property -dict [ list CONFIG.C_GPIO2_WIDTH {6} CONFIG.C_IS_DUAL {1}  ] $axi_gpio_2
+  set_property -dict [ list CONFIG.C_GPIO_WIDTH {26} CONFIG.C_IS_DUAL {0}  ] $axi_gpio_2
 
   # Create instance: axi_interconnect_0, and set properties
   set axi_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0 ]
@@ -198,7 +199,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: clk_wiz_0, and set properties
   set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.1 clk_wiz_0 ]
-  set_property -dict [ list CONFIG.CLKOUT1_JITTER {117.101} CONFIG.CLKOUT1_PHASE_ERROR {142.582} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {135} CONFIG.CLKOUT2_JITTER {118.930} CONFIG.CLKOUT2_PHASE_ERROR {142.582} CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {122.88} CONFIG.CLKOUT2_USED {true} CONFIG.CLKOUT3_JITTER {118.930} CONFIG.CLKOUT3_PHASE_ERROR {142.582} CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {122.88} CONFIG.CLKOUT3_REQUESTED_PHASE {180.000} CONFIG.CLKOUT3_USED {true} CONFIG.MMCM_CLKFBOUT_MULT_F {27.000} CONFIG.MMCM_CLKOUT0_DIVIDE_F {10.000} CONFIG.MMCM_CLKOUT1_DIVIDE {11} CONFIG.MMCM_CLKOUT2_DIVIDE {11} CONFIG.MMCM_CLKOUT2_PHASE {180.000} CONFIG.MMCM_DIVCLK_DIVIDE {2} CONFIG.NUM_OUT_CLKS {3} CONFIG.PRIMITIVE {MMCM}  ] $clk_wiz_0
+  set_property -dict [ list CONFIG.CLKOUT1_JITTER {117.101} CONFIG.CLKOUT1_PHASE_ERROR {142.582} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {135} CONFIG.CLKOUT2_JITTER {118.930} CONFIG.CLKOUT2_PHASE_ERROR {142.582} CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {122.88} CONFIG.CLKOUT2_USED {true} CONFIG.CLKOUT3_JITTER {118.930} CONFIG.CLKOUT3_PHASE_ERROR {142.582} CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {122.88} CONFIG.CLKOUT3_REQUESTED_PHASE {180.000} CONFIG.CLKOUT3_USED {true} CONFIG.NUM_OUT_CLKS {3} CONFIG.PRIMITIVE {MMCM}  ] $clk_wiz_0
 
   # Create instance: intr_hub_0, and set properties
   set intr_hub_0 [ create_bd_cell -type ip -vlnv xiaofei:user:intr_hub:1.0 intr_hub_0 ]
@@ -245,7 +246,6 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net axi_gpio_1_GPIO [get_bd_intf_ports GPIO_1] [get_bd_intf_pins axi_gpio_1/GPIO]
   connect_bd_intf_net -intf_net axi_gpio_1_GPIO2 [get_bd_intf_ports GPIO2_1] [get_bd_intf_pins axi_gpio_1/GPIO2]
   connect_bd_intf_net -intf_net axi_gpio_2_GPIO [get_bd_intf_ports GPIO_2] [get_bd_intf_pins axi_gpio_2/GPIO]
-  connect_bd_intf_net -intf_net axi_gpio_2_GPIO2 [get_bd_intf_ports GPIO2_2] [get_bd_intf_pins axi_gpio_2/GPIO2]
   connect_bd_intf_net -intf_net axi_interconnect_0_M00_AXI [get_bd_intf_pins axi_interconnect_0/M00_AXI] [get_bd_intf_pins axi_pcie_0/S_AXI]
   connect_bd_intf_net -intf_net axi_interconnect_0_M01_AXI [get_bd_intf_pins axi_interconnect_0/M01_AXI] [get_bd_intf_pins axi_pcie_0/S_AXI_CTL]
   connect_bd_intf_net -intf_net axi_interconnect_0_M02_AXI [get_bd_intf_pins axi_dma_0/S_AXI_LITE] [get_bd_intf_pins axi_interconnect_0/M02_AXI]
@@ -279,6 +279,8 @@ proc create_root_design { parentCell } {
   connect_bd_net -net kc705_pcie_ext_0_EXT_LEDS [get_bd_ports EXT_LEDS] [get_bd_pins kc705_pcie_ext_0/EXT_LEDS]
   connect_bd_net -net kc705_pcie_ext_0_mmcms_locked [get_bd_pins kc705_pcie_ext_0/mmcms_locked] [get_bd_pins proc_sys_reset_0/dcm_locked]
   connect_bd_net -net kc705_pcie_ext_0_pcie_refclk_100MHz [get_bd_pins axi_pcie_0/REFCLK] [get_bd_pins clk_wiz_0/clk_in1] [get_bd_pins kc705_pcie_ext_0/pcie_refclk_100MHz] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
+  connect_bd_net -net kc705_ts2asi_0_asi_out_n [get_bd_ports asi_out_n] [get_bd_pins kc705_ts2asi_0/asi_out_n]
+  connect_bd_net -net kc705_ts2asi_0_asi_out_p [get_bd_ports asi_out_p] [get_bd_pins kc705_ts2asi_0/asi_out_p]
   connect_bd_net -net kc705_ts2asi_0_ts_clk [get_bd_pins kc705_dvb_s2_0/ts_clk_h264out] [get_bd_pins kc705_ts2asi_0/ts_clk]
   connect_bd_net -net kc705_ts2asi_0_ts_data [get_bd_pins kc705_dvb_s2_0/ts_din_h264out] [get_bd_pins kc705_ts2asi_0/ts_data]
   connect_bd_net -net kc705_ts2asi_0_ts_sync [get_bd_pins kc705_dvb_s2_0/ts_syn_h264out] [get_bd_pins kc705_ts2asi_0/ts_sync]

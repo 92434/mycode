@@ -606,17 +606,17 @@ set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[7]}]
 	print txt
 
 myip_fmc_signal = [
-	('FMC_HPC_LA30_P', 'mpeg_clk'),
-	('FMC_HPC_LA22_N', 'mpeg_valid'),
-	('FMC_HPC_LA28_P', 'mpeg_data[0]'),
-	('FMC_HPC_LA28_N', 'mpeg_data[1]'),
-	('FMC_HPC_LA24_P', 'mpeg_data[2]'),
-	('FMC_HPC_LA16_P', 'mpeg_data[3]'),
-	('FMC_HPC_LA16_N', 'mpeg_data[4]'),
-	('FMC_HPC_LA20_P', 'mpeg_data[5]'),
-	('FMC_HPC_LA20_N', 'mpeg_data[6]'),
-	('FMC_HPC_LA22_P', 'mpeg_data[7]'),
-	('FMC_HPC_LA30_N', 'mpeg_sync'),
+	('FMC_LPC_LA25_P', 'mpeg_clk'),
+	('FMC_LPC_LA29_P', 'mpeg_valid'),
+	('FMC_LPC_LA24_P', 'mpeg_data[0]'),
+	('FMC_LPC_LA24_N', 'mpeg_data[1]'),
+	('FMC_LPC_LA26_P', 'mpeg_data[2]'),
+	('FMC_LPC_LA31_P', 'mpeg_data[3]'),
+	('FMC_LPC_LA31_N', 'mpeg_data[4]'),
+	('FMC_LPC_LA28_P', 'mpeg_data[5]'),
+	('FMC_LPC_LA28_N', 'mpeg_data[6]'),
+	('FMC_LPC_LA29_N', 'mpeg_data[7]'),
+	('FMC_LPC_LA25_N', 'mpeg_sync'),
 	#('FMC_HPC_HA23_N', 'ts_out_sync'),
 	#('FMC_HPC_HA23_P', 'slot0_out_dump_flag'),
 
@@ -658,10 +658,13 @@ myip_fmc_signal = [
 
 	('FMC_LPC_LA22_N', 'clk_out2'),
 	('FMC_LPC_LA21_P', 'clk_out3'),
+
+	('FMC_LPC_LA32_N', 'asi_out_p'),
+	('FMC_LPC_LA33_N', 'asi_out_n'),
 ]
 
 #myip_fmc_signal = []
-	
+
 def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 	constrain = []
 
@@ -669,7 +672,7 @@ def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 	myip_fmc_ios = []
 	for io, signal in myip_fmc_signal:
 		myip_fmc_ios.append(io)
-	
+
 	signal_index = []
 	for i in range(len(pins_resistor)):
 		pin, resistor = pins_resistor[i]
@@ -761,10 +764,10 @@ def gen_encryption_constrain():
 	txt = """
 #Encryption Settings
 
-set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]
-set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT BBRAM [current_design]
-#set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT eFUSE [current_design]
-set_property BITSTREAM.ENCRYPTION.KEY0 256'h12345678ABCDDCBA1234578ABCDDCBA1234578ABCDDCBA1234578ABCDDCBA [current_design]
+#set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]
+#set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT BBRAM [current_design]
+##set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT eFUSE [current_design]
+#set_property BITSTREAM.ENCRYPTION.KEY0 256'h12345678ABCDDCBA1234578ABCDDCBA1234578ABCDDCBA1234578ABCDDCBA [current_design]
 	"""
 
 	print '#', '-' * 100

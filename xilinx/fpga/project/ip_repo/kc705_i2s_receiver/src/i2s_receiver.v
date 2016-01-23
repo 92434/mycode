@@ -59,24 +59,20 @@ module i2s_receiver # (
 	integer match_state = 0;
 	integer i = 0;
 	reg need_cache_i2s_data = 0;
-	reg i2s_data_cached = 0;
 	always @(posedge s_data_valid) begin
 		if(rst_n == 0) begin
-			match_state <= 0;
+			i2s_data <= 0;
 			need_cache_i2s_data <= 0;
 			i <= 0;
+
+			match_state <= 0;
 		end
 		else begin
+			need_cache_i2s_data <= 0;
 			case(match_state)
 				0: begin
-					if(i2s_data_cached == 1) begin
-						need_cache_i2s_data <= 0;
-					end
-					else begin
-					end
-
 					if(header == i2s_data[DATA_WIDTH * HEADER_BYTE_COUNT - 1 : 0]) begin
-						i <= HEADER_BYTE_COUNT + I2S_DATA_VALID_BYTE_WIDTH;
+						i <= HEADER_BYTE_COUNT + I2S_DATA_VALID_BYTE_WIDTH;//set cached bytes count
 						match_state <= 1;
 					end
 					else begin
@@ -98,7 +94,6 @@ module i2s_receiver # (
 					end
 				end
 				default: begin
-					match_state <= 0;
 				end
 			endcase
 
@@ -110,19 +105,17 @@ module i2s_receiver # (
 	integer data_index = 0;
 	reg w_enable = 0;
 	reg [DATA_WIDTH - 1 : 0] fifo_data = 0;
-
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			cache_state <= 0;
 			data_index <= 0;
 			w_enable <= 0;
-			i2s_data_cached <= 0;
 		end
 		else begin 
+			w_enable <= 0;
+
 			case(cache_state)
 				0: begin
-					w_enable <= 0;
-
 					if(need_cache_i2s_data == 1) begin
 						data_index <= DATA_BYTE_COUNT;
 						cache_state <= 1;
@@ -137,17 +130,10 @@ module i2s_receiver # (
 						data_index <= data_index - 1;
 					end
 					else begin
-						w_enable <= 0;
-						i2s_data_cached <= 1;
-
-						if(need_cache_i2s_data == 0) begin//wait for reset need_cache_i2s_data
-							i2s_data_cached <= 0;
-							cache_state <= 0;
-						end
+						cache_state <= 0;
 					end
 				end
 				default: begin
-					cache_state <= 0;
 				end
 			endcase
 		end

@@ -36,7 +36,6 @@ module ts2asi #(
 		input wire sync,
 		input wire [7:0] din_8b, // 8-bit input data to be encoded, serialized, transmitted
 
-		output wire asi_out, //1-bit serialized output data. 8b10b encoded.
 		output wire asi_out_p, //1-bit serialized output data. 8b10b encoded.
 		output wire asi_out_n, //1-bit serialized output data. 8b10b encoded.
 
@@ -143,9 +142,7 @@ module ts2asi #(
 		.ce(ce),
 		.reset(~rst_n),
 		.din_10b(data_enc10b),
-		.sdout(asi_out));
-	
-	assign asi_out_p = asi_out;
-	assign asi_out_n = ~asi_out;
+		.sdout_p(asi_out_p),
+		.sdout_n(asi_out_n));
 
 endmodule // txdata_path

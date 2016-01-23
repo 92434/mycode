@@ -54,7 +54,8 @@
 
 module serializer_10b1b(/*AUTOARG*/
    // Outputs
-   sdout,
+   sdout_p,
+   sdout_n,
    start,
    sout_data,
    // Inputs
@@ -65,7 +66,8 @@ module serializer_10b1b(/*AUTOARG*/
    input ce;                // Clock enable
    input reset;         // Synchronous reset for clk domain
    input [9:0] din_10b;     // 10-bit parallel data
-   output      sdout;       // Serial data at sclk*2 rate (uses DDR)
+   output      sdout_p;       // Serial data at sclk*2 rate (uses DDR)
+   output      sdout_n;       // Serial data at sclk*2 rate (uses DDR)
    output wire start;
    output wire [9:0] sout_data;
    // Parameters for gray code counter
@@ -159,13 +161,34 @@ module serializer_10b1b(/*AUTOARG*/
       .DDR_ALIGNMENT("NONE"), // Sets output alignment to "NONE", "C0" or "C1
       .INIT(1'b0),            // Sets initial state of the Q output to 1'b0 or 1'b1
       .SRTYPE("SYNC")         // Specifies "SYNC" or "ASYNC" set/reset
-   ) ser_oddr2_inst (
-      .Q(sdout),           // 1-bit DDR output data
+   ) ser_oddr2_inst_0 (
+      .Q(sdout_p),           // 1-bit DDR output data
       .C0(sclk_0),         // 1-bit clock input
       .C1(sclk_180),       // 1-bit clock input
       .CE(1'b1),           // 1-bit clock enable input
       .D0(sdata_slice_R[1]), // 1-bit data input (associated with C0)
       .D1(sdata_slice_R[0]), // 1-bit data input (associated with C1)
+      .R(1'b0),              // 1-bit reset input
+      .S(1'b0)                 // 1-bit set input
+   ); 
+
+   wire [1:0] sdata_slice_R_n;    // Pipeline state to ease DDR timing
+
+   assign sdata_slice_R_n = ~sdata_slice_R;
+
+   // DDR primitive instantiation
+   ODDR2 #(
+   //oddr_2 #(
+      .DDR_ALIGNMENT("NONE"), // Sets output alignment to "NONE", "C0" or "C1
+      .INIT(1'b0),            // Sets initial state of the Q output to 1'b0 or 1'b1
+      .SRTYPE("SYNC")         // Specifies "SYNC" or "ASYNC" set/reset
+   ) ser_oddr2_inst_1 (
+      .Q(sdout_n),           // 1-bit DDR output data
+      .C0(sclk_0),         // 1-bit clock input
+      .C1(sclk_180),       // 1-bit clock input
+      .CE(1'b1),           // 1-bit clock enable input
+      .D0(sdata_slice_R_n[1]), // 1-bit data input (associated with C0)
+      .D1(sdata_slice_R_n[0]), // 1-bit data input (associated with C1)
       .R(1'b0),              // 1-bit reset input
       .S(1'b0)                 // 1-bit set input
    ); 
