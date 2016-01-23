@@ -173,8 +173,8 @@ static int pcie_tr_thread(void *ppara) {
 	 }
 
 	while(get_pcie_tr(kc705_pci_dev, &tr) != 0) {
-		tr_wakeup(tr.tr_cmp);
 		wake_up(&(tr.dma->wq));
+		tr_wakeup(tr.tr_cmp);
 	}
 
 	return ret;

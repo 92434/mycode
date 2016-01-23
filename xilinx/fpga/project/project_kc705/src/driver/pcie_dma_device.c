@@ -74,7 +74,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 		if((c > 0) && read_available(dma->list)) {
 			read_buffer(buf + ret, c, dma->list);
 			if(request_c != c) {
-				read_buffer(buf + ret, request_c - c, dma->list);
+				read_buffer(NULL, request_c - c, dma->list);
 			}
 			ret += c;
 			offset += c;
@@ -84,7 +84,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 				return ret;
 			}
 
-			if(idle_count++ == 1000) {
+			if(idle_count++ == 10) {
 				return ret;
 			}
 		}
@@ -152,7 +152,7 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 			if (filp->f_flags & O_NONBLOCK)
 				return ret;
 
-			if(idle_count++ == 1000) {
+			if(idle_count++ == 10) {
 				return ret;
 			}
 		}
