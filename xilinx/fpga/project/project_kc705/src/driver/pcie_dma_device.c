@@ -69,6 +69,8 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 			} else {
 				c = 0;
 			}
+		} else {
+			request_c = c;
 		}
 
 		if((c > 0) && read_available(dma->list)) {
