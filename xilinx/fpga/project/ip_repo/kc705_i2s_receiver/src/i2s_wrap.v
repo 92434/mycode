@@ -5,7 +5,7 @@ module i2s_wrap #
 	(
 		// Users to add parameters here
 		parameter integer I2S_RECEIVER_NUM = 32,
-		parameter integer NUMBER_OF_OUTPUT_WORDS = 15,
+		parameter integer NUMBER_OF_OUTPUT_WORDS = 16,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line

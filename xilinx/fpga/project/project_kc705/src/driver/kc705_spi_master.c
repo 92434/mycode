@@ -18,13 +18,13 @@
 #include <linux/spi/spi.h>
 #include <linux/spi/spi_gpio.h>
 
-//169 : s0//FMC_LPC_LA22_P
-//157 : s1//FMC_LPC_LA19_P
-//165 : s2//FMC_LPC_LA19_N
+//164 : s0//FMC_LPC_LA22_P
+//158 : s1//FMC_LPC_LA19_P
+//160 : s2//FMC_LPC_LA19_N
 
-#define MISO 170//FMC_LPC_LA20_N
-#define MOSI 178//FMC_LPC_LA23_N
-#define SCK 179//FMC_LPC_LA23_P
+#define MISO 165//FMC_LPC_LA20_N
+#define MOSI 172//FMC_LPC_LA23_N
+#define SCK 173//FMC_LPC_LA23_P
 #define SPI_BUS_NUM 1
 
 static struct spi_gpio_platform_data spi_gpio_cfg = {

@@ -399,23 +399,26 @@ def get_gpio_pin_no(gpio, start, gpio_bank_base):
 
 	return pin_no
 
-def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, start):
+def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, start, count):
 	print '-' * 100
 	print '%s gpio pin number for driver' %(fmc_type)
 	print '-' * 100
 
 	print 'start', start
-	if (start % 32) != 0:
-		start = 32 * ((start / 32) + 1)
+	if (start % (32 * 2)) != 0:
+		start = 32 * 2 * ((start / (32 * 2)) + 1)
 
 	pins_resistor = hpc_lpc_pins_resistor_map.get(fmc_type)
 
-	gpio_bank_base = [0, 0, 0, 0]
-	if fmc_type == 'HPC':
-		gpio_bank_base = [148, 116, 84, 57]
-	elif fmc_type == 'LPC':
-		gpio_bank_base = [148, 142, 0, 0]
+	gpio_boundary = 180
 
+	gpio_bank_base = []
+	for i in range(count / 32):
+		gpio_boundary -= 32
+		gpio_bank_base.append(gpio_boundary)
+	gpio_boundary -= (count % 32);
+	gpio_bank_base.append(gpio_boundary)
+	
 	io_pin_no_map = {}
 	for io, pin, gpio in constrain:
 		pin_no = get_gpio_pin_no(gpio, start, gpio_bank_base)
@@ -824,8 +827,8 @@ def gen_kc705_constrain():
 
 	gen_encryption_constrain()
 
-	get_gpios_pin_no_for_driver(hpc_constrain, hpc_lpc_pins_resistor_map, 'HPC', 0)
-	get_gpios_pin_no_for_driver(lpc_constrain, hpc_lpc_pins_resistor_map, 'LPC', len(hpc_constrain))
+	get_gpios_pin_no_for_driver(hpc_constrain, hpc_lpc_pins_resistor_map, 'HPC', 0, len(hpc_constrain))
+	get_gpios_pin_no_for_driver(lpc_constrain, hpc_lpc_pins_resistor_map, 'LPC', len(hpc_constrain), len(lpc_constrain))
 	print 'total', len(hpc_constrain) + len(lpc_constrain)
 
 	#打印pin号

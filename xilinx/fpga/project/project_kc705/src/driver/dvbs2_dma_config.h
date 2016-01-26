@@ -1,10 +1,6 @@
 #ifndef _DVBS2_DMA_CONFIG_H
 #define _DVBS2_DMA_CONFIG_H
-#if defined(KC705_DVBS2)
 #include "dvbs2_dma_thread_config.h"
-#elif defined(KC705_CSA)
-#include "csa_dma_thread_config.h"
-#endif
 typedef struct dma_static_config {
 	int dma_lite_offset;
 	int pcie_bar_map_ctl_offset_0;
@@ -54,7 +50,7 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_thread_count = DVBS2_DMA_THREADS, 
 		.is_auto_receive = true,
 
-		.receive_bulk_size = 15 * 4,
+		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
 		.devname = "i2s_dma",
 	},
