@@ -11,7 +11,13 @@
 #include <pthread.h>
 #include "kc705.h"
 
-#define BUFSIZE (50 * 15 * 4)
+
+unsigned int raw_data[] = {
+};
+#define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
+
+#define BUFSIZE (16 * 4)
+
 static int stop = 0;
 
 static void default_sig_action(int signo, siginfo_t *info, void *context) {
@@ -40,13 +46,15 @@ void *read_fn(void *arg) {
 	fd_set rfds;
 	fd_set efds;
 	int nread;
+	int toread = BUFSIZE;
 
-	printids("read_fn: ");
+	//printids("read_fn: ");
 
 	tv.tv_sec=1;
 	tv.tv_usec=0;
 
 	while(stop == 0) {
+
 		FD_ZERO(&rfds);
 		FD_ZERO(&efds);
 		FD_SET(targ->fd, &rfds);
@@ -55,16 +63,23 @@ void *read_fn(void *arg) {
 		if(select(targ->fd + 1, &rfds, NULL, &efds, &tv) > 0) {
 			if(FD_ISSET(targ->fd, &rfds)) {
 				//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-				nread = read(targ->fd, targ->buffer, BUFSIZE);
+				nread = read(targ->fd, targ->buffer, toread);
 				if(nread < 0) {
 					printf("%s\n", strerror(errno));
-				} else {
+					return NULL;
+				}
+
+				toread -= nread;
+
+				if(toread == 0) {
 					int i;
 					uint32_t *data = (uint32_t *)targ->buffer;
 
+					toread = BUFSIZE;
+
 					//printf("read %d!\n", nread);
-					for(i = 0; i < nread / sizeof(uint32_t); i++) {
-						if((i != 0) && (i % 15 == 0)) {
+					for(i = 0; i < toread / sizeof(uint32_t); i++) {
+						if((i != 0) && (i % BUFSIZE == 0)) {
 							printf("\n");
 						}
 						printf("%04x ", data[i] & 0xffff);
@@ -76,28 +91,32 @@ void *read_fn(void *arg) {
 				//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
 			}
 		}
+
+		//return NULL;
 	}
 	return NULL;
 }
 
 void *write_fn(void *arg) {
 	thread_arg_t *targ = (thread_arg_t *)arg;
-	targ = targ;
-	int nwrite;
 
-	printids("write_fn: ");
+	//printids("write_fn: ");
 
 	while(stop == 0) {
-		//memset(buffer, 0xff, BUFSIZE);
-		//nwrite = write(fd, buffer, BUFSIZE);
-		//if(nwrite < 0) {
-		//	printf("%s\n", strerror(errno));
-		//} else {
-		//	printf("write %d!\n", nwrite);
-		//}
-		usleep(1000000);
+		return NULL;
 	}
 	return NULL;
+}
+
+void main_proc(thread_arg_t *arg) {
+	thread_arg_t *targ = (thread_arg_t *)arg;
+
+	//printids("main_proc: ");
+
+	while(stop == 0) {
+
+		return NULL;
+	}
 }
 
 int read_write(thread_arg_t *targ) {
@@ -115,7 +134,8 @@ int read_write(thread_arg_t *targ) {
 		printf("can't create thread: %s\n", strerror(err));
 	}
 
-	printids("main thread:");
+	main_proc(targ);
+
 	pthread_join(rtid,NULL);
 	pthread_join(wtid,NULL);
 
@@ -131,7 +151,7 @@ int main(int argc, char **argv) {
 	int flags;
 
 	int mmap_size;
-	char *mmap_memory;
+	//char *mmap_memory;
 
 	if(argc < 2) {
 		printf("err: para error!:%s\n", strerror(errno));
@@ -149,19 +169,19 @@ int main(int argc, char **argv) {
 	////用以下方法将socket设置为非阻塞方式
 	//fcntl(targ.fd, F_SETFL, flags | O_NONBLOCK);
 
-	ret = ioctl(targ.fd, PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE, &mmap_size);
-	if (ret != 0) {
-		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-		return ret;
-	}
-	printf("mmap_size:%d(%x)\n", mmap_size, mmap_size);
+	//ret = ioctl(targ.fd, PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE, &mmap_size);
+	//if (ret != 0) {
+	//	printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+	//	return ret;
+	//}
+	//printf("mmap_size:%d(%x)\n", mmap_size, mmap_size);
 
-	mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, targ.fd, (off_t)0);
-	if(mmap_memory == (void *)-1) {
-		printf("xiaofei: %s:%d: %s\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-		ret = -1;
-		return ret;
-	}
+	//mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, targ.fd, (off_t)0);
+	//if(mmap_memory == (void *)-1) {
+	//	printf("xiaofei: %s:%d: %s\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+	//	ret = -1;
+	//	return ret;
+	//}
 
 	if(catch_signal(default_sig_action) == -1) {
 		printf("err: can't catch sigio!\n");
