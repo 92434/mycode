@@ -42,17 +42,18 @@ module ts2asi #(
 		//debug ports
 		output wire [FIFO_DATA_WIDTH - 1 : 0] din,
 		output wire [FIFO_DATA_WIDTH - 1 : 0] rdata,
-		output wire [FIFO_DATA_WIDTH - 1 : 0] dout,
+		output reg [FIFO_DATA_WIDTH - 1 : 0] dout,
 
 		output wire ts_clk,
 		output wire ts_valid,
 		output wire ts_sync,
 		output wire [7:0] ts_data,
 
-		output wire r_enable,
+		output wire r_ready,
 		output wire error_full,
 		output wire error_empty,
 
+		output reg ce_R = 0,
 		output reg ce, //Clock enable for parallel domain
 		output reg [4 : 0] ce_sr,
 		output wire start,
@@ -60,15 +61,20 @@ module ts2asi #(
 		output wire [7:0] din_8b_R_debug
 	);
 
+	wire r_enable;
+	reg r_enable_R = 0;
+
 	// Tx clock enable generation
 	always @(posedge clk) begin
 		if (rst_n == 0) begin
-			ce <= 1'b0;
 			ce_sr <= 5'b00001;
+			ce_R <= 0;
+			ce <= 1'b0;
 		end
 		else begin
-			ce_sr <= {ce_sr[3:0], ce_sr[4]};
+			ce_R <= ce;
 			ce <= ce_sr[4];
+			ce_sr <= {ce_sr[3:0], ce_sr[4]};
 		end
 	end 
 
@@ -77,16 +83,29 @@ module ts2asi #(
 	assign ts_sync = sync;
 	assign ts_data = din_8b;
 
-	reg output_ready_R;
-	assign din = (valid == 0) ? {1'b1, 8'hBC} : {1'b0, din_8b};
-	assign dout = (output_ready_R == 0) ? {1'b1, 8'hBC} : rdata;
-
-	always @(negedge ce) begin
+	assign din = {1'b0, din_8b};
+	assign r_enable = ((ce == 1) && (r_ready == 1)) ? 1 : 0;
+	
+	always @(negedge clk) begin
 		if (rst_n == 0) begin
-			output_ready_R <= 0;
+			r_enable_R <= 0;
 		end
 		else begin
-			output_ready_R <= r_enable;
+			r_enable_R <= r_enable;
+		end
+	end
+
+	always @(posedge clk) begin
+		if (rst_n == 0) begin
+			dout <= 0;
+		end
+		else begin
+			if(r_enable_R == 1) begin
+				dout <= rdata;
+			end
+			else begin
+				dout <= {1'b1, 8'hBC};
+			end
 		end
 	end
 
@@ -96,30 +115,19 @@ module ts2asi #(
 		) xiaofei_fifo (
 			.rst_n(rst_n),
 			.wclk(din_clk),
-			.rclk(ce),
+			.rclk(clk),
 			.wdata(din),
 			.rdata(rdata),
-			.w_enable(1),
+			.w_enable(valid),
 			.r_enable(r_enable),
-			.r_ready(r_enable),
+			.r_ready(r_ready),
 			.error_full(error_full),
 			.error_empty(error_empty)
 		);
 
-	//reg kchar_in_R = 1'b0;
-	//reg [7:0] din_8b_R = 8'h00;
-
 	// Internal signals
 	wire [9:0] data_enc10b;
 
- 
-	//// Synchronous process
-	//always @(posedge clk) begin
-	//	if(ce) begin
-	//		din_8b_R <= din_8b;
-	//		kchar_in_R <= kchar_in;
-	//	end
-	//end
  
 	// 8b10b Encoder
 	encoder_8b10b encoder_inst(
@@ -127,7 +135,7 @@ module ts2asi #(
 		.din(dout[7 : 0]),
 		.kin(dout[8]),
 		.clk(clk),
-		.ce(ce),
+		.ce(ce_R),
 		.dout(data_enc10b),
 		.valid(),
 		.code_err());
@@ -139,7 +147,7 @@ module ts2asi #(
 		.start(start),
 		.sclk_0(clk),
 		.sclk_180(~clk),
-		.ce(ce),
+		.ce(ce_R),
 		.reset(~rst_n),
 		.din_10b(data_enc10b),
 		.sdout_p(asi_out_p),

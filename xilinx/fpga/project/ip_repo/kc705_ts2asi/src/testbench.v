@@ -35,13 +35,15 @@ module testbench #(
 	wire ts_clk;
 	wire ts_valid;
 	wire [DATA_WIDTH - 1 : 0] ts_data;
-	wire asi_out;
+	wire asi_out_p;
+	wire asi_out_n;
 	wire [FIFO_DATA_WIDTH - 1 : 0] din;
 	wire [FIFO_DATA_WIDTH - 1 : 0] rdata;
 	wire [FIFO_DATA_WIDTH - 1 : 0] dout;
+	wire ce_R;
 	wire ce;
 	wire [4 : 0] ce_sr;
-	wire r_enable;
+	wire r_ready;
 	wire error_full;
 	wire error_empty;
 	wire start;
@@ -108,7 +110,8 @@ module testbench #(
 			.valid(valid),
 			.din_8b(din_8b),
 
-			.asi_out(asi_out),
+			.asi_out_p(asi_out_p),
+			.asi_out_n(asi_out_p),
 
 			.din(din),
 			.rdata(rdata),
@@ -118,10 +121,11 @@ module testbench #(
 			.ts_valid(ts_valid),
 			.ts_data(ts_data),
 
-			.r_enable(r_enable),
+			.r_ready(r_ready),
 			.error_full(error_full),
 			.error_empty(error_empty),
 
+			.ce_R(ce_R),
 			.ce(ce),
 			.ce_sr(ce_sr),
 			.start(start),

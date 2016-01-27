@@ -46,9 +46,9 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-		.dma_thread = dvbs2_dma_threads,
-		.dma_thread_count = DVBS2_DMA_THREADS, 
-		.is_auto_receive = true,
+		.dma_thread = NULL,
+		.dma_thread_count = 0, 
+		.is_auto_receive = false,
 
 		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
@@ -70,6 +70,57 @@ static dma_static_config_info_t dma_info[] = {
 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
 		.devname = "dvbs2_regs",
+	},
+	{
+		.dma_lite_offset = OFFSET_AXI_DMA_LITE_1,
+		.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
+		.pcie_bar_map_ctl_offset_1 = AXIBAR2PCIEBAR_1U,
+		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0,
+		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1,
+		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
+
+		.dma_type = AXI_DMA,
+		.dma_thread = dma_threads,
+		.dma_thread_count = DMA_THREAD_COUNT, 
+		.is_auto_receive = true,
+
+		.receive_bulk_size = 16 * 4,
+		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+		.devname = "asi_dma",
+	},
+	{
+		.dma_lite_offset = OFFSET_AXI_DMA_LITE_2,
+		.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
+		.pcie_bar_map_ctl_offset_1 = AXIBAR2PCIEBAR_1U,
+		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0,
+		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1,
+		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
+
+		.dma_type = AXI_DMA,
+		.dma_thread = NULL,
+		.dma_thread_count = 0, 
+		.is_auto_receive = false,
+
+		.receive_bulk_size = 16 * 4,
+		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+		.devname = "tsp_dma1",
+	},
+	{
+		.dma_lite_offset = OFFSET_AXI_DMA_LITE_3,
+		.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
+		.pcie_bar_map_ctl_offset_1 = AXIBAR2PCIEBAR_1U,
+		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0,
+		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1,
+		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
+
+		.dma_type = AXI_DMA,
+		.dma_thread = NULL,
+		.dma_thread_count = 0, 
+		.is_auto_receive = false,
+
+		.receive_bulk_size = 16 * 4,
+		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+		.devname = "tsp_dma0",
 	},
 };
 

@@ -16,7 +16,7 @@ unsigned int raw_data[] = {
 };
 #define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
 
-#define BUFSIZE (15 * 4)
+#define BUFSIZE (16 * 4)
 
 static int stop = 0;
 
@@ -39,6 +39,39 @@ typedef struct {
 	int fd;
 	unsigned char *buffer;
 } thread_arg_t;
+
+int printf_bit(unsigned int v) {
+	int ret = 0;
+	unsigned char v0 = '0';
+	unsigned char v1 = '1';
+	unsigned char buffer[11];
+	int i;
+	int mask = 1;
+	
+	for(i = 0; i < 10; i++) {
+		if((v & mask) == 0) {
+			buffer[i] = v0;
+		} else {
+			buffer[i] = v1;
+		}
+
+		mask <<= 1;
+	}
+	buffer[10] = 0;
+
+	ret = printf("%s ", buffer);
+
+	return ret;
+}
+
+void print_asi_word(uint32_t word) {
+		unsigned int v1 = (word >> 0) & 0x3ff;
+		unsigned int v2 = (word >> 10) & 0x3ff;
+		unsigned int v3 = (word >> 20) & 0x3ff;
+		printf_bit(v1);
+		printf_bit(v2);
+		printf_bit(v3);
+}
 
 void *read_fn(void *arg) {
 	thread_arg_t *targ = (thread_arg_t *)arg;
@@ -79,10 +112,10 @@ void *read_fn(void *arg) {
 
 					//printf("read %d!\n", nread);
 					for(i = 0; i < toread / sizeof(uint32_t); i++) {
-						if((i != 0) && (i % BUFSIZE == 0)) {
+						if((i != 0) && (i % 4 == 0)) {
 							printf("\n");
 						}
-						printf("%04x ", data[i] & 0xffff);
+						print_asi_word(data[i]);
 					}
 					printf("\n");
 				}
