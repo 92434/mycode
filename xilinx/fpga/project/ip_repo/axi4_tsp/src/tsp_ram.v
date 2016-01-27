@@ -59,10 +59,6 @@ module tsp_ram #(
 	// implement Block RAM(s)
 	// for write command
 	//
-	reg [OPT_MEM_ADDR_BITS:0] current_write_address = 0;
-	reg [C_S_AXI_DATA_WIDTH-1:0] current_write_data = 0;
-	reg current_mem_wren = 0;
-
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_slot = 0;
 	reg [C_S_AXI_DATA_WIDTH-1:0] current_pid_index = 0;
 
@@ -83,20 +79,6 @@ module tsp_ram #(
 
 	reg [ALL_FILTERS_NUM - 1 : 0] update_pid_request = 0;
 
-	integer index_wstrb;
-	//assigning 8 bit data
-	always @(posedge clk) begin
-		if (wen == 1) begin
-			current_write_address <= waddr;
-			for(index_wstrb = 0; index_wstrb < (C_S_AXI_DATA_WIDTH / 8); index_wstrb = index_wstrb + 1) begin
-				if(wstrb[index_wstrb] == 1) begin
-					current_write_data[(8 * index_wstrb + 7) -: 8] <= wdata[(8 * index_wstrb + 7) -: 8];
-				end
-			end
-		end
-		current_mem_wren <= wen;
-	end
-
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			update_pid_request <= 0;
@@ -108,36 +90,36 @@ module tsp_ram #(
 			pump_data_request <= 0;
 			update_data_request <= 0;
 
-			if(current_mem_wren == 1) begin
-				case(current_write_address)
+			if(wen == 1) begin
+				case(waddr)
 					ADDR_INDEX: begin
-						if((current_write_data >= 0) && (current_write_data < ALL_FILTERS_NUM)) begin
-							current_slot <= current_write_data;
+						if((wdata >= 0) && (wdata < ALL_FILTERS_NUM)) begin
+							current_slot <= wdata;
 						end
 						else begin
 						end
 					end
 					ADDR_PID_INDEX: begin
-						if((current_write_data >= 0) && (current_write_data < COMMON_REPLACE_MATCH_PID_COUNT)) begin
-							current_pid_index <= current_write_data;
+						if((wdata >= 0) && (wdata < COMMON_REPLACE_MATCH_PID_COUNT)) begin
+							current_pid_index <= wdata;
 						end
 						else begin
 						end
 					end
 					ADDR_PID: begin
-						ram_for_pid[current_slot] <= current_write_data;
+						ram_for_pid[current_slot] <= wdata;
 						update_pid_request[current_slot] <= 1;
 					end
 					ADDR_MATCH_ENABLE: begin
-						match_enable[current_slot] <= (current_write_data == 1) ? 1 : 0;
+						match_enable[current_slot] <= (wdata == 1) ? 1 : 0;
 					end
 					ADDR_READ_REQUEST: begin
 						pump_data_request[current_slot] <= 1;
 					end
 					default: begin
-						if((current_write_address >= ADDR_TS_DATA_BASE) && (current_write_address < ADDR_TS_DATA_END)) begin
-							current_data_index <= current_write_address - ADDR_TS_DATA_BASE;
-							current_data <= current_write_data;
+						if((waddr >= ADDR_TS_DATA_BASE) && (waddr < ADDR_TS_DATA_END)) begin
+							current_data_index <= waddr - ADDR_TS_DATA_BASE;
+							current_data <= wdata;
 							update_data_request[current_slot] <= 1;
 						end
 						else begin
