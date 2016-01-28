@@ -16,16 +16,16 @@ module tsp_ram #(
 		input wire clk,
 		input wire rst_n,
 
-		input wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] wstrb,
+		input wire [(C_S_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		input wire wen,
-		input wire [C_S_AXI_DATA_WIDTH-1 : 0] wdata,
-		input wire [OPT_MEM_ADDR_BITS:0] waddr,
+		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] wdata,
+		input wire [OPT_MEM_ADDR_BITS : 0] waddr,
 
 		input wire ren,
-		output reg [C_S_AXI_DATA_WIDTH-1 : 0] rdata,
-		input wire [OPT_MEM_ADDR_BITS:0] raddr,
+		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] rdata,
+		input wire [OPT_MEM_ADDR_BITS : 0] raddr,
 
-		input wire [7:0] mpeg_data,
+		input wire [7 : 0] mpeg_data,
 		input wire mpeg_clk,
 		input wire mpeg_valid,
 		input wire mpeg_sync,
@@ -33,7 +33,7 @@ module tsp_ram #(
 		output wire ts_out_clk,
 		output wire ts_out_valid,
 		output wire ts_out_sync,
-		output wire [7:0] ts_out
+		output wire [7 : 0] ts_out
 	);
 
 	localparam integer PACK_BYTE_SIZE = 188;
@@ -59,43 +59,25 @@ module tsp_ram #(
 	// implement Block RAM(s)
 	// for write command
 	//
-	reg [OPT_MEM_ADDR_BITS:0] current_write_address = 0;
-	reg [C_S_AXI_DATA_WIDTH-1:0] current_write_data = 0;
-	reg current_mem_wren = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] current_slot = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] current_pid_index = 0;
 
-	reg [C_S_AXI_DATA_WIDTH-1:0] current_slot = 0;
-	reg [C_S_AXI_DATA_WIDTH-1:0] current_pid_index = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] current_data_index = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] current_data = 0;
 
-	reg [C_S_AXI_DATA_WIDTH-1:0] current_data_index = 0;
-	reg [C_S_AXI_DATA_WIDTH-1:0] current_data = 0;
-
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_pid_index [0 : ALL_FILTERS_NUM - 1];
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_pid [0 : ALL_FILTERS_NUM - 1];
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ram_for_pid_index [0 : ALL_FILTERS_NUM - 1];
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ram_for_pid [0 : ALL_FILTERS_NUM - 1];
 
 	reg [ALL_FILTERS_NUM - 1 : 0] match_enable = 0;
 
 	reg [ALL_FILTERS_NUM - 1 : 0] pump_data_request = 0;
 	wire [ALL_FILTERS_NUM - 1 : 0] pump_data_request_ready;
-	reg [C_S_AXI_DATA_WIDTH-1:0] ram_for_data [0 : PACK_WORD_SIZE * COMMON_REPLACE_DATA_GROUPS - 1];
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ram_for_data [0 : PACK_WORD_SIZE * COMMON_REPLACE_DATA_GROUPS - 1];
 
 
 	reg [ALL_FILTERS_NUM - 1 : 0] update_data_request = 0;
 
 	reg [ALL_FILTERS_NUM - 1 : 0] update_pid_request = 0;
-
-	integer index_wstrb;
-	//assigning 8 bit data
-	always @(posedge clk) begin
-		if (wen == 1) begin
-			current_write_address <= waddr;
-			for(index_wstrb = 0; index_wstrb < (C_S_AXI_DATA_WIDTH / 8); index_wstrb = index_wstrb + 1) begin
-				if(wstrb[index_wstrb] == 1) begin
-					current_write_data[(8 * index_wstrb + 7) -: 8] <= wdata[(8 * index_wstrb + 7) -: 8];
-				end
-			end
-		end
-		current_mem_wren <= wen;
-	end
 
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
@@ -108,36 +90,36 @@ module tsp_ram #(
 			pump_data_request <= 0;
 			update_data_request <= 0;
 
-			if(current_mem_wren == 1) begin
-				case(current_write_address)
+			if(wen == 1) begin
+				case(waddr)
 					ADDR_INDEX: begin
-						if((current_write_data >= 0) && (current_write_data < ALL_FILTERS_NUM)) begin
-							current_slot <= current_write_data;
+						if((wdata >= 0) && (wdata < ALL_FILTERS_NUM)) begin
+							current_slot <= wdata;
 						end
 						else begin
 						end
 					end
 					ADDR_PID_INDEX: begin
-						if((current_write_data >= 0) && (current_write_data < COMMON_REPLACE_MATCH_PID_COUNT)) begin
-							current_pid_index <= current_write_data;
+						if((wdata >= 0) && (wdata < COMMON_REPLACE_MATCH_PID_COUNT)) begin
+							current_pid_index <= wdata;
 						end
 						else begin
 						end
 					end
 					ADDR_PID: begin
-						ram_for_pid[current_slot] <= current_write_data;
+						ram_for_pid[current_slot] <= wdata;
 						update_pid_request[current_slot] <= 1;
 					end
 					ADDR_MATCH_ENABLE: begin
-						match_enable[current_slot] <= (current_write_data == 1) ? 1 : 0;
+						match_enable[current_slot] <= (wdata == 1) ? 1 : 0;
 					end
 					ADDR_READ_REQUEST: begin
 						pump_data_request[current_slot] <= 1;
 					end
 					default: begin
-						if((current_write_address >= ADDR_TS_DATA_BASE) && (current_write_address < ADDR_TS_DATA_END)) begin
-							current_data_index <= current_write_address - ADDR_TS_DATA_BASE;
-							current_data <= current_write_data;
+						if((waddr >= ADDR_TS_DATA_BASE) && (waddr < ADDR_TS_DATA_END)) begin
+							current_data_index <= waddr - ADDR_TS_DATA_BASE;
+							current_data <= wdata;
 							update_data_request[current_slot] <= 1;
 						end
 						else begin
@@ -188,13 +170,13 @@ module tsp_ram #(
 	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_match_enable;
 	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_udpate_pid_request;
 	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_pump_data_request;
-	wire [C_S_AXI_DATA_WIDTH-1:0] monitors_ram_for_pid [0 : MONITOR_FILTER_NUM - 1];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_ram_for_pid [0 : MONITOR_FILTER_NUM - 1];
 
 	//for output
 	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_pump_data_request_ready;
-	wire [C_S_AXI_DATA_WIDTH-1:0] monitors_out_data[0 : MONITOR_FILTER_NUM - 1];
-	wire [C_S_AXI_DATA_WIDTH-1:0] monitors_out_data_index[0 : MONITOR_FILTER_NUM - 1];
-	wire [C_S_AXI_DATA_WIDTH-1:0] monitors_out_pid [0 : MONITOR_FILTER_NUM - 1];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_out_data[0 : MONITOR_FILTER_NUM - 1];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_out_data_index[0 : MONITOR_FILTER_NUM - 1];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_out_pid [0 : MONITOR_FILTER_NUM - 1];
 
 	//output assign
 	assign pump_data_request_ready[MONITOR_FILTER_NUM - 1 : 0] = monitors_pump_data_request_ready;
@@ -244,20 +226,20 @@ module tsp_ram #(
 	wire [REPLACER_FILTER_NUM : 0] replacers_update_pid_request;
 	wire [REPLACER_FILTER_NUM : 0] replacers_update_data_request;
 	wire [REPLACER_FILTER_NUM : 0] replacers_pump_data_request;
-	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_ram_for_pid [0 : REPLACER_FILTER_NUM];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_ram_for_pid [0 : REPLACER_FILTER_NUM];
 
 
 	//for output
 	wire [REPLACER_FILTER_NUM : 0] replacers_data_request_ready;
-	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_data[0 : REPLACER_FILTER_NUM];
-	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_data_index[0 : REPLACER_FILTER_NUM];
-	wire [C_S_AXI_DATA_WIDTH-1:0] replacers_out_pid[0 : REPLACER_FILTER_NUM];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_out_data[0 : REPLACER_FILTER_NUM];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_out_data_index[0 : REPLACER_FILTER_NUM];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_out_pid[0 : REPLACER_FILTER_NUM];
 
 	wire [REPLACER_FILTER_NUM : 0] replacers_matched_state;
 	wire [REPLACER_FILTER_NUM : 0] replacers_basic_data;
 	wire [REPLACER_FILTER_NUM : 0] replacers_ts_out_valid;
 	wire [REPLACER_FILTER_NUM : 0] replacers_ts_out_sync;
-	wire [7:0] replacers_ts_out[0 : REPLACER_FILTER_NUM];
+	wire [7 : 0] replacers_ts_out[0 : REPLACER_FILTER_NUM];
 
 	assign replacers_basic_data = {{(REPLACER_FILTER_NUM){1'b0}}, 1'b1};
 
@@ -361,7 +343,7 @@ module tsp_ram #(
 	//process ts out
 	reg [7 : 0] ts_out_index = 0;
 	reg ts_out_valid_reg = 0;
-	reg [7:0] ts_out_reg = 0;
+	reg [7 : 0] ts_out_reg = 0;
 	reg ts_out_sync_reg = 0;
 
 	assign ts_out_clk = mpeg_clk;

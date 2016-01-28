@@ -96,6 +96,8 @@ module tb #(
 			ts_index <= 0;
 		end
 		else begin
+			mpeg_sync <= 0;
+			mpeg_valid <= 0;
 			if((ts_index >= 0) && (ts_index < MPEG_LENGTH)) begin
 				if((send_valid == 3)) begin
 					mpeg_valid <= 1;
@@ -105,12 +107,10 @@ module tb #(
 						mpeg_sync <= 1;
 					end
 					else begin
-						mpeg_sync <= 0;
 					end
 					ts_index <= ts_index + 1;
 				end
 				else begin
-					mpeg_valid <= 0;
 				end
 			end
 			else begin

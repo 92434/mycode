@@ -88,6 +88,7 @@ module monitor #(
 					if(pump_data_request == 1) begin
 						pump_data_request_ready <= 0;
 						pump_data_index <= 0;
+
 						pump_data_state <= 1;
 					end
 					else begin
@@ -112,6 +113,7 @@ module monitor #(
 					end
 					else begin
 						pump_data_request_ready <= 1;
+
 						pump_data_state <= 0;
 					end
 				end
@@ -151,7 +153,7 @@ module monitor #(
 		end
 	end
 
-	reg pid_matched = 0;
+	reg matched_pid = 0;
 	reg [C_S_AXI_DATA_WIDTH-1:0] matched_index = 0;
 
 	wire match_states;
@@ -159,13 +161,23 @@ module monitor #(
 
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
-			pid_matched <= 0;
-			matched_index <= 0;
+			matched_pid <= 0;
 			caching_ram_index <= 0;
 		end
 		else begin
-			if(mpeg_valid == 1) begin
-				if(pid_matched == 1) begin
+			if((mpeg_valid == 1) && (mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
+				if((match_states == 1) && (match_enable == 1)) begin
+					matched_pid <= 1;
+					matched_index <= 0;
+					caching_ram_index <= (caching_ram_index == 0) ? 1 : 0;
+				end
+				else begin
+					matched_pid <= 0;
+				end
+			end
+
+			if(matched_pid == 1) begin
+				if(mpeg_valid == 1) begin
 					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
 						case(caching_ram_index)
 							0: begin
@@ -178,31 +190,6 @@ module monitor #(
 							end
 						endcase
 						matched_index <= matched_index + 1;
-					end
-					else begin
-					end
-				end
-				else begin
-				end
-			end
-			else begin
-			end
-
-			if(mpeg_valid == 1) begin
-				if(mpeg_sync_d2 == 1) begin
-					if(mpeg_data_d2 == 8'h47) begin
-						if((match_states == 1) && (match_enable == 1)) begin
-							pid_matched <= 1;
-							matched_index <= 0;
-							if(pump_data_state == 1) begin
-							end
-							else begin
-								caching_ram_index <= (caching_ram_index == 0) ? 1 : 0;
-							end
-						end
-						else begin
-							pid_matched <= 0;
-						end
 					end
 					else begin
 					end

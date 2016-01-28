@@ -35,8 +35,8 @@ module replacer #(
 		input wire mpeg_sync,
 
 		output reg matched_state = 0,
-		output reg ts_out_valid = 0,
 		output reg [7:0] ts_out = 0,
+		output reg ts_out_valid = 0,
 		output reg ts_out_sync = 0
 	);
 
@@ -114,8 +114,8 @@ module replacer #(
 				0: begin
 					if(pump_data_request == 1) begin
 						pump_data_request_ready <= 0;
-
 						pump_data_index <= 0;
+
 						pump_data_state <= 1;
 					end
 					else begin
@@ -130,6 +130,7 @@ module replacer #(
 					end
 					else begin
 						pump_data_request_ready <= 1;
+
 						pump_data_state <= 0;
 					end
 				end
@@ -145,6 +146,7 @@ module replacer #(
 	reg [7:0] mpeg_data_d1 = 0;
 	reg [7:0] mpeg_data_d2 = 0;
 	reg [7:0] mpeg_data_d3 = 0;
+	reg updated = 0;
 
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
@@ -154,8 +156,10 @@ module replacer #(
 			mpeg_data_d1 <= 0;
 			mpeg_data_d2 <= 0;
 			mpeg_data_d3 <= 0;
+			updated <= 0;
 		end
 		else begin
+			updated <= 0;
 			if(mpeg_valid == 1) begin
 				mpeg_sync_d1 <= mpeg_sync;
 				mpeg_sync_d2 <= mpeg_sync_d1;
@@ -163,16 +167,12 @@ module replacer #(
 				mpeg_data_d1 <= mpeg_data;
 				mpeg_data_d2 <= mpeg_data_d1;
 				mpeg_data_d3 <= mpeg_data_d2;
+				updated <= 1;
 			end
 			else begin
 			end
 		end
 	end
-
-	reg [C_S_AXI_DATA_WIDTH-1:0] ts_out_group_index = 0;
-
-	reg pid_matched = 0;
-	reg [C_S_AXI_DATA_WIDTH-1:0] matched_index = 0;
 
 	wire [REPLACE_MATCH_PID_COUNT - 1 : 0] match_states;
 	genvar i;
@@ -182,70 +182,69 @@ module replacer #(
 		end
 	endgenerate
 
-	reg ts_out_valid_d1 = 0;
-	reg ts_out_valid_d2 = 0;
-	reg ts_out_valid_d3 = 0;
+	reg [C_S_AXI_DATA_WIDTH-1:0] ts_out_group_index = 0;
+	reg [C_S_AXI_DATA_WIDTH-1:0] matched_index = 0;
+	reg matched_pid = 0;
+	
+	wire [C_S_AXI_DATA_WIDTH-1:0] ram_match_index;
+	assign ram_match_index = (ts_out_group_index * PACK_BYTE_SIZE) + matched_index;
 
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
-			pid_matched <= 0;
+			matched_pid <= 0;
 			matched_state <= 0;
-			matched_index <= 0;
-			ts_out_valid <= 0;
+
 			ts_out_group_index <= 0;
+			matched_index <= 0;
+			ts_out <= 0;
+			ts_out_valid <= 0;
+			ts_out_sync <= 0;
 		end
 		else begin
-			matched_state <= pid_matched;
+			matched_state <= matched_pid;
 
 			if(base_data == 1) begin
-				matched_state <= 1;
-
-				ts_out_valid_d1 <= mpeg_valid;
-				ts_out_valid_d2 <= ts_out_valid_d1;
-				ts_out_valid_d3 <= ts_out_valid_d2;
-
-				ts_out_valid <= ts_out_valid_d3;
-				ts_out_sync <= ((mpeg_sync_d3 == 1) && (ts_out_valid_d3 == 1)) ? 1 : 0;
-				ts_out <= mpeg_data_d3;
+				matched_pid <= 1;
 			end
 			else begin
-				if(pid_matched == 1) begin
-					if((matched_index >= ts_out_group_index * PACK_BYTE_SIZE) && (matched_index < ts_out_group_index * PACK_BYTE_SIZE + PACK_BYTE_SIZE)) begin
+				if((mpeg_valid == 1) && (mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
+					if((match_states > 0) && (match_enable == 1)) begin
+						matched_pid <= 1;
+
+						matched_index <= 0;
+
+						if((ts_out_group_index >= 0) && (ts_out_group_index < REPLACE_DATA_GROUPS - 1)) begin
+							ts_out_group_index <= ts_out_group_index + 1;
+						end
+						else begin
+							ts_out_group_index <= 0;
+						end
+					end
+					else begin
+						matched_pid <= 0;
+					end
+				end
+				else begin
+				end
+			end
+
+			if(matched_pid == 1) begin
+				if(base_data == 1) begin
+					ts_out <= mpeg_data_d3;
+					ts_out_valid <= (updated == 1) ? 1 : 0;
+					ts_out_sync <= (updated == 1) ? mpeg_sync_d3 : 0;
+				end
+				else begin
+					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
+						ts_out <= ram_for_data[ram_match_index / 4][(8 * (ram_match_index % 4) + 7) -: 8];
 						ts_out_valid <= 1;
-						ts_out_sync <= ((mpeg_sync_d3 == 1) && (matched_index == 0)) ? 1 : 0;
-						ts_out <= ram_for_data[matched_index / 4][(8 * (matched_index % 4) + 7) -: 8];
+						ts_out_sync <= (matched_index == 0) ? 1 : 0;
+
 						matched_index <= matched_index + 1;
 					end
 					else begin
 						ts_out_valid <= 0;
 					end
-				end
-				else begin
-				end
-			end
-
-			if(mpeg_valid == 1) begin
-				if(mpeg_sync_d2 == 1) begin
-					if(mpeg_data_d2 == 8'h47) begin
-						if((match_states > 0) && (match_enable == 1)) begin
-							pid_matched <= 1;
-							if((ts_out_group_index >= 0) && (ts_out_group_index < REPLACE_DATA_GROUPS - 1)) begin
-								matched_index <= (ts_out_group_index + 1) * PACK_BYTE_SIZE;
-								ts_out_group_index <= ts_out_group_index + 1;
-							end
-							else begin
-								matched_index <= 0;
-								ts_out_group_index <= 0;
-							end
-						end
-						else begin
-							pid_matched <= 0;
-						end
-					end
-					else begin
-					end
-				end
-				else begin
 				end
 			end
 			else begin
