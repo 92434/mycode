@@ -176,23 +176,19 @@ module monitor #(
 				end
 			end
 
-			if(matched_pid == 1) begin
-				if(mpeg_valid == 1) begin
-					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
-						case(caching_ram_index)
-							0: begin
-								ram_for_data_0[matched_index / 4][(8 * (matched_index % 4) + 7) -: 8] <= mpeg_data_d3;
-							end
-							1: begin
-								ram_for_data_1[matched_index / 4][(8 * (matched_index % 4) + 7) -: 8] <= mpeg_data_d3;
-							end
-							default: begin
-							end
-						endcase
-						matched_index <= matched_index + 1;
-					end
-					else begin
-					end
+			if((mpeg_valid == 1) && (matched_pid == 1)) begin
+				if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
+					case(caching_ram_index)
+						0: begin
+							ram_for_data_0[matched_index / 4][(8 * (matched_index % 4) + 7) -: 8] <= mpeg_data_d3;
+						end
+						1: begin
+							ram_for_data_1[matched_index / 4][(8 * (matched_index % 4) + 7) -: 8] <= mpeg_data_d3;
+						end
+						default: begin
+						end
+					endcase
+					matched_index <= matched_index + 1;
 				end
 				else begin
 				end
