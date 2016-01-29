@@ -86,7 +86,7 @@ static dma_static_config_info_t dma_info[] = {
 
 		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
-		.devname = "asi_dma",
+		.devname = "asi_dma",//after asi
 	},
 	{
 		.dma_lite_offset = OFFSET_AXI_DMA_LITE_2,
@@ -97,13 +97,13 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-		.dma_thread = NULL,
-		.dma_thread_count = 0, 
-		.is_auto_receive = false,
+		.dma_thread = 0,//dma_threads,
+		.dma_thread_count = 0,//DMA_THREAD_COUNT, 
+		.is_auto_receive = false,//true,
 
 		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
-		.devname = "tsp_dma1",
+		.devname = "tsp_dma1",//after tsp
 	},
 	{
 		.dma_lite_offset = OFFSET_AXI_DMA_LITE_3,
@@ -114,13 +114,13 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-		.dma_thread = NULL,
-		.dma_thread_count = 0, 
-		.is_auto_receive = false,
+		.dma_thread = 0,//dma_threads,
+		.dma_thread_count = 0,//DMA_THREAD_COUNT, 
+		.is_auto_receive = false,//true,
 
 		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
-		.devname = "tsp_dma0",
+		.devname = "tsp_dma0",//before tsp
 	},
 };
 
