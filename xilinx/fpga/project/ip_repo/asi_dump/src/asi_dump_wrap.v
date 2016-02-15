@@ -15,7 +15,8 @@ module asi_dump_wrap #
 	)
 	(
 		// Users to add ports here
-		input wire ts_clk,
+		input wire clk,
+		input wire ce,
 		input wire [MPEG_DATA_WIDTH - 1 : 0] ts_data,
 
 		// User ports ends
@@ -67,10 +68,10 @@ module asi_dump_wrap #
 			.MPEG_DATA_WIDTH(MPEG_DATA_WIDTH),
 			.C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH)
 		) asi_dump_fifo_wrap_inst (
-			.clk(m00_axis_aclk),
+			.clk(clk),
 			.rst_n(m00_axis_aresetn),
 
-			.ts_clk(ts_clk),
+			.ce(ce),
 			.ts_data(ts_data),
 
 			.wclk(wclk),

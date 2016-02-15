@@ -8,7 +8,7 @@ module asi_dump_fifo_wrap #(
 		input wire rst_n,
 		input wire clk,
 
-		input wire ts_clk,
+		input wire ce,
 		input wire [MPEG_DATA_WIDTH - 1 : 0] ts_data,
 
 		output wire wclk,
@@ -20,41 +20,55 @@ module asi_dump_fifo_wrap #(
 
 
 	integer buffer_index = 0;
-	integer buffer_index_R1 = 0;
+	integer buffer_index_R = 0;
 	reg [C_M_AXIS_TDATA_WIDTH - 1 : 0] buffer_ts_data = 0;
-	reg [MPEG_DATA_WIDTH - 1 : 0] ts_data_R1 = 0;
 	reg buffer_valid = 0;
 
 	wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] current_endpos;
 	assign current_endpos = buffer_index * MPEG_DATA_WIDTH + MPEG_DATA_WIDTH - 1;
 
 	//buffer mpeg data to 32 bit
-	always @(posedge ts_clk) begin
-		if(rst_n == 0) begin
-			ts_data_R1 <= 0;
+	
+	wire [MPEG_DATA_WIDTH - 1 : 0] k28p5_p;
+	wire [MPEG_DATA_WIDTH - 1 : 0] k28p5_n;
 
+	assign k28p5_p = {10'b0101111100};
+	assign k28p5_n = {10'b1010000011};
+
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
+			buffer_index_R <= 0;
 			buffer_ts_data <= 0;
 			buffer_index <= 0;
 			buffer_valid <= 0;
 		end
 		else begin
 			buffer_valid <= 0;
-			ts_data_R1 <= ts_data;
-			buffer_index_R1 <= buffer_index;
-			buffer_ts_data[current_endpos -: MPEG_DATA_WIDTH] <= ts_data_R1;
+			if(ce == 1) begin
+				if(ts_data == k28p5_p) begin
+				end
+				else if(ts_data == k28p5_n) begin
+				end
+				else begin
+					buffer_index_R <= buffer_index;
+					buffer_ts_data[current_endpos -: MPEG_DATA_WIDTH] <= ts_data;
 
-			if((buffer_index >= 0) && (buffer_index < TS_DATA_NUM_PER_WFIFO - 1)) begin
-				buffer_index <= buffer_index + 1;
+					if((buffer_index >= 0) && (buffer_index < TS_DATA_NUM_PER_WFIFO - 1)) begin
+						buffer_index <= buffer_index + 1;
+					end
+					else begin
+						buffer_index <= 0;
+						buffer_valid <= 1;
+					end
+				end
 			end
 			else begin
-				buffer_index <= 0;
-				buffer_valid <= 1;
 			end
 		end
 	end
 
 
-	always @(posedge ts_clk) begin
+	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			wen <= 0;
 			wdata <= 0;
@@ -64,7 +78,7 @@ module asi_dump_fifo_wrap #(
 			wdata <= 0;
 
 			if(buffer_valid == 1) begin
-				case(buffer_index_R1)
+				case(buffer_index_R)
 					0: begin
 						wdata <= {{(C_M_AXIS_TDATA_WIDTH - 1 * MPEG_DATA_WIDTH){1'b0}}, buffer_ts_data[( 1 * MPEG_DATA_WIDTH - 1) : 0]};
 					end
@@ -85,5 +99,5 @@ module asi_dump_fifo_wrap #(
 		end
 	end
 
-	assign wclk = ts_clk;
+	assign wclk = clk;
 endmodule

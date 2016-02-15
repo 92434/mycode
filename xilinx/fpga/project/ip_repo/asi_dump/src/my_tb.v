@@ -24,15 +24,15 @@ module tb #(
 
 	reg S_AXI_ARESETN = 0;
 
-	wire ts_clk;
 	reg ts_valid = 0;
 	reg ts_sync = 0;
 	reg [MPEG_DATA_WIDTH - 1 : 0] ts_data = 0;
 
-	clkgen #(.clk_period(2)) xiaofeiclk2(.clk(ts_clk));
-
 	reg [C_M00_AXIS_TDATA_WIDTH-1 : 0] send_valid = 0;
-	always @(posedge ts_clk) begin
+
+	clkgen #(.clk_period(2)) xiaofeiclk2(.clk(clk));
+
+	always @(posedge clk) begin
 		if((send_valid >= 0) && (send_valid < 3)) begin
 			send_valid <= send_valid + 1;
 		end
@@ -43,7 +43,7 @@ module tb #(
 
 	//send ts
 	reg [C_M00_AXIS_TDATA_WIDTH-1 : 0] ts_index = 0;
-	always @(posedge ts_clk) begin
+	always @(posedge clk) begin
 		if(S_AXI_ARESETN == 0) begin
 			ts_data <= 0;
 			ts_valid <= 0;
@@ -51,21 +51,29 @@ module tb #(
 			ts_index <= 0;
 		end
 		else begin
+			ts_valid <= 0;
+			ts_sync <= 0;
 			if((ts_index >= 0) && (ts_index < MPEG_LENGTH)) begin
 				if((send_valid == 3)) begin
 					ts_valid <= 1;
 
-					ts_data <= {2'b11, mpeg_in[ts_index]};
+					if((ts_index % 3) == 0) begin
+						ts_data <= {2'b11, mpeg_in[ts_index]};
+					end
+					else if((ts_index % 3) == 1)begin
+						ts_data <= {10'b0011111010};
+					end
+					else begin
+						ts_data <= {10'b1100000101};
+					end
 					if((ts_index % PACK_BYTE_SIZE) == 0) begin
 						ts_sync <= 1;
 					end
 					else begin
-						ts_sync <= 0;
 					end
 					ts_index <= ts_index + 1;
 				end
 				else begin
-					ts_valid <= 0;
 				end
 			end
 			else begin
@@ -103,7 +111,8 @@ module tb #(
 		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
 		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
 	) asi_dump_wrap_inst (
-		.ts_clk(ts_valid),
+		.clk(clk),
+		.ce(ts_valid),
 		.ts_data(ts_data),
 
 		.r_ready(r_ready),

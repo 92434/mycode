@@ -27,6 +27,11 @@ module ts2asi #(
 		parameter integer FIFO_DATA_WIDTH = 9
 	)
 	(
+		output wire ts2_clk,
+		output wire ts2_valid,
+		output wire ts2_sync,
+		output wire [7:0] ts2_data,
+
 		// Inputs
 		input wire rst_n, //Synchronous reset
 		input wire clk, //half-bit rate clock, 
@@ -109,6 +114,11 @@ module ts2asi #(
 		end
 	end
 
+	assign ts2_clk = clk;
+	assign ts2_valid = (r_enable_R == 1) ? 1 : 0;
+	assign ts2_sync = 0;
+	assign ts2_data = rdata[7 : 0];
+
 	my_fifo #(
 			.DATA_WIDTH(FIFO_DATA_WIDTH),
 			.BULK_OF_DATA(1)
@@ -140,10 +150,11 @@ module ts2asi #(
 		.valid(),
 		.code_err());
 
+	assign sout_data = data_enc10b;
 
 	// Instantiate the 10:1 serializer
 	serializer_10b1b asi_serializer(
-		.sout_data(sout_data),
+		//.sout_data(sout_data),
 		.start(start),
 		.sclk_0(clk),
 		.sclk_180(~clk),

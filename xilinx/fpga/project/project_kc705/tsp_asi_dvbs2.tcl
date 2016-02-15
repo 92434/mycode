@@ -244,9 +244,11 @@ proc create_root_design { parentCell } {
 
   # Create instance: tsp_dump_0, and set properties
   set tsp_dump_0 [ create_bd_cell -type ip -vlnv xiaofei:user:tsp_dump:1.0 tsp_dump_0 ]
+  set_property -dict [ list CONFIG.C_M00_AXIS_START_COUNT {1}  ] $tsp_dump_0
 
   # Create instance: tsp_dump_1, and set properties
   set tsp_dump_1 [ create_bd_cell -type ip -vlnv xiaofei:user:tsp_dump:1.0 tsp_dump_1 ]
+  set_property -dict [ list CONFIG.C_M00_AXIS_START_COUNT {1}  ] $tsp_dump_1
 
   # Create instance: xlconcat_0, and set properties
   set xlconcat_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_0 ]
@@ -306,10 +308,10 @@ proc create_root_design { parentCell } {
   connect_bd_net -net axi_dma_2_s2mm_introut [get_bd_pins axi_dma_2/s2mm_introut] [get_bd_pins xlconcat_0/In5]
   connect_bd_net -net axi_dma_3_mm2s_introut [get_bd_pins axi_dma_3/mm2s_introut] [get_bd_pins xlconcat_0/In6]
   connect_bd_net -net axi_dma_3_s2mm_introut [get_bd_pins axi_dma_3/s2mm_introut] [get_bd_pins xlconcat_0/In7]
-  connect_bd_net -net axi_pcie_0_axi_aclk_out [get_bd_pins asi_dump_0/m00_axis_aclk] [get_bd_pins axi4_tsp_0/s00_axi_aclk] [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_dma_0/m_axi_s2mm_aclk] [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins axi_dma_1/m_axi_mm2s_aclk] [get_bd_pins axi_dma_1/m_axi_s2mm_aclk] [get_bd_pins axi_dma_1/s_axi_lite_aclk] [get_bd_pins axi_dma_2/m_axi_mm2s_aclk] [get_bd_pins axi_dma_2/m_axi_s2mm_aclk] [get_bd_pins axi_dma_2/s_axi_lite_aclk] [get_bd_pins axi_dma_3/m_axi_mm2s_aclk] [get_bd_pins axi_dma_3/m_axi_s2mm_aclk] [get_bd_pins axi_dma_3/s_axi_lite_aclk] [get_bd_pins axi_gpio_0/s_axi_aclk] [get_bd_pins axi_gpio_1/s_axi_aclk] [get_bd_pins axi_gpio_2/s_axi_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/M02_ACLK] [get_bd_pins axi_interconnect_0/M03_ACLK] [get_bd_pins axi_interconnect_0/M04_ACLK] [get_bd_pins axi_interconnect_0/M05_ACLK] [get_bd_pins axi_interconnect_0/M06_ACLK] [get_bd_pins axi_interconnect_0/M07_ACLK] [get_bd_pins axi_interconnect_0/M08_ACLK] [get_bd_pins axi_interconnect_0/M09_ACLK] [get_bd_pins axi_interconnect_0/M10_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_interconnect_0/S01_ACLK] [get_bd_pins axi_interconnect_0/S02_ACLK] [get_bd_pins axi_interconnect_0/S03_ACLK] [get_bd_pins axi_interconnect_0/S04_ACLK] [get_bd_pins axi_interconnect_0/S05_ACLK] [get_bd_pins axi_interconnect_0/S06_ACLK] [get_bd_pins axi_interconnect_0/S07_ACLK] [get_bd_pins axi_interconnect_0/S08_ACLK] [get_bd_pins axi_pcie_0/axi_aclk_out] [get_bd_pins intr_hub_0/clk] [get_bd_pins kc705_dvb_s2_0/s00_axi_aclk] [get_bd_pins kc705_dvb_s2_0/sys_clk] [get_bd_pins kc705_i2s_receiver_0/m00_axis_aclk] [get_bd_pins kc705_pcie_ext_0/pcie_clk_125MHz] [get_bd_pins kc705_ts2asi_0/clk] [get_bd_pins myip_i2s_sender_0/clk] [get_bd_pins tsp_dump_0/m00_axis_aclk] [get_bd_pins tsp_dump_1/m00_axis_aclk]
+  connect_bd_net -net axi_pcie_0_axi_aclk_out [get_bd_pins asi_dump_0/m00_axis_aclk] [get_bd_pins axi4_tsp_0/s00_axi_aclk] [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_dma_0/m_axi_s2mm_aclk] [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins axi_dma_1/m_axi_mm2s_aclk] [get_bd_pins axi_dma_1/m_axi_s2mm_aclk] [get_bd_pins axi_dma_1/s_axi_lite_aclk] [get_bd_pins axi_dma_2/m_axi_mm2s_aclk] [get_bd_pins axi_dma_2/m_axi_s2mm_aclk] [get_bd_pins axi_dma_2/s_axi_lite_aclk] [get_bd_pins axi_dma_3/m_axi_mm2s_aclk] [get_bd_pins axi_dma_3/m_axi_s2mm_aclk] [get_bd_pins axi_dma_3/s_axi_lite_aclk] [get_bd_pins axi_gpio_0/s_axi_aclk] [get_bd_pins axi_gpio_1/s_axi_aclk] [get_bd_pins axi_gpio_2/s_axi_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/M02_ACLK] [get_bd_pins axi_interconnect_0/M03_ACLK] [get_bd_pins axi_interconnect_0/M04_ACLK] [get_bd_pins axi_interconnect_0/M05_ACLK] [get_bd_pins axi_interconnect_0/M06_ACLK] [get_bd_pins axi_interconnect_0/M07_ACLK] [get_bd_pins axi_interconnect_0/M08_ACLK] [get_bd_pins axi_interconnect_0/M09_ACLK] [get_bd_pins axi_interconnect_0/M10_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_interconnect_0/S01_ACLK] [get_bd_pins axi_interconnect_0/S02_ACLK] [get_bd_pins axi_interconnect_0/S03_ACLK] [get_bd_pins axi_interconnect_0/S04_ACLK] [get_bd_pins axi_interconnect_0/S05_ACLK] [get_bd_pins axi_interconnect_0/S06_ACLK] [get_bd_pins axi_interconnect_0/S07_ACLK] [get_bd_pins axi_interconnect_0/S08_ACLK] [get_bd_pins axi_pcie_0/axi_aclk_out] [get_bd_pins intr_hub_0/clk] [get_bd_pins kc705_dvb_s2_0/s00_axi_aclk] [get_bd_pins kc705_dvb_s2_0/sys_clk] [get_bd_pins kc705_i2s_receiver_0/m00_axis_aclk] [get_bd_pins kc705_pcie_ext_0/pcie_clk_125MHz] [get_bd_pins myip_i2s_sender_0/clk] [get_bd_pins tsp_dump_0/m00_axis_aclk] [get_bd_pins tsp_dump_1/m00_axis_aclk]
   connect_bd_net -net axi_pcie_0_axi_ctl_aclk_out [get_bd_pins axi_interconnect_0/M01_ACLK] [get_bd_pins axi_pcie_0/axi_ctl_aclk_out]
   connect_bd_net -net axi_pcie_0_mmcm_lock [get_bd_pins axi_pcie_0/mmcm_lock] [get_bd_pins kc705_pcie_ext_0/pcie_mmcm_locked]
-  connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_ports clk_out1] [get_bd_pins clk_wiz_0/clk_out1]
+  connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_ports clk_out1] [get_bd_pins asi_dump_0/clk] [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins kc705_ts2asi_0/clk]
   connect_bd_net -net clk_wiz_0_clk_out2 [get_bd_ports clk_out2] [get_bd_pins clk_wiz_0/clk_out2]
   connect_bd_net -net clk_wiz_0_clk_out3 [get_bd_ports clk_out3] [get_bd_pins clk_wiz_0/clk_out3]
   connect_bd_net -net intr_hub_0_int_o [get_bd_pins axi_pcie_0/INTX_MSI_Request] [get_bd_pins intr_hub_0/int_o]
@@ -321,16 +323,20 @@ proc create_root_design { parentCell } {
   connect_bd_net -net kc705_pcie_ext_0_pcie_refclk_100MHz [get_bd_pins axi_pcie_0/REFCLK] [get_bd_pins clk_wiz_0/clk_in1] [get_bd_pins kc705_pcie_ext_0/pcie_refclk_100MHz] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
   connect_bd_net -net kc705_ts2asi_0_asi_out_n [get_bd_ports asi_out_n] [get_bd_pins kc705_ts2asi_0/asi_out_n]
   connect_bd_net -net kc705_ts2asi_0_asi_out_p [get_bd_ports asi_out_p] [get_bd_pins kc705_ts2asi_0/asi_out_p]
-  connect_bd_net -net kc705_ts2asi_0_ce_R [get_bd_pins asi_dump_0/ts_clk] [get_bd_pins kc705_ts2asi_0/ce_R]
+  connect_bd_net -net kc705_ts2asi_0_ce_R [get_bd_pins asi_dump_0/ce] [get_bd_pins kc705_ts2asi_0/ce_R]
   connect_bd_net -net kc705_ts2asi_0_sout_data [get_bd_pins asi_dump_0/ts_data] [get_bd_pins kc705_ts2asi_0/sout_data]
+  connect_bd_net -net kc705_ts2asi_0_ts2_clk [get_bd_pins kc705_ts2asi_0/ts2_clk] [get_bd_pins tsp_dump_1/ts_clk]
+  connect_bd_net -net kc705_ts2asi_0_ts2_data [get_bd_pins kc705_ts2asi_0/ts2_data] [get_bd_pins tsp_dump_1/ts_data]
+  connect_bd_net -net kc705_ts2asi_0_ts2_sync [get_bd_pins kc705_ts2asi_0/ts2_sync] [get_bd_pins tsp_dump_1/ts_sync]
+  connect_bd_net -net kc705_ts2asi_0_ts2_valid [get_bd_pins kc705_ts2asi_0/ts2_valid] [get_bd_pins tsp_dump_1/ts_valid]
   connect_bd_net -net kc705_ts2asi_0_ts_clk [get_bd_pins kc705_dvb_s2_0/ts_clk_h264out] [get_bd_pins kc705_ts2asi_0/ts_clk]
   connect_bd_net -net kc705_ts2asi_0_ts_data [get_bd_pins kc705_dvb_s2_0/ts_din_h264out] [get_bd_pins kc705_ts2asi_0/ts_data]
   connect_bd_net -net kc705_ts2asi_0_ts_sync [get_bd_pins kc705_dvb_s2_0/ts_syn_h264out] [get_bd_pins kc705_ts2asi_0/ts_sync]
   connect_bd_net -net kc705_ts2asi_0_ts_valid [get_bd_pins kc705_dvb_s2_0/ts_valid_h264out] [get_bd_pins kc705_ts2asi_0/ts_valid]
-  connect_bd_net -net mpeg_clk_1 [get_bd_ports mpeg_clk] [get_bd_pins axi4_tsp_0/mpeg_clk] [get_bd_pins tsp_dump_1/ts_clk]
-  connect_bd_net -net mpeg_data_1 [get_bd_ports mpeg_data] [get_bd_pins axi4_tsp_0/mpeg_data] [get_bd_pins tsp_dump_1/ts_data]
-  connect_bd_net -net mpeg_sync_1 [get_bd_ports mpeg_sync] [get_bd_pins axi4_tsp_0/mpeg_sync] [get_bd_pins tsp_dump_1/ts_sync]
-  connect_bd_net -net mpeg_valid_1 [get_bd_ports mpeg_valid] [get_bd_pins axi4_tsp_0/mpeg_valid] [get_bd_pins tsp_dump_1/ts_valid]
+  connect_bd_net -net mpeg_clk_1 [get_bd_ports mpeg_clk] [get_bd_pins axi4_tsp_0/mpeg_clk]
+  connect_bd_net -net mpeg_data_1 [get_bd_ports mpeg_data] [get_bd_pins axi4_tsp_0/mpeg_data]
+  connect_bd_net -net mpeg_sync_1 [get_bd_ports mpeg_sync] [get_bd_pins axi4_tsp_0/mpeg_sync]
+  connect_bd_net -net mpeg_valid_1 [get_bd_ports mpeg_valid] [get_bd_pins axi4_tsp_0/mpeg_valid]
   connect_bd_net -net myip_i2s_sender_0_i2s_sender_bclk [get_bd_pins kc705_i2s_receiver_0/bclk] [get_bd_pins myip_i2s_sender_0/i2s_sender_bclk]
   connect_bd_net -net myip_i2s_sender_0_i2s_sender_lrclk [get_bd_pins kc705_i2s_receiver_0/lrclk] [get_bd_pins myip_i2s_sender_0/i2s_sender_lrclk]
   connect_bd_net -net myip_i2s_sender_0_i2s_sender_sdata [get_bd_pins kc705_i2s_receiver_0/sdata] [get_bd_pins myip_i2s_sender_0/i2s_sender_sdata]

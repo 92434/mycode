@@ -4,7 +4,8 @@ connect_hw_server
 open_hw_target [lindex [get_hw_targets -of_objects [get_hw_servers localhost]] 0]
 
 #set bitstream_file /home/action/vivadoworkspace/kc705/kc705.runs/impl_1/design_1_wrapper.bit
-set bitstream_file /home/action/vivadoworkspace/csa/csa.runs/impl_1/design_1_wrapper.bit
+#set bitstream_file /home/action/vivadoworkspace/csa/csa.runs/impl_1/design_1_wrapper.bit
+set bitstream_file /home/action/vivadoworkspace/tsp_asi_dvbs2/tsp_asi_dvbs2.runs/impl_1/design_1_wrapper.bit
 
 set mcs_file /home/action/vivadoworkspace/kc705.mcs
 if {![file exists $mcs_file]} {

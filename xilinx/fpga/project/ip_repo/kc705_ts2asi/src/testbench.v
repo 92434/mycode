@@ -100,9 +100,19 @@ module testbench #(
 		end
 	end
 	
+	wire ts2_clk;
+	wire ts2_valid;
+	wire ts2_sync;
+	wire [7:0] ts2_data;
+
 	ts2asi #(
 			.FIFO_DATA_WIDTH(9)
 		) ts2asi_inst (
+			.ts2_clk(ts2_clk),
+			.ts2_valid(ts2_valid),
+			.ts2_sync(ts2_sync),
+			.ts2_data(ts2_data),
+
 			.rst_n(rst_n),
 			.clk(clk),
 
