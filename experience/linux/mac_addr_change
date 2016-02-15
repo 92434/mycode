@@ -1,0 +1,3 @@
+1）编辑“/etc/network/interfaces”文件（sudo gedit /etc/network/interfaces）
+
+2）在此配置文件中找到“iface eth0 inet static”行，在其后面加上“hwaddress ether AA:BB:CC:DD:EE:FF”，如何没有这一行，则自己手动完整添加

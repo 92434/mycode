@@ -1,0 +1,363 @@
+ 来公司上班现在已经整整一个月了，蔽人不才，能力有限，学习进度缓慢，不过也是有一点点的收获与心得，在这里写出来与大家分享，养成良好的记录习惯也免得后忘记。
+
+   不啰嗦了，开入正题。来公司一个月左右的时间，主要接触了高通android4.0和android2.3的LCD驱动，当然在bootloader下LCD的驱动我也调试的。
+
+ 
+
+   (1) kernel
+
+   先来说一下kernel里LCD的移植，之前从来没有接触过LINUX里LCD的驱动，所以刚一开始我竟然连MIPI接口、LCDC接口这些最基本的都不知道，鄙视一下我自己，呵呵。感觉android2.3和android4.0在kernel里LCD驱动上的区别不是特别大。只是android2.3里多了一个late_display.c这个文件，背光和MDP的开关以及屏的初始化都是在这个文件里调用的。
+
+       因为高通给的codebase本身包含有一些LCD芯片的驱动，我在2.3上用的是MIPI接口的，是根据truly的例子来做的。在2.3上我们使用的是MIPI CMD模式，从truly的例子移植的时候代码的大体结构不需要改动，一般只是需要针对要更改的屏的文档作一些参数与配置的修改就可以了。我是照着truly的在/kernel/drivers/video/msm下创建mipi_hx8369a.cMipi_hx8369a_cmd_wvga_pt.c这两个文件，从truly的例子中把内容拷过来，把名字全改成hx8369a，的mipi_hx8369a.c里面，主要就是GPIO_HX8369A_LCD_RESET的宏，根据原理图来定义正确的RESET管脚，然后还有mipi_hx8369a_lcd_reset()里LCD初始化之前reset的时序要根据lcd芯片的spec来，初始化之前的reset对lcd非常重要;最后就是根据FAE给的初始化指令填好初始化数组。
+
+          在Mipi_hx8369a_cmd_wvga_pt.c文件里有一些要传到frame_buffer中去的一些参数，这些参数与所选用的显示屏有关，在这里把最主要的一些列出来：
+
+  
+[cpp] view plaincopy
+
+    pinfo.xres = 480;   // LCD的x方向宽度  
+    pinfo.yres = 800;   // LCD的y方向高度  
+    pinfo.type = MIPI_CMD_PANEL;  // LCD接口是哪种类型，如MIPI_VIDEO_PANEL,LCDC_PANEL  
+    pinfo.pdest = DISPLAY_1;// 应该是系统中的第几个屏（我自己猜测的）  
+    pinfo.bpp = 24;//每个像素的bit位数，即是多少位色  
+    //下面几个porch值可以从FAE要到  
+    pinfo.lcdc.h_back_porch = 16;  
+    pinfo.lcdc.h_front_porch = 16;  
+    pinfo.lcdc.h_pulse_width = 16;  
+    pinfo.lcdc.v_back_porch = 4;  
+    pinfo.lcdc.v_front_porch = 4;  
+    pinfo.lcdc.v_pulse_width = 4;  
+    pinfo.bl_max = 32;  //背光的最大和最小等级  
+    pinfo.bl_min = 1;  
+    pinfo.fb_num = 2;// 显存的个数  
+    pinfo.clk_rate = 349000000;//LCD的p_clock时种频率，要与Modem里的值对应起来  
+    pinfo.mipi.mode = DSI_CMD_MODE;  
+    //mipi接口的模式  
+    pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;  //RGB的格式  
+    pinfo.mipi.rgb_swap = DSI_RGB_SWAP_RGB; //RGB的排序  
+    pinfo.mipi.data_lane0 = TRUE;   //是否使用MIPI的第一个通道  
+    pinfo.mipi.data_lane1 = TRUE;   //是否使用MIPI的第二个通道  
+
+   其它的一些参数我还没弄清是什么意思，不明白就照着别的例子抄来吧。
+   由于android2.3里有一个late_display.c的函数，这个函数用来控制背光、MDP的开关以及打开屏的时候调用mipi_hx8369a.c和Mipi_hx8369a_cmd_wvga_pt.c中的初始化函数mipi_hx8369a_lcd_late_init()和mipi_cmd_hx8369a_wvga_pt_late_init()。所以late_display.c里把变量gpio_backlight_en的值改为当前使用的背光控制管脚。函数mipi_hx8369a_lcd_late_init()和mipi_cmd_hx8369a_wvga_pt_late_init()是在late_display_ioctl()里调用，在上层打开LCD设备的时候会来设用这两个函数来初始化LCD设备。
+
+   下面就是要改board文件了，在board文件里会给LCD分配显存，这里会有一个宏MSM_FB_SIZE，通过计算后填一个有余量的值便好。然后就是在board文件里添加设备以及设备相关的一些资源，也可以参考别的芯片的例子来。定义
+[cpp] view plaincopy
+
+    static struct msm_panel_common_pdata mipi_pdata = {  
+                .gpio = GPIO_BACKLIGHT_EN,  
+                }；  
+
+   这里定义了控制背光的GPIO管脚，如果背光控制管脚使用的是PMIC的一个GPIO来控制，使用的方法也不一样，在下一篇4.0的LCD移植中会写这种方式。还要定义一个platform_device，
+[cpp] view plaincopy
+
+    static struct platform_device mipi_dsi_panel_device = {  
+         .name = "mipi_hx8369a",  
+         .id = 0,  
+         .dev    = {  
+                 .platform_data = &mipi_pdata,  
+                 }  
+          };  
+
+   这里name要与mipi_hx8369a.c里的platform_driver里的名字一样，id要选择0，因为mipi_hx8369a.c里还会分配一个platform_device，它的name和这个一样，所以mipi_hx8369a.c里的probe函数会被调用两次，第一次与board里的platform_devices匹配，目的是为了将背光的管脚号传递给驱动（因为我这里使用了late_display.c里的变量，而且背光控制是在late_display.c里，所以这里的管脚号也不重要了）。
+
+   最后再把结构体mipi_dsi_panel_device加到board文件里添加设备的数组中，当系统启动时统一向内核中注册设备。
+
+ 
+
+   kernel里驱动文件添加和修改就基本完成了，然后就是要在/kernel/driver/video/msm里修改Kconfig和Makefile文件.
+
+   在Makefile里，添加
+[cpp] view plaincopy
+
+    obj-$(CONFIG_FB_MSM_MIPI_DSI_HX8369A) += mipi_hx8369a.o  
+    obj-$(CONFIG_FB_MSM_MIPI_HX8369A_CMD_WVGA_PT) += mipi_hx8369a_cmd_wvga_pt.o  
+
+   在Kconfig里，添加
+[cpp] view plaincopy
+
+    config FB_MSM_MIPI_HX8369A_CMD_WVGA_PT_PANEL  
+          bool "MIPI Yassy Command WVGA PT Panel"  
+          select FB_MSM_MIPI_HX8369A_CMD_WVGA_PT  
+            
+    config FB_MSM_MIPI_HX8369A_CMD_WVGA_PT  
+          bool  
+          select FB_MSM_MIPI_DSI_HX8369A  
+          default n  
+
+         但有一点要注意的是，config FB_MSM_MIPI_HX8369A_CMD_WVGA_PT_PANEL这个的位置要放在choice包含的里面，具体可以参考truly的例子的位置。
+
+   最后，运行make kernelconfig，在里面选中FB_MSM_MIPI_HX8369A_CMD_WVGA_PT_PANEL和FB_MSM_MIPI_HX8369A_CMD_WVGA_PT，
+然后在/kernel/arch/arm/configs下找到与工程相关的配置文件，在里面可以找到选中的配置，在编绎的时候，根据这个成.config文件，在out/target/product/$(Projec)/obj/KERNEL_OBJ,在这里也可以查到最后选中的配置。
+
+  
+
+   (2) bootloader
+
+   我每次都是先移植kernel里的LCD驱动，因为我觉得kernel里的代码要相对集中一些，而且就算是代码弄的有问题，也不会造成手机找不到端口而下不了程序，而且kernel里的LOG要容易抓一些，bootloader里还得接个串口，太麻烦。然后就是有了kernel里驱动，bootloader里的LCD也要简单一些了，毕竟有了一些经验了。
+
+ 
+
+   在bootloader里移植LCD有一点需要特别注意，就是/bootable/bootloader/lk/platform/msm_shared/splash.h这个文件，如果高通的codebase是Lcdc接口的，而你要改为mipi接口的话，这个文件一定要注意更换，否则会造成手机找不到端口而直接挂掉。蔽人不才，由于这个原因烧坏了手机不下十次，鄙视一下在这里，哈哈。更换了splash.h后还要注释掉/vendor/qcom/opensource/qrdplus/QRDExtensions/DynamicComponents/res/Splash_QRD/Android.mk这个文件下的
+[cpp] view plaincopy
+
+    ifeq ($(strip $(QRDExt_Splash)),cu)  
+          $(shell cp $(LOCAL_PATH)/splash_cu.h bootable/bootloader/lk/platform/msm_shared/include/splash.h)  
+    else  
+          $(shell cp $(LOCAL_PATH)/splash_qrd.h bootable/bootloader/lk/platform/msm_shared/include/splash.h)  
+    endif  
+
+这几句，否则在你编译的时候，你改过的splash.h会被更改回去。
+
+ 
+
+   步入正题吧，该说说bootloader里移植lcd驱动了。高通的bootloader使用的是一个叫lk(little kernel)的bootloader，在lk里也有不少高通提供的示例代码，我一般也是参考truly的来改，同样的，代码的大体结构都不需要更改。首先要在目录/bootable/bootloader/lk/target/$(Projec)下更改lcd的makefile文件rules.mk，由于我们的手机是从nand flash启动，所以要改的都在NDND启下的方式下改。在rules.mk下添加：
+[cpp] view plaincopy
+
+    DEFINES += DISPLAY_MIPI_CMD_PANEL_HX8369A=1  
+
+   代码的主要流程基本上可以根着codebase里truly的来照着填，这里简单的列一下：
+[cpp] view plaincopy
+
+    void kmain()(/bootable/bootloader/lk/kernel/main.c)  
+       ->    thread_resume (thread_create("bootstrap2", &bootstrap2, NULL, DEFAULT_PRIORITY, DEFAULT_STACK_SIZE));  
+          -> bootstrap2  
+             ->  target_init(); (bootable\bootloader\lk\target\$(project)\Init.c)  
+                ->/*这里是bootloader里按键的驱动*/  
+                    #if (!ENABLE_NANDWRITE)  
+                    keys_init();  
+                    keypad_init();  
+                    #endif  
+      
+                    /* 下面的就是与屏相关的函数，下面来一个一个的分析*/  
+                     #if DISPLAY_SPLASH_SCREEN  
+                      display_init();  
+                      dprintf(SPEW, "Diplay initialized\n");  
+                      display_image_on_screen();  
+                      mdelay(50);  
+                      //turn on backlight  
+                      gpio_set(I300_PANEL_BACKLIGHT, 1);        /*打开LCD背光*/  
+                      #endif  
+
+
+[cpp] view plaincopy
+
+    display_init()  (/bootable/bootloader/lk/platform/msm7627a/platform.c)  
+       ->panel_dsi_init()/*主要是初始化LCD相关的管脚，如reset和backlight*/  
+       ->mipi_init()(/bootable/bootloader/lk/platform/msm_shared/mipi_dsi.c)  
+          ->struct mipi_dsi_panel_config *panel_info = get_panel_info()  
+             ->  return &hx8369a_cmd_panel_info;/*结构体hx8369a_cmd_panel_info里是一些与LCD相关的参数，可参考kernel里填写，但有一点要注意，就是这里面有lcd芯片的初始化参数，它有特定的格式，第一个是参数个数，接着三是固定值，剩下的才是初始化参数，而且所有这些必须是4的整数倍，若不够则补0xff*/  
+          ->mipi_dsi_phy_init() (/bootable/bootloader/lk/target/$(project)/panel.c)/*设置mipi接口相关的一些寄存器*/  
+          ->status += mipi_dsi_panel_initialize(panel_info);  
+             ->  status = mipi_dsi_cmds_tx(pinfo->panel_cmds, pinfo->num_of_panel_cmds);/*这里对LCD进行初始化，然后屏里写初始化参数*/  
+          -> mipi_fb_cfg.base = MIPI_FB_ADDR;    /*DMA地址*/  
+          -> cmd_mode_status = 1;/*标记为cmd模式*/  
+
+[cpp] view plaincopy
+
+    display_image_on_screen()   (/bootable/bootloader/lk/dev/fbcon/fbcon.c)  
+       -> for (i = 0; i < SPLASH_IMAGE_WIDTH_HDPI; i++)   /*向DMA地址写数据*/  
+          {  
+             memcpy (config->base + ((image_base_hdpi + (i * (config->width))) * bytes_per_bpp),  
+             imageBuffer_rgb888 + (i * SPLASH_IMAGE_HEIGHT_HDPI * bytes_per_bpp),  
+             SPLASH_IMAGE_HEIGHT_HDPI * bytes_per_bpp);  
+          }  
+       -> fbcon_flush();  
+       -> if(is_cmd_mode_enabled()) /*如果是CMD模式，就启动MDA，往LCD里送显示数据*/  
+          -> mipi_dsi_cmd_mode_trigger();  
+
+
+      到这里lk里LCD移植也写完了，如果认为有问题的地方，欢迎提出来。下一篇再写4.0里LCD的移植，4.0里使用的是LCDC的接口。
+
+
+高通安卓调试LCD几方面总结（二）
+
+        最近工作太忙了，而且经常出差，所以有一个多月没有来得及更新博客了，唉，之前一个项目LCD也遇到几个棘手的问题，压力山大。
+
+   闲话少说，直接进入正题了，在上一篇里写了高通平台android2.3里的kernel和bootloader(LK)里LCD驱动的移植，这一篇主要写一下在4.0里LCD驱动的移植。
+
+  
+
+   (1) kernel
+
+   高通的android4.0和2.3在kernel里的LCD驱动是有区别的，主要在于4.0里少了latedisplay.c这个文件。这里我以renesas公司的r61408这颗IC来介绍。我使用的是RGB565的接口，由于kernel里有高通公司提供的其它家IC的代码，我同样是以truly的来作为参考的，代码的框架不变。首先就是在kernel\drivers\video\msm下以truly的代码为模板，创建一个名为lcdc_r61408.c的文件，文件里的内容照着truly的来做。
+
+   这里先来把Makefile和Kconfig文件修改好。在kernel\drivers\video\msm文件夹下的Makefile里添加：
+
+         
+[cpp] view plaincopy
+
+    obj-$(CONFIG_FB_MSM_LCDC_RENESAS_R61408) += lcdc_renesas_r61408.o  
+
+   在此目录下打开Kconfig文件，在里面添加：
+
+  
+[cpp] view plaincopy
+
+     config FB_MSM_LCDC_RENESAS_R61408  
+      bool  
+      select FB_MSM_LCDC_PANEL  
+      default n  
+      
+    config FB_MSM_LCDC_RENESAS_R61408_PT_PANEL  
+      depends on FB_MSM_LCDC_HW  
+      bool "LCDC Renesas PT Panel"  
+      select FB_MSM_LCDC_RENESAS_R61408  
+      default n  
+      ---help---  
+      Support for LCDC Renesas PT panel  
+
+   还要在kernel\arch\arm\configs目录下的board config文件里添加：
+[cpp] view plaincopy
+
+    CONFIG_FB_MSM_LCDC_RENESAS_R61408_PT_PANEL=y  
+
+   在lcdc_r61408.c文件里主要就是要写向LCD用SPI发指令和发数据的函数，我们的这个项目里使用的是GPIO口模拟的SPI总线，所以SPI的时序一定要写正确，R61408在用SPI发指令的时候data和command是在写8bit数据前通过SDO口的高和低来判别的，但是有些LCD的IC，比如NT35510，需要在发8bit数据之前要发送R/W,H/L,D/C几个信号来区别接下来发的数据表示什么。所以一定要根据所选用的LCD的IC的spec严格的来写SPI的时序，否则有可能造成LCD的初始化都不成功。
+
+   在kernel里，LCD的驱动的调用的流程是：
+[cpp] view plaincopy
+
+    msm_fb_open()  (msm_fb.c)  
+      -> msm_fb_blank_sub(FB_BLANK_UNBLANK, info, mfd->op_enable)  
+        -> if (!mfd->panel_power_on) {  
+               ret = pdata->on(mfd->pdev); //这里的on指向的就是lcdc.c里的lcdc_on()函数  
+                    -> lcdc_on() /*这个函数里开启LCDC时钟，并且打开LCD*/  
+                  -> clk_prepare_enable(pixel_mdp_clk);  
+                     clk_prepare_enable(pixel_lcdc_clk);  
+                     if (lcdc_pdata && lcdc_pdata->lcdc_power_save)  
+                       lcdc_pdata->lcdc_power_save(1);/*函数指针，指向board-display.c里的msm_lcdc_power_save()*/  
+                     if (lcdc_pdata && lcdc_pdata->lcdc_gpio_config) /*这里lcdc_gpio_config指针是空，所以不会接着调 下一步*/  
+                           ret = lcdc_pdata->lcdc_gpio_config(1);  
+                     ret = panel_next_on(pdev);/*函数指针，指向lcdc_renesas_r61408.c里的lcdc_renesas_panel_on()函数*/  
+
+[cpp] view plaincopy
+
+    panel_next_on(pdev)  (lcdc.c)  
+      -> lcdc_renesas_panel_on() (lcdc_renesas_r61408.c)  
+        -> renesas_disp_reginit()    /*初始化LCD的寄存器*/  
+          -> renesas_spi_write_bytes() /*设用SPI写函数*/  
+
+[cpp] view plaincopy
+
+    lcdc_renesas_panel_init(void) (lcdc_renesas_r61408.c)  
+    -> platform_driver_register(&this_driver);/*注册LCD驱动，此时renesas_probe函数会调一次，主要是为了从board-display.c里获取SPI和背光各管脚的定义值*/  
+       /*设置与LCD相关的参数，具体各参数意义参考上一篇*/  
+       pinfo->xres = 480;  
+       pinfo->yres = 800;  
+       MSM_FB_SINGLE_MODE_PANEL(pinfo);  
+       pinfo->type = LCDC_PANEL;  
+       pinfo->pdest = DISPLAY_1;  
+       pinfo->wait_cycle = 0;  
+       pinfo->bpp = 16;  
+       pinfo->fb_num = 2;  
+       pinfo->clk_rate = 30720000;  
+       pinfo->bl_max = 32;  
+       pinfo->bl_min = 1;  
+       pinfo->lcdc.h_back_porch = 10;/* hsw = 8 + hbp=16 */  
+       pinfo->lcdc.h_front_porch = 150;////100  
+       pinfo->lcdc.h_pulse_width = 10;  
+       pinfo->lcdc.v_back_porch = 22;///12/* vsw=1 + vbp = 7 */  
+       pinfo->lcdc.v_front_porch = 10;  
+       pinfo->lcdc.v_pulse_width = 2;  
+       pinfo->lcdc.border_clr = 0;   /* blk */  
+       pinfo->lcdc.underflow_clr = 0xff;/* blue */  
+       pinfo->lcdc.hsync_skew = 0;  
+      
+       platform_device_register(&this_device);/*这里又注册了一个device,这个device和board-display.c里 的device是通过id来区别的，然后会再次调用renesas_probe函数*/  
+         -> msm_fb_add_device(pdev)  /*向高通的FB架构里将上面的LCD信息注册进去*/  
+
+   在关闭LCD的时候，kernel里驱动调用流程刚好是和上面反向的。
+
+   这里有一点，因为我们使用的背光是通过PMIC的一个1号脚来控制的，使用PMIC管脚产生PWM的使用方法是，在board-display.c里初始化GPIO的函数里，加上这么一句：
+[cpp] view plaincopy
+
+    pmapp_disp_backlight_init();  
+
+   然后在board-display.c里加上如下配置：
+[cpp] view plaincopy
+
+    static int lcdc_set_bl(int level)  
+    {  
+      int ret;  
+      //PRINTK("lcdc_renesas_set_bl,level = %d\r\n",level);  
+      ret = pmapp_disp_backlight_set_brightness(level);  
+      if (ret)  
+        pr_err("%s: can't set lcd backlight!\n", __func__);  
+      return ret;  
+    }  
+    static struct msm_panel_common_pdata lcdc_panel_data = {  
+      .panel_config_gpio = NULL,  
+      .pmic_backlight = lcdc_set_bl,  
+      .gpio_num   = lcdc_gpio_table,  
+    }  
+
+   最后在lcdc_renesas_r61408.c的pmic_backlight这个函数指针就可以实现背光的控制和调节。
+
+  
+
+   (2) bootloader(lk)
+
+   和上一篇一样，首先要在目录/bootable/bootloader/lk/target/$(Projec)下更改lcd的makefile文件rules.mk，在rules.mk下添加：
+[cpp] view plaincopy
+
+    DEFINES += DISPLAY_LCDC_PANEL_R61408=1  
+
+   代码的流程可以跟着truly的例子来做，这里简单的介绍一下流程：
+[cpp] view plaincopy
+
+    void kmain()(/bootable/bootloader/lk/kernel/main.c)  
+      -> thread_resume (thread_create("bootstrap2", &bootstrap2, NULL, DEFAULT_PRIORITY, DEFAULT_STACK_SIZE));  
+        -> bootstrap2  
+          -> target_init(); (bootable\bootloader\lk\target\$(project)\Init.c)  
+            -> /*这里是bootloader里按键的驱动*/  
+              #if (!ENABLE_NANDWRITE)  
+              keys_init();  
+              keypad_init();  
+              #endif  
+      
+              display_init();   /*初台化LCD驱动*/  
+              dprintf(INFO, "Diplay initialized\n");  
+               display_image_on_screen(); /*向LCD里发送图像数据*/  
+
+[cpp] view plaincopy
+
+    display_init()  (/bootable/bootloader/lk/platform/msm7627a/platform.c)  
+    /*这里lcdc_init()和panel_lcdc_init()的顺序如果调过来LCD显示就不正常，我也很奇怪，不知道是为什么*/  
+    -> fb_config = lcdc_init();  
+      -> mdp_lcdc_clock_init();/*初始化LCDC的时钟*/  
+          lcd_timing = get_lcd_timing();/*获取LCD相关的硬件设置*/  
+          fb_cfg = lcdc_init_set(lcd_timing);/*根据上面得到的设置数据来设置CPU的寄存器*/  
+      
+    -> panel_lcdc_init();    /*初始化LCD，要完成的有RESET，SPI的读写函数等等*/  
+
+   LCDC接口的LCD驱动在LK里相对MIPI的来说流程比较简单，SPI的时序参考KERNEL里的一般就没有什么问题的。
+
+ 
+
+   到这里，LCDC和MIPI的两种LCD在高通平台上的驱动也算是写完了,小弟也正处在学习的过程当中，写得不好。我再写一下在调试LCDC接口的LCD驱动时的一些心得（也是之前在网上看到的）：
+
+1）调试lcd背光,背光主要分为PMIC自带的和单独的DCDC，如果为PMIC自带的背光，一般平台厂商已经做好，直接调用接口即可，如果为单独的DCDC驱动，则需要用GPIO控制DCDC的EN端
+
+2）确认lcd的模拟电，io电是否正常
+
+3）根据lcd的分辨率，RGB／CPU／MIPI等不同的接口，配置控制寄存器接口
+
+4）根据lcd spec配置PCLK的频率，配置PCLK,VSYNC,HSYNC,DE等控制线的极性
+
+5）使用示波器测试所有clk的波形，确认频率，极性是否符合要求
+
+6）使用示波器测试data线，看是否有数据输出，bpp的设置是否正确
+
+7）如果lcd需要初始化，配置spi的接口，一般分为cpu自带的spi控制器，和gpio模拟的spi。
+
+8）根据lcd spec中的初始化代码进行lcd的初始化
+
+9）用示波器测量lcd的spi clk及数据线，确认是否正常输出
+
+10）正常情况下，此时lcd应该可以点亮。如果没有点亮，按照上述步骤1到9，逐项进行检查测试，重点检查第5项，clk的极性
+
+11）如果lcd点亮，但是花屏。则需要先确认数据格式是否正确，然后确认fb里的数据是否正常，有以下几种方法确认fb里的数据
+
+i)cat /dev/graphics/fb0 > /sdcard/fb0，然后将/sdcard/fb0 >到另一台相同分辨率及相同格式的手机上，看图片显示是否正常 ii)使用irfanview软件显示cat /dev/graphics/fb0出来的raw数据，注意要正确设置分辨率及格式，否则显示花屏 iii)如果adb连接正常，可以使用豌豆莢等软件，查看fb中的数据是否正常
+
+通过以上三种途径，如果确认fb中的数据正常显示，则很可能为lcd初始化代码的问题，或者clk极性的问题，如果fb数据不正常，则可能为lcd控制寄存器配置不正常导致
