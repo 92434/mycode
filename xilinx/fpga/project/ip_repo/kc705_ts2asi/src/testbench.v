@@ -40,9 +40,11 @@ module testbench #(
 	wire [FIFO_DATA_WIDTH - 1 : 0] din;
 	wire [FIFO_DATA_WIDTH - 1 : 0] rdata;
 	wire [FIFO_DATA_WIDTH - 1 : 0] dout;
-	wire ce_R;
+	wire ce_R1;
 	wire ce;
 	wire [4 : 0] ce_sr;
+	wire r_enable;
+	wire r_enable_R;
 	wire r_ready;
 	wire error_full;
 	wire error_empty;
@@ -131,11 +133,13 @@ module testbench #(
 			.ts_valid(ts_valid),
 			.ts_data(ts_data),
 
+			.r_enable(r_enable),
+			.r_enable_R(r_enable_R),
 			.r_ready(r_ready),
 			.error_full(error_full),
 			.error_empty(error_empty),
 
-			.ce_R(ce_R),
+			.ce_R1(ce_R1),
 			.ce(ce),
 			.ce_sr(ce_sr),
 			.start(start),
