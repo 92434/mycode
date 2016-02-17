@@ -203,6 +203,28 @@ module replacer #(
 		else begin
 			matched_state <= matched_pid;
 
+			if(matched_pid == 1) begin
+				if(base_data == 1) begin
+					ts_out <= mpeg_data_d3;
+					ts_out_valid <= (updated == 1) ? 1 : 0;
+					ts_out_sync <= (updated == 1) ? mpeg_sync_d3 : 0;
+				end
+				else begin
+					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
+						ts_out <= ram_for_data[ram_match_index / 4][(8 * (ram_match_index % 4) + 7) -: 8];
+						ts_out_valid <= 1;
+						ts_out_sync <= (matched_index == 0) ? 1 : 0;
+
+						matched_index <= matched_index + 1;
+					end
+					else begin
+						ts_out_valid <= 0;
+					end
+				end
+			end
+			else begin
+			end
+
 			if(base_data == 1) begin
 				matched_pid <= 1;
 			end
@@ -228,27 +250,6 @@ module replacer #(
 				end
 			end
 
-			if(matched_pid == 1) begin
-				if(base_data == 1) begin
-					ts_out <= mpeg_data_d3;
-					ts_out_valid <= (updated == 1) ? 1 : 0;
-					ts_out_sync <= (updated == 1) ? mpeg_sync_d3 : 0;
-				end
-				else begin
-					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
-						ts_out <= ram_for_data[ram_match_index / 4][(8 * (ram_match_index % 4) + 7) -: 8];
-						ts_out_valid <= 1;
-						ts_out_sync <= (matched_index == 0) ? 1 : 0;
-
-						matched_index <= matched_index + 1;
-					end
-					else begin
-						ts_out_valid <= 0;
-					end
-				end
-			end
-			else begin
-			end
 		end
 	end
 endmodule

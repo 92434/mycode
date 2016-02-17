@@ -165,17 +165,6 @@ module monitor #(
 			caching_ram_index <= 0;
 		end
 		else begin
-			if((mpeg_valid == 1) && (mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
-				if((match_states == 1) && (match_enable == 1)) begin
-					matched_pid <= 1;
-					matched_index <= 0;
-					caching_ram_index <= (caching_ram_index == 0) ? 1 : 0;
-				end
-				else begin
-					matched_pid <= 0;
-				end
-			end
-
 			if((mpeg_valid == 1) && (matched_pid == 1)) begin
 				if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
 					case(caching_ram_index)
@@ -194,6 +183,17 @@ module monitor #(
 				end
 			end
 			else begin
+			end
+
+			if((mpeg_valid == 1) && (mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
+				if((match_states == 1) && (match_enable == 1)) begin
+					matched_pid <= 1;
+					matched_index <= 0;
+					caching_ram_index <= (caching_ram_index == 0) ? 1 : 0;
+				end
+				else begin
+					matched_pid <= 0;
+				end
 			end
 		end
 	end

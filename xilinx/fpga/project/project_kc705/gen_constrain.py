@@ -609,17 +609,17 @@ set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[7]}]
 	print txt
 
 myip_fmc_signal = [
-	#('FMC_LPC_LA25_P', 'mpeg_clk'),
-	#('FMC_LPC_LA29_P', 'mpeg_valid'),
-	#('FMC_LPC_LA24_P', 'mpeg_data[0]'),
-	#('FMC_LPC_LA24_N', 'mpeg_data[1]'),
-	#('FMC_LPC_LA26_P', 'mpeg_data[2]'),
-	#('FMC_LPC_LA31_P', 'mpeg_data[3]'),
-	#('FMC_LPC_LA31_N', 'mpeg_data[4]'),
-	#('FMC_LPC_LA28_P', 'mpeg_data[5]'),
-	#('FMC_LPC_LA28_N', 'mpeg_data[6]'),
-	#('FMC_LPC_LA29_N', 'mpeg_data[7]'),
-	#('FMC_LPC_LA25_N', 'mpeg_sync'),
+	('FMC_LPC_LA25_P', 'mpeg_clk'),
+	('FMC_LPC_LA29_P', 'mpeg_valid'),
+	('FMC_LPC_LA24_P', 'mpeg_data[0]'),
+	('FMC_LPC_LA24_N', 'mpeg_data[1]'),
+	('FMC_LPC_LA26_P', 'mpeg_data[2]'),
+	('FMC_LPC_LA31_P', 'mpeg_data[3]'),
+	('FMC_LPC_LA31_N', 'mpeg_data[4]'),
+	('FMC_LPC_LA28_P', 'mpeg_data[5]'),
+	('FMC_LPC_LA28_N', 'mpeg_data[6]'),
+	('FMC_LPC_LA29_N', 'mpeg_data[7]'),
+	('FMC_LPC_LA25_N', 'mpeg_sync'),
 
 	#('FMC_HPC_HA23_N', 'ts_out_sync'),
 	#('FMC_HPC_HA23_P', 'slot0_out_dump_flag'),

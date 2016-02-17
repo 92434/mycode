@@ -272,20 +272,40 @@ code_table = {
 	'11110010' : ['0100110111', '0100110001'],
 }
 
+import sys
+
+def table_key_hex_str(k):
+	try:
+		hex_str = '0x%02x' %(int(k, 2))
+	except:
+		hex_str = k
+	return hex_str
+
 def replace_asi_to_hex(d, data_file):
 	data_txt = ''
 
+	table_keys = sorted(d, key = lambda x : (table_key_hex_str(x)))
+
 	with open(data_file) as f:
 		data_txt = f.read()
-	for k, l in d.items():
+	for k in table_keys:
 		try:
 			hex_str = '0x%02x' %(int(k, 2))
 		except:
 			hex_str = k
+		print >> sys.stderr, "retrieve %s" %(hex_str)
 
+		l = d.get(k, None)
 		for i in l:
 			pattern = re.compile(r'%s' %i)
 			data_txt = pattern.sub(r'%s' %(hex_str), data_txt)
+
+        print >> sys.stderr, "process ' '"
+        pattern = re.compile(r'\n')
+        data_txt = pattern.sub(r'', data_txt)
+        pattern = re.compile(r' ')
+        data_txt = pattern.sub(r'\n', data_txt)
+
 	print data_txt
 
 if __name__ == "__main__":

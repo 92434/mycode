@@ -25,6 +25,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 	loff_t offset = *off;
 	loff_t end = *off + len;
 	int idle_count = 0;
+	bool data_available = true;
 
 	//mydebug("len:%d, off:%lld\n", len, *off);
 
@@ -55,38 +56,40 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 
 		if(!dma->is_auto_receive) {
 			if(c > 0) {
-				if(put_pcie_tr(
-						dma,
-						0,
-						offset,
-						0,
-						request_c,
-						NULL,
-						NULL) < 0) {
-					mydebug("%p\n", current);
-					c = 0;
+				if(!data_available) {
+					if(put_pcie_tr(
+							dma,
+							0,
+							offset,
+							0,
+							request_c,
+							NULL,
+							NULL) < 0) {
+						mydebug("%p\n", current);
+						c = 0;
+					} else {
+						data_available = true;
+					}
 				}
 			} else {
 				c = 0;
 			}
-		} else {
-			request_c = c;
 		}
 
-		if((c > 0) && read_available(dma->list)) {
-			read_buffer(buf + ret, c, dma->list);
-			if(request_c != c) {
-				read_buffer(NULL, request_c - c, dma->list);
+		if(c > 0) {
+			if(read_available(dma->list)) {
+				c = read_buffer(buf + ret, c, dma->list);
+				ret += c;
+				offset += c;
+				idle_count = 0;
+			} else {
+				data_available = false;
+				if(idle_count++ == 10) {
+					return ret;
+				}
 			}
-			ret += c;
-			offset += c;
-			idle_count = 0;
 		} else {
 			if (filp->f_flags & O_NONBLOCK) {
-				return ret;
-			}
-
-			if(idle_count++ == 10) {
 				return ret;
 			}
 		}
