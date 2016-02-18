@@ -186,7 +186,7 @@ module monitor #(
 			end
 
 			if((mpeg_valid == 1) && (mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
-				if((match_states == 1) && (match_enable == 1)) begin
+				if((match_states != 0) && (match_enable == 1)) begin
 					matched_pid <= 1;
 					matched_index <= 0;
 					caching_ram_index <= (caching_ram_index == 0) ? 1 : 0;

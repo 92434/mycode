@@ -96,11 +96,12 @@ int test_pid_op(thread_arg_t *targ) {
 
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
-	int pid = 0x1fff;
 
 	for(i = 0; i < 2 + 16 + 1; i ++) {
 		int j;
 		int pid_slot = (i == 18) ? 16 : 1;
+		int pid = 0x0000;
+		int enable_pid = 0;
 
 		*pbuffer = i;//
 		ret = write_regs(targ, ADDR_INDEX, sizeof(uint32_t));
@@ -109,7 +110,26 @@ int test_pid_op(thread_arg_t *targ) {
 			return ret;
 		}
 
-		
+		//set pid index 0
+		switch(i) {
+			case 0:
+				pid = 0x0000;
+				enable_pid = 1;
+				break;
+			case 1:
+				pid = 0x0001;
+				enable_pid = 1;
+				break;
+			case 18:
+				pid = 0x0000;
+				enable_pid = 1;
+				break;
+			default:
+				pid = 0x0000;
+				enable_pid = 0;
+				break;
+		}
+
 		for(j = 0; j < pid_slot; j++) {
 			*pbuffer = j;//
 			ret = write_regs(targ, ADDR_PID_INDEX, sizeof(uint32_t));
@@ -117,8 +137,20 @@ int test_pid_op(thread_arg_t *targ) {
 				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 				return ret;
 			}
-
-			*pbuffer = PID_INFO(1, pid);
+			//set pid index 1---->
+			switch(j) {
+				case 0:
+					break;
+				case 1:
+					pid = 0x0001;
+					enable_pid = 1;
+					break;
+				default:
+					pid = 0x0000;
+					enable_pid = 0;
+					break;
+			}
+			*pbuffer = PID_INFO(enable_pid, pid);
 			ret = write_regs(targ, ADDR_PID, sizeof(uint32_t));
 			if (ret < 0) {
 				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -127,7 +159,7 @@ int test_pid_op(thread_arg_t *targ) {
 
 		}
 
-		*pbuffer = (i == 0 || i == 2) ? 1 : 0;//
+		*pbuffer = (i == 0 || i == 1 || i == 18) ? 1 : 0;//
 		ret = write_regs(targ, ADDR_MATCH_ENABLE, sizeof(uint32_t));
 		if (ret < 0) {
 			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -195,19 +227,20 @@ int write_ts_pack(thread_arg_t *targ, int slot) {
 				targ->buffer[i] = 0x47;
 				break;
 			case 1:
-				targ->buffer[i] = 0x1f;
+				targ->buffer[i] = 0x00;
 				break;
 			case 2:
-				targ->buffer[i] = 0xff;
+				targ->buffer[i] = 0x00;
 				break;
 			case 188:
 				targ->buffer[i] = 0x47;
+				loc += 1;
 				break;
 			case 189:
-				targ->buffer[i] = 0x1f;
+				targ->buffer[i] = 0x00;
 				break;
 			case 190:
-				targ->buffer[i] = 0xff;
+				targ->buffer[i] = 0x00;
 				break;
 			default:
 				targ->buffer[i] = loc;
