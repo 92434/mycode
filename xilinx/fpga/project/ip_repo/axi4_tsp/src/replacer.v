@@ -178,7 +178,7 @@ module replacer #(
 	genvar i;
 	generate for (i = 0; i < REPLACE_MATCH_PID_COUNT; i = i + 1)
 		begin : matcher
-			assign match_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && pid_match_enable[i]) ? 1 : 0;
+			assign match_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_match_enable[i] == 1)) ? 1 : 0;
 		end
 	endgenerate
 
@@ -188,6 +188,9 @@ module replacer #(
 	
 	wire [C_S_AXI_DATA_WIDTH-1:0] ram_match_index;
 	assign ram_match_index = (ts_out_group_index * PACK_BYTE_SIZE) + matched_index;
+
+	wire [8 - 1 : 0] cur_ram_data;
+	assign cur_ram_data = ram_for_data[ram_match_index / 4][(8 * (ram_match_index % 4) + 7) -: 8];
 
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
@@ -205,22 +208,34 @@ module replacer #(
 
 			if(matched_pid == 1) begin
 				if(base_data == 1) begin
-					ts_out <= mpeg_data_d3;
-					ts_out_valid <= (updated == 1) ? 1 : 0;
-					ts_out_sync <= (updated == 1) ? mpeg_sync_d3 : 0;
+					if(updated == 1) begin
+						ts_out <= mpeg_data_d3;
+					end
+					else begin
+					end
 				end
 				else begin
-					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
-						ts_out <= ram_for_data[ram_match_index / 4][(8 * (ram_match_index % 4) + 7) -: 8];
-						ts_out_valid <= 1;
-						ts_out_sync <= (matched_index == 0) ? 1 : 0;
-
+					if((updated == 1) && (matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
+						ts_out <= (matched_index == 3) ? {cur_ram_data[8 - 1 : 4], mpeg_data_d3[4 - 1 : 0]} : cur_ram_data;
+						
+						if(matched_index == (PACK_BYTE_SIZE - 1)) begin
+							if((ts_out_group_index >= 0) && (ts_out_group_index < REPLACE_DATA_GROUPS - 1)) begin
+								ts_out_group_index <= ts_out_group_index + 1;
+							end
+							else begin
+								ts_out_group_index <= 0;
+							end
+						end
+						else begin
+						end
 						matched_index <= matched_index + 1;
 					end
 					else begin
-						ts_out_valid <= 0;
 					end
 				end
+
+				ts_out_valid <= (updated == 1) ? 1 : 0;
+				ts_out_sync <= (updated == 1) ? mpeg_sync_d3 : 0;
 			end
 			else begin
 			end
@@ -230,17 +245,10 @@ module replacer #(
 			end
 			else begin
 				if((mpeg_valid == 1) && (mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
-					if((match_states > 0) && (match_enable == 1)) begin
+					if((match_states != 0) && (match_enable == 1)) begin
 						matched_pid <= 1;
 
 						matched_index <= 0;
-
-						if((ts_out_group_index >= 0) && (ts_out_group_index < REPLACE_DATA_GROUPS - 1)) begin
-							ts_out_group_index <= ts_out_group_index + 1;
-						end
-						else begin
-							ts_out_group_index <= 0;
-						end
 					end
 					else begin
 						matched_pid <= 0;

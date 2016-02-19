@@ -120,6 +120,14 @@ int test_pid_op(thread_arg_t *targ) {
 				pid = 0x0001;
 				enable_pid = 1;
 				break;
+			case 2:
+				pid = 0x0000;
+				enable_pid = 0;
+				break;
+			case 3:
+				pid = 0x0000;
+				enable_pid = 0;
+				break;
 			case 18:
 				pid = 0x0000;
 				enable_pid = 1;
@@ -142,8 +150,8 @@ int test_pid_op(thread_arg_t *targ) {
 				case 0:
 					break;
 				case 1:
-					pid = 0x0001;
-					enable_pid = 1;
+					pid = 0x0000;
+					enable_pid = 0;
 					break;
 				default:
 					pid = 0x0000;
@@ -159,7 +167,7 @@ int test_pid_op(thread_arg_t *targ) {
 
 		}
 
-		*pbuffer = (i == 0 || i == 1 || i == 18) ? 1 : 0;//
+		*pbuffer = (i == 0 || i == 1 || i == 18 || i == 19) ? 1 : 0;//
 		ret = write_regs(targ, ADDR_MATCH_ENABLE, sizeof(uint32_t));
 		if (ret < 0) {
 			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -210,7 +218,7 @@ int write_ts_pack(thread_arg_t *targ, int slot) {
 	int ret = 0;
 	int i;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
-	static int loc = 0xbc;
+	static int loc = 0x01;
 
 	int tx_size = (slot == 18) ? 188 * 2 : (slot >= 2 && slot < 18) ? 188 : 0;
 
@@ -240,7 +248,7 @@ int write_ts_pack(thread_arg_t *targ, int slot) {
 				targ->buffer[i] = 0x00;
 				break;
 			case 190:
-				targ->buffer[i] = 0x00;
+				targ->buffer[i] = 0x01;
 				break;
 			default:
 				targ->buffer[i] = loc;

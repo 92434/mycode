@@ -18,7 +18,8 @@
 #include <linux/spi/spi.h>
 #include <linux/spi/spi_gpio.h>
 #define MY_NAME "spidev_device"
-#define CS 160//FMC_LPC_LA19_N
+//#define CS 160//FMC_LPC_LA19_N
+#define CS 169//FMC_LPC_LA32_P
 
 #define SPI_BUS_NUM 1
 
