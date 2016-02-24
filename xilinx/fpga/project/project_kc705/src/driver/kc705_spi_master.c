@@ -22,7 +22,7 @@
 //158 : s1//FMC_LPC_LA19_P
 //160 : s2//FMC_LPC_LA19_N
 
-#define MISO 165//FMC_LPC_LA20_N
+#define MISO 166//FMC_LPC_LA20_N
 #define MOSI 172//FMC_LPC_LA23_N
 #define SCK 173//FMC_LPC_LA23_P
 #define SPI_BUS_NUM 1

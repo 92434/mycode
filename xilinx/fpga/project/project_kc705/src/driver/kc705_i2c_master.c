@@ -19,8 +19,8 @@
 #include <linux/i2c-gpio.h>
 #define MY_NAME "kc705_i2c"
 
-#define SDA0 156 //FMC_LPC_LA30_P
-#define SCL0 155 //FMC_LPC_LA30_N
+#define SDA0 157 //FMC_LPC_LA30_P
+#define SCL0 156 //FMC_LPC_LA30_N
 #define I2C_BUS_NUM (-1)
 
 static struct i2c_gpio_platform_data i2c_gpio_data = {

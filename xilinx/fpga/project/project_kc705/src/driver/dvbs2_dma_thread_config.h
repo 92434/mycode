@@ -7,9 +7,9 @@ static int dma_thread(void *ppara) {
 
 	while(!kthread_should_stop()) {
 		set_current_state(TASK_UNINTERRUPTIBLE);  
-		//schedule_timeout(msecs_to_jiffies(10)); 
+		schedule_timeout(msecs_to_jiffies(10)); 
 
-		put_pcie_tr(dma, 0, 0, 0, dma->receive_bulk_size, NULL, NULL);
+		//put_pcie_tr(dma, 0, 0, 0, dma->receive_bulk_size, NULL, NULL);
 	}
 
 	mydebug("\n");

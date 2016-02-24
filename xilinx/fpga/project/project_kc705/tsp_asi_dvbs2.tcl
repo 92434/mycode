@@ -159,6 +159,7 @@ proc create_root_design { parentCell } {
   set clk_out1 [ create_bd_port -dir O -type clk clk_out1 ]
   set clk_out2 [ create_bd_port -dir O -type clk clk_out2 ]
   set clk_out3 [ create_bd_port -dir O -type clk clk_out3 ]
+  set clk_out4 [ create_bd_port -dir O -type clk clk_out4 ]
   set mpeg_clk [ create_bd_port -dir I mpeg_clk ]
   set mpeg_data [ create_bd_port -dir I -from 7 -to 0 mpeg_data ]
   set mpeg_sync [ create_bd_port -dir I mpeg_sync ]
@@ -203,7 +204,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi_gpio_2, and set properties
   set axi_gpio_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_2 ]
-  set_property -dict [ list CONFIG.C_GPIO_WIDTH {25} CONFIG.C_IS_DUAL {0}  ] $axi_gpio_2
+  set_property -dict [ list CONFIG.C_GPIO_WIDTH {24} CONFIG.C_IS_DUAL {0}  ] $axi_gpio_2
 
   # Create instance: axi_interconnect_0, and set properties
   set axi_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0 ]
@@ -215,7 +216,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: clk_wiz_0, and set properties
   set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.1 clk_wiz_0 ]
-  set_property -dict [ list CONFIG.CLKOUT1_JITTER {117.101} CONFIG.CLKOUT1_PHASE_ERROR {142.582} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {135} CONFIG.CLKOUT2_JITTER {118.930} CONFIG.CLKOUT2_PHASE_ERROR {142.582} CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {122.88} CONFIG.CLKOUT2_USED {true} CONFIG.CLKOUT3_JITTER {118.930} CONFIG.CLKOUT3_PHASE_ERROR {142.582} CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {122.88} CONFIG.CLKOUT3_REQUESTED_PHASE {180.000} CONFIG.CLKOUT3_USED {true} CONFIG.NUM_OUT_CLKS {3} CONFIG.PRIMITIVE {MMCM}  ] $clk_wiz_0
+  set_property -dict [ list CONFIG.CLKOUT1_JITTER {117.101} CONFIG.CLKOUT1_PHASE_ERROR {142.582} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {135} CONFIG.CLKOUT2_JITTER {118.930} CONFIG.CLKOUT2_PHASE_ERROR {142.582} CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {122.88} CONFIG.CLKOUT2_USED {true} CONFIG.CLKOUT3_JITTER {118.930} CONFIG.CLKOUT3_PHASE_ERROR {142.582} CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {122.88} CONFIG.CLKOUT3_REQUESTED_PHASE {180.000} CONFIG.CLKOUT3_USED {true} CONFIG.CLKOUT4_JITTER {193.719} CONFIG.CLKOUT4_PHASE_ERROR {142.582} CONFIG.CLKOUT4_REQUESTED_OUT_FREQ {10.000} CONFIG.CLKOUT4_USED {true} CONFIG.MMCM_CLKOUT3_DIVIDE {128} CONFIG.NUM_OUT_CLKS {4} CONFIG.PRIMITIVE {MMCM}  ] $clk_wiz_0
 
   # Create instance: intr_hub_0, and set properties
   set intr_hub_0 [ create_bd_cell -type ip -vlnv xiaofei:user:intr_hub:1.0 intr_hub_0 ]
@@ -314,6 +315,7 @@ proc create_root_design { parentCell } {
   connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_ports clk_out1] [get_bd_pins asi_dump_0/clk] [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins kc705_ts2asi_0/clk]
   connect_bd_net -net clk_wiz_0_clk_out2 [get_bd_ports clk_out2] [get_bd_pins clk_wiz_0/clk_out2]
   connect_bd_net -net clk_wiz_0_clk_out3 [get_bd_ports clk_out3] [get_bd_pins clk_wiz_0/clk_out3]
+  connect_bd_net -net clk_wiz_0_clk_out4 [get_bd_ports clk_out4] [get_bd_pins clk_wiz_0/clk_out4]
   connect_bd_net -net intr_hub_0_int_o [get_bd_pins axi_pcie_0/INTX_MSI_Request] [get_bd_pins intr_hub_0/int_o]
   connect_bd_net -net kc705_dvb_s2_0_symbol_2x_im_out [get_bd_ports symbol_2x_im_out] [get_bd_pins kc705_dvb_s2_0/symbol_2x_im_out]
   connect_bd_net -net kc705_dvb_s2_0_symbol_2x_oe [get_bd_ports symbol_2x_oe] [get_bd_pins kc705_dvb_s2_0/symbol_2x_oe]

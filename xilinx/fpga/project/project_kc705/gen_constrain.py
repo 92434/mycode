@@ -663,6 +663,8 @@ myip_fmc_signal = [
 	('FMC_LPC_LA22_N', 'clk_out2'),
 	('FMC_LPC_LA21_P', 'clk_out3'),
 
+	('FMC_LPC_LA20_P', 'clk_out4'),
+
 	('FMC_LPC_LA32_N', 'asi_out_p'),
 	('FMC_LPC_LA33_N', 'asi_out_n'),
 ]
