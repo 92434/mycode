@@ -99,7 +99,7 @@
 	// ADDR_LSB = 2 for 32 bits (n downto 2)
 	// ADDR_LSB = 3 for 64 bits (n downto 3)
 	localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32) + 1;
-	localparam integer OPT_MEM_ADDR_BITS = 1;
+	localparam integer OPT_MEM_ADDR_BITS = 10;
 	//----------------------------------------------
 	//-- Signals for user logic register space example
 	//------------------------------------------------
@@ -220,7 +220,7 @@
 	  else begin
 	    if (slv_reg_wren)
 	      begin
-	        case ( axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
+	        case ( axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS - 1:ADDR_LSB] )
 	          2'h0:
 	            for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
 	              if ( S_AXI_WSTRB[byte_index] == 1 ) begin
@@ -361,7 +361,7 @@
 	always @(*)
 	begin
 	      // Address decoding for reading registers
-	      case ( axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
+	      case ( axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS - 1 :ADDR_LSB] )
 	        2'h0   : reg_data_out <= slv_reg0;
 	        2'h1   : reg_data_out <= slv_reg1;
 	        2'h2   : reg_data_out <= slv_reg2;

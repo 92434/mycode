@@ -487,11 +487,11 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>asi_dump</xilinx:displayName>
-      <xilinx:coreRevision>31</xilinx:coreRevision>
+      <xilinx:coreRevision>32</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:my_tb:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2016-02-02T09:12:43Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2016-02-27T09:49:15Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
         <xilinx:tag xilinx:name="user.org:user:my_tb:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/asi_dump</xilinx:tag>

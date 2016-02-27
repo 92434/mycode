@@ -12,18 +12,18 @@ module axi_lite_v1_0_S00_AXI #
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		// Width of S_AXI address bus
 		parameter integer C_S_AXI_ADDR_WIDTH = 3,
-		parameter integer OPT_MEM_ADDR_BITS = 0,
+		parameter integer OPT_MEM_ADDR_BITS = 10,
 		parameter integer ADDR_LSB = 2
 	)
 	(
 		// Users to add ports here
 		//output wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] wstrb,
 		output wire wen,
-		output wire [OPT_MEM_ADDR_BITS : 0] waddr,
+		output wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 		output wire [C_S_AXI_DATA_WIDTH - 1 : 0] wdata,
 
 		output wire ren,
-		output wire [OPT_MEM_ADDR_BITS : 0] raddr,
+		output wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] rdata,
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -284,10 +284,10 @@ module axi_lite_v1_0_S00_AXI #
 
  // Add user logic here
 	assign wen = slv_reg_wren;
-	assign waddr = axi_awaddr[ADDR_LSB + OPT_MEM_ADDR_BITS : ADDR_LSB];
+	assign waddr = axi_awaddr[ADDR_LSB + OPT_MEM_ADDR_BITS - 1 : ADDR_LSB];
 	assign wdata = S_AXI_WDATA;
 	assign ren = slv_reg_rden;
-	assign raddr = axi_araddr[ADDR_LSB + OPT_MEM_ADDR_BITS : ADDR_LSB];
+	assign raddr = axi_araddr[ADDR_LSB + OPT_MEM_ADDR_BITS - 1 : ADDR_LSB];
 	assign axi_rdata = rdata;
  // User logic ends
 

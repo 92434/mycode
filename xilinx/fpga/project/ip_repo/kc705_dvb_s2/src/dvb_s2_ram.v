@@ -11,11 +11,11 @@ module dvb_s2_ram #(
 		input wire [(C_S_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		input wire wen,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] wdata,
-		input wire [OPT_MEM_ADDR_BITS : 0] waddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 
 		input wire ren,
 		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] rdata,
-		input wire [OPT_MEM_ADDR_BITS : 0] raddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 
 		input wire hard_rst_n,
 
@@ -42,7 +42,7 @@ module dvb_s2_ram #(
 		output wire signed [15 : 0] symbol_2x_im_out
 	);
 
-	reg [OPT_MEM_ADDR_BITS : 0] current_write_address = 0;
+	reg [OPT_MEM_ADDR_BITS - 1 : 0] current_write_address = 0;
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] current_write_data = 0;
 	reg current_mem_wren = 0;
 
@@ -217,7 +217,7 @@ module dvb_s2_ram #(
 						rdata <= fs_en_switch;
 					end
 					default: begin
-						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS - 1){1'b0}}, raddr};
+						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};
 					end
 				endcase
 			end

@@ -27,11 +27,11 @@ module csa_ram_tb #(
 
 	reg wen = 0;//input
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] wdata = 0;//input
-	reg [OPT_MEM_ADDR_BITS : 0] waddr = 0;//input
+	reg [OPT_MEM_ADDR_BITS - 1 : 0] waddr = 0;//input
 
 	reg ren = 0;//input
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] rdata;//output
-	reg [OPT_MEM_ADDR_BITS : 0] raddr = 0;//input
+	reg [OPT_MEM_ADDR_BITS - 1 : 0] raddr = 0;//input
 
 	wire csa_calc_clk;//input --csa_calc_clk MUST NOT slower than axi_mm_clk!!!
 	assign csa_calc_clk = axi_mm_clk;

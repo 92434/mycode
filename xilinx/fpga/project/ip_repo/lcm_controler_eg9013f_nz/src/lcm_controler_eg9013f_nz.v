@@ -12,6 +12,8 @@ module lcm_controler_eg9013f_nz #(
 		input wire clk,
 		input wire rst_n,
 
+		input wire request_update,
+
 		input wire lcm_clk_event,
 		input wire lcm_clk,
 
@@ -41,9 +43,7 @@ module lcm_controler_eg9013f_nz #(
 			lcm_lp <= 0;
 			case(state)
 				0: begin
-					if((lcm_clk_event == 1) && (lcm_clk == 1)) begin//start
-						lcm_clk_enable <= 1;
-						lcm_data_index <= 0;
+					if(request_update == 1) begin
 
 						state <= 1;
 					end
@@ -51,42 +51,57 @@ module lcm_controler_eg9013f_nz #(
 					end
 				end
 				1: begin
+					if((lcm_clk_event == 1) && (lcm_clk == 1)) begin//start
+						lcm_clk_enable <= 1;
+						lcm_data_index <= 0;
+
+						state <= 2;
+					end
+					else begin
+					end
+				end
+				2: begin
 					if((lcm_clk_event == 1) && (lcm_clk == 1)) begin//wait for posedge lcm_clk
 						if((((lcm_data_index + 1) + 1) % LCM_WIDTH_BYTES) == 0) begin//write one line
 							if(((lcm_data_index + 1) + 1) == LCM_WIDTH_BYTES) begin
-								lcm_din <= 1;
+								lcm_din <= 1;//set din to 1
 							end
 							else begin
 							end
 
-							state <= 2;//delay for lp
+							state <= 3;//delay for lp
 						end
 						else begin
 						end
 
 						if((lcm_data_index >= 0) && (lcm_data_index < LCM_DATA_BYTES - 1)) begin
+							lcm_clk_enable <= 1;//enable xscl
+
 							lcm_data_index <= lcm_data_index + 1;
 						end
 						else begin
+							lcm_clk_enable <= 0;//disable xscl
 							lcm_data_index <= 0;
+
+							state <= 0;
 						end
 					end
 					else begin
 					end
 
 				end
-				2: begin
+				3: begin
 					if((lcm_clk_event == 1) && (lcm_clk == 0)) begin//wait for negedge lcm_clk
 						lcm_clk_enable <= 0;//disable xscl
 						lcm_lp <= 1;//set lcm_lp to 1
 						lp_delay_count <= 0;
 
-						state <= 3;
+						state <= 4;
 					end
 					else begin
 					end
 				end
-				3: begin//keep lp to 1
+				4: begin//keep lp to 1
 					lcm_lp <= 1;
 					if((lcm_clk_event == 1) && (lcm_clk == 1)) begin//wait for posedge lcm_clk
 						if((lp_delay_count >= 0) && (lp_delay_count < LCM_LP_DELAY - 1)) begin
@@ -95,26 +110,25 @@ module lcm_controler_eg9013f_nz #(
 						else begin
 							lp_delay_count <= 0;
 
-							state <= 4;
+							state <= 5;
 						end
 					end
 					else begin
 					end
 				end
-				4: begin//reset lcm_lp
+				5: begin//reset lcm_lp
 					if((lcm_clk_event == 1) && (lcm_clk == 0)) begin//wait for negedge lcm_clk
-						lcm_clk_enable <= 1;//enable xscl
 						
-						state <= 5;
+						state <= 6;
 					end
 					else begin
 					end
 				end
-				5: begin
+				6: begin
 					if((lcm_clk_event == 1) && (lcm_clk == 1)) begin//wait for posedge lcm_clk
-						lcm_din <= 0;
+						lcm_din <= 0;// reset din
 						
-						state <= 1;
+						state <= 2;
 					end
 					else begin
 					end

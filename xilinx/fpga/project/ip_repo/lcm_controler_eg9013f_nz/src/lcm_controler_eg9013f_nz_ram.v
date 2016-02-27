@@ -13,11 +13,11 @@ module lcm_controler_eg9013f_nz_ram #(
 		input wire [(C_S_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		input wire wen,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] wdata,
-		input wire [OPT_MEM_ADDR_BITS : 0] waddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 
 		input wire ren,
 		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] rdata,
-		input wire [OPT_MEM_ADDR_BITS : 0] raddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 
 		output wire [BYTE_WIDTH - 1 : 0] lcm_data_origin,
 		output wire lcm_din,
@@ -28,57 +28,85 @@ module lcm_controler_eg9013f_nz_ram #(
 
 	localparam integer C_S_AXI_DATA_BYTE_WIDTH = C_S_AXI_DATA_WIDTH / BYTE_WIDTH;
 
-	//localparam integer LCM_WIDTH_BITS = 640;
-	//localparam integer LCM_HEIGHT_BITS = 480;
-	localparam integer LCM_WIDTH_BITS = 32;
-	localparam integer LCM_HEIGHT_BITS = 3;
+	localparam integer REG_RANGE_DATA_WORD_SIZE = (1 << OPT_MEM_ADDR_BITS);
+
+	localparam integer LCM_WIDTH_BITS = 640;
+	localparam integer LCM_HEIGHT_BITS = 480;
 	localparam integer LCM_WIDTH_WORDS = LCM_WIDTH_BITS / C_S_AXI_DATA_WIDTH;
 	localparam integer LCM_DATA_WORD_SIZE = LCM_WIDTH_WORDS * LCM_HEIGHT_BITS;
-	localparam integer ADDR_LCM_CLK_LEVEL_DELAY = LCM_DATA_WORD_SIZE;
 
-	localparam integer LCM_CLK_LEVEL_DELAY = 1;
+	localparam integer ADDR_LCM_CLK_LEVEL_DELAY = 0;
+	localparam integer ADDR_CHANNEL_INDEX = ADDR_LCM_CLK_LEVEL_DELAY + 1;
+
 
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] lcm_ram [0 : LCM_DATA_WORD_SIZE - 1];
 
-	reg [BYTE_WIDTH - 1 : 0] index_wstrb = 0;
+	reg [BYTE_WIDTH - 1 : 0] channel_index = 0;
+
+	wire [BYTE_WIDTH - 1 : 0] channel_index_ram;
+	assign channel_index_ram = (channel_index >= 1) ? channel_index - 1 : 0;
+
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] waddr_ram;
+	assign waddr_ram = {{(C_S_AXI_DATA_WIDTH - BYTE_WIDTH - OPT_MEM_ADDR_BITS){1'b0}}, channel_index_ram, waddr};
+
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] raddr_ram;
+	assign raddr_ram = {{(C_S_AXI_DATA_WIDTH - BYTE_WIDTH - OPT_MEM_ADDR_BITS){1'b0}}, channel_index_ram, raddr};
+
+	localparam integer LCM_CLK_LEVEL_DELAY = 1;
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] lcm_clk_level_delay = LCM_CLK_LEVEL_DELAY;
 
+	reg [BYTE_WIDTH - 1 : 0] index_wstrb = 0;
+	reg request_update = 0;
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			index_wstrb <= 0;
 			lcm_clk_level_delay <= LCM_CLK_LEVEL_DELAY;
-			lcm_ram[0][8 * 0 +: 8] = 8'h00;
-			lcm_ram[0][8 * 1 +: 8] = 8'h01;
-			lcm_ram[0][8 * 2 +: 8] = 8'h02;
-			lcm_ram[0][8 * 3 +: 8] = 8'h03;
-			lcm_ram[1][8 * 0 +: 8] = 8'h04;
-			lcm_ram[1][8 * 1 +: 8] = 8'h05;
-			lcm_ram[1][8 * 2 +: 8] = 8'h06;
-			lcm_ram[1][8 * 3 +: 8] = 8'h07;
-			lcm_ram[2][8 * 0 +: 8] = 8'h08;
-			lcm_ram[2][8 * 1 +: 8] = 8'h09;
-			lcm_ram[2][8 * 2 +: 8] = 8'h0a;
-			lcm_ram[2][8 * 3 +: 8] = 8'h0b;
+			request_update <= 0;
+			channel_index <= 0;
 		end
 		else begin
+			request_update <= 0;
 			if (wen == 1) begin
-				if((waddr >= 0) && (waddr < LCM_DATA_WORD_SIZE)) begin
-					for(index_wstrb = 0; index_wstrb < C_S_AXI_DATA_BYTE_WIDTH; index_wstrb = index_wstrb + 1) begin
-						if(wstrb[index_wstrb] == 1) begin
-							lcm_ram[waddr][(8 * index_wstrb) +: 8] <= wdata[(8 * index_wstrb) +: 8];
+				case(channel_index)
+					0: begin
+						case(waddr)
+							ADDR_LCM_CLK_LEVEL_DELAY: begin
+								if(wdata <= LCM_CLK_LEVEL_DELAY) begin
+									lcm_clk_level_delay <= LCM_CLK_LEVEL_DELAY;
+								end
+								else begin
+									lcm_clk_level_delay <= wdata;
+								end
+							end
+							ADDR_CHANNEL_INDEX: begin
+								channel_index <= wdata;
+							end
+							default: begin
+							end
+						endcase
+					end
+					default: begin
+						if((waddr_ram >= 0) && (waddr_ram < LCM_DATA_WORD_SIZE)) begin
+							for(index_wstrb = 0; index_wstrb < C_S_AXI_DATA_BYTE_WIDTH; index_wstrb = index_wstrb + 1) begin
+								if(wstrb[index_wstrb] == 1) begin
+									lcm_ram[waddr_ram][(8 * index_wstrb) +: 8] <= wdata[(8 * index_wstrb) +: 8];
+								end
+							end
+
+							if((waddr_ram == (LCM_DATA_WORD_SIZE - 1)) && (wstrb[C_S_AXI_DATA_BYTE_WIDTH - 1] == 1)) begin
+								channel_index <= 0;
+								request_update <= 1;
+							end
+							else if((waddr_ram > 0) && ((waddr_ram + 1) % REG_RANGE_DATA_WORD_SIZE == 0) && (wstrb[C_S_AXI_DATA_BYTE_WIDTH - 1] == 1)) begin
+								channel_index <= 0;
+							end
+							else begin
+							end
+						end
+						else begin
 						end
 					end
-				end
-				else if(waddr == ADDR_LCM_CLK_LEVEL_DELAY) begin
-					if(wdata <= LCM_CLK_LEVEL_DELAY) begin
-						lcm_clk_level_delay <= LCM_CLK_LEVEL_DELAY;
-					end
-					else begin
-						lcm_clk_level_delay <= wdata;
-					end
-				end
-				else begin
-				end
+				endcase
 			end
 			else begin
 			end
@@ -91,15 +119,38 @@ module lcm_controler_eg9013f_nz_ram #(
 		end
 		else begin
 			if (ren == 1) begin
-				if((raddr >= 0) && (raddr <  LCM_DATA_WORD_SIZE)) begin
-					rdata <= lcm_ram[raddr];
-				end
-				else if(raddr == ADDR_LCM_CLK_LEVEL_DELAY) begin
-					rdata <= lcm_clk_level_delay;
-				end
-				else begin
-					rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS - 1){1'b0}}, raddr};
-				end
+				case(channel_index)
+					0: begin
+						case(raddr)
+							ADDR_LCM_CLK_LEVEL_DELAY: begin
+								rdata <= lcm_clk_level_delay;
+							end
+							ADDR_CHANNEL_INDEX: begin
+								rdata <= 0;
+							end
+							default: begin
+								rdata <= {8'hE0, raddr_ram[C_S_AXI_DATA_WIDTH - 8 - 1 : 0]};
+							end
+						endcase
+					end
+					default: begin
+						if((raddr_ram >= 0) && (raddr_ram <  LCM_DATA_WORD_SIZE)) begin
+							rdata <= lcm_ram[raddr_ram];
+
+							if(raddr_ram == (LCM_DATA_WORD_SIZE - 1)) begin
+								channel_index <= 0;
+							end
+							else if((raddr_ram > 0) && ((raddr_ram + 1) % REG_RANGE_DATA_WORD_SIZE == 0)) begin
+								channel_index <= 0;
+							end
+							else begin
+							end
+						end
+						else begin
+							rdata <= {8'hE0, raddr_ram[C_S_AXI_DATA_WIDTH - 8 - 1 : 0]};
+						end
+					end
+				endcase
 			end
 			else begin
 			end
@@ -138,6 +189,8 @@ module lcm_controler_eg9013f_nz_ram #(
 		) lcm_controler_eg9013f_nz_inst(
 			.clk(clk),
 			.rst_n(rst_n),
+
+			.request_update(request_update),
 
 			.lcm_clk_event(lcm_clk_event),
 			.lcm_clk(lcm_clk),

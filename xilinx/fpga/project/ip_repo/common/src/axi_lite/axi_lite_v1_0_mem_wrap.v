@@ -4,7 +4,7 @@ module axi_lite_v1_0_mem_wrap #(
 		// Width of S_AXI data bus
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 			// Width of S_AXI address bus index by word
-		parameter integer OPT_MEM_ADDR_BITS = 31
+		parameter integer OPT_MEM_ADDR_BITS = 10 
 	)
 	(
 		input wire clk,
@@ -12,15 +12,15 @@ module axi_lite_v1_0_mem_wrap #(
 
 		input wire [(C_S_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		input wire wen,
-		input wire [OPT_MEM_ADDR_BITS : 0] waddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] wdata,
 
 		input wire ren,
-		input wire [OPT_MEM_ADDR_BITS : 0] raddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] rdata = 0
 	);
 
-	localparam integer MEMSIZE = (1 << (OPT_MEM_ADDR_BITS + 1));
+	localparam integer MEMSIZE = (1 << OPT_MEM_ADDR_BITS);
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] data[0 : MEMSIZE - 1];
 
 	integer byte_index;

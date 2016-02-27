@@ -19,11 +19,11 @@ module tsp_ram #(
 		input wire [(C_S_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		input wire wen,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] wdata,
-		input wire [OPT_MEM_ADDR_BITS : 0] waddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 
 		input wire ren,
 		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] rdata,
-		input wire [OPT_MEM_ADDR_BITS : 0] raddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 
 		input wire [7 : 0] mpeg_data,
 		input wire mpeg_clk,
@@ -158,7 +158,7 @@ module tsp_ram #(
 						rdata <= ram_for_data[raddr - ADDR_TS_DATA_BASE];
 					end
 					else begin
-						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS - 1){1'b0}}, raddr};
+						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};
 					end
 				end
 			endcase

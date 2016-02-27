@@ -17,11 +17,11 @@ module csa_ram #(
 		input wire [(C_S_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		input wire wen,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] wdata,
-		input wire [OPT_MEM_ADDR_BITS : 0] waddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 
 		input wire ren,
 		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] rdata,
-		input wire [OPT_MEM_ADDR_BITS : 0] raddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 
 		input wire csa_calc_clk,//csa_calc_clk MUST NOT slower than axi_mm_clk!!!
 
@@ -173,7 +173,7 @@ module csa_ram #(
 						rdata <= csa_calc_logic_delay;
 					end
 					default: begin
-						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS - 1){1'b0}}, raddr};
+						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};
 					end
 				endcase
 			end

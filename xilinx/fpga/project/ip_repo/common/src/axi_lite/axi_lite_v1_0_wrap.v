@@ -39,18 +39,18 @@ module axi_lite_v1_0_wrap #(
 
 	localparam integer ADDR_LSB = clogb2((C_S00_AXI_DATA_WIDTH / 8) - 1);
 
-	localparam integer OPT_MEM_ADDR_BITS = C_S00_AXI_ADDR_WIDTH - ADDR_LSB - 1;
+	localparam integer OPT_MEM_ADDR_BITS = C_S00_AXI_ADDR_WIDTH - ADDR_LSB;
 
 	wire clk;
 	wire rst_n;
 
 	wire [(C_S00_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb;
 	wire wen;
-	wire [OPT_MEM_ADDR_BITS : 0] waddr;
+	wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr;
 	wire [C_S00_AXI_DATA_WIDTH - 1 : 0] wdata;
 
 	wire ren;
-	wire [OPT_MEM_ADDR_BITS : 0] raddr;
+	wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr;
 	wire [C_S00_AXI_DATA_WIDTH - 1 : 0] rdata;
 
 	axi_lite_v1_0 #(

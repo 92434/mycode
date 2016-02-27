@@ -7,6 +7,10 @@ module tb #
 		parameter integer OPT_MEM_ADDR_BITS = 10
 	)
 	();
+
+
+	localparam integer C_S_AXI_DATA_BYTE_WIDTH = C_S_AXI_DATA_WIDTH / BYTE_WIDTH;
+
 	wire clk;
 	reg rst_n = 0;
 	initial begin
@@ -23,6 +27,144 @@ module tb #
 		end
 	end
 
+	reg [C_S_AXI_DATA_BYTE_WIDTH - 1 : 0] wstrb = 0;
+	reg wen = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] wdata = 0;
+	reg [OPT_MEM_ADDR_BITS - 1 : 0] waddr = 0;
+
+	reg ren;
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] rdata;
+	reg [OPT_MEM_ADDR_BITS - 1 : 0] raddr;
+
+	localparam integer LCM_WIDTH_BITS = 640;
+	localparam integer LCM_HEIGHT_BITS = 480;
+	localparam integer LCM_WIDTH_BYTES = LCM_WIDTH_BITS / BYTE_WIDTH;
+	localparam integer LCM_WIDTH_WORDS = LCM_WIDTH_BITS / C_S_AXI_DATA_WIDTH;
+	localparam integer LCM_DATA_BYTES = LCM_WIDTH_BYTES * LCM_HEIGHT_BITS;
+	localparam integer REG_RANGE_DATA_WORD_SIZE = (1 << OPT_MEM_ADDR_BITS);
+	localparam integer REG_RANGE_DATA_BYTE_SIZE = (1 << (OPT_MEM_ADDR_BITS + 2));
+
+	localparam integer ADDR_LCM_CLK_LEVEL_DELAY = 0;
+	localparam integer ADDR_CHANNEL_INDEX = ADDR_LCM_CLK_LEVEL_DELAY + 1;
+
+	integer state = 0;
+	integer index = 0;
+
+	wire [BYTE_WIDTH - 1 : 0] channel_index;
+	assign channel_index = index[(OPT_MEM_ADDR_BITS + 2) +: BYTE_WIDTH] + 1;
+
+	wire [BYTE_WIDTH - 1 : 0] wstrb_index;
+	assign wstrb_index = (index % C_S_AXI_DATA_BYTE_WIDTH);
+	wire [BYTE_WIDTH - 1 : 0] data;
+	assign data = ((index % LCM_WIDTH_BYTES) / 5);
+
+	integer delay = 0;
+
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
+			index <= 0;
+			state <= 0;
+
+			wen <= 0;
+			wstrb <= 0;
+			waddr <= 0;
+			wdata <= 0;
+			
+			ren <= 0;
+			raddr <= 0;
+
+			delay <= 0;
+		end
+		else begin
+			wen <= 0;
+			ren <= 0;
+			wstrb <= 4'b0000;
+			case(state)
+				0: begin
+					wen <= 1;
+					wstrb <= 4'b1111;
+					waddr <= ADDR_CHANNEL_INDEX;
+					wdata <= channel_index;
+
+					state <= 1;
+				end
+				1: begin
+					if((index >= 0) && (index < LCM_DATA_BYTES)) begin
+						wen <= 1;
+						case(wstrb_index)
+							0: begin
+								wstrb <= 4'b0001;
+							end
+							1: begin
+								wstrb <= 4'b0010;
+							end
+							2: begin
+								wstrb <= 4'b0100;
+							end
+							3: begin
+								wstrb <= 4'b1000;
+							end
+							default: begin
+							end
+						endcase
+						waddr <= index[(OPT_MEM_ADDR_BITS - 1 + 2) : 2];
+						wdata[BYTE_WIDTH * wstrb_index +: BYTE_WIDTH] <= data;
+
+						if((index > 0) && ((index + 1) % REG_RANGE_DATA_BYTE_SIZE) == 0) begin
+							state <= 0;
+						end
+						else begin
+						end
+
+						index <= index + 1;
+					end
+					else begin
+						index <= 0;
+						state <= 2;
+					end
+				end
+				2: begin
+					wen <= 1;
+					wstrb <= 4'b1111;
+					waddr <= ADDR_CHANNEL_INDEX;
+					wdata <= channel_index;
+
+					state <= 3;
+				end
+				3: begin
+					if((index >= 0) && (index < LCM_DATA_BYTES)) begin
+						ren <= 1;
+						raddr <= index[(OPT_MEM_ADDR_BITS - 1 + 2) : 2];
+
+						if((index > 0) && ((index + C_S_AXI_DATA_BYTE_WIDTH) % REG_RANGE_DATA_BYTE_SIZE == 0)) begin
+							state <= 2;
+						end
+						else begin
+						end
+
+						index <= index + C_S_AXI_DATA_BYTE_WIDTH;
+					end
+					else begin
+						index <= 0;
+						state <= 4;
+					end
+				end
+				4: begin
+					if((delay >= 0) && (delay < 50000)) begin
+
+						delay <= delay + 1;
+					end
+					else begin
+						delay <= 0;
+						state <= 0;
+					end
+				end
+				default: begin
+				end
+			endcase
+		end
+	end
+
 	wire [BYTE_WIDTH - 1 : 0] lcm_data_origin;
 	wire lcm_din;
 	wire lcm_lp;
@@ -36,6 +178,15 @@ module tb #
 		) lcm_controler_eg9013f_nz_ram_inst (
 			.clk(clk),
 			.rst_n(rst_n),
+
+			.wstrb(wstrb),
+			.wen(wen),
+			.wdata(wdata),
+			.waddr(waddr),
+
+			.ren(ren),
+			.rdata(rdata),
+			.raddr(raddr),
 
 			.lcm_data_origin(lcm_data_origin),
 			.lcm_din(lcm_din),

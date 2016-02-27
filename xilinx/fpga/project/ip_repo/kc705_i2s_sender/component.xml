@@ -231,12 +231,12 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>kc705_i2s_sender</xilinx:displayName>
-      <xilinx:coreRevision>4</xilinx:coreRevision>
+      <xilinx:coreRevision>5</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:myip_testbench:1.0</xilinx:canUpgradeFrom>
         <xilinx:canUpgradeFrom>xiaofei:user:myip_testbench:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2016-01-22T07:41:31Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2016-02-27T09:51:25Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
         <xilinx:tag xilinx:name="user.org:user:myip_testbench:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/kc705_i2s_sender</xilinx:tag>

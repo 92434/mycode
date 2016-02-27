@@ -93,17 +93,17 @@ module csa_wrap #
 
 	localparam integer ADDR_LSB = clogb2((C_S00_AXI_DATA_WIDTH / 8) - 1);
 
-	localparam integer OPT_MEM_ADDR_BITS = C_S00_AXI_ADDR_WIDTH - ADDR_LSB - 1;
+	localparam integer OPT_MEM_ADDR_BITS = C_S00_AXI_ADDR_WIDTH - ADDR_LSB;
 
 
 	wire [(C_S00_AXI_DATA_WIDTH / 8) - 1 : 0] axi_wstrb;
 	wire axi_wen;
 	wire [C_S00_AXI_DATA_WIDTH-1 : 0] axi_wdata;
-	wire [OPT_MEM_ADDR_BITS:0] axi_waddr;
+	wire [OPT_MEM_ADDR_BITS - 1 : 0] axi_waddr;
 
 	wire axi_ren;
 	wire [C_S00_AXI_DATA_WIDTH-1 : 0] axi_rdata;
-	wire [OPT_MEM_ADDR_BITS:0] axi_raddr;
+	wire [OPT_MEM_ADDR_BITS - 1 : 0] axi_raddr;
 
 	assign axi_wstrb = s00_axi_wstrb;
 

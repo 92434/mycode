@@ -3,7 +3,7 @@
 module axi_mm_mem_wrap #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 
-		parameter integer OPT_MEM_ADDR_BITS = 0
+		parameter integer OPT_MEM_ADDR_BITS = 10
 	)
 	(
 		input wire clk,
@@ -12,17 +12,17 @@ module axi_mm_mem_wrap #(
 		input wire [(C_S_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		input wire wen,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] wdata,
-		input wire [OPT_MEM_ADDR_BITS : 0] waddr,
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 
 		input wire ren,
 		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] rdata = 0,
-		input wire [OPT_MEM_ADDR_BITS : 0] raddr
+		input wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr
 	);
 
 	// implement Block RAM(s)
 	// for write command
 	//
-	localparam integer MEMSIZE = (1 << (OPT_MEM_ADDR_BITS + 1));
+	localparam integer MEMSIZE = (1 << (OPT_MEM_ADDR_BITS));
 
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] data[0 : MEMSIZE - 1];
 

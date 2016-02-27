@@ -4,7 +4,7 @@
 module axi_lite_v1_0 #
 	(
 		// Users to add parameters here
-		parameter integer OPT_MEM_ADDR_BITS = 0,
+		parameter integer OPT_MEM_ADDR_BITS = 10,
 		parameter integer ADDR_LSB = 2,
 
 		// User parameters ends
@@ -22,11 +22,11 @@ module axi_lite_v1_0 #
 
 		output wire [(C_S00_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		output wire wen,
-		output wire [OPT_MEM_ADDR_BITS : 0] waddr,
+		output wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 		output wire [C_S00_AXI_DATA_WIDTH - 1 : 0] wdata,
 
 		output wire ren,
-		output wire [OPT_MEM_ADDR_BITS : 0] raddr,
+		output wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 		input wire [C_S00_AXI_DATA_WIDTH - 1 : 0] rdata,
 		// User ports ends
 		// Do not modify the ports beyond this line

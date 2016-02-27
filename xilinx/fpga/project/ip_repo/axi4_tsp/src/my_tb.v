@@ -44,8 +44,8 @@ module tb #(
 
 	reg ren = 0;
 	reg wen = 0;
-	reg [OPT_MEM_ADDR_BITS:0] waddr = 0;
-	reg [OPT_MEM_ADDR_BITS:0] raddr = 0;
+	reg [OPT_MEM_ADDR_BITS - 1 : 0] waddr = 0;
+	reg [OPT_MEM_ADDR_BITS - 1 : 0] raddr = 0;
 
 
 	wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] wstrb;

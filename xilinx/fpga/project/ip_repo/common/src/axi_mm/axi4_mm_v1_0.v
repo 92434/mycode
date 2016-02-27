@@ -24,11 +24,11 @@ module axi4_mm_v1_0 #
 		// Users to add ports here
 		output wire wen,
 		output wire [C_S00_AXI_DATA_WIDTH-1 : 0] wdata,
-		output wire [OPT_MEM_ADDR_BITS:0] waddr,
+		output wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 
 		output wire ren,
 		input wire [C_S00_AXI_DATA_WIDTH-1 : 0] rdata,
-		output wire [OPT_MEM_ADDR_BITS:0] raddr,
+		output wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 
 		// User ports ends
 		// Do not modify the ports beyond this line

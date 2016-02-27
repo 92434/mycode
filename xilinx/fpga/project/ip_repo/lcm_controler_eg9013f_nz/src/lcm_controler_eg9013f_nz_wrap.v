@@ -78,7 +78,7 @@ module lcm_controler_eg9013f_nz_wrap #(
 
 	localparam integer ADDR_LSB = clogb2((C_S00_AXI_DATA_WIDTH / 8) - 1);
 
-	localparam integer OPT_MEM_ADDR_BITS = C_S00_AXI_ADDR_WIDTH - ADDR_LSB - 1;
+	localparam integer OPT_MEM_ADDR_BITS = C_S00_AXI_ADDR_WIDTH - ADDR_LSB;
 
 	wire clk;
 	wire rst_n;
@@ -86,11 +86,11 @@ module lcm_controler_eg9013f_nz_wrap #(
 	wire [(C_S00_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb;
 	wire wen;
 	wire [C_S00_AXI_DATA_WIDTH-1 : 0] wdata;
-	wire [OPT_MEM_ADDR_BITS:0] waddr;
+	wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr;
 
 	wire ren;
 	wire [C_S00_AXI_DATA_WIDTH-1 : 0] rdata;
-	wire [OPT_MEM_ADDR_BITS:0] raddr;
+	wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr;
 
 
 	assign clk = s00_axi_aclk;
