@@ -29,9 +29,9 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = 3,
 
 		.dma_type = PSEUDO_DMA,
-		.dma_thread = NULL,
-		.dma_thread_count = 0, 
-		.is_auto_receive = false,
+		.dma_thread = NULL,//dma_threads,
+		.dma_thread_count = 0,//DMA_THREAD_COUNT, 
+		.is_auto_receive = false,//true,
 
 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
@@ -46,9 +46,9 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-		.dma_thread = NULL,
-		.dma_thread_count = 0, 
-		.is_auto_receive = false,
+		.dma_thread = NULL,//dma_threads,
+		.dma_thread_count = 0,//DMA_THREAD_COUNT, 
+		.is_auto_receive = false,//true,
 
 		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
@@ -63,9 +63,9 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = 3,
 
 		.dma_type = PSEUDO_DMA,
-		.dma_thread = NULL,
-		.dma_thread_count = 0, 
-		.is_auto_receive = false,
+		.dma_thread = NULL,//dma_threads,
+		.dma_thread_count = 0,//DMA_THREAD_COUNT, 
+		.is_auto_receive = false,//true,
 
 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
@@ -80,9 +80,9 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-		.dma_thread = dma_threads,
-		.dma_thread_count = DMA_THREAD_COUNT, 
-		.is_auto_receive = true,
+		.dma_thread = NULL,//dma_threads,
+		.dma_thread_count = 0,//DMA_THREAD_COUNT, 
+		.is_auto_receive = false,//true,
 
 		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
@@ -97,7 +97,7 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-		.dma_thread = 0,//dma_threads,
+		.dma_thread = NULL,//dma_threads,
 		.dma_thread_count = 0,//DMA_THREAD_COUNT, 
 		.is_auto_receive = false,//true,
 
@@ -114,7 +114,7 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-		.dma_thread = 0,//dma_threads,
+		.dma_thread = NULL,//dma_threads,
 		.dma_thread_count = 0,//DMA_THREAD_COUNT, 
 		.is_auto_receive = false,//true,
 

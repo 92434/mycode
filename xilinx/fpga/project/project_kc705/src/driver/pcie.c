@@ -25,6 +25,7 @@ static struct pci_device_id ids[] = {
 #include "pcie_gpio.h"
 #include "pcie_device.h"
 #include "pcie_dma.h"
+#include "eg9013f_nz_fb.h"
 static void add_local_device(kc705_pci_dev_t *kc705_pci_dev) {
 	add_kc705_gpio(kc705_pci_dev);
 
@@ -197,6 +198,11 @@ static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *en
 		goto init_pcie_tr_failed;
 	}
 
+	ret = eg9013f_nz_fb_add(kc705_pci_dev);
+	if(ret != 0) {
+		goto add_fb_failed;
+	}
+
 	ret = pci_enable_device(kc705_pci_dev->pdev);
 	if(ret < 0) {
 		mydebug("PCI device enable failed.\n");
@@ -273,6 +279,8 @@ remap_pcie_bars_failed:
 pci_request_regions_failed:
 	pci_disable_device(kc705_pci_dev->pdev);
 free_dma_resource:
+	eg9013f_nz_fb_remove(kc705_pci_dev);
+add_fb_failed:
 	free_pcie_tr(kc705_pci_dev);
 init_pcie_tr_failed:
 	free_kc705_gpio(kc705_pci_dev);
@@ -313,6 +321,8 @@ static void kc705_remove_pcie(struct pci_dev *pdev) {
 	pci_clear_master(pdev);
 
 	pci_disable_device(pdev);
+
+	eg9013f_nz_fb_remove(kc705_pci_dev);
 
 	free_pcie_tr(kc705_pci_dev);
 

@@ -5,33 +5,40 @@ include $(default_rules)
 SUB_DIRS := driver app
 
 include $(ADD_TARGET)
+
+KBUILD_CFLAGS += -DKC705_DVBS2
+#KBUILD_CFLAGS += -DKC705_CSA
+
 install:
 	sudo insmod driver/kc705-module.ko
 
-#	sudo insmod driver/i2c-gpio.ko
-#	sudo insmod driver/kc705_i2c_master.ko
-#	sudo insmod driver/i2c-dev.ko
+ifeq ($(KBUILD_CFLAGS), -DKC705_DVBS2)
+	sudo insmod driver/i2c-gpio.ko
+	sudo insmod driver/kc705_i2c_master.ko
+	sudo insmod driver/i2c-dev.ko
 
 	sudo insmod driver/spi-gpio-all.ko
 	sudo insmod driver/kc705_spi_master.ko
 	sudo insmod driver/spidev.ko
 	sudo insmod driver/kc705_spi_device.ko
+endif
 
 	dmesg
 
 uninstall:
 #	make start_dma
 
+ifeq ($(KBUILD_CFLAGS), -DKC705_DVBS2)
 	-sudo rmmod kc705_spi_device
 	-sudo rmmod spidev
 	-sudo rmmod spi_bitbang
 	-sudo rmmod kc705_spi_master
 	-sudo rmmod spi_gpio_all
 
-
-#	-sudo rmmod i2c-dev
-#	-sudo rmmod kc705_i2c_master
-#	-sudo rmmod i2c_gpio
+	-sudo rmmod i2c-dev
+	-sudo rmmod kc705_i2c_master
+	-sudo rmmod i2c_gpio
+endif
 
 	-sudo rmmod kc705-module
 

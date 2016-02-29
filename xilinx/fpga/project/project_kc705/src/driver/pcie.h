@@ -119,6 +119,7 @@ typedef struct {
 	struct cdev cdev;
 	dev_t dev;
 
+	struct semaphore dma_dev_sema;
 	struct device *device;
 } pcie_dma_t;
 
@@ -165,6 +166,9 @@ typedef struct {
 
 	struct class *kc705_class;
 	struct device *device;
+
+	char *eg9013f_nz_buffer;
+	struct fb_info *fb_info;
 } kc705_pci_dev_t;
 
 extern struct pci_driver kc705_pcie_driver;

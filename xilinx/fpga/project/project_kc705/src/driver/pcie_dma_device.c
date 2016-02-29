@@ -8,15 +8,33 @@
 #include "kc705.h"//PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE
 
 static int pcie_dma_open(struct inode *i, struct file *filp) {
+	int ret = 0;
 	pcie_dma_t *dma = container_of(i->i_cdev, pcie_dma_t, cdev);
+
+	if(down_trylock(&dma->dma_dev_sema) != 0) {
+		if (filp->f_flags & O_NONBLOCK) {
+			ret = -EBUSY;
+			return ret;
+		} else {
+			if(down_interruptible(&dma->dma_dev_sema) != 0) {
+				mydebug("%s:wait to open!!!\n", dma->devname);
+				ret = -EINTR;
+				return ret;
+			}
+		}
+	}
+
 	filp->private_data = dma;
 	//mydebug("\n");
-	return 0;
+	return ret;
 }
 
 static int pcie_dma_close(struct inode *i, struct file *filp) {
+	int ret = 0;
+	pcie_dma_t *dma = container_of(i->i_cdev, pcie_dma_t, cdev);
 	//mydebug("\n");
-	return 0;
+	up(&dma->dma_dev_sema);
+	return ret;
 }
 
 static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
@@ -305,6 +323,8 @@ int setup_pcie_dma_dev(pcie_dma_t *dma) {
 		mydebug("\n");
 		goto no_device_name_failed;
 	}
+
+	sema_init(&dma->dma_dev_sema, 1);
 
 	cdev_init(&dma->cdev, &pcie_dma_fops);
 

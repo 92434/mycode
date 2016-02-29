@@ -6,8 +6,8 @@
 #modules-name-objs := obj1.o obj2.o obj3.o
 #KERNEL-OBJS += modules-name.o
 
-#KBUILD_CFLAGS += -DKC705_DVBS2
-KBUILD_CFLAGS += -DKC705_CSA
+KBUILD_CFLAGS += -DKC705_DVBS2
+#KBUILD_CFLAGS += -DKC705_CSA
 
 kc705-module-objs := kc705.o \
 	pcie.o \
@@ -20,6 +20,11 @@ kc705-module-objs := kc705.o \
 	pcie_tr_thread.o \
 	pcie_dma_thread.o \
 	pcie_dma_device.o \
+	fb_sys_fops.o \
+	sysimgblt.o \
+	sysfillrect.o \
+	syscopyarea.o \
+	eg9013f_nz_fb.o \
 	axi_cdma.o \
 	axi_dma.o \
 	pseudo_dma.o \
