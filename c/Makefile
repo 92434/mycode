@@ -69,6 +69,7 @@ include $(default_rules)
 include $(ADD_TARGET)
 
 SUB_DIRS :=
+SUB_DIRS += utils
 SUB_DIRS += test_daemon
 SUB_DIRS += test_poll
 SUB_DIRS += c

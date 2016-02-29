@@ -1,6 +1,6 @@
 include $(default_rules)
 
-local_lib_src := $(top)/utils
+local_lib_src := $(top)/c/utils
 CFLAGS += -I$(local_lib_src)
 CFLAGS += -DLOOPER_USES_EPOLL
 

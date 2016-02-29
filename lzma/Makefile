@@ -64,7 +64,7 @@ LOCAL_CFLAGS := -D_7ZIP_ST
 #LOCAL_CFLAGS += -g
 include $(BUILD_APP)
 
-local_lib_src := $(top)/utils
+local_lib_src := $(top)/c/utils
 
 app_c_files := mylzma.cpp
 $(app_c_files) : C

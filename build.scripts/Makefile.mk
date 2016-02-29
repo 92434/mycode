@@ -1,5 +1,6 @@
 out_dir := out
 
+#test V=S
 ifeq ("$(origin V)", "command line")
 #$(info "******************************************************")
 VERBOSE = $(V)
