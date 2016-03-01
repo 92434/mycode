@@ -442,7 +442,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>bc1de994</spirit:value>
+            <spirit:value>bca724e3</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -458,7 +458,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>bc1de994</spirit:value>
+            <spirit:value>bca724e3</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -488,7 +488,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>26f88041</spirit:value>
+            <spirit:value>1c29d3c2</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1567,11 +1567,11 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>lcm_controler_eg9013f_nz</xilinx:displayName>
-      <xilinx:coreRevision>25</xilinx:coreRevision>
+      <xilinx:coreRevision>26</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:tb:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2016-02-27T10:07:00Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2016-03-01T03:37:55Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
         <xilinx:tag xilinx:name="user.org:user:tb:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/lcm_controler_eg9013f_nz</xilinx:tag>
@@ -1582,7 +1582,7 @@
       <xilinx:xilinxVersion>2014.3</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="0c827798"/>
       <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="400a1c2c"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="cd698908"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="31722708"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="0bbc7ded"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="20076539"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="5e5ad5dd"/>

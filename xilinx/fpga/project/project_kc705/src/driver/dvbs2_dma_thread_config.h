@@ -30,7 +30,9 @@ static dma_thread_info_t dma_threads[] = {
 #define REG_RANGE 4096
 typedef enum {
 	ADDR_LCM_CLK_LEVEL_DELAY = 0,
-	ADDR_CHANNEL_INDEX,
+	ADDR_BYTE_ORDER,
+	ADDR_READ_CHANNEL_INDEX,
+	ADDR_WRITE_CHANNEL_INDEX,
 } addr_lcd_controler_config_t;
 
 #define ADDR_OFFSET(addr) (addr * 4)
@@ -61,10 +63,10 @@ static int flush_data_to_lcd(pcie_dma_t *dma, char *buffer, int size) {
 	while(start_pos < end_pos) {
 		int flush_size;
 
-		memcpy(dma->bar_map_memory[1] + ADDR_OFFSET(ADDR_CHANNEL_INDEX), &channel_idx, sizeof(uint32_t));
+		memcpy(dma->bar_map_memory[1] + ADDR_OFFSET(ADDR_WRITE_CHANNEL_INDEX), &channel_idx, sizeof(uint32_t));
 		if(put_pcie_tr(
 				dma,
-				ADDR_OFFSET(ADDR_CHANNEL_INDEX),
+				ADDR_OFFSET(ADDR_WRITE_CHANNEL_INDEX),
 				0,
 				sizeof(uint32_t),
 				0,
