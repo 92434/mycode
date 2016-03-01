@@ -15,6 +15,7 @@ module lcm_controler_eg9013f_nz_wrap #(
 	)
 	(
 		output wire [BYTE_WIDTH - 1 : 0] lcm_data_origin,
+		output wire [BYTE_WIDTH - 1 : 0] lcm_data_reverse,
 		output wire lcm_din,
 		output wire lcm_lp,
 		output wire xscl,
@@ -187,6 +188,7 @@ module lcm_controler_eg9013f_nz_wrap #(
 			.raddr(raddr),
 
 			.lcm_data_origin(lcm_data_origin),
+			.lcm_data_reverse(lcm_data_reverse),
 			.lcm_din(lcm_din),
 			.lcm_lp(lcm_lp),
 			.xscl(xscl),
