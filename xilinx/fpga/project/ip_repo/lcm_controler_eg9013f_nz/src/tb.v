@@ -218,7 +218,7 @@ module tb #
 	wire [BYTE_WIDTH - 1 : 0] lcm_data_reverse;
 	wire lcm_din;
 	wire lcm_lp;
-	wire xscl;
+	wire lcm_xscl;
 	wire [BYTE_WIDTH - 1 : 0] lcm_data;
 
 	lcm_controler_eg9013f_nz_ram #(
@@ -242,7 +242,7 @@ module tb #
 			.lcm_data_reverse(lcm_data_reverse),
 			.lcm_din(lcm_din),
 			.lcm_lp(lcm_lp),
-			.xscl(xscl),
+			.lcm_xscl(lcm_xscl),
 			.lcm_data(lcm_data)
 		);
 endmodule

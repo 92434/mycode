@@ -855,9 +855,49 @@ set_property IOSTANDARD LVCMOS15 [get_ports {asi_out_p}]
 set_property PACKAGE_PIN AC30 [get_ports {asi_out_n}]
 set_property IOSTANDARD LVCMOS15 [get_ports {asi_out_n}]
 
-#XADC_GPIO_0
-set_property PACKAGE_PIN AB25 [get_ports {clk_out1}]
-set_property IOSTANDARD LVCMOS15 [get_ports {clk_out1}]
+#IO_L7P_T1_33
+set_property PACKAGE_PIN AB10 [get_ports {lcm_din}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_din}]
+
+#IO_L4P_T0_33
+set_property PACKAGE_PIN Y11 [get_ports {lcm_lp}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_lp}]
+
+#IO_L6N_T0_VREF_33
+set_property PACKAGE_PIN AB13 [get_ports {lcm_xscl}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_xscl}]
+
+#IO_L6N_T0_VREF_13
+set_property PACKAGE_PIN AB25 [get_ports {lcm_data[0]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[0]}]
+
+#IO_L6P_T0_13
+set_property PACKAGE_PIN AA25 [get_ports {lcm_data[1]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[1]}]
+
+#IO_L5N_T0_13
+set_property PACKAGE_PIN AB28 [get_ports {lcm_data[2]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[2]}]
+
+#IO_L5P_T0_13
+set_property PACKAGE_PIN AA27 [get_ports {lcm_data[3]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[3]}]
+
+#IO_L6P_T0_33
+set_property PACKAGE_PIN AA13 [get_ports {lcm_data[4]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[4]}]
+
+#IO_L5N_T0_33
+set_property PACKAGE_PIN AA10 [get_ports {lcm_data[5]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[5]}]
+
+#IO_L5P_T0_33
+set_property PACKAGE_PIN AA11 [get_ports {lcm_data[6]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[6]}]
+
+#IO_L4N_T0_33
+set_property PACKAGE_PIN Y10 [get_ports {lcm_data[7]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[7]}]
 # ----------------------------------------------------------------------------------------------------
 # bitstream encryption
 # ----------------------------------------------------------------------------------------------------

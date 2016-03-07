@@ -23,7 +23,7 @@ module lcm_controler_eg9013f_nz_ram #(
 		output wire [BYTE_WIDTH - 1 : 0] lcm_data_reverse,
 		output wire lcm_din,
 		output wire lcm_lp,
-		output wire xscl,
+		output wire lcm_xscl,
 		output wire [BYTE_WIDTH - 1 : 0] lcm_data
 	);
 
@@ -217,7 +217,7 @@ module lcm_controler_eg9013f_nz_ram #(
 
 			.lcm_din(lcm_din),
 			.lcm_lp(lcm_lp),
-			.xscl(xscl),
+			.lcm_xscl(lcm_xscl),
 			.lcm_data_index(lcm_data_index)
 		);
 

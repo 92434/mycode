@@ -727,10 +727,21 @@ def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 
 def gen_myip_constrain():
 	myip_extra_signal = [
-		('XADC_GPIO_0', 'AB25', 'clk_out1', 'LVCMOS15'),
+		#('XADC_GPIO_0', 'AB25', 'clk_out1', 'LVCMOS15'),
 		#('USER_SMA_GPIO_P', 'Y23', 'asi_out', 'LVCMOS15'),
 		#('LCD_DB4_LS', 'AA13', 'asi_out', 'LVCMOS15'),
 		#('GPIO_SW_E', 'AG5', 'asi_out', 'LVCMOS15'),
+		('IO_L7P_T1_33', 'AB10', 'lcm_din', 'LVCMOS15'),
+		('IO_L4P_T0_33', 'Y11', 'lcm_lp', 'LVCMOS15'),
+		('IO_L6N_T0_VREF_33', 'AB13', 'lcm_xscl', 'LVCMOS15'),
+		('IO_L6N_T0_VREF_13', 'AB25', 'lcm_data[0]', 'LVCMOS15'),
+		('IO_L6P_T0_13', 'AA25', 'lcm_data[1]', 'LVCMOS15'),
+		('IO_L5N_T0_13', 'AB28', 'lcm_data[2]', 'LVCMOS15'),
+		('IO_L5P_T0_13', 'AA27', 'lcm_data[3]', 'LVCMOS15'),
+		('IO_L6P_T0_33', 'AA13', 'lcm_data[4]', 'LVCMOS15'),
+		('IO_L5N_T0_33', 'AA10', 'lcm_data[5]', 'LVCMOS15'),
+		('IO_L5P_T0_33', 'AA11', 'lcm_data[6]', 'LVCMOS15'),
+		('IO_L4N_T0_33', 'Y10', 'lcm_data[7]', 'LVCMOS15'),
 	]
 
 	extra_property = {

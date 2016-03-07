@@ -19,7 +19,7 @@ module lcm_controler_eg9013f_nz #(
 
 		output reg lcm_din = 0,
 		output reg lcm_lp = 0,
-		output wire xscl,
+		output wire lcm_xscl,
 		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] lcm_data_index = 0
 	);
 
@@ -75,12 +75,12 @@ module lcm_controler_eg9013f_nz #(
 						end
 
 						if((lcm_data_index >= 0) && (lcm_data_index < LCM_DATA_BYTES - 1)) begin
-							lcm_clk_enable <= 1;//enable xscl
+							lcm_clk_enable <= 1;//enable lcm_xscl
 
 							lcm_data_index <= lcm_data_index + 1;
 						end
 						else begin
-							lcm_clk_enable <= 0;//disable xscl
+							lcm_clk_enable <= 0;//disable lcm_xscl
 							lcm_data_index <= 0;
 
 							state <= 0;
@@ -92,7 +92,7 @@ module lcm_controler_eg9013f_nz #(
 				end
 				3: begin
 					if((lcm_clk_event == 1) && (lcm_clk == 0)) begin//wait for negedge lcm_clk
-						lcm_clk_enable <= 0;//disable xscl
+						lcm_clk_enable <= 0;//disable lcm_xscl
 						lcm_lp <= 1;//set lcm_lp to 1
 						lp_delay_count <= 0;
 
@@ -153,5 +153,5 @@ module lcm_controler_eg9013f_nz #(
 		end
 	end
 
-	assign xscl = (lcm_clk_enable == 1) ? xscl_reg : 0;
+	assign lcm_xscl = (lcm_clk_enable == 1) ? xscl_reg : 0;
 endmodule
