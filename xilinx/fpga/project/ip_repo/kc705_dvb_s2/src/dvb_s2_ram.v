@@ -70,7 +70,7 @@ module dvb_s2_ram #(
 	//09
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] Freq_Inv_mode_reg = 0;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 	//10
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en_switch_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en_switch_reg = 1;
 
 	wire [1 : 0] mod_mode_cfg;
 	wire [3 : 0] ldpc_mode_cfg;

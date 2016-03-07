@@ -48,4 +48,11 @@ LOCAL_LDFLAGS := -pthread
 app_name := csa_reg
 include $(BUILD_APP)
 
+app_c_files := dvbs2_regs.c
+app_c_files += utils.c
+LOCAL_CFLAGS := -I$(shell pwd)/../driver
+LOCAL_LDFLAGS := -pthread
+app_name := dvbs2_regs
+include $(BUILD_APP)
+
 include $(ADD_TARGET)

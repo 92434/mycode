@@ -20,6 +20,7 @@
 #define MY_NAME "spidev_device"
 //#define CS 160//FMC_LPC_LA19_N
 #define CS 169//FMC_LPC_LA32_P
+//#define CS 165//FMC_LPC_LA22_P
 
 #define SPI_BUS_NUM 1
 
