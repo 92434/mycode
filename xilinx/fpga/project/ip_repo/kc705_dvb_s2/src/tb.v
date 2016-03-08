@@ -24,6 +24,29 @@ module tb #(
 		#2;
 		rst_n = 1;
 	end
+
+	reg fs_en2_outer = 0;
+	integer delay = 0;
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
+			fs_en2_outer <= 0;
+			delay <= 0;
+		end
+		else begin
+			//fs_en2_outer <= ~fs_en2_outer;
+			fs_en2_outer <= 0;
+			if(delay >= 4 - 1) begin
+				delay <= 0;
+			end
+			else begin
+				delay <= delay + 1;
+			end
+		end
+	end
+
+	wire fs_en_outer;
+	//assign fs_en_outer = (delay == 1) ? fs_en2_outer : 0;
+	assign fs_en_outer = 0;
 	
 	reg [7:0] mpeg_data = 0;
 	wire mpeg_clk;
@@ -78,9 +101,6 @@ module tb #(
 
 
 	wire ts_clk;
-	reg fs_en_outer = 0;
-	reg fs_en2_outer = 0;
-
 	wire [7 : 0] ts_din;// @ sys_clk
 	wire ts_syn;// @ sys_clk
 	wire ts_head;// @ sys_clk

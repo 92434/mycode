@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <spirit:component xmlns:xilinx="http://www.xilinx.com" xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1685-2009" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <spirit:vendor>user.org</spirit:vendor>
+  <spirit:vendor>xiaofei</spirit:vendor>
   <spirit:library>user</spirit:library>
   <spirit:name>lcm_controler_eg9013f_nz</spirit:name>
   <spirit:version>1.0</spirit:version>
@@ -1499,15 +1499,17 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>lcm_controler_eg9013f_nz</xilinx:displayName>
-      <xilinx:coreRevision>33</xilinx:coreRevision>
+      <xilinx:coreRevision>3</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:tb:1.0</xilinx:canUpgradeFrom>
+        <xilinx:canUpgradeFrom>user.org:user:lcm_controler_eg9013f_nz:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2016-03-07T10:00:21Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2016-03-08T05:57:13Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
         <xilinx:tag xilinx:name="user.org:user:tb:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/lcm_controler_eg9013f_nz</xilinx:tag>
         <xilinx:tag xilinx:name="user.org:user:lcm_controler_eg9013f_nz:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/lcm_controler_eg9013f_nz</xilinx:tag>
+        <xilinx:tag xilinx:name="xiaofei:user:lcm_controler_eg9013f_nz:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/lcm_controler_eg9013f_nz</xilinx:tag>
       </xilinx:tags>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>

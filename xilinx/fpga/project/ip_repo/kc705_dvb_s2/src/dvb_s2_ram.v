@@ -130,7 +130,7 @@ module dvb_s2_ram #(
 			TS_Source_mode_reg <= 2;
 			SYS_Baud_Num_reg <= 2500;
 			Freq_Inv_mode_reg <= 0;
-			fs_en_switch_reg <= 0;
+			fs_en_switch_reg <= 1;
 		end
 		else begin
 			if(current_mem_wren == 1) begin

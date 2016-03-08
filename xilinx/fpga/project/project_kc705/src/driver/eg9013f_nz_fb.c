@@ -2534,7 +2534,7 @@ alloc_fb_memory_failed:
 }
 
 int eg9013f_nz_fb_remove(kc705_pci_dev_t *kc705_pci_dev) {
-	if (kc705_pci_dev->fb_info) {
+	if (kc705_pci_dev->fb_info != NULL) {
 		unregister_framebuffer(kc705_pci_dev->fb_info);
 		framebuffer_release(kc705_pci_dev->fb_info);
 		kc705_pci_dev->fb_info = NULL;

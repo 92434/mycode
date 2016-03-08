@@ -80,9 +80,9 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-		.dma_thread = dma_threads,
-		.dma_thread_count = DMA_THREAD_COUNT, 
-		.is_auto_receive = true,
+		.dma_thread = NULL,//dma_threads,
+		.dma_thread_count = 0,//DMA_THREAD_COUNT, 
+		.is_auto_receive = false,//true,
 
 		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
@@ -122,23 +122,23 @@ static dma_static_config_info_t dma_info[] = {
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
 		.devname = "tsp_dma0",//after tsp2asi fifo
 	},
-	//{
-	//	.dma_lite_offset = OFFSET_AXI_LCM_LITE,
-	//	.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
-	//	.pcie_bar_map_ctl_offset_1 = AXIBAR2PCIEBAR_1U,
-	//	.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0,
-	//	.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1,
-	//	.dma_bar_map_num = MIN_BAR_MAP_MEMORY,
+	{
+		.dma_lite_offset = OFFSET_AXI_LCM_LITE,
+		.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
+		.pcie_bar_map_ctl_offset_1 = AXIBAR2PCIEBAR_1U,
+		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0,
+		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1,
+		.dma_bar_map_num = MIN_BAR_MAP_MEMORY,
 
-	//	.dma_type = PSEUDO_DMA,
-	//	.dma_thread = eg9013f_nz_fb_thread,
-	//	.dma_thread_count = DMA_THREAD_EG9013F_NZ_COUNT, 
-	//	.is_auto_receive = false,
+		.dma_type = PSEUDO_DMA,
+		.dma_thread = eg9013f_nz_fb_thread,
+		.dma_thread_count = DMA_THREAD_EG9013F_NZ_COUNT, 
+		.is_auto_receive = false,
 
-	//	.receive_bulk_size = PCIe_MAP_BAR_SIZE,
-	//	.send_bulk_size = PCIe_MAP_BAR_SIZE,
-	//	.devname = "lcm_regs",
-	//},
+		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
+		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+		.devname = "lcm_regs",
+	},
 };
 
 #define DMA_MAX (sizeof(dma_info) / sizeof(dma_static_config_info_t))

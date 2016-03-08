@@ -51,6 +51,8 @@ static int dma_tr(void *ppara) {
 	tx_dest_memory = (uint8_t *)(dma_base_vaddr + tx_dest_axi_addr);
 	rx_src_memory = (uint8_t *)(dma_base_vaddr + rx_src_axi_addr);
 
+	//myprintf("tx_dest_memory:%p\n", tx_dest_memory);
+
 	if(tx_size != 0) {
 		for(i = 0; i + 4 <= tx_size; i += 4) {
 			writel(*((uint32_t *)(tx_src_memory + i)), tx_dest_memory + i);

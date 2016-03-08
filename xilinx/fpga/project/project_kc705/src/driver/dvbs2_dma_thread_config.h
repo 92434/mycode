@@ -43,8 +43,9 @@ static int flush_data_to_lcd(pcie_dma_t *dma, char *buffer, int size) {
 	uint32_t lcm_clk_level_delay = 64;
 	char *start_pos = buffer;
 	char *end_pos = buffer + size;
+	uint8_t *tx_bar_mem = (uint8_t *)dma->bar_map_memory[1];
 
-	memcpy(dma->bar_map_memory[1] + ADDR_OFFSET(ADDR_LCM_CLK_LEVEL_DELAY), &lcm_clk_level_delay, sizeof(uint32_t));
+	memcpy(tx_bar_mem, &lcm_clk_level_delay, sizeof(uint32_t));
 	if(put_pcie_tr(
 			dma,
 			ADDR_OFFSET(ADDR_LCM_CLK_LEVEL_DELAY),
@@ -63,7 +64,7 @@ static int flush_data_to_lcd(pcie_dma_t *dma, char *buffer, int size) {
 	while(start_pos < end_pos) {
 		int flush_size;
 
-		memcpy(dma->bar_map_memory[1] + ADDR_OFFSET(ADDR_WRITE_CHANNEL_INDEX), &channel_idx, sizeof(uint32_t));
+		memcpy(tx_bar_mem, &channel_idx, sizeof(uint32_t));
 		if(put_pcie_tr(
 				dma,
 				ADDR_OFFSET(ADDR_WRITE_CHANNEL_INDEX),
@@ -81,7 +82,7 @@ static int flush_data_to_lcd(pcie_dma_t *dma, char *buffer, int size) {
 		
 		flush_size = (end_pos - start_pos >= REG_RANGE) ? REG_RANGE : (end_pos - start_pos);
 
-		memcpy(dma->bar_map_memory[1], start_pos, flush_size);
+		memcpy(tx_bar_mem, start_pos, flush_size);
 		if(put_pcie_tr(
 				dma,
 				0,
@@ -122,10 +123,10 @@ static int eg9013f_nz_fb_dma_thread(void *ppara) {
 		set_current_state(TASK_UNINTERRUPTIBLE);  
 		schedule_timeout(msecs_to_jiffies(50)); 
 
-		if(memcmp(eg9013f_nz_buffer_buckup, eg9013f_nz_buffer, buffer_size) != 0) {
+		//if(memcmp(eg9013f_nz_buffer_buckup, eg9013f_nz_buffer, buffer_size) != 0) {
 			memcpy(eg9013f_nz_buffer_buckup, eg9013f_nz_buffer, buffer_size);
 			flush_data_to_lcd(dma, eg9013f_nz_buffer_buckup, buffer_size);
-		}
+		//}
 	}
 
 	vfree(eg9013f_nz_buffer_buckup);
