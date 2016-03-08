@@ -10,7 +10,8 @@ reg	          							frame_mode_cfg;
 reg   			 				    		pilot_mode_cfg;
 reg							[1:0]			srrc_mode;//00:0.35; 01:0.25; 10:0.20 
 reg							[2:0]			dvb_s_convolution_mode;
-reg   			 				    		dvb_s_mode;// 0:dvb-s; 1:dvb-s2                            
+reg   			 				    		dvb_s_mode;// 0:dvb-s; 1:dvb-s2    
+reg   			 				    		fs_en_switch;  //0:from outer;1:from inner                      
 //reg							[1:0]			SYS_Baud_mode;
 reg							[1:0]			TS_Source_mode;
 reg							[31:0]		    SYS_Baud_Num;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
@@ -21,8 +22,14 @@ reg							[7:0]       ts_din;// @ sys_clk
 reg                  					ts_syn;// @ sys_clk
 reg                  					ts_head;// @ sys_clk
 wire	               					ts_clk;// @ sys_clk
-reg                 						fs_en;
-reg                						fs_en2;
+reg                 						fs_en_outer;
+reg                						fs_en2_outer;
+
+wire                 						fs_en;
+wire                						fs_en2;
+
+wire                 						fs_en_inner;
+wire                						fs_en2_inner;
 
 wire				[7:0]       ts_din_tp;// @ sys_clk
 wire         					ts_syn_tp;// @ sys_clk
@@ -32,16 +39,14 @@ wire													symbol_1x_oe;
 wire				signed [15:0]					symbol_1x_re_out;  
 wire				signed [15:0]					symbol_1x_im_out;  
 
-wire													symbol_2x_oe;             
-wire				signed [15:0]					symbol_2x_re_out;  
-wire				signed [15:0]					symbol_2x_im_out;  
+//wire													symbol_2x_oe;             
+//wire				signed [15:0]					symbol_2x_re_out;  
+//wire				signed [15:0]					symbol_2x_im_out;  
 
 
 wire                  							ts_clk_h264out;// @ ts_clk_out
 
 assign	ts_clk_h264out = sys_clk;
-
-reg fs_en_switch;
 
 dvb_s2_system_top uut(
 .hard_rst_n				(hard_rst_n),
@@ -66,19 +71,20 @@ dvb_s2_system_top uut(
 .ts_clk					(ts_clk),
 
 .fs_en_switch               (fs_en_switch),
-.fs_en_outer					(fs_en),
-.fs_en2_outer					(fs_en2),
+.fs_en_outer					(fs_en_outer),
+.fs_en2_outer					(fs_en2_outer),
 .ts_din                 (ts_din_tp),
 .ts_syn                 (ts_syn_tp),
 .ts_head                (ts_head_tp),
+.fs_en_inner            (fs_en_inner),
+.fs_en2_inner           (fs_en2_inner),
 //////////////////////////////////////////////////////////////
 .symbol_1x_oe			(symbol_1x_oe),
 .symbol_1x_re_out		(symbol_1x_re_out),
-.symbol_1x_im_out		(symbol_1x_im_out),
-
-.symbol_2x_oe			(symbol_2x_oe),
-.symbol_2x_re_out		(symbol_2x_re_out),
-.symbol_2x_im_out		(symbol_2x_im_out)
+.symbol_1x_im_out		(symbol_1x_im_out)//,
+//.symbol_2x_oe			(symbol_2x_oe),
+//.symbol_2x_re_out		(symbol_2x_re_out),
+//.symbol_2x_im_out		(symbol_2x_im_out)
 );
 
 wire glb_rst_n;
@@ -299,12 +305,13 @@ initial // Clock generator
 		
 initial // Clock generator
   begin
-    fs_en = 0;
+    fs_en_outer = 0;
+    fs_en2_outer = 0;
     forever begin
-    #30 fs_en = 1; fs_en2 = 1;
-    #30 fs_en = 0; fs_en2 = 0;
-	 #30 fs_en = 0; fs_en2 = 1;
-    #30 fs_en = 0; fs_en2 = 0;
+    #30 fs_en_outer = 1; fs_en2_outer = 1;
+    #30 fs_en_outer = 0; fs_en2_outer = 0;
+	 #30 fs_en_outer = 0; fs_en2_outer = 1;
+    #30 fs_en_outer = 0; fs_en2_outer = 0;
     //#10 fs_en = 0; fs_en2 = 0;
   end
   end			
@@ -328,6 +335,8 @@ initial // Clock generator
 		
 initial	// Test stimulus
   begin
+   // fs_en = 0;
+    //fs_en2 = 0;
   	mod_mode_cfg   	= 2'b00;
   	ldpc_mode_cfg  	= 4'b0110;
   	frame_mode_cfg 	= 1'b0;
@@ -339,12 +348,31 @@ initial	// Test stimulus
 	TS_Source_mode = 2'b01;
 	SYS_Baud_Num  = 32'd2500;
 	Freq_Inv_mode = 1'b0;
-	fs_en_switch = 0;
+	fs_en_switch = 0;//0:from outer;1:from inner
    hard_rst_n 	= 1;	 
 	//ts_clk_h264out = 0;
 #120 hard_rst_n = 0;
 #120 hard_rst_n = 1;
   end
+  
+ assign    fs_en = (fs_en_switch == 1)?fs_en_inner:fs_en_outer;
+ assign    fs_en2 = (fs_en_switch == 1)?fs_en2_inner:fs_en2_outer; 
+  
+//always @(posedge sys_clk)begin
+//      if(~hard_rst_n)begin
+//          fs_en <= 0;
+//          fs_en2 <= 0;
+//      end
+//      else if(fs_en_switch == 1'b1)begin
+//              fs_en <= fs_en_inner;
+//              fs_en2 <= fs_en2_inner;
+//      end
+//      else begin
+//         fs_en <= fs_en_outer;
+//         fs_en2 <= fs_en2_outer;
+//      end
+//  end
+
 
   
   wire			[31:0]		fs_cnt;
@@ -776,17 +804,17 @@ always @(negedge sys_clk or negedge glb_rst_n)begin
 	end
 end
 
-always @(negedge sys_clk or negedge glb_rst_n)begin      
-	if(~glb_rst_n)begin
+//always @(negedge sys_clk or negedge glb_rst_n)begin      
+//	if(~glb_rst_n)begin
 		
-	end
-	else if((uut.symbol_2x_oe == 1)) begin
-		$fwrite(symbol_out_2x_file_pointer,"%f %f \n",uut.symbol_2x_re_out,uut.symbol_2x_im_out);
-	end
-	else begin
-		//$fclose(symbol_out_file_pointer);
-	end
-end
+//	end
+//	else if((uut.symbol_2x_oe == 1)) begin
+//		$fwrite(symbol_out_2x_file_pointer,"%f %f \n",uut.symbol_2x_re_out,uut.symbol_2x_im_out);
+//	end
+//	else begin
+//		//$fclose(symbol_out_file_pointer);
+//	end
+//end
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
