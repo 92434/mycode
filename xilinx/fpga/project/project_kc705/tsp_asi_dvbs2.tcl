@@ -240,7 +240,7 @@ proc create_root_design { parentCell } {
   set kc705_ts2asi_0 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_ts2asi:1.0 kc705_ts2asi_0 ]
 
   # Create instance: lcm_controler_eg9013f_nz_0, and set properties
-  set lcm_controler_eg9013f_nz_0 [ create_bd_cell -type ip -vlnv user.org:user:lcm_controler_eg9013f_nz:1.0 lcm_controler_eg9013f_nz_0 ]
+  set lcm_controler_eg9013f_nz_0 [ create_bd_cell -type ip -vlnv xiaofei:user:lcm_controler_eg9013f_nz:1.0 lcm_controler_eg9013f_nz_0 ]
 
   # Create instance: myip_i2s_sender_0, and set properties
   set myip_i2s_sender_0 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_i2s_sender:1.0 myip_i2s_sender_0 ]

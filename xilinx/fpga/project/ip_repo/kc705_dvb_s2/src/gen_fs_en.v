@@ -24,7 +24,7 @@ module gen_fs_en(
     input                                           sys_clk,
     input                                           glb_rst_n,
     input							[31:0]		    SYS_Baud_Num,//32'd2500 --> 25M BaudRate   SYS_Baud_mode,
-    output          reg                             fs_en,
+    output          wire                             fs_en,
     output          reg                             fs_en2
     );
     
@@ -138,18 +138,11 @@ module gen_fs_en(
         end
     end
     
-    reg					fs_reg1;
-    reg                    fs_reg2;
-    always@(posedge sys_clk) begin
-        fs_reg1<=fs_en2;
-        fs_reg2<=fs_reg1;
-    end
-    
-    always @(posedge sys_clk) begin
-        if((fs_reg2==1'b0)&&(fs_reg1==1'b1))
-            fs_en<=1'b1;
-        else
-            fs_en<=1'b0;
-    end
+	reg delay = 0;
+	always @(posedge fs_en2) begin
+		delay <= delay + 1;
+	end
+
+	assign fs_en = (delay == 0) ? fs_en2 : 0;
     
 endmodule

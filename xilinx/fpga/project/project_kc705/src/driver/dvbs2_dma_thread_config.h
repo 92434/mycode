@@ -113,6 +113,11 @@ static int eg9013f_nz_fb_dma_thread(void *ppara) {
 	char *eg9013f_nz_buffer = kc705_pci_dev->eg9013f_nz_buffer;
 	char *eg9013f_nz_buffer_buckup = (char *)vzalloc(buffer_size);
 
+	if(down_trylock(&dma->dma_dev_sema) != 0) {
+		ret = -EBUSY;
+		return ret;
+	}
+
 	if(eg9013f_nz_buffer_buckup == NULL) {
 		mydebug("\n");
 		ret = -1;
@@ -130,6 +135,8 @@ static int eg9013f_nz_fb_dma_thread(void *ppara) {
 	}
 
 	vfree(eg9013f_nz_buffer_buckup);
+	up(&dma->dma_dev_sema);
+
 	mydebug("\n");
 
 	return ret;
