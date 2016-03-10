@@ -195,8 +195,6 @@ module dvb_s2_wrap #
 		);
 
 
-	wire symbol_2x_oe_origin;
-	assign symbol_2x_oe = ((symbol_2x_oe_origin == 1) && (sys_clk == 1)) ? 1 : 0;
 	// Add user logic here
 	dvb_s2_ram #(
 			.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
@@ -234,7 +232,7 @@ module dvb_s2_wrap #
 			.symbol_1x_re_out(symbol_1x_re_out),
 			.symbol_1x_im_out(symbol_1x_im_out),
 
-			.symbol_2x_oe(symbol_2x_oe_origin),
+			.symbol_2x_oe(symbol_2x_oe),
 			.symbol_2x_re_out(symbol_2x_re_out),
 			.symbol_2x_im_out(symbol_2x_im_out)
 		);

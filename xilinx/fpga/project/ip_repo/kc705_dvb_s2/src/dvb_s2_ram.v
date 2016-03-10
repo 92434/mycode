@@ -72,6 +72,8 @@ module dvb_s2_ram #(
 	//10
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en_switch_reg = 1;
 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_2x_oe_posedge_count = 0;
+
 	wire [1 : 0] mod_mode_cfg;
 	wire [3 : 0] ldpc_mode_cfg;
 	wire frame_mode_cfg;
@@ -216,6 +218,9 @@ module dvb_s2_ram #(
 					10: begin
 						rdata <= fs_en_switch;
 					end
+					11: begin
+						rdata <= symbol_2x_oe_posedge_count;
+					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};
 					end
@@ -258,6 +263,18 @@ module dvb_s2_ram #(
 			.symbol_1x_im_out(symbol_1x_im_out)
 		);
 
+	wire symbol_2x_oe_origin;
+	assign symbol_2x_oe = ((symbol_2x_oe_origin == 1) && (sys_clk == 1)) ? 1 : 0;
+
+	always @(posedge symbol_2x_oe) begin
+		if(rst_n == 0) begin
+			symbol_2x_oe_posedge_count <= 0;
+		end
+		else begin
+			symbol_2x_oe_posedge_count <= symbol_2x_oe_posedge_count + 1;
+		end
+	end
+
 	dvb_s2_srrc_filter dvb_s2_srrc_filter_inst(
 			.hard_rst_n(hard_rst_n),// modified by 2014.09.22
 
@@ -267,7 +284,7 @@ module dvb_s2_ram #(
 			.symbol_1x_re_out(symbol_1x_re_out),
 			.symbol_1x_im_out(symbol_1x_im_out),
 
-			.symbol_2x_oe(symbol_2x_oe),
+			.symbol_2x_oe(symbol_2x_oe_origin),
 			.symbol_2x_re_out(symbol_2x_re_out),
 			.symbol_2x_im_out(symbol_2x_im_out)
 		);
