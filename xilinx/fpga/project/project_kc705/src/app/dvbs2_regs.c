@@ -108,12 +108,15 @@ void *write_fn(void *arg) {
 	int nwrite;
 
 	//uint32_t fs_en_switch_reg = 1;
+	uint32_t ts_source_mode_reg = 1;
 
 	//printids("write_fn: ");
 
 	while(stop == 0) {
 		//lseek(targ->fd, ADDR_OFFSET(FS_EN_SWITCH_REG), SEEK_SET);
-		//nwrite = write(targ->fd, &fs_en_switch_reg, sizeof(int));
+		//nwrite = write(targ->fd, &fs_en_switch_reg, sizeof(uint32_t));
+		lseek(targ->fd, ADDR_OFFSET(TS_SOURCE_MODE_REG), SEEK_SET);
+		nwrite = write(targ->fd, &ts_source_mode_reg, sizeof(uint32_t));
 
 		return NULL;
 	}
