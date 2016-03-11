@@ -108,7 +108,7 @@ void *write_fn(void *arg) {
 	int nwrite;
 
 	//uint32_t fs_en_switch_reg = 1;
-	uint32_t ts_source_mode_reg = 1;
+	uint32_t ts_source_mode_reg = 2;
 
 	//printids("write_fn: ");
 
