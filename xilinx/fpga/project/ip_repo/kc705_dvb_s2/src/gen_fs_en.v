@@ -23,12 +23,11 @@
 module gen_fs_en(
     input                                           sys_clk,
     input                                           glb_rst_n,
+    input							[31:0]		    SYS_Freq_Num,//sys_clk
     input							[31:0]		    SYS_Baud_Num,//32'd2500 --> 25M BaudRate   SYS_Baud_mode,
     output          wire                             fs_en,
     output          reg                             fs_en2
     );
-    
-    parameter SYS_Freq_Num = 32'd10000;
     
     reg [31:0]			       byte_en_step;
     reg [31:0]                clk_period;

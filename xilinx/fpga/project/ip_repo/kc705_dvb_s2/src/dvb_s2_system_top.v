@@ -10,6 +10,7 @@ input							[1:0]			srrc_mode,//00:0.35; 01:0.25; 10:0.20(default)
 input							[2:0]			dvb_s_convolution_mode,
 input   			 				    		dvb_s_mode,// 0:dvb-s; 1:dvb-s2
 input							[1:0]			TS_Source_mode,// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
+input							[31:0]		    SYS_Freq_Num,//sys_clk
 input							[31:0]		    SYS_Baud_Num,//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
 input											Freq_Inv_mode,// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 //////////////////////////////////////////////////////////////
@@ -50,6 +51,7 @@ wire                             fs_en2;
 gen_fs_en uut_gen_fs_en(
     .sys_clk(sys_clk),
     .glb_rst_n(hard_rst_n),
+    .SYS_Freq_Num(SYS_Freq_Num),
     .SYS_Baud_Num(SYS_Baud_Num),//32'd2500 --> 25M BaudRate   SYS_Baud_mode,
     .fs_en(fs_en_inner),
     .fs_en2(fs_en2_inner)

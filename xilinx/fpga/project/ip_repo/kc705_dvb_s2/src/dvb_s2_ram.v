@@ -66,12 +66,14 @@ module dvb_s2_ram #(
 	//07
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] TS_Source_mode_reg = 2;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
 	//08
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Baud_Num_reg = 2500;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Freq_Num_reg = 10000;//sys_clk freq 
 	//09
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] Freq_Inv_mode_reg = 0;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Baud_Num_reg = 2500;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
 	//10
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] Freq_Inv_mode_reg = 0;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
+	//11
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en_switch_reg = 1;
-
+	//12
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_2x_oe_posedge_count = 0;
 
 	wire [1 : 0] mod_mode_cfg;
@@ -82,6 +84,7 @@ module dvb_s2_ram #(
 	wire [2 : 0] dvb_s_convolution_mode;
 	wire dvb_s_mode;// 0:dvb-s; 1:dvb-s2
 	wire [1 : 0] TS_Source_mode;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
+	wire [31 : 0] SYS_Freq_Num;//sys_clk freq
 	wire [31 : 0] SYS_Baud_Num;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
 	wire Freq_Inv_mode;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 	wire fs_en_switch;
@@ -94,6 +97,7 @@ module dvb_s2_ram #(
 	assign dvb_s_convolution_mode = dvb_s_convolution_mode_reg[2 : 0];
 	assign dvb_s_mode = dvb_s_mode_reg[0];
 	assign TS_Source_mode = TS_Source_mode_reg[1 : 0];
+	assign SYS_Freq_Num = SYS_Freq_Num_reg;
 	assign SYS_Baud_Num = SYS_Baud_Num_reg;
 	assign Freq_Inv_mode = Freq_Inv_mode_reg[0];
 	assign fs_en_switch = fs_en_switch_reg[0];
@@ -162,12 +166,15 @@ module dvb_s2_ram #(
 						TS_Source_mode_reg <= current_write_data;
 					end
 					8: begin
-						SYS_Baud_Num_reg <= current_write_data;
+						SYS_Freq_Num_reg <= current_write_data;
 					end
 					9: begin
-						Freq_Inv_mode_reg <= current_write_data;
+						SYS_Baud_Num_reg <= current_write_data;
 					end
 					10: begin
+						Freq_Inv_mode_reg <= current_write_data;
+					end
+					11: begin
 						fs_en_switch_reg <= current_write_data;
 					end
 					default: begin
@@ -210,15 +217,18 @@ module dvb_s2_ram #(
 						rdata <= TS_Source_mode;
 					end
 					8: begin
-						rdata <= SYS_Baud_Num;
+						rdata <= SYS_Freq_Num_reg;
 					end
 					9: begin
-						rdata <= Freq_Inv_mode;
+						rdata <= SYS_Baud_Num;
 					end
 					10: begin
-						rdata <= fs_en_switch;
+						rdata <= Freq_Inv_mode;
 					end
 					11: begin
+						rdata <= fs_en_switch;
+					end
+					12: begin
 						rdata <= symbol_2x_oe_posedge_count;
 					end
 					default: begin
@@ -240,6 +250,7 @@ module dvb_s2_ram #(
 			.dvb_s_convolution_mode(dvb_s_convolution_mode),
 			.dvb_s_mode(dvb_s_mode),// 0:dvb-s; 1:dvb-s2
 			.TS_Source_mode(TS_Source_mode),// 00:TS Source inside by ts_clk; 01:TS Source outside without Empty Frame; 10: TS Source outside with Empty Frame;
+			.SYS_Freq_Num(SYS_Freq_Num),//sys_clk freq
 			.SYS_Baud_Num(SYS_Baud_Num),//32'd2500 --> 25M BaudRate SYS_Baud_mode,// 00:10M; 01:25M; 
 			.Freq_Inv_mode(Freq_Inv_mode),// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 
