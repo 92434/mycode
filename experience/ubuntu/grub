@@ -1,0 +1,16 @@
+sudo su
+mount /dev/sdb1 /mnt
+
+接下来将一些需要的目录“绑定到” live CD的系统上去
+
+mount --bind /dev /mnt/dev
+mount --bind /proc /mnt/proc
+mount --bind /sys /mnt/sys
+
+最后切换root根目录到/mnt
+
+chroot /mnt
+
+这样我们就切换回我们原来的系统上了， 执行update-grub来更新引导
+
+sudo update-grub

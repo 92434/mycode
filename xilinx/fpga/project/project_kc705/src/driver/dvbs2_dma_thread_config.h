@@ -105,6 +105,8 @@ static int flush_data_to_lcd(pcie_dma_t *dma, char *buffer, int size) {
 	return ret;
 }
 
+#define REFRESH_DURATION_BY_MSECS 50
+#define FORCE_REFRESH_COUNT (1000 / REFRESH_DURATION_BY_MSECS)
 static int eg9013f_nz_fb_dma_thread(void *ppara) {
 	int ret = 0;
 	pcie_dma_t *dma = (pcie_dma_t *)ppara;
@@ -112,6 +114,7 @@ static int eg9013f_nz_fb_dma_thread(void *ppara) {
 	int buffer_size = EG9013F_NZ_SIZE;
 	char *eg9013f_nz_buffer = kc705_pci_dev->eg9013f_nz_buffer;
 	char *eg9013f_nz_buffer_buckup = (char *)vzalloc(buffer_size);
+	int force_refresh_count = 0;
 
 	if(down_trylock(&dma->dma_dev_sema) != 0) {
 		ret = -EBUSY;
@@ -126,12 +129,17 @@ static int eg9013f_nz_fb_dma_thread(void *ppara) {
 
 	while(!kthread_should_stop()) {
 		set_current_state(TASK_UNINTERRUPTIBLE);  
-		schedule_timeout(msecs_to_jiffies(50)); 
+		schedule_timeout(msecs_to_jiffies(REFRESH_DURATION_BY_MSECS)); 
 
-		//if(memcmp(eg9013f_nz_buffer_buckup, eg9013f_nz_buffer, buffer_size) != 0) {
+		if((memcmp(eg9013f_nz_buffer_buckup, eg9013f_nz_buffer, buffer_size) != 0) || (force_refresh_count == 0)) {
 			memcpy(eg9013f_nz_buffer_buckup, eg9013f_nz_buffer, buffer_size);
 			flush_data_to_lcd(dma, eg9013f_nz_buffer_buckup, buffer_size);
-		//}
+		}
+
+		force_refresh_count++;
+		if(force_refresh_count == FORCE_REFRESH_COUNT) {
+			force_refresh_count = 0;
+		}
 	}
 
 	vfree(eg9013f_nz_buffer_buckup);
