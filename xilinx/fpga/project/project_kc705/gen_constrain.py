@@ -668,8 +668,7 @@ myip_fmc_signal = [
 	('FMC_LPC_LA32_N', 'asi_out_p'),
 	('FMC_LPC_LA33_N', 'asi_out_n'),
 
-	('FMC_LPC_CLK1_M2C_P', 'IBUF_DS_P'),
-	('FMC_LPC_CLK1_M2C_N', 'IBUF_DS_N'),
+	('FMC_LPC_CLK0_M2C_P', 'sys_clk'),
 ]
 
 #myip_fmc_signal = []
@@ -750,9 +749,11 @@ def gen_myip_constrain():
 	extra_property = {
 		#'i2s_receiver_bclk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		'IBUF_DS_P': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		'IBUF_DS_N': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		'sys_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	}
+
+	fmc_io_stand_except = [
+	]
 
 
 	print '#', '-' * 100
@@ -766,7 +767,8 @@ def gen_myip_constrain():
 	for io, signal in myip_fmc_signal:
 		pin = io_pin_map.get(io)
 		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, signal)
-		print 'set_property IOSTANDARD LVCMOS15 [get_ports {%s}]' %(signal)
+		if not io in fmc_io_stand_except:
+			print 'set_property IOSTANDARD LVCMOS15 [get_ports {%s}]' %(signal)
 		extra_list = extra_property.get(signal)
 		if not extra_list:
 			continue

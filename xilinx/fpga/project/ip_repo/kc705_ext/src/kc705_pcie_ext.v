@@ -52,23 +52,22 @@ module kc705_pcie_ext #
 		ddr_clk_counter = ddr_clk_counter + 1;
 	end
 
-assign EXT_LEDS = {
-		ddr_clk_counter[27:26],
-		pcie_clk_counter[27:26],
-		pcie_mmcm_locked,
-		ddr_rdy,
-		~ddr_rst,
-		~EXT_SYS_RST
-	}; 
+	assign EXT_LEDS = {
+			ddr_clk_counter[27:26],
+			pcie_clk_counter[27:26],
+			pcie_mmcm_locked,
+			ddr_rdy,
+			~ddr_rst,
+			~EXT_SYS_RST
+		}; 
 
-assign mmcms_locked = pcie_mmcm_locked & ddr_rdy;
+	assign mmcms_locked = pcie_mmcm_locked & ddr_rdy;
 
-IBUFDS_GTE2 pcie_refclk_buf
-	(
-		.I(EXT_PCIE_REFCLK_P),
-		.CEB(1'b0),
-		.IB(EXT_PCIE_REFCLK_N),
-		.ODIV2(),
-		.O(pcie_refclk_100MHz)
-	);
+	IBUFDS_GTE2 pcie_refclk_buf (
+			.I(EXT_PCIE_REFCLK_P),
+			.CEB(1'b0),
+			.IB(EXT_PCIE_REFCLK_N),
+			.ODIV2(),
+			.O(pcie_refclk_100MHz)
+		);
 endmodule
