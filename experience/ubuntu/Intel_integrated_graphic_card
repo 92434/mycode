@@ -1,0 +1,26 @@
+Intel集成显卡驱动安装linux
+
+在http://intellinuxgraphics.org/中下载最新的驱动包 xf86-video-intel 2.15.0
+
+Debian的源中有安装包xserver-xorg-video-intel，其实就是基于xf86-video-intel包编译的，只是不一定是最新的。
+ 
+
+首先安装下面的包
+
+#apt-get install xserver-xorg-dev
+
+ 
+
+解压xf86-video-intel后，进入目录，运行
+
+$./configure --prefix=/usr
+
+# make
+
+#sudo make install
+
+
+ 
+配置/etc/X11/xorg.conf。ebian6.0中默认是没有这个文件的，可以用以下方法生成：
+# sudo Xorg -configure
+# cp /root/xorg.conf.new /etc/X11/xorg.con 
