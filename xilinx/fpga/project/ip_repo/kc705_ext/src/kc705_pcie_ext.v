@@ -38,6 +38,9 @@ module kc705_pcie_ext #
 		input wire EXT_PCIE_REFCLK_N,
 		output wire [0:0] pcie_refclk_100MHz,
 
+		input wire dvbs2_sys_clk,
+		output wire dvbs2_sys_clk_out,
+
 		output wire [7:0] EXT_LEDS
 	);
 
@@ -70,4 +73,10 @@ module kc705_pcie_ext #
 			.ODIV2(),
 			.O(pcie_refclk_100MHz)
 		);
+
+	assign dvbs2_sys_clk_out = dvbs2_sys_clk;
+	//BUFMR BUFMR_inst (
+	//	.O(O), // 1-bit output: Clock output (connect to BUFIOs/BUFRs)
+	//	.I(dvbs2_sys_clk) // 1-bit input: Clock input (Connect to IBUF)
+	//);
 endmodule

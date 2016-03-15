@@ -852,9 +852,9 @@ set_property PACKAGE_PIN AC30 [get_ports {asi_out_n}]
 set_property IOSTANDARD LVCMOS15 [get_ports {asi_out_n}]
 
 #FMC_LPC_CLK0_M2C_P
-set_property PACKAGE_PIN AF22 [get_ports {sys_clk}]
-set_property IOSTANDARD LVCMOS15 [get_ports {sys_clk}]
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {sys_clk}]
+set_property PACKAGE_PIN AF22 [get_ports {dvbs2_sys_clk}]
+set_property IOSTANDARD LVCMOS15 [get_ports {dvbs2_sys_clk}]
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {dvbs2_sys_clk}]
 
 #IO_L7P_T1_33
 set_property PACKAGE_PIN AB10 [get_ports {lcm_din}]
