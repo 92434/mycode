@@ -80,9 +80,9 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-		.dma_thread = NULL,//dma_threads,
-		.dma_thread_count = 0,//DMA_THREAD_COUNT, 
-		.is_auto_receive = false,//true,
+		.dma_thread = dma_threads,
+		.dma_thread_count = DMA_THREAD_COUNT, 
+		.is_auto_receive = true,
 
 		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
@@ -97,8 +97,11 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MIN_BAR_MAP_MEMORY,
 
 		.dma_type = PSEUDO_DMA,
+		//.dma_thread = NULL,//eg9013f_nz_fb_thread,
+		//.dma_thread_count = 0,//DMA_THREAD_EG9013F_NZ_COUNT,
+		//.is_auto_receive = false,
 		.dma_thread = eg9013f_nz_fb_thread,
-		.dma_thread_count = DMA_THREAD_EG9013F_NZ_COUNT, 
+		.dma_thread_count = DMA_THREAD_EG9013F_NZ_COUNT,
 		.is_auto_receive = false,
 
 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,

@@ -1499,12 +1499,12 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>lcm_controler_eg9013f_nz</xilinx:displayName>
-      <xilinx:coreRevision>3</xilinx:coreRevision>
+      <xilinx:coreRevision>4</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:tb:1.0</xilinx:canUpgradeFrom>
         <xilinx:canUpgradeFrom>user.org:user:lcm_controler_eg9013f_nz:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2016-03-08T05:57:13Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2016-03-16T02:44:46Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
         <xilinx:tag xilinx:name="user.org:user:tb:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/lcm_controler_eg9013f_nz</xilinx:tag>

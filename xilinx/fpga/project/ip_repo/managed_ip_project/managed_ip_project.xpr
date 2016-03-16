@@ -18,6 +18,20 @@
     <Option Name="IPRepoPath" Val="$PPRDIR/../../ip_repo"/>
     <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_i2s_sender"/>
     <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_csa"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_dvb_s2"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../asi_dump"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../axi4_tsp"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../common/axi_lite_test"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../common/axi_stream_test"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_i2s_receiver"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_ts2asi"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../tsp_dump"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../common/axi_mm_test"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../ts_generator"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../lcm_controler_eg9013f_nz"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_intr_hub"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../kc705_ext"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../test_multi_to_one"/>
   </Configuration>
   <FileSets Version="1" Minor="31">
     <FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
@@ -78,4 +92,5 @@
       </Strategy>
     </Run>
   </Runs>
+  <HWSession Dir="hw_1" File="hw.xml"/>
 </Project>

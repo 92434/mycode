@@ -96,7 +96,7 @@ void *read_fn(void *arg) {
 
 		for(i = 0; i < TOTAL_REGS; i++) {
 			read_regs(i);
-			printf("%s: %08x(%d)\n", reg_name[i], data[0], data[0]);
+			printf("%s: %08x(%u)\n", reg_name[i], data[0], data[0]);
 		}
 
 		return NULL;
@@ -109,16 +109,16 @@ void *write_fn(void *arg) {
 	targ = targ;
 	int nwrite;
 
-	//uint32_t fs_en_switch_reg = 1;
-	uint32_t ts_source_mode_reg = 2;
+	//uint32_t fs_en_switch_reg = 0;
+	//uint32_t ts_source_mode_reg = 2;
 
 	//printids("write_fn: ");
 
 	while(stop == 0) {
 		//lseek(targ->fd, ADDR_OFFSET(FS_EN_SWITCH_REG), SEEK_SET);
 		//nwrite = write(targ->fd, &fs_en_switch_reg, sizeof(uint32_t));
-		lseek(targ->fd, ADDR_OFFSET(TS_SOURCE_MODE_REG), SEEK_SET);
-		nwrite = write(targ->fd, &ts_source_mode_reg, sizeof(uint32_t));
+		//lseek(targ->fd, ADDR_OFFSET(TS_SOURCE_MODE_REG), SEEK_SET);
+		//nwrite = write(targ->fd, &ts_source_mode_reg, sizeof(uint32_t));
 
 		return NULL;
 	}

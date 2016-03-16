@@ -14,7 +14,7 @@ module axi4_mm_v1_0_S00_AXI #
 		// Width of S_AXI data bus
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		// Width of S_AXI address bus
-		parameter integer C_S_AXI_ADDR_WIDTH = 13,
+		parameter integer C_S_AXI_ADDR_WIDTH = 12,
 		// Width of optional user defined signal in write address channel
 		parameter integer C_S_AXI_AWUSER_WIDTH = 1,
 		// Width of optional user defined signal in read address channel

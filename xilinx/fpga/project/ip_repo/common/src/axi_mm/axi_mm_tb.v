@@ -3,7 +3,7 @@
 module tp #(
 		parameter integer C_S00_AXI_ID_WIDTH = 1,
 		parameter integer C_S00_AXI_DATA_WIDTH = 32,
-		parameter integer C_S00_AXI_ADDR_WIDTH = 13,
+		parameter integer C_S00_AXI_ADDR_WIDTH = 12,
 		parameter integer C_S00_AXI_AWUSER_WIDTH = 1,
 		parameter integer C_S00_AXI_ARUSER_WIDTH = 1,
 		parameter integer C_S00_AXI_WUSER_WIDTH = 1,

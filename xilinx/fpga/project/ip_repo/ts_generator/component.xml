@@ -193,11 +193,11 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>ts_generator</xilinx:displayName>
-      <xilinx:coreRevision>2</xilinx:coreRevision>
+      <xilinx:coreRevision>3</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:tb:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2016-02-27T09:57:33Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2016-03-16T02:45:17Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
         <xilinx:tag xilinx:name="user.org:user:tb:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/ts_generator</xilinx:tag>
