@@ -51,12 +51,12 @@ static int dma_tr(void *ppara) {
 	tx_dest_memory = (uint8_t *)(dma_base_vaddr + tx_dest_axi_addr);
 	rx_src_memory = (uint8_t *)(dma_base_vaddr + rx_src_axi_addr);
 
-	//myprintf("tx_dest_memory:%p\n", tx_dest_memory);
+	myprintf("tx_dest_memory:%p\n", tx_dest_memory);
 
 	if(tx_size != 0) {
 		for(i = 0; i + 4 <= tx_size; i += 4) {
 			writel(*((uint32_t *)(tx_src_memory + i)), tx_dest_memory + i);
-			//myprintf("%08x->%p\n", *((uint32_t *)(tx_src_memory + i)), (void *)(tx_dest_memory + i));
+			myprintf("%08x->%p\n", *((uint32_t *)(tx_src_memory + i)), (void *)(tx_dest_memory + i));
 		}
 		pos = i;
 		for(i = pos; i + 2 <= tx_size; i += 2) {
@@ -73,7 +73,7 @@ static int dma_tr(void *ppara) {
 	if(rx_size != 0) {
 		for(i = 0; i + 4 <= rx_size; i += 4) {
 			*((uint32_t *)(rx_dest_memory + i)) = readl(rx_src_memory + i);
-			//myprintf("%08x<-%p\n", *((uint32_t *)(rx_dest_memory + i)), (void *)(rx_src_memory + i));
+			myprintf("%08x<-%p\n", *((uint32_t *)(rx_dest_memory + i)), (void *)(rx_src_memory + i));
 		}
 		pos = i;
 		for(i = pos; i + 2 <= rx_size; i += 2) {

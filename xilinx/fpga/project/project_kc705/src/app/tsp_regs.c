@@ -14,6 +14,10 @@
 #define	PACK_BYTE_SIZE 188
 #define	PACK_WORD_SIZE (PACK_BYTE_SIZE / sizeof(uint32_t))
 
+typedef int bool;
+#define true (1 == 1)
+#define false (1 == 0)
+
 typedef enum {
 	ADDR_INDEX = 0,
 	ADDR_PID_INDEX,
@@ -25,9 +29,13 @@ typedef enum {
 } addr_t;
 
 #define ADDR_OFFSET(addr) (addr * 4)
-#define PID_INFO(ENABLE, PID) ((ENABLE << 16)/*match enable*/ + PID)
+#define PID_INFO(ENABLE, PID) (((ENABLE == 0 ? 0 : 1) << 16)/*match enable*/ + PID)
 
 #define BUFSIZE (PACK_BYTE_SIZE * 2)
+
+#define MONITOR_SIZE 2
+#define REPLACER_SIZE 16
+#define COMMON_REPLACER_SIZE 1
 
 static int stop = 0;
 
@@ -89,143 +97,97 @@ void *write_fn(void *arg) {
 	return NULL;
 }
 
-int test_pid_op(thread_arg_t *targ) {
+int select_slot(thread_arg_t *targ, uint32_t slot) {
 	int ret = 0;
-
-	int i;
-
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
-
-	for(i = 0; i < 2 + 16 + 1; i ++) {
-		int j;
-		int pid_slot = (i == 18) ? 16 : 1;
-		int pid = 0x0000;
-		int enable_pid = 0;
-
-		*pbuffer = i;//
-		ret = write_regs(targ, ADDR_INDEX, sizeof(uint32_t));
-		if (ret < 0) {
-			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-			return ret;
-		}
-
-		//set pid index 0
-		switch(i) {
-			case 0:
-				pid = 0x0000;
-				enable_pid = 1;
-				break;
-			case 1:
-				pid = 0x0001;
-				enable_pid = 1;
-				break;
-			case 2:
-				pid = 0x0000;
-				enable_pid = 0;
-				break;
-			case 3:
-				pid = 0x0000;
-				enable_pid = 0;
-				break;
-			case 18:
-				pid = 0x0000;
-				enable_pid = 0;
-				break;
-			default:
-				pid = 0x0000;
-				enable_pid = 0;
-				break;
-		}
-
-		for(j = 0; j < pid_slot; j++) {
-			*pbuffer = j;//
-			ret = write_regs(targ, ADDR_PID_INDEX, sizeof(uint32_t));
-			if (ret < 0) {
-				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-				return ret;
-			}
-			//set pid index 1---->
-			switch(j) {
-				case 0:
-					break;
-				case 1:
-					pid = 0x0000;
-					enable_pid = 0;
-					break;
-				default:
-					pid = 0x0000;
-					enable_pid = 0;
-					break;
-			}
-			*pbuffer = PID_INFO(enable_pid, pid);
-			ret = write_regs(targ, ADDR_PID, sizeof(uint32_t));
-			if (ret < 0) {
-				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-				return ret;
-			}
-
-		}
-
-		*pbuffer = (i == 0 || i == 1) ? 1 : 0;//
-		ret = write_regs(targ, ADDR_MATCH_ENABLE, sizeof(uint32_t));
-		if (ret < 0) {
-			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-			return ret;
-		}
-
-	}
-
-	for(i = 0; i < 2 + 16 + 1; i++) {
-		int j;
-		int pid_slot = (i == 18) ? 16 : 1;
-
-		*pbuffer = i;//
-		ret = write_regs(targ, ADDR_INDEX, sizeof(uint32_t));
-		if (ret < 0) {
-			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-			return ret;
-		}
-
-		for(j = 0; j < pid_slot; j++) {
-			*pbuffer = j;//
-			ret = write_regs(targ, ADDR_PID_INDEX, sizeof(uint32_t));
-			if (ret < 0) {
-				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-				return ret;
-			}
-
-			ret = read_regs(targ, ADDR_PID, sizeof(uint32_t));
-			if (ret < 0) {
-				printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-				return ret;
-			}
-			printf("slot %d pid_index %d pid:%08x\n", i, j, *pbuffer);
-		}
-
-		ret = read_regs(targ, ADDR_MATCH_ENABLE, sizeof(uint32_t));
-		if (ret < 0) {
-			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-			return ret;
-		}
-		printf("slot %d match enable:%s\n", i, *pbuffer == 1 ? "true" : *pbuffer == 0 ? "false" : "other");
-
-	}
-	return ret;
-}
-
-int write_ts_pack(thread_arg_t *targ, int slot) {
-	int ret = 0;
-	int i;
-	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
-	static int loc = 0x01;
-
-	int tx_size = (slot == 18) ? 188 * 2 : (slot >= 2 && slot < 18) ? 188 : 0;
-
-	*pbuffer = slot;//replacer #17
+	*pbuffer = slot;//
 	ret = write_regs(targ, ADDR_INDEX, sizeof(uint32_t));
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+
+	return ret;
+}
+
+int select_pid_slot(thread_arg_t *targ, uint32_t pid_slot) {
+	int ret = 0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	*pbuffer = pid_slot;//
+	ret = write_regs(targ, ADDR_PID_INDEX, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+
+	return ret;
+}
+
+int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable) {
+	int ret = 0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	*pbuffer = PID_INFO(pid_enable ? 1 : 0, pid);
+	ret = write_regs(targ, ADDR_PID, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+
+	return ret;
+}
+
+int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable) {
+	int ret = 0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	ret = read_regs(targ, ADDR_PID, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+	*pid = *pbuffer & 0xffff;
+	*pid_enable = (((*pbuffer >> 16) & 1) == 0) ? false : true;
+	return ret;
+}
+
+int set_slot_enable(thread_arg_t *targ, bool slot_enable) {
+	int ret = 0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	*pbuffer = slot_enable ? 1 : 0;//
+	ret = write_regs(targ, ADDR_MATCH_ENABLE, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+
+	return ret;
+}
+
+int get_slot_enable(thread_arg_t *targ, bool *slot_enable) {
+	int ret = 0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	ret = read_regs(targ, ADDR_MATCH_ENABLE, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+
+	*slot_enable = (*pbuffer == 1) ? true : false;
+
+	return ret;
+}
+
+int write_ts_data(thread_arg_t *targ, int tx_size, unsigned char slot) {
+	int ret = 0;
+	int i;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	if(tx_size <= 0) {
 		return ret;
 	}
 
@@ -240,9 +202,11 @@ int write_ts_pack(thread_arg_t *targ, int slot) {
 			case 2:
 				targ->buffer[i] = 0xff;
 				break;
+			case 3:
+				targ->buffer[i] = slot;
+				break;
 			case 188:
 				targ->buffer[i] = 0x47;
-				loc += 1;
 				break;
 			case 189:
 				targ->buffer[i] = 0x1f;
@@ -250,8 +214,11 @@ int write_ts_pack(thread_arg_t *targ, int slot) {
 			case 190:
 				targ->buffer[i] = 0xff;
 				break;
+			case 191:
+				targ->buffer[i] = slot;
+				break;
 			default:
-				targ->buffer[i] = loc;
+				targ->buffer[i] = 0;
 				break;
 		}
 	}
@@ -266,13 +233,14 @@ int write_ts_pack(thread_arg_t *targ, int slot) {
 	return ret;
 }
 
-int read_ts_pack(thread_arg_t *targ, int slot) {
+int read_ts_data(thread_arg_t *targ, int rx_size) {
 	int ret = 0;
-
 	int i;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
-	int rx_size = (slot == 18) ? 188 * 2 : (slot >= 0 && slot < 18) ? 188 : 0;
+	if(rx_size <= 0) {
+		return ret;
+	}
 
 	*pbuffer = 0;//any value
 	ret = write_regs(targ, ADDR_READ_REQUEST, sizeof(uint32_t));
@@ -282,7 +250,7 @@ int read_ts_pack(thread_arg_t *targ, int slot) {
 	}
 
 	*pbuffer = 0;
-	while(*pbuffer == 0) {
+	while(*pbuffer != 1) {
 		ret = read_regs(targ, ADDR_READ_REQUEST, sizeof(uint32_t));
 		if (ret < 0) {
 			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -308,22 +276,92 @@ int read_ts_pack(thread_arg_t *targ, int slot) {
 	return ret;
 }
 
-int test_ts_pack_write_read(thread_arg_t *targ) {
+int test_set(thread_arg_t *targ) {
 	int ret = 0;
 	int i;
 
-	for(i = 0; i < 19; i++) {
-		ret = write_ts_pack(targ, i);
-		if (ret < 0) {
-			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-			return ret;
+	for(i = 0; i < MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE; i++) {//slot
+		int j;
+
+		int pid_slot = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 16 : 1;
+		int tx_size = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 188 * 2 : ((i >= MONITOR_SIZE) && (i <  MONITOR_SIZE + REPLACER_SIZE)) ? 188 : 0;
+		bool slot_enable;
+
+		switch(i) {
+			case 0:
+				slot_enable = true;
+				break;
+			default:
+				slot_enable = false;
+				break;
 		}
 
-		ret = read_ts_pack(targ, i);
-		if (ret < 0) {
-			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-			return ret;
+		select_slot(targ, i);
+		for(j = 0; j < pid_slot; j++) {//pid_slot
+			uint32_t pid;
+			bool pid_enable;
+			switch(j) {
+				case 0:
+					pid = 0x1871;
+					pid_enable = true;
+					break;
+					break;
+				default:
+					pid = 0x0000;
+					pid_enable = false;
+					break;
+			}
+			select_pid_slot(targ, j);
+			set_pid(targ, pid, pid_enable);
 		}
+
+		write_ts_data(targ, tx_size, i);
+
+		set_slot_enable(targ, slot_enable);
+	}
+
+	return ret;
+}
+
+int test_get(thread_arg_t *targ) {
+	int ret = 0;
+	int i;
+
+	for(i = 0; i < MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE; i++) {//slot
+		int j;
+
+		int pid_slot = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 16 : 1;
+		int rx_size = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 188 * 2 : ((i >= 0) && (i <  MONITOR_SIZE + REPLACER_SIZE)) ? 188 : 0;
+		bool slot_enable;
+
+		select_slot(targ, i);
+		switch(i) {
+			case 0:
+				break;
+			default:
+				break;
+		}
+
+		printf("slot %d:\n", i);
+
+		for(j = 0; j < pid_slot; j++) {//pid_slot
+			uint32_t pid;
+			bool pid_enable;
+			switch(j) {
+				case 0:
+					break;
+				default:
+					break;
+			}
+			select_pid_slot(targ, j);
+			get_pid(targ, &pid, &pid_enable);
+			printf("pid: %08x; pid_enable: %s\n", pid, pid_enable ? "true" : "false");
+		}
+
+		get_slot_enable(targ, &slot_enable);
+		printf("slot_enable %s \n\n", slot_enable ? "true" : "false");
+
+		read_ts_data(targ, rx_size);
 	}
 
 	return ret;
@@ -335,9 +373,8 @@ void main_proc(thread_arg_t *arg) {
 	//printids("main_proc: ");
 
 	while(stop == 0) {
-		test_pid_op(targ);
-		test_ts_pack_write_read(targ);
-
+		test_set(targ);
+		test_get(targ);
 		return;
 	}
 }
