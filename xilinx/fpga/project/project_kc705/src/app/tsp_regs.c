@@ -194,31 +194,31 @@ int write_ts_data(thread_arg_t *targ, int tx_size, unsigned char slot) {
 	for(i = 0; i < tx_size; i++) {
 		switch(i) {
 			case 0:
-				targ->buffer[i] = 0x47;
+				targ->buffer[i] = slot;//0x47;
 				break;
 			case 1:
-				targ->buffer[i] = 0x1f;
+				targ->buffer[i] = slot;//0x1f;
 				break;
 			case 2:
-				targ->buffer[i] = 0xff;
+				targ->buffer[i] = slot;//0xff;
 				break;
 			case 3:
-				targ->buffer[i] = slot;
+				targ->buffer[i] = slot;//slot;
 				break;
 			case 188:
-				targ->buffer[i] = 0x47;
+				targ->buffer[i] = slot;//0x47;
 				break;
 			case 189:
-				targ->buffer[i] = 0x1f;
+				targ->buffer[i] = slot;//0x1f;
 				break;
 			case 190:
-				targ->buffer[i] = 0xff;
+				targ->buffer[i] = slot;//0xff;
 				break;
 			case 191:
-				targ->buffer[i] = slot;
+				targ->buffer[i] = slot;//slot;
 				break;
 			default:
-				targ->buffer[i] = 0;
+				targ->buffer[i] = slot;//0;
 				break;
 		}
 	}
@@ -286,25 +286,30 @@ int test_set(thread_arg_t *targ) {
 		int pid_slot = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 16 : 1;
 		int tx_size = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 188 * 2 : ((i >= MONITOR_SIZE) && (i <  MONITOR_SIZE + REPLACER_SIZE)) ? 188 : 0;
 		bool slot_enable;
+		uint32_t pid;
 
 		switch(i) {
 			case 0:
+				pid = 0x0000;
+				slot_enable = true;
+				break;
+			case 1:
+				pid = 0x0020;
 				slot_enable = true;
 				break;
 			default:
 				slot_enable = false;
+				continue;
 				break;
 		}
 
 		select_slot(targ, i);
 		for(j = 0; j < pid_slot; j++) {//pid_slot
-			uint32_t pid;
 			bool pid_enable;
+
 			switch(j) {
 				case 0:
-					pid = 0x1871;
 					pid_enable = true;
-					break;
 					break;
 				default:
 					pid = 0x0000;

@@ -76,15 +76,15 @@ module tb #(
 	wire ts_out_sync;
 	wire [7:0] ts_out;
 
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] send_valid = 0;
-	always @(posedge mpeg_clk) begin
-		if((send_valid >= 0) && (send_valid < 3)) begin
-			send_valid <= send_valid + 1;
-		end
-		else begin
-			send_valid <= 0;
-		end
-	end
+	reg [C_S_AXI_DATA_WIDTH-1 : 0] send_valid = 3;
+	//always @(posedge mpeg_clk) begin
+	//	if((send_valid >= 0) && (send_valid < 3)) begin
+	//		send_valid <= send_valid + 1;
+	//	end
+	//	else begin
+	//		send_valid <= 0;
+	//	end
+	//end
 
 	//send ts
 	reg [C_S_AXI_DATA_WIDTH-1 : 0] ts_index = 0;
