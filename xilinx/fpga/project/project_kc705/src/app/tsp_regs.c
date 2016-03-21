@@ -290,11 +290,11 @@ int test_set(thread_arg_t *targ) {
 
 		switch(i) {
 			case 0:
-				pid = 0x0000;
+				pid = 0x1412;
 				slot_enable = true;
 				break;
 			case 1:
-				pid = 0x0020;
+				pid = 0x0000;
 				slot_enable = true;
 				break;
 			default:

@@ -48,11 +48,11 @@ module tb #(
 	reg [OPT_MEM_ADDR_BITS - 1 : 0] raddr = 0;
 
 
-	wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] wstrb;
+	wire [(C_S_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb;
 
-	assign wstrb = {(C_S_AXI_DATA_WIDTH/8){1'b1}};
+	assign wstrb = {(C_S_AXI_DATA_WIDTH / 8){1'b1}};
 
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] wdata = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] wdata = 0;
 	reg start_test_replacer = 0;
 
 	initial begin
@@ -70,13 +70,13 @@ module tb #(
 	reg mpeg_valid = 0;
 	reg mpeg_sync = 0;
 
-	wire [C_S_AXI_DATA_WIDTH-1 : 0] rdata;
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] rdata;
 	wire ts_out_clk;
 	wire ts_out_valid;
 	wire ts_out_sync;
 	wire [7:0] ts_out;
 
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] send_valid = 3;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] send_valid = 3;
 	//always @(posedge mpeg_clk) begin
 	//	if((send_valid >= 0) && (send_valid < 3)) begin
 	//		send_valid <= send_valid + 1;
@@ -87,7 +87,7 @@ module tb #(
 	//end
 
 	//send ts
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] ts_index = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ts_index = 0;
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
 			mpeg_data <= 0;
@@ -119,10 +119,10 @@ module tb #(
 		end
 	end
 
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] read_delay = 0;
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] state_test = 0;
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] write_data_index = 0;
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] read_data_index = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] read_delay = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] state_test = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] write_data_index = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] read_data_index = 0;
 
 
 	always @(posedge clk) begin
