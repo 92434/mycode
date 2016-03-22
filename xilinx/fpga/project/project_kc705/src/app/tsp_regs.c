@@ -286,30 +286,39 @@ int test_set(thread_arg_t *targ) {
 		int pid_slot = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 16 : 1;
 		int tx_size = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 188 * 2 : ((i >= MONITOR_SIZE) && (i <  MONITOR_SIZE + REPLACER_SIZE)) ? 188 : 0;
 		bool slot_enable;
-		uint32_t pid;
 
 		switch(i) {
 			case 0:
-				pid = 0x1412;
 				slot_enable = true;
 				break;
 			case 1:
-				pid = 0x0000;
 				slot_enable = true;
 				break;
 			default:
-				slot_enable = false;
-				continue;
+				slot_enable = true;
 				break;
 		}
 
 		select_slot(targ, i);
 		for(j = 0; j < pid_slot; j++) {//pid_slot
+			uint32_t pid;
 			bool pid_enable;
 
 			switch(j) {
 				case 0:
-					pid_enable = true;
+					switch(i) {
+						case 0:
+							pid = 0x003d;
+							pid_enable = true;
+							break;
+						case 1:
+							pid = 0x003c;
+							break;
+						default:
+							pid = 0x0000;
+							pid_enable = false;
+							break;
+					}
 					break;
 				default:
 					pid = 0x0000;
@@ -339,14 +348,16 @@ int test_get(thread_arg_t *targ) {
 		int rx_size = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 188 * 2 : ((i >= 0) && (i <  MONITOR_SIZE + REPLACER_SIZE)) ? 188 : 0;
 		bool slot_enable;
 
-		select_slot(targ, i);
 		switch(i) {
-			case 0:
-				break;
+			//case 0:
+			//	break;
+			//case 1:
+			//	break;
 			default:
 				break;
 		}
 
+		select_slot(targ, i);
 		printf("slot %d:\n", i);
 
 		for(j = 0; j < pid_slot; j++) {//pid_slot
@@ -378,7 +389,7 @@ void main_proc(thread_arg_t *arg) {
 	//printids("main_proc: ");
 
 	while(stop == 0) {
-		test_set(targ);
+		//test_set(targ);
 		test_get(targ);
 		return;
 	}
