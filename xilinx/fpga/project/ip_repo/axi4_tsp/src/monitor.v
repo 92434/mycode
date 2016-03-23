@@ -4,6 +4,8 @@ module monitor #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32
 	)
 	(
+		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] matched_count = 0,
+
 		input wire rst_n,
 		input wire clk,
 
@@ -12,6 +14,7 @@ module monitor #(
 		input wire update_pid_request,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] pid_index,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] pid,
+
 
 		output wire [C_S_AXI_DATA_WIDTH - 1 : 0] out_pid,
 
@@ -82,6 +85,8 @@ module monitor #(
 
 			pump_data_state <= 0;
 			pump_data_index <= 0;
+
+			caching_ram_index <= 0;
 		end
 		else begin
 			case(pump_data_state)
@@ -97,6 +102,14 @@ module monitor #(
 					end
 				end
 				1: begin
+					if(matched_pid == 0) begin
+						caching_ram_index <= (caching_ram_index == 0) ? 1 : 0;
+						pump_data_state <= 2;
+					end
+					else begin
+					end
+				end
+				2: begin
 					if((pump_data_index >= 0) && (pump_data_index < PACK_WORD_SIZE)) begin
 						out_data_index <= pump_data_index;
 
@@ -165,36 +178,27 @@ module monitor #(
 	wire match_states;
 	assign match_states = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid) && (pid_match_enable == 1)) ? 1 : 0;
 
-	wire [C_S_AXI_DATA_WIDTH - 1 : 0] caching_ram_word_index;
-	wire [C_S_AXI_DATA_WIDTH - 1 : 0] caching_ram_byte_index;
-	assign caching_ram_word_index = (matched_index / 4);
-	assign caching_ram_byte_index = (matched_index % 4);
-
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
 			matched_pid <= 0;
 			matched_index <= 0;
-			caching_ram_index <= 0;
+
+			matched_count <= 0;
 		end
 		else begin
 			if((updated == 1) && (matched_pid == 1)) begin
 				if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
 					case(caching_ram_index)
 						0: begin
-							ram_for_data_0[caching_ram_word_index][(8 * caching_ram_byte_index) +: 8] <= mpeg_data_d3;
+							ram_for_data_0[matched_index / 4][(8 * (matched_index % 4)) +: 8] <= matched_index[8 - 1 : 0];
 						end
 						1: begin
-							ram_for_data_1[caching_ram_word_index][(8 * caching_ram_byte_index) +: 8] <= mpeg_data_d3;
+							ram_for_data_1[matched_index / 4][(8 * (matched_index % 4)) +: 8] <= matched_index[8 - 1 : 0];
 						end
 						default: begin
 						end
 					endcase
 
-					if((matched_index == PACK_BYTE_SIZE - 1) && (pump_data_state == 0)) begin
-						caching_ram_index <= (caching_ram_index == 0) ? 1 : 0;
-					end
-					else begin
-					end
 					matched_index <= matched_index + 1;
 				end
 				else begin
@@ -208,6 +212,7 @@ module monitor #(
 					matched_pid <= 1;
 
 					matched_index <= 0;
+					matched_count <= matched_count + 1;
 				end
 				else begin
 					matched_pid <= 0;

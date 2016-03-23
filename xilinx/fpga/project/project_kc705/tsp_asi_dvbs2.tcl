@@ -180,7 +180,6 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi4_tsp_0, and set properties
   set axi4_tsp_0 [ create_bd_cell -type ip -vlnv xiaofei:user:axi4_tsp:1.0 axi4_tsp_0 ]
-  set_property -dict [ list CONFIG.C_S00_AXI_ADDR_WIDTH {12} CONFIG.C_S00_AXI_ARUSER_WIDTH {1} CONFIG.C_S00_AXI_AWUSER_WIDTH {1} CONFIG.C_S00_AXI_BUSER_WIDTH {1} CONFIG.C_S00_AXI_RUSER_WIDTH {1} CONFIG.C_S00_AXI_WUSER_WIDTH {1} CONFIG.MONITOR_FILTER_NUM {2} CONFIG.REPLACER_FILTER_NUM {17}  ] $axi4_tsp_0
 
   # Create instance: axi_dma_0, and set properties
   set axi_dma_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma:7.1 axi_dma_0 ]

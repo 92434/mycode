@@ -4,8 +4,8 @@ module tsp_ram #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
 
-		parameter integer MONITOR_FILTER_NUM = 2,
-		parameter integer REPLACER_FILTER_NUM = 17,
+		parameter integer MONITOR_FILTER_NUM = 1,
+		parameter integer REPLACER_FILTER_NUM = 9,
 		parameter integer REPLACE_MATCH_PID_COUNT = 1,
 		parameter integer REPLACE_DATA_GROUPS = 1,
 		parameter integer COMMON_REPLACER_FILTER_NUM = 1,
@@ -48,6 +48,8 @@ module tsp_ram #(
 	localparam integer ADDR_MATCH_ENABLE = ADDR_PID + 1;
 
 	localparam integer ADDR_READ_REQUEST = ADDR_MATCH_ENABLE + 1;
+
+	localparam integer ADDR_MATCHED_COUNT = ADDR_READ_REQUEST + 1;
 
 	localparam integer ADDR_TS_DATA_BASE = 128;
 	localparam integer ADDR_TS_DATA_END = ADDR_TS_DATA_BASE + PACK_WORD_SIZE * COMMON_REPLACE_DATA_GROUPS;
@@ -116,6 +118,8 @@ module tsp_ram #(
 					ADDR_READ_REQUEST: begin
 						pump_data_request[current_slot] <= 1;
 					end
+					ADDR_MATCHED_COUNT: begin
+					end
 					default: begin
 						if((waddr >= ADDR_TS_DATA_BASE) && (waddr < ADDR_TS_DATA_END)) begin
 							current_data_index <= waddr - ADDR_TS_DATA_BASE;
@@ -153,6 +157,16 @@ module tsp_ram #(
 					rdata <= match_enable[current_slot];
 				ADDR_READ_REQUEST:
 					rdata <= pump_data_request_ready[current_slot];
+				ADDR_MATCHED_COUNT: begin
+					if((current_slot >= 0) && (current_slot < REPLACER_PID_BASE)) begin
+						rdata <= monitors_matched_count[current_slot];
+					end
+					else if((current_slot >= REPLACER_PID_BASE) && (current_slot < ALL_FILTERS_NUM))begin
+						rdata <= replacers_matched_count[current_slot - REPLACER_PID_BASE + 1];
+					end
+					else begin
+					end
+				end
 				default: begin
 					if((raddr >= ADDR_TS_DATA_BASE) && (raddr < ADDR_TS_DATA_END)) begin
 						rdata <= ram_for_data[raddr - ADDR_TS_DATA_BASE];
@@ -173,6 +187,7 @@ module tsp_ram #(
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_ram_for_pid [0 : MONITOR_FILTER_NUM - 1];
 
 	//for output
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_matched_count [0 : MONITOR_FILTER_NUM - 1];
 	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_pump_data_request_ready;
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_out_data[0 : MONITOR_FILTER_NUM - 1];
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_out_data_index[0 : MONITOR_FILTER_NUM - 1];
@@ -196,6 +211,7 @@ module tsp_ram #(
 					.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH)
 				)
 				monitor_inst (
+					.matched_count(monitors_matched_count[i]),
 					.rst_n(rst_n),
 					.clk(clk),
 
@@ -230,6 +246,7 @@ module tsp_ram #(
 
 
 	//for output
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_matched_count[0 : REPLACER_FILTER_NUM];
 	wire [REPLACER_FILTER_NUM : 0] replacers_data_request_ready;
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_out_data[0 : REPLACER_FILTER_NUM];
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_out_data_index[0 : REPLACER_FILTER_NUM];
@@ -268,6 +285,7 @@ module tsp_ram #(
 					.REPLACE_DATA_GROUPS(CUR_REPLACE_DATA_GROUPS)
 				)
 				replacer_inst (
+					.matched_count(replacers_matched_count[j]),
 					.rst_n(rst_n),
 					.clk(clk),
 

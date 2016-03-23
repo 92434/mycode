@@ -3,8 +3,8 @@
 module tsp_wrap #
 	(
 		// Users to add parameters here
-		parameter integer MONITOR_FILTER_NUM = 2,
-		parameter integer REPLACER_FILTER_NUM = 17,
+		parameter integer MONITOR_FILTER_NUM = 1,
+		parameter integer REPLACER_FILTER_NUM = 9,
 		parameter integer REPLACE_MATCH_PID_COUNT = 1,
 		parameter integer REPLACE_DATA_GROUPS = 1,
 		parameter integer COMMON_REPLACER_FILTER_NUM = 1,

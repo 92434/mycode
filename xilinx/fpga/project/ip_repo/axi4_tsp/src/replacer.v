@@ -6,6 +6,8 @@ module replacer #(
 		parameter integer REPLACE_DATA_GROUPS = 1
 	)
 	(
+		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] matched_count = 0,
+
 		input wire rst_n,
 		input wire clk,
 
@@ -202,6 +204,8 @@ module replacer #(
 			ts_out <= 0;
 			ts_out_valid <= 0;
 			ts_out_sync <= 0;
+
+			matched_count <= 0;
 		end
 		else begin
 			matched_state <= matched_pid;
@@ -249,6 +253,7 @@ module replacer #(
 						matched_pid <= 1;
 
 						matched_index <= 0;
+						matched_count <= matched_count + 1;
 					end
 					else begin
 						matched_pid <= 0;

@@ -24,6 +24,7 @@ typedef enum {
 	ADDR_PID,
 	ADDR_MATCH_ENABLE,
 	ADDR_READ_REQUEST,
+	ADDR_MATCHED_COUNT,
 	ADDR_TS_DATA_BASE = 128,
 	ADDR_TS_DATA_END = ADDR_TS_DATA_BASE + PACK_WORD_SIZE * 2,
 } addr_t;
@@ -33,8 +34,8 @@ typedef enum {
 
 #define BUFSIZE (PACK_BYTE_SIZE * 2)
 
-#define MONITOR_SIZE 2
-#define REPLACER_SIZE 16
+#define MONITOR_SIZE 1
+#define REPLACER_SIZE 8
 #define COMMON_REPLACER_SIZE 1
 
 static int stop = 0;
@@ -153,6 +154,19 @@ int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable) {
 	return ret;
 }
 
+int get_matched_count(thread_arg_t *targ, uint32_t *matched_count) {
+	int ret = 0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	ret = read_regs(targ, ADDR_MATCHED_COUNT, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+	*matched_count = *pbuffer; 
+	return ret;
+}
+
 int set_slot_enable(thread_arg_t *targ, bool slot_enable) {
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
@@ -250,12 +264,18 @@ int read_ts_data(thread_arg_t *targ, int rx_size) {
 	}
 
 	*pbuffer = 0;
+	i = 0;
 	while(*pbuffer != 1) {
 		ret = read_regs(targ, ADDR_READ_REQUEST, sizeof(uint32_t));
 		if (ret < 0) {
 			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 			return ret;
 		}
+		if(i >= 200) {
+			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+			return -1;
+		}
+		i++;
 	}
 
 	ret = read_regs(targ, ADDR_TS_DATA_BASE, rx_size);//will valid after 3 clock
@@ -292,10 +312,13 @@ int test_set(thread_arg_t *targ) {
 				slot_enable = true;
 				break;
 			case 1:
-				slot_enable = true;
+				slot_enable = false;
+				break;
+			case 2:
+				slot_enable = false;
 				break;
 			default:
-				slot_enable = true;
+				slot_enable = false;
 				break;
 		}
 
@@ -308,11 +331,16 @@ int test_set(thread_arg_t *targ) {
 				case 0:
 					switch(i) {
 						case 0:
-							pid = 0x003d;
+							pid = 0x0000;
 							pid_enable = true;
 							break;
 						case 1:
-							pid = 0x003c;
+							pid = 0x0000;
+							pid_enable = false;
+							break;
+						case 2:
+							pid = 0x0020;
+							pid_enable = false;
 							break;
 						default:
 							pid = 0x0000;
@@ -347,6 +375,7 @@ int test_get(thread_arg_t *targ) {
 		int pid_slot = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 16 : 1;
 		int rx_size = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 188 * 2 : ((i >= 0) && (i <  MONITOR_SIZE + REPLACER_SIZE)) ? 188 : 0;
 		bool slot_enable;
+		uint32_t matched_count;
 
 		switch(i) {
 			//case 0:
@@ -363,6 +392,7 @@ int test_get(thread_arg_t *targ) {
 		for(j = 0; j < pid_slot; j++) {//pid_slot
 			uint32_t pid;
 			bool pid_enable;
+
 			switch(j) {
 				case 0:
 					break;
@@ -374,8 +404,9 @@ int test_get(thread_arg_t *targ) {
 			printf("pid: %08x; pid_enable: %s\n", pid, pid_enable ? "true" : "false");
 		}
 
+		get_matched_count(targ, &matched_count);
 		get_slot_enable(targ, &slot_enable);
-		printf("slot_enable %s \n\n", slot_enable ? "true" : "false");
+		printf("slot_enable %s; matched_count: %08x(%d)\n", slot_enable ? "true" : "false", matched_count, matched_count);
 
 		read_ts_data(targ, rx_size);
 	}
@@ -389,7 +420,7 @@ void main_proc(thread_arg_t *arg) {
 	//printids("main_proc: ");
 
 	while(stop == 0) {
-		//test_set(targ);
+		test_set(targ);
 		test_get(targ);
 		return;
 	}

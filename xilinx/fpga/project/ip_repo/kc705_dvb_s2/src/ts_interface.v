@@ -3,6 +3,7 @@ module ts_interface(
 input								sys_clk,
 input								fs_en,
 input								glb_rst_n,
+input				[31:0]			SYS_Freq_Num,// 00:2M; 01:4M; 10; 7.5M // modified by 2014.09.22
 input				[31:0]			SYS_Baud_Num,// 00:2M; 01:4M; 10; 7.5M // modified by 2014.09.22
 input				[7:0]			ts_din,
 input								ts_syn,
@@ -20,7 +21,7 @@ input   			 				pilot_mode,
 output	reg					ts_clk
 );
 
-parameter SYS_Freq_Num = 32'd10000;// modified by 2014.09.22///////////////////////////////????????????????????????????
+//parameter SYS_Freq_Num = 32'd10000;// modified by 2014.09.22///////////////////////////////????????????????????????????
 //parameter SYS_Baud_Num = 32'd756;// modified by 2014.09.22
 
 //wire	[31:0] SYS_Baud_Num;// = 32'd756;// modified by 2014.09.22

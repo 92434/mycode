@@ -43,7 +43,7 @@ module gen_fs_en(
         clk_period_rdy <= 0;
     end
     else begin
-        byte_en_step   <= 2*SYS_Baud_Num;//32'd3036096 ;
+        byte_en_step   <= SYS_Baud_Num;//32'd3036096 ;
         clk_period          <= SYS_Freq_Num;//32'd259920000;
         clk_period_rdy <= 1;
     end
