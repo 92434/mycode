@@ -623,7 +623,7 @@ ts_interface uut_ts_interface(
 .fs_en										(fs_en),
 .glb_rst_n									(glb_rst_n),
 .SYS_Freq_Num								(SYS_Freq_Num),
-.SYS_Baud_Num								(SYS_Baud_Num / 2),// modified by 2014.09.22
+.SYS_Baud_Num								(SYS_Baud_Num),// modified by 2014.09.22
 .ts_din										(crc_byte_out),
 .ts_syn										(crc8_oe),
 .glb_start_en								(glb_start_en),

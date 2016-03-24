@@ -138,7 +138,7 @@ module tb #(
 					end
 					1: begin
 						waddr <= ADDR_INDEX;
-						wdata <= REPLACER_PID_BASE + 32;
+						wdata <= REPLACER_PID_BASE + 0;
 						wen <= 1;
 						ren <= 0;
 
@@ -175,13 +175,13 @@ module tb #(
 					end
 					6: begin
 						waddr <= ADDR_INDEX;
-						wdata <= REPLACER_PID_BASE + 32;
+						wdata <= REPLACER_PID_BASE + 1;
 
 						state_test <= 7;
 					end
 					7: begin
 						waddr <= ADDR_PID_INDEX;
-						wdata <= 1;
+						wdata <= 0;
 
 						state_test <= 8;
 					end
@@ -194,7 +194,7 @@ module tb #(
 					end
 					9: begin
 						if((write_data_index >= 0) && (write_data_index < PACK_BYTE_SIZE)) begin
-							waddr <= ADDR_TS_DATA_BASE + PACK_BYTE_SIZE / 4 + write_data_index / 4;
+							waddr <= ADDR_TS_DATA_BASE/* + PACK_BYTE_SIZE / 4*/ + write_data_index / 4;
 							wdata <= {filter2[write_data_index + 3], filter2[write_data_index + 2], filter2[write_data_index + 1], filter2[write_data_index + 0]};
 							write_data_index <= write_data_index + 4;
 						end

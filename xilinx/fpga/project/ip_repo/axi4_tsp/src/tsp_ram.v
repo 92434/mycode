@@ -136,6 +136,12 @@ module tsp_ram #(
 		end
 	end
 
+	//for output
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_out_pid [0 : MONITOR_FILTER_NUM - 1];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_out_pid[0 : REPLACER_FILTER_NUM];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_matched_count [0 : MONITOR_FILTER_NUM - 1];
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_matched_count[0 : REPLACER_FILTER_NUM];
+
 	always @(posedge clk) begin
 		if (ren == 1) begin
 			case(raddr)
@@ -187,11 +193,9 @@ module tsp_ram #(
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_ram_for_pid [0 : MONITOR_FILTER_NUM - 1];
 
 	//for output
-	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_matched_count [0 : MONITOR_FILTER_NUM - 1];
 	wire [MONITOR_FILTER_NUM - 1 : 0] monitors_pump_data_request_ready;
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_out_data[0 : MONITOR_FILTER_NUM - 1];
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_out_data_index[0 : MONITOR_FILTER_NUM - 1];
-	wire [C_S_AXI_DATA_WIDTH - 1 : 0] monitors_out_pid [0 : MONITOR_FILTER_NUM - 1];
 
 	//output assign
 	assign pump_data_request_ready[MONITOR_FILTER_NUM - 1 : 0] = monitors_pump_data_request_ready;
@@ -246,11 +250,9 @@ module tsp_ram #(
 
 
 	//for output
-	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_matched_count[0 : REPLACER_FILTER_NUM];
 	wire [REPLACER_FILTER_NUM : 0] replacers_data_request_ready;
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_out_data[0 : REPLACER_FILTER_NUM];
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_out_data_index[0 : REPLACER_FILTER_NUM];
-	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_out_pid[0 : REPLACER_FILTER_NUM];
 
 	wire [REPLACER_FILTER_NUM : 0] replacers_matched_state;
 	wire [REPLACER_FILTER_NUM : 0] replacers_basic_data;

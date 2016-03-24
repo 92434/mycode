@@ -68,7 +68,7 @@ module dvb_s2_ram #(
 	//08
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Freq_Num_reg = 10000;//sys_clk freq 
 	//09
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Baud_Num_reg = 5000;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Baud_Num_reg = 2500;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
 	//10
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] Freq_Inv_mode_reg = 0;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 	//11
@@ -139,7 +139,7 @@ module dvb_s2_ram #(
 			dvb_s_mode_reg <= 1;
 			TS_Source_mode_reg <= 2;
 			SYS_Freq_Num_reg <= 10000;
-			SYS_Baud_Num_reg <= 5000;
+			SYS_Baud_Num_reg <= 2500;
 			Freq_Inv_mode_reg <= 0;
 			fs_en_switch_reg <= 1;
 			debug_for_2x_oe_reg <= 0;

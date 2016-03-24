@@ -312,10 +312,13 @@ int test_set(thread_arg_t *targ) {
 				slot_enable = true;
 				break;
 			case 1:
-				slot_enable = false;
+				slot_enable = true;
 				break;
 			case 2:
-				slot_enable = false;
+				slot_enable = true;
+				break;
+			case 9:
+				slot_enable = true;
 				break;
 			default:
 				slot_enable = false;
@@ -331,22 +334,30 @@ int test_set(thread_arg_t *targ) {
 				case 0:
 					switch(i) {
 						case 0:
-							pid = 0x0000;
+							pid = 0x0205;
 							pid_enable = true;
 							break;
 						case 1:
-							pid = 0x0000;
-							pid_enable = false;
+							pid = 0x0533;
+							pid_enable = true;
 							break;
 						case 2:
-							pid = 0x0020;
-							pid_enable = false;
+							pid = 0x0534;
+							pid_enable = true;
+							break;
+						case 9:
+							pid = 0x0000;
+							pid_enable = true;
 							break;
 						default:
 							pid = 0x0000;
 							pid_enable = false;
 							break;
 					}
+					break;
+				case 1:
+					pid = 0x0001;
+					pid_enable = true;
 					break;
 				default:
 					pid = 0x0000;
@@ -378,10 +389,6 @@ int test_get(thread_arg_t *targ) {
 		uint32_t matched_count;
 
 		switch(i) {
-			//case 0:
-			//	break;
-			//case 1:
-			//	break;
 			default:
 				break;
 		}
@@ -394,8 +401,6 @@ int test_get(thread_arg_t *targ) {
 			bool pid_enable;
 
 			switch(j) {
-				case 0:
-					break;
 				default:
 					break;
 			}
