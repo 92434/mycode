@@ -208,31 +208,31 @@ int write_ts_data(thread_arg_t *targ, int tx_size, unsigned char slot) {
 	for(i = 0; i < tx_size; i++) {
 		switch(i) {
 			case 0:
-				targ->buffer[i] = slot;//0x47;
+				targ->buffer[i] = 0x47;
 				break;
 			case 1:
-				targ->buffer[i] = slot;//0x1f;
+				targ->buffer[i] = 0x1f;
 				break;
 			case 2:
-				targ->buffer[i] = slot;//0xff;
+				targ->buffer[i] = 0xff;
 				break;
 			case 3:
-				targ->buffer[i] = slot;//slot;
+				targ->buffer[i] = 0xff;
 				break;
 			case 188:
-				targ->buffer[i] = slot;//0x47;
+				targ->buffer[i] = 0x47;
 				break;
 			case 189:
-				targ->buffer[i] = slot;//0x1f;
+				targ->buffer[i] = 0x1f;
 				break;
 			case 190:
-				targ->buffer[i] = slot;//0xff;
+				targ->buffer[i] = 0xff;
 				break;
 			case 191:
-				targ->buffer[i] = slot;//slot;
+				targ->buffer[i] = 0xff;
 				break;
 			default:
-				targ->buffer[i] = slot;//0;
+				targ->buffer[i] = 0;
 				break;
 		}
 	}
@@ -355,7 +355,7 @@ int test_set(thread_arg_t *targ) {
 							break;
 					}
 					break;
-				case 1:
+				case 9:
 					pid = 0x0001;
 					pid_enable = true;
 					break;

@@ -113,8 +113,8 @@ void *write_fn(void *arg) {
 
 	//uint32_t fs_en_switch_reg = 0;
 	//uint32_t ts_source_mode_reg = 2;
-	uint32_t sys_freq_num_reg = 12000;
-	uint32_t sys_baud_num_reg = 1666;
+	uint32_t sys_freq_num_reg = 1000;
+	uint32_t sys_baud_num_reg = 200;
 	uint32_t debug_for_2x_oe_reg = 0;
 
 	//printids("write_fn: ");
