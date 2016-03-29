@@ -14,6 +14,7 @@ reg   			 				    		dvb_s_mode;// 0:dvb-s; 1:dvb-s2
 reg   			 				    		fs_en_switch;  //0:from outer;1:from inner                      
 //reg							[1:0]			SYS_Baud_mode;
 reg							[1:0]			TS_Source_mode;
+reg							[31:0]		    SYS_Freq_Num;
 reg							[31:0]		    SYS_Baud_Num;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
 reg											Freq_Inv_mode;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 //////////////////////////////////////////////////////////////
@@ -60,6 +61,7 @@ dvb_s2_system_top uut(
 .dvb_s_mode            (dvb_s_mode),
 //.SYS_Baud_mode			(SYS_Baud_mode),
 .TS_Source_mode		(TS_Source_mode),
+.SYS_Freq_Num       (SYS_Freq_Num),
 .SYS_Baud_Num       (SYS_Baud_Num),
 .Freq_Inv_mode      (Freq_Inv_mode),
 //////////////////////////////////////////////////////////////
@@ -295,7 +297,7 @@ end
 
 reg 	CRCEncoder_In_Bits[CRCEncoder_In_Bits_Len - 1:0];
 
-initial $readmemb("../../../CRCEncoder_In.txt",CRCEncoder_In_Bits);
+initial $readmemb("../../../../CRCEncoder_In.txt",CRCEncoder_In_Bits);
 
 initial // Clock generator
   begin
@@ -346,6 +348,7 @@ initial	// Test stimulus
   	dvb_s_mode = 1'b1;
 	//SYS_Baud_mode = 2'b00;//2'b10;
 	TS_Source_mode = 2'b01;
+	SYS_Freq_Num = 32'd10000;
 	SYS_Baud_Num  = 32'd2500;
 	Freq_Inv_mode = 1'b0;
 	fs_en_switch = 0;//0:from outer;1:from inner

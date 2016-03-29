@@ -424,9 +424,19 @@ def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, 
 		pin_no = get_gpio_pin_no(gpio, start, gpio_bank_base)
 		io_pin_no_map.update({io: pin_no})
 
+	
+	io_des_map = {
+			'FMC_LPC_LA30_P' : 'I2C_SDA0',
+			'FMC_LPC_LA30_N' : 'I2C_SCL0',
+			'FMC_LPC_LA32_P' : 'SPI_CS',
+			'FMC_LPC_LA20_N' : 'SPI_MISO',
+			'FMC_LPC_LA23_N' : 'SPI_MOSI',
+			'FMC_LPC_LA23_P' : 'SPI_SCK',
+	}
+
 	for i in pins_resistor:
 		#print '%s\t%s\t%s' %(io_pin_no_map.get(i[0][0]), i[1], str(i))
-		print '%s\t%s\t%s' %(io_pin_no_map.get(i[0][0]), i[1], i[0][0])
+                print '%s\t%s\t%s(%s)' %(io_pin_no_map.get(i[0][0]), i[1], i[0][0], io_des_map.get(i[0][0]))
 
 def kc705_pins_resistor_key_resistor(x):
 	r = x[1]
