@@ -35,6 +35,9 @@ module dvb_s2_wrap #
 		output wire ts_syn,// @ sys_clk
 		output wire ts_head,// @ sys_clk
 
+		output wire fs_en_inner,
+		output wire fs_en2_inner,
+
 		output wire symbol_1x_oe,
 		output wire signed [15 : 0] symbol_1x_re_out,
 		output wire signed [15 : 0] symbol_1x_im_out,
@@ -227,6 +230,9 @@ module dvb_s2_wrap #
 			.ts_din(ts_din),// @ sys_clk
 			.ts_syn(ts_syn),// @ sys_clk
 			.ts_head(ts_head),// @ sys_clk
+
+			.fs_en_inner(fs_en_inner),
+			.fs_en2_inner(fs_en2_inner),
 
 			.symbol_1x_oe(symbol_1x_oe),
 			.symbol_1x_re_out(symbol_1x_re_out),

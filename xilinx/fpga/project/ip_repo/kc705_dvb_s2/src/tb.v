@@ -54,6 +54,10 @@ module tb #(
 	wire fs_en_outer;
 	//assign fs_en_outer = (delay == 1) ? fs_en2_outer : 0;
 	assign fs_en_outer = 0;
+
+
+	wire fs_en_inner;
+	wire fs_en2_inner;
 	
 	reg [7:0] mpeg_data = 0;
 	wire mpeg_clk;
@@ -189,6 +193,9 @@ module tb #(
 		.ts_din(ts_din),// @ sys_clk
 		.ts_syn(ts_syn),// @ sys_clk
 		.ts_head(ts_head),// @ sys_clk
+
+		.fs_en_inner(fs_en_inner),
+		.fs_en2_inner(fs_en2_inner),
 
 		.symbol_1x_oe(symbol_1x_oe),
 		.symbol_1x_re_out(symbol_1x_re_out),

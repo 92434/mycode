@@ -33,6 +33,9 @@ module dvb_s2_ram #(
 		output wire ts_syn,// @ sys_clk
 		output wire ts_head,// @ sys_clk
 
+		output wire fs_en_inner,
+		output wire fs_en2_inner,
+
 		output wire symbol_1x_oe,
 		output wire signed [15 : 0] symbol_1x_re_out,
 		output wire signed [15 : 0] symbol_1x_im_out,
@@ -283,13 +286,13 @@ module dvb_s2_ram #(
 			.ts_syn(ts_syn),// @ sys_clk
 			.ts_head(ts_head),// @ sys_clk
 
+			.fs_en_inner(fs_en_inner),
+			.fs_en2_inner(fs_en2_inner),
+
 			.symbol_1x_oe(symbol_1x_oe),
 			.symbol_1x_re_out(symbol_1x_re_out),
 			.symbol_1x_im_out(symbol_1x_im_out)
 		);
-
-	wire symbol_2x_oe_origin;
-	assign symbol_2x_oe = (debug_for_2x_oe == 1) ? sys_clk : (((symbol_2x_oe_origin == 1) && (sys_clk == 1)) ? 1 : 0);
 
 	always @(posedge symbol_2x_oe) begin
 		if(rst_n == 0) begin
@@ -300,6 +303,9 @@ module dvb_s2_ram #(
 		end
 	end
 
+	wire symbol_2x_oe_origin;
+	wire signed [15 : 0] symbol_2x_re_out_origin;
+	wire signed [15 : 0] symbol_2x_im_out_origin;
 	dvb_s2_srrc_filter dvb_s2_srrc_filter_inst(
 			.hard_rst_n(hard_rst_n),// modified by 2014.09.22
 
@@ -310,7 +316,73 @@ module dvb_s2_ram #(
 			.symbol_1x_im_out(symbol_1x_im_out),
 
 			.symbol_2x_oe(symbol_2x_oe_origin),
-			.symbol_2x_re_out(symbol_2x_re_out),
-			.symbol_2x_im_out(symbol_2x_im_out)
+			.symbol_2x_re_out(symbol_2x_re_out_origin),
+			.symbol_2x_im_out(symbol_2x_im_out_origin)
 		);
+	
+	wire sys_clk_n;
+	wire fs_en2;
+	assign sys_clk_n = ~sys_clk;
+	assign fs_en2 = (fs_en_switch == 1) ? fs_en2_inner : fs_en2_outer;
+
+	reg r_enable = 0;
+	wire r_ready;
+	wire error_full;
+	wire error_empty;
+	wire [31 : 0] symbol_2x_out_origin;
+	wire [31 : 0] symbol_2x_out_origin_fifo;
+	assign symbol_2x_out_origin = {symbol_2x_re_out_origin, symbol_2x_im_out_origin};
+
+	my_fifo # (
+			.DATA_WIDTH(32),
+			.BULK_OF_DATA(1),
+			.BULK_DEPTH(32)
+		) symbol_out_fifo (
+			.rst_n(rst_n),
+			.wclk(sys_clk_n),
+			.rclk(fs_en2),
+			.wdata(symbol_2x_out_origin),
+			.rdata(symbol_2x_out_origin_fifo),
+			.w_enable(symbol_2x_oe_origin),
+			.r_enable(r_enable),
+			.r_ready(r_ready),
+			.error_full(error_full),
+			.error_empty(error_empty)
+		);
+
+	always @(posedge fs_en2) begin
+		if(rst_n == 0) begin
+			r_enable <= 0;
+		end
+		else begin
+			r_enable <= 0;
+			if(r_ready == 1) begin
+				r_enable <= 1;
+			end
+			else begin
+			end
+		end
+	end
+
+	reg [31 : 0] symbol_2x_out_origin_fifo_reg = 0;
+	reg symbol_2x_oe_enable = 0;
+	always @(posedge fs_en2) begin
+		if(rst_n == 0) begin
+			symbol_2x_out_origin_fifo_reg <= 0;
+		end
+		else begin
+			symbol_2x_oe_enable <= 0;
+			if(r_enable == 1) begin
+				symbol_2x_out_origin_fifo_reg <= symbol_2x_out_origin_fifo;
+				symbol_2x_oe_enable <= 1;
+			end
+			else begin
+			end
+		end
+	end
+
+	assign symbol_2x_oe = (symbol_2x_oe_enable == 1) ? fs_en2 : 0;
+	assign symbol_2x_re_out = symbol_2x_out_origin_fifo_reg[16 * 1 +: 16];
+	assign symbol_2x_im_out = symbol_2x_out_origin_fifo_reg[16 * 0 +: 16];
+
 endmodule

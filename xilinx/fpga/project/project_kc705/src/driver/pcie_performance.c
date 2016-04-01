@@ -17,6 +17,10 @@ static void test_performance(kc705_pci_dev_t *kc705_pci_dev) {
 	//mydebug("start_time.tv_sec:%lu\n", start_time.tv_sec);
 	//mydebug("stop_time.tv_usec:%lu\n", stop_time.tv_usec);
 	//mydebug("start_time.tv_usec:%lu\n", start_time.tv_usec);
+	//
+	if(kc705_pci_dev->dma_count == 0) {
+		return;
+	}
 
 	for(i = 0; i < kc705_pci_dev->dma_count; i++) {
 		pcie_dma_t *dma = kc705_pci_dev->dma + i;

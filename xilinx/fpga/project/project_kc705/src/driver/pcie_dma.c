@@ -107,6 +107,10 @@ static void free_dma_memory(kc705_pci_dev_t *kc705_pci_dev) {
 int alloc_kc705_dma(kc705_pci_dev_t *kc705_pci_dev) {
 	int ret = 0;
 
+	if(DMA_MAX == 0) {
+		return ret;
+	}
+
 	kc705_pci_dev->dma = (pcie_dma_t *)vzalloc(sizeof(pcie_dma_t) * DMA_MAX);
 	if(kc705_pci_dev->dma == NULL) {
 		mydebug("alloc kc705_pci_dev->dma failed.\n");
