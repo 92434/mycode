@@ -297,7 +297,7 @@ end
 
 reg 	CRCEncoder_In_Bits[CRCEncoder_In_Bits_Len - 1:0];
 
-initial $readmemb("../../../../CRCEncoder_In.txt",CRCEncoder_In_Bits);
+initial $readmemb("../../../../testUseCase/Mode_0_0_6_0/anotherSimul/CRCEncoder_In.txt",CRCEncoder_In_Bits);
 
 initial // Clock generator
   begin
@@ -781,10 +781,10 @@ always @(negedge sys_clk or negedge glb_rst_n)begin
 		
 	if(mod_mode_cfg == 2'b00)
 		case({uut.symbol_1x_re_out,uut.symbol_1x_im_out})
-	32'hf4b0f4b0:$fwrite(symbol_out_file_pointer,"%s \n","-0.70710678118654757 - 0.70710678118654757j");
-	32'hf4b00b50:$fwrite(symbol_out_file_pointer,"%s \n","-0.70710678118654757 + 0.70710678118654757j");
-	32'h0b50f4b0:$fwrite(symbol_out_file_pointer,"%s \n","0.70710678118654757 - 0.70710678118654757j");
-	32'h0b500b50:$fwrite(symbol_out_file_pointer,"%s \n","0.70710678118654757 + 0.70710678118654757j");
+	    32'hE960E960:$fwrite(symbol_out_file_pointer,"%s \n","-0.70710678118654757 - 0.70710678118654757j");
+        32'hE96016A0:$fwrite(symbol_out_file_pointer,"%s \n","-0.70710678118654757 + 0.70710678118654757j");
+        32'h16A0E960:$fwrite(symbol_out_file_pointer,"%s \n","0.70710678118654757 - 0.70710678118654757j");
+        32'h16A016A0:$fwrite(symbol_out_file_pointer,"%s \n","0.70710678118654757 + 0.70710678118654757j");
 	endcase
 	else begin
 		$fwrite(symbol_out_file_pointer,"%08f %08f j \n",uut.symbol_1x_re_out/(2^12),uut.symbol_1x_im_out/(2^12));

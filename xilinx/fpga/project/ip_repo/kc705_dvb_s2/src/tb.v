@@ -64,15 +64,15 @@ module tb #(
 	reg mpeg_valid = 0;
 	reg mpeg_sync = 0;
 
-	reg [C_S_AXI_DATA_WIDTH-1 : 0] send_valid = 0;
-	always @(posedge mpeg_clk) begin
-		if((send_valid >= 0) && (send_valid < 3)) begin
-			send_valid <= send_valid + 1;
-		end
-		else begin
-			send_valid <= 0;
-		end
-	end
+	reg [C_S_AXI_DATA_WIDTH-1 : 0] send_valid = 3;
+	//always @(posedge mpeg_clk) begin
+	//	if((send_valid >= 0) && (send_valid < 3)) begin
+	//		send_valid <= send_valid + 1;
+	//	end
+	//	else begin
+	//		send_valid <= 0;
+	//	end
+	//end
 
 	//send ts
 	reg [C_S_AXI_DATA_WIDTH-1 : 0] ts_index = 0;
@@ -87,7 +87,7 @@ module tb #(
 			mpeg_sync <= 0;
 			mpeg_valid <= 0;
 			if((ts_index >= 0) && (ts_index < (CRCEncoder_In_Bits_Len / 8)/*MPEG_LENGTH*/)) begin
-				if((send_valid == 3)) begin
+				if((send_valid == 3) && (ts_clk == 1)) begin
 					mpeg_valid <= 1;
 
 					//mpeg_data <= mpeg_in[ts_index];
@@ -118,7 +118,8 @@ module tb #(
 	end
 
 	clkgen #(.clk_period(1)) xiaofeiclk1(.clk(clk));
-	clkgen #(.clk_period(2)) xiaofeiclk2(.clk(mpeg_clk));
+	//clkgen #(.clk_period(2)) xiaofeiclk2(.clk(mpeg_clk));
+	assign mpeg_clk = clk;
 
 
 	wire ts_clk;
@@ -151,19 +152,19 @@ module tb #(
 		if(rst_n == 0) begin
 		end
 		else begin
-			if((dvb_s2_inst.dvb_s2_ram_inst.dvb_s2_system_top_inst.mapper_oe == 1)) begin
+			if((dvb_s2_inst.dvb_s2_ram_inst.dvb_s2_system_top_inst.symbol_1x_oe == 1)) begin
 
-				case({dvb_s2_inst.dvb_s2_ram_inst.dvb_s2_system_top_inst.mapper_symbol_re_out, dvb_s2_inst.dvb_s2_ram_inst.dvb_s2_system_top_inst.mapper_symbol_im_out})
-					32'hf4b0f4b0: begin
+				case({dvb_s2_inst.dvb_s2_ram_inst.dvb_s2_system_top_inst.symbol_1x_re_out, dvb_s2_inst.dvb_s2_ram_inst.dvb_s2_system_top_inst.symbol_1x_im_out})
+					32'hE960E960: begin
 						$fwrite(symbol_1x_out_sim_file_pointer, "%s\n", "-0.70710678118654757 - 0.70710678118654757j");
 					end
-					32'hf4b00b50: begin
+					32'hE96016A0: begin
 						$fwrite(symbol_1x_out_sim_file_pointer, "%s\n", "-0.70710678118654757 + 0.70710678118654757j");
 					end
-					32'h0b50f4b0: begin
+					32'h16A0E960: begin
 						$fwrite(symbol_1x_out_sim_file_pointer, "%s\n", "0.70710678118654757 - 0.70710678118654757j");
 					end
-					32'h0b500b50: begin
+					32'h16A016A0: begin
 						$fwrite(symbol_1x_out_sim_file_pointer, "%s\n", "0.70710678118654757 + 0.70710678118654757j");
 					end
 					default: begin

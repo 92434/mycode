@@ -291,7 +291,7 @@ module ldpc_check_ram_noip(
 
     
  always @(posedge clock)begin
-        if(~aclr)begin
+        if(aclr)begin
         ram_buff_00 <= 45'h000000000000;
         ram_buff_01 <= 45'h000000000000;
         ram_buff_02 <= 45'h000000000000;
@@ -812,7 +812,7 @@ module ldpc_check_ram_noip(
  end   
     
  always @(posedge clock)begin
-         if(~aclr)begin
+         if(aclr)begin
          q <= 45'h000000000000;
          end
          else if(rden)begin
