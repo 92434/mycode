@@ -351,7 +351,7 @@ initial	// Test stimulus
 	SYS_Freq_Num = 32'd10000;
 	SYS_Baud_Num  = 32'd2500;
 	Freq_Inv_mode = 1'b0;
-	fs_en_switch = 0;//0:from outer;1:from inner
+	fs_en_switch = 1;//0:from outer;1:from inner
    hard_rst_n 	= 1;	 
 	//ts_clk_h264out = 0;
 #120 hard_rst_n = 0;
@@ -498,8 +498,13 @@ end
 	  input_cnt <= 0;
 	end
 	else if((ts_clk == 1)) begin
-		input_cnt <= input_cnt + 1;
 		ts_din 	<= {CRCEncoder_In_Bits[8*input_cnt + 0],CRCEncoder_In_Bits[8*input_cnt + 1],CRCEncoder_In_Bits[8*input_cnt + 2],CRCEncoder_In_Bits[8*input_cnt + 3],CRCEncoder_In_Bits[8*input_cnt + 4],CRCEncoder_In_Bits[8*input_cnt + 5],CRCEncoder_In_Bits[8*input_cnt + 6],CRCEncoder_In_Bits[8*input_cnt + 7]};
+		if(input_cnt == ((CRCEncoder_In_Bits_Len / 8) - 1)) begin
+			input_cnt <= 0;
+		end
+		else begin
+			input_cnt <= input_cnt + 1;
+		end
 	end
 	else begin
 	   
@@ -566,7 +571,8 @@ end
 	genpilot_symbol_out_file_pointer 				= $fopen("genpilot_symbol_out.txt","w");
 	genplheader_symbol_out_file_pointer 			= $fopen("genplheader_symbol_out.txt","w");
 	plframer_symbol_out_file_pointer 				= $fopen("plframer_symbol_out.txt","w");
-	symbol_out_file_pointer 							= $fopen("symbol_out.txt","w");
+	//symbol_out_file_pointer 							= $fopen("symbol_out.txt","w");
+	symbol_out_file_pointer 							= $fopen("../../../../testUseCase/Mode_0_0_6_0/anotherSimul/symbol_1x_out_sim_orig.txt","w");
 	
 	//ldpc_encoder_top_byte_out_1x_file_pointer 	= $fopen("ldpc_encoder_top_byte_out_1x.txt","w");
 //	sys_ctrl_out_1x_file_pointer 							= $fopen("sys_ctrl_out_1x.txt","w");
@@ -737,10 +743,10 @@ always @(negedge sys_clk or negedge glb_rst_n)begin
 		
 	if(mod_mode_cfg == 2'b00)
 		case({uut.genplheader_symbol_re_out,uut.genplheader_symbol_im_out})
-	32'hf4b0f4b0:$fwrite(genplheader_symbol_out_file_pointer,"%s \n","-0.70710678118654757 - 0.70710678118654757j");
-	32'hf4b00b50:$fwrite(genplheader_symbol_out_file_pointer,"%s \n","-0.70710678118654757 + 0.70710678118654757j");
-	32'h0b50f4b0:$fwrite(genplheader_symbol_out_file_pointer,"%s \n","0.70710678118654757 - 0.70710678118654757j");
-	32'h0b500b50:$fwrite(genplheader_symbol_out_file_pointer,"%s \n","0.70710678118654757 + 0.70710678118654757j");
+	32'hf4b0f4b0:$fwrite(genplheader_symbol_out_file_pointer,"%s\n","-0.70710678118654757 - 0.70710678118654757j");
+	32'hf4b00b50:$fwrite(genplheader_symbol_out_file_pointer,"%s\n","-0.70710678118654757 + 0.70710678118654757j");
+	32'h0b50f4b0:$fwrite(genplheader_symbol_out_file_pointer,"%s\n","0.70710678118654757 - 0.70710678118654757j");
+	32'h0b500b50:$fwrite(genplheader_symbol_out_file_pointer,"%s\n","0.70710678118654757 + 0.70710678118654757j");
 	endcase
 	else begin
 		$fwrite(genplheader_symbol_out_file_pointer,"%08f %08f j \n",uut.genplheader_symbol_re_out/(2^12),uut.genplheader_symbol_im_out/(2^12));
@@ -777,7 +783,7 @@ always @(negedge sys_clk or negedge glb_rst_n)begin
 	if(~glb_rst_n)begin
 		
 	end
-	else if((uut.symbol_1x_oe == 1)&&(fs_en == 1)) begin
+	else if((uut.symbol_1x_oe == 1)) begin
 		
 	if(mod_mode_cfg == 2'b00)
 		case({uut.symbol_1x_re_out,uut.symbol_1x_im_out})

@@ -67,7 +67,7 @@ module dvb_s2_ram #(
 	//06
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] dvb_s_mode_reg = 1;// 0:dvb-s; 1:dvb-s2
 	//07
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] TS_Source_mode_reg = 2;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] TS_Source_mode_reg = 1;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
 	//08
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Freq_Num_reg = 10000;//sys_clk freq 
 	//09
@@ -140,7 +140,7 @@ module dvb_s2_ram #(
 			srrc_mode_reg <= 2;
 			dvb_s_convolution_mode_reg <= 0;
 			dvb_s_mode_reg <= 1;
-			TS_Source_mode_reg <= 2;
+			TS_Source_mode_reg <= 1;
 			SYS_Freq_Num_reg <= 10000;
 			SYS_Baud_Num_reg <= 2500;
 			Freq_Inv_mode_reg <= 0;

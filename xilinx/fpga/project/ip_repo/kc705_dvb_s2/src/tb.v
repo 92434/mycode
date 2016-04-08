@@ -17,7 +17,7 @@ module tb #(
 	reg CRCEncoder_In_Bits[CRCEncoder_In_Bits_Len - 1 : 0];
 
 	wire clk;
-	reg rst_n = 0;
+	reg rst_n = 1;
 
 	integer symbol_1x_out_sim_file_pointer;
 	integer symbol_1x_out_sim_file_pointer_null;
@@ -28,7 +28,9 @@ module tb #(
 		$readmemb("../../../../testUseCase/Mode_0_0_6_0/anotherSimul/CRCEncoder_In.txt",CRCEncoder_In_Bits);
 		symbol_1x_out_sim_file_pointer = $fopen("../../../../testUseCase/Mode_0_0_6_0/anotherSimul/symbol_1x_out_sim.txt", "w");
 		symbol_1x_out_sim_file_pointer_null = $fopen("../../../../testUseCase/Mode_0_0_6_0/anotherSimul/symbol_1x_out_sim_null.txt", "w");
-		#2;
+		#120;
+		rst_n = 0;
+		#120;
 		rst_n = 1;
 	end
 
@@ -106,7 +108,13 @@ module tb #(
 					end
 					else begin
 					end
-					ts_index <= ts_index + 1;
+
+					if(ts_index == ((CRCEncoder_In_Bits_Len / 8) - 1)) begin
+						ts_index <= 0;
+					end
+					else begin
+						ts_index <= ts_index + 1;
+					end
 				end
 				else begin
 				end
@@ -117,8 +125,10 @@ module tb #(
 		end
 	end
 
-	clkgen #(.clk_period(1)) xiaofeiclk1(.clk(clk));
+	wire clk_orig;
+	clkgen #(.clk_period(15)) xiaofeiclk1(.clk(clk_orig));
 	//clkgen #(.clk_period(2)) xiaofeiclk2(.clk(mpeg_clk));
+	assign clk = ~clk_orig;
 	assign mpeg_clk = clk;
 
 
