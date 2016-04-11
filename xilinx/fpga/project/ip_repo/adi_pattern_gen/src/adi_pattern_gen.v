@@ -16,18 +16,18 @@ module adi_pattern_gen # (
 		16'h7fff,
 		16'h5a82,
 		16'h0000,
-		16'hda82,
-		16'hffff,
-		16'hda82,
+		16'ha57e,
+		16'h8001,
+		16'ha57e,
 		16'h0000,
 		16'h5a82
 	};
 
 	reg [16 * 8 - 1 : 0] im_ram = {
 		16'h0000,
-		16'hda82,
-		16'hffff,
-		16'hda82,
+		16'ha57e,
+		16'h8001,
+		16'ha57e,
 		16'h0000,
 		16'h5a82,
 		16'h7fff,

@@ -43,47 +43,105 @@ static int dma_tr(void *ppara) {
 
 	uint8_t *tx_dest_memory;
 	uint8_t *rx_src_memory;
-	int i;
-	int pos;
 
 	reset_list_buffer(dma->list);
 
 	tx_dest_memory = (uint8_t *)(dma_base_vaddr + tx_dest_axi_addr);
 	rx_src_memory = (uint8_t *)(dma_base_vaddr + rx_src_axi_addr);
 
-	myprintf("tx_dest_memory:%p\n", tx_dest_memory);
-
 	if(tx_size != 0) {
-		for(i = 0; i + 4 <= tx_size; i += 4) {
-			writel(*((uint32_t *)(tx_src_memory + i)), tx_dest_memory + i);
-			myprintf("%08x->%p\n", *((uint32_t *)(tx_src_memory + i)), (void *)(tx_dest_memory + i));
+		int start = tx_dest_axi_addr;
+		int end = start + tx_size;
+
+		if(((start + 1) <= end) && (start % 2 != 0)) {
+			writeb(*((uint8_t *)tx_src_memory), tx_dest_memory);
+			//myprintf("%02x->%p\n", *((uint8_t *)tx_src_memory), (void *)tx_dest_memory);
+			tx_src_memory += 1;
+			tx_dest_memory += 1;
+			start += 1;
 		}
-		pos = i;
-		for(i = pos; i + 2 <= tx_size; i += 2) {
-			writew(*((uint16_t *)(tx_src_memory + i)), tx_dest_memory + i);
-			//myprintf("%04x->%p\n", *((uint16_t *)(tx_src_memory + i)), (void *)(tx_dest_memory + i));
+
+		if(((start + 2) <= end) && (start % 4 != 0)) {
+			writew(*((uint16_t *)tx_src_memory), tx_dest_memory);
+			//myprintf("%04x->%p\n", *((uint16_t *)tx_src_memory), (void *)tx_dest_memory);
+			tx_src_memory += 2;
+			tx_dest_memory += 2;
+			start += 2;
 		}
-		pos = i;
-		for(i = pos; i + 1 <= tx_size; i += 1) {
-			writeb(*((uint8_t *)(tx_src_memory + i)), tx_dest_memory + i);
-			//myprintf("%02x->%p\n", *((uint8_t *)(tx_src_memory + i)), (void *)(tx_dest_memory + i));
+
+		for(; (start + 4) <= end; start += 4) {
+			writel(*((uint32_t *)tx_src_memory), tx_dest_memory);
+			//myprintf("%08x->%p\n", *((uint32_t *)tx_src_memory), (void *)tx_dest_memory);
+			tx_src_memory += 4;
+			tx_dest_memory += 4;
+		}
+		
+		if((start + 2) <= end) {
+			writew(*((uint16_t *)tx_src_memory), tx_dest_memory);
+			//myprintf("%04x->%p\n", *((uint16_t *)tx_src_memory), (void *)tx_dest_memory);
+			tx_src_memory += 2;
+			tx_dest_memory += 2;
+			start += 2;
+		}
+
+		if((start + 1) <= end) {
+			writeb(*((uint8_t *)tx_src_memory), tx_dest_memory);
+			//myprintf("%02x->%p\n", *((uint8_t *)tx_src_memory), (void *)tx_dest_memory);
+			tx_src_memory += 1;
+			tx_dest_memory += 1;
+			start += 1;
+		}
+
+		if(start != end) {
+			mydebug("tx:start:%x, end:%x\n", start, end);
 		}
 	}
 
 	if(rx_size != 0) {
-		for(i = 0; i + 4 <= rx_size; i += 4) {
-			*((uint32_t *)(rx_dest_memory + i)) = readl(rx_src_memory + i);
-			myprintf("%08x<-%p\n", *((uint32_t *)(rx_dest_memory + i)), (void *)(rx_src_memory + i));
+		int start = rx_src_axi_addr;
+		int end = start + rx_size;
+
+		if(((start + 1) <= end) && (start % 2 != 0)) {
+			*((uint8_t *)rx_dest_memory) = readb(rx_src_memory);
+			//myprintf("%02x<-%p\n", *((uint8_t *)rx_dest_memory), (void *)rx_src_memory);
+			rx_dest_memory += 1;
+			rx_src_memory += 1;
+			start += 1;
 		}
-		pos = i;
-		for(i = pos; i + 2 <= rx_size; i += 2) {
-			*((uint16_t *)(rx_dest_memory + i)) = readw(rx_src_memory + i);
-			//myprintf("%04x<-%p\n", *((uint16_t *)(rx_dest_memory + i)), (void *)(rx_src_memory + i));
+
+		if(((start + 2) <= end) && (start % 4 != 0)) {
+			*((uint16_t *)rx_dest_memory) = readw(rx_src_memory);
+			//myprintf("%04x<-%p\n", *((uint16_t *)rx_dest_memory), (void *)rx_src_memory);
+			rx_dest_memory += 2;
+			rx_src_memory += 2;
+			start += 2;
 		}
-		pos = i;
-		for(i = pos; i + 1 <= rx_size; i += 1) {
-			*((uint8_t *)(rx_dest_memory + i)) = readb(rx_src_memory + i);
-			//myprintf("%02x<-%p\n", *((uint8_t *)(rx_dest_memory + i)), (void *)(rx_src_memory + i));
+
+		for(; (start + 4) <= end; start += 4) {
+			*((uint32_t *)rx_dest_memory) = readl(rx_src_memory);
+			//myprintf("%08x<-%p\n", *((uint32_t *)rx_dest_memory), (void *)rx_src_memory);
+			rx_dest_memory += 4;
+			rx_src_memory += 4;
+		}
+		
+		if((start + 2) <= end) {
+			*((uint16_t *)rx_dest_memory) = readw(rx_src_memory);
+			//myprintf("%04x<-%p\n", *((uint16_t *)rx_dest_memory), (void *)rx_src_memory);
+			rx_dest_memory += 2;
+			rx_src_memory += 2;
+			start += 2;
+		}
+
+		if((start + 1) <= end) {
+			*((uint8_t *)rx_dest_memory) = readb(rx_src_memory);
+			//myprintf("%02x<-%p\n", *((uint8_t *)rx_dest_memory), (void *)rx_src_memory);
+			rx_dest_memory += 1;
+			rx_src_memory += 1;
+			start += 1;
+		}
+
+		if(start != end) {
+			mydebug("rx:start:%x, end:%x\n", start, end);
 		}
 	}
 
