@@ -654,252 +654,148 @@ set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[22]}]
 # generator constrain for ip signals
 # ----------------------------------------------------------------------------------------------------
 
-#FMC_LPC_LA25_P
-set_property PACKAGE_PIN AC26 [get_ports {mpeg_clk}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_clk}]
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {mpeg_clk}]
-
-#FMC_LPC_LA29_P
-set_property PACKAGE_PIN AE28 [get_ports {mpeg_valid}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_valid}]
-
-#FMC_LPC_LA24_P
-set_property PACKAGE_PIN AG30 [get_ports {mpeg_data[0]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_data[0]}]
-
-#FMC_LPC_LA24_N
-set_property PACKAGE_PIN AH30 [get_ports {mpeg_data[1]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_data[1]}]
-
-#FMC_LPC_LA26_P
-set_property PACKAGE_PIN AK29 [get_ports {mpeg_data[2]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_data[2]}]
-
-#FMC_LPC_LA31_P
-set_property PACKAGE_PIN AD29 [get_ports {mpeg_data[3]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_data[3]}]
-
-#FMC_LPC_LA31_N
-set_property PACKAGE_PIN AE29 [get_ports {mpeg_data[4]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_data[4]}]
-
-#FMC_LPC_LA28_P
-set_property PACKAGE_PIN AE30 [get_ports {mpeg_data[5]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_data[5]}]
-
-#FMC_LPC_LA28_N
-set_property PACKAGE_PIN AF30 [get_ports {mpeg_data[6]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_data[6]}]
-
-#FMC_LPC_LA29_N
-set_property PACKAGE_PIN AF28 [get_ports {mpeg_data[7]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_data[7]}]
-
-#FMC_LPC_LA25_N
-set_property PACKAGE_PIN AD26 [get_ports {mpeg_sync}]
-set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_sync}]
-
 #FMC_LPC_LA10_P
-set_property PACKAGE_PIN AJ24 [get_ports {symbol_2x_oe}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_oe}]
-set_property slew FAST [get_nets {symbol_2x_oe}]
+set_property PACKAGE_PIN AJ24 [get_ports {oe}]
+set_property IOSTANDARD LVCMOS15 [get_ports {oe}]
+set_property slew FAST [get_ports {oe}]
 
 #FMC_LPC_LA00_CC_P
-set_property PACKAGE_PIN AD23 [get_ports {symbol_2x_re_out[0]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[0]}]
+set_property PACKAGE_PIN AD23 [get_ports {re[0]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[0]}]
 
 #FMC_LPC_LA02_P
-set_property PACKAGE_PIN AF20 [get_ports {symbol_2x_re_out[1]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[1]}]
+set_property PACKAGE_PIN AF20 [get_ports {re[1]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[1]}]
 
 #FMC_LPC_LA00_CC_N
-set_property PACKAGE_PIN AE24 [get_ports {symbol_2x_re_out[2]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[2]}]
+set_property PACKAGE_PIN AE24 [get_ports {re[2]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[2]}]
 
 #FMC_LPC_LA02_N
-set_property PACKAGE_PIN AF21 [get_ports {symbol_2x_re_out[3]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[3]}]
+set_property PACKAGE_PIN AF21 [get_ports {re[3]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[3]}]
 
 #FMC_LPC_LA03_P
-set_property PACKAGE_PIN AG20 [get_ports {symbol_2x_re_out[4]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[4]}]
+set_property PACKAGE_PIN AG20 [get_ports {re[4]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[4]}]
 
 #FMC_LPC_LA04_P
-set_property PACKAGE_PIN AH21 [get_ports {symbol_2x_re_out[5]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[5]}]
+set_property PACKAGE_PIN AH21 [get_ports {re[5]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[5]}]
 
 #FMC_LPC_LA03_N
-set_property PACKAGE_PIN AH20 [get_ports {symbol_2x_re_out[6]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[6]}]
+set_property PACKAGE_PIN AH20 [get_ports {re[6]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[6]}]
 
 #FMC_LPC_LA04_N
-set_property PACKAGE_PIN AJ21 [get_ports {symbol_2x_re_out[7]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[7]}]
+set_property PACKAGE_PIN AJ21 [get_ports {re[7]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[7]}]
 
 #FMC_LPC_LA07_P
-set_property PACKAGE_PIN AG25 [get_ports {symbol_2x_re_out[8]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[8]}]
+set_property PACKAGE_PIN AG25 [get_ports {re[8]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[8]}]
 
 #FMC_LPC_LA08_P
-set_property PACKAGE_PIN AJ22 [get_ports {symbol_2x_re_out[9]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[9]}]
+set_property PACKAGE_PIN AJ22 [get_ports {re[9]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[9]}]
 
 #FMC_LPC_LA01_CC_P
-set_property PACKAGE_PIN AE23 [get_ports {symbol_2x_re_out[10]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[10]}]
+set_property PACKAGE_PIN AE23 [get_ports {re[10]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[10]}]
 
 #FMC_LPC_LA01_CC_N
-set_property PACKAGE_PIN AF23 [get_ports {symbol_2x_re_out[11]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[11]}]
+set_property PACKAGE_PIN AF23 [get_ports {re[11]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[11]}]
 
 #FMC_LPC_LA06_P
-set_property PACKAGE_PIN AK20 [get_ports {symbol_2x_re_out[12]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[12]}]
+set_property PACKAGE_PIN AK20 [get_ports {re[12]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[12]}]
 
 #FMC_LPC_LA06_N
-set_property PACKAGE_PIN AK21 [get_ports {symbol_2x_re_out[13]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[13]}]
+set_property PACKAGE_PIN AK21 [get_ports {re[13]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[13]}]
 
 #FMC_LPC_LA05_P
-set_property PACKAGE_PIN AG22 [get_ports {symbol_2x_re_out[14]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[14]}]
+set_property PACKAGE_PIN AG22 [get_ports {re[14]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[14]}]
 
 #FMC_LPC_LA05_N
-set_property PACKAGE_PIN AH22 [get_ports {symbol_2x_re_out[15]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_re_out[15]}]
+set_property PACKAGE_PIN AH22 [get_ports {re[15]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {re[15]}]
 
 #FMC_LPC_LA10_N
-set_property PACKAGE_PIN AK25 [get_ports {symbol_2x_im_out[0]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[0]}]
+set_property PACKAGE_PIN AK25 [get_ports {im[0]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[0]}]
 
 #FMC_LPC_LA09_P
-set_property PACKAGE_PIN AK23 [get_ports {symbol_2x_im_out[1]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[1]}]
+set_property PACKAGE_PIN AK23 [get_ports {im[1]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[1]}]
 
 #FMC_LPC_LA09_N
-set_property PACKAGE_PIN AK24 [get_ports {symbol_2x_im_out[2]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[2]}]
+set_property PACKAGE_PIN AK24 [get_ports {im[2]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[2]}]
 
 #FMC_LPC_LA13_P
-set_property PACKAGE_PIN AB24 [get_ports {symbol_2x_im_out[3]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[3]}]
+set_property PACKAGE_PIN AB24 [get_ports {im[3]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[3]}]
 
 #FMC_LPC_LA14_P
-set_property PACKAGE_PIN AD21 [get_ports {symbol_2x_im_out[4]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[4]}]
+set_property PACKAGE_PIN AD21 [get_ports {im[4]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[4]}]
 
 #FMC_LPC_LA13_N
-set_property PACKAGE_PIN AC25 [get_ports {symbol_2x_im_out[5]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[5]}]
+set_property PACKAGE_PIN AC25 [get_ports {im[5]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[5]}]
 
 #FMC_LPC_LA14_N
-set_property PACKAGE_PIN AE21 [get_ports {symbol_2x_im_out[6]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[6]}]
+set_property PACKAGE_PIN AE21 [get_ports {im[6]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[6]}]
 
 #FMC_LPC_LA07_N
-set_property PACKAGE_PIN AH25 [get_ports {symbol_2x_im_out[7]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[7]}]
+set_property PACKAGE_PIN AH25 [get_ports {im[7]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[7]}]
 
 #FMC_LPC_LA08_N
-set_property PACKAGE_PIN AJ23 [get_ports {symbol_2x_im_out[8]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[8]}]
+set_property PACKAGE_PIN AJ23 [get_ports {im[8]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[8]}]
 
 #FMC_LPC_LA12_P
-set_property PACKAGE_PIN AA20 [get_ports {symbol_2x_im_out[9]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[9]}]
+set_property PACKAGE_PIN AA20 [get_ports {im[9]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[9]}]
 
 #FMC_LPC_LA11_P
-set_property PACKAGE_PIN AE25 [get_ports {symbol_2x_im_out[10]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[10]}]
+set_property PACKAGE_PIN AE25 [get_ports {im[10]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[10]}]
 
 #FMC_LPC_LA12_N
-set_property PACKAGE_PIN AB20 [get_ports {symbol_2x_im_out[11]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[11]}]
+set_property PACKAGE_PIN AB20 [get_ports {im[11]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[11]}]
 
 #FMC_LPC_LA11_N
-set_property PACKAGE_PIN AF25 [get_ports {symbol_2x_im_out[12]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[12]}]
+set_property PACKAGE_PIN AF25 [get_ports {im[12]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[12]}]
 
 #FMC_LPC_LA16_P
-set_property PACKAGE_PIN AC22 [get_ports {symbol_2x_im_out[13]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[13]}]
+set_property PACKAGE_PIN AC22 [get_ports {im[13]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[13]}]
 
 #FMC_LPC_LA16_N
-set_property PACKAGE_PIN AD22 [get_ports {symbol_2x_im_out[14]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[14]}]
+set_property PACKAGE_PIN AD22 [get_ports {im[14]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[14]}]
 
 #FMC_LPC_LA15_P
-set_property PACKAGE_PIN AC24 [get_ports {symbol_2x_im_out[15]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_im_out[15]}]
-
-#FMC_LPC_LA22_N
-set_property PACKAGE_PIN AK28 [get_ports {clk_out2}]
-set_property IOSTANDARD LVCMOS15 [get_ports {clk_out2}]
-
-#FMC_LPC_LA21_P
-set_property PACKAGE_PIN AG27 [get_ports {clk_out3}]
-set_property IOSTANDARD LVCMOS15 [get_ports {clk_out3}]
-
-#FMC_LPC_LA20_P
-set_property PACKAGE_PIN AF26 [get_ports {clk_out4}]
-set_property IOSTANDARD LVCMOS15 [get_ports {clk_out4}]
-
-#FMC_LPC_LA32_N
-set_property PACKAGE_PIN AA30 [get_ports {asi_out_p}]
-set_property IOSTANDARD LVCMOS15 [get_ports {asi_out_p}]
-
-#FMC_LPC_LA33_N
-set_property PACKAGE_PIN AC30 [get_ports {asi_out_n}]
-set_property IOSTANDARD LVCMOS15 [get_ports {asi_out_n}]
+set_property PACKAGE_PIN AC24 [get_ports {im[15]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {im[15]}]
 
 #FMC_LPC_CLK0_M2C_P
 set_property PACKAGE_PIN AF22 [get_ports {dvbs2_sys_clk}]
 set_property IOSTANDARD LVCMOS15 [get_ports {dvbs2_sys_clk}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {dvbs2_sys_clk}]
 
-#IO_L7P_T1_33
-set_property PACKAGE_PIN AB10 [get_ports {lcm_din}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_din}]
-
-#IO_L4P_T0_33
-set_property PACKAGE_PIN Y11 [get_ports {lcm_lp}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_lp}]
-
-#IO_L6N_T0_VREF_33
-set_property PACKAGE_PIN AB13 [get_ports {lcm_xscl}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_xscl}]
-
-#IO_L6N_T0_VREF_13
-set_property PACKAGE_PIN AB25 [get_ports {lcm_data[0]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[0]}]
-
-#IO_L6P_T0_13
-set_property PACKAGE_PIN AA25 [get_ports {lcm_data[1]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[1]}]
-
-#IO_L5N_T0_13
-set_property PACKAGE_PIN AB28 [get_ports {lcm_data[2]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[2]}]
-
-#IO_L5P_T0_13
-set_property PACKAGE_PIN AA27 [get_ports {lcm_data[3]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[3]}]
-
-#IO_L6P_T0_33
-set_property PACKAGE_PIN AA13 [get_ports {lcm_data[4]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[4]}]
-
-#IO_L5N_T0_33
-set_property PACKAGE_PIN AA10 [get_ports {lcm_data[5]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[5]}]
-
-#IO_L5P_T0_33
-set_property PACKAGE_PIN AA11 [get_ports {lcm_data[6]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[6]}]
-
-#IO_L4N_T0_33
-set_property PACKAGE_PIN Y10 [get_ports {lcm_data[7]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[7]}]
+#FMC_LPC_LA22_N
+set_property PACKAGE_PIN AK28 [get_ports {oe1}]
+set_property IOSTANDARD LVCMOS15 [get_ports {oe1}]
+set_property slew FAST [get_ports {oe1}]
 # ----------------------------------------------------------------------------------------------------
 # bitstream encryption
 # ----------------------------------------------------------------------------------------------------

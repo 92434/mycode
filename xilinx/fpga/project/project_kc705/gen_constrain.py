@@ -760,6 +760,7 @@ def gen_myip_constrain():
 		#'i2s_receiver_bclk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		'dvbs2_sys_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		'symbol_2x_oe' : ['slew FAST'],
 	}
 
 	fmc_io_stand_except = [
