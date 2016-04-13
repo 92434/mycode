@@ -4,7 +4,7 @@ module adi_pattern_gen # (
 	)
 	(
 		input wire rst_n,
-		input wire clk,
+		input wire sys_clk,
 
 		output reg oe = 0,
 		output wire oe1,
@@ -12,29 +12,35 @@ module adi_pattern_gen # (
 		output reg [15 : 0] im = 0
 	);
 
-	reg [16 * 8 - 1 : 0] re_ram = {
+	localparam integer N = 10;
+
+	reg [16 * N - 1 : 0] re_ram = {
+		16'h53c6,
+		16'hf3c8,
 		16'h7fff,
-		16'h5a82,
-		16'h0000,
-		16'ha57e,
+		16'hf3c8,
+		16'h53c6,
+		16'hac3a,
+		16'h0c38,
 		16'h8001,
-		16'ha57e,
-		16'h0000,
-		16'h5a82
+		16'h0c38,
+		16'hac3a
 	};
 
-	reg [16 * 8 - 1 : 0] im_ram = {
+	reg [16 * N - 1 : 0] im_ram = {
+		16'h3cdd,
+		16'h259d,
 		16'h0000,
-		16'ha57e,
-		16'h8001,
-		16'ha57e,
+		16'hda63,
+		16'hc323,
+		16'hc323,
+		16'hda63,
 		16'h0000,
-		16'h5a82,
-		16'h7fff,
-		16'h5a82
+		16'h259d,
+		16'h3cdd
 	};
 
-	always @(posedge clk) begin
+	always @(posedge sys_clk) begin
 		if(rst_n == 0) begin
 			oe <= 0;
 		end
@@ -52,7 +58,7 @@ module adi_pattern_gen # (
 			re <= re_ram[sample_index * 16 +: 16];
 			im <= im_ram[sample_index * 16 +: 16];
 
-			if((sample_index >= 0) && (sample_index < (8 - 1))) begin
+			if((sample_index >= 0) && (sample_index < (N - 1))) begin
 				sample_index <= sample_index + 1;
 			end
 			else begin

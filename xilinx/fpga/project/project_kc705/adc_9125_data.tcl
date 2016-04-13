@@ -154,13 +154,13 @@ proc create_root_design { parentCell } {
   set EXT_LEDS [ create_bd_port -dir O -from 7 -to 0 EXT_LEDS ]
   set EXT_PCIE_REFCLK_N [ create_bd_port -dir I EXT_PCIE_REFCLK_N ]
   set EXT_PCIE_REFCLK_P [ create_bd_port -dir I EXT_PCIE_REFCLK_P ]
-  set dvbs2_sys_clk [ create_bd_port -dir I dvbs2_sys_clk ]
   set im [ create_bd_port -dir O -from 15 -to 0 im ]
   set oe [ create_bd_port -dir O oe ]
   set oe1 [ create_bd_port -dir O oe1 ]
   set re [ create_bd_port -dir O -from 15 -to 0 re ]
   set reset [ create_bd_port -dir I -type rst reset ]
   set_property -dict [ list CONFIG.POLARITY {ACTIVE_HIGH}  ] $reset
+  set sys_clk [ create_bd_port -dir I sys_clk ]
 
   # Create instance: adi_pattern_gen_0, and set properties
   set adi_pattern_gen_0 [ create_bd_cell -type ip -vlnv xiaofei:user:adi_pattern_gen:1.0 adi_pattern_gen_0 ]
@@ -222,13 +222,12 @@ proc create_root_design { parentCell } {
   connect_bd_net -net axi_pcie_0_axi_aclk_out [get_bd_pins axi_gpio_0/s_axi_aclk] [get_bd_pins axi_gpio_1/s_axi_aclk] [get_bd_pins axi_gpio_2/s_axi_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/M02_ACLK] [get_bd_pins axi_interconnect_0/M03_ACLK] [get_bd_pins axi_interconnect_0/M04_ACLK] [get_bd_pins axi_interconnect_0/M05_ACLK] [get_bd_pins axi_interconnect_0/M06_ACLK] [get_bd_pins axi_interconnect_0/M07_ACLK] [get_bd_pins axi_interconnect_0/M08_ACLK] [get_bd_pins axi_interconnect_0/M09_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_pcie_0/axi_aclk_out] [get_bd_pins kc705_pcie_ext_0/pcie_clk_125MHz]
   connect_bd_net -net axi_pcie_0_axi_ctl_aclk_out [get_bd_pins axi_interconnect_0/M01_ACLK] [get_bd_pins axi_pcie_0/axi_ctl_aclk_out]
   connect_bd_net -net axi_pcie_0_mmcm_lock [get_bd_pins axi_pcie_0/mmcm_lock] [get_bd_pins kc705_pcie_ext_0/pcie_mmcm_locked]
-  connect_bd_net -net dvbs2_sys_clk_1 [get_bd_ports dvbs2_sys_clk] [get_bd_pins kc705_pcie_ext_0/dvbs2_sys_clk]
   connect_bd_net -net kc705_pcie_ext_0_EXT_LEDS [get_bd_ports EXT_LEDS] [get_bd_pins kc705_pcie_ext_0/EXT_LEDS]
-  connect_bd_net -net kc705_pcie_ext_0_dvbs2_sys_clk_out [get_bd_pins adi_pattern_gen_0/clk] [get_bd_pins kc705_pcie_ext_0/dvbs2_sys_clk_out]
   connect_bd_net -net kc705_pcie_ext_0_mmcms_locked [get_bd_pins kc705_pcie_ext_0/mmcms_locked] [get_bd_pins proc_sys_reset_0/dcm_locked]
   connect_bd_net -net kc705_pcie_ext_0_pcie_refclk_100MHz [get_bd_pins axi_pcie_0/REFCLK] [get_bd_pins kc705_pcie_ext_0/pcie_refclk_100MHz] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
   connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins adi_pattern_gen_0/rst_n] [get_bd_pins axi_gpio_0/s_axi_aresetn] [get_bd_pins axi_gpio_1/s_axi_aresetn] [get_bd_pins axi_gpio_2/s_axi_aresetn] [get_bd_pins axi_pcie_0/axi_aresetn] [get_bd_pins proc_sys_reset_0/peripheral_aresetn]
   connect_bd_net -net reset_1 [get_bd_ports reset] [get_bd_pins kc705_pcie_ext_0/EXT_SYS_RST] [get_bd_pins proc_sys_reset_0/ext_reset_in]
+  connect_bd_net -net sys_clk_1 [get_bd_ports sys_clk] [get_bd_pins adi_pattern_gen_0/sys_clk]
   connect_bd_net -net xlconstant_0_dout [get_bd_pins axi_pcie_0/MSI_Vector_Num] [get_bd_pins xlconstant_0/dout]
   connect_bd_net -net xlconstant_1_dout [get_bd_pins kc705_pcie_ext_0/ddr_clk_100MHz] [get_bd_pins kc705_pcie_ext_0/ddr_rdy] [get_bd_pins kc705_pcie_ext_0/ddr_rst] [get_bd_pins xlconstant_1/dout]
 

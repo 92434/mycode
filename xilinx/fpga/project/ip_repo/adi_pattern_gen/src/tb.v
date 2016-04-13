@@ -21,7 +21,7 @@ module tb #
 	wire [15 : 0] im;
 	adi_pattern_gen adi_pattern_gen_inst(
 			.rst_n(rst_n),
-			.clk(clk),
+			.sys_clk(clk),
 			
 			.oe(oe),
 			.oe1(oe1),

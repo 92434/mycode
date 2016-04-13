@@ -575,81 +575,85 @@ set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[2]}]
 set_property PACKAGE_PIN AJ26 [get_ports {gpio_2_tri_io[3]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[3]}]
 
-#FMC_LPC_LA19_N
-set_property PACKAGE_PIN AK26 [get_ports {gpio_2_tri_io[4]}]
+#FMC_LPC_CLK0_M2C_P
+set_property PACKAGE_PIN AF22 [get_ports {gpio_2_tri_io[4]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[4]}]
 
-#FMC_LPC_LA15_N
-set_property PACKAGE_PIN AD24 [get_ports {gpio_2_tri_io[5]}]
+#FMC_LPC_LA19_N
+set_property PACKAGE_PIN AK26 [get_ports {gpio_2_tri_io[5]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[5]}]
 
-#FMC_LPC_CLK0_M2C_N
-set_property PACKAGE_PIN AG23 [get_ports {gpio_2_tri_io[6]}]
+#FMC_LPC_LA15_N
+set_property PACKAGE_PIN AD24 [get_ports {gpio_2_tri_io[6]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[6]}]
 
-#FMC_LPC_PRSNT_M2C_B_LS
-set_property PACKAGE_PIN J22 [get_ports {gpio_2_tri_io[7]}]
+#FMC_LPC_CLK0_M2C_N
+set_property PACKAGE_PIN AG23 [get_ports {gpio_2_tri_io[7]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[7]}]
 
-#FMC_LPC_LA22_P
-set_property PACKAGE_PIN AJ27 [get_ports {gpio_2_tri_io[8]}]
+#FMC_LPC_PRSNT_M2C_B_LS
+set_property PACKAGE_PIN J22 [get_ports {gpio_2_tri_io[8]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[8]}]
 
-#FMC_LPC_LA20_N
-set_property PACKAGE_PIN AF27 [get_ports {gpio_2_tri_io[9]}]
+#FMC_LPC_LA22_P
+set_property PACKAGE_PIN AJ27 [get_ports {gpio_2_tri_io[9]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[9]}]
 
-#FMC_LPC_CLK1_M2C_N
-set_property PACKAGE_PIN AH29 [get_ports {gpio_2_tri_io[10]}]
+#FMC_LPC_LA20_N
+set_property PACKAGE_PIN AF27 [get_ports {gpio_2_tri_io[10]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[10]}]
 
-#FMC_LPC_CLK1_M2C_P
-set_property PACKAGE_PIN AG29 [get_ports {gpio_2_tri_io[11]}]
+#FMC_LPC_CLK1_M2C_N
+set_property PACKAGE_PIN AH29 [get_ports {gpio_2_tri_io[11]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[11]}]
 
-#FMC_LPC_LA32_P
-set_property PACKAGE_PIN Y30 [get_ports {gpio_2_tri_io[12]}]
+#FMC_LPC_CLK1_M2C_P
+set_property PACKAGE_PIN AG29 [get_ports {gpio_2_tri_io[12]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[12]}]
 
-#FMC_LPC_LA33_P
-set_property PACKAGE_PIN AC29 [get_ports {gpio_2_tri_io[13]}]
+#FMC_LPC_LA32_P
+set_property PACKAGE_PIN Y30 [get_ports {gpio_2_tri_io[13]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[13]}]
 
-#FMC_LPC_LA26_N
-set_property PACKAGE_PIN AK30 [get_ports {gpio_2_tri_io[14]}]
+#FMC_LPC_LA33_P
+set_property PACKAGE_PIN AC29 [get_ports {gpio_2_tri_io[14]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[14]}]
 
-#FMC_LPC_LA23_N
-set_property PACKAGE_PIN AH27 [get_ports {gpio_2_tri_io[15]}]
+#FMC_LPC_LA26_N
+set_property PACKAGE_PIN AK30 [get_ports {gpio_2_tri_io[15]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[15]}]
 
-#FMC_LPC_LA23_P
-set_property PACKAGE_PIN AH26 [get_ports {gpio_2_tri_io[16]}]
+#FMC_LPC_LA23_N
+set_property PACKAGE_PIN AH27 [get_ports {gpio_2_tri_io[16]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[16]}]
 
-#FMC_LPC_LA17_CC_N
-set_property PACKAGE_PIN AC27 [get_ports {gpio_2_tri_io[17]}]
+#FMC_LPC_LA23_P
+set_property PACKAGE_PIN AH26 [get_ports {gpio_2_tri_io[17]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[17]}]
 
-#FMC_LPC_LA17_CC_P
-set_property PACKAGE_PIN AB27 [get_ports {gpio_2_tri_io[18]}]
+#FMC_LPC_LA17_CC_N
+set_property PACKAGE_PIN AC27 [get_ports {gpio_2_tri_io[18]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[18]}]
 
-#FMC_LPC_LA27_N
-set_property PACKAGE_PIN AJ29 [get_ports {gpio_2_tri_io[19]}]
+#FMC_LPC_LA17_CC_P
+set_property PACKAGE_PIN AB27 [get_ports {gpio_2_tri_io[19]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[19]}]
 
-#FMC_LPC_LA27_P
-set_property PACKAGE_PIN AJ28 [get_ports {gpio_2_tri_io[20]}]
+#FMC_LPC_LA27_N
+set_property PACKAGE_PIN AJ29 [get_ports {gpio_2_tri_io[20]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[20]}]
 
-#FMC_LPC_LA18_CC_N
-set_property PACKAGE_PIN AD28 [get_ports {gpio_2_tri_io[21]}]
+#FMC_LPC_LA27_P
+set_property PACKAGE_PIN AJ28 [get_ports {gpio_2_tri_io[21]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[21]}]
 
-#FMC_LPC_LA18_CC_P
-set_property PACKAGE_PIN AD27 [get_ports {gpio_2_tri_io[22]}]
+#FMC_LPC_LA18_CC_N
+set_property PACKAGE_PIN AD28 [get_ports {gpio_2_tri_io[22]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[22]}]
+
+#FMC_LPC_LA18_CC_P
+set_property PACKAGE_PIN AD27 [get_ports {gpio_2_tri_io[23]}]
+set_property IOSTANDARD LVCMOS15 [get_ports {gpio_2_tri_io[23]}]
 # ----------------------------------------------------------------------------------------------------
 # generator constrain for ip signals
 # ----------------------------------------------------------------------------------------------------
@@ -702,7 +706,6 @@ set_property IOSTANDARD LVCMOS15 [get_ports {mpeg_sync}]
 #FMC_LPC_LA10_P
 set_property PACKAGE_PIN AJ24 [get_ports {symbol_2x_oe}]
 set_property IOSTANDARD LVCMOS15 [get_ports {symbol_2x_oe}]
-set_property slew FAST [get_nets {symbol_2x_oe}]
 
 #FMC_LPC_LA00_CC_P
 set_property PACKAGE_PIN AD23 [get_ports {symbol_2x_re_out[0]}]
@@ -851,11 +854,6 @@ set_property IOSTANDARD LVCMOS15 [get_ports {asi_out_p}]
 #FMC_LPC_LA33_N
 set_property PACKAGE_PIN AC30 [get_ports {asi_out_n}]
 set_property IOSTANDARD LVCMOS15 [get_ports {asi_out_n}]
-
-#FMC_LPC_CLK0_M2C_P
-set_property PACKAGE_PIN AF22 [get_ports {dvbs2_sys_clk}]
-set_property IOSTANDARD LVCMOS15 [get_ports {dvbs2_sys_clk}]
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {dvbs2_sys_clk}]
 
 #IO_L7P_T1_33
 set_property PACKAGE_PIN AB10 [get_ports {lcm_din}]

@@ -788,9 +788,9 @@ set_property PACKAGE_PIN AC24 [get_ports {im[15]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {im[15]}]
 
 #FMC_LPC_CLK0_M2C_P
-set_property PACKAGE_PIN AF22 [get_ports {dvbs2_sys_clk}]
-set_property IOSTANDARD LVCMOS15 [get_ports {dvbs2_sys_clk}]
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {dvbs2_sys_clk}]
+set_property PACKAGE_PIN AF22 [get_ports {sys_clk}]
+set_property IOSTANDARD LVCMOS15 [get_ports {sys_clk}]
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {sys_clk}]
 
 #FMC_LPC_LA22_N
 set_property PACKAGE_PIN AK28 [get_ports {oe1}]

@@ -111,25 +111,25 @@ void *write_fn(void *arg) {
 	targ = targ;
 	int nwrite;
 
-	//uint32_t fs_en_switch_reg = 0;
-	//uint32_t ts_source_mode_reg = 2;
-	uint32_t sys_freq_num_reg = 1000;
-	uint32_t sys_baud_num_reg = 200;
-	uint32_t debug_for_2x_oe_reg = 0;
+	//uint32_t ts_source_mode_reg = 1;
+	//uint32_t sys_freq_num_reg = 10000;
+	//uint32_t sys_baud_num_reg = 2500;
+	//uint32_t fs_en_switch_reg = 1;
+	//uint32_t debug_for_2x_oe_reg = 1;
 
 	//printids("write_fn: ");
 
 	while(stop == 0) {
-		//lseek(targ->fd, ADDR_OFFSET(FS_EN_SWITCH_REG), SEEK_SET);
-		//nwrite = write(targ->fd, &fs_en_switch_reg, sizeof(uint32_t));
 		//lseek(targ->fd, ADDR_OFFSET(TS_SOURCE_MODE_REG), SEEK_SET);
 		//nwrite = write(targ->fd, &ts_source_mode_reg, sizeof(uint32_t));
-		lseek(targ->fd, ADDR_OFFSET(SYS_FREQ_NUM_REG), SEEK_SET);
-		nwrite = write(targ->fd, &sys_freq_num_reg, sizeof(uint32_t));
-		lseek(targ->fd, ADDR_OFFSET(SYS_BAUD_NUM_REG), SEEK_SET);
-		nwrite = write(targ->fd, &sys_baud_num_reg, sizeof(uint32_t));
-		lseek(targ->fd, ADDR_OFFSET(DEBUG_FOR_2X_OE_REG), SEEK_SET);
-		nwrite = write(targ->fd, &debug_for_2x_oe_reg, sizeof(uint32_t));
+		//lseek(targ->fd, ADDR_OFFSET(SYS_FREQ_NUM_REG), SEEK_SET);
+		//nwrite = write(targ->fd, &sys_freq_num_reg, sizeof(uint32_t));
+		//lseek(targ->fd, ADDR_OFFSET(SYS_BAUD_NUM_REG), SEEK_SET);
+		//nwrite = write(targ->fd, &sys_baud_num_reg, sizeof(uint32_t));
+		//lseek(targ->fd, ADDR_OFFSET(FS_EN_SWITCH_REG), SEEK_SET);
+		//nwrite = write(targ->fd, &fs_en_switch_reg, sizeof(uint32_t));
+		//lseek(targ->fd, ADDR_OFFSET(DEBUG_FOR_2X_OE_REG), SEEK_SET);
+		//nwrite = write(targ->fd, &debug_for_2x_oe_reg, sizeof(uint32_t));
 
 		return NULL;
 	}

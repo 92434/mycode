@@ -678,7 +678,7 @@ myip_fmc_signal = [
 	('FMC_LPC_LA32_N', 'asi_out_p'),
 	('FMC_LPC_LA33_N', 'asi_out_n'),
 
-	('FMC_LPC_CLK0_M2C_P', 'dvbs2_sys_clk'),
+	#('FMC_LPC_CLK0_M2C_P', 'sys_clk'),
 ]
 
 #myip_fmc_signal = []
@@ -759,8 +759,8 @@ def gen_myip_constrain():
 	extra_property = {
 		#'i2s_receiver_bclk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		'dvbs2_sys_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		'symbol_2x_oe' : ['slew FAST'],
+		#'sys_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'symbol_2x_oe' : ['slew FAST'],
 	}
 
 	fmc_io_stand_except = [
