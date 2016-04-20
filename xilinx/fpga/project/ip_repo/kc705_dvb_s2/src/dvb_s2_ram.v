@@ -26,15 +26,17 @@ module dvb_s2_ram #(
 
 		input wire sys_clk,
 		output wire ts_clk,// @ sys_clk
-		input wire fs_en_outer,
-		input wire fs_en2_outer,
+		//input wire fs_en_outer,
+		//input wire fs_en2_outer,
+		input wire fs_en2,
+		output wire fs_en,
 
 		output wire [7 : 0] ts_din,// @ sys_clk
 		output wire ts_syn,// @ sys_clk
 		output wire ts_head,// @ sys_clk
 
-		output wire fs_en_inner,
-		output wire fs_en2_inner,
+		//output wire fs_en_inner,
+		//output wire fs_en2_inner,
 
 		output wire symbol_1x_oe,
 		output wire signed [15 : 0] symbol_1x_re_out,
@@ -61,7 +63,7 @@ module dvb_s2_ram #(
 	//03
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] pilot_mode_cfg_reg = 0;
 	//04
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] srrc_mode_reg = 2;//00:0.35; 01:0.25; 10:0.20(default) 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] srrc_mode_reg = 1;//00:0.35; 01:0.25; 10:0.20(default) 
 	//05
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] dvb_s_convolution_mode_reg = 0;
 	//06
@@ -77,7 +79,7 @@ module dvb_s2_ram #(
 	//11
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en_switch_reg = 1;
 	//12
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_2x_oe_posedge_count_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_2x_oe_count_reg = 0;
 	//13
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] debug_for_2x_oe_reg = 0;
 
@@ -137,7 +139,7 @@ module dvb_s2_ram #(
 			ldpc_mode_cfg_reg <= 6;
 			frame_mode_cfg_reg <= 0;
 			pilot_mode_cfg_reg <= 0;
-			srrc_mode_reg <= 2;
+			srrc_mode_reg <= 1;
 			dvb_s_convolution_mode_reg <= 0;
 			dvb_s_mode_reg <= 1;
 			TS_Source_mode_reg <= 1;
@@ -243,7 +245,7 @@ module dvb_s2_ram #(
 						rdata <= fs_en_switch;
 					end
 					12: begin
-						rdata <= symbol_2x_oe_posedge_count_reg;
+						rdata <= symbol_2x_oe_count_reg;
 					end
 					13: begin
 						rdata <= debug_for_2x_oe_reg;
@@ -278,30 +280,23 @@ module dvb_s2_ram #(
 
 			.sys_clk(sys_clk),
 			.ts_clk(ts_clk),// @ sys_clk
-			.fs_en_switch(fs_en_switch),
-			.fs_en_outer(fs_en_outer),
-			.fs_en2_outer(fs_en2_outer),
+			//.fs_en_switch(fs_en_switch),
+			//.fs_en_outer(fs_en_outer),
+			//.fs_en2_outer(fs_en2_outer),
+			.fs_en2(fs_en2),
+			.fs_en_ref(fs_en),
 
 			.ts_din(ts_din),// @ sys_clk
 			.ts_syn(ts_syn),// @ sys_clk
 			.ts_head(ts_head),// @ sys_clk
 
-			.fs_en_inner(fs_en_inner),
-			.fs_en2_inner(fs_en2_inner),
+			//.fs_en_inner(fs_en_inner),
+			//.fs_en2_inner(fs_en2_inner),
 
 			.symbol_1x_oe(symbol_1x_oe),
 			.symbol_1x_re_out(symbol_1x_re_out),
 			.symbol_1x_im_out(symbol_1x_im_out)
 		);
-
-	always @(posedge symbol_2x_oe) begin
-		if(rst_n == 0) begin
-			symbol_2x_oe_posedge_count_reg <= 0;
-		end
-		else begin
-			symbol_2x_oe_posedge_count_reg <= symbol_2x_oe_posedge_count_reg + 1;
-		end
-	end
 
 	wire symbol_2x_oe_origin;
 	wire signed [15 : 0] symbol_2x_re_out_origin;
@@ -319,70 +314,33 @@ module dvb_s2_ram #(
 			.symbol_2x_re_out(symbol_2x_re_out_origin),
 			.symbol_2x_im_out(symbol_2x_im_out_origin)
 		);
-	
-	wire sys_clk_n;
-	wire fs_en2;
-	assign sys_clk_n = ~sys_clk;
-	assign fs_en2 = (fs_en_switch == 1) ? fs_en2_inner : fs_en2_outer;
 
-	reg r_enable = 0;
-	wire r_ready;
-	wire error_full;
-	wire error_empty;
-	wire [31 : 0] symbol_2x_out_origin;
-	wire [31 : 0] symbol_2x_out_origin_fifo;
-	assign symbol_2x_out_origin = {symbol_2x_re_out_origin, symbol_2x_im_out_origin};
+	always @(negedge sys_clk) begin
+		if(hard_rst_n == 0) begin
+			symbol_2x_oe_count_reg <= 0;
+		end
+		else begin
+			if(symbol_2x_oe_origin == 1) begin
+				symbol_2x_oe_count_reg <= symbol_2x_oe_count_reg + 1;
+			end
+			else begin
+			end
+		end
+	end
 
-	my_fifo # (
-			.DATA_WIDTH(32),
-			.BULK_OF_DATA(1),
-			.BULK_DEPTH(32)
-		) symbol_out_fifo (
-			.rst_n(rst_n),
-			.wclk(sys_clk_n),
-			.rclk(fs_en2),
-			.wdata(symbol_2x_out_origin),
-			.rdata(symbol_2x_out_origin_fifo),
-			.w_enable(symbol_2x_oe_origin),
-			.r_enable(r_enable),
-			.r_ready(r_ready),
-			.error_full(error_full),
-			.error_empty(error_empty)
+	symbol_2x_process #(
+		) symbol_2x_process_inst(
+			.rst_n(hard_rst_n),
+			.sys_clk(sys_clk),
+
+			.fs_en2(fs_en2),
+
+			.symbol_2x_oe_origin(symbol_2x_oe_origin),
+			.symbol_2x_re_out_origin(symbol_2x_re_out_origin),
+			.symbol_2x_im_out_origin(symbol_2x_im_out_origin),
+
+			.symbol_2x_oe(symbol_2x_oe),
+			.symbol_2x_re_out(symbol_2x_re_out),
+			.symbol_2x_im_out(symbol_2x_im_out)
 		);
-
-	always @(posedge fs_en2) begin
-		if(rst_n == 0) begin
-			r_enable <= 0;
-		end
-		else begin
-			r_enable <= 0;
-			if(r_ready == 1) begin
-				r_enable <= 1;
-			end
-			else begin
-			end
-		end
-	end
-
-	reg [31 : 0] symbol_2x_out_origin_fifo_reg = 0;
-	reg symbol_2x_oe_enable = 0;
-	always @(posedge fs_en2) begin
-		if(rst_n == 0) begin
-			symbol_2x_out_origin_fifo_reg <= 0;
-		end
-		else begin
-			symbol_2x_oe_enable <= 0;
-			if(r_enable == 1) begin
-				symbol_2x_out_origin_fifo_reg <= symbol_2x_out_origin_fifo;
-				symbol_2x_oe_enable <= 1;
-			end
-			else begin
-			end
-		end
-	end
-
-	assign symbol_2x_oe = (symbol_2x_oe_enable == 1) ? fs_en2 : 0;
-	assign symbol_2x_re_out = symbol_2x_out_origin_fifo_reg[16 * 1 +: 16];
-	assign symbol_2x_im_out = symbol_2x_out_origin_fifo_reg[16 * 0 +: 16];
-
 endmodule

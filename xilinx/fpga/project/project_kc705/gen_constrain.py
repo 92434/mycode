@@ -678,7 +678,7 @@ myip_fmc_signal = [
 	('FMC_LPC_LA32_N', 'asi_out_p'),
 	('FMC_LPC_LA33_N', 'asi_out_n'),
 
-	#('FMC_LPC_CLK0_M2C_P', 'sys_clk'),
+	('FMC_LPC_CLK0_M2C_P', 'fs_en2'),
 ]
 
 #myip_fmc_signal = []
@@ -759,8 +759,43 @@ def gen_myip_constrain():
 	extra_property = {
 		#'i2s_receiver_bclk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sys_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'symbol_2x_oe' : ['slew FAST'],
+		'fs_en2': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'symbol_2x_oe' : ['slew FAST'],
+
+		'symbol_2x_re_out[0]' : ['slew FAST'],
+		'symbol_2x_re_out[1]' : ['slew FAST'],
+		'symbol_2x_re_out[2]' : ['slew FAST'],
+		'symbol_2x_re_out[3]' : ['slew FAST'],
+		'symbol_2x_re_out[4]' : ['slew FAST'],
+		'symbol_2x_re_out[5]' : ['slew FAST'],
+		'symbol_2x_re_out[6]' : ['slew FAST'],
+		'symbol_2x_re_out[7]' : ['slew FAST'],
+		'symbol_2x_re_out[8]' : ['slew FAST'],
+		'symbol_2x_re_out[9]' : ['slew FAST'],
+		'symbol_2x_re_out[10]' : ['slew FAST'],
+		'symbol_2x_re_out[11]' : ['slew FAST'],
+		'symbol_2x_re_out[12]' : ['slew FAST'],
+		'symbol_2x_re_out[13]' : ['slew FAST'],
+		'symbol_2x_re_out[14]' : ['slew FAST'],
+		'symbol_2x_re_out[15]' : ['slew FAST'],
+
+		'symbol_2x_im_out[0]' : ['slew FAST'],
+		'symbol_2x_im_out[1]' : ['slew FAST'],
+		'symbol_2x_im_out[2]' : ['slew FAST'],
+		'symbol_2x_im_out[3]' : ['slew FAST'],
+		'symbol_2x_im_out[4]' : ['slew FAST'],
+		'symbol_2x_im_out[5]' : ['slew FAST'],
+		'symbol_2x_im_out[6]' : ['slew FAST'],
+		'symbol_2x_im_out[7]' : ['slew FAST'],
+		'symbol_2x_im_out[8]' : ['slew FAST'],
+		'symbol_2x_im_out[9]' : ['slew FAST'],
+		'symbol_2x_im_out[10]' : ['slew FAST'],
+		'symbol_2x_im_out[11]' : ['slew FAST'],
+		'symbol_2x_im_out[12]' : ['slew FAST'],
+		'symbol_2x_im_out[13]' : ['slew FAST'],
+		'symbol_2x_im_out[14]' : ['slew FAST'],
+		'symbol_2x_im_out[15]' : ['slew FAST'],
 	}
 
 	fmc_io_stand_except = [

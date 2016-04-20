@@ -24,15 +24,17 @@ input                  					sys_clk,
 //input                  					ts_syn,// @ sys_clk
 //input                  					ts_head,// @ sys_clk
 output               					ts_clk,// @ sys_clk
-input                 					fs_en_switch,//0:from outer;1:from inner
-input                 					fs_en_outer,
-input                					fs_en2_outer,
+//input                 					fs_en_switch,//0:from outer;1:from inner
+//input                 					fs_en_outer,
+//input                					fs_en2_outer,
+input fs_en2,
+output fs_en_ref,
 //////////////////////////////////////////////////////////////
 output		reg				[7:0]       ts_din,// @ sys_clk
 output      reg         					ts_syn,// @ sys_clk
 output      reg         				ts_head,// @ sys_clk
-output                             fs_en_inner,
-output                             fs_en2_inner,
+//output                             fs_en_inner,
+//output                             fs_en2_inner,
 //////////////////////////////////////////////////////////////
 output 		reg							symbol_1x_oe,
 output 	    reg 	signed [15:0]			symbol_1x_re_out,
@@ -46,19 +48,29 @@ output 		reg    signed [15:0]			symbol_1x_im_out//,
 //parameter SYS_Baud_mode = 2'b01;// 00:10M; 01:25M;
 
 wire                             fs_en;
-wire                             fs_en2;
+//wire                             fs_en2;
 
-gen_fs_en uut_gen_fs_en(
-    .sys_clk(sys_clk),
-    .glb_rst_n(hard_rst_n),
-    .SYS_Freq_Num(SYS_Freq_Num),
-    .SYS_Baud_Num(SYS_Baud_Num),//32'd2500 --> 25M BaudRate   SYS_Baud_mode,
-    .fs_en(fs_en_inner),
-    .fs_en2(fs_en2_inner)
-    );
+//gen_fs_en uut_gen_fs_en(
+//    .sys_clk(sys_clk),
+//    .glb_rst_n(hard_rst_n),
+//    .SYS_Freq_Num(SYS_Freq_Num),
+//    .SYS_Baud_Num(SYS_Baud_Num),//32'd2500 --> 25M BaudRate   SYS_Baud_mode,
+//    .fs_en(fs_en_inner),
+//    .fs_en2(fs_en2_inner)
+//    );
 
-assign    fs_en = (fs_en_switch == 1)?fs_en_inner:fs_en_outer;
-assign    fs_en2 = (fs_en_switch == 1)?fs_en2_inner:fs_en2_outer;
+//assign    fs_en = (fs_en_switch == 1)?fs_en_inner:fs_en_outer;
+//assign    fs_en2 = (fs_en_switch == 1)?fs_en2_inner:fs_en2_outer;
+	fs_en_process #(
+		) fs_en_process_inst(
+			.sys_clk(sys_clk),
+			.rst_n(hard_rst_n),
+
+			.fs_en2(fs_en2),
+
+			.fs_en_on_sys_clk(fs_en),
+			.fs_en(fs_en_ref)
+		);
 
 //always @(posedge sys_clk)begin
 //	if(~hard_rst_n)begin

@@ -20,3 +20,7 @@ wire [15:0] out [0:1];
 // useful code goes here
 
 endmodule // example
+
+
+叠加逻辑不能做时钟用，即逻辑内部不能产生时钟，只能产生enable开关.
+唯一作时钟用的是tb里的赋值逻辑产生时钟。

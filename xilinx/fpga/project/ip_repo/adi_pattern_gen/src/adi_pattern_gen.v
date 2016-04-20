@@ -28,16 +28,16 @@ module adi_pattern_gen # (
 	};
 
 	reg [16 * N - 1 : 0] im_ram = {
-		16'h3cdd,
-		16'h259d,
-		16'h0000,
-		16'hda63,
-		16'hc323,
-		16'hc323,
-		16'hda63,
-		16'h0000,
-		16'h259d,
-		16'h3cdd
+		16'h0321,
+		16'h9a63,
+		16'h3fff,
+		16'he59f,
+		16'h7cdd,
+		16'hfcdf,
+		16'h659d,
+		16'hc001,
+		16'h1a61,
+		16'h8323
 	};
 
 	always @(posedge sys_clk) begin

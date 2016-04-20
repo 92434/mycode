@@ -18,7 +18,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>79992ca3</spirit:value>
+            <spirit:value>3f32b3c4</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -34,7 +34,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>79992ca3</spirit:value>
+            <spirit:value>3f32b3c4</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -48,7 +48,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>e65e5adf</spirit:value>
+            <spirit:value>b3eea7a6</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -63,7 +63,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>944209a3</spirit:value>
+            <spirit:value>d8d8b5e3</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -83,7 +83,7 @@
         </spirit:wire>
       </spirit:port>
       <spirit:port>
-        <spirit:name>clk</spirit:name>
+        <spirit:name>sys_clk</spirit:name>
         <spirit:wire>
           <spirit:direction>in</spirit:direction>
           <spirit:wireTypeDefs>
@@ -175,7 +175,7 @@
       <spirit:file>
         <spirit:name>src/adi_pattern_gen.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_79992ca3</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_3f32b3c4</spirit:userFileType>
         <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
@@ -193,7 +193,7 @@
         <spirit:name>xgui/adi_pattern_gen_v1_0.tcl</spirit:name>
         <spirit:fileType>tclSource</spirit:fileType>
         <spirit:userFileType>XGUI_VERSION_2</spirit:userFileType>
-        <spirit:userFileType>CHECKSUM_e65e5adf</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_b3eea7a6</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -225,11 +225,11 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>adi_pattern_gen</xilinx:displayName>
-      <xilinx:coreRevision>5</xilinx:coreRevision>
+      <xilinx:coreRevision>12</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:tb:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2016-04-01T10:46:09Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2016-04-19T07:43:52Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
         <xilinx:tag xilinx:name="user.org:user:tb:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/adi_pattern_gen</xilinx:tag>
@@ -239,8 +239,8 @@
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2014.3</xilinx:xilinxVersion>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="21690b40"/>
-      <xilinx:checksum xilinx:scope="ports" xilinx:value="20f4bbed"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="7408646a"/>
+      <xilinx:checksum xilinx:scope="ports" xilinx:value="6c40d2ee"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="9ac5950b"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>

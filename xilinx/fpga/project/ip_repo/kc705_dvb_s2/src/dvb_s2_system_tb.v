@@ -27,7 +27,7 @@ reg                 						fs_en_outer;
 reg                						fs_en2_outer;
 
 wire                 						fs_en;
-wire                						fs_en2;
+reg                						fs_en2 = 0;
 
 wire                 						fs_en_inner;
 wire                						fs_en2_inner;
@@ -72,14 +72,16 @@ dvb_s2_system_top uut(
 .ts_clk_h264out		(ts_clk_h264out),// @ ts_clk_h264out
 .ts_clk					(ts_clk),
 
-.fs_en_switch               (fs_en_switch),
-.fs_en_outer					(fs_en_outer),
-.fs_en2_outer					(fs_en2_outer),
+//.fs_en_switch               (fs_en_switch),
+//.fs_en_outer					(fs_en_outer),
+//.fs_en2_outer					(fs_en2_outer),
+.fs_en2(fs_en2),
+.fs_en_ref(fs_en),
 .ts_din                 (ts_din_tp),
 .ts_syn                 (ts_syn_tp),
 .ts_head                (ts_head_tp),
-.fs_en_inner            (fs_en_inner),
-.fs_en2_inner           (fs_en2_inner),
+//.fs_en_inner            (fs_en_inner),
+//.fs_en2_inner           (fs_en2_inner),
 //////////////////////////////////////////////////////////////
 .symbol_1x_oe			(symbol_1x_oe),
 .symbol_1x_re_out		(symbol_1x_re_out),
@@ -88,6 +90,9 @@ dvb_s2_system_top uut(
 //.symbol_2x_re_out		(symbol_2x_re_out),
 //.symbol_2x_im_out		(symbol_2x_im_out)
 );
+
+	wire fs_en_on_sys_clk;
+	assign fs_en_on_sys_clk = uut.fs_en_process_inst.fs_en_on_sys_clk;
 
 wire glb_rst_n;
 
@@ -301,7 +306,7 @@ initial $readmemb("../../../../testUseCase/Mode_0_0_6_0/anotherSimul/CRCEncoder_
 
 initial // Clock generator
   begin
-    sys_clk = 1;
+    sys_clk = 0;
     forever #15 sys_clk = !sys_clk;
   end		
 		
@@ -358,8 +363,16 @@ initial	// Test stimulus
 #120 hard_rst_n = 1;
   end
   
- assign    fs_en = (fs_en_switch == 1)?fs_en_inner:fs_en_outer;
- assign    fs_en2 = (fs_en_switch == 1)?fs_en2_inner:fs_en2_outer; 
+ //assign    fs_en = (fs_en_switch == 1)?fs_en_inner:fs_en_outer;
+ //assign    fs_en2 = (fs_en_switch == 1)?fs_en2_inner:fs_en2_outer; 
+initial // Clock generator
+	begin
+	fs_en2 = 0;
+	forever begin
+		#30;
+		fs_en2 = ~fs_en2;
+	end
+end			
   
 //always @(posedge sys_clk)begin
 //      if(~hard_rst_n)begin

@@ -18,7 +18,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>1cf73ce9</spirit:value>
+            <spirit:value>3d92c529</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -34,7 +34,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>1cf73ce9</spirit:value>
+            <spirit:value>3d92c529</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -189,32 +189,6 @@
         </spirit:wire>
       </spirit:port>
       <spirit:port>
-        <spirit:name>dvbs2_sys_clk</spirit:name>
-        <spirit:wire>
-          <spirit:direction>in</spirit:direction>
-          <spirit:wireTypeDefs>
-            <spirit:wireTypeDef>
-              <spirit:typeName>wire</spirit:typeName>
-              <spirit:viewNameRef>xilinx_verilogsynthesis</spirit:viewNameRef>
-              <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
-            </spirit:wireTypeDef>
-          </spirit:wireTypeDefs>
-        </spirit:wire>
-      </spirit:port>
-      <spirit:port>
-        <spirit:name>dvbs2_sys_clk_out</spirit:name>
-        <spirit:wire>
-          <spirit:direction>out</spirit:direction>
-          <spirit:wireTypeDefs>
-            <spirit:wireTypeDef>
-              <spirit:typeName>wire</spirit:typeName>
-              <spirit:viewNameRef>xilinx_verilogsynthesis</spirit:viewNameRef>
-              <spirit:viewNameRef>xilinx_verilogbehavioralsimulation</spirit:viewNameRef>
-            </spirit:wireTypeDef>
-          </spirit:wireTypeDefs>
-        </spirit:wire>
-      </spirit:port>
-      <spirit:port>
         <spirit:name>EXT_LEDS</spirit:name>
         <spirit:wire>
           <spirit:direction>out</spirit:direction>
@@ -239,7 +213,7 @@
       <spirit:file>
         <spirit:name>src/kc705_pcie_ext.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_1cf73ce9</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_3d92c529</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -276,11 +250,11 @@
         <xilinx:taxonomy>/UserIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>kc705_pcie_ext</xilinx:displayName>
-      <xilinx:coreRevision>14</xilinx:coreRevision>
+      <xilinx:coreRevision>15</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>vendor:user:kc705_pcie_ext:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2016-03-16T02:43:50Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2016-04-13T07:47:17Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="user.org:user:kc705_pcie_ext:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/project_kc705_cdma/kc705_ext</xilinx:tag>
         <xilinx:tag xilinx:name="(none):user:kc705_pcie_ext:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/project_kc705_cdma/kc705_ext</xilinx:tag>
@@ -290,8 +264,8 @@
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2014.3</xilinx:xilinxVersion>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="d273bcf3"/>
-      <xilinx:checksum xilinx:scope="ports" xilinx:value="0dad585a"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="6806e37a"/>
+      <xilinx:checksum xilinx:scope="ports" xilinx:value="7433be7e"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="d2d8219d"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>
