@@ -19,7 +19,7 @@ typedef struct dma_static_config {
 	char *devname;
 } dma_static_config_info_t;
 
-#define STATE 1
+#define STATE 0
 
 static dma_static_config_info_t dma_info[] = {
 #if STATE
@@ -118,7 +118,7 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MIN_BAR_MAP_MEMORY,
 
 		.dma_type = PSEUDO_DMA,
-#if 1
+#if 0
 		.dma_thread = eg9013f_nz_fb_thread,
 		.dma_thread_count = DMA_THREAD_EG9013F_NZ_COUNT,
 #else

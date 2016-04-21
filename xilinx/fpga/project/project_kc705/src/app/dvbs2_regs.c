@@ -24,8 +24,8 @@ typedef enum {
 	SYS_BAUD_NUM_REG,
 	FREQ_INV_MODE_REG,
 	FS_EN_SWITCH_REG,
-	SYMBOL_2X_OE_POSEDGE_COUNT_REG,
-	DEBUG_FOR_2X_OE_REG,
+	FS_EN2_COUNT_REG,
+	SYMBOL_2X_OE_COUNT_REG,
 	TOTAL_REGS,
 } addr_t;
 
@@ -42,8 +42,8 @@ char *reg_name[] = {
 	"SYS_BAUD_NUM_REG",
 	"FREQ_INV_MODE_REG",
 	"FS_EN_SWITCH_REG",
-	"SYMBOL_2X_OE_POSEDGE_COUNT_REG",
-	"DEBUG_FOR_2X_OE_REG",
+	"FS_EN2_COUNT_REG",
+	"SYMBOL_2X_OE_COUNT_REG",
 };
 
 #define ADDR_OFFSET(addr) (addr * 4)
@@ -98,7 +98,7 @@ void *read_fn(void *arg) {
 
 		for(i = 0; i < TOTAL_REGS; i++) {
 			read_regs(i);
-			printf("%s: %08x(%u)\n", reg_name[i], data[0], data[0]);
+			printf("%40s(%03x): %8x(%8u)\n", reg_name[i], i * 4, data[0], data[0]);
 		}
 
 		return NULL;
@@ -111,29 +111,31 @@ void *write_fn(void *arg) {
 	targ = targ;
 	int nwrite;
 
-	//uint32_t ts_source_mode_reg = 1;
-	//uint32_t sys_freq_num_reg = 10000;
-	//uint32_t sys_baud_num_reg = 2500;
-	//uint32_t fs_en_switch_reg = 1;
-	//uint32_t debug_for_2x_oe_reg = 1;
+	uint32_t ts_source_mode_reg = 2;
+	uint32_t sys_freq_num_reg = 12500;
+	uint32_t sys_baud_num_reg = 2500;
+	uint32_t fs_en_switch_reg = 1;
 
-	//printids("write_fn: ");
+	printids("write_fn: ");
 
 	while(stop == 0) {
-		//lseek(targ->fd, ADDR_OFFSET(TS_SOURCE_MODE_REG), SEEK_SET);
-		//nwrite = write(targ->fd, &ts_source_mode_reg, sizeof(uint32_t));
-		//lseek(targ->fd, ADDR_OFFSET(SYS_FREQ_NUM_REG), SEEK_SET);
-		//nwrite = write(targ->fd, &sys_freq_num_reg, sizeof(uint32_t));
-		//lseek(targ->fd, ADDR_OFFSET(SYS_BAUD_NUM_REG), SEEK_SET);
-		//nwrite = write(targ->fd, &sys_baud_num_reg, sizeof(uint32_t));
-		//lseek(targ->fd, ADDR_OFFSET(FS_EN_SWITCH_REG), SEEK_SET);
-		//nwrite = write(targ->fd, &fs_en_switch_reg, sizeof(uint32_t));
-		//lseek(targ->fd, ADDR_OFFSET(DEBUG_FOR_2X_OE_REG), SEEK_SET);
-		//nwrite = write(targ->fd, &debug_for_2x_oe_reg, sizeof(uint32_t));
+		lseek(targ->fd, ADDR_OFFSET(TS_SOURCE_MODE_REG), SEEK_SET);
+		nwrite = write(targ->fd, &ts_source_mode_reg, sizeof(uint32_t));
+		lseek(targ->fd, ADDR_OFFSET(SYS_FREQ_NUM_REG), SEEK_SET);
+		nwrite = write(targ->fd, &sys_freq_num_reg, sizeof(uint32_t));
+		lseek(targ->fd, ADDR_OFFSET(SYS_BAUD_NUM_REG), SEEK_SET);
+		nwrite = write(targ->fd, &sys_baud_num_reg, sizeof(uint32_t));
+		lseek(targ->fd, ADDR_OFFSET(FS_EN_SWITCH_REG), SEEK_SET);
+		nwrite = write(targ->fd, &fs_en_switch_reg, sizeof(uint32_t));
 
 		return NULL;
 	}
 	return NULL;
+}
+
+int main_proc(thread_arg_t *targ) {
+	write_fn(targ);
+	read_fn(targ);
 }
 
 int read_write(thread_arg_t *targ) {
@@ -141,19 +143,20 @@ int read_write(thread_arg_t *targ) {
 	pthread_t rtid;
 	pthread_t wtid;
 
-	err = pthread_create(&rtid, NULL, read_fn, targ);
-	if (err != 0) {
-		printf("can't create thread: %s\n", strerror(err));
-	}
+	//err = pthread_create(&rtid, NULL, read_fn, targ);
+	//if (err != 0) {
+	//	printf("can't create thread: %s\n", strerror(err));
+	//}
 
-	err = pthread_create(&wtid, NULL, write_fn, targ);
-	if (err != 0) {
-		printf("can't create thread: %s\n", strerror(err));
-	}
+	//err = pthread_create(&wtid, NULL, write_fn, targ);
+	//if (err != 0) {
+	//	printf("can't create thread: %s\n", strerror(err));
+	//}
 
-	//printids("main thread:");
-	pthread_join(rtid,NULL);
-	pthread_join(wtid,NULL);
+	////printids("main thread:");
+	//pthread_join(rtid,NULL);
+	//pthread_join(wtid,NULL);
+	main_proc(targ);
 
 	return EXIT_SUCCESS;
 }

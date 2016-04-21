@@ -79,9 +79,9 @@ module dvb_s2_ram #(
 	//11
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en_switch_reg = 1;
 	//12
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_2x_oe_count_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en2_count_reg = 0;
 	//13
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] debug_for_2x_oe_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_2x_oe_count_reg = 0;
 
 	wire [1 : 0] mod_mode_cfg;
 	wire [3 : 0] ldpc_mode_cfg;
@@ -95,7 +95,6 @@ module dvb_s2_ram #(
 	wire [31 : 0] SYS_Baud_Num;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
 	wire Freq_Inv_mode;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 	wire fs_en_switch;
-	wire debug_for_2x_oe;
 
 	assign mod_mode_cfg = mod_mode_cfg_reg[1 : 0];
 	assign ldpc_mode_cfg = ldpc_mode_cfg_reg[3 : 0];
@@ -109,7 +108,6 @@ module dvb_s2_ram #(
 	assign SYS_Baud_Num = SYS_Baud_Num_reg;
 	assign Freq_Inv_mode = Freq_Inv_mode_reg[0];
 	assign fs_en_switch = fs_en_switch_reg[0];
-	assign debug_for_2x_oe = debug_for_2x_oe_reg[0];
 
 	integer index_wstrb;
 	//assigning 8 bit data
@@ -147,7 +145,7 @@ module dvb_s2_ram #(
 			SYS_Baud_Num_reg <= 2500;
 			Freq_Inv_mode_reg <= 0;
 			fs_en_switch_reg <= 1;
-			debug_for_2x_oe_reg <= 0;
+			symbol_2x_oe_count_reg <= 0;
 		end
 		else begin
 			if(current_mem_wren == 1) begin
@@ -191,7 +189,6 @@ module dvb_s2_ram #(
 					12: begin
 					end
 					13: begin
-						debug_for_2x_oe_reg <= current_write_data;
 					end
 					default: begin
 					end
@@ -245,10 +242,10 @@ module dvb_s2_ram #(
 						rdata <= fs_en_switch;
 					end
 					12: begin
-						rdata <= symbol_2x_oe_count_reg;
+						rdata <= fs_en2_count_reg;
 					end
 					13: begin
-						rdata <= debug_for_2x_oe_reg;
+						rdata <= symbol_2x_oe_count_reg;
 					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};
@@ -314,6 +311,15 @@ module dvb_s2_ram #(
 			.symbol_2x_re_out(symbol_2x_re_out_origin),
 			.symbol_2x_im_out(symbol_2x_im_out_origin)
 		);
+
+	always @(posedge fs_en2) begin
+		if(hard_rst_n == 0) begin
+			fs_en2_count_reg <= 0;
+		end
+		else begin
+			fs_en2_count_reg <= fs_en2_count_reg + 1;
+		end
+	end
 
 	always @(negedge sys_clk) begin
 		if(hard_rst_n == 0) begin

@@ -55,7 +55,7 @@ static int dma_tr(void *ppara) {
 
 		if(((start + 1) <= end) && (start % 2 != 0)) {
 			writeb(*((uint8_t *)tx_src_memory), tx_dest_memory);
-			//myprintf("%02x->%p\n", *((uint8_t *)tx_src_memory), (void *)tx_dest_memory);
+			myprintf("%02x->%p\n", *((uint8_t *)tx_src_memory), (void *)tx_dest_memory);
 			tx_src_memory += 1;
 			tx_dest_memory += 1;
 			start += 1;
@@ -63,7 +63,7 @@ static int dma_tr(void *ppara) {
 
 		if(((start + 2) <= end) && (start % 4 != 0)) {
 			writew(*((uint16_t *)tx_src_memory), tx_dest_memory);
-			//myprintf("%04x->%p\n", *((uint16_t *)tx_src_memory), (void *)tx_dest_memory);
+			myprintf("%04x->%p\n", *((uint16_t *)tx_src_memory), (void *)tx_dest_memory);
 			tx_src_memory += 2;
 			tx_dest_memory += 2;
 			start += 2;
@@ -71,14 +71,14 @@ static int dma_tr(void *ppara) {
 
 		for(; (start + 4) <= end; start += 4) {
 			writel(*((uint32_t *)tx_src_memory), tx_dest_memory);
-			//myprintf("%08x->%p\n", *((uint32_t *)tx_src_memory), (void *)tx_dest_memory);
+			myprintf("%08x->%p\n", *((uint32_t *)tx_src_memory), (void *)tx_dest_memory);
 			tx_src_memory += 4;
 			tx_dest_memory += 4;
 		}
 		
 		if((start + 2) <= end) {
 			writew(*((uint16_t *)tx_src_memory), tx_dest_memory);
-			//myprintf("%04x->%p\n", *((uint16_t *)tx_src_memory), (void *)tx_dest_memory);
+			myprintf("%04x->%p\n", *((uint16_t *)tx_src_memory), (void *)tx_dest_memory);
 			tx_src_memory += 2;
 			tx_dest_memory += 2;
 			start += 2;
@@ -86,7 +86,7 @@ static int dma_tr(void *ppara) {
 
 		if((start + 1) <= end) {
 			writeb(*((uint8_t *)tx_src_memory), tx_dest_memory);
-			//myprintf("%02x->%p\n", *((uint8_t *)tx_src_memory), (void *)tx_dest_memory);
+			myprintf("%02x->%p\n", *((uint8_t *)tx_src_memory), (void *)tx_dest_memory);
 			tx_src_memory += 1;
 			tx_dest_memory += 1;
 			start += 1;
@@ -103,7 +103,7 @@ static int dma_tr(void *ppara) {
 
 		if(((start + 1) <= end) && (start % 2 != 0)) {
 			*((uint8_t *)rx_dest_memory) = readb(rx_src_memory);
-			//myprintf("%02x<-%p\n", *((uint8_t *)rx_dest_memory), (void *)rx_src_memory);
+			myprintf("%02x<-%p\n", *((uint8_t *)rx_dest_memory), (void *)rx_src_memory);
 			rx_dest_memory += 1;
 			rx_src_memory += 1;
 			start += 1;
@@ -111,7 +111,7 @@ static int dma_tr(void *ppara) {
 
 		if(((start + 2) <= end) && (start % 4 != 0)) {
 			*((uint16_t *)rx_dest_memory) = readw(rx_src_memory);
-			//myprintf("%04x<-%p\n", *((uint16_t *)rx_dest_memory), (void *)rx_src_memory);
+			myprintf("%04x<-%p\n", *((uint16_t *)rx_dest_memory), (void *)rx_src_memory);
 			rx_dest_memory += 2;
 			rx_src_memory += 2;
 			start += 2;
@@ -119,14 +119,14 @@ static int dma_tr(void *ppara) {
 
 		for(; (start + 4) <= end; start += 4) {
 			*((uint32_t *)rx_dest_memory) = readl(rx_src_memory);
-			//myprintf("%08x<-%p\n", *((uint32_t *)rx_dest_memory), (void *)rx_src_memory);
+			myprintf("%08x<-%p\n", *((uint32_t *)rx_dest_memory), (void *)rx_src_memory);
 			rx_dest_memory += 4;
 			rx_src_memory += 4;
 		}
 		
 		if((start + 2) <= end) {
 			*((uint16_t *)rx_dest_memory) = readw(rx_src_memory);
-			//myprintf("%04x<-%p\n", *((uint16_t *)rx_dest_memory), (void *)rx_src_memory);
+			myprintf("%04x<-%p\n", *((uint16_t *)rx_dest_memory), (void *)rx_src_memory);
 			rx_dest_memory += 2;
 			rx_src_memory += 2;
 			start += 2;
@@ -134,7 +134,7 @@ static int dma_tr(void *ppara) {
 
 		if((start + 1) <= end) {
 			*((uint8_t *)rx_dest_memory) = readb(rx_src_memory);
-			//myprintf("%02x<-%p\n", *((uint8_t *)rx_dest_memory), (void *)rx_src_memory);
+			myprintf("%02x<-%p\n", *((uint8_t *)rx_dest_memory), (void *)rx_src_memory);
 			rx_dest_memory += 1;
 			rx_src_memory += 1;
 			start += 1;
