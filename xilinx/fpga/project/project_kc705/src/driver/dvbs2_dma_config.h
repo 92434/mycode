@@ -19,7 +19,7 @@ typedef struct dma_static_config {
 	char *devname;
 } dma_static_config_info_t;
 
-#define STATE 0
+#define STATE 1
 
 static dma_static_config_info_t dma_info[] = {
 #if STATE

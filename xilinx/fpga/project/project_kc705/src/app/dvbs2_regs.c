@@ -98,7 +98,7 @@ void *read_fn(void *arg) {
 
 		for(i = 0; i < TOTAL_REGS; i++) {
 			read_regs(i);
-			printf("%40s(%03x): %8x(%8u)\n", reg_name[i], i * 4, data[0], data[0]);
+			printf("%40s(%03x): %16x(%16u)\n", reg_name[i], i * 4, data[0], data[0]);
 		}
 
 		return NULL;
