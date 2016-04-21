@@ -276,7 +276,7 @@ import sys
 
 def table_key_hex_str(k):
 	try:
-		hex_str = '0x%02x' %(int(k, 2))
+		hex_str = '%02x' %(int(k, 2))
 	except:
 		hex_str = k
 	return hex_str
@@ -290,7 +290,7 @@ def replace_asi_to_hex(d, data_file):
 		data_txt = f.read()
 	for k in table_keys:
 		try:
-			hex_str = '0x%02x' %(int(k, 2))
+			hex_str = '%02x' %(int(k, 2))
 		except:
 			hex_str = k
 		print >> sys.stderr, "retrieve %s" %(hex_str)

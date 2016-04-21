@@ -1,7 +1,7 @@
 #!/bin/sh
 
 function get_dvb_out_count() {
-	sudo ./app/dvbs2_regs /dev/dvbs2_regs | grep SYMBOL_2X_OE_POSEDGE_COUNT | sed 's/SYMBOL_2X_OE_POSEDGE_COUNT: [^(]*(\(.*\))/\1/g'
+	sudo ./app/dvbs2_regs /dev/dvbs2_regs | grep FS_EN2_COUNT_REG | sed 's/FS_EN2_COUNT_REG(030): [^(]*(\(.*\))/\1/g'
 }
 
 function get_current_count() {
