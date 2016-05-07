@@ -306,7 +306,7 @@ initial $readmemb("../../../../testUseCase/Mode_0_0_6_0/anotherSimul/CRCEncoder_
 
 initial // Clock generator
   begin
-    sys_clk = 0;
+    sys_clk = 1;
     forever #15 sys_clk = !sys_clk;
   end		
 		
@@ -356,7 +356,7 @@ initial	// Test stimulus
 	SYS_Freq_Num = 32'd10000;
 	SYS_Baud_Num  = 32'd2500;
 	Freq_Inv_mode = 1'b0;
-	fs_en_switch = 1;//0:from outer;1:from inner
+	fs_en_switch = 0;//0:from outer;1:from inner
    hard_rst_n 	= 1;	 
 	//ts_clk_h264out = 0;
 #120 hard_rst_n = 0;
@@ -365,14 +365,32 @@ initial	// Test stimulus
   
  //assign    fs_en = (fs_en_switch == 1)?fs_en_inner:fs_en_outer;
  //assign    fs_en2 = (fs_en_switch == 1)?fs_en2_inner:fs_en2_outer; 
-initial // Clock generator
-	begin
-	fs_en2 = 0;
-	forever begin
-		#30;
-		fs_en2 = ~fs_en2;
+//initial // Clock generator
+//	begin
+//	fs_en2 = 0;
+//	forever begin
+//		#30;
+//		fs_en2 = ~fs_en2;
+//	end
+//end			
+	initial begin 
+		fs_en2 = 0;
+		//fs_en = 0;
+		forever begin
+			#30;
+			fs_en2 = 1;
+			//fs_en = 1;
+			#30;
+			fs_en2 = 0;
+			//fs_en = 0;
+			#30;
+			fs_en2 = 1;
+			//fs_en = 0;
+			#30;
+			fs_en2 = 0;
+			//fs_en = 0;
+		end
 	end
-end			
   
 //always @(posedge sys_clk)begin
 //      if(~hard_rst_n)begin
@@ -796,7 +814,7 @@ always @(negedge sys_clk or negedge glb_rst_n)begin
 	if(~glb_rst_n)begin
 		
 	end
-	else if((uut.symbol_1x_oe == 1)) begin
+	else if((uut.symbol_1x_oe == 1) && (uut.fs_en == 1)) begin
 		
 	if(mod_mode_cfg == 2'b00)
 		case({uut.symbol_1x_re_out,uut.symbol_1x_im_out})
@@ -814,17 +832,17 @@ always @(negedge sys_clk or negedge glb_rst_n)begin
 	end
 end
 
-always @(negedge sys_clk or negedge glb_rst_n)begin    
-	if(~glb_rst_n)begin
+//always @(negedge sys_clk or negedge glb_rst_n)begin    
+//	if(~glb_rst_n)begin
 		
-	end
-	else if((uut.symbol_1x_oe == 1)) begin
-		$fwrite(symbol_out_1x_file_pointer,"%f %f \n",uut.symbol_1x_re_out,uut.symbol_1x_im_out);
-	end
-	else begin
-		//$fclose(symbol_out_file_pointer);
-	end
-end
+//	end
+//	else if((uut.symbol_1x_oe == 1)) begin
+//		$fwrite(symbol_out_1x_file_pointer,"%f %f \n",uut.symbol_1x_re_out,uut.symbol_1x_im_out);
+//	end
+//	else begin
+//		//$fclose(symbol_out_file_pointer);
+//	end
+//end
 
 //always @(negedge sys_clk or negedge glb_rst_n)begin      
 //	if(~glb_rst_n)begin

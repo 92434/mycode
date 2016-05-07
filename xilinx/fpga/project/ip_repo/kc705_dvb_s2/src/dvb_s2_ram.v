@@ -63,7 +63,7 @@ module dvb_s2_ram #(
 	//03
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] pilot_mode_cfg_reg = 0;
 	//04
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] srrc_mode_reg = 1;//00:0.35; 01:0.25; 10:0.20(default) 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] srrc_mode_reg = 2;//00:0.35; 01:0.25; 10:0.20(default) 
 	//05
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] dvb_s_convolution_mode_reg = 0;
 	//06
@@ -137,7 +137,7 @@ module dvb_s2_ram #(
 			ldpc_mode_cfg_reg <= 6;
 			frame_mode_cfg_reg <= 0;
 			pilot_mode_cfg_reg <= 0;
-			srrc_mode_reg <= 1;
+			srrc_mode_reg <= 2;
 			dvb_s_convolution_mode_reg <= 0;
 			dvb_s_mode_reg <= 1;
 			TS_Source_mode_reg <= 1;

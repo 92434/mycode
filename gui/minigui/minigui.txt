@@ -1,0 +1,151 @@
+
+1、首先准备如下几个包，可从minigui官网上下载到
+
+jpegsrc.v7.tar.gz            
+minigui-res-be-3.0.12.tar.gz
+libminigui-gpl-3.0.12.tar.gz 
+qvfb2-2.0.tar.gz
+libpng-1.2.37.tar.gz         
+zlib-1.2.2.tar.gz
+mg-samples-3.0.12.tar.gz
+libmgplus-1_2_4.tar.gz
+
+ 
+
+2、安装zlib，该包是png库的必要组件，要先装这个
+
+$ tar zxvf zlib-1.2.2.tar.gz
+$ cd zlib-1.2.2/
+$ ./configure
+$ sudo make
+$ sudo make install
+
+ 
+
+3、安装png，该包是minigui3.0的必要组件
+
+$ tar zxvf libpng-1.2.37.tar.gz
+$ cd libpng-1.2.37/
+$ ./configure
+$ sudo make
+$ sudo make install
+
+ 
+
+4、安装jpeg，该包是minigui3.0的必要组件
+
+$ tar zxvf jpegsrc.v7.tar.gz
+$ cd jpeg-7/
+$ ./configure
+$ sudo make
+$ sudo make install
+
+ 
+
+5、安装minigui3.0
+
+$ tar zxvf libminigui-gpl-3.0.12.tar.gz
+$ cd libminigui-gpl-3.0.12/
+$ ./configure
+$ sudo make
+$ sudo make install
+
+ 
+
+6、安装minigui3.0资源
+
+$ tar zxvf minigui-res-be-3.0.12.tar.gz
+$ cd minigui-res-be-3.0.12/
+$ ./configure --enable-ctrlgridview
+$ sudo make
+$ sudo make install
+
+ 
+
+至此，minigui已经安装完毕了，下面让它在pc下运行
+
+ 
+
+7、设置lib的环境变量
+
+$ sudo vi /etc/ld.so.conf
+添加：include /usr/local/lib
+$ sudo ldconfig
+
+ 
+
+8、安装libmgplus，这个是mg-sample的必要组件
+
+$ tar zxvf libmgplus-1_2_4.tar.gz
+$ cd libmgplus-1.2.4/
+$ ./configure
+$ sudo make
+$ sudo make install
+
+ 
+
+9、安装qvfb2，这个是用来模拟framebuffer的，minigui的程序只能显示在framebuffer上
+
+$ tar zxvf qvfb2-2.0.tar.gz
+$ cd qvfb2-2.0/
+$ sudo apt-get install qt3-dev-tools-embedded
+$ ./configure --with-qt-includes=/usr/include/qt3/ --with-qt-libraries=/usr/lib/qt3/ -x-includes=/usr/include/X11 --x-libraries=/usr/lib/X11
+$ sudo make
+$ sudo make install
+
+ 
+
+10、安装mg-sample
+
+$ tar zxvf mg-samples-3.0.12
+$ cd mg-samples-3.0.12/
+$ ./configure
+$ sudo make
+
+ 
+
+11、运行mg-sample
+
+$ sudo vi /usr/local/etc/MiniGUI.cfg
+将第44行的gvfb改为qvfb2
+进入src目录
+$ ./helloworld
+
+ 
+
+接下来，再尝试让它在framebuffer下运行
+
+ 
+
+12、打开Ubuntu10.04的framebuffer
+
+$ sudo vi /etc/initramfs-tools/modules
+加入
+fbcon
+vesafb
+$ sudo vi /etc/modprobe.d/blacklist-framebuffer.conf
+注释blacklist vesafb
+$ sudo update-initramfs -u
+$ sudo vi /etc/default/grub
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash vga=785"
+
+$ sudo grub-mkconfig
+$ sudo update-grub
+重启系统
+
+ 
+
+13、修改Minigui.cfg
+
+# sudo vi /usr/local/etc/Minigui.cfg
+gal_engine=fbcon
+ial_engine=console
+[fbcon]
+defaultmode=640x480-16bpp
+
+
+14、运行demo
+
+注意，一定要加上sudo，否则无法运行
+
+gvfb CMake  -lX11 -L/usr/lib/i386-linux-gnu/libXtst.a  -L/usr/lib/i386-linux-gnu/libX11.a 
