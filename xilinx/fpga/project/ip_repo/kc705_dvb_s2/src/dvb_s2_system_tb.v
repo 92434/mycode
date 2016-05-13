@@ -11,26 +11,28 @@ reg   			 				    		pilot_mode_cfg;
 reg							[1:0]			srrc_mode;//00:0.35; 01:0.25; 10:0.20 
 reg							[2:0]			dvb_s_convolution_mode;
 reg   			 				    		dvb_s_mode;// 0:dvb-s; 1:dvb-s2    
-reg   			 				    		fs_en_switch;  //0:from outer;1:from inner                      
+//reg   			 				    		fs_en_switch;  //0:from outer;1:from inner                      
 //reg							[1:0]			SYS_Baud_mode;
 reg							[1:0]			TS_Source_mode;
-reg							[31:0]		    SYS_Freq_Num;
-reg							[31:0]		    SYS_Baud_Num;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
+reg							[31:0]		    SYS_Baud_Num;//32'd2500 --> 25M BaudRate   
+reg							[31:0]		    SYS_Freq_Num;//32'd10000 --> 100M System Clock,
 reg											Freq_Inv_mode;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 //////////////////////////////////////////////////////////////
 reg                  					sys_clk;
+//reg                  					sys_clk_fs_en;
 reg							[7:0]       ts_din;// @ sys_clk
 reg                  					ts_syn;// @ sys_clk
 reg                  					ts_head;// @ sys_clk
 wire	               					ts_clk;// @ sys_clk
-reg                 						fs_en_outer;
-reg                						fs_en2_outer;
+//reg                 						fs_en_outer;
+//reg                						fs_en2_outer;
+reg                                     fs_0p5_en;
 
 wire                 						fs_en;
-reg                						fs_en2 = 0;
+wire                						fs_en2;
 
-wire                 						fs_en_inner;
-wire                						fs_en2_inner;
+//wire                 						fs_en_inner;
+//wire                						fs_en2_inner;
 
 wire				[7:0]       ts_din_tp;// @ sys_clk
 wire         					ts_syn_tp;// @ sys_clk
@@ -44,10 +46,19 @@ wire				signed [15:0]					symbol_1x_im_out;
 //wire				signed [15:0]					symbol_2x_re_out;  
 //wire				signed [15:0]					symbol_2x_im_out;  
 
-
+wire                  							fs_en_1cycle;
 wire                  							ts_clk_h264out;// @ ts_clk_out
 
 assign	ts_clk_h264out = sys_clk;
+
+//fs_transform uut_fs_transform(
+//.hard_rst_n(hard_rst_n),// modified by 2014.09.22
+//.sys_clk(sys_clk),
+//.fs_0p5_en(fs_0p5_en),
+//.fs_en_1cycle(fs_en_1cycle),
+//.fs_en_1cycle_1dly()
+//);
+
 
 dvb_s2_system_top uut(
 .hard_rst_n				(hard_rst_n),
@@ -61,11 +72,12 @@ dvb_s2_system_top uut(
 .dvb_s_mode            (dvb_s_mode),
 //.SYS_Baud_mode			(SYS_Baud_mode),
 .TS_Source_mode		(TS_Source_mode),
-.SYS_Freq_Num       (SYS_Freq_Num),
 .SYS_Baud_Num       (SYS_Baud_Num),
+.SYS_Freq_Num       (SYS_Freq_Num),
 .Freq_Inv_mode      (Freq_Inv_mode),
 //////////////////////////////////////////////////////////////
 .sys_clk					(sys_clk),
+//.sys_clk_fs_en					(sys_clk_fs_en),
 .ts_din_h264out		(ts_din),// @ ts_clk_h264out
 .ts_valid_h264out		(ts_syn),// @ ts_clk_h264out
 .ts_syn_h264out		(ts_head),// @ ts_clk_h264out
@@ -75,13 +87,13 @@ dvb_s2_system_top uut(
 //.fs_en_switch               (fs_en_switch),
 //.fs_en_outer					(fs_en_outer),
 //.fs_en2_outer					(fs_en2_outer),
-.fs_en2(fs_en2),
-.fs_en_ref(fs_en),
+.fs_0p5_en                      (fs_0p5_en),
 .ts_din                 (ts_din_tp),
 .ts_syn                 (ts_syn_tp),
 .ts_head                (ts_head_tp),
 //.fs_en_inner            (fs_en_inner),
 //.fs_en2_inner           (fs_en2_inner),
+.fs_en_1cycle           (fs_en_1cycle),
 //////////////////////////////////////////////////////////////
 .symbol_1x_oe			(symbol_1x_oe),
 .symbol_1x_re_out		(symbol_1x_re_out),
@@ -90,9 +102,6 @@ dvb_s2_system_top uut(
 //.symbol_2x_re_out		(symbol_2x_re_out),
 //.symbol_2x_im_out		(symbol_2x_im_out)
 );
-
-	wire fs_en_on_sys_clk;
-	assign fs_en_on_sys_clk = uut.fs_en_process_inst.fs_en_on_sys_clk;
 
 wire glb_rst_n;
 
@@ -304,24 +313,35 @@ reg 	CRCEncoder_In_Bits[CRCEncoder_In_Bits_Len - 1:0];
 
 initial $readmemb("../../../../testUseCase/Mode_0_0_6_0/anotherSimul/CRCEncoder_In.txt",CRCEncoder_In_Bits);
 
-initial // Clock generator
+initial // Clock generator  125M 
   begin
+//    sys_clk_fs_en = 1;
     sys_clk = 1;
-    forever #15 sys_clk = !sys_clk;
+    forever begin
+//     #3 sys_clk_fs_en = !sys_clk_fs_en;
+     #4 sys_clk = !sys_clk;
+     end
   end		
-		
+
 initial // Clock generator
   begin
-    fs_en_outer = 0;
-    fs_en2_outer = 0;
-    forever begin
-    #30 fs_en_outer = 1; fs_en2_outer = 1;
-    #30 fs_en_outer = 0; fs_en2_outer = 0;
-	 #30 fs_en_outer = 0; fs_en2_outer = 1;
-    #30 fs_en_outer = 0; fs_en2_outer = 0;
-    //#10 fs_en = 0; fs_en2 = 0;
+    fs_0p5_en = 0;
+    forever #10 fs_0p5_en = !fs_0p5_en;
   end
-  end			
+
+		
+//initial // Clock generator
+//  begin
+//    fs_en_outer = 0;
+//    fs_en2_outer = 0;
+//    forever begin
+//    #16 fs_en_outer = 1; fs_en2_outer = 1;
+//    #8 fs_en_outer = 0; fs_en2_outer = 0;
+//	 #8 fs_en_outer = 0; fs_en2_outer = 1;
+//    #8 fs_en_outer = 0; fs_en2_outer = 0;
+//    //#10 fs_en = 0; fs_en2 = 0;
+//  end
+//  end			
 //initial // Clock generator
 //  begin
 //    sys_clk = 1;
@@ -344,6 +364,7 @@ initial	// Test stimulus
   begin
    // fs_en = 0;
     //fs_en2 = 0;
+    fs_0p5_en = 0;
   	mod_mode_cfg   	= 2'b00;
   	ldpc_mode_cfg  	= 4'b0110;
   	frame_mode_cfg 	= 1'b0;
@@ -353,44 +374,19 @@ initial	// Test stimulus
   	dvb_s_mode = 1'b1;
 	//SYS_Baud_mode = 2'b00;//2'b10;
 	TS_Source_mode = 2'b01;
-	SYS_Freq_Num = 32'd10000;
 	SYS_Baud_Num  = 32'd2500;
+	SYS_Freq_Num  = 32'd12500;
 	Freq_Inv_mode = 1'b0;
-	fs_en_switch = 0;//0:from outer;1:from inner
-   hard_rst_n 	= 1;	 
+//	fs_en_switch = 0;//0:from outer;1:from inner
+   hard_rst_n 	= 0;	 
 	//ts_clk_h264out = 0;
 #120 hard_rst_n = 0;
 #120 hard_rst_n = 1;
   end
   
- //assign    fs_en = (fs_en_switch == 1)?fs_en_inner:fs_en_outer;
- //assign    fs_en2 = (fs_en_switch == 1)?fs_en2_inner:fs_en2_outer; 
-//initial // Clock generator
-//	begin
-//	fs_en2 = 0;
-//	forever begin
-//		#30;
-//		fs_en2 = ~fs_en2;
-//	end
-//end			
-	initial begin 
-		fs_en2 = 0;
-		//fs_en = 0;
-		forever begin
-			#30;
-			fs_en2 = 1;
-			//fs_en = 1;
-			#30;
-			fs_en2 = 0;
-			//fs_en = 0;
-			#30;
-			fs_en2 = 1;
-			//fs_en = 0;
-			#30;
-			fs_en2 = 0;
-			//fs_en = 0;
-		end
-	end
+ assign    fs_en = fs_en_1cycle;//fs_en_outer;
+// assign    fs_en = (fs_en_switch == 1)?fs_en_inner:fs_en_1cycle;//fs_en_outer;
+// assign    fs_en2 = (fs_en_switch == 1)?fs_en2_inner:fs_en2_outer; 
   
 //always @(posedge sys_clk)begin
 //      if(~hard_rst_n)begin
@@ -529,13 +525,8 @@ end
 	  input_cnt <= 0;
 	end
 	else if((ts_clk == 1)) begin
+		input_cnt <= input_cnt + 1;
 		ts_din 	<= {CRCEncoder_In_Bits[8*input_cnt + 0],CRCEncoder_In_Bits[8*input_cnt + 1],CRCEncoder_In_Bits[8*input_cnt + 2],CRCEncoder_In_Bits[8*input_cnt + 3],CRCEncoder_In_Bits[8*input_cnt + 4],CRCEncoder_In_Bits[8*input_cnt + 5],CRCEncoder_In_Bits[8*input_cnt + 6],CRCEncoder_In_Bits[8*input_cnt + 7]};
-		if(input_cnt == ((CRCEncoder_In_Bits_Len / 8) - 1)) begin
-			input_cnt <= 0;
-		end
-		else begin
-			input_cnt <= input_cnt + 1;
-		end
 	end
 	else begin
 	   
@@ -774,10 +765,10 @@ always @(negedge sys_clk or negedge glb_rst_n)begin
 		
 	if(mod_mode_cfg == 2'b00)
 		case({uut.genplheader_symbol_re_out,uut.genplheader_symbol_im_out})
-	32'hf4b0f4b0:$fwrite(genplheader_symbol_out_file_pointer,"%s\n","-0.70710678118654757 - 0.70710678118654757j");
-	32'hf4b00b50:$fwrite(genplheader_symbol_out_file_pointer,"%s\n","-0.70710678118654757 + 0.70710678118654757j");
-	32'h0b50f4b0:$fwrite(genplheader_symbol_out_file_pointer,"%s\n","0.70710678118654757 - 0.70710678118654757j");
-	32'h0b500b50:$fwrite(genplheader_symbol_out_file_pointer,"%s\n","0.70710678118654757 + 0.70710678118654757j");
+	32'hf4b0f4b0:$fwrite(genplheader_symbol_out_file_pointer,"%s \n","-0.70710678118654757 - 0.70710678118654757j");
+	32'hf4b00b50:$fwrite(genplheader_symbol_out_file_pointer,"%s \n","-0.70710678118654757 + 0.70710678118654757j");
+	32'h0b50f4b0:$fwrite(genplheader_symbol_out_file_pointer,"%s \n","0.70710678118654757 - 0.70710678118654757j");
+	32'h0b500b50:$fwrite(genplheader_symbol_out_file_pointer,"%s \n","0.70710678118654757 + 0.70710678118654757j");
 	endcase
 	else begin
 		$fwrite(genplheader_symbol_out_file_pointer,"%08f %08f j \n",uut.genplheader_symbol_re_out/(2^12),uut.genplheader_symbol_im_out/(2^12));
@@ -796,10 +787,10 @@ always @(negedge sys_clk or negedge glb_rst_n)begin
 		
 	if(mod_mode_cfg == 2'b00)
 		case({uut.plframer_symbol_re_out,uut.plframer_symbol_im_out})
-	32'hf4b0f4b0:$fwrite(plframer_symbol_out_file_pointer,"%s \n","-0.70710678118654757 - 0.70710678118654757j");
-	32'hf4b00b50:$fwrite(plframer_symbol_out_file_pointer,"%s \n","-0.70710678118654757 + 0.70710678118654757j");
-	32'h0b50f4b0:$fwrite(plframer_symbol_out_file_pointer,"%s \n","0.70710678118654757 - 0.70710678118654757j");
-	32'h0b500b50:$fwrite(plframer_symbol_out_file_pointer,"%s \n","0.70710678118654757 + 0.70710678118654757j");
+	        32'hf4b0f4b0:$fwrite(plframer_symbol_out_file_pointer,"%s \n","-0.70710678118654757 - 0.70710678118654757j");
+            32'hf4b00b50:$fwrite(plframer_symbol_out_file_pointer,"%s \n","-0.70710678118654757 + 0.70710678118654757j");
+            32'h0b50f4b0:$fwrite(plframer_symbol_out_file_pointer,"%s \n","0.70710678118654757 - 0.70710678118654757j");
+            32'h0b500b50:$fwrite(plframer_symbol_out_file_pointer,"%s \n","0.70710678118654757 + 0.70710678118654757j");
 	endcase
 	else begin
 		$fwrite(plframer_symbol_out_file_pointer,"%08f %08f j \n",uut.plframer_symbol_re_out/(2^12),uut.plframer_symbol_im_out/(2^12));
@@ -814,7 +805,7 @@ always @(negedge sys_clk or negedge glb_rst_n)begin
 	if(~glb_rst_n)begin
 		
 	end
-	else if((uut.symbol_1x_oe == 1) && (uut.fs_en == 1)) begin
+	else if((uut.symbol_1x_oe == 1)) begin
 		
 	if(mod_mode_cfg == 2'b00)
 		case({uut.symbol_1x_re_out,uut.symbol_1x_im_out})

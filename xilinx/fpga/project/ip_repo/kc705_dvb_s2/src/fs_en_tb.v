@@ -28,4 +28,28 @@ module fs_en_tb #() ();
 			.fs_en_on_sys_clk(fs_en_on_sys_clk),
 			.fs_en(fs_en)
 		);
+
+
+	wire clk0;
+	clkgen #(.clk_period(1)) xiaofeiclk3(.clk(clk0));
+
+	reg clk1 = 0;
+	always @(posedge clk0) begin
+		if(rst_n == 0) begin
+			clk1 <= 0;
+		end
+		else begin
+			clk1 <= ~clk1;
+		end
+	end
+
+	reg clk2 = 0;
+	always @(posedge clk1) begin
+		if(rst_n == 0) begin
+			clk2 <= 0;
+		end
+		else begin
+			clk2 <= ~clk2;
+		end
+	end
 endmodule

@@ -26,17 +26,13 @@ module dvb_s2_ram #(
 
 		input wire sys_clk,
 		output wire ts_clk,// @ sys_clk
-		//input wire fs_en_outer,
-		//input wire fs_en2_outer,
-		input wire fs_en2,
-		output wire fs_en,
+		input wire fs_0p5_en,
 
 		output wire [7 : 0] ts_din,// @ sys_clk
 		output wire ts_syn,// @ sys_clk
 		output wire ts_head,// @ sys_clk
 
-		//output wire fs_en_inner,
-		//output wire fs_en2_inner,
+		output wire fs_en_1cycle,
 
 		output wire symbol_1x_oe,
 		output wire signed [15 : 0] symbol_1x_re_out,
@@ -71,16 +67,14 @@ module dvb_s2_ram #(
 	//07
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] TS_Source_mode_reg = 1;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
 	//08
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Freq_Num_reg = 10000;//sys_clk freq 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Freq_Num_reg = 12500;//sys_clk freq 
 	//09
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Baud_Num_reg = 2500;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
 	//10
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] Freq_Inv_mode_reg = 0;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 	//11
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en_switch_reg = 1;
-	//12
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en2_count_reg = 0;
-	//13
+	//12
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_2x_oe_count_reg = 0;
 
 	wire [1 : 0] mod_mode_cfg;
@@ -94,7 +88,6 @@ module dvb_s2_ram #(
 	wire [31 : 0] SYS_Freq_Num;//sys_clk freq
 	wire [31 : 0] SYS_Baud_Num;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
 	wire Freq_Inv_mode;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
-	wire fs_en_switch;
 
 	assign mod_mode_cfg = mod_mode_cfg_reg[1 : 0];
 	assign ldpc_mode_cfg = ldpc_mode_cfg_reg[3 : 0];
@@ -107,7 +100,6 @@ module dvb_s2_ram #(
 	assign SYS_Freq_Num = SYS_Freq_Num_reg;
 	assign SYS_Baud_Num = SYS_Baud_Num_reg;
 	assign Freq_Inv_mode = Freq_Inv_mode_reg[0];
-	assign fs_en_switch = fs_en_switch_reg[0];
 
 	integer index_wstrb;
 	//assigning 8 bit data
@@ -141,10 +133,9 @@ module dvb_s2_ram #(
 			dvb_s_convolution_mode_reg <= 0;
 			dvb_s_mode_reg <= 1;
 			TS_Source_mode_reg <= 1;
-			SYS_Freq_Num_reg <= 10000;
+			SYS_Freq_Num_reg <= 12500;
 			SYS_Baud_Num_reg <= 2500;
 			Freq_Inv_mode_reg <= 0;
-			fs_en_switch_reg <= 1;
 			symbol_2x_oe_count_reg <= 0;
 		end
 		else begin
@@ -184,11 +175,8 @@ module dvb_s2_ram #(
 						Freq_Inv_mode_reg <= current_write_data;
 					end
 					11: begin
-						fs_en_switch_reg <= current_write_data;
 					end
 					12: begin
-					end
-					13: begin
 					end
 					default: begin
 					end
@@ -239,12 +227,9 @@ module dvb_s2_ram #(
 						rdata <= Freq_Inv_mode;
 					end
 					11: begin
-						rdata <= fs_en_switch;
-					end
-					12: begin
 						rdata <= fs_en2_count_reg;
 					end
-					13: begin
+					12: begin
 						rdata <= symbol_2x_oe_count_reg;
 					end
 					default: begin
@@ -266,8 +251,8 @@ module dvb_s2_ram #(
 			.dvb_s_convolution_mode(dvb_s_convolution_mode),
 			.dvb_s_mode(dvb_s_mode),// 0:dvb-s; 1:dvb-s2
 			.TS_Source_mode(TS_Source_mode),// 00:TS Source inside by ts_clk; 01:TS Source outside without Empty Frame; 10: TS Source outside with Empty Frame;
-			.SYS_Freq_Num(SYS_Freq_Num),//sys_clk freq
 			.SYS_Baud_Num(SYS_Baud_Num),//32'd2500 --> 25M BaudRate SYS_Baud_mode,// 00:10M; 01:25M; 
+			.SYS_Freq_Num(SYS_Freq_Num),//sys_clk freq
 			.Freq_Inv_mode(Freq_Inv_mode),// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 
 			.ts_clk_h264out(ts_clk_h264out),// clock from h.264 encoder
@@ -277,18 +262,14 @@ module dvb_s2_ram #(
 
 			.sys_clk(sys_clk),
 			.ts_clk(ts_clk),// @ sys_clk
-			//.fs_en_switch(fs_en_switch),
-			//.fs_en_outer(fs_en_outer),
-			//.fs_en2_outer(fs_en2_outer),
-			.fs_en2(fs_en2),
-			.fs_en_ref(fs_en),
+
+			.fs_0p5_en(fs_0p5_en),
 
 			.ts_din(ts_din),// @ sys_clk
 			.ts_syn(ts_syn),// @ sys_clk
 			.ts_head(ts_head),// @ sys_clk
 
-			//.fs_en_inner(fs_en_inner),
-			//.fs_en2_inner(fs_en2_inner),
+			.fs_en_1cycle(fs_en_1cycle),
 
 			.symbol_1x_oe(symbol_1x_oe),
 			.symbol_1x_re_out(symbol_1x_re_out),
@@ -312,7 +293,7 @@ module dvb_s2_ram #(
 			.symbol_2x_im_out(symbol_2x_im_out_origin)
 		);
 
-	always @(posedge fs_en2) begin
+	always @(posedge fs_0p5_en) begin
 		if(hard_rst_n == 0) begin
 			fs_en2_count_reg <= 0;
 		end
@@ -339,7 +320,7 @@ module dvb_s2_ram #(
 			.rst_n(hard_rst_n),
 			.sys_clk(sys_clk),
 
-			.fs_en2(fs_en2),
+			.fs_en2(fs_0p5_en),
 
 			.symbol_2x_oe_origin(symbol_2x_oe_origin),
 			.symbol_2x_re_out_origin(symbol_2x_re_out_origin),

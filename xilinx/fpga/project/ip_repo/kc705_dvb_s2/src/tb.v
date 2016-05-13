@@ -16,8 +16,7 @@ module tb #(
 	//reg[7:0] mpeg_in[MPEG_LENGTH - 1 : 0];
 	reg CRCEncoder_In_Bits[CRCEncoder_In_Bits_Len - 1 : 0];
 
-	wire sys_clk;
-	reg rst_n = 1;
+	reg rst_n = 0;
 
 	integer symbol_1x_out_sim_file_pointer;
 	integer symbol_1x_out_sim_file_pointer_null;
@@ -34,65 +33,17 @@ module tb #(
 		rst_n = 1;
 	end
 
-	//reg fs_en2_outer = 0;
-	//integer delay = 0;
-	//always @(posedge sys_clk) begin
-	//	if(rst_n == 0) begin
-	//		fs_en2_outer <= 0;
-	//		delay <= 0;
-	//	end
-	//	else begin
-	//		//fs_en2_outer <= ~fs_en2_outer;
-	//		fs_en2_outer <= 0;
-	//		if(delay >= 4 - 1) begin
-	//			delay <= 0;
-	//		end
-	//		else begin
-	//			delay <= delay + 1;
-	//		end
-	//	end
-	//end
+	//wire [31 : 0] symbol_2x_oe_count_reg;
+	//assign symbol_2x_oe_count_reg = dvb_s2_inst.dvb_s2_ram_inst.symbol_2x_oe_count_reg;
 
-	//wire fs_en_outer;
-	////assign fs_en_outer = (delay == 1) ? fs_en2_outer : 0;
-	//assign fs_en_outer = 0;
+	//wire symbol_2x_oe_origin;
+	//assign symbol_2x_oe_origin = dvb_s2_inst.dvb_s2_ram_inst.symbol_2x_oe_origin;
 
+	//wire signed [15 : 0] symbol_2x_re_out_origin;
+	//assign symbol_2x_re_out_origin = dvb_s2_inst.dvb_s2_ram_inst.symbol_2x_re_out_origin;
 
-	//wire fs_en_inner;
-	//wire fs_en2_inner;
-
-
-	wire fs_en2;
-	clkgen #(.clk_period(30)) xiaofeiclk2(.clk(fs_en2));
-
-	//reg fs_en = 0;
-	//initial begin 
-	//	fs_en <= 0;
-	//	#30;
-	//	forever begin
-	//		fs_en = ~fs_en;
-	//		#15;
-	//		fs_en = ~fs_en;
-	//		#105;
-	//	end
-	//end
-	wire fs_en;
-
-
-	wire fs_en_on_sys_clk;
-	assign fs_en_on_sys_clk = dvb_s2_inst.dvb_s2_ram_inst.dvb_s2_system_top_inst.fs_en_process_inst.fs_en_on_sys_clk;
-
-	wire [31 : 0] symbol_2x_oe_count_reg;
-	assign symbol_2x_oe_count_reg = dvb_s2_inst.dvb_s2_ram_inst.symbol_2x_oe_count_reg;
-
-	wire symbol_2x_oe_origin;
-	assign symbol_2x_oe_origin = dvb_s2_inst.dvb_s2_ram_inst.symbol_2x_oe_origin;
-
-	wire signed [15 : 0] symbol_2x_re_out_origin;
-	assign symbol_2x_re_out_origin = dvb_s2_inst.dvb_s2_ram_inst.symbol_2x_re_out_origin;
-
-	wire signed [15 : 0] symbol_2x_im_out_origin;
-	assign symbol_2x_im_out_origin = dvb_s2_inst.dvb_s2_ram_inst.symbol_2x_im_out_origin;
+	//wire signed [15 : 0] symbol_2x_im_out_origin;
+	//assign symbol_2x_im_out_origin = dvb_s2_inst.dvb_s2_ram_inst.symbol_2x_im_out_origin;
 	
 	reg [7:0] mpeg_data = 0;
 	wire mpeg_clk;
@@ -158,11 +109,24 @@ module tb #(
 		end
 	end
 
-	wire clk_orig;
-	clkgen #(.clk_period(15)) xiaofeiclk1(.clk(clk_orig));
-	//clkgen #(.clk_period(2)) xiaofeiclk2(.clk(mpeg_clk));
-	assign sys_clk = ~clk_orig;
+	reg sys_clk = 0;
+	initial begin
+		sys_clk <= 0;
+		forever begin
+			#4;
+			sys_clk = ~sys_clk;
+		end
+	end
 	assign mpeg_clk = sys_clk;
+
+	reg fs_0p5_en = 0;
+	initial begin
+		fs_0p5_en <= 0;
+		forever begin
+			#10;
+			fs_0p5_en = ~fs_0p5_en;
+		end
+	end
 
 
 	wire ts_clk;
@@ -221,6 +185,8 @@ module tb #(
 		//$fclose(symbol_out_file_pointer);
 	end
 
+	wire fs_en_1cycle;
+
 	dvb_s2_wrap #() dvb_s2_inst (
 		.hard_rst_n(rst_n),
 
@@ -231,17 +197,13 @@ module tb #(
 
 		.sys_clk(sys_clk),
 		.ts_clk(ts_clk),// @ sys_clk
-		//.fs_en_outer(fs_en_outer),
-		//.fs_en2_outer(fs_en2_outer),
-		.fs_en2(fs_en2),
-		.fs_en(fs_en),
+		.fs_0p5_en(fs_0p5_en),
 
 		.ts_din(ts_din),// @ sys_clk
 		.ts_syn(ts_syn),// @ sys_clk
 		.ts_head(ts_head),// @ sys_clk
 
-		//.fs_en_inner(fs_en_inner),
-		//.fs_en2_inner(fs_en2_inner),
+		.fs_en_1cycle(fs_en_1cycle),
 
 		.symbol_1x_oe(symbol_1x_oe),
 		.symbol_1x_re_out(symbol_1x_re_out),

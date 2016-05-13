@@ -3,8 +3,8 @@ module ts_interface(
 input								sys_clk,
 input								fs_en,
 input								glb_rst_n,
-input				[31:0]			SYS_Freq_Num,// 00:2M; 01:4M; 10; 7.5M // modified by 2014.09.22
-input				[31:0]			SYS_Baud_Num,// 00:2M; 01:4M; 10; 7.5M // modified by 2014.09.22
+input				[31:0]			SYS_Baud_Num,
+input				[31:0]		    SYS_Freq_Num,//32'd10000 --> 100M System Clock,
 input				[7:0]			ts_din,
 input								ts_syn,
 output	reg					glb_start_en,
@@ -464,28 +464,46 @@ always @(posedge sys_clk)begin
 				else begin
 					ts_byte_en <= 1;
 					ts_byte_in <= bbheader_crc;
-					ts_out_state <= TS_OUT_BBHEADER_CRC;
+					ts_out_state <= TS_OUT_BBHEADER_CRC; 
 				end
 			end
 			else begin
 			end
 		end
+//		TS_OUT_BBHEADER_CRC:begin
+//			if(fs_en == 1'b1)begin
+
+//				if(fifo_rd_fst_flg == 0)begin
+//				    fifo_rd_fst_flg <= 1;
+//				    ts_byte_en <= 0;
+//				    ts_byte_in <= 0;//8'h47;//fifo_out; 2015.09.23
+//			    end
+//				else begin	
+//				    ts_byte_en <= ts_rd_vld_19dly;			    
+//				    fifo_rd_fst_flg <= 1;
+//				    ts_byte_in <= fifo_out; //2015.09.23
+//				end
+//				ts_out_state <= TS_OUT_DATA;
+//			end
+//			else begin
+//			end
+//		end
 		TS_OUT_BBHEADER_CRC:begin
-			if(fs_en == 1'b1)begin
-				ts_byte_en <= ts_rd_vld_19dly;
-				if(fifo_rd_fst_flg == 0)begin
-				    fifo_rd_fst_flg <= 1;
-				    ts_byte_in <= 8'h47;//fifo_out; 2015.09.23
-			    end
-				else begin
-				    fifo_rd_fst_flg <= 1;
-				    ts_byte_in <= fifo_out; //2015.09.23
-				end
-				ts_out_state <= TS_OUT_DATA;
-			end
-			else begin
-			end
-		end
+                    if(fs_en == 1'b1)begin
+                        ts_byte_en <= ts_rd_vld_19dly;
+                        if(fifo_rd_fst_flg == 0)begin
+                            fifo_rd_fst_flg <= 1;
+                            ts_byte_in <= 8'h47;//fifo_out; 2015.09.23
+                        end
+                        else begin                    
+                            fifo_rd_fst_flg <= 1;
+                            ts_byte_in <= fifo_out; //2015.09.23
+                        end
+                        ts_out_state <= TS_OUT_DATA;
+                    end
+                    else begin
+                    end
+                end
 		TS_OUT_DATA:begin
 			if(fs_en == 1'b1)begin
 				if(ts_rd_vld_19dly == 1'b1)begin
@@ -536,7 +554,7 @@ mepg2_ts_fifo uut_ts_input_fifo (
   .rd_clk(sys_clk),                // input wire rd_clk
   .din(ts_din),                      // input wire [7 : 0] din
   .wr_en(ts_syn),                  // input wire wr_en
-  .rd_en(ts_rd_vld_19dly&&fs_en),                  // input wire rd_en
+  .rd_en(ts_rd_vld_18dly&&fs_en),                  // input wire rd_en
   .dout(fifo_out),                    // output wire [7 : 0] dout
   .full(),                    // output wire full
   .wr_ack(),                // output wire wr_ack
@@ -564,7 +582,7 @@ always @(posedge sys_clk)begin
 		case(state)
 		IDLE_STATE:begin
 			if(fs_en == 1'b1)begin
-				if(wrusedw == TS_Bytes_Num_Frm)begin//13'h00ff)begin
+				if(wrusedw == TS_Bytes_Num_Frm)begin//12'h00ff)begin
 					state <= WORK_STATE;
 					glb_start_en	<= 1'b1;
 				end

@@ -8,8 +8,7 @@ module fs_en_process # (
 
 		input wire fs_en2,
 
-		output reg fs_en_on_sys_clk = 0,
-		output wire fs_en
+		output reg fs_en_on_sys_clk = 0
 	);
 
 	reg delay = 0;
@@ -22,6 +21,7 @@ module fs_en_process # (
 		end
 	end
 
+	wire fs_en;
 	assign fs_en = ((delay == 1) && (fs_en2 == 1)) ? 1 : 0;
 
 	wire sys_clk_neg;

@@ -10,8 +10,8 @@ input							[1:0]			srrc_mode,//00:0.35; 01:0.25; 10:0.20(default)
 input							[2:0]			dvb_s_convolution_mode,
 input   			 				    		dvb_s_mode,// 0:dvb-s; 1:dvb-s2
 input							[1:0]			TS_Source_mode,// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
-input							[31:0]		    SYS_Freq_Num,//sys_clk
-input							[31:0]		    SYS_Baud_Num,//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
+input							[31:0]		    SYS_Baud_Num,//32'd2500 --> 25M BaudRate  
+input							[31:0]		    SYS_Freq_Num,//32'd10000 --> 100M System Clock,
 input											Freq_Inv_mode,// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 //////////////////////////////////////////////////////////////
 input                  					ts_clk_h264out,// clock from h.264 encoder
@@ -20,25 +20,26 @@ input                  					ts_syn_h264out,// @ ts_clk_out ts stream head
 input                  					ts_valid_h264out,// @ ts_clk_out
 //////////////////////////////////////////////////////////////
 input                  					sys_clk,
+//input                  					sys_clk_fs_en,
 //input							[7:0]       ts_din,// @ sys_clk
 //input                  					ts_syn,// @ sys_clk
 //input                  					ts_head,// @ sys_clk
 output               					ts_clk,// @ sys_clk
 //input                 					fs_en_switch,//0:from outer;1:from inner
 //input                 					fs_en_outer,
-//input                					fs_en2_outer,
-input fs_en2,
-output fs_en_ref,
+//input                 					fs_en2_outer,
+input                					fs_0p5_en,
 //////////////////////////////////////////////////////////////
 output		reg				[7:0]       ts_din,// @ sys_clk
 output      reg         					ts_syn,// @ sys_clk
 output      reg         				ts_head,// @ sys_clk
 //output                             fs_en_inner,
 //output                             fs_en2_inner,
+output                             fs_en_1cycle,
 //////////////////////////////////////////////////////////////
-output 		reg							symbol_1x_oe,
-output 	    reg 	signed [15:0]			symbol_1x_re_out,
-output 		reg    signed [15:0]			symbol_1x_im_out//,
+output 		reg							symbol_1x_oe = 0,
+output 	    reg 	signed [15:0]			symbol_1x_re_out = 0,
+output 		reg    signed [15:0]			symbol_1x_im_out = 0//,
 
 //output 									symbol_2x_oe,
 //output 		signed [15:0]			symbol_2x_re_out,
@@ -48,29 +49,40 @@ output 		reg    signed [15:0]			symbol_1x_im_out//,
 //parameter SYS_Baud_mode = 2'b01;// 00:10M; 01:25M;
 
 wire                             fs_en;
-//wire                             fs_en2;
+wire                             fs_en2;
+
+wire                            fs_en_1cycle_1dly;
+
+//fs_transform uut_fs_transform(
+//.hard_rst_n(hard_rst_n),// modified by 2014.09.22
+//.sys_clk(sys_clk),
+//.fs_0p5_en(fs_0p5_en),
+//.fs_en_1cycle(fs_en_1cycle),
+//.fs_en_1cycle_1dly(fs_en_1cycle_1dly)
+//);
+
+fs_en_process fs_en_process_inst(
+	.sys_clk(sys_clk),
+	.rst_n(hard_rst_n),
+
+	.fs_en2(fs_0p5_en),
+
+	.fs_en_on_sys_clk(fs_en_1cycle)
+);
+
 
 //gen_fs_en uut_gen_fs_en(
 //    .sys_clk(sys_clk),
 //    .glb_rst_n(hard_rst_n),
-//    .SYS_Freq_Num(SYS_Freq_Num),
 //    .SYS_Baud_Num(SYS_Baud_Num),//32'd2500 --> 25M BaudRate   SYS_Baud_mode,
+//    .SYS_Freq_Num(SYS_Freq_Num),
 //    .fs_en(fs_en_inner),
 //    .fs_en2(fs_en2_inner)
 //    );
 
-//assign    fs_en = (fs_en_switch == 1)?fs_en_inner:fs_en_outer;
+assign    fs_en = fs_en_1cycle;
+//assign    fs_en = (fs_en_switch == 1)?fs_en_inner:fs_en_1cycle;
 //assign    fs_en2 = (fs_en_switch == 1)?fs_en2_inner:fs_en2_outer;
-	fs_en_process #(
-		) fs_en_process_inst(
-			.sys_clk(sys_clk),
-			.rst_n(hard_rst_n),
-
-			.fs_en2(fs_en2),
-
-			.fs_en_on_sys_clk(fs_en),
-			.fs_en(fs_en_ref)
-		);
 
 //always @(posedge sys_clk)begin
 //	if(~hard_rst_n)begin
@@ -634,8 +646,8 @@ ts_interface uut_ts_interface(
 .sys_clk										(sys_clk),
 .fs_en										(fs_en),
 .glb_rst_n									(glb_rst_n),
-.SYS_Freq_Num								(SYS_Freq_Num),
 .SYS_Baud_Num								(SYS_Baud_Num),// modified by 2014.09.22
+.SYS_Freq_Num                               (SYS_Freq_Num),
 .ts_din										(crc_byte_out),
 .ts_syn										(crc8_oe),
 .glb_start_en								(glb_start_en),

@@ -933,11 +933,12 @@ set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[6]}]
 set_property PACKAGE_PIN Y10 [get_ports {lcm_data[7]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {lcm_data[7]}]
 # ----------------------------------------------------------------------------------------------------
-# bitstream encryption
+# bitstream constrain
 # ----------------------------------------------------------------------------------------------------
 
-#Encryption Settings
+#set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
 
+##Encryption Settings
 #set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]
 #set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT BBRAM [current_design]
 ##set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT eFUSE [current_design]

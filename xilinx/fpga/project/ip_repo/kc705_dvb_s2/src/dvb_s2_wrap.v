@@ -28,17 +28,13 @@ module dvb_s2_wrap #
 
 		input wire sys_clk,
 		output wire ts_clk,// @ sys_clk
-		//input wire fs_en_outer,
-		//input wire fs_en2_outer,
-		input wire fs_en2,
-		output wire fs_en,
+		input wire fs_0p5_en,
 
 		output wire [7 : 0] ts_din,// @ sys_clk
 		output wire ts_syn,// @ sys_clk
 		output wire ts_head,// @ sys_clk
 
-		//output wire fs_en_inner,
-		//output wire fs_en2_inner,
+		output wire fs_en_1cycle,
 
 		output wire symbol_1x_oe,
 		output wire signed [15 : 0] symbol_1x_re_out,
@@ -226,17 +222,13 @@ module dvb_s2_wrap #
 
 			.sys_clk(sys_clk),
 			.ts_clk(ts_clk),// @ sys_clk
-			//.fs_en_outer(fs_en_outer),
-			//.fs_en2_outer(fs_en2_outer),
-			.fs_en2(fs_en2),
-			.fs_en(fs_en),
+			.fs_0p5_en(fs_0p5_en),
 
 			.ts_din(ts_din),// @ sys_clk
 			.ts_syn(ts_syn),// @ sys_clk
 			.ts_head(ts_head),// @ sys_clk
 
-			//.fs_en_inner(fs_en_inner),
-			//.fs_en2_inner(fs_en2_inner),
+			.fs_en_1cycle(fs_en_1cycle),
 
 			.symbol_1x_oe(symbol_1x_oe),
 			.symbol_1x_re_out(symbol_1x_re_out),

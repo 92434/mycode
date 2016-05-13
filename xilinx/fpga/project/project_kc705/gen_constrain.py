@@ -830,10 +830,11 @@ def gen_myip_constrain():
 		for p in extra_list:
 			print 'set_property %s [get_nets {%s}]' %(p, signal)
 
-def gen_encryption_constrain():
+def gen_bitstream_constrain():
 	txt = """
-#Encryption Settings
+#set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
 
+##Encryption Settings
 #set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]
 #set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT BBRAM [current_design]
 ##set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT eFUSE [current_design]
@@ -841,7 +842,7 @@ def gen_encryption_constrain():
 	"""
 
 	print '#', '-' * 100
-	print '#', 'bitstream encryption'
+	print '#', 'bitstream constrain'
 	print '#', '-' * 100
 	print txt
 
@@ -892,7 +893,7 @@ def gen_kc705_constrain():
 	
 	gen_myip_constrain()
 
-	gen_encryption_constrain()
+	gen_bitstream_constrain()
 
 	get_gpios_pin_no_for_driver(hpc_constrain, hpc_lpc_pins_resistor_map, 'HPC', 0, len(hpc_constrain))
 	get_gpios_pin_no_for_driver(lpc_constrain, hpc_lpc_pins_resistor_map, 'LPC', len(hpc_constrain), len(lpc_constrain))
