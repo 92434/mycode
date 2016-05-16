@@ -1,8 +1,10 @@
 #include "pcie.h"
 #if defined(KC705_DVBS2)
-#include "dvbs2_gpio_config.h"
+#include "dvbs2_conf/dvbs2_gpio_config.h"
 #elif defined(KC705_CSA)
-#include "csa_gpio_config.h"
+#include "csa_conf/csa_gpio_config.h"
+#elif defined(KC705_FMC_GPIO)
+#include "fmc_gpio_conf/fmc_gpio_gpio_config.h"
 #endif
 #include "utils/xiaofei_debug.h"
 

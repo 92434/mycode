@@ -8,6 +8,7 @@ include $(ADD_TARGET)
 
 KBUILD_CFLAGS += -DKC705_DVBS2
 #KBUILD_CFLAGS += -DKC705_CSA
+#KBUILD_CFLAGS += -DKC705_FMC_GPIO
 
 install:
 	sudo insmod driver/kc705-module.ko

@@ -166,6 +166,7 @@ function all() {
 80	R21.1	FMC_HPC_LA01_CC_N
 81	R20.1	FMC_HPC_LA01_CC_P
 82	R6.1	FMC_HPC_LA06_N
+83	R17.1	FMC_C2M_PG_LS
 	"
 	gpio_str=( $gpios )
 

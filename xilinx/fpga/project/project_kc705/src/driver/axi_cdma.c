@@ -28,7 +28,7 @@
 //#define DES_STATUS 0x1c //bit31:Cmplt bit30:DMADecErr bit29:DMASlvErr bit28:DMAIntErr
 
 /*
- *dma->bar_map_memory[0]-----------for sg
+ *dma->bar_map_memory[0]-----------for sg list memory
  *dma->bar_map_memory[1]-----------for tx test data
  *dma->bar_map_memory[2-MAX_BAR_MAP_MEMORY]-----------for rx data
  *
@@ -272,14 +272,14 @@ static int dma_tr(void *ppara) {
 	rx_dest_bar_map_memory = (uint8_t *)(write.buffer + write.write_offset);
 
 	tx_src_bar_map_addr = (uint64_t)dma->bar_map_addr[1];
-	rx_dest_bar_map_addr = (uint64_t)write.buffer_addr;
-	prepare_bars_map(dma, tx_src_bar_map_addr, rx_dest_bar_map_addr);//bind sg to bar0, write addr to bram
+	rx_dest_bar_map_addr = (uint64_t)write.buffer_addr + write.write_offset;//dma bar2 addr
+	prepare_bars_map(dma, tx_src_bar_map_addr, rx_dest_bar_map_addr);//map dma bar0 to pcie axi bar0, write dma bar1 and dma bar2 addr to bram
 
-	tx_src_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_1);
-	rx_dest_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_1 + write.write_offset);
+	tx_src_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_1);//get pcie axi bar1 pos for tx src
+	rx_dest_axi_addr = (uint64_t)(dma->pcie_map_bar_axi_addr_1 + write.write_offset);//get pcie axi bar1 pos for rx dest
 
 	if(tx_size != 0) {
-		ret = alloc_sg_des_item(BASE_Translation_BRAM + offset,
+		ret = alloc_sg_des_item(BASE_Translation_BRAM + offset,//map dma bar1 to pcie axi bar1
 				BASE_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_1,
 				sizeof(uint64_t),
 				&sg_descripter_list);
@@ -287,7 +287,7 @@ static int dma_tr(void *ppara) {
 			goto exit;
 		}
 
-		ret = alloc_sg_des_item(tx_src_axi_addr, tx_dest_axi_addr, tx_size, &sg_descripter_list);
+		ret = alloc_sg_des_item(tx_src_axi_addr, tx_dest_axi_addr, tx_size, &sg_descripter_list);//pcie axi bar1 -> sdram axi addr
 		if(ret != 0) {
 			goto exit;
 		}
@@ -296,7 +296,7 @@ static int dma_tr(void *ppara) {
 	offset += sizeof(uint64_t);
 
 	if(rx_size != 0) {
-		ret = alloc_sg_des_item(BASE_Translation_BRAM + offset,
+		ret = alloc_sg_des_item(BASE_Translation_BRAM + offset,//map dma bar2 to pcie axi bar1
 				BASE_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_1,
 				sizeof(uint64_t),
 				&sg_descripter_list);
@@ -304,7 +304,7 @@ static int dma_tr(void *ppara) {
 			goto exit;
 		}
 
-		ret = alloc_sg_des_item(rx_src_axi_addr, rx_dest_axi_addr, rx_size, &sg_descripter_list);
+		ret = alloc_sg_des_item(rx_src_axi_addr, rx_dest_axi_addr, rx_size, &sg_descripter_list);//sdram axi addr -> pcie axi bar1
 		if(ret != 0) {
 			goto exit;
 		}

@@ -399,6 +399,17 @@ def get_gpio_pin_no(gpio, start, gpio_bank_base):
 
 	return pin_no
 
+io_des_map = {
+		'FMC_LPC_LA30_P' : 'I2C_SDA0',
+		'FMC_LPC_LA30_N' : 'I2C_SCL0',
+		'FMC_LPC_LA32_P' : 'SPI_CS',
+		'FMC_LPC_LA20_N' : 'SPI_MISO',
+		'FMC_LPC_LA23_N' : 'SPI_MOSI',
+		'FMC_LPC_LA23_P' : 'SPI_SCK',
+}
+
+io_des_map = {}
+
 def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, start, count):
 	print '-' * 100
 	print '%s gpio pin number for driver' %(fmc_type)
@@ -425,18 +436,11 @@ def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, 
 		io_pin_no_map.update({io: pin_no})
 
 	
-	io_des_map = {
-			'FMC_LPC_LA30_P' : 'I2C_SDA0',
-			'FMC_LPC_LA30_N' : 'I2C_SCL0',
-			'FMC_LPC_LA32_P' : 'SPI_CS',
-			'FMC_LPC_LA20_N' : 'SPI_MISO',
-			'FMC_LPC_LA23_N' : 'SPI_MOSI',
-			'FMC_LPC_LA23_P' : 'SPI_SCK',
-	}
-
 	for i in pins_resistor:
 		#print '%s\t%s\t%s' %(io_pin_no_map.get(i[0][0]), i[1], str(i))
-                print '%s\t%s\t%s(%s)' %(io_pin_no_map.get(i[0][0]), i[1], i[0][0], io_des_map.get(i[0][0]))
+		des = io_des_map.get(i[0][0])
+		des = '(%s)' %des if des != None else ''
+                print '%s\t%s\t%s%s' %(io_pin_no_map.get(i[0][0]), i[1], i[0][0], des)
 
 def kc705_pins_resistor_key_resistor(x):
 	r = x[1]
@@ -555,11 +559,11 @@ def gen_hpc_lpc_pins_resistor_map(resistor_kc705_pins_resistor_map):
 def gen_default_contrain():
 	txt = """
 # Sys Clock Pins
-#set_property PACKAGE_PIN AD11 [get_ports EXT_SYS_CLK_clk_n]
-#set_property IOSTANDARD DIFF_SSTL15 [get_ports EXT_SYS_CLK_clk_n]
+set_property PACKAGE_PIN AD11 [get_ports MIG_SYS_CLK_clk_n]
+set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_n]
 
-#set_property PACKAGE_PIN AD12 [get_ports EXT_SYS_CLK_clk_p]
-#set_property IOSTANDARD DIFF_SSTL15 [get_ports EXT_SYS_CLK_clk_p]
+set_property PACKAGE_PIN AD12 [get_ports MIG_SYS_CLK_clk_p]
+set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_p]
 
 # Sys Reset Pins
 set_property PACKAGE_PIN AB7 [get_ports reset]
@@ -678,10 +682,10 @@ myip_fmc_signal = [
 	('FMC_LPC_LA32_N', 'asi_out_p'),
 	('FMC_LPC_LA33_N', 'asi_out_n'),
 
-	('FMC_LPC_CLK0_M2C_P', 'fs_en2'),
+	('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
 ]
 
-#myip_fmc_signal = []
+myip_fmc_signal = []
 
 def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 	constrain = []
@@ -756,10 +760,12 @@ def gen_myip_constrain():
 		('IO_L4N_T0_33', 'Y10', 'lcm_data[7]', 'LVCMOS15'),
 	]
 
+	myip_extra_signal = []
+
 	extra_property = {
 		#'i2s_receiver_bclk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		'fs_en2': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
 		'symbol_2x_oe' : ['slew FAST'],
 

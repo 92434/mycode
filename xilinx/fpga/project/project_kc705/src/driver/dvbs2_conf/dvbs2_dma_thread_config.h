@@ -1,6 +1,5 @@
 #ifndef _DVBS2_DMA_THREAD_CONFIG_H
 #define _DVBS2_DMA_THREAD_CONFIG_H
-#include "eg9013f_nz_fb.h"
 
 static int dma_thread(void *ppara) {
 	int ret = 0;

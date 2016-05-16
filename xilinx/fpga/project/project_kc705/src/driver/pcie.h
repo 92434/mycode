@@ -58,9 +58,11 @@
 #define DMA_BLOCK_SIZE 0x1000
 
 #if defined(KC705_DVBS2)
-#include "dvbs2_pcie_config.h"
+#include "dvbs2_conf/dvbs2_pcie_config.h"
 #elif defined(KC705_CSA)
-#include "csa_pcie_config.h"
+#include "csa_conf/csa_pcie_config.h"
+#elif defined(KC705_FMC_GPIO)
+#include "fmc_gpio_conf/fmc_gpio_pcie_config.h"
 #endif
 
 typedef enum {

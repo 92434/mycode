@@ -174,7 +174,7 @@ proc create_root_design { parentCell } {
   set_property -dict [ list CONFIG.Memory_Type {True_Dual_Port_RAM}  ] $blk_mem_gen_0
 
   # Create instance: kc705_pcie_ext_0, and set properties
-  set kc705_pcie_ext_0 [ create_bd_cell -type ip -vlnv vendor:user:kc705_pcie_ext:1.0 kc705_pcie_ext_0 ]
+  set kc705_pcie_ext_0 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_pcie_ext:1.0 kc705_pcie_ext_0 ]
 
   # Create instance: mig_7series_0, and set properties
   set mig_7series_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:mig_7series:2.2 mig_7series_0 ]

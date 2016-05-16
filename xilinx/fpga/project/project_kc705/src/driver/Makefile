@@ -8,6 +8,7 @@
 
 KBUILD_CFLAGS += -DKC705_DVBS2
 #KBUILD_CFLAGS += -DKC705_CSA
+#KBUILD_CFLAGS += -DKC705_FMC_GPIO
 
 kc705-module-objs := kc705.o \
 	pcie.o \
