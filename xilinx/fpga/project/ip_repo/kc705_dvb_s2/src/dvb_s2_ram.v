@@ -302,12 +302,12 @@ module dvb_s2_ram #(
 		end
 	end
 
-	always @(negedge sys_clk) begin
+	always @(posedge sys_clk) begin
 		if(hard_rst_n == 0) begin
 			symbol_2x_oe_count_reg <= 0;
 		end
 		else begin
-			if(symbol_2x_oe_origin == 1) begin
+			if(fs_en_1cycle == 1) begin
 				symbol_2x_oe_count_reg <= symbol_2x_oe_count_reg + 1;
 			end
 			else begin

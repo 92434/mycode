@@ -17,7 +17,6 @@ module fs_en_tb #() ();
 	end
 
 	wire fs_en_on_sys_clk;
-	wire fs_en;
 	fs_en_process #(
 		) fs_en_process_inst(
 			.sys_clk(sys_clk),
@@ -25,8 +24,7 @@ module fs_en_tb #() ();
 
 			.fs_en2(fs_en2),
 
-			.fs_en_on_sys_clk(fs_en_on_sys_clk),
-			.fs_en(fs_en)
+			.fs_en_on_sys_clk(fs_en_on_sys_clk)
 		);
 
 

@@ -1,5 +1,6 @@
 #ifndef _FMC_GPIO_DMA_THREAD_CONFIG_H
 #define _FMC_GPIO_DMA_THREAD_CONFIG_H
+#include <linux/delay.h>
 
 static int dma_thread(void *ppara) {
 	int ret = 0;
@@ -18,14 +19,15 @@ static int dma_thread(void *ppara) {
 	while(!kthread_should_stop()) {
 		set_current_state(TASK_UNINTERRUPTIBLE);  
 		//schedule_timeout(msecs_to_jiffies(10)); 
-		uint32_t sz_buffer[DMA_BLOCK_SIZE];
 
 		memset(dma->bar_map_memory[2], 0, dma->receive_bulk_size);
 
 		put_pcie_tr(dma, tx_dest_axi_addr, rx_src_axi_addr, dma->send_bulk_size, dma->receive_bulk_size, NULL, NULL);
 		
 		if(memcmp(dma->bar_map_memory[1], dma->bar_map_memory[2], dma->receive_bulk_size) != 0) {
-			mydebug("tx_dest_axi_addr:%x(%d) rx_src_axi_addr:%x(%d)\n", tx_dest_axi_addr, tx_dest_axi_addr, rx_src_axi_addr, rx_src_axi_addr);
+			mydebug("failed!tx_dest_axi_addr:%x(%d) rx_src_axi_addr:%x(%d)\n", (int)tx_dest_axi_addr, (int)tx_dest_axi_addr, (int)rx_src_axi_addr, (int)rx_src_axi_addr);
+			set_current_state(TASK_UNINTERRUPTIBLE);  
+			schedule_timeout(msecs_to_jiffies(1000)); 
 		} else {
 			tx_dest_axi_addr += dma->send_bulk_size;
 			if(tx_dest_axi_addr >= 1024 * 1024) {

@@ -408,7 +408,7 @@ io_des_map = {
 		'FMC_LPC_LA23_P' : 'SPI_SCK',
 }
 
-io_des_map = {}
+#io_des_map = {}
 
 def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, start, count):
 	print '-' * 100
@@ -559,11 +559,11 @@ def gen_hpc_lpc_pins_resistor_map(resistor_kc705_pins_resistor_map):
 def gen_default_contrain():
 	txt = """
 # Sys Clock Pins
-set_property PACKAGE_PIN AD11 [get_ports MIG_SYS_CLK_clk_n]
-set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_n]
+#set_property PACKAGE_PIN AD11 [get_ports MIG_SYS_CLK_clk_n]
+#set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_n]
 
-set_property PACKAGE_PIN AD12 [get_ports MIG_SYS_CLK_clk_p]
-set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_p]
+#set_property PACKAGE_PIN AD12 [get_ports MIG_SYS_CLK_clk_p]
+#set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_p]
 
 # Sys Reset Pins
 set_property PACKAGE_PIN AB7 [get_ports reset]
@@ -685,7 +685,7 @@ myip_fmc_signal = [
 	('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
 ]
 
-myip_fmc_signal = []
+#myip_fmc_signal = []
 
 def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 	constrain = []
@@ -760,7 +760,7 @@ def gen_myip_constrain():
 		('IO_L4N_T0_33', 'Y10', 'lcm_data[7]', 'LVCMOS15'),
 	]
 
-	myip_extra_signal = []
+#	myip_extra_signal = []
 
 	extra_property = {
 		#'i2s_receiver_bclk': ['CLOCK_DEDICATED_ROUTE FALSE'],

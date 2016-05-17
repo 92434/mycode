@@ -7,8 +7,8 @@
 //
 #define MAX_KC705_DEV_NUM 16
 
-void start_dma(void);
-void stop_dma(void);
+void start_dma(kc705_pci_dev_t *kc705_pci_dev);
+void stop_dma(kc705_pci_dev_t *kc705_pci_dev);
 
 static int kc705_open(struct inode *i, struct file *filp) {
 	kc705_pci_dev_t *kc705_pci_dev = container_of(i->i_cdev, kc705_pci_dev_t, cdev);
@@ -64,19 +64,18 @@ static int kc705_mmap(struct file *filp, struct vm_area_struct *vma) {
 static long kc705_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
 	int ret = 0;
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)filp->private_data;
-	kc705_pci_dev = kc705_pci_dev;
 
 	switch (cmd) {
 		case PCIE_DEVICE_IOCTL_START_DMA_THREAD:
 			{
 				mydebug("\n");
-				start_dma();
+				start_dma(kc705_pci_dev);
 			}
 			break;
 		case PCIE_DEVICE_IOCTL_STOP_DMA_THREAD:
 			{
 				mydebug("\n");
-				stop_dma();
+				stop_dma(kc705_pci_dev);
 			}
 			break;
 		default:

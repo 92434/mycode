@@ -24,8 +24,8 @@ module fs_en_process # (
 	wire fs_en;
 	assign fs_en = ((delay == 1) && (fs_en2 == 1)) ? 1 : 0;
 
-	wire sys_clk_neg;
-	assign sys_clk_neg = ~sys_clk;
+	wire sys_clk_using;
+	assign sys_clk_using = sys_clk;
 
 	wire rdata;
 	reg r_enable = 0;
@@ -40,7 +40,7 @@ module fs_en_process # (
 		) fs_en_fifo (
 			.rst_n(rst_n),
 			.wclk(fs_en2),
-			.rclk(sys_clk_neg),
+			.rclk(sys_clk_using),
 			.wdata(0),
 			.rdata(rdata),
 			.w_enable(fs_en),
@@ -50,7 +50,7 @@ module fs_en_process # (
 			.error_empty(error_empty)
 		);
 
-	always @(posedge sys_clk_neg) begin
+	always @(posedge sys_clk_using) begin
 		if(rst_n == 0) begin
 			r_enable <= 0;
 		end
@@ -66,7 +66,7 @@ module fs_en_process # (
 	end
 
 	reg fs_en_enable = 0;
-	always @(posedge sys_clk_neg) begin
+	always @(posedge sys_clk_using) begin
 		if(rst_n == 0) begin
 			fs_en_enable <= 0;
 		end
