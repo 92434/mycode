@@ -25,6 +25,7 @@ typedef enum {
 	FREQ_INV_MODE_REG,
 	FS_EN2_COUNT_REG,
 	SYMBOL_2X_OE_COUNT_REG,
+	MPEG_BYTES_COUNT_REG,
 	TOTAL_REGS,
 } addr_t;
 
@@ -42,6 +43,7 @@ char *reg_name[] = {
 	"FREQ_INV_MODE_REG",
 	"FS_EN2_COUNT_REG",
 	"SYMBOL_2X_OE_COUNT_REG",
+	"MPEG_BYTES_COUNT_REG",
 };
 
 #define ADDR_OFFSET(addr) (addr * 4)

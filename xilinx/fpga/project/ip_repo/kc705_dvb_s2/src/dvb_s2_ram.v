@@ -76,6 +76,8 @@ module dvb_s2_ram #(
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en2_count_reg = 0;
 	//12
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_2x_oe_count_reg = 0;
+	//13
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] mpeg_bytes_count_reg = 0;
 
 	wire [1 : 0] mod_mode_cfg;
 	wire [3 : 0] ldpc_mode_cfg;
@@ -136,7 +138,6 @@ module dvb_s2_ram #(
 			SYS_Freq_Num_reg <= 12500;
 			SYS_Baud_Num_reg <= 2500;
 			Freq_Inv_mode_reg <= 0;
-			symbol_2x_oe_count_reg <= 0;
 		end
 		else begin
 			if(current_mem_wren == 1) begin
@@ -177,6 +178,8 @@ module dvb_s2_ram #(
 					11: begin
 					end
 					12: begin
+					end
+					13: begin
 					end
 					default: begin
 					end
@@ -231,6 +234,9 @@ module dvb_s2_ram #(
 					end
 					12: begin
 						rdata <= symbol_2x_oe_count_reg;
+					end
+					13: begin
+						rdata <= mpeg_bytes_count_reg;
 					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};
@@ -309,6 +315,19 @@ module dvb_s2_ram #(
 		else begin
 			if(fs_en_1cycle == 1) begin
 				symbol_2x_oe_count_reg <= symbol_2x_oe_count_reg + 1;
+			end
+			else begin
+			end
+		end
+	end
+
+	always @(posedge ts_clk_h264out) begin
+		if(hard_rst_n == 0) begin
+			mpeg_bytes_count_reg <= 0;
+		end
+		else begin
+			if(ts_valid_h264out == 1) begin
+				mpeg_bytes_count_reg <= mpeg_bytes_count_reg + 1;
 			end
 			else begin
 			end

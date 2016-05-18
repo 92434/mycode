@@ -11,18 +11,28 @@ module fs_en_process # (
 		output reg fs_en_on_sys_clk = 0
 	);
 
-	reg delay = 0;
+	//reg delay = 0;
+	//always @(posedge fs_en2) begin
+	//	if(rst_n == 0) begin
+	//		delay <= 0;
+	//	end
+	//	else begin
+	//		delay <= delay + 1;
+	//	end
+	//end
+
+	//wire fs_en;
+	//assign fs_en = ((delay == 1) && (fs_en2 == 1)) ? 1 : 0;
+
+	reg fs_en = 0;
 	always @(posedge fs_en2) begin
 		if(rst_n == 0) begin
-			delay <= 0;
+			fs_en <= 0;
 		end
 		else begin
-			delay <= delay + 1;
+			fs_en <= ~fs_en;
 		end
 	end
-
-	wire fs_en;
-	assign fs_en = ((delay == 1) && (fs_en2 == 1)) ? 1 : 0;
 
 	wire sys_clk_using;
 	assign sys_clk_using = sys_clk;
@@ -65,20 +75,16 @@ module fs_en_process # (
 		end
 	end
 
-	reg fs_en_enable = 0;
 	always @(posedge sys_clk_using) begin
 		if(rst_n == 0) begin
-			fs_en_enable <= 0;
+			fs_en_on_sys_clk <= 0;
 		end
 		else begin
-			fs_en_enable <= 0;
-			fs_en_on_sys_clk <= 0;
-
 			if(r_enable == 1) begin
-				fs_en_enable <= 1;
 				fs_en_on_sys_clk <= 1;
 			end
 			else begin
+				fs_en_on_sys_clk <= 0;
 			end
 		end
 	end

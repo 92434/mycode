@@ -19,10 +19,12 @@ typedef struct dma_static_config {
 	char *devname;
 } dma_static_config_info_t;
 
-#define STATE 1
+#define DVBS2_PROJECT_FULL 0
+#define ENABLE_DMA 1
 
 static dma_static_config_info_t dma_info[] = {
-#if STATE
+#if DVBS2_PROJECT_FULL
+#if ENABLE_DMA
 	{
 		.dma_lite_offset = OFFSET_AXI_TSP_LITE,
 		.pcie_bar_map_ctl_offset_0 = 0,
@@ -40,8 +42,11 @@ static dma_static_config_info_t dma_info[] = {
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
 		.devname = "tsp_regs",
 	},
-#endif
-#if STATE
+#endif//#if ENABLE_DMA
+#endif//#if DVBS2_PROJECT_FULL
+
+#if DVBS2_PROJECT_FULL
+#if ENABLE_DMA
 	{
 		.dma_lite_offset = OFFSET_AXI_DMA_LITE_0,
 		.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
@@ -55,18 +60,20 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_thread = dma_threads,
 		.dma_thread_count = DMA_THREAD_COUNT, 
 		.is_auto_receive = true,
-#else
+#else//#if 0
 		.dma_thread = NULL,
 		.dma_thread_count = 0, 
 		.is_auto_receive = false,
-#endif
+#endif//#if 0
 
 		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
 		.devname = "i2s_dma",
 	},
-#endif
-#if STATE
+#endif//#if ENABLE_DMA
+#endif//#if DVBS2_PROJECT_FULL
+
+#if ENABLE_DMA
 	{
 		.dma_lite_offset = OFFSET_AXI_DVBS2_0,
 		.pcie_bar_map_ctl_offset_0 = 0,
@@ -84,6 +91,10 @@ static dma_static_config_info_t dma_info[] = {
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
 		.devname = "dvbs2_regs",
 	},
+#endif//#if ENABLE_DMA
+
+#if DVBS2_PROJECT_FULL
+#if ENABLE_DMA
 	{
 		.dma_lite_offset = OFFSET_AXI_DMA_LITE_1,
 		.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
@@ -97,18 +108,21 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_thread = dma_threads,
 		.dma_thread_count = DMA_THREAD_COUNT, 
 		.is_auto_receive = true,
-#else
+#else//#if 1
 		.dma_thread = NULL,
 		.dma_thread_count = 0, 
 		.is_auto_receive = false,
-#endif
+#endif//#if 1
 
 		.receive_bulk_size = 16 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
 		.devname = "asi_dma",//after asi
 	},
-#endif
-#if STATE
+#endif//#if ENABLE_DMA
+#endif//#if DVBS2_PROJECT_FULL
+
+#if DVBS2_PROJECT_FULL
+#if ENABLE_DMA
 	{
 		.dma_lite_offset = OFFSET_AXI_LCM_LITE,
 		.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
@@ -121,17 +135,18 @@ static dma_static_config_info_t dma_info[] = {
 #if 0
 		.dma_thread = eg9013f_nz_fb_thread,
 		.dma_thread_count = DMA_THREAD_EG9013F_NZ_COUNT,
-#else
+#else//#if 0
 		.dma_thread = NULL,
 		.dma_thread_count = 0,
-#endif
+#endif//#if 0
 		.is_auto_receive = false,
 
 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
 		.devname = "lcm_regs",
 	},
-#endif
+#endif//#if ENABLE_DMA
+#endif//#if DVBS2_PROJECT_FULL
 };
 
 #define DMA_MAX (sizeof(dma_info) / sizeof(dma_static_config_info_t))
