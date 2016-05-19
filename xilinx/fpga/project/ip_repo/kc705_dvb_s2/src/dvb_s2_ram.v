@@ -79,6 +79,8 @@ module dvb_s2_ram #(
 	//13
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] mpeg_bytes_count_reg = 0;
 	//14
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_1x_oe_count_reg = 0;
+	//15
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_2x_oe_count_reg = 0;
 
 	wire [1 : 0] mod_mode_cfg;
@@ -185,6 +187,8 @@ module dvb_s2_ram #(
 					end
 					14: begin
 					end
+					15: begin
+					end
 					default: begin
 					end
 				endcase
@@ -243,6 +247,9 @@ module dvb_s2_ram #(
 						rdata <= mpeg_bytes_count_reg;
 					end
 					14: begin
+						rdata <= symbol_1x_oe_count_reg;
+					end
+					15: begin
 						rdata <= symbol_2x_oe_count_reg;
 					end
 					default: begin
@@ -343,6 +350,19 @@ module dvb_s2_ram #(
 
 	always @(negedge sys_clk) begin
 		if(hard_rst_n == 0) begin
+			symbol_1x_oe_count_reg <= 0;
+		end
+		else begin
+			if(symbol_1x_oe == 1) begin
+				symbol_1x_oe_count_reg <= symbol_1x_oe_count_reg + 1;
+			end
+			else begin
+			end
+		end
+	end
+
+	always @(negedge sys_clk) begin
+		if(hard_rst_n == 0) begin
 			symbol_2x_oe_count_reg <= 0;
 		end
 		else begin
@@ -353,7 +373,6 @@ module dvb_s2_ram #(
 			end
 		end
 	end
-
 
 	symbol_2x_process #(
 		) symbol_2x_process_inst(

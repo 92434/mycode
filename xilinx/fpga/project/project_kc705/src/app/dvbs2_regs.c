@@ -26,6 +26,7 @@ typedef enum {
 	FS_EN2_COUNT_REG,
 	FS_EN_COUNT_REG,
 	MPEG_BYTES_COUNT_REG,
+	SYMBOL_1X_OE_COUNT_REG,
 	SYMBOL_2X_OE_COUNT_REG,
 	TOTAL_REGS,
 } addr_t;
@@ -45,6 +46,7 @@ char *reg_name[] = {
 	"FS_EN2_COUNT_REG",
 	"FS_EN_COUNT_REG",
 	"MPEG_BYTES_COUNT_REG",
+	"SYMBOL_1X_OE_COUNT_REG",
 	"SYMBOL_2X_OE_COUNT_REG",
 };
 
@@ -115,7 +117,7 @@ void *write_fn(void *arg) {
 
 	uint32_t ts_source_mode_reg = 2;
 	uint32_t sys_freq_num_reg = 12500;
-	uint32_t sys_baud_num_reg = 1250;
+	uint32_t sys_baud_num_reg = 1000;
 
 	printids("write_fn: ");
 
