@@ -51,36 +51,38 @@ module dvb_s2_ram #(
 	// for write command
 	//
 	//00
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] mod_mode_cfg_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] power_on_switch_reg = 0;
 	//01
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ldpc_mode_cfg_reg = 6;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] mod_mode_cfg_reg = 0;
 	//02
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] frame_mode_cfg_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ldpc_mode_cfg_reg = 6;
 	//03
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] pilot_mode_cfg_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] frame_mode_cfg_reg = 0;
 	//04
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] srrc_mode_reg = 2;//00:0.35; 01:0.25; 10:0.20(default) 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] pilot_mode_cfg_reg = 0;
 	//05
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] dvb_s_convolution_mode_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] srrc_mode_reg = 2;//00:0.35; 01:0.25; 10:0.20(default) 
 	//06
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] dvb_s_mode_reg = 1;// 0:dvb-s; 1:dvb-s2
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] dvb_s_convolution_mode_reg = 0;
 	//07
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] TS_Source_mode_reg = 1;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] dvb_s_mode_reg = 1;// 0:dvb-s; 1:dvb-s2
 	//08
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Freq_Num_reg = 12500;//sys_clk freq 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] TS_Source_mode_reg = 1;// 00:TS Source inside by ts_clk; 01:TS Source outside input without Empty Frame; 10: TS Source outside input with Empty Frame;
 	//09
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Baud_Num_reg = 2500;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Freq_Num_reg = 12500;//sys_clk freq 
 	//10
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] Freq_Inv_mode_reg = 0;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] SYS_Baud_Num_reg = 2500;//32'd2500 --> 25M BaudRate   SYS_Baud_mode,// 00:10M; 01:25M; 
 	//11
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en2_count_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] Freq_Inv_mode_reg = 0;// 0:不执行频谱翻转; 1:执行频谱翻转 通过交换I和Q发送基带信号翻转频谱，具体地：Im=sin(ωmt) 及Qm=cos(ωmt);
 	//12
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en_count_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en2_count_reg = 0;
 	//13
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] mpeg_bytes_count_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] fs_en_count_reg = 0;
 	//14
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_1x_oe_count_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] mpeg_bytes_count_reg = 0;
 	//15
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_1x_oe_count_reg = 0;
+	//16
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] symbol_2x_oe_count_reg = 0;
 
 	wire [1 : 0] mod_mode_cfg;
@@ -147,39 +149,40 @@ module dvb_s2_ram #(
 			if(current_mem_wren == 1) begin
 				case(current_write_address)
 					0: begin
-						mod_mode_cfg_reg <= current_write_data;
+						power_on_switch_reg <= current_write_data;
 					end
 					1: begin
-						ldpc_mode_cfg_reg <= current_write_data;
+						mod_mode_cfg_reg <= current_write_data;
 					end
 					2: begin
-						frame_mode_cfg_reg <= current_write_data;
+						ldpc_mode_cfg_reg <= current_write_data;
 					end
 					3: begin
-						pilot_mode_cfg_reg <= current_write_data;
+						frame_mode_cfg_reg <= current_write_data;
 					end
 					4: begin
-						srrc_mode_reg <= current_write_data;
+						pilot_mode_cfg_reg <= current_write_data;
 					end
 					5: begin
-						dvb_s_convolution_mode_reg <= current_write_data;
+						srrc_mode_reg <= current_write_data;
 					end
 					6: begin
-						dvb_s_mode_reg <= current_write_data;
+						dvb_s_convolution_mode_reg <= current_write_data;
 					end
 					7: begin
-						TS_Source_mode_reg <= current_write_data;
+						dvb_s_mode_reg <= current_write_data;
 					end
 					8: begin
-						SYS_Freq_Num_reg <= current_write_data;
+						TS_Source_mode_reg <= current_write_data;
 					end
 					9: begin
-						SYS_Baud_Num_reg <= current_write_data;
+						SYS_Freq_Num_reg <= current_write_data;
 					end
 					10: begin
-						Freq_Inv_mode_reg <= current_write_data;
+						SYS_Baud_Num_reg <= current_write_data;
 					end
 					11: begin
+						Freq_Inv_mode_reg <= current_write_data;
 					end
 					12: begin
 					end
@@ -188,6 +191,8 @@ module dvb_s2_ram #(
 					14: begin
 					end
 					15: begin
+					end
+					16: begin
 					end
 					default: begin
 					end
@@ -205,51 +210,54 @@ module dvb_s2_ram #(
 			if (ren == 1) begin
 				case(raddr)
 					0: begin
-						rdata <= mod_mode_cfg;
+						rdata <= power_on_switch_reg;
 					end
 					1: begin
-						rdata <= ldpc_mode_cfg;
+						rdata <= mod_mode_cfg;
 					end
 					2: begin
-						rdata <= frame_mode_cfg;
+						rdata <= ldpc_mode_cfg;
 					end
 					3: begin
-						rdata <= pilot_mode_cfg;
+						rdata <= frame_mode_cfg;
 					end
 					4: begin
-						rdata <= srrc_mode;
+						rdata <= pilot_mode_cfg;
 					end
 					5: begin
-						rdata <= dvb_s_convolution_mode;
+						rdata <= srrc_mode;
 					end
 					6: begin
-						rdata <= dvb_s_mode;
+						rdata <= dvb_s_convolution_mode;
 					end
 					7: begin
-						rdata <= TS_Source_mode;
+						rdata <= dvb_s_mode;
 					end
 					8: begin
-						rdata <= SYS_Freq_Num_reg;
+						rdata <= TS_Source_mode;
 					end
 					9: begin
-						rdata <= SYS_Baud_Num;
+						rdata <= SYS_Freq_Num_reg;
 					end
 					10: begin
-						rdata <= Freq_Inv_mode;
+						rdata <= SYS_Baud_Num;
 					end
 					11: begin
-						rdata <= fs_en2_count_reg;
+						rdata <= Freq_Inv_mode;
 					end
 					12: begin
-						rdata <= fs_en_count_reg;
+						rdata <= fs_en2_count_reg;
 					end
 					13: begin
-						rdata <= mpeg_bytes_count_reg;
+						rdata <= fs_en_count_reg;
 					end
 					14: begin
-						rdata <= symbol_1x_oe_count_reg;
+						rdata <= mpeg_bytes_count_reg;
 					end
 					15: begin
+						rdata <= symbol_1x_oe_count_reg;
+					end
+					16: begin
 						rdata <= symbol_2x_oe_count_reg;
 					end
 					default: begin
@@ -260,9 +268,24 @@ module dvb_s2_ram #(
 		end
 	end
 
+	reg hard_rst_n_reg = 0;
+	always @(posedge sys_clk) begin
+		if(rst_n == 0) begin
+			hard_rst_n_reg <= 0;
+		end
+		else begin
+			if((power_on_switch_reg == 1) && (hard_rst_n == 1)) begin
+				hard_rst_n_reg <= 1;
+			end
+			else begin
+				hard_rst_n_reg <= 0;
+			end
+		end
+	end
+
 	dvb_s2_system_top #(
 		) dvb_s2_system_top_inst(
-			.hard_rst_n(hard_rst_n),// modified by 2014.09.22
+			.hard_rst_n(hard_rst_n_reg),// modified by 2014.09.22
 			.mod_mode_cfg(mod_mode_cfg),
 			.ldpc_mode_cfg(ldpc_mode_cfg),
 			.frame_mode_cfg(frame_mode_cfg),
@@ -300,7 +323,7 @@ module dvb_s2_ram #(
 	wire signed [15 : 0] symbol_2x_re_out_origin;
 	wire signed [15 : 0] symbol_2x_im_out_origin;
 	dvb_s2_srrc_filter dvb_s2_srrc_filter_inst(
-			.hard_rst_n(hard_rst_n),// modified by 2014.09.22
+			.hard_rst_n(rst_n),// modified by 2014.09.22
 
 			.sys_clk(sys_clk),
 
@@ -314,7 +337,7 @@ module dvb_s2_ram #(
 		);
 
 	always @(posedge fs_0p5_en) begin
-		if(hard_rst_n == 0) begin
+		if(rst_n == 0) begin
 			fs_en2_count_reg <= 0;
 		end
 		else begin
@@ -323,7 +346,7 @@ module dvb_s2_ram #(
 	end
 
 	always @(posedge sys_clk) begin
-		if(hard_rst_n == 0) begin
+		if(rst_n == 0) begin
 			fs_en_count_reg <= 0;
 		end
 		else begin
@@ -336,7 +359,7 @@ module dvb_s2_ram #(
 	end
 
 	always @(posedge ts_clk_h264out) begin
-		if(hard_rst_n == 0) begin
+		if(rst_n == 0) begin
 			mpeg_bytes_count_reg <= 0;
 		end
 		else begin
@@ -349,7 +372,7 @@ module dvb_s2_ram #(
 	end
 
 	always @(negedge sys_clk) begin
-		if(hard_rst_n == 0) begin
+		if(rst_n == 0) begin
 			symbol_1x_oe_count_reg <= 0;
 		end
 		else begin
@@ -362,7 +385,7 @@ module dvb_s2_ram #(
 	end
 
 	always @(negedge sys_clk) begin
-		if(hard_rst_n == 0) begin
+		if(rst_n == 0) begin
 			symbol_2x_oe_count_reg <= 0;
 		end
 		else begin
@@ -376,7 +399,7 @@ module dvb_s2_ram #(
 
 	symbol_2x_process #(
 		) symbol_2x_process_inst(
-			.rst_n(hard_rst_n),
+			.rst_n(rst_n),
 			.sys_clk(sys_clk),
 
 			.fs_en2(fs_0p5_en),

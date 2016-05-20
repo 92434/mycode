@@ -12,7 +12,8 @@
 #include "kc705.h"
 
 typedef enum {
-	MOD_MODE_CFG_REG = 0,
+	POWER_ON_SWITCH_REG = 0,
+	MOD_MODE_CFG_REG,
 	LDPC_MODE_CFG_REG,
 	FRAME_MODE_CFG_REG,
 	PILOT_MODE_CFG_REG,
@@ -32,6 +33,7 @@ typedef enum {
 } addr_t;
 
 char *reg_name[] = {
+	"POWER_ON_SWITCH_REG",
 	"MOD_MODE_CFG_REG",
 	"LDPC_MODE_CFG_REG",
 	"FRAME_MODE_CFG_REG",
@@ -115,13 +117,16 @@ void *write_fn(void *arg) {
 	targ = targ;
 	int nwrite;
 
+	uint32_t power_on_switch_reg = 1;
 	uint32_t ts_source_mode_reg = 2;
 	uint32_t sys_freq_num_reg = 12500;
-	uint32_t sys_baud_num_reg = 1000;
+	uint32_t sys_baud_num_reg = 2500;
 
 	printids("write_fn: ");
 
 	while(stop == 0) {
+		lseek(targ->fd, ADDR_OFFSET(POWER_ON_SWITCH_REG), SEEK_SET);
+		nwrite = write(targ->fd, &power_on_switch_reg, sizeof(uint32_t));
 		lseek(targ->fd, ADDR_OFFSET(TS_SOURCE_MODE_REG), SEEK_SET);
 		nwrite = write(targ->fd, &ts_source_mode_reg, sizeof(uint32_t));
 		lseek(targ->fd, ADDR_OFFSET(SYS_FREQ_NUM_REG), SEEK_SET);
