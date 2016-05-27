@@ -11,6 +11,8 @@
 #include <pthread.h>
 #include "kc705.h"
 
+//40bits in, 48bits out
+//5byte in, 3 words out(use lower 16 bits)
 
 //unsigned int raw_data[] = {0x00000011, 0x00002200, 0x00330000, 0x44000000, 0x00000000};
 unsigned int raw_data[] = {

@@ -25,7 +25,7 @@ module csa_calc_logic #(
 
 	localparam integer CYPHER_DATA_WIDTH = 8 * 8;
 
-	reg request_fetch = 0;
+	reg [CYPHER_DATA_WIDTH - 1 : 0] ck_out_reg = 0;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] times_reg = 0;
 
@@ -34,11 +34,13 @@ module csa_calc_logic #(
 	wire [CYPHER_DATA_WIDTH - 1 : 0] ck_out;
 
 	reg [32 - 1 : 0] delay_reg = 0;
+
+	reg [CYPHER_DATA_WIDTH - 1 : 0] ck = 0;
 	integer calc_state = 0;
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			csa_calc_logic_inuse <= 0;
-			request_fetch <= 0;
+			ck_out_reg <= 0;
 
 			times_reg <= 50000;
 
@@ -48,9 +50,9 @@ module csa_calc_logic #(
 			calc_state <= 0;
 
 			delay_reg <= 0;
+			ck <= 0;
 		end
 		else begin
-			request_fetch <= 0;
 
 			case(calc_state)
 				0: begin
@@ -87,13 +89,14 @@ module csa_calc_logic #(
 						calc_state <= 2;
 					end
 					else begin
+						ck_out_reg <= ck_out;
 
 						calc_state <= 3;
 					end
 				end
 				3: begin
 					if(times_reg > 0) begin
-						request_fetch <= 1;
+						ck <= ck_out_reg;
 					end
 					else begin
 					end
@@ -126,20 +129,6 @@ module csa_calc_logic #(
 				default: begin
 				end
 			endcase
-		end
-	end
-
-	reg [CYPHER_DATA_WIDTH - 1 : 0] ck = 0;
-	always @(negedge clk) begin
-		if(rst_n == 0) begin
-			ck <= 0;
-		end
-		else begin
-			if(request_fetch == 1) begin
-				ck <= ck_out;
-			end
-			else begin 
-			end
 		end
 	end
 

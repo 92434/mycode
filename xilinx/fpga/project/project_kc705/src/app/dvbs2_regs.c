@@ -119,8 +119,9 @@ void *write_fn(void *arg) {
 
 	uint32_t power_on_switch_reg = 1;
 	uint32_t ts_source_mode_reg = 2;
-	uint32_t sys_freq_num_reg = 12500;
-	uint32_t sys_baud_num_reg = 2500;
+	//uint32_t sys_freq_num_reg = 12500;
+	//uint32_t sys_baud_num_reg = 2500;
+	uint32_t freq_inv_mode_reg = 1;
 
 	printids("write_fn: ");
 
@@ -129,10 +130,12 @@ void *write_fn(void *arg) {
 		nwrite = write(targ->fd, &power_on_switch_reg, sizeof(uint32_t));
 		lseek(targ->fd, ADDR_OFFSET(TS_SOURCE_MODE_REG), SEEK_SET);
 		nwrite = write(targ->fd, &ts_source_mode_reg, sizeof(uint32_t));
-		lseek(targ->fd, ADDR_OFFSET(SYS_FREQ_NUM_REG), SEEK_SET);
-		nwrite = write(targ->fd, &sys_freq_num_reg, sizeof(uint32_t));
-		lseek(targ->fd, ADDR_OFFSET(SYS_BAUD_NUM_REG), SEEK_SET);
-		nwrite = write(targ->fd, &sys_baud_num_reg, sizeof(uint32_t));
+		//lseek(targ->fd, ADDR_OFFSET(SYS_FREQ_NUM_REG), SEEK_SET);
+		//nwrite = write(targ->fd, &sys_freq_num_reg, sizeof(uint32_t));
+		//lseek(targ->fd, ADDR_OFFSET(SYS_BAUD_NUM_REG), SEEK_SET);
+		//nwrite = write(targ->fd, &sys_baud_num_reg, sizeof(uint32_t));
+		lseek(targ->fd, ADDR_OFFSET(FREQ_INV_MODE_REG), SEEK_SET);
+		nwrite = write(targ->fd, &freq_inv_mode_reg, sizeof(uint32_t));
 
 		return NULL;
 	}

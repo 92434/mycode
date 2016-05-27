@@ -61,11 +61,12 @@ set_property PACKAGE_PIN F16 [get_ports {EXT_LEDS[7]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[7]}]
 	
 # ----------------------------------------------------------------------------------------------------
-# bitstream encryption
+# bitstream constrain
 # ----------------------------------------------------------------------------------------------------
 
-#Encryption Settings
+set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
 
+##Encryption Settings
 #set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]
 #set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT BBRAM [current_design]
 #set_property BITSTREAM.ENCRYPTION.ENCRYPTKEYSELECT eFUSE [current_design]
