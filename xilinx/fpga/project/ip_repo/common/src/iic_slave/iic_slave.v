@@ -1,5 +1,5 @@
 `include "timescale.v"
-`include "i2cSlave_define.v"
+`include "iic_slave_def.v"
 
 module iic_slave #
 	(
@@ -51,20 +51,16 @@ module iic_slave #
 		// 4 ticks = 83nS @ 48MHz
 		parameter integer SDA_DEL_LEN = 4,
 
-		parameter integer ADDR_LSB = 0,
-		parameter integer OPT_MEM_ADDR_BITS = 8,
-
-		parameter integer IIC_SLAVE_DATA_WIDTH = 8,
-		parameter integer IIC_SLAVE_ADDR_WIDTH = 8
+		parameter integer OPT_MEM_ADDR_BITS = 8
 	)
 	(
 		// Users to add ports here
 		output wire wen,
-		output wire [IIC_SLAVE_DATA_WIDTH - 1 : 0] wdata,
+		output wire [8 - 1 : 0] wdata,
 		output wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 
 		output wire ren,
-		input wire [IIC_SLAVE_DATA_WIDTH - 1 : 0] rdata,
+		input wire [8 - 1 : 0] rdata,
 		output wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 
 		// User ports ends
@@ -72,8 +68,9 @@ module iic_slave #
 
 
 		// Ports of iic-slave
-		input clk,
-		input rst_n,
+		input wire clk,
+		input wire rst_n,
+
 		inout sda,
 		input scl
 	);
@@ -81,12 +78,13 @@ module iic_slave #
 
 	// local wires and regs
 
-	wire clearStartStopDet;
-	wire sdaOut;
-	wire sdaIn;
+	wire start_stop_det_enable;
+	wire sda_in;
+	wire sda_out_en;
+	wire sda_out;
 
-	assign sda = (sdaOut == 1'b0) ? 1'b0 : 1'bz;
-	assign sdaIn = sda;
+	assign sda = (sda_out_en == 1) ? sda_out : 1'bz;
+	assign sda_in = sda;
 
 
 
@@ -96,141 +94,164 @@ module iic_slave #
 		if(rst_n == 1'b0) begin
 			rst_n_pipe <= 2'b00;
 		end
-		else begin
-			rst_n_pipe <= {rst_n_pipe[0], 1'b1};
+		else begin rst_n_pipe <= {rst_n_pipe[0], 1'b1};
 		end
 	end
 
 	wire rst_n_sync_to_clk;
-	wire rst_sync_to_clk;
 
 	assign rst_n_sync_to_clk = rst_n_pipe[1];
-	assign rst_sync_to_clk = ~rst_n_sync_to_clk;
 
 	// debounce sda and scl
-	reg [DEB_I2C_LEN - 1 : 0] sdaPipe;
-	reg sdaDeb;
-	reg [DEB_I2C_LEN - 1 : 0] sclPipe;
-	reg sclDeb;
+	reg [DEB_I2C_LEN - 1 : 0] sda_pipe;
+	reg sda_deb;
+	reg [DEB_I2C_LEN - 1 : 0] scl_pipe;
+	reg scl_deb;
 	always @(posedge clk) begin
 		if(rst_n_sync_to_clk == 1'b0) begin
-			sdaPipe <= {DEB_I2C_LEN{1'b1}};
-			sdaDeb <= 1'b1;
-			sclPipe <= {DEB_I2C_LEN{1'b1}};
-			sclDeb <= 1'b1;
+			sda_pipe <= {DEB_I2C_LEN{1'b1}};
+			sda_deb <= 1'b1;
+			scl_pipe <= {DEB_I2C_LEN{1'b1}};
+			scl_deb <= 1'b1;
 		end
 		else begin
-			if(&sclPipe[DEB_I2C_LEN - 1 : 1] == 1'b1) begin
-				sclDeb <= 1'b1;
+			if(&scl_pipe[DEB_I2C_LEN - 1 : 1] == 1'b1) begin
+				scl_deb <= 1'b1;
 			end
-			else if(|sclPipe[DEB_I2C_LEN - 1 : 1] == 1'b0) begin
-				sclDeb <= 1'b0;
-			end
-
-			if(&sdaPipe[DEB_I2C_LEN - 1 : 1] == 1'b1) begin
-				sdaDeb <= 1'b1;
-			end
-			else if(|sdaPipe[DEB_I2C_LEN - 1 : 1] == 1'b0) begin
-				sdaDeb <= 1'b0;
+			else if(|scl_pipe[DEB_I2C_LEN - 1 : 1] == 1'b0) begin
+				scl_deb <= 1'b0;
 			end
 
-			sdaPipe <= {sdaPipe[DEB_I2C_LEN - 2 : 0], sdaIn};
-			sclPipe <= {sclPipe[DEB_I2C_LEN - 2 : 0], scl};
+			if(&sda_pipe[DEB_I2C_LEN - 1 : 1] == 1'b1) begin
+				sda_deb <= 1'b1;
+			end
+			else if(|sda_pipe[DEB_I2C_LEN - 1 : 1] == 1'b0) begin
+				sda_deb <= 1'b0;
+			end
+
+			sda_pipe <= {sda_pipe[DEB_I2C_LEN - 2 : 0], sda_in};
+			scl_pipe <= {scl_pipe[DEB_I2C_LEN - 2 : 0], scl};
 		end
 	end
 
 
 	// delay scl and sda
-	// sclDelayed is used as a delayed sampling clock
-	// sdaDelayed is only used for start stop detection
+	// scl_delayed is used as a delayed sampling clock
+	// sda_delayed is only used for start stop detection
 	// Because sda hold time from scl falling is 0nS
 	// sda must be delayed with respect to scl to avoid incorrect
 	// detection of start/stop at scl falling edge. 
-	reg [SCL_DEL_LEN - 1 : 0] sclDelayed;
-	reg [SDA_DEL_LEN - 1 : 0] sdaDelayed;
+	reg [SCL_DEL_LEN - 1 : 0] scl_delayed;
+	reg [SDA_DEL_LEN - 1 : 0] sda_delayed;
 	always @(posedge clk) begin
 		if(rst_n_sync_to_clk == 1'b0) begin
-			sclDelayed <= {SCL_DEL_LEN{1'b1}};
-			sdaDelayed <= {SDA_DEL_LEN{1'b1}};
+			scl_delayed <= {SCL_DEL_LEN{1'b1}};
+			sda_delayed <= {SDA_DEL_LEN{1'b1}};
 		end
 		else begin
-			sclDelayed <= {sclDelayed[SCL_DEL_LEN - 2 : 0], sclDeb};
-			sdaDelayed <= {sdaDelayed[SDA_DEL_LEN - 2 : 0], sdaDeb};
+			scl_delayed <= {scl_delayed[SCL_DEL_LEN - 2 : 0], scl_deb};
+			sda_delayed <= {sda_delayed[SDA_DEL_LEN - 2 : 0], sda_deb};
 		end
 	end
 
 	// start stop detection
-	reg startEdgeDet;
-	reg [1 : 0] startStopDetState;
+	wire scl_stay_high;
+	wire sda_rise;
+	wire sda_fall;
+	assign scl_stay_high = (scl_delayed[SDA_DEL_LEN - 1] == 1'b1 && scl_delayed[SDA_DEL_LEN - 2] == 1'b1) ? 1 : 0;
+	assign sda_rise = (sda_delayed[SDA_DEL_LEN - 1] == 1'b0 && sda_delayed[SDA_DEL_LEN - 2] == 1'b1) ? 1 : 0;
+	assign sda_fall = (sda_delayed[SDA_DEL_LEN - 1] == 1'b1 && sda_delayed[SDA_DEL_LEN - 2] == 1'b0) ? 1 : 0;
+
+	reg [1 : 0] start_stop_state = `NULL_DET;
 	always @(posedge clk) begin
 		if(rst_n_sync_to_clk == 1'b0) begin
-			startEdgeDet <= 1'b0;
-			startStopDetState <= `NULL_DET;
+			start_stop_state <= `NULL_DET;
 		end
 		else begin
-			if(sclDeb == 1'b1 && sdaDelayed[SDA_DEL_LEN - 2] == 1'b0 && sdaDelayed[SDA_DEL_LEN - 1] == 1'b1) begin
-				startEdgeDet <= 1'b1;
-			end
-			else begin
-				startEdgeDet <= 1'b0;
-			end
-
-			if(clearStartStopDet == 1'b1) begin
-				startStopDetState <= `NULL_DET;
-			end
-			else begin
-				if(sclDeb == 1'b1) begin
-					if(sdaDelayed[SDA_DEL_LEN - 2] == 1'b1 && sdaDelayed[SDA_DEL_LEN - 1] == 1'b0) begin
-						startStopDetState <= `STOP_DET;
+			if(start_stop_det_enable == 1) begin
+				if(scl_stay_high == 1) begin
+					if(sda_rise == 1) begin
+						start_stop_state <= `STOP_DET;
 					end
-					else if(sdaDelayed[SDA_DEL_LEN - 2] == 1'b0 && sdaDelayed[SDA_DEL_LEN - 1] == 1'b1) begin
-						startStopDetState <= `START_DET;
+					else if(sda_fall == 1) begin
+						start_stop_state <= `START_DET;
+					end
+					else begin
 					end
 				end
 				else begin
 				end
 			end
+			else begin
+				start_stop_state <= `NULL_DET;
+			end
+		end
+	end
+
+	// Instantiation of iic-slave
+	
+	wire fifo_wdata_start;
+	iic_slave_interface #(
+			.I2C_ADDRESS(I2C_ADDRESS)
+		) iic_slave_interface_inst(
+			.clk(clk),
+			.rst_n(rst_n_sync_to_clk),
+
+			.start_stop_det_enable(start_stop_det_enable),
+			.start_stop_state(start_stop_state),
+
+			.scl_in(scl_delayed[SCL_DEL_LEN - 1]),
+			.sda_in(sda_delayed[SDA_DEL_LEN - 1]),
+			.sda_out_en(sda_out_en),
+			.sda_out(sda_out),
+
+			.fifo_wen(fifo_wen),
+			.fifo_wdata(fifo_wdata),
+			.fifo_wdata_start(fifo_wdata_start),
+
+			.fifo_ren(fifo_ren),
+			.fifo_rdata(fifo_rdata)
+		);
+	// Add user logic here
+	localparam integer ADDR_BYTES_COUNT = OPT_MEM_ADDR_BITS / 8;
+
+	reg [OPT_MEM_ADDR_BITS - 1 : 0] addr = 0;
+	reg [8 : 0] addr_bytes_count = ADDR_BYTES_COUNT;
+	always @(posedge clk) begin
+		if(rst_n_sync_to_clk == 0) begin
+			addr <= 0;
+			addr_bytes_count <= ADDR_BYTES_COUNT;
+		end
+		else begin
+			if(fifo_wen == 1) begin
+				if(fifo_wdata_start == 1) begin
+					addr[7 : 0] <= fifo_wdata[7 : 0];
+
+					addr_bytes_count <= 1;
+				end
+				else begin
+					if(addr_bytes_count < ADDR_BYTES_COUNT) begin
+						addr[(addr_bytes_count * 8) +: 8] <= fifo_wdata[7 : 0];//???????????????????
+
+						addr_bytes_count <= addr_bytes_count + 1;
+					end
+				end
+			end
+			else begin
+			end
 		end
 	end
 
 
+	assign state_addr = (fifo_wdata_start == 1 || addr_bytes_count < ADDR_BYTES_COUNT) ? 1 : 0;
 
-	// Instantiation of iic-slave
-	wire rst_intf;
-	assign rst_intf = rst_sync_to_clk | startEdgeDet;
+	assign wen = (state_addr == 0) ? fifo_wen : 0;
+	assign wdata = (state_addr == 0) ? fifo_wdata : 0;
+	assign waddr = addr;
 
-	wire [IIC_SLAVE_ADDR_WIDTH : 0] regAddr;
-	wire [IIC_SLAVE_DATA_WIDTH : 0] dataToRegIF;
-	wire writeEn;
-	wire [IIC_SLAVE_DATA_WIDTH : 0] dataFromRegIF;
-
-	assign wen = writeEn; //to reg
-	assign wdata = dataToRegIF;
-	assign waddr = regAddr;
-
-	assign ren = ~writeEn; //to iic
-	assign dataFromRegIF = rdata;
-	assign raddr = regAddr;
-
-	wire scl_delayed;
-	assign scl_delayed = sclDelayed[SCL_DEL_LEN - 1];
-
-	serialInterface # (
-		.I2C_ADDRESS(I2C_ADDRESS)
-		) u_serialInterface (
-			.clk(clk), 
-			.rst(rst_intf), 
-			.dataIn(dataFromRegIF), 
-			.dataOut(dataToRegIF), 
-			.writeEn(writeEn),
-			.regAddr(regAddr), 
-			.scl(scl_delayed), 
-			.sdaIn(sdaDeb), 
-			.sdaOut(sdaOut), 
-			.startStopDetState(startStopDetState),
-			.clearStartStopDet(clearStartStopDet) 
-		);
-	// Add user logic here
+	assign ren = fifo_ren;
+	assign rdata = fifo_rdata;
+	assign raddr = addr;
 
 	// User logic ends
 
