@@ -1,5 +1,5 @@
-`include "timescale.v"
-`include "iic_slave_def.v"
+`timescale 1ns / 1ps
+`include "iic_def.v"
 
 module iic_slave #
 	(
@@ -71,7 +71,7 @@ module iic_slave #
 		input wire clk,
 		input wire rst_n,
 
-		inout sda,
+		inout wire sda,
 		input scl
 	);
 

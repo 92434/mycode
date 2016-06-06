@@ -1,12 +1,5 @@
-
-//////////////////////////////////////////////////////////////////////
-////                                                              ////
-//// iic_slave_interface.v                                                 ////
-////                                                              ////
-//////////////////////////////////////////////////////////////////////
-//
-`include "timescale.v"
-`include "iic_slave_def.v"
+`timescale 1ns / 1ps
+`include "iic_def.v"
 
 module iic_slave_interface #(
 		parameter integer I2C_ADDRESS = 7'h3c
@@ -37,6 +30,7 @@ module iic_slave_interface #(
 	`define STREAM_STATE_DATA_IN_DATA 2
 	`define STREAM_STATE_DATA_OUT_DATA 3
 
+	//iic slave state
 	`define STATE_START_CONDITION 0
 	`define STATE_IN_I2C_ADDRESS 1
 	`define STATE_CHECK_I2C_ADDRESS 2
@@ -52,6 +46,9 @@ module iic_slave_interface #(
 	reg [2 : 0] data_bit_count = 0;
 
 	reg fifo_rdata_valid = 0;
+
+	reg [7 : 0] fifo_rdata_reg = 0;
+
 	reg wait_first_in_data = 0;
 
 	integer state = `STATE_START_CONDITION;
@@ -74,6 +71,8 @@ module iic_slave_interface #(
 			data_bit_count <= 0;
 
 			fifo_rdata_valid <= 0;
+
+			fifo_rdata_reg <= 0;
 
 			wait_first_in_data <= 0;
 
