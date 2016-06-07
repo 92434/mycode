@@ -1,15 +1,15 @@
 `timescale 1ns / 1ps
 `include "iic_def.v"
 
-module iic_slave_interface #
+module iic_master_interface #
 	(
 	)
 	(
 		input wire clk,
 		input wire rst_n,
 
-		output input scl_out,
-		output input scl_out_delay,
+		input wire scl_out,
+		input wire scl_out_delay,
 
 		input wire sda_in,
 		output reg sda_out_en = 0,
@@ -39,14 +39,19 @@ module iic_slave_interface #
 
 	//iic master state
 	`define STATE_NULL 0
-	`define STATE_OUT_I2C_ADDRESS 1
-	`define STATE_CHECK_I2C_ADDRESS 2
-	`define STATE_IN_DATA 3
-	`define STATE_CHECK_IN_DATA 4
-	`define STATE_OUT_DATA 5
-	`define STATE_CHECK_OUT_DATA 6
-	`define STATE_DATA_LOOP 7
-	`define STATE_ACK 8
+	`define STATE_START 1
+	`define STATE_START_OUT 2
+	`define STATE_STOP 3
+	`define STATE_STOP_WAIT 4
+	`define STATE_STOP_OUT 5
+	`define STATE_OUT_I2C_ADDRESS 6
+	`define STATE_CHECK_OUT_I2C_ADDRESS 7
+	`define STATE_IN_DATA 8
+	`define STATE_CHECK_IN_DATA 9
+	`define STATE_OUT_DATA 10
+	`define STATE_CHECK_OUT_DATA 11
+	`define STATE_DATA_LOOP 12
+	`define STATE_ACK 13
 
 	integer stream_state = `STREAM_STATE_NULL;
 	reg [2 : 0] data_bit_count = 0;
@@ -64,7 +69,7 @@ module iic_slave_interface #
 			fifo_ren <= 0;
 
 			stop_request <= 0;
-			status <= I2C_NO_ERR;
+			status <= `I2C_NO_ERR;
 
 			stream_state <= `STREAM_STATE_NULL;
 
@@ -81,10 +86,17 @@ module iic_slave_interface #
 			fifo_ren <= 0;
 
 			stop_request <= 0;
-			status <= I2C_NO_ERR;
+			status <= `I2C_NO_ERR;
 
 			case(state)
 				`STATE_START: begin
+					if(scl_out == 1) begin
+						state <= `STATE_START_OUT;
+					end
+					else begin
+					end
+				end
+				`STATE_START_OUT: begin
 					if(scl_out_delay == 1) begin
 						sda_out <= 0;
 
@@ -97,11 +109,29 @@ module iic_slave_interface #
 					else begin
 					end
 				end
+				`STATE_STOP_WAIT: begin
+					if(scl_out == 0) begin
+						sda_out <= 0;
+						sda_out_en = 1;
+
+						state <= `STATE_STOP;
+					end
+					else begin
+					end
+				end
 				`STATE_STOP: begin
+					if(scl_out == 1) begin
+
+						state <= `STATE_STOP_OUT;
+					end
+					else begin
+					end
+				end
+				`STATE_STOP_OUT: begin
 					if(scl_out_delay == 1) begin
 						sda_out <= 1;
 
-						state <= STATE_NULL;
+						state <= `STATE_NULL;
 					end
 					else begin
 					end
@@ -168,7 +198,7 @@ module iic_slave_interface #
 						state <= `STATE_DATA_LOOP;
 					end
 				end
-				STATE_CHECK_OUT_DATA: begin
+				`STATE_CHECK_OUT_DATA: begin
 					if(scl_out == 0) begin
 						sda_out_en <= 0;//prepare for reading ack/nack
 						fifo_rdata_valid <= 0;//enable update fifo_rdata
@@ -224,6 +254,8 @@ module iic_slave_interface #
 				end
 				`STATE_ACK: begin
 					if(scl_out == 1) begin
+						stop_request <= 1;
+
 						case(stream_state)
 							`STREAM_STATE_DATA_OUT_I2C_ADDRESS: begin
 								if(sda_in == `I2C_ACK) begin
@@ -240,19 +272,19 @@ module iic_slave_interface #
 										else begin
 										end
 
-										stream_state <= STREAM_STATE_DATA_OUT_DATA;
+										stream_state <= `STREAM_STATE_DATA_OUT_DATA;
 
-										state <= STATE_OUT_DATA;
+										state <= `STATE_OUT_DATA;
 									end
 								end
 								else begin//I2C_NACK?wait for start/stop
-									stop_request <= 1;
-									status <= I2C_ERR_NO_ADDR_ACK;
+									status <= `I2C_ERR_NO_ADDR_ACK;
 
 									stream_state <= `STREAM_STATE_NULL;
 								end
 							end
 							`STREAM_STATE_DATA_IN_DATA: begin
+
 								state <= `STATE_IN_DATA;
 							end
 							`STREAM_STATE_DATA_OUT_DATA: begin
@@ -267,8 +299,7 @@ module iic_slave_interface #
 									state <= `STATE_OUT_DATA;
 								end
 								else begin//I2C_NACK?wait for start/stop
-									stop_request <= 1;
-									status <= I2C_ERR_NO_DATA_ACK;
+									status <= `I2C_ERR_NO_DATA_ACK;
 
 									stream_state <= `STREAM_STATE_NULL;
 								end
@@ -291,11 +322,15 @@ module iic_slave_interface #
 
 					state <= `STATE_START;
 				end
-				else if(stop == 1) begin
-					sda_out <= 0;
-					sda_out_en = 1;
+				else begin
+				end
+			end
+			else begin
+				if(stop == 1) begin
 
-					state <= `STATE_STOP;
+					state <= `STATE_STOP_WAIT;
+				end
+				else begin
 				end
 			end
 		end

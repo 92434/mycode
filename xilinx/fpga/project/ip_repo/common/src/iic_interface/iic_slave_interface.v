@@ -18,7 +18,7 @@ module iic_slave_interface #(
 
 		output reg fifo_wen = 0,
 		output reg [7 : 0] fifo_wdata = 8'h00, 
-		output reg fifo_wdata_start = 0,//
+		output reg fifo_wdata_start = 0,
 
 		output reg fifo_ren = 0,
 		input wire [7 : 0] fifo_rdata 

@@ -190,7 +190,12 @@ module iic_slave #
 
 	// Instantiation of iic-slave
 	
+	wire fifo_wen;
+	wire [7 : 0] fifo_wdata;
 	wire fifo_wdata_start;
+
+	wire fifo_ren;
+	wire [7 : 0] fifo_rdata;
 	iic_slave_interface #(
 			.I2C_ADDRESS(I2C_ADDRESS)
 		) iic_slave_interface_inst(
@@ -217,10 +222,12 @@ module iic_slave #
 
 	reg [OPT_MEM_ADDR_BITS - 1 : 0] addr = 0;
 	reg [8 : 0] addr_bytes_count = ADDR_BYTES_COUNT;
+	reg [8 : 0] data_bytes_count = ADDR_BYTES_COUNT;
 	always @(posedge clk) begin
 		if(rst_n_sync_to_clk == 0) begin
 			addr <= 0;
 			addr_bytes_count <= ADDR_BYTES_COUNT;
+			data_bytes_count <= ADDR_BYTES_COUNT;
 		end
 		else begin
 			if(fifo_wen == 1) begin
@@ -228,6 +235,7 @@ module iic_slave #
 					addr[7 : 0] <= fifo_wdata[7 : 0];
 
 					addr_bytes_count <= 1;
+					data_bytes_count <= 1;
 				end
 				else begin
 					if(addr_bytes_count < ADDR_BYTES_COUNT) begin
@@ -235,6 +243,7 @@ module iic_slave #
 
 						addr_bytes_count <= addr_bytes_count + 1;
 					end
+					data_bytes_count <= data_bytes_count + 1;
 				end
 			end
 			else begin
@@ -242,16 +251,15 @@ module iic_slave #
 		end
 	end
 
-
 	assign state_addr = (fifo_wdata_start == 1 || addr_bytes_count < ADDR_BYTES_COUNT) ? 1 : 0;
 
 	assign wen = (state_addr == 0) ? fifo_wen : 0;
 	assign wdata = (state_addr == 0) ? fifo_wdata : 0;
-	assign waddr = addr;
+	assign waddr = addr + data_bytes_count - addr_bytes_count;
 
 	assign ren = fifo_ren;
 	assign rdata = fifo_rdata;
-	assign raddr = addr;
+	assign raddr = addr + data_bytes_count - addr_bytes_count;
 
 	// User logic ends
 
