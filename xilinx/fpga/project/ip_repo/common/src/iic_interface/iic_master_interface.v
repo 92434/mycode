@@ -23,6 +23,8 @@ module iic_master_interface #
 		output reg fifo_ren = 0,
 		input wire [7 : 0] fifo_rdata,
 
+		wire [7 : 0] count,
+
 		input wire start,
 
 		output reg stop_request = 0,
@@ -55,7 +57,6 @@ module iic_master_interface #
 
 	integer stream_state = `STREAM_STATE_NULL;
 	reg [2 : 0] data_bit_count = 0;
-	reg fifo_rdata_valid = 0;
 	reg [7 : 0] fifo_rdata_reg = 0;
 	integer state = `STATE_NULL;
 	always @(posedge clk) begin
@@ -74,8 +75,6 @@ module iic_master_interface #
 			stream_state <= `STREAM_STATE_NULL;
 
 			data_bit_count <= 0;
-
-			fifo_rdata_valid <= 0;
 
 			fifo_rdata_reg <= 0;
 
@@ -174,7 +173,12 @@ module iic_master_interface #
 				end
 				`STATE_CHECK_IN_DATA: begin
 					if(scl_out == 0) begin
-						sda_out <= `I2C_ACK;
+						if(count == 0) begin
+							sda_out <= `I2C_NAK;
+						end
+						else begin
+							sda_out <= `I2C_ACK;
+						end
 						sda_out_en <= 1;
 
 						state <= `STATE_ACK;
@@ -201,7 +205,6 @@ module iic_master_interface #
 				`STATE_CHECK_OUT_DATA: begin
 					if(scl_out == 0) begin
 						sda_out_en <= 0;//prepare for reading ack/nack
-						fifo_rdata_valid <= 0;//enable update fifo_rdata
 
 						state <= `STATE_ACK;
 					end
@@ -265,12 +268,7 @@ module iic_master_interface #
 										state <= `STATE_IN_DATA;
 									end
 									else begin
-										if(fifo_rdata_valid == 0) begin
-											fifo_ren <= 1;
-											fifo_rdata_valid <= 1;
-										end
-										else begin
-										end
+										fifo_ren <= 1;
 
 										stream_state <= `STREAM_STATE_DATA_OUT_DATA;
 
@@ -289,12 +287,7 @@ module iic_master_interface #
 							end
 							`STREAM_STATE_DATA_OUT_DATA: begin
 								if(sda_in == `I2C_ACK) begin
-									if(fifo_rdata_valid == 0) begin
-										fifo_ren <= 1;
-										fifo_rdata_valid <= 1;
-									end
-									else begin
-									end
+									fifo_ren <= 1;
 
 									state <= `STATE_OUT_DATA;
 								end

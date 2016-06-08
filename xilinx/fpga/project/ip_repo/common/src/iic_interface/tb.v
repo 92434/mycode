@@ -40,6 +40,7 @@ module tb #
 	reg request = 0;
 	integer state_m = 0;
 	wire iic_ready;
+	wire iic_complete;
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			read_count <= 0;
@@ -63,7 +64,9 @@ module tb #
 						data_m[4] <= 3;
 						data_m[5] <= 4;
 						data_m[6] <= 5;
-						read_count <= 7;
+						data_m[7] <= 6;
+						data_m[8] <= 7;
+						read_count <= 9;
 
 						state_m <= 1;
 					end
@@ -76,7 +79,107 @@ module tb #
 						state_m <= 2;
 				end
 				2: begin
-					if(iic_ready == 1) begin
+					if(iic_complete == 1) begin
+
+						state_m <= 3;
+					end
+					else begin
+					end
+				end
+				3: begin
+						slave_addr[0] <= 0;
+						data_m[0] <= 2;
+						data_m[1] <= 0;
+						read_count <= 2;
+
+						state_m <= 4;
+				end
+				4: begin
+						request <= 1;
+
+						state_m <= 5;
+				end
+				5: begin
+					if(iic_complete == 1) begin
+
+						state_m <= 6;
+					end
+					else begin
+					end
+				end
+				6: begin
+						slave_addr[0] <= 1;
+						data_m[0] <= 0;
+						data_m[1] <= 0;
+						data_m[2] <= 0;
+						data_m[3] <= 0;
+						data_m[4] <= 0;
+						data_m[5] <= 0;
+						data_m[6] <= 0;
+						data_m[7] <= 0;
+						data_m[8] <= 0;
+						write_count <= 5;
+
+						state_m <= 7;
+				end
+				7: begin
+						request <= 1;
+
+						state_m <= 8;
+				end
+				8: begin
+					if(iic_complete == 1) begin
+
+						state_m <= 9;
+					end
+					else begin
+					end
+				end
+				9: begin
+						slave_addr[0] <= 0;
+						data_m[0] <= 1;
+						data_m[1] <= 0;
+						read_count <= 2;
+
+						state_m <= 10;
+				end
+				10: begin
+						request <= 1;
+
+						state_m <= 11;
+				end
+				11: begin
+					if(iic_complete == 1) begin
+
+						state_m <= 12;
+					end
+					else begin
+					end
+				end
+				12: begin
+						slave_addr[0] <= 1;
+						data_m[0] <= 0;
+						data_m[1] <= 0;
+						data_m[2] <= 0;
+						data_m[3] <= 0;
+						data_m[4] <= 0;
+						data_m[5] <= 0;
+						data_m[6] <= 0;
+						data_m[7] <= 0;
+						data_m[8] <= 0;
+						write_count <= 5;
+
+						state_m <= 13;
+				end
+				13: begin
+						request <= 1;
+
+						state_m <= 14;
+				end
+				14: begin
+					if(iic_complete == 1) begin
+
+						state_m <= 0;
 					end
 					else begin
 					end
@@ -137,6 +240,8 @@ module tb #
 			.slave_addr(slave_addr),
 
 			.iic_ready(iic_ready),
+
+			.iic_complete(iic_complete),
 			
 			.clk(clk),
 			.rst_n(rst_n),

@@ -25,22 +25,23 @@ module csa_calc_logic #(
 
 	localparam integer CYPHER_DATA_WIDTH = 8 * 8;
 
-	reg [CYPHER_DATA_WIDTH - 1 : 0] ck_out_reg = 0;
+	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg = 0;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] times_reg = 0;
 
-	wire [CYPHER_DATA_WIDTH - 1 : 0] cb;
+	reg [CYPHER_DATA_WIDTH - 1 : 0] cb;
 
 	wire [CYPHER_DATA_WIDTH - 1 : 0] ck_out;
 
+	wire [CYPHER_DATA_WIDTH - 1 : 0] cb_out;
+
 	reg [32 - 1 : 0] delay_reg = 0;
 
-	reg [CYPHER_DATA_WIDTH - 1 : 0] ck = 0;
 	integer calc_state = 0;
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			csa_calc_logic_inuse <= 0;
-			ck_out_reg <= 0;
+			cb_out_reg <= 0;
 
 			times_reg <= 50000;
 
@@ -50,7 +51,6 @@ module csa_calc_logic #(
 			calc_state <= 0;
 
 			delay_reg <= 0;
-			ck <= 0;
 		end
 		else begin
 
@@ -89,14 +89,14 @@ module csa_calc_logic #(
 						calc_state <= 2;
 					end
 					else begin
-						ck_out_reg <= ck_out;
+						cb_out_reg <= cb_out;
 
 						calc_state <= 3;
 					end
 				end
 				3: begin
 					if(times_reg > 0) begin
-						ck <= ck_out_reg;
+						cb <= cb_out_reg;
 					end
 					else begin
 					end
@@ -110,7 +110,7 @@ module csa_calc_logic #(
 						calc_state <= 1;
 					end
 					else begin
-						csa_calc_logic_out <= cb[CSA_CALC_OUT_WIDTH - 1 : 0];
+						csa_calc_logic_out <= ck_out[CSA_CALC_OUT_WIDTH - 1 : 0];
 						csa_calc_logic_ready <= 1;
 
 						calc_state <= 5;
@@ -136,15 +136,7 @@ module csa_calc_logic #(
 
 	assign sb = 64'hE613DB6DC11C4524;
 
-	//assign cb = ck;
-	stream_cypher stream_cypher_inst(
-			.ck(ck),//input
-			.sb(sb),//input fixed!
-			.cb(cb)//output
-		);
-
 	wire [AXI_DATA_WIDTH - 1 : 0] loops;
-
 	assign loops = csa_calc_logic_times - times_reg;
 
 	//assign ck_out = (loops == 0) ? {16'd0, ID[8 - 1 : 0], csa_calc_logic_in} : cb;
@@ -159,4 +151,12 @@ module csa_calc_logic #(
 
 			.ck_out(ck_out)
 		);
+
+	//assign cb = ck;
+	stream_cypher stream_cypher_inst(
+			.ck(ck_out),//input
+			.sb(sb),//input fixed!
+			.cb(cb_out)//output
+		);
+
 endmodule

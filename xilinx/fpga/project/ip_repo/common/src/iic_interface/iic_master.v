@@ -45,6 +45,8 @@ module iic_master #
 
 		output reg iic_ready = 0,
 
+		output reg iic_complete = 0,
+
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -123,7 +125,6 @@ module iic_master #
 
 	reg [7 : 0] count = 0;
 
-
 	wire fifo_wen;
 	assign wen = fifo_wen;
 	wire [7 : 0] fifo_wdata;
@@ -131,7 +132,7 @@ module iic_master #
 	assign waddr = wcount - count;
 
 	wire fifo_ren;
-	assign ren = fifo_ren;
+	assign ren = (count > 0) ? fifo_ren : 0;
 	wire [7 : 0] fifo_rdata;
 	assign fifo_rdata = rdata;
 	assign raddr = rcount - count;
@@ -145,6 +146,8 @@ module iic_master #
 		if(rst_n == 0) begin
 			iic_ready <= 0;
 
+			iic_complete <= 0;
+
 			count <= 0;
 
 			start <= 0;
@@ -155,6 +158,8 @@ module iic_master #
 		end
 		else begin
 			iic_ready <= 0;
+
+			iic_complete <= 0;
 
 			start <= 0;
 
@@ -228,6 +233,7 @@ module iic_master #
 				end
 				4: begin
 					if(scl == 0) begin
+						iic_complete <= 1;
 
 						state <= 0;
 					end
@@ -261,6 +267,8 @@ module iic_master #
 
 			.fifo_ren(fifo_ren),
 			.fifo_rdata(fifo_rdata),
+
+			.count(count),
 
 			.start(start),
 

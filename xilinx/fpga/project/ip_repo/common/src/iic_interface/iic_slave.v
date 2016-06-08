@@ -56,11 +56,11 @@ module iic_slave #
 	(
 		// Users to add ports here
 		output wire wen,
-		output wire [8 - 1 : 0] wdata,
+		output wire [7 : 0] wdata,
 		output wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 
 		output wire ren,
-		input wire [8 - 1 : 0] rdata,
+		input wire [7 : 0] rdata,
 		output wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 
 		// User ports ends
@@ -221,13 +221,15 @@ module iic_slave #
 	localparam integer ADDR_BYTES_COUNT = OPT_MEM_ADDR_BITS / 8;
 
 	reg [OPT_MEM_ADDR_BITS - 1 : 0] addr = 0;
-	reg [8 : 0] addr_bytes_count = ADDR_BYTES_COUNT;
-	reg [8 : 0] data_bytes_count = ADDR_BYTES_COUNT;
+	reg [7 : 0] addr_bytes_count = ADDR_BYTES_COUNT;
+	reg [7 : 0] wdata_bytes_count = ADDR_BYTES_COUNT;
+	reg [7 : 0] rdata_bytes_count = 0;
 	always @(posedge clk) begin
 		if(rst_n_sync_to_clk == 0) begin
 			addr <= 0;
 			addr_bytes_count <= ADDR_BYTES_COUNT;
-			data_bytes_count <= ADDR_BYTES_COUNT;
+			wdata_bytes_count <= ADDR_BYTES_COUNT;
+			rdata_bytes_count <= 0;
 		end
 		else begin
 			if(fifo_wen == 1) begin
@@ -235,7 +237,7 @@ module iic_slave #
 					addr[7 : 0] <= fifo_wdata[7 : 0];
 
 					addr_bytes_count <= 1;
-					data_bytes_count <= 1;
+					wdata_bytes_count <= 1;
 				end
 				else begin
 					if(addr_bytes_count < ADDR_BYTES_COUNT) begin
@@ -243,10 +245,17 @@ module iic_slave #
 
 						addr_bytes_count <= addr_bytes_count + 1;
 					end
-					data_bytes_count <= data_bytes_count + 1;
+					wdata_bytes_count <= wdata_bytes_count + 1;
 				end
 			end
+			else if(fifo_ren == 1) begin
+				rdata_bytes_count <= rdata_bytes_count + 1;
+			end
 			else begin
+			end
+			
+			if(start_stop_state == `START_DET) begin
+				rdata_bytes_count <= 0;
 			end
 		end
 	end
@@ -255,11 +264,11 @@ module iic_slave #
 
 	assign wen = (state_addr == 0) ? fifo_wen : 0;
 	assign wdata = (state_addr == 0) ? fifo_wdata : 0;
-	assign waddr = addr + data_bytes_count - addr_bytes_count;
+	assign waddr = addr + wdata_bytes_count - addr_bytes_count;
 
 	assign ren = fifo_ren;
-	assign rdata = fifo_rdata;
-	assign raddr = addr + data_bytes_count - addr_bytes_count;
+	assign fifo_rdata = rdata;
+	assign raddr = addr + rdata_bytes_count;
 
 	// User logic ends
 
