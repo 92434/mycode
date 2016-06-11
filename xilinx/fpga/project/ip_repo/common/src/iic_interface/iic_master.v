@@ -67,20 +67,20 @@ module iic_master #
 	assign sda = (sda_out_en == 1) ? sda_out : 1'bz;
 	assign sda_in = sda;
 
-	localparam integer SCL_LEVEL_COUNT = DEB_I2C_LEN * 5;
+	localparam integer SCL_FLIP_DELAY = DEB_I2C_LEN * 5;
 
-	integer scl_level_count = SCL_LEVEL_COUNT;
+	integer scl_flip_delay = SCL_FLIP_DELAY;
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			scl <= 1;
-			scl_level_count <= SCL_LEVEL_COUNT;
+			scl_flip_delay <= SCL_FLIP_DELAY;
 		end
 		else begin
-			if(scl_level_count > 1) begin
-				scl_level_count <= scl_level_count - 1;
+			if(scl_flip_delay > 1) begin
+				scl_flip_delay <= scl_flip_delay - 1;
 			end
 			else begin
-				scl_level_count <= SCL_LEVEL_COUNT;
+				scl_flip_delay <= SCL_FLIP_DELAY;
 				scl <= ~scl;
 			end
 		end
