@@ -192,7 +192,6 @@ module iic_slave #
 	
 	wire fifo_wen;
 	wire [7 : 0] fifo_wdata;
-	wire fifo_wdata_start;
 
 	wire fifo_ren;
 	wire [7 : 0] fifo_rdata;
@@ -212,7 +211,6 @@ module iic_slave #
 
 			.fifo_wen(fifo_wen),
 			.fifo_wdata(fifo_wdata),
-			.fifo_wdata_start(fifo_wdata_start),
 
 			.fifo_ren(fifo_ren),
 			.fifo_rdata(fifo_rdata)
@@ -221,32 +219,24 @@ module iic_slave #
 	localparam integer ADDR_BYTES_COUNT = OPT_MEM_ADDR_BITS / 8;
 
 	reg [OPT_MEM_ADDR_BITS - 1 : 0] addr = 0;
-	reg [7 : 0] addr_bytes_count = ADDR_BYTES_COUNT;
-	reg [7 : 0] wdata_bytes_count = ADDR_BYTES_COUNT;
+	reg [7 : 0] addr_bytes_count = 0;
+	reg [7 : 0] wdata_bytes_count = 0;
 	reg [7 : 0] rdata_bytes_count = 0;
 	always @(posedge clk) begin
 		if(rst_n_sync_to_clk == 0) begin
 			addr <= 0;
-			addr_bytes_count <= ADDR_BYTES_COUNT;
-			wdata_bytes_count <= ADDR_BYTES_COUNT;
+			addr_bytes_count <= 0;
+			wdata_bytes_count <= 0;
 			rdata_bytes_count <= 0;
 		end
 		else begin
 			if(fifo_wen == 1) begin
-				if(fifo_wdata_start == 1) begin
-					addr[7 : 0] <= fifo_wdata[7 : 0];
+				if(addr_bytes_count < ADDR_BYTES_COUNT) begin
+					addr[(addr_bytes_count * 8) +: 8] <= fifo_wdata[7 : 0];//???????????????????
 
-					addr_bytes_count <= 1;
-					wdata_bytes_count <= 1;
+					addr_bytes_count <= addr_bytes_count + 1;
 				end
-				else begin
-					if(addr_bytes_count < ADDR_BYTES_COUNT) begin
-						addr[(addr_bytes_count * 8) +: 8] <= fifo_wdata[7 : 0];//???????????????????
-
-						addr_bytes_count <= addr_bytes_count + 1;
-					end
-					wdata_bytes_count <= wdata_bytes_count + 1;
-				end
+				wdata_bytes_count <= wdata_bytes_count + 1;
 			end
 			else if(fifo_ren == 1) begin
 				rdata_bytes_count <= rdata_bytes_count + 1;
@@ -255,12 +245,14 @@ module iic_slave #
 			end
 			
 			if(start_stop_state == `START_DET) begin
+				addr_bytes_count <= 0;
+				wdata_bytes_count <= 0;
 				rdata_bytes_count <= 0;
 			end
 		end
 	end
 
-	assign state_addr = (fifo_wdata_start == 1 || addr_bytes_count < ADDR_BYTES_COUNT) ? 1 : 0;
+	assign state_addr = (addr_bytes_count < ADDR_BYTES_COUNT) ? 1 : 0;
 
 	assign wen = (state_addr == 0) ? fifo_wen : 0;
 	assign wdata = (state_addr == 0) ? fifo_wdata : 0;

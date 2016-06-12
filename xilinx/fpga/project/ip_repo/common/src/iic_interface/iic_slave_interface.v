@@ -18,7 +18,6 @@ module iic_slave_interface #(
 
 		output reg fifo_wen = 0,
 		output reg [7 : 0] fifo_wdata = 8'h00, 
-		output reg fifo_wdata_start = 0,
 
 		output reg fifo_ren = 0,
 		input wire [7 : 0] fifo_rdata 
@@ -49,8 +48,6 @@ module iic_slave_interface #(
 
 	reg [7 : 0] fifo_rdata_reg = 0;
 
-	reg wait_first_in_data = 0;
-
 	integer state = `STATE_START_CONDITION;
 
 	always @(posedge clk) begin
@@ -62,7 +59,6 @@ module iic_slave_interface #(
 
 			fifo_wen <= 0;
 			fifo_wdata <= 8'h00;
-			fifo_wdata_start <= 0;
 
 			fifo_ren <= 0;
 
@@ -74,13 +70,10 @@ module iic_slave_interface #(
 
 			fifo_rdata_reg <= 0;
 
-			wait_first_in_data <= 0;
-
 			state <= `STATE_START_CONDITION;
 		end
 		else begin
 			fifo_wen <= 0;
-			fifo_wdata_start <= 0;
 
 			fifo_ren <= 0;
 			
@@ -119,7 +112,6 @@ module iic_slave_interface #(
 									stream_state <= `STREAM_STATE_DATA_OUT_DATA;
 								end
 								else begin
-									wait_first_in_data <= 1;
 									stream_state <= `STREAM_STATE_DATA_IN_DATA;
 								end
 
@@ -197,13 +189,6 @@ module iic_slave_interface #(
 
 									if(data_bit_count == 7) begin
 										fifo_wen <= 1;
-										if(wait_first_in_data == 1) begin
-											wait_first_in_data <= 0;
-
-											fifo_wdata_start <= 1;
-										end
-										else begin
-										end
 
 										state <= `STATE_CHECK_IN_DATA;
 									end

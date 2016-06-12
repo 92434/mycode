@@ -28,8 +28,7 @@ module iic_master_interface #
 		input wire start,
 
 		output reg stop_request = 0,
-		output reg [8 : 0] status = `I2C_NO_ERR,
-		input wire stop
+		output reg [8 : 0] status = `I2C_NO_ERR
 
 	);
 	
@@ -257,14 +256,13 @@ module iic_master_interface #
 				end
 				`STATE_ACK: begin
 					if(scl_out == 1) begin
-						stop_request <= 1;
-
 						case(stream_state)
 							`STREAM_STATE_DATA_OUT_I2C_ADDRESS: begin
 								if(sda_in == `I2C_ACK) begin
 									if(slave_addr[0] == 1) begin
 
 										stream_state <= `STREAM_STATE_DATA_IN_DATA;
+
 										state <= `STATE_IN_DATA;
 									end
 									else begin
@@ -276,25 +274,49 @@ module iic_master_interface #
 									end
 								end
 								else begin//I2C_NACK?wait for start/stop
+									stop_request <= 1;
 									status <= `I2C_ERR_NO_ADDR_ACK;
 
 									stream_state <= `STREAM_STATE_NULL;
+
+									state <= `STATE_STOP_WAIT;
 								end
 							end
 							`STREAM_STATE_DATA_IN_DATA: begin
-
-								state <= `STATE_IN_DATA;
-							end
-							`STREAM_STATE_DATA_OUT_DATA: begin
-								if(sda_in == `I2C_ACK) begin
-									fifo_ren <= 1;
-
-									state <= `STATE_OUT_DATA;
-								end
-								else begin//I2C_NACK?wait for start/stop
-									status <= `I2C_ERR_NO_DATA_ACK;
+								if(count == 0) begin
+									stop_request <= 1;
 
 									stream_state <= `STREAM_STATE_NULL;
+
+									state <= `STATE_STOP_WAIT;
+								end
+								else begin
+
+									state <= `STATE_IN_DATA;
+								end
+							end
+							`STREAM_STATE_DATA_OUT_DATA: begin
+								if(count == 0) begin
+										stop_request <= 1;
+
+										stream_state <= `STREAM_STATE_NULL;
+
+										state <= `STATE_STOP_WAIT;
+								end
+								else begin
+									if(sda_in == `I2C_ACK) begin
+										fifo_ren <= 1;
+
+										state <= `STATE_OUT_DATA;
+									end
+									else begin//I2C_NACK?wait for start/stop
+										stop_request <= 1;
+										status <= `I2C_ERR_NO_DATA_ACK;
+
+										stream_state <= `STREAM_STATE_NULL;
+
+										state <= `STATE_STOP_WAIT;
+									end
 								end
 							end
 							default: begin
@@ -319,12 +341,6 @@ module iic_master_interface #
 				end
 			end
 			else begin
-				if(stop == 1) begin
-
-					state <= `STATE_STOP_WAIT;
-				end
-				else begin
-				end
 			end
 		end
 	end

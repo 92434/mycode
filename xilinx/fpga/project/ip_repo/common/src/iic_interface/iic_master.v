@@ -140,7 +140,6 @@ module iic_master #
 	reg start = 0;
 	wire stop_request;
 	wire [8 : 0] status;
-	reg stop = 0;
 	integer state = 0;
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
@@ -152,8 +151,6 @@ module iic_master #
 
 			start <= 0;
 
-			stop <= 0;
-
 			state <= 0;
 		end
 		else begin
@@ -162,8 +159,6 @@ module iic_master #
 			iic_complete <= 0;
 
 			start <= 0;
-
-			stop <= 0;
 
 			case(state)
 				0: begin
@@ -200,20 +195,8 @@ module iic_master #
 				end
 				3: begin
 					if(stop_request == 1) begin//scl == 1
-						if(status == `I2C_NO_ERR) begin
-							if(count <= 0) begin
-								stop <= 1;
 
-								state <= 4;
-							end
-							else begin
-							end
-						end
-						else begin
-							stop <= 1;
-
-							state <= 4;
-						end
+						state <= 4;
 					end
 					else begin
 					end
@@ -273,7 +256,6 @@ module iic_master #
 			.start(start),
 
 			.stop_request(stop_request),
-			.status(status),
-			.stop(stop)
+			.status(status)
 		);
 endmodule
