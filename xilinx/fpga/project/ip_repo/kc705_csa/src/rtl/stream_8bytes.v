@@ -4,11 +4,15 @@
 // this module do 8bytes iteration
 
 module stream_8bytes(
+				clk,
+				rst_n,
                                 init,sb,
                                 Ai,Bi,Di,Ei,Fi,Xi,Yi,Zi,pi,qi,ri,
                                 Ao,Bo,Do,Eo,Fo,Xo,Yo,Zo,po,qo,ro,
                                 cb
                         );
+input clk;
+input rst_n;
 input            init;
 input [8*8-1 :0] sb;
 
@@ -35,8 +39,158 @@ output [3     :0] Zo;
 output            po;
 output            qo;
 output            ro;
-
 output [8*8-1 :0] cb;
+
+reg init_reg;
+reg init_reg_1;
+reg init_reg_2;
+reg init_reg_3;
+reg init_reg_4;
+reg init_reg_5;
+reg init_reg_6;
+reg init_reg_7;
+reg [8*8-1:0] sb_reg;
+reg [8*8-1:0] sb_reg_1;
+reg [8*8-1:0] sb_reg_2;
+reg [8*8-1:0] sb_reg_3;
+reg [8*8-1:0] sb_reg_4;
+reg [8*8-1:0] sb_reg_5;
+reg [8*8-1:0] sb_reg_6;
+reg [8*8-1:0] sb_reg_7;
+reg [10*4-1:0] Ai_reg;
+reg [10*4-1:0] Bi_reg;
+reg [3:0] Di_reg;
+reg [3:0] Ei_reg;
+reg [3:0] Fi_reg;
+reg [3:0] Xi_reg;
+reg [3:0] Yi_reg;
+reg [3:0] Zi_reg;
+reg pi_reg;
+reg qi_reg;
+reg ri_reg;
+reg [8*8-1 :0] cb_reg;
+reg [8*8-1 :0] cb_reg_1;
+reg [8*8-1 :0] cb_reg_2;
+reg [8*8-1 :0] cb_reg_3;
+reg [8*8-1 :0] cb_reg_4;
+reg [8*8-1 :0] cb_reg_5;
+reg [8*8-1 :0] cb_reg_6;
+reg [8*8-1 :0] cb_reg_7;
+//assign init_reg = init;
+//assign init_reg_1 = init;
+//assign init_reg_2 = init;
+//assign init_reg_3 = init;
+//assign init_reg_4 = init;
+//assign init_reg_5 = init;
+//assign init_reg_6 = init;
+//assign init_reg_7 = init;
+//assign sb_reg = sb;
+//assign sb_reg_1 = sb;
+//assign sb_reg_2 = sb;
+//assign sb_reg_3 = sb;
+//assign sb_reg_4 = sb;
+//assign sb_reg_5 = sb;
+//assign sb_reg_6 = sb;
+//assign sb_reg_7 = sb;
+//assign Ai_reg = Ai;
+//assign Bi_reg = Bi;
+//assign Di_reg = Di;
+//assign Ei_reg = Ei;
+//assign Fi_reg = Fi;
+//assign Xi_reg = Xi;
+//assign Yi_reg = Yi;
+//assign Zi_reg = Zi;
+//assign pi_reg = pi;
+//assign qi_reg = qi;
+//assign ri_reg = ri;
+
+wire [8-1 :0] cb_wire;
+wire [8-1 :0] cb_wire_1;
+wire [8-1 :0] cb_wire_2;
+wire [8-1 :0] cb_wire_3;
+wire [8-1 :0] cb_wire_4;
+wire [8-1 :0] cb_wire_5;
+wire [8-1 :0] cb_wire_6;
+wire [8-1 :0] cb_wire_7;
+always @(posedge clk) begin
+	if(rst_n == 0) begin
+		init_reg <= 0;
+		init_reg_1 <= 0;
+		init_reg_2 <= 0;
+		init_reg_3 <= 0;
+		init_reg_4 <= 0;
+		init_reg_5 <= 0;
+		init_reg_6 <= 0;
+		init_reg_7 <= 0;
+		sb_reg <= 0;
+		sb_reg_1 <= 0;
+		sb_reg_2 <= 0;
+		sb_reg_3 <= 0;
+		sb_reg_4 <= 0;
+		sb_reg_5 <= 0;
+		sb_reg_6 <= 0;
+		sb_reg_7 <= 0;
+		Ai_reg <= 0;
+		Bi_reg <= 0;
+		Di_reg <= 0;
+		Ei_reg <= 0;
+		Fi_reg <= 0;
+		Xi_reg <= 0;
+		Yi_reg <= 0;
+		Zi_reg <= 0;
+		pi_reg <= 0;
+		qi_reg <= 0;
+		ri_reg <= 0;
+		cb_reg <= 0;
+		cb_reg_1 <= 0;
+		cb_reg_2 <= 0;
+		cb_reg_3 <= 0;
+		cb_reg_4 <= 0;
+		cb_reg_5 <= 0;
+		cb_reg_6 <= 0;
+		cb_reg_7 <= 0;
+	end
+	else begin
+		init_reg <= init;
+		init_reg_1 <= init_reg;
+		init_reg_2 <= init_reg_1;
+		init_reg_3 <= init_reg_2;
+		init_reg_4 <= init_reg_3;
+		init_reg_5 <= init_reg_4;
+		init_reg_6 <= init_reg_5;
+		init_reg_7 <= init_reg_6;
+		sb_reg <= sb;
+		sb_reg_1 <= sb_reg;
+		sb_reg_2 <= sb_reg_1;
+		sb_reg_3 <= sb_reg_2;
+		sb_reg_4 <= sb_reg_3;
+		sb_reg_5 <= sb_reg_4;
+		sb_reg_6 <= sb_reg_5;
+		sb_reg_7 <= sb_reg_6;
+		Ai_reg <= Ai;
+		Bi_reg <= Bi;
+		Di_reg <= Di;
+		Ei_reg <= Ei;
+		Fi_reg <= Fi;
+		Xi_reg <= Xi;
+		Yi_reg <= Yi;
+		Zi_reg <= Zi;
+		pi_reg <= pi;
+		qi_reg <= qi;
+		ri_reg <= ri;
+		cb_reg <= {cb_wire, cb_reg[8 * 8 - 1 : 8]};
+		cb_reg_1 <= {cb_wire_1, cb_reg_1[8 * 8 - 1 : 8]};
+		cb_reg_2 <= {cb_wire_2, cb_reg_2[8 * 8 - 1 : 8]};
+		cb_reg_3 <= {cb_wire_3, cb_reg_3[8 * 8 - 1 : 8]};
+		cb_reg_4 <= {cb_wire_4, cb_reg_4[8 * 8 - 1 : 8]};
+		cb_reg_5 <= {cb_wire_5, cb_reg_5[8 * 8 - 1 : 8]};
+		cb_reg_6 <= {cb_wire_6, cb_reg_6[8 * 8 - 1 : 8]};
+		cb_reg_7 <= {cb_wire_7, cb_reg_7[8 * 8 - 1 : 8]};
+	end
+end
+
+assign cb = {cb_reg_7[8 * 8 - 1 : 8 * 7], cb_reg_6[8 * 7 - 1 : 8 * 6], cb_reg_5[8 * 6 - 1 : 8 * 5], cb_reg_4[8 * 5 - 1 : 8 * 4], cb_reg_3[8 * 4 - 1 : 8 * 3], cb_reg_2[8 * 3 - 1 : 8 * 2], cb_reg_1[8 * 2 - 1 : 8 * 1], cb_reg[8 * 1 - 1 : 8 * 0]};
+//assign cb = {cb_wire_7[7 : 0], cb_wire_6[7 : 0], cb_wire_5[7 : 0], cb_wire_4[7 : 0], cb_wire_3[7 : 0], cb_wire_2[7 : 0], cb_wire_1[7 : 0], cb_wire[7 : 0]};
 
 wire  [10*4-1:0] A1;
 wire  [10*4-1:0] B1;
@@ -123,19 +277,21 @@ wire             q7;
 wire             r7;
 
 stream_byte stream_byte1(
-                         .init(init)
-                        ,.sb  (sb[8*1-1:8*0])
-                        ,.Ai  (Ai)
-                        ,.Bi  (Bi)
-                        ,.Di  (Di)
-                        ,.Ei  (Ei)
-                        ,.Fi  (Fi)
-                        ,.Xi  (Xi)
-                        ,.Yi  (Yi)
-                        ,.Zi  (Zi)
-                        ,.pi  (pi)
-                        ,.qi  (qi)
-                        ,.ri  (ri)
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg)
+                        ,.sb  (sb_reg[8*1-1:8*0])
+                        ,.Ai  (Ai_reg)
+                        ,.Bi  (Bi_reg)
+                        ,.Di  (Di_reg)
+                        ,.Ei  (Ei_reg)
+                        ,.Fi  (Fi_reg)
+                        ,.Xi  (Xi_reg)
+                        ,.Yi  (Yi_reg)
+                        ,.Zi  (Zi_reg)
+                        ,.pi  (pi_reg)
+                        ,.qi  (qi_reg)
+                        ,.ri  (ri_reg)
                         ,.Ao  (A1)
                         ,.Bo  (B1)
                         ,.Do  (D1)
@@ -147,12 +303,14 @@ stream_byte stream_byte1(
                         ,.po  (p1)
                         ,.qo  (q1)
                         ,.ro  (r1)
-                        ,.op  (cb[8*1-1:8*0])                        
+                        ,.op  (cb_wire)                        
                 );
 
 stream_byte stream_byte2(
-                         .init(init)
-                        ,.sb  (sb[8*2-1:8*1])
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg_1)
+                        ,.sb  (sb_reg_1[8*2-1:8*1])
                         ,.Ai  (A1)
                         ,.Bi  (B1)
                         ,.Di  (D1)
@@ -175,12 +333,14 @@ stream_byte stream_byte2(
                         ,.po  (p2)
                         ,.qo  (q2)
                         ,.ro  (r2)
-                        ,.op  (cb[8*2-1:8*1])                        
+                        ,.op  (cb_wire_1)                        
                 );
 
 stream_byte stream_byte3(
-                         .init(init)
-                        ,.sb  (sb[8*3-1:8*2])
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg_2)
+                        ,.sb  (sb_reg_2[8*3-1:8*2])
                         ,.Ai  (A2)
                         ,.Bi  (B2)
                         ,.Di  (D2)
@@ -203,12 +363,14 @@ stream_byte stream_byte3(
                         ,.po  (p3)
                         ,.qo  (q3)
                         ,.ro  (r3)
-                        ,.op  (cb[8*3-1:8*2])                        
+                        ,.op  (cb_wire_2)                        
                 );
 
 stream_byte stream_byte4(
-                         .init(init)
-                        ,.sb  (sb[8*4-1:8*3])
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg_3)
+                        ,.sb  (sb_reg_3[8*4-1:8*3])
                         ,.Ai  (A3)
                         ,.Bi  (B3)
                         ,.Di  (D3)
@@ -231,12 +393,14 @@ stream_byte stream_byte4(
                         ,.po  (p4)
                         ,.qo  (q4)
                         ,.ro  (r4)
-                        ,.op  (cb[8*4-1:8*3])                        
+                        ,.op  (cb_wire_3)                        
                 );
 
 stream_byte stream_byte5(
-                         .init(init)
-                        ,.sb  (sb[8*5-1:8*4])
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg_4)
+                        ,.sb  (sb_reg_4[8*5-1:8*4])
                         ,.Ai  (A4)
                         ,.Bi  (B4)
                         ,.Di  (D4)
@@ -259,12 +423,14 @@ stream_byte stream_byte5(
                         ,.po  (p5)
                         ,.qo  (q5)
                         ,.ro  (r5)
-                        ,.op  (cb[8*5-1:8*4])                        
+                        ,.op  (cb_wire_4)                        
                 );
 
 stream_byte stream_byte6(
-                         .init(init)
-                        ,.sb  (sb[8*6-1:8*5])
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg_5)
+                        ,.sb  (sb_reg_5[8*6-1:8*5])
                         ,.Ai  (A5)
                         ,.Bi  (B5)
                         ,.Di  (D5)
@@ -287,12 +453,14 @@ stream_byte stream_byte6(
                         ,.po  (p6)
                         ,.qo  (q6)
                         ,.ro  (r6)
-                        ,.op  (cb[8*6-1:8*5])                        
+                        ,.op  (cb_wire_5)                        
                 );
 
 stream_byte stream_byte7(
-                         .init(init)
-                        ,.sb  (sb[8*7-1:8*6])
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg_6)
+                        ,.sb  (sb_reg_6[8*7-1:8*6])
                         ,.Ai  (A6)
                         ,.Bi  (B6)
                         ,.Di  (D6)
@@ -315,12 +483,14 @@ stream_byte stream_byte7(
                         ,.po  (p7)
                         ,.qo  (q7)
                         ,.ro  (r7)
-                        ,.op  (cb[8*7-1:8*6])                        
+                        ,.op  (cb_wire_6)                        
                 );
 
 stream_byte stream_bytes8(
-                         .init(init)
-                        ,.sb  (sb[8*8-1:8*7])
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg_7)
+                        ,.sb  (sb_reg_7[8*8-1:8*7])
                         ,.Ai  (A7)
                         ,.Bi  (B7)
                         ,.Di  (D7)
@@ -343,7 +513,7 @@ stream_byte stream_bytes8(
                         ,.po  (po)
                         ,.qo  (qo)
                         ,.ro  (ro)
-                        ,.op  (cb[8*8-1:8*7])                        
+                        ,.op  (cb_wire_7)                        
                 );
 
 endmodule

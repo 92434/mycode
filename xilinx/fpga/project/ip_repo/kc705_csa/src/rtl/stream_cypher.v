@@ -3,14 +3,30 @@
 
 // this file implement the stream cypher module
 
-module stream_cypher(sb,ck,cb);
+module stream_cypher(clk, rst_n, sb,ck,cb);
 //input                 clk;
 //input                 init;   // hi enable
 //input                 en;      // hi enable
+input clk;
+input rst_n;
 input  [8 *8-1:0]     ck;
 input  [8 *8-1:0]     sb;
 output [8 *8-1:0]     cb;
 
+reg [8 *8-1:0] ck_reg;
+reg [8 *8-1:0] sb_reg;
+//assign ck_reg = ck;
+//assign sb_reg = sb;
+always @(posedge clk) begin
+	if(rst_n == 0) begin
+		ck_reg <= 0;
+		sb_reg <= 0;
+	end
+	else begin
+		ck_reg <= ck;
+		sb_reg <= sb;
+	end
+end
 
 
 // intermediate variable
@@ -44,18 +60,18 @@ wire   [8 *8-1 : 0]cbo;
 //reg init0,init1;
 assign Ainit = { 
                 4'b0,         4'b0,
-        ck[7*4-1:6*4],ck[8*4-1:7*4], 
-        ck[5*4-1:4*4],ck[6*4-1:5*4], 
-        ck[3*4-1:2*4],ck[4*4-1:3*4], 
-        ck[1*4-1:0*4],ck[2*4-1:1*4] 
+        ck_reg[7*4-1:6*4],ck_reg[8*4-1:7*4], 
+        ck_reg[5*4-1:4*4],ck_reg[6*4-1:5*4], 
+        ck_reg[3*4-1:2*4],ck_reg[4*4-1:3*4], 
+        ck_reg[1*4-1:0*4],ck_reg[2*4-1:1*4] 
 };
 
 assign Binit = { 
                    4'b0,           4'b0,
-        ck[15*4-1:14*4],ck[16*4-1:15*4], 
-        ck[13*4-1:12*4],ck[14*4-1:13*4], 
-        ck[11*4-1:10*4],ck[12*4-1:11*4], 
-        ck[ 9*4-1: 8*4],ck[10*4-1: 9*4]
+        ck_reg[15*4-1:14*4],ck_reg[16*4-1:15*4], 
+        ck_reg[13*4-1:12*4],ck_reg[14*4-1:13*4], 
+        ck_reg[11*4-1:10*4],ck_reg[12*4-1:11*4], 
+        ck_reg[ 9*4-1: 8*4],ck_reg[10*4-1: 9*4]
 };
 /*
 always @(posedge clk)
@@ -68,8 +84,10 @@ begin
 end
 */
 stream_8bytes stream_8bytes_init(
-                        .init(1)
-                       ,.sb(sb)
+                         .clk(clk),
+                         .rst_n(rst_n),
+                        .init(1'b1)
+                       ,.sb(sb_reg)
                        ,.Ai(Ainit)
                        ,.Bi(Binit)
                        ,.Di(4'b0)
@@ -96,7 +114,9 @@ stream_8bytes stream_8bytes_init(
                        ,.cb()
                 );
 stream_8bytes stream_8bytes_calc(
-                        .init(0)
+                         .clk(clk),
+                         .rst_n(rst_n),
+                        .init(1'b0)
                        ,.sb()
                        ,.Ai(A)
                        ,.Bi(B)

@@ -4,11 +4,13 @@
 // this module do a stream_byte opertion
 
 
-module stream_byte(init,sb,
+module stream_byte(clk, rst_n, init,sb,
                                 Ai,Bi,Di,Ei,Fi,Xi,Yi,Zi,pi,qi,ri,
                                 Ao,Bo,Do,Eo,Fo,Xo,Yo,Zo,po,qo,ro,
                                 op
                   );
+input clk;
+input rst_n;
 input            init;
 input [7     :0] sb;
 
@@ -37,6 +39,67 @@ output            qo;
 output            ro;
 
 output[7     :0]  op;
+
+
+reg            init_reg;
+reg [7     :0] sb_reg;
+reg [10*4-1:0] Ai_reg;
+reg [10*4-1:0] Bi_reg;
+reg [3     :0] Di_reg;
+reg [3     :0] Ei_reg;
+reg [3     :0] Fi_reg;
+reg [3     :0] Xi_reg;
+reg [3     :0] Yi_reg;
+reg [3     :0] Zi_reg;
+reg            pi_reg;
+reg            qi_reg;
+reg            ri_reg;
+//assign init_reg = init;
+//assign sb_reg = sb;
+//assign Ai_reg = Ai;
+//assign Bi_reg = Bi;
+//assign Di_reg = Di;
+//assign Ei_reg = Ei;
+//assign Fi_reg = Fi;
+//assign Xi_reg = Xi;
+//assign Yi_reg = Yi;
+//assign Zi_reg = Zi;
+//assign pi_reg = pi;
+//assign qi_reg = qi;
+//assign ri_reg = ri;
+
+always @(posedge clk) begin
+	if(rst_n == 0) begin
+		init_reg <= 0;
+		sb_reg <= 0;
+		Ai_reg <= 0;
+		Bi_reg <= 0;
+		Di_reg <= 0;
+		Ei_reg <= 0;
+		Fi_reg <= 0;
+		Xi_reg <= 0;
+		Yi_reg <= 0;
+		Zi_reg <= 0;
+		pi_reg <= 0;
+		qi_reg <= 0;
+		ri_reg <= 0;
+	end
+	else begin
+		init_reg <= init;
+		sb_reg <= sb;
+		Ai_reg <= Ai;
+		Bi_reg <= Bi;
+		Di_reg <= Di;
+		Ei_reg <= Ei;
+		Fi_reg <= Fi;
+		Xi_reg <= Xi;
+		Yi_reg <= Yi;
+		Zi_reg <= Zi;
+		pi_reg <= pi;
+		qi_reg <= qi;
+		ri_reg <= ri;
+	end
+end
 
 // intermedate result;
 wire [10*4-1:0] A1;
@@ -80,24 +143,26 @@ wire [7     :0] _op;
 wire [3     :0] in1;
 wire [3     :0] in2;
 
-assign in1 = sb[7:4];
-assign in2 = sb[3:0];
+assign in1 = sb_reg[7:4];
+assign in2 = sb_reg[3:0];
 
 stream_iteration  stream_iteration1 (
-                         .init(init)
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg)
                         ,.in1 (in2)
                         ,.in2 (in1)
-                        ,.Ai  (Ai)
-                        ,.Bi  (Bi)
-                        ,.Di  (Di)
-                        ,.Ei  (Ei)
-                        ,.Fi  (Fi)
-                        ,.Xi  (Xi)
-                        ,.Yi  (Yi)
-                        ,.Zi  (Zi)
-                        ,.pi  (pi)
-                        ,.qi  (qi)
-                        ,.ri  (ri)
+                        ,.Ai  (Ai_reg)
+                        ,.Bi  (Bi_reg)
+                        ,.Di  (Di_reg)
+                        ,.Ei  (Ei_reg)
+                        ,.Fi  (Fi_reg)
+                        ,.Xi  (Xi_reg)
+                        ,.Yi  (Yi_reg)
+                        ,.Zi  (Zi_reg)
+                        ,.pi  (pi_reg)
+                        ,.qi  (qi_reg)
+                        ,.ri  (ri_reg)
                         ,.Ao  (A1)
                         ,.Bo  (B1)
                         ,.Do  (D1)
@@ -113,7 +178,9 @@ stream_iteration  stream_iteration1 (
                         );
 
 stream_iteration  stream_iteration2 (
-                         .init(init)
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg)
                         ,.in1 (in1)
                         ,.in2 (in2)
                         ,.Ai  (A1)
@@ -142,7 +209,9 @@ stream_iteration  stream_iteration2 (
                         );
 
 stream_iteration  stream_iteration3 (
-                         .init(init)
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg)
                         ,.in1 (in2)
                         ,.in2 (in1)
                         ,.Ai  (A2)
@@ -171,7 +240,9 @@ stream_iteration  stream_iteration3 (
                         );
 
 stream_iteration  stream_iteration4 (
-                         .init(init)
+                         .clk(clk),
+                         .rst_n(rst_n),
+                         .init(init_reg)
                         ,.in1 (in1)
                         ,.in2 (in2)
                         ,.Ai  (A3)
@@ -199,5 +270,5 @@ stream_iteration  stream_iteration4 (
                         ,.op  (_op[1:0])
                         );
 
-assign op=(init)?sb:_op;
+assign op = (init_reg) ? sb_reg :_op;
 endmodule
