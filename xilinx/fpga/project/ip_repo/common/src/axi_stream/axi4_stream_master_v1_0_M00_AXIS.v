@@ -83,11 +83,10 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	wire axis_tlast;
 
 	//The master has issued all the streaming data stored in FIFO
-	wire tx_done;
+	//reg tx_done = 0;
 
 	wire [C_M_AXIS_TDATA_WIDTH - 1 : 0] rdata;
 	//reg [C_M_AXIS_TDATA_WIDTH - 1 : 0] rdata_R = 0;
-	wire read_enable;
 
 	// I/O Connections assignments
 
@@ -97,16 +96,14 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	assign M_AXIS_TLAST = axis_tlast;
 	assign M_AXIS_TSTRB = {(C_M_AXIS_TDATA_WIDTH / 8){1'b1}};
 
-	reg ren = 0;
+	wire ren;
 	// Control state machine implementation
 	always @(posedge M_AXIS_ACLK) begin
 		// Synchronous reset (active low)
 		if (!M_AXIS_ARESETN) begin
 			mst_exec_state <= IDLE;
-			ren <= 0;
 		end
 		else begin
-			ren <= 0;
 			case (mst_exec_state)
 				// The slave starts accepting tdata when
 				// there tvalid is asserted to mark the
@@ -126,7 +123,6 @@ module axi4_stream_master_v1_0_M00_AXIS #
 				INIT_COUNTER: begin
 					if(count == C_M_START_COUNT - 1) begin
 						mst_exec_state <= SEND_STREAM;
-						ren <= 1;
 					end
 					else begin
 						count <= count + 1;
@@ -138,15 +134,10 @@ module axi4_stream_master_v1_0_M00_AXIS #
 					// The example design streaming master functionality starts
 					// when the master drives output tdata from the FIFO and the slave
 					// has finished storing the S_AXIS_TDATA
-					if(tx_done == 1) begin
+					if(axis_tlast == 1) begin
 						mst_exec_state <= IDLE;
 					end
 					else begin
-						if(M_AXIS_TREADY == 1) begin
-							ren <= 1;
-						end
-
-						mst_exec_state <= SEND_STREAM;
 					end
 				end
 				default: begin
@@ -159,14 +150,13 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	//tvalid generation
 	//axis_tvalid is asserted when the control state machine's state is SEND_STREAM and
 	//number of output streaming data is less than the NUMBER_OF_OUTPUT_WORDS.
-	assign axis_tvalid = ((mst_exec_state == SEND_STREAM) && (read_pointer < NUMBER_OF_OUTPUT_WORDS)) ? 1 : 0;
+	assign axis_tvalid = (mst_exec_state == SEND_STREAM) ? 1 : 0;
+	assign ren = (axis_tvalid == 1 && M_AXIS_TREADY == 1) ? 1 : 0;
 
 	// AXI tlast generation
 	// axis_tlast is asserted number of output streaming data is NUMBER_OF_OUTPUT_WORDS - 1
 	// (0 to NUMBER_OF_OUTPUT_WORDS - 1)
-	assign axis_tlast = (read_pointer == NUMBER_OF_OUTPUT_WORDS - 1) ? 1 : 0;
-
-	assign tx_done = (read_pointer == NUMBER_OF_OUTPUT_WORDS - 1) ? 1 : 0;
+	assign axis_tlast = (ren == 1 && read_pointer == NUMBER_OF_OUTPUT_WORDS - 1) ? 1 : 0;
 
 	//read_pointer pointer
 	always@(posedge M_AXIS_ACLK) begin

@@ -1,8 +1,8 @@
 `timescale 1ns / 1ns
 
 module tb #(
-		parameter integer NUMBER_OF_OUTPUT_WORDS = 5,
-		parameter integer NUMBER_OF_INPUT_WORDS = 5,
+		parameter integer NUMBER_OF_OUTPUT_WORDS = 14,
+		parameter integer NUMBER_OF_INPUT_WORDS = 3,
 
 		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
 		parameter integer C_M00_AXIS_START_COUNT = 1,
@@ -19,11 +19,12 @@ module tb #(
 
 	//send ts
 	reg [C_M00_AXIS_TDATA_WIDTH - 1 : 0] index = 0;
-	reg [C_M00_AXIS_TDATA_WIDTH - 1 : 0] count = 2;
+	reg [C_M00_AXIS_TDATA_WIDTH - 1 : 0] count = 1;
 
 	always @(posedge wclk) begin
 		if(m00_axis_aresetn == 0) begin
 			index <= 0;
+			count <= 1;
 		end
 		else begin
 			wen <= 0;
@@ -98,6 +99,7 @@ module tb #(
 			case(state)
 				0: begin
 					if(r_ready_slave == 1) begin
+						ren <= 1;
 						state <= 1;
 						rcount <= 0;
 					end
@@ -105,8 +107,7 @@ module tb #(
 					end
 				end
 				1: begin
-					if((rcount >= 0) && (rcount <= 5 - 1)) begin
-						ren <= 1;
+					if((rcount >= 0) && (rcount < 2 - 1)) begin
 						rcount <= rcount + 1;
 					end
 					else begin

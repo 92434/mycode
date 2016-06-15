@@ -51,7 +51,7 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	// Total number of input data.
 	//localparam NUMBER_OF_INPUT_WORDS = 16;
 	// bit_num gives the minimum number of bits needed to address 'NUMBER_OF_INPUT_WORDS' size of FIFO.
-	localparam bit_num = clogb2(NUMBER_OF_INPUT_WORDS - 1);
+	localparam bit_num = clogb2(NUMBER_OF_INPUT_WORDS);
 	// Define the states of state machine
 	// The control state machine oversees the writing of input streaming data to the FIFO,
 	// and outputs the streaming data from the FIFO
@@ -72,24 +72,19 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	assign S_AXIS_TREADY = axis_tready;
 
 
-	reg wen = 0;
 	// Control state machine implementation
 	always @(posedge S_AXIS_ACLK) begin
 		// Synchronous reset (active low)
 		if (!S_AXIS_ARESETN) begin
 			mst_exec_state <= IDLE;
-			wen <= 0;
 		end
 		else begin
-			wen <= 0;
 			case (mst_exec_state)
 				IDLE: begin
 					// The sink starts accepting tdata when 
 					// there tvalid is asserted to mark the
 					// presence of valid streaming data 
 					if (S_AXIS_TVALID) begin
-						wen <= 1;
-
 						mst_exec_state <= WRITE_FIFO;
 					end
 					else begin
@@ -99,17 +94,10 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 				WRITE_FIFO: begin
 					// When the sink has accepted all the streaming input data,
 					// the interface swiches functionality to a streaming master
-					if (writes_done) begin
+					if(writes_done == 1) begin
 						mst_exec_state <= IDLE;
 					end
 					else begin
-						if(S_AXIS_TVALID == 1) begin
-							wen <= 1;
-						end
-
-						// The sink accepts and stores tdata 
-						// into FIFO
-						mst_exec_state <= WRITE_FIFO;
 					end
 				end
 				default: begin
@@ -122,9 +110,28 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	// 
 	// The example design sink is always ready to accept the S_AXIS_TDATA until
 	// the FIFO is not filled with NUMBER_OF_INPUT_WORDS number of input words.
-	assign axis_tready = ((mst_exec_state == WRITE_FIFO) && (write_pointer < NUMBER_OF_INPUT_WORDS));
+	
+	reg r_ready_reg = 0;
+	always @(posedge S_AXIS_ACLK) begin
+		if(S_AXIS_ARESETN == 0) begin
+			r_ready_reg <= 1;
+		end
+		else begin
+			r_ready_reg <= r_ready;
+		end
+	end
 
-	assign writes_done = ((write_pointer == NUMBER_OF_INPUT_WORDS - 1) || (S_AXIS_TLAST == 1)) ? 1 : 0;
+	wire r_ready_use;
+	assign r_ready_use = (r_ready == 0 && r_ready_reg == 0) ? 0 : 1;
+
+	assign axis_tready = ((S_AXIS_TVALID == 1) && (mst_exec_state == WRITE_FIFO) && (r_ready_use == 0));
+
+	wire wen;
+	assign wen = axis_tready;
+
+	wire s_axis_wlast;
+	assign s_axis_wlast = (wen == 1 && write_pointer == (NUMBER_OF_INPUT_WORDS - 1)) ? 1 : 0;
+	assign writes_done = ((s_axis_wlast == 1) || (S_AXIS_TLAST == 1)) ? 1 : 0;
 
 	always@(posedge S_AXIS_ACLK) begin
 		if(!S_AXIS_ARESETN) begin
