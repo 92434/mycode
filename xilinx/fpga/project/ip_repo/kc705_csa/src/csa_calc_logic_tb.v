@@ -53,7 +53,7 @@ module csa_calc_logic_tb #(
 	wire fifo_ren;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start = 0;
 
@@ -82,7 +82,7 @@ module csa_calc_logic_tb #(
 	end
 
 	wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_o;
-	wire [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_o;//used for ck_processer init
+	wire [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_o;//used for ck_processer init
 	wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_o;
 	wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_o;
 	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_calc_logic_out;

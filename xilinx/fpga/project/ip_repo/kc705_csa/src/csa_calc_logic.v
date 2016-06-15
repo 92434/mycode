@@ -16,13 +16,13 @@ module csa_calc_logic #(
 		output reg fifo_ren = 0,
 
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block,
-		input wire [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in,//used for ck_processer
+		input wire [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in,//used for ck_processer
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times,
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start,
 
 		output reg csa_calc_logic_ready = 0,
 		output reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_o = 0,
-		output reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_o = 0,//used for ck_processer init
+		output reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_o = 0,//used for ck_processer init
 		output reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_o = 0,
 		output reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_o = 0,
 		output reg [CSA_CALC_OUT_WIDTH - 1 : 0] csa_calc_logic_out = 0
@@ -68,29 +68,29 @@ module csa_calc_logic #(
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_reg_21 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_reg_22 = 0;
 
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_1 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_2 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_3 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_4 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_5 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_6 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_7 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_8 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_9 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_10 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_11 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_12 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_13 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_14 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_15 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_16 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_17 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_18 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_19 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_20 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_21 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_22 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_1 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_2 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_3 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_4 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_5 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_6 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_7 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_8 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_9 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_10 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_11 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_12 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_13 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_14 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_15 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_16 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_17 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_18 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_19 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_20 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_21 = 0;
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_reg_22 = 0;
 
 	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg_1 = 0;
