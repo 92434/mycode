@@ -17,14 +17,12 @@ module csa_calc_logic #(
 
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block,
 		input wire [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in,//used for ck_processer
-		input wire [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in,
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times,
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start,
 
 		output reg csa_calc_logic_ready = 0,
 		output reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_o = 0,
 		output reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_o = 0,//used for ck_processer init
-		output reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_o = 0,
 		output reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_o = 0,
 		output reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_o = 0,
 		output reg [CSA_CALC_OUT_WIDTH - 1 : 0] csa_calc_logic_out = 0
@@ -41,8 +39,8 @@ module csa_calc_logic #(
 		end
 	end
 
-	reg fifo_ready_reg_20 = 0;
 	reg fifo_ready_reg_21 = 0;
+	reg fifo_ready_reg_22 = 0;
 
 	wire [CYPHER_DATA_WIDTH - 1 : 0] cb_out;
 
@@ -68,6 +66,7 @@ module csa_calc_logic #(
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_reg_19 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_reg_20 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_reg_21 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_reg_22 = 0;
 
 	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_1 = 0;
@@ -91,29 +90,7 @@ module csa_calc_logic #(
 	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_19 = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_20 = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_21 = 0;
-
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_1 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_2 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_3 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_4 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_5 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_6 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_7 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_8 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_9 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_10 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_11 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_12 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_13 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_14 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_15 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_16 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_17 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_18 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_19 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_20 = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_reg_21 = 0;
+	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_reg_22 = 0;
 
 	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg_1 = 0;
@@ -137,6 +114,7 @@ module csa_calc_logic #(
 	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg_19 = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg_20 = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg_21 = 0;
+	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg_22 = 0;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_reg = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_reg_1 = 0;
@@ -160,6 +138,7 @@ module csa_calc_logic #(
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_reg_19 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_reg_20 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_reg_21 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_reg_22 = 0;
 
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_left_reg = 0;
@@ -184,7 +163,7 @@ module csa_calc_logic #(
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_left_reg_19 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_left_reg_20 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_left_reg_21 = 0;
-
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_left_reg_22 = 0;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_reg = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_reg_1 = 0;
@@ -208,17 +187,16 @@ module csa_calc_logic #(
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_reg_19 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_reg_20 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_reg_21 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_reg_22 = 0;
 
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
-			fifo_ready_reg_20 <= 0;
 			fifo_ready_reg_21 <= 0;
+			fifo_ready_reg_22 <= 0;
 
 			fifo_ren <= 0;
 
 			csa_calc_logic_ready <= 0;
-
-			csa_calc_logic_cb_in_o <= 0;
 
 			csa_calc_logic_block_o <= 0;
 
@@ -252,6 +230,7 @@ module csa_calc_logic #(
 			csa_calc_logic_block_reg_19 <= 0;
 			csa_calc_logic_block_reg_20 <= 0;
 			csa_calc_logic_block_reg_21 <= 0;
+			csa_calc_logic_block_reg_22 <= 0;
 
 			csa_calc_logic_in_reg <= 0;
 			csa_calc_logic_in_reg_1 <= 0;
@@ -275,29 +254,7 @@ module csa_calc_logic #(
 			csa_calc_logic_in_reg_19 <= 0;
 			csa_calc_logic_in_reg_20 <= 0;
 			csa_calc_logic_in_reg_21 <= 0;
-
-			csa_calc_logic_cb_in_reg <= 0;
-			csa_calc_logic_cb_in_reg_1 <= 0;
-			csa_calc_logic_cb_in_reg_2 <= 0;
-			csa_calc_logic_cb_in_reg_3 <= 0;
-			csa_calc_logic_cb_in_reg_4 <= 0;
-			csa_calc_logic_cb_in_reg_5 <= 0;
-			csa_calc_logic_cb_in_reg_6 <= 0;
-			csa_calc_logic_cb_in_reg_7 <= 0;
-			csa_calc_logic_cb_in_reg_8 <= 0;
-			csa_calc_logic_cb_in_reg_9 <= 0;
-			csa_calc_logic_cb_in_reg_10 <= 0;
-			csa_calc_logic_cb_in_reg_11 <= 0;
-			csa_calc_logic_cb_in_reg_12 <= 0;
-			csa_calc_logic_cb_in_reg_13 <= 0;
-			csa_calc_logic_cb_in_reg_14 <= 0;
-			csa_calc_logic_cb_in_reg_15 <= 0;
-			csa_calc_logic_cb_in_reg_16 <= 0;
-			csa_calc_logic_cb_in_reg_17 <= 0;
-			csa_calc_logic_cb_in_reg_18 <= 0;
-			csa_calc_logic_cb_in_reg_19 <= 0;
-			csa_calc_logic_cb_in_reg_20 <= 0;
-			csa_calc_logic_cb_in_reg_21 <= 0;
+			csa_calc_logic_in_reg_22 <= 0;
 
 			cb_out_reg <= 0;
 			cb_out_reg_1 <= 0;
@@ -321,6 +278,7 @@ module csa_calc_logic #(
 			cb_out_reg_19 <= 0;
 			cb_out_reg_20 <= 0;
 			cb_out_reg_21 <= 0;
+			cb_out_reg_22 <= 0;
 
 			csa_calc_logic_times_reg <= 0;
 			csa_calc_logic_times_reg_1 <= 0;
@@ -344,6 +302,7 @@ module csa_calc_logic #(
 			csa_calc_logic_times_reg_19 <= 0;
 			csa_calc_logic_times_reg_20 <= 0;
 			csa_calc_logic_times_reg_21 <= 0;
+			csa_calc_logic_times_reg_22 <= 0;
 
 			csa_calc_logic_times_left_reg <= 0;
 			csa_calc_logic_times_left_reg_1 <= 0;
@@ -367,6 +326,7 @@ module csa_calc_logic #(
 			csa_calc_logic_times_left_reg_19 <= 0;
 			csa_calc_logic_times_left_reg_20 <= 0;
 			csa_calc_logic_times_left_reg_21 <= 0;
+			csa_calc_logic_times_left_reg_22 <= 0;
 
 			csa_calc_logic_times_start_reg <= 0;
 			csa_calc_logic_times_start_reg_1 <= 0;
@@ -390,10 +350,11 @@ module csa_calc_logic #(
 			csa_calc_logic_times_start_reg_19 <= 0;
 			csa_calc_logic_times_start_reg_20 <= 0;
 			csa_calc_logic_times_start_reg_21 <= 0;
+			csa_calc_logic_times_start_reg_22 <= 0;
 		end
 		else begin
-			fifo_ready_reg_20 <= fifo_ready;
-			fifo_ready_reg_21 <= fifo_ready_reg_20;
+			fifo_ready_reg_21 <= fifo_ready;
+			fifo_ready_reg_22 <= fifo_ready_reg_21;
 
 			fifo_ren <= 0;
 
@@ -421,6 +382,7 @@ module csa_calc_logic #(
 			csa_calc_logic_block_reg_19 <= csa_calc_logic_block_reg_18;
 			csa_calc_logic_block_reg_20 <= csa_calc_logic_block_reg_19;
 			csa_calc_logic_block_reg_21 <= csa_calc_logic_block_reg_20;
+			csa_calc_logic_block_reg_22 <= csa_calc_logic_block_reg_21;
 
 			csa_calc_logic_in_reg <= csa_calc_logic_in;
 			csa_calc_logic_in_reg_1 <= csa_calc_logic_in_reg;
@@ -444,31 +406,9 @@ module csa_calc_logic #(
 			csa_calc_logic_in_reg_19 <= csa_calc_logic_in_reg_18;
 			csa_calc_logic_in_reg_20 <= csa_calc_logic_in_reg_19;
 			csa_calc_logic_in_reg_21 <= csa_calc_logic_in_reg_20;
+			csa_calc_logic_in_reg_22 <= csa_calc_logic_in_reg_21;
 
-			csa_calc_logic_cb_in_reg <= csa_calc_logic_cb_in;
-			csa_calc_logic_cb_in_reg_1 <= csa_calc_logic_cb_in_reg;
-			csa_calc_logic_cb_in_reg_2 <= csa_calc_logic_cb_in_reg_1;
-			csa_calc_logic_cb_in_reg_3 <= csa_calc_logic_cb_in_reg_2;
-			csa_calc_logic_cb_in_reg_4 <= csa_calc_logic_cb_in_reg_3;
-			csa_calc_logic_cb_in_reg_5 <= csa_calc_logic_cb_in_reg_4;
-			csa_calc_logic_cb_in_reg_6 <= csa_calc_logic_cb_in_reg_5;
-			csa_calc_logic_cb_in_reg_7 <= csa_calc_logic_cb_in_reg_6;
-			csa_calc_logic_cb_in_reg_8 <= csa_calc_logic_cb_in_reg_7;
-			csa_calc_logic_cb_in_reg_9 <= csa_calc_logic_cb_in_reg_8;
-			csa_calc_logic_cb_in_reg_10 <= csa_calc_logic_cb_in_reg_9;
-			csa_calc_logic_cb_in_reg_11 <= csa_calc_logic_cb_in_reg_10;
-			csa_calc_logic_cb_in_reg_12 <= csa_calc_logic_cb_in_reg_11;
-			csa_calc_logic_cb_in_reg_13 <= csa_calc_logic_cb_in_reg_12;
-			csa_calc_logic_cb_in_reg_14 <= csa_calc_logic_cb_in_reg_13;
-			csa_calc_logic_cb_in_reg_15 <= csa_calc_logic_cb_in_reg_14;
-			csa_calc_logic_cb_in_reg_16 <= csa_calc_logic_cb_in_reg_15;
-			csa_calc_logic_cb_in_reg_17 <= csa_calc_logic_cb_in_reg_16;
-			csa_calc_logic_cb_in_reg_18 <= csa_calc_logic_cb_in_reg_17;
-			csa_calc_logic_cb_in_reg_19 <= csa_calc_logic_cb_in_reg_18;
-			csa_calc_logic_cb_in_reg_20 <= csa_calc_logic_cb_in_reg_19;
-			csa_calc_logic_cb_in_reg_21 <= csa_calc_logic_cb_in_reg_20;
-
-			cb_out_reg <= csa_calc_logic_cb_in;//entry
+			cb_out_reg <= csa_calc_logic_in_reg;//entry
 			cb_out_reg_1 <= cb_out_reg;
 			cb_out_reg_2 <= cb_out_reg_1;
 			cb_out_reg_3 <= cb_out_reg_2;
@@ -490,7 +430,8 @@ module csa_calc_logic #(
 			cb_out_reg_19 <= cb_out_reg_18;
 			cb_out_reg_20 <= cb_out_reg_19;
 			cb_out_reg_21 <= cb_out_reg_20;
-			//cb_out_reg_21 -->result
+			cb_out_reg_22 <= cb_out_reg_21;
+			//cb_out_reg_22 -->result
 
 			csa_calc_logic_times_reg <= csa_calc_logic_times;//entry
 			csa_calc_logic_times_reg_1 <= csa_calc_logic_times_reg;
@@ -514,6 +455,7 @@ module csa_calc_logic #(
 			csa_calc_logic_times_reg_19 <= csa_calc_logic_times_reg_18;
 			csa_calc_logic_times_reg_20 <= csa_calc_logic_times_reg_19;
 			csa_calc_logic_times_reg_21 <= csa_calc_logic_times_reg_20;
+			csa_calc_logic_times_reg_22 <= csa_calc_logic_times_reg_21;
 
 			csa_calc_logic_times_start_reg <= csa_calc_logic_times_start;
 			csa_calc_logic_times_start_reg_1 <= csa_calc_logic_times_start_reg;
@@ -537,6 +479,7 @@ module csa_calc_logic #(
 			csa_calc_logic_times_start_reg_19 <= csa_calc_logic_times_start_reg_18;
 			csa_calc_logic_times_start_reg_20 <= csa_calc_logic_times_start_reg_19;
 			csa_calc_logic_times_start_reg_21 <= csa_calc_logic_times_start_reg_20;
+			csa_calc_logic_times_start_reg_22 <= csa_calc_logic_times_start_reg_21;
 
 			csa_calc_logic_times_left_reg <= csa_calc_logic_times - csa_calc_logic_times_start;//entry
 			csa_calc_logic_times_left_reg_1 <= csa_calc_logic_times_left_reg;
@@ -560,6 +503,7 @@ module csa_calc_logic #(
 			csa_calc_logic_times_left_reg_19 <= csa_calc_logic_times_left_reg_18;
 			csa_calc_logic_times_left_reg_20 <= csa_calc_logic_times_left_reg_19;
 			csa_calc_logic_times_left_reg_21 <= csa_calc_logic_times_left_reg_20;
+			csa_calc_logic_times_left_reg_22 <= csa_calc_logic_times_left_reg_21;
 
 			if(csa_calc_logic_times_left_reg > 0) begin
 				csa_calc_logic_times_left_reg_1 <= csa_calc_logic_times_left_reg - 1;
@@ -567,7 +511,7 @@ module csa_calc_logic #(
 			else begin
 			end
 
-			if(csa_calc_logic_times_left_reg_19 <= 0) begin
+			if(csa_calc_logic_times_left_reg_20 <= 0) begin
 				if(fifo_ready == 1) begin//data is ready
 					fifo_ren <= 1;
 				end
@@ -577,35 +521,32 @@ module csa_calc_logic #(
 			else begin
 			end
 
-			if(csa_calc_logic_times_reg_21 > 0) begin
-				if(csa_calc_logic_times_left_reg_21 > 0) begin
-					csa_calc_logic_block_reg <= csa_calc_logic_block_reg_21;
-					csa_calc_logic_in_reg <= csa_calc_logic_in_reg_21;
-					csa_calc_logic_cb_in_reg <= csa_calc_logic_cb_in_reg_21;
-					csa_calc_logic_times_reg <= csa_calc_logic_times_reg_21;
-					csa_calc_logic_times_start_reg <= csa_calc_logic_times_start_reg_21;
-					csa_calc_logic_times_left_reg <= csa_calc_logic_times_left_reg_21;
+			if(csa_calc_logic_times_reg_22 > 0) begin
+				if(csa_calc_logic_times_left_reg_22 > 0) begin
+					csa_calc_logic_block_reg <= csa_calc_logic_block_reg_22;
+					csa_calc_logic_in_reg <= csa_calc_logic_in_reg_22;
+					csa_calc_logic_times_reg <= csa_calc_logic_times_reg_22;
+					csa_calc_logic_times_start_reg <= csa_calc_logic_times_start_reg_22;
+					csa_calc_logic_times_left_reg <= csa_calc_logic_times_left_reg_22;
 					//cb_out_reg <= cb_out;//for debug
-					cb_out_reg <= cb_out_reg_21;//for debug
+					cb_out_reg <= cb_out_reg_22;//for debug
 				end
 				else begin//loop over? out!!!
 					csa_calc_logic_ready <= 1;
-					csa_calc_logic_block_o <= csa_calc_logic_block_reg_21;
-					csa_calc_logic_in_o <= csa_calc_logic_in_reg_21;
-					csa_calc_logic_cb_in_o <= cb_out_reg_21;
-					csa_calc_logic_times_o <= csa_calc_logic_times_reg_21;
-					csa_calc_logic_times_start_o <= csa_calc_logic_times_start_reg_21;
+					csa_calc_logic_block_o <= csa_calc_logic_block_reg_22;
+					csa_calc_logic_in_o <= csa_calc_logic_in_reg_22;
+					csa_calc_logic_times_o <= csa_calc_logic_times_reg_22;
+					csa_calc_logic_times_start_o <= csa_calc_logic_times_start_reg_22;
 					csa_calc_logic_out <= cb_out;
 				end
 			end
 			else begin
 			end
 
-			if(csa_calc_logic_times_left_reg_21 <= 0) begin
-				if(fifo_ready_reg_21 == 0) begin//data is not ready
+			if(csa_calc_logic_times_left_reg_22 <= 0) begin
+				if(fifo_ready_reg_22 == 0) begin//data is not ready
 					csa_calc_logic_block_reg <= 0;
 					csa_calc_logic_in_reg <= 0;
-					csa_calc_logic_cb_in_reg <= 0;
 					csa_calc_logic_times_reg <= 0;
 					csa_calc_logic_times_start_reg <= 0;
 					csa_calc_logic_times_left_reg <= 0;
@@ -633,7 +574,7 @@ module csa_calc_logic #(
 	//	) ck_processer_inst(
 	//		.init(init);
 	//		.in(csa_calc_logic_in_reg),
-	//		.cb(cb_out_reg),//first time use csa_calc_logic_cb_in
+	//		.cb(cb_out_reg),
 	//		.loops(loops),
 
 	//		.ck_out(ck_out)

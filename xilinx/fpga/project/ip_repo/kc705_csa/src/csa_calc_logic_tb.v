@@ -54,7 +54,6 @@ module csa_calc_logic_tb #(
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in = 0;
-	reg [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start = 0;
 
@@ -62,7 +61,6 @@ module csa_calc_logic_tb #(
 		if(rst_n == 0) begin
 			csa_calc_logic_block <= 0;
 			csa_calc_logic_in <= 0;
-			csa_calc_logic_cb_in <= 0;
 			csa_calc_logic_times <= 0;
 			csa_calc_logic_times_start <= 0;
 		end
@@ -70,13 +68,13 @@ module csa_calc_logic_tb #(
 			if(fifo_ready_reg == 1 && fifo_ren == 1) begin
 				csa_calc_logic_block <= csa_calc_logic_block + 1;
 				csa_calc_logic_in <= csa_calc_logic_in + 1;
-				csa_calc_logic_cb_in <= csa_calc_logic_cb_in + 1;
-				csa_calc_logic_times <= csa_calc_logic_times + 1;
-				if(csa_calc_logic_times > 5) begin
-					csa_calc_logic_times_start <= 5;
-				end
-				else begin
-				end
+				//csa_calc_logic_times <= csa_calc_logic_times + 1;
+				csa_calc_logic_times <= 1;
+				//if(csa_calc_logic_times > 5) begin
+				//	csa_calc_logic_times_start <= 5;
+				//end
+				//else begin
+				//end
 			end
 			else begin
 			end
@@ -85,7 +83,6 @@ module csa_calc_logic_tb #(
 
 	wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_o;
 	wire [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_in_o;//used for ck_processer init
-	wire [CYPHER_DATA_WIDTH - 1 : 0] csa_calc_logic_cb_in_o;
 	wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_o;
 	wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_o;
 	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_calc_logic_out;
@@ -104,14 +101,12 @@ module csa_calc_logic_tb #(
 
 			.csa_calc_logic_block(csa_calc_logic_block),
 			.csa_calc_logic_in(csa_calc_logic_in),
-			.csa_calc_logic_cb_in(csa_calc_logic_cb_in),
 			.csa_calc_logic_times(csa_calc_logic_times),
 			.csa_calc_logic_times_start(csa_calc_logic_times_start),
 
 			.csa_calc_logic_ready(csa_calc_logic_ready),
 			.csa_calc_logic_block_o(csa_calc_logic_block_o),
 			.csa_calc_logic_in_o(csa_calc_logic_in_o),
-			.csa_calc_logic_cb_in_o(csa_calc_logic_cb_in_o),
 			.csa_calc_logic_times_o(csa_calc_logic_times_o),
 			.csa_calc_logic_times_start_o(csa_calc_logic_times_start_o),
 			.csa_calc_logic_out(csa_calc_logic_out)
