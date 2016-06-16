@@ -4,8 +4,7 @@ module csa_calc_logic_tb #(
 		parameter integer AXI_DATA_WIDTH = 32,
 
 		parameter integer CYPHER_DATA_WIDTH = 8 * 8,
-		parameter integer CSA_CALC_IN_WIDTH = 8 * 5,
-		//parameter integer CSA_CALC_OUT_WIDTH = 8 * 6
+		parameter integer CSA_CALC_IN_WIDTH = 8 * 6,
 		parameter integer CSA_CALC_OUT_WIDTH = 8 * 8
 	)
 	(

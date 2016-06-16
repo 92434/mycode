@@ -4,10 +4,14 @@ module csa_ram_tb #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
 
-
 		parameter integer CSA_CALC_INST_NUM = 4,
-		parameter integer CSA_CALC_IN_WIDTH = 8 * 5,
-		parameter integer CSA_CALC_OUT_WIDTH = 8 * 6
+
+		parameter integer CYPHER_DATA_WIDTH = 8 * 8,
+		parameter integer CSA_CALC_IN_WIDTH = 8 * 6,
+		parameter integer CSA_CALC_OUT_WIDTH = 8 * 8,
+
+		parameter integer CSA_IN_PARAMETER_LENGTH = C_S_AXI_DATA_WIDTH * 5,
+		parameter integer CSA_OUT_PARAMETER_LENGTH = C_S_AXI_DATA_WIDTH * 7
 	)
 	(
 	);
@@ -39,12 +43,11 @@ module csa_ram_tb #(
 	wire csa_in_r_ready;//input
 	wire csa_in_rclk;//output
 	wire csa_in_ren;//output
-	wire [CSA_CALC_IN_WIDTH - 1 : 0] csa_in_rdata;//input
-
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] csa_in_rdata;//input
 
 	wire csa_in_wclk;
 	assign csa_in_wclk = axi_mm_clk;
-	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_in_wdata = 40'h1234567890;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_in_wdata = 0;
 	reg csa_in_wen = 0;
 	wire csa_in_error_full;
 	wire csa_in_error_empty;
@@ -71,17 +74,19 @@ module csa_ram_tb #(
 	wire csa_out_wclk;//output
 	wire csa_out_wen;//output
 	wire [CSA_CALC_OUT_WIDTH - 1 : 0] csa_out_wdata;//output
-	wire axis_m_r_ready;
-
-	assign axis_m_r_ready = 1;
 
 	csa_ram #(
-			.C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
+			.AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
 			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
 
 			.CSA_CALC_INST_NUM(CSA_CALC_INST_NUM),
+
+			.CYPHER_DATA_WIDTH(CYPHER_DATA_WIDTH),
 			.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
-			.CSA_CALC_OUT_WIDTH(CSA_CALC_OUT_WIDTH)
+			.CSA_CALC_OUT_WIDTH(CSA_CALC_OUT_WIDTH),
+
+			.CSA_IN_PARAMETER_LENGTH(CSA_IN_PARAMETER_LENGTH),
+			.CSA_OUT_PARAMETER_LENGTH(CSA_OUT_PARAMETER_LENGTH)
 		) csa_ram_inst(
 			.axi_mm_clk(axi_mm_clk),
 			.rst_n(rst_n),
@@ -105,15 +110,21 @@ module csa_ram_tb #(
 			.csa_out_error_full(csa_out_error_full),
 			.csa_out_wclk(csa_out_wclk),
 			.csa_out_wen(csa_out_wen),
-			.csa_out_wdata(csa_out_wdata),
-
-			.axis_m_r_ready(axis_m_r_ready)
+			.csa_out_wdata(csa_out_wdata)
 		);
 
-	localparam integer ADDR_CSA_BUSY = 0;
-	localparam integer ADDR_CSA_READY = ADDR_CSA_BUSY + 1;
+	always @(posedge csa_in_wclk) begin
+		if(rst_n == 0) begin
+			csa_in_wen <= 0;
+			csa_in_wdata <= 0;
+		end
+		else begin
+			csa_in_wen <= 0;
+			csa_in_wdata <= 0;
+		end
+	end
 
-	localparam integer ADDR_CHANNEL_INDEX = ADDR_CSA_READY + 1;
+	localparam integer ADDR_CHANNEL_INDEX = 0;
 
 	localparam integer ADDR_IN_DATA_VALID = ADDR_CHANNEL_INDEX + 1;
 	localparam integer ADDR_IN_DATA_0 = ADDR_IN_DATA_VALID + 1;
@@ -126,8 +137,10 @@ module csa_ram_tb #(
 	localparam integer ADDR_OUT_DATA_0 = ADDR_OUT_DATA_VALID + 1;
 	localparam integer ADDR_OUT_DATA_1 = ADDR_OUT_DATA_0 + 1;
 	localparam integer ADDR_OUT_DATA_2 = ADDR_OUT_DATA_1 + 1;
-
-	localparam integer ADDR_CALC_TIMES = ADDR_OUT_DATA_2 + 1;
+	localparam integer ADDR_OUT_DATA_3 = ADDR_OUT_DATA_2 + 1;
+	localparam integer ADDR_OUT_DATA_4 = ADDR_OUT_DATA_3 + 1;
+	localparam integer ADDR_OUT_DATA_5 = ADDR_OUT_DATA_4 + 1;
+	localparam integer ADDR_OUT_DATA_6 = ADDR_OUT_DATA_5 + 1;
 
 	integer state = 0;
 	always @(posedge csa_in_wclk) begin
@@ -140,10 +153,6 @@ module csa_ram_tb #(
 
 			ren <= 0;
 			raddr <= 0;
-
-			csa_in_wen <= 0;
-			//csa_in_wdata <= 40'h1234567890;
-			csa_in_wdata <= 0;
 		end
 		else begin 
 			wen <= 0;
@@ -198,8 +207,6 @@ module csa_ram_tb #(
 						csa_in_wdata <= csa_in_wdata + 1;
 						state <= 5;
 					end
-
-
 				end
 				7: begin
 					raddr <= ADDR_IN_DATA_VALID;
