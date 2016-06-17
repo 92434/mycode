@@ -111,20 +111,20 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	// The example design sink is always ready to accept the S_AXIS_TDATA until
 	// the FIFO is not filled with NUMBER_OF_INPUT_WORDS number of input words.
 	
-	reg r_ready_reg = 0;
+	reg error_full_reg = 0;
 	always @(posedge S_AXIS_ACLK) begin
 		if(S_AXIS_ARESETN == 0) begin
-			r_ready_reg <= 1;
+			error_full_reg <= 1;
 		end
 		else begin
-			r_ready_reg <= r_ready;
+			error_full_reg <= error_full;
 		end
 	end
 
-	wire r_ready_use;
-	assign r_ready_use = (r_ready == 0 && r_ready_reg == 0) ? 0 : 1;
+	wire error_full_use;
+	assign error_full_use = (error_full == 0 && error_full_reg == 0) ? 0 : 1;
 
-	assign axis_tready = ((S_AXIS_TVALID == 1) && (mst_exec_state == WRITE_FIFO) && (r_ready_use == 0));
+	assign axis_tready = ((S_AXIS_TVALID == 1) && (mst_exec_state == WRITE_FIFO) && (error_full_use == 0));
 
 	wire wen;
 	assign wen = axis_tready;
