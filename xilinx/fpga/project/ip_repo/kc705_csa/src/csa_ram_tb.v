@@ -4,7 +4,7 @@ module csa_ram_tb #(
 		parameter integer AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
 
-		parameter integer CSA_CALC_INST_NUM = 1,
+		parameter integer CSA_CALC_INST_NUM = 4,
 
 		parameter integer CYPHER_DATA_WIDTH = 8 * 8,
 		parameter integer CSA_CALC_IN_WIDTH = 8 * 6,

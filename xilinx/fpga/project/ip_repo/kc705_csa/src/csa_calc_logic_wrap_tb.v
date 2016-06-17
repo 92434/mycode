@@ -44,6 +44,7 @@ module csa_calc_logic_wrap_tb #(
 	wire [CSA_CALC_INST_NUM - 1 : 0] csa_in_full;
 	reg [CSA_CALC_INST_NUM - 1 : 0] csa_in_wen = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] w_index = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] current_w_index = 0;
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			csa_calc_logic_block <= 0;
@@ -54,6 +55,7 @@ module csa_calc_logic_wrap_tb #(
 			count <= 1;
 			w_state <= 0;
 			w_index <= 0;
+			current_w_index <= 0;
 		end
 		else begin
 			csa_in_wen <= 0;
@@ -61,23 +63,25 @@ module csa_calc_logic_wrap_tb #(
 			case(w_state)
 				0: begin
 					if(csa_in_full[w_index] == 0) begin
+						current_w_index <= w_index;
 
 						w_state <= 1;
 					end
 					else begin
-						if(w_index == CSA_CALC_INST_NUM - 1) begin
-							w_index <= 0;
-						end
-						else begin
-							w_index <= w_index + 1;
-						end
+					end
+
+					if(w_index == CSA_CALC_INST_NUM - 1) begin
+						w_index <= 0;
+					end
+					else begin
+						w_index <= w_index + 1;
 					end
 				end
 				1 : begin
-					csa_in_wen[w_index] <= 1;
+					csa_in_wen[current_w_index] <= 1;
 					csa_calc_logic_block <= count;
 					csa_calc_logic_in <= count;
-					csa_calc_logic_times <= 1;
+					csa_calc_logic_times <= 10;
 					csa_calc_logic_times_start <= 0;
 
 					count <= count + 1;
@@ -100,42 +104,71 @@ module csa_calc_logic_wrap_tb #(
 	wire [CSA_CALC_INST_NUM - 1 : 0] csa_out_ready;
 	reg [CSA_CALC_INST_NUM - 1 : 0] csa_out_ren = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] r_index = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] current_r_index = 0;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] r_state = 0;
+
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_o_reg = 0;
+	reg csa_ready = 0;
+	reg csa_error = 0;
+
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
+			csa_calc_logic_block_o <= 0;
+			csa_calc_logic_in_o <= 0;
+			csa_calc_logic_times_o <= 0;
+			csa_calc_logic_times_start_o <= 0;
+			csa_calc_logic_out <= 0;
+
 			r_state <= 0;
 			r_index <= 0;
+			current_r_index <= 0;
+			csa_ready <= 0;
+			csa_error <= 0;
+			csa_calc_logic_block_o_reg <= 0;
 		end
 		else begin
 			csa_out_ren <= 0;
+			csa_ready <= 0;
+			csa_error <= 0;
 
 			case(r_state)
 				0: begin
 					if(csa_out_ready[r_index] == 1) begin
+						current_r_index <= r_index;
 
 						r_state <= 1;
 					end
 					else begin
-						if(r_index == CSA_CALC_INST_NUM - 1) begin
-							r_index <= 0;
-						end
-						else begin
-							r_index <= r_index + 1;
-						end
+					end
+
+					if(r_index == CSA_CALC_INST_NUM - 1) begin
+						r_index <= 0;
+					end
+					else begin
+						r_index <= r_index + 1;
 					end
 				end
 				1 : begin
-					csa_out_ren[r_index] <= 1;
+					csa_out_ren[current_r_index] <= 1;
 
 					r_state <= 2;
 				end
 				2: begin
-					csa_calc_logic_block_o <= csa_out[r_index][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
-					csa_calc_logic_in_o <= csa_out[r_index][AXI_DATA_WIDTH * 3 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1];
-					csa_calc_logic_times_o <= csa_out[r_index][AXI_DATA_WIDTH * 4 - 1 : AXI_DATA_WIDTH * 3];
-					csa_calc_logic_times_start_o <= csa_out[r_index][AXI_DATA_WIDTH * 5 - 1 : AXI_DATA_WIDTH * 4];
-					csa_calc_logic_out <= csa_out[r_index][AXI_DATA_WIDTH * 7 - 1 : AXI_DATA_WIDTH * 5];
+					csa_calc_logic_block_o <= csa_out[current_r_index][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					csa_calc_logic_in_o <= csa_out[current_r_index][AXI_DATA_WIDTH * 3 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1];
+					csa_calc_logic_times_o <= csa_out[current_r_index][AXI_DATA_WIDTH * 4 - 1 : AXI_DATA_WIDTH * 3];
+					csa_calc_logic_times_start_o <= csa_out[current_r_index][AXI_DATA_WIDTH * 5 - 1 : AXI_DATA_WIDTH * 4];
+					csa_calc_logic_out <= csa_out[current_r_index][AXI_DATA_WIDTH * 7 - 1 : AXI_DATA_WIDTH * 5];
+
+					csa_ready <= 1;
+					if(csa_calc_logic_block_o_reg + 1 == csa_out[current_r_index][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0]) begin
+					end
+					else begin
+						csa_error <= 1;
+					end
+
+					csa_calc_logic_block_o_reg <= csa_out[current_r_index][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 
 					r_state <= 0;
 				end
