@@ -74,7 +74,7 @@ module csa_calc_logic_wrap #(
 	wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_wire;
 	wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_start_wire;
 
-	reg fifo_ready = 0;//input
+	reg fifo_ready_reg = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block = 0;
 	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times = 0;
@@ -82,14 +82,14 @@ module csa_calc_logic_wrap #(
 
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
-			fifo_ready <= 0;
+			fifo_ready_reg <= 0;
 			csa_calc_logic_block <= 0;
 			csa_calc_logic_in <= 0;
 			csa_calc_logic_times <= 0;
 			csa_calc_logic_times_start <= 0;
 		end
 		else begin
-			fifo_ready <= fifo_ready_wire;
+			fifo_ready_reg <= fifo_ready_wire;
 
 			csa_calc_logic_block <= 0;
 			csa_calc_logic_in <= 0;
@@ -105,6 +105,8 @@ module csa_calc_logic_wrap #(
 		end
 	end
 
+	wire fifo_ready;
+	assign fifo_ready = (fifo_ready_wire == 1 && fifo_ready_reg == 1) ? 1 : 0;
 	assign fifo_ready_wire = (my_fifo_inst_1_r_ready == 1 && my_fifo_inst_2_error_empty == 1) ? 1 : 0;
 	assign csa_calc_logic_block_wire = my_fifo_inst_1_rdata[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 	assign csa_calc_logic_in_wire = my_fifo_inst_1_rdata[AXI_DATA_WIDTH * 3 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1];

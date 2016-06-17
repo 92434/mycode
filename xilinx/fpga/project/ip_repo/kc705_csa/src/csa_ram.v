@@ -17,26 +17,26 @@ module csa_ram #(
 		input wire axi_mm_clk,
 		input wire rst_n,
 
-		input wire [(C_S_AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
+		input wire [(AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		input wire wen,
-		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] wdata,
+		input wire [AXI_DATA_WIDTH - 1 : 0] wdata,
 		input wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 
 		input wire ren,
-		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] rdata,
+		output reg [AXI_DATA_WIDTH - 1 : 0] rdata = 0,
 		input wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 
 		input wire csa_calc_clk,//csa_calc_clk MUST NOT slower than axi_mm_clk!!!
 
 		input wire csa_in_r_ready,
 		output wire csa_in_rclk,
-		output reg csa_in_ren,
-		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] csa_in_rdata,
+		output reg csa_in_ren = 0,
+		input wire [AXI_DATA_WIDTH - 1 : 0] csa_in_rdata,
 
 		input wire csa_out_error_full,
 		output wire csa_out_wclk,
-		output reg csa_out_wen,
-		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_out_wdata = 0
+		output reg csa_out_wen = 0,
+		output reg [AXI_DATA_WIDTH - 1 : 0] csa_out_wdata = 0
 	);
 
 	localparam integer ADDR_CHANNEL_INDEX = 0;
@@ -57,7 +57,7 @@ module csa_ram #(
 	localparam integer ADDR_OUT_DATA_5 = ADDR_OUT_DATA_4 + 1;
 	localparam integer ADDR_OUT_DATA_6 = ADDR_OUT_DATA_5 + 1;
 
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
 
 	always @(posedge axi_mm_clk) begin
@@ -87,19 +87,19 @@ module csa_ram #(
 		end
 	end
 
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_in_0 = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_in_1 = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_in_2 = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_in_3 = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_in_4 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_0 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_1 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_2 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_3 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_4 = 0;
 
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_out_0 = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_out_1 = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_out_2 = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_out_3 = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_out_4 = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_out_5 = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] csa_out_6 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_out_0 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_out_1 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_out_2 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_out_3 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_out_4 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_out_5 = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] csa_out_6 = 0;
 
 	reg csa_in_valid = 0;
 	reg csa_out_valid = 0;
@@ -115,10 +115,10 @@ module csa_ram #(
 						rdata <= csa_current_channel;
 					end
 					ADDR_IN_DATA_VALID: begin
-						rdata <= {{(C_S_AXI_DATA_WIDTH - 1){1'b0}}, csa_in_valid};
+						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, csa_in_valid};
 					end
 					ADDR_OUT_DATA_VALID: begin
-						rdata <= {{(C_S_AXI_DATA_WIDTH - 1){1'b0}}, csa_out_valid};
+						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, csa_out_valid};
 					end
 					ADDR_IN_DATA_0: begin
 						rdata <= csa_in_0;
@@ -235,14 +235,14 @@ module csa_ram #(
 					w_state <= 2;
 				end
 				2: begin
-					csa_calc_logic_in[C_S_AXI_DATA_WIDTH * 1 - 1 : C_S_AXI_DATA_WIDTH * 0] <= csa_in_rdata;
+					csa_calc_logic_in[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0] <= csa_in_rdata;
 
 					csa_in_ren <= 1;
 
 					w_state <= 3;
 				end
 				3: begin
-					csa_calc_logic_in[C_S_AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : C_S_AXI_DATA_WIDTH * 1] <= csa_in_rdata[C_S_AXI_DATA_WIDTH * 1 - 1 - CSA_CALC_IN_WIDTH_PAD : C_S_AXI_DATA_WIDTH * 0];
+					csa_calc_logic_in[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1] <= csa_in_rdata[AXI_DATA_WIDTH * 1 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 0];
 
 					csa_in_ren <= 1;
 
@@ -279,8 +279,8 @@ module csa_ram #(
 					if(w_index == csa_current_channel) begin
 						csa_in_valid <= 0;
 						csa_in_0 <= csa_calc_logic_block;
-						csa_in_1 <= csa_calc_logic_in[C_S_AXI_DATA_WIDTH * 1 - 1 : C_S_AXI_DATA_WIDTH * 0];
-						csa_in_2 <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in[C_S_AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : C_S_AXI_DATA_WIDTH * 1]};
+						csa_in_1 <= csa_calc_logic_in[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+						csa_in_2 <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};
 						csa_in_3 <= csa_calc_logic_times;
 						csa_in_4 <= csa_calc_logic_times_start;
 					end
@@ -360,12 +360,12 @@ module csa_ram #(
 					if(r_index == csa_current_channel) begin
 						csa_out_valid <= 0;
 						csa_out_0 <= csa_calc_logic_block_o;
-						csa_out_1 <= csa_calc_logic_in_o[C_S_AXI_DATA_WIDTH * 1 - 1 : C_S_AXI_DATA_WIDTH * 0];
-						csa_out_2 <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[C_S_AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : C_S_AXI_DATA_WIDTH * 1]};
+						csa_out_1 <= csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+						csa_out_2 <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};
 						csa_out_3 <= csa_calc_logic_times_o;
 						csa_out_4 <= csa_calc_logic_times_start_o;
-						csa_out_5 <= csa_calc_logic_out[C_S_AXI_DATA_WIDTH * 1 - 1 : C_S_AXI_DATA_WIDTH * 0];
-						csa_out_6 <= csa_calc_logic_out[C_S_AXI_DATA_WIDTH * 2 - 1 : C_S_AXI_DATA_WIDTH * 1];
+						csa_out_5 <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+						csa_out_6 <= csa_calc_logic_out[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
 					end
 					else begin
 					end
@@ -384,13 +384,13 @@ module csa_ram #(
 				end
 				4: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_in_o[C_S_AXI_DATA_WIDTH * 1 - 1 : C_S_AXI_DATA_WIDTH * 0];
+					csa_out_wdata <= csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 
 					r_state <= 5;
 				end
 				5: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[C_S_AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : C_S_AXI_DATA_WIDTH * 1]};
+					csa_out_wdata <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};
 
 					r_state <= 6;
 				end
@@ -408,13 +408,13 @@ module csa_ram #(
 				end
 				8: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_out[C_S_AXI_DATA_WIDTH * 1 - 1 : C_S_AXI_DATA_WIDTH * 0];
+					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 
 					r_state <= 9;
 				end
 				9: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_out[C_S_AXI_DATA_WIDTH * 2 - 1 : C_S_AXI_DATA_WIDTH * 1];
+					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
 
 					r_state <= 0;
 				end
