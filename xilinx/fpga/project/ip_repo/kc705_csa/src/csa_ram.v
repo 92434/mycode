@@ -281,7 +281,7 @@ module csa_ram #(
 				7 : begin
 					csa_in_wen[current_w_index] <= 1;
 					if(current_w_index == csa_current_channel) begin
-						csa_in_valid <= 0;
+						csa_in_valid <= 1;
 						csa_in_0 <= csa_calc_logic_block;
 						csa_in_1 <= csa_calc_logic_in[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 						csa_in_2 <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};
@@ -366,7 +366,7 @@ module csa_ram #(
 					csa_calc_logic_out <= csa_out[current_r_index][AXI_DATA_WIDTH * 7 - 1 : AXI_DATA_WIDTH * 5];
 
 					if(current_r_index == csa_current_channel) begin
-						csa_out_valid <= 0;
+						csa_out_valid <= 1;
 						csa_out_0 <= csa_calc_logic_block_o;
 						csa_out_1 <= csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 						csa_out_2 <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};

@@ -314,6 +314,8 @@ module csa_ram_tb #(
 	localparam integer ADDR_OUT_DATA_6 = ADDR_OUT_DATA_5 + 1;
 
 	integer state = 0;
+	reg in_ready = 0;
+	reg out_ready = 0;
 	always @(posedge axi_mm_clk) begin
 		if(rst_n == 0) begin
 			state <= 0;
@@ -324,10 +326,16 @@ module csa_ram_tb #(
 
 			ren <= 0;
 			raddr <= 0;
+
+			in_ready <= 0;
+			out_ready <= 0;
 		end
 		else begin 
 			wen <= 0;
 			ren <= 0;
+
+			in_ready <= 0;
+			out_ready <= 0;
 
 			case(state)
 				0: begin
@@ -353,11 +361,14 @@ module csa_ram_tb #(
 					if(rdata == 1) begin
 						ren <= 1;
 
+						in_ready <= 1;
 						raddr <= ADDR_IN_DATA_0;
 						
 						state <= 4;
 					end
 					else begin
+
+						state <= 1;
 					end
 				end
 				4: begin
@@ -402,11 +413,13 @@ module csa_ram_tb #(
 					if(rdata == 1) begin
 						ren <= 1;
 
+						out_ready <= 1;
 						raddr <= ADDR_OUT_DATA_0;
 						
 						state <= 11;
 					end
 					else begin
+						state <= 8;
 					end
 				end
 				11: begin
