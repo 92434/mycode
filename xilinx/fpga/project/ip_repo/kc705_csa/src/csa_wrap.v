@@ -3,6 +3,8 @@
 module csa_wrap #
 	(
 		parameter integer CSA_CALC_INST_NUM = 4,
+		parameter NUMBER_OF_INPUT_WORDS = 5,
+		parameter NUMBER_OF_OUTPUT_WORDS = 7,
 	
 		parameter integer C_S00_AXI_ID_WIDTH = 1,
 		parameter integer C_S00_AXI_DATA_WIDTH = 32,
@@ -194,8 +196,6 @@ module csa_wrap #
 	wire axis_s_error_full;
 	wire axis_s_error_empty;
 
-	localparam NUMBER_OF_INPUT_WORDS = 5;
-
 	axi4_stream_slave_v1_0 #(
 			.NUMBER_OF_INPUT_WORDS(NUMBER_OF_INPUT_WORDS),
 			.C_S00_AXIS_TDATA_WIDTH(C_S00_AXIS_TDATA_WIDTH)
@@ -224,8 +224,6 @@ module csa_wrap #
 	wire axis_m_r_ready;
 	wire axis_m_error_full;
 	wire axis_m_error_empty;
-
-	localparam NUMBER_OF_OUTPUT_WORDS = 7;
 
 	axi4_stream_master_v1_0 # (
 		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
