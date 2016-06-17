@@ -634,7 +634,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>b88d5231</spirit:value>
+            <spirit:value>bcdca3e1</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -650,7 +650,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>b88d5231</spirit:value>
+            <spirit:value>bcdca3e1</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -678,7 +678,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>d5b65e1b</spirit:value>
+            <spirit:value>f9fcc19f</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1873,10 +1873,6 @@
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/ck_processer.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>src/rtl/stream_cypher.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
@@ -1885,15 +1881,11 @@
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/convert_32_to_40.v</spirit:name>
+        <spirit:name>src/csa_calc_logic_wrap.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
         <spirit:name>src/csa_ram.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>src/convert_48_to_3x32.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
@@ -1903,7 +1895,7 @@
       <spirit:file>
         <spirit:name>src/csa_wrap.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_124828f1</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_1d002b00</spirit:userFileType>
       </spirit:file>
       <spirit:file>
         <spirit:name>../common/src/axi_stream/axi4_stream_master_v1_0.v</spirit:name>
@@ -1989,10 +1981,6 @@
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/ck_processer.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>src/rtl/stream_cypher.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
@@ -2001,15 +1989,11 @@
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/convert_32_to_40.v</spirit:name>
+        <spirit:name>src/csa_calc_logic_wrap.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
         <spirit:name>src/csa_ram.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>src/convert_48_to_3x32.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
@@ -2072,19 +2056,19 @@
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>src/convert_32_to_40_tb.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>src/convert_48_to_3x32_tb.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>src/csa_calc_logic_tb.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
         <spirit:name>../common/src/clock.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>src/stream_cypher_tb.v</spirit:name>
+        <spirit:fileType>verilogSource</spirit:fileType>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>src/csa_calc_logic_wrap_tb.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
     </spirit:fileSet>
@@ -2166,11 +2150,11 @@
         <xilinx:taxonomy>/BaseIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>kc705_csa</xilinx:displayName>
-      <xilinx:coreRevision>119</xilinx:coreRevision>
+      <xilinx:coreRevision>129</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:decrypt:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2016-05-27T10:24:48Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2016-06-17T07:41:59Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
         <xilinx:tag xilinx:name="user.org:user:decrypt:1.0_ARCHIVE_LOCATION">/home/action/vivadoworkspace/ip_repo/kc705_csa</xilinx:tag>
@@ -2181,7 +2165,7 @@
       <xilinx:xilinxVersion>2014.3</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="653052ee"/>
       <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="400a1c2c"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="c3abc04c"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="69116b82"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="79c8c082"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="8ff6b230"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="a39a9588"/>

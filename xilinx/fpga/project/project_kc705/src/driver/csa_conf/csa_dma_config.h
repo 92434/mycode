@@ -33,8 +33,8 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_thread_count = CSA_DMA_THREAD, 
 		.is_auto_receive = false,
 
-		.receive_bulk_size = (4 * 3) * 4,
-		.send_bulk_size = 5 * 4,
+		.receive_bulk_size = 70 * 4,
+		.send_bulk_size = 50 * 4,
 		.devname = "csa_dma",
 	},
 	{

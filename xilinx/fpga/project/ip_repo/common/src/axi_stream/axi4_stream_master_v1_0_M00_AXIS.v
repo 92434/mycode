@@ -186,7 +186,7 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	my_fifo #(
 			.DATA_WIDTH(C_M_AXIS_TDATA_WIDTH),
 			.BULK_OF_DATA(NUMBER_OF_OUTPUT_WORDS),
-			.BULK_DEPTH(256)
+			.BULK_DEPTH(NUMBER_OF_OUTPUT_WORDS * 64)
 		) my_fifo_inst (
 			.rst_n(M_AXIS_ARESETN),
 			.wclk(wclk),

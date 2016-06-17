@@ -157,7 +157,7 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	my_fifo #(
 			.DATA_WIDTH(C_S_AXIS_TDATA_WIDTH),
 			.BULK_OF_DATA(NUMBER_OF_INPUT_WORDS),
-			.BULK_DEPTH(256)
+			.BULK_DEPTH(NUMBER_OF_INPUT_WORDS * 64)
 		) my_fifo_inst (
 			.rst_n(S_AXIS_ARESETN),
 			.wclk(S_AXIS_ACLK),

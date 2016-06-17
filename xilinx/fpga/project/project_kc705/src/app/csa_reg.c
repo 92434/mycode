@@ -12,9 +12,7 @@
 #include "kc705.h"
 
 typedef enum {
-	ADDR_CSA_BUSY = 0,
-	ADDR_CSA_READY,
-	ADDR_CHANNEL_INDEX,
+	ADDR_CHANNEL_INDEX = 0,
 	ADDR_IN_DATA_VALID,
 	ADDR_IN_DATA_0,
 	ADDR_IN_DATA_1,
@@ -25,14 +23,14 @@ typedef enum {
 	ADDR_OUT_DATA_0,
 	ADDR_OUT_DATA_1,
 	ADDR_OUT_DATA_2,
-	ADDR_CALC_TIMES,
-	ADDR_CALC_DELAY,
+	ADDR_OUT_DATA_3,
+	ADDR_OUT_DATA_4,
+	ADDR_OUT_DATA_5,
+	ADDR_OUT_DATA_6,
 	TOTAL_REGS,
 } addr_t;
 
 char *reg_name[] = {
-	"ADDR_CSA_BUSY",
-	"ADDR_CSA_READY",
 	"ADDR_CHANNEL_INDEX",
 	"ADDR_IN_DATA_VALID",
 	"ADDR_IN_DATA_0",
@@ -44,13 +42,15 @@ char *reg_name[] = {
 	"ADDR_OUT_DATA_0",
 	"ADDR_OUT_DATA_1",
 	"ADDR_OUT_DATA_2",
-	"ADDR_CALC_TIMES",
-	"ADDR_CALC_DELAY",
+	"ADDR_OUT_DATA_3",
+	"ADDR_OUT_DATA_4",
+	"ADDR_OUT_DATA_5",
+	"ADDR_OUT_DATA_6",
 };
 
 #define ADDR_OFFSET(addr) (addr * 4)
 
-#define BUFSIZE ((ADDR_CALC_TIMES + 1) * 4)
+#define BUFSIZE (TOTAL_REGS * 4)
 
 static int stop = 0;
 
@@ -114,19 +114,12 @@ void *write_fn(void *arg) {
 	int nwrite;
 
 	//printids("write_fn: ");
-	//int channel = 1;
-	int times = 100;
-	//int delay = 0;
+	int channel = 2;
 
 	while(stop == 0) {
-		//lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
-		//nwrite = write(targ->fd, &channel, sizeof(int));
+		lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
+		nwrite = write(targ->fd, &channel, sizeof(int));
 
-		lseek(targ->fd, ADDR_OFFSET(ADDR_CALC_TIMES), SEEK_SET);
-		nwrite = write(targ->fd, &times, sizeof(int));
-
-		//lseek(targ->fd, ADDR_OFFSET(ADDR_CALC_DELAY), SEEK_SET);
-		//nwrite = write(targ->fd, &delay, sizeof(int));
 		return NULL;
 	}
 	return NULL;
