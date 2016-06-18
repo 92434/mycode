@@ -12,34 +12,8 @@ module tb #(
 	);
 
 	wire wclk;
-	reg wen = 0;
-	reg [C_M00_AXIS_TDATA_WIDTH - 1 : 0] wdata = 0;
-
 	clkgen #(.clk_period(4)) xiaofeiclk1(.clk(wclk));
 
-	//send ts
-	reg [C_M00_AXIS_TDATA_WIDTH - 1 : 0] index = 0;
-	reg [C_M00_AXIS_TDATA_WIDTH - 1 : 0] count = 1;
-
-	always @(posedge wclk) begin
-		if(m00_axis_aresetn == 0) begin
-			index <= 0;
-			count <= 1;
-		end
-		else begin
-			wen <= 0;
-
-			if((index % 2) == 0) begin
-				wdata <= count;
-				wen <= 1;
-
-				count <= count + 1;
-			end
-			else begin
-			end
-			index <= index + 1;
-		end
-	end
 
 	// Instantiation of Axi Bus Interface M00_AXIS
 	wire r_ready_master;
@@ -55,6 +29,45 @@ module tb #(
 	wire m00_axis_tready;
 
 	clkgen #(.clk_period(1)) xiaofeiclk2(.clk(m00_axis_aclk));
+
+	reg wen = 0;
+	reg [C_M00_AXIS_TDATA_WIDTH - 1 : 0] wdata = 0;
+	reg [C_M00_AXIS_TDATA_WIDTH - 1 : 0] count = 1;
+	reg [C_M00_AXIS_TDATA_WIDTH - 1 : 0] w_state = 0;
+
+	always @(posedge wclk) begin
+		if(m00_axis_aresetn == 0) begin
+			count <= 1;
+
+			w_state <= 0;
+		end
+		else begin
+			wen <= 0;
+
+			case(w_state)
+				0: begin
+					if(error_full_master == 0) begin
+						wen <= 1;
+						wdata <= count;
+
+						count <= count + 1;
+
+						w_state <= 1;
+					end
+					else begin
+					end
+				end
+				1: begin
+					w_state <= 2;
+				end
+				2: begin
+					w_state <= 0;
+				end
+				default: begin
+				end
+			endcase
+		end
+	end
 
 	axi4_stream_master_v1_0 # ( 
 		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
@@ -85,33 +98,48 @@ module tb #(
 	wire error_full_slave;
 	wire error_empty_slave;
 
-	integer state = 0;
+	integer r_state = 0;
 	integer rcount = 0;
+	reg [C_M00_AXIS_TDATA_WIDTH - 1 : 0] rdata_reg = 0;
+	reg rdata_error = 0;
 
 	always @(posedge m00_axis_aclk) begin
 		if(m00_axis_aresetn == 0) begin
-			state <= 0;
+			r_state <= 0;
 			rcount <= 0;
+			rdata_reg <= 0;
+			rdata_error <= 0;
 		end
 		else begin
 			ren <= 0;
+			rdata_error <= 0;
 
-			case(state)
+			case(r_state)
 				0: begin
 					if(r_ready_slave == 1) begin
 						ren <= 1;
-						state <= 1;
+						r_state <= 1;
 						rcount <= 0;
 					end
 					else begin
 					end
 				end
 				1: begin
-					if((rcount >= 0) && (rcount < 2 - 1)) begin
+					if(rdata_reg + 1 == rdata) begin
+					end
+					else begin
+						rdata_error <= 1;
+					end
+					rdata_reg <= rdata;
+
+					r_state <= 2;
+				end
+				2: begin
+					if((rcount >= 0) && (rcount < 100 - 1)) begin
 						rcount <= rcount + 1;
 					end
 					else begin
-						state <= 0;
+						r_state <= 0;
 					end
 				end
 				default: begin

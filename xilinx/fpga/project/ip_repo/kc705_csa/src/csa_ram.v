@@ -15,7 +15,7 @@ module csa_ram #(
 	)
 	(
 		input wire axi_mm_clk,
-		input wire rst_n,
+		input wire s00_axi_aresetn,
 
 		input wire [(AXI_DATA_WIDTH / 8) - 1 : 0] wstrb,
 		input wire wen,
@@ -27,6 +27,8 @@ module csa_ram #(
 		input wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 
 		input wire csa_calc_clk,//csa_calc_clk MUST NOT slower than axi_mm_clk!!!
+		output wire user_rst_n,
+		input wire rst_n,
 
 		input wire csa_in_r_ready,
 		output wire csa_in_rclk,
@@ -56,17 +58,22 @@ module csa_ram #(
 	localparam integer ADDR_OUT_DATA_4 = ADDR_OUT_DATA_3 + 1;
 	localparam integer ADDR_OUT_DATA_5 = ADDR_OUT_DATA_4 + 1;
 	localparam integer ADDR_OUT_DATA_6 = ADDR_OUT_DATA_5 + 1;
+	localparam integer ADDR_RESET = ADDR_OUT_DATA_6 + 1;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
+	reg user_rst_n_reg = 1;
+	reg user_rst_n_reg_1 = 1;
 
 	always @(posedge axi_mm_clk) begin
-		if(rst_n == 0) begin
+		if(s00_axi_aresetn == 0) begin
 			csa_current_channel <= 0;
 			csa_current_channel_changed <= 0;
 		end
 		else begin
 			csa_current_channel_changed <= 0;
+			user_rst_n_reg <= 1;
+			user_rst_n_reg_1 <= user_rst_n_reg;
 
 			if(wen == 1) begin
 				case(waddr)
@@ -78,6 +85,9 @@ module csa_ram #(
 						else begin
 						end
 					end
+					ADDR_RESET: begin
+						user_rst_n_reg <= 0;
+					end
 					default: begin
 					end
 				endcase
@@ -86,6 +96,8 @@ module csa_ram #(
 			end
 		end
 	end
+
+	assign user_rst_n = (user_rst_n_reg == 1 && user_rst_n_reg_1 == 1) ? 1 : 0;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_0 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_1 = 0;
@@ -105,7 +117,7 @@ module csa_ram #(
 	reg csa_out_valid = 0;
 
 	always @(posedge axi_mm_clk) begin
-		if(rst_n == 0) begin
+		if(s00_axi_aresetn == 0) begin
 			rdata <= 0;
 		end
 		else begin

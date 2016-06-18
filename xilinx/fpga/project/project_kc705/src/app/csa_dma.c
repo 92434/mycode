@@ -120,44 +120,88 @@ void *write_fn(void *arg) {
 	return NULL;
 }
 
+int init_raw_data(int start) {
+	int i;
+	uint32_t *data = raw_data;
+	int use_start = start;
+
+	for(i = 0; i < RAW_DATA_SIZE / sizeof(uint32_t); i += 5) {
+		data[i + 0] = use_start;
+		data[i + 1] = use_start;
+		data[i + 2] = 0;
+		data[i + 3] = 50000;
+		data[i + 4] = 0;
+
+		use_start++;
+	}
+
+	return use_start;
+}
+
 void main_proc(thread_arg_t *arg) {
 	thread_arg_t *targ = (thread_arg_t *)arg;
-	int nwrite;
-	int nread;
+	int nwrite = RAW_DATA_SIZE;
+	int nread = BUFSIZE;
+	int count;
+	int start = 0;
 
 	//printids("main_proc: ");
 
 	while(stop == 0) {
-		nwrite = write(targ->fd, raw_data, RAW_DATA_SIZE);
-		if(nwrite < 0) {
-			printf("%s\n", strerror(errno));
-		} else {
-			//printf("write %d!\n", nwrite);
-		}
-
-		nread = read(targ->fd, targ->buffer, BUFSIZE);
-		if(nread < 0) {
-			printf("%s\n", strerror(errno));
-		} else {
-			int i;
-			uint32_t *data = (uint32_t *)targ->buffer;
-
-			//printf("read %d!\n", nread);
-			for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
-				printf("block:%08x in:%08x%08x times:%08x times_start:%08x out:%08x%08x\n",
-						data[i + 0],//block
-						data[i + 2],//in(high)
-						data[i + 1],//in(low)
-						data[i + 3],//times
-						data[i + 4],//times delay
-						data[i + 6],//out(high)
-						data[i + 5]//out(low)
-						);
+		for(count = 0; count < 1 && stop == 0;) {
+			if(nwrite == RAW_DATA_SIZE) {
+				start = init_raw_data(start);
+				printf("start %d! count:%d!\n", start, count);
+			} else {
+				printf("nwrite %d! count:%d!\n", nwrite, count);
 			}
-			printf("\n");
+
+			nwrite = write(targ->fd, raw_data, RAW_DATA_SIZE);
+			if(nwrite < 0) {
+				printf("%s\n", strerror(errno));
+			} else {
+				//printf("write %d!\n", nwrite);
+				if(nwrite == RAW_DATA_SIZE) {
+					count++;
+				} else if(nwrite != 0) {
+					stop = 1;
+					break;
+				}
+			}
 		}
 
-		//return NULL;
+		for(count = 0; count < 1 && stop == 0;) {
+			nread = read(targ->fd, targ->buffer, BUFSIZE);
+			if(nread < 0) {
+				printf("%s\n", strerror(errno));
+			} else {
+				int i;
+				uint32_t *data = (uint32_t *)targ->buffer;
+
+				//printf("read %d!\n", nread);
+				if(nread == BUFSIZE) {
+					count++;
+				} else if(nread != 0) {
+					stop = 1;
+					break;
+				}
+
+				for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
+					printf("block:%012d in:%08x%08x times:%08x times_start:%08x out:%08x%08x\n",
+							data[i + 0],//block
+							data[i + 2],//in(high)
+							data[i + 1],//in(low)
+							data[i + 3],//times
+							data[i + 4],//times delay
+							data[i + 6],//out(high)
+							data[i + 5]//out(low)
+							);
+				}
+				//printf("\n");
+			}
+		}
+
+		return NULL;
 	}
 }
 

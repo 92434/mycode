@@ -4,6 +4,7 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	(
 		// Users to add parameters here
 		parameter integer NUMBER_OF_OUTPUT_WORDS = 16,
+		parameter integer BULK_DEPTH = 16,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -186,7 +187,7 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	my_fifo #(
 			.DATA_WIDTH(C_M_AXIS_TDATA_WIDTH),
 			.BULK_OF_DATA(NUMBER_OF_OUTPUT_WORDS),
-			.BULK_DEPTH(NUMBER_OF_OUTPUT_WORDS * 64)
+			.BULK_DEPTH(BULK_DEPTH)
 		) my_fifo_inst (
 			.rst_n(M_AXIS_ARESETN),
 			.wclk(wclk),

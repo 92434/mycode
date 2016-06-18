@@ -27,6 +27,7 @@ typedef enum {
 	ADDR_OUT_DATA_4,
 	ADDR_OUT_DATA_5,
 	ADDR_OUT_DATA_6,
+	ADDR_RESET,
 	TOTAL_REGS,
 } addr_t;
 
@@ -46,6 +47,7 @@ char *reg_name[] = {
 	"ADDR_OUT_DATA_4",
 	"ADDR_OUT_DATA_5",
 	"ADDR_OUT_DATA_6",
+	"ADDR_RESET",
 };
 
 #define ADDR_OFFSET(addr) (addr * 4)
@@ -114,11 +116,14 @@ void *write_fn(void *arg) {
 	int nwrite;
 
 	//printids("write_fn: ");
-	int channel = 2;
+	int channel = 3;
+	int reset = 1;
 
 	while(stop == 0) {
-		lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
-		nwrite = write(targ->fd, &channel, sizeof(int));
+		//lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
+		//nwrite = write(targ->fd, &channel, sizeof(int));
+		//lseek(targ->fd, ADDR_OFFSET(ADDR_RESET), SEEK_SET);
+		//nwrite = write(targ->fd, &reset, sizeof(int));
 
 		return NULL;
 	}

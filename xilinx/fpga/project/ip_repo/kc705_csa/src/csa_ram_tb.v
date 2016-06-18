@@ -101,6 +101,7 @@ module csa_ram_tb #(
 			.error_empty(csa_out_error_empty)
 		);
 
+	wire user_rst_n;
 	csa_ram #(
 			.AXI_DATA_WIDTH(AXI_DATA_WIDTH),
 			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS),
@@ -115,7 +116,7 @@ module csa_ram_tb #(
 			.CSA_OUT_PARAMETER_LENGTH(CSA_OUT_PARAMETER_LENGTH)
 		) csa_ram_inst(
 			.axi_mm_clk(axi_mm_clk),
-			.rst_n(rst_n),
+			.s00_axi_aresetn(rst_n),
 
 			.wstrb(wstrb),
 			.wen(wen),
@@ -127,6 +128,8 @@ module csa_ram_tb #(
 			.raddr(raddr),
 
 			.csa_calc_clk(csa_calc_clk),
+			.user_rst_n(user_rst_n),
+			.rst_n(rst_n),
 
 			.csa_in_r_ready(csa_in_r_ready),
 			.csa_in_rclk(csa_in_rclk),

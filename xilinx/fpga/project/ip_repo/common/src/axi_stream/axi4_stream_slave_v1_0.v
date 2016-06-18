@@ -4,6 +4,7 @@ module axi4_stream_slave_v1_0 #
 	(
 		// Users to add parameters here
 		parameter integer NUMBER_OF_INPUT_WORDS = 16,
+		parameter integer BULK_DEPTH = 16,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -38,6 +39,7 @@ module axi4_stream_slave_v1_0 #
 	// Instantiation of Axi Bus Interface S00_AXIS
 	axi4_stream_slave_v1_0_S00_AXIS # ( 
 			.NUMBER_OF_INPUT_WORDS(NUMBER_OF_INPUT_WORDS),
+			.BULK_DEPTH(BULK_DEPTH),
 			.C_S_AXIS_TDATA_WIDTH(C_S00_AXIS_TDATA_WIDTH)
 		) axi4_stream_slave_v1_0_S00_AXIS_inst (
 			.rclk(rclk),

@@ -105,6 +105,11 @@ module csa_wrap #
 	localparam integer CSA_IN_PARAMETER_LENGTH = AXI_DATA_WIDTH * 5;
 	localparam integer CSA_OUT_PARAMETER_LENGTH = AXI_DATA_WIDTH * 7;
 
+	wire user_rst_n;
+	wire rst_n;
+
+	assign rst_n = (user_rst_n == 1 && s00_axi_aresetn == 1 && s00_axis_aresetn == 1 && m00_axis_aresetn == 1) ? 1 : 0;
+
 
 	wire [(C_S00_AXI_DATA_WIDTH / 8) - 1 : 0] axi_wstrb;
 	wire axi_wen;
@@ -209,7 +214,7 @@ module csa_wrap #
 			.error_empty(axis_s_error_empty),
 
 			.s00_axis_aclk(s00_axis_aclk),
-			.s00_axis_aresetn(s00_axis_aresetn),
+			.s00_axis_aresetn(rst_n),
 			.s00_axis_tready(s00_axis_tready),
 			.s00_axis_tdata(s00_axis_tdata),
 			.s00_axis_tstrb(s00_axis_tstrb),
@@ -239,7 +244,7 @@ module csa_wrap #
 		.error_empty(axis_m_error_empty),
 
 		.m00_axis_aclk(m00_axis_aclk),
-		.m00_axis_aresetn(m00_axis_aresetn),
+		.m00_axis_aresetn(rst_n),
 		.m00_axis_tvalid(m00_axis_tvalid),
 		.m00_axis_tdata(m00_axis_tdata),
 		.m00_axis_tstrb(m00_axis_tstrb),
@@ -261,7 +266,7 @@ module csa_wrap #
 			.CSA_OUT_PARAMETER_LENGTH(CSA_OUT_PARAMETER_LENGTH)
 		) csa_ram_inst(
 			.axi_mm_clk(s00_axi_aclk),
-			.rst_n(s00_axi_aresetn),
+			.s00_axi_aresetn(s00_axi_aresetn),
 
 			.wstrb(axi_wstrb),
 			.wen(axi_wen),
@@ -273,6 +278,8 @@ module csa_wrap #
 			.raddr(axi_raddr),
 
 			.csa_calc_clk(s00_axi_aclk),
+			.user_rst_n(user_rst_n),
+			.rst_n(rst_n),
 
 			.csa_in_r_ready(axis_s_r_ready),
 			.csa_in_rclk(axis_s_rclk),

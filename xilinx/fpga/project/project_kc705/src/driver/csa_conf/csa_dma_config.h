@@ -29,9 +29,15 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
+#if 0
 		.dma_thread = csa_dma_threads,
 		.dma_thread_count = CSA_DMA_THREAD, 
+		.is_auto_receive = true,
+#else//#if 1
+		.dma_thread = NULL,
+		.dma_thread_count = 0, 
 		.is_auto_receive = false,
+#endif//#if 1
 
 		.receive_bulk_size = 70 * 4,
 		.send_bulk_size = 50 * 4,

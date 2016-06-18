@@ -102,7 +102,7 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 				idle_count = 0;
 			} else {
 				data_available = false;
-				if(idle_count++ == 10) {
+				if(idle_count++ == 300) {
 					return ret;
 				}
 			}
@@ -175,7 +175,7 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 			if (filp->f_flags & O_NONBLOCK)
 				return ret;
 
-			if(idle_count++ == 10) {
+			if(idle_count++ == 300) {
 				return ret;
 			}
 		}

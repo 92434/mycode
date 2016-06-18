@@ -5,6 +5,7 @@ module axi4_stream_master_v1_0 #
 	(
 		// Users to add parameters here
 		parameter integer NUMBER_OF_OUTPUT_WORDS = 16,
+		parameter integer BULK_DEPTH = 16,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -40,6 +41,7 @@ module axi4_stream_master_v1_0 #
 	// Instantiation of Axi Bus Interface M00_AXIS
 	axi4_stream_master_v1_0_M00_AXIS # (
 		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
+		.BULK_DEPTH(BULK_DEPTH),
 
 		.C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
 		.C_M_START_COUNT(C_M00_AXIS_START_COUNT)
