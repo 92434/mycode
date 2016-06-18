@@ -9,6 +9,8 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <pthread.h>
+#include <sys/time.h>
+#include <time.h>
 #include "kc705.h"
 
 //40bits in, 48bits out
@@ -16,15 +18,15 @@
 
 uint32_t raw_data[] = {
 	1, 0x00000001, 0x00000000, 50000, 0,
-	//2, 0x00000002, 0x00000000, 50000, 0,
-	//3, 0x00000003, 0x00000000, 50000, 0,
-	//4, 0x00000004, 0x00000000, 50000, 0,
-	//5, 0x00000005, 0x00000000, 50000, 0,
-	//6, 0x00000006, 0x00000000, 50000, 0,
-	//7, 0x00000007, 0x00000000, 50000, 0,
-	//8, 0x00000008, 0x00000000, 50000, 0,
-	//9, 0x00000009, 0x00000000, 50000, 0,
-	//10, 0x0000000a, 0x00000000, 50000, 0,
+	2, 0x00000002, 0x00000000, 50000, 0,
+	3, 0x00000003, 0x00000000, 50000, 0,
+	4, 0x00000004, 0x00000000, 50000, 0,
+	5, 0x00000005, 0x00000000, 50000, 0,
+	6, 0x00000006, 0x00000000, 50000, 0,
+	7, 0x00000007, 0x00000000, 50000, 0,
+	8, 0x00000008, 0x00000000, 50000, 0,
+	9, 0x00000009, 0x00000000, 50000, 0,
+	10, 0x0000000a, 0x00000000, 50000, 0,
 };
 #define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
 
@@ -146,14 +148,22 @@ void main_proc(thread_arg_t *arg) {
 	int start = 0;
 
 	//printids("main_proc: ");
+	
+        struct timeval tv0, tv1;
+        struct timezone tz0, tz1;
+
+        gettimeofday(&tv0, &tz0);
 
 	while(stop == 0) {
-		for(count = 0; count < 1 && stop == 0;) {
+		for(count = 0; count < 15;) {
 			if(nwrite == RAW_DATA_SIZE) {
 				start = init_raw_data(start);
-				printf("start %d! count:%d!\n", start, count);
+				if(start == 50000) {
+					stop = 1;
+				}
+				//printf("start %d! count:%d!\n", start, count);
 			} else {
-				printf("nwrite %d! count:%d!\n", nwrite, count);
+				//printf("nwrite %d! count:%d!\n", nwrite, count);
 			}
 
 			nwrite = write(targ->fd, raw_data, RAW_DATA_SIZE);
@@ -164,13 +174,12 @@ void main_proc(thread_arg_t *arg) {
 				if(nwrite == RAW_DATA_SIZE) {
 					count++;
 				} else if(nwrite != 0) {
-					stop = 1;
 					break;
 				}
 			}
 		}
 
-		for(count = 0; count < 1 && stop == 0;) {
+		for(count = 0; count < 15;) {
 			nread = read(targ->fd, targ->buffer, BUFSIZE);
 			if(nread < 0) {
 				printf("%s\n", strerror(errno));
@@ -182,7 +191,6 @@ void main_proc(thread_arg_t *arg) {
 				if(nread == BUFSIZE) {
 					count++;
 				} else if(nread != 0) {
-					stop = 1;
 					break;
 				}
 
@@ -201,8 +209,19 @@ void main_proc(thread_arg_t *arg) {
 			}
 		}
 
-		return NULL;
+		//return;
 	}
+        gettimeofday(&tv1, &tz1);
+
+        printf("tv0.tv_sec:%d\n", tv0.tv_sec);
+        printf("tv0.tv_usec:%d\n", tv0.tv_usec);
+        printf("tz0.tz_minuteswest:%d\n", tz0.tz_minuteswest);
+        printf("tz0.tz_dsttime:%d\n", tz0.tz_dsttime);
+
+        printf("tv1.tv_sec:%d\n", tv1.tv_sec);
+        printf("tv1.tv_usec:%d\n", tv1.tv_usec);
+        printf("tz1.tz_minuteswest:%d\n", tz1.tz_minuteswest);
+        printf("tz1.tz_dsttime:%d\n", tz1.tz_dsttime);
 }
 
 int read_write(thread_arg_t *targ) {
