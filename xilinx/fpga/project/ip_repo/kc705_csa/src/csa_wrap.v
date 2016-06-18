@@ -3,8 +3,10 @@
 module csa_wrap #
 	(
 		parameter integer CSA_CALC_INST_NUM = 4,
-		parameter NUMBER_OF_INPUT_WORDS = 5,
-		parameter NUMBER_OF_OUTPUT_WORDS = 7,
+		parameter integer NUMBER_OF_INPUT_WORDS = 5,
+		parameter integer NUMBER_OF_OUTPUT_WORDS = 7,
+		parameter integer FIFO_RAM_DEPTH = 10 * 16,
+
 	
 		parameter integer C_S00_AXI_ID_WIDTH = 1,
 		parameter integer C_S00_AXI_DATA_WIDTH = 32,
@@ -105,6 +107,7 @@ module csa_wrap #
 	localparam integer CSA_IN_PARAMETER_LENGTH = AXI_DATA_WIDTH * 5;
 	localparam integer CSA_OUT_PARAMETER_LENGTH = AXI_DATA_WIDTH * 7;
 
+
 	wire user_rst_n;
 	wire rst_n;
 
@@ -203,6 +206,8 @@ module csa_wrap #
 
 	axi4_stream_slave_v1_0 #(
 			.NUMBER_OF_INPUT_WORDS(NUMBER_OF_INPUT_WORDS),
+			.BULK_DEPTH(FIFO_RAM_DEPTH),
+
 			.C_S00_AXIS_TDATA_WIDTH(C_S00_AXIS_TDATA_WIDTH)
 		) axi4_stream_slave_v1_0_inst (
 			.rclk(axis_s_rclk),
@@ -231,8 +236,10 @@ module csa_wrap #
 	wire axis_m_error_empty;
 
 	axi4_stream_master_v1_0 # (
-		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
 		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
+		.BULK_DEPTH(FIFO_RAM_DEPTH),
+
+		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
 		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
 	) axi4_stream_master_v1_0_inst (
 		.wclk(axis_m_wclk),

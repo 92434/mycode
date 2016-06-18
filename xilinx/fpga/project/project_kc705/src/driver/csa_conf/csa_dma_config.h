@@ -39,8 +39,8 @@ static dma_static_config_info_t dma_info[] = {
 		.is_auto_receive = false,
 #endif//#if 1
 
-		.receive_bulk_size = 70 * 4,
-		.send_bulk_size = 50 * 4,
+		.receive_bulk_size = 7 * 4,
+		.send_bulk_size = 5 * 4,
 		.devname = "csa_dma",
 	},
 	{
