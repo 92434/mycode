@@ -40,7 +40,7 @@ static dma_static_config_info_t dma_info[] = {
 #endif//#if 1
 
 		.receive_bulk_size = 7 * 4,
-		.send_bulk_size = 5 * 4,
+		.send_bulk_size = 5 * 10 * 4,
 		.devname = "csa_dma",
 	},
 	{
@@ -58,7 +58,7 @@ static dma_static_config_info_t dma_info[] = {
 
 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
-		.devname = "csa_regs",
+		.devname = "csa_reg",
 	},
 };
 

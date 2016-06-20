@@ -33,10 +33,17 @@ uint32_t raw_data[] = {
 #define BUFSIZE (7 * 4 * 10)
 
 static int stop = 0;
+static int force_stop = 0;
 
 static void default_sig_action(int signo, siginfo_t *info, void *context) {
 	printf("xiaofei:%s called! info->si_signo:%d\n", __func__, info->si_signo);
-	stop = 1;
+
+	if(stop == 0) {
+		stop = 1;
+	} else {
+		force_stop = 1;
+		printf("xiaofei:force stop!\n");
+	}
 
 	return;
 }
@@ -145,7 +152,7 @@ void main_proc(thread_arg_t *arg) {
 	int nwrite = RAW_DATA_SIZE;
 	int nread = BUFSIZE;
 	int count;
-	int start = 0;
+	int start = 1;
 
 	//printids("main_proc: ");
 	
@@ -155,11 +162,11 @@ void main_proc(thread_arg_t *arg) {
         gettimeofday(&tv0, &tz0);
 
 	while(stop == 0) {
-		for(count = 0; count < 15;) {
+		for(count = 0; count < 159;) {
 			if(nwrite == RAW_DATA_SIZE) {
 				start = init_raw_data(start);
-				if(start == 50000) {
-					stop = 1;
+				if(start >= 50000) {
+					//stop = 1;
 				}
 				//printf("start %d! count:%d!\n", start, count);
 			} else {
@@ -175,11 +182,17 @@ void main_proc(thread_arg_t *arg) {
 					count++;
 				} else if(nwrite != 0) {
 					break;
+				} else {
+					if(force_stop == 1) {
+						break;
+					}
 				}
 			}
 		}
 
-		for(count = 0; count < 15;) {
+		//usleep(100000);
+
+		for(count = 0; count < 159;) {
 			nread = read(targ->fd, targ->buffer, BUFSIZE);
 			if(nread < 0) {
 				printf("%s\n", strerror(errno));
@@ -192,6 +205,10 @@ void main_proc(thread_arg_t *arg) {
 					count++;
 				} else if(nread != 0) {
 					break;
+				} else {
+					if(force_stop == 1) {
+						break;
+					}
 				}
 
 				for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
@@ -213,15 +230,15 @@ void main_proc(thread_arg_t *arg) {
 	}
         gettimeofday(&tv1, &tz1);
 
-        printf("tv0.tv_sec:%d\n", tv0.tv_sec);
-        printf("tv0.tv_usec:%d\n", tv0.tv_usec);
-        printf("tz0.tz_minuteswest:%d\n", tz0.tz_minuteswest);
-        printf("tz0.tz_dsttime:%d\n", tz0.tz_dsttime);
+        printf("tv0.tv_sec:%d\n", (int)tv0.tv_sec);
+        printf("tv0.tv_usec:%d\n", (int)tv0.tv_usec);
+        printf("tz0.tz_minuteswest:%d\n", (int)tz0.tz_minuteswest);
+        printf("tz0.tz_dsttime:%d\n", (int)tz0.tz_dsttime);
 
-        printf("tv1.tv_sec:%d\n", tv1.tv_sec);
-        printf("tv1.tv_usec:%d\n", tv1.tv_usec);
-        printf("tz1.tz_minuteswest:%d\n", tz1.tz_minuteswest);
-        printf("tz1.tz_dsttime:%d\n", tz1.tz_dsttime);
+        printf("tv1.tv_sec:%d\n", (int)tv1.tv_sec);
+        printf("tv1.tv_usec:%d\n", (int)tv1.tv_usec);
+        printf("tz1.tz_minuteswest:%d\n", (int)tz1.tz_minuteswest);
+        printf("tz1.tz_dsttime:%d\n", (int)tz1.tz_dsttime);
 }
 
 int read_write(thread_arg_t *targ) {
