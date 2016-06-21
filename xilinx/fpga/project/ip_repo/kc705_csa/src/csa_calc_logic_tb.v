@@ -65,10 +65,11 @@ module csa_calc_logic_tb #(
 		end
 		else begin
 			if(fifo_ready_reg == 1 && fifo_ren == 1) begin
-				csa_calc_logic_block <= csa_calc_logic_block + 1;
+				csa_calc_logic_block <= 32'h40000001;//csa_calc_logic_block + 1;
 				csa_calc_logic_in <= csa_calc_logic_in + 1;
 				//csa_calc_logic_times <= csa_calc_logic_times + 1;
-				csa_calc_logic_times <= 1;
+				csa_calc_logic_times <= 9;
+				csa_calc_logic_times_start <= 4;
 				//if(csa_calc_logic_times > 5) begin
 				//	csa_calc_logic_times_start <= 5;
 				//end

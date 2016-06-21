@@ -103,12 +103,12 @@ module csa_wrap #
 	localparam integer CSA_IN_PARAMETER_LENGTH = AXI_DATA_WIDTH * 5;
 	localparam integer CSA_OUT_PARAMETER_LENGTH = AXI_DATA_WIDTH * 7;
 
-	localparam integer NUMBER_OF_INPUT_WORDS = 5;
-	localparam integer NUMBER_OF_OUTPUT_WORDS = 7;
+	localparam integer NUMBER_OF_INPUT_WORDS = 50;
+	localparam integer NUMBER_OF_OUTPUT_WORDS = 70;
 	localparam integer BULK_OF_INPUT_DATA = 5;
-	localparam integer BULK_OF_OUTPUT_DATA = 7;
+	localparam integer BULK_OF_OUTPUT_DATA = 70;
 	localparam integer FIFO_RAM_INPUT_DEPTH = 10 * 160;
-	localparam integer FIFO_RAM_OUTPUT_DEPTH = 10 * 160;
+	localparam integer FIFO_RAM_OUTPUT_DEPTH = 1 * 160;
 
 	wire user_rst_n;
 	wire rst_n;

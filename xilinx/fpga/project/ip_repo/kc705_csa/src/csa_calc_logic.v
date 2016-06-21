@@ -509,8 +509,8 @@ module csa_calc_logic #(
 					csa_calc_logic_times_reg <= csa_calc_logic_times_reg_21;
 					csa_calc_logic_times_start_reg <= csa_calc_logic_times_start_reg_21;
 					csa_calc_logic_times_left_reg <= csa_calc_logic_times_left_reg_21;
-					//cb_out_reg <= cb_out;//for debug
-					cb_out_reg <= cb_out_reg_21;//for debug
+					cb_out_reg <= cb_out;//for debug
+					//cb_out_reg <= cb_out_reg_21;//for debug
 				end
 				else begin//loop over? out!!!
 					csa_calc_logic_ready <= 1;
@@ -547,20 +547,20 @@ module csa_calc_logic #(
 	assign init = (csa_calc_logic_times_start_reg == loops) ? 1 : 0;
 	wire [CYPHER_DATA_WIDTH - 1 : 0] ck_out;
 	//assign ck_out = (loops == 0) ? {16'd0, ID[8 - 1 : 0], csa_calc_logic_in_reg} : cb_out_reg;
-	assign ck_out = cb_out_reg;
-	//ck_processer #(
-	//		.AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-	//		.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
-	//		.CYPHER_DATA_WIDTH(CYPHER_DATA_WIDTH)
-	//	) ck_processer_inst(
-	//		.init(init),
-	//		.block(csa_calc_logic_block_reg),
-	//		.in(csa_calc_logic_in_reg),
-	//		.cb(cb_out_reg),
-	//		.loops(loops),
+	//assign ck_out = cb_out_reg;
+	ck_processer #(
+			.AXI_DATA_WIDTH(AXI_DATA_WIDTH),
+			.CSA_CALC_IN_WIDTH(CSA_CALC_IN_WIDTH),
+			.CYPHER_DATA_WIDTH(CYPHER_DATA_WIDTH)
+		) ck_processer_inst(
+			.init(init),
+			.block(csa_calc_logic_block_reg),
+			.in(csa_calc_logic_in_reg),
+			.cb(cb_out_reg),
+			.loops(loops),
 
-	//		.ck_out(ck_out)
-	//	);
+			.ck_out(ck_out)
+		);
 
 	reg [CYPHER_DATA_WIDTH - 1 : 0] ck_out_reg = 0;
 	always @(posedge clk) begin

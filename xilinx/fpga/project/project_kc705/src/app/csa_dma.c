@@ -135,7 +135,7 @@ int init_raw_data(int start) {
 	int use_start = start;
 
 	for(i = 0; i < RAW_DATA_SIZE / sizeof(uint32_t); i += 5) {
-		data[i + 0] = use_start;
+		data[i + 0] = use_start | 0x00000000;
 		data[i + 1] = use_start;
 		data[i + 2] = 0;
 		data[i + 3] = 50000;
@@ -212,8 +212,9 @@ void main_proc(thread_arg_t *arg) {
 				}
 
 				for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
-					printf("block:%012d in:%08x%08x times:%08x times_start:%08x out:%08x%08x\n",
-							data[i + 0],//block
+					printf("block:<%01x>%10d in:0x%08x%08x times:%10d times_start:%10d out:0x%08x%08x\n",
+							(data[i + 0] & 0xc0000000) >> 30,//block
+							data[i + 0] & 0x3fffffff,//block
 							data[i + 2],//in(high)
 							data[i + 1],//in(low)
 							data[i + 3],//times

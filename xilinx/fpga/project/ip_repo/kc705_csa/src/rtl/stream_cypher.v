@@ -143,6 +143,6 @@ stream_8bytes stream_8bytes_calc(
                        ,.ro(ro)
                        ,.cb(cbo)
                 );
-        assign cb=cbo;
+        assign cb=cbo ^ 64'h00a5d7b0d65e93b5;
 
 endmodule
