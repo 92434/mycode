@@ -16,21 +16,23 @@
 //40bits in, 48bits out
 //5byte in, 3 words out(use lower 16 bits)
 
-uint32_t raw_data[] = {
-	1, 0x00000001, 0x00000000, 50000, 0,
-	2, 0x00000002, 0x00000000, 50000, 0,
-	3, 0x00000003, 0x00000000, 50000, 0,
-	4, 0x00000004, 0x00000000, 50000, 0,
-	5, 0x00000005, 0x00000000, 50000, 0,
-	6, 0x00000006, 0x00000000, 50000, 0,
-	7, 0x00000007, 0x00000000, 50000, 0,
-	8, 0x00000008, 0x00000000, 50000, 0,
-	9, 0x00000009, 0x00000000, 50000, 0,
-	10, 0x0000000a, 0x00000000, 50000, 0,
-};
-#define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
+//uint32_t raw_data[] = {
+//	1, 0x00000001, 0x00000000, 50000, 0,
+//	2, 0x00000002, 0x00000000, 50000, 0,
+//	3, 0x00000003, 0x00000000, 50000, 0,
+//	4, 0x00000004, 0x00000000, 50000, 0,
+//	5, 0x00000005, 0x00000000, 50000, 0,
+//	6, 0x00000006, 0x00000000, 50000, 0,
+//	7, 0x00000007, 0x00000000, 50000, 0,
+//	8, 0x00000008, 0x00000000, 50000, 0,
+//	9, 0x00000009, 0x00000000, 50000, 0,
+//	10, 0x0000000a, 0x00000000, 50000, 0,
+//};
+//#define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
+uint32_t *raw_data = NULL;
+#define RAW_DATA_SIZE (5 * 4 * 1500)
 
-#define BUFSIZE (7 * 4 * 10)
+#define BUFSIZE (7 * 4 * 1500)
 
 static int stop = 0;
 static int force_stop = 0;
@@ -138,7 +140,7 @@ int init_raw_data(int start) {
 		data[i + 0] = use_start | 0x00000000;
 		data[i + 1] = use_start;
 		data[i + 2] = 0;
-		data[i + 3] = 50000;
+		data[i + 3] = 50000;//(use_start % 50000) ? (use_start % 50000) : 50000;
 		data[i + 4] = 0;
 
 		use_start++;
@@ -162,7 +164,7 @@ void main_proc(thread_arg_t *arg) {
         gettimeofday(&tv0, &tz0);
 
 	while(stop == 0) {
-		for(count = 0; count < 159;) {
+		for(count = 0; count < 1;) {
 			if(nwrite == RAW_DATA_SIZE) {
 				start = init_raw_data(start);
 				if(start >= 50000) {
@@ -192,7 +194,7 @@ void main_proc(thread_arg_t *arg) {
 
 		//usleep(100000);
 
-		for(count = 0; count < 159;) {
+		for(count = 0; count < 1;) {
 			nread = read(targ->fd, targ->buffer, BUFSIZE);
 			if(nread < 0) {
 				printf("%s\n", strerror(errno));
@@ -312,6 +314,7 @@ int main(int argc, char **argv) {
 		return ret;
 	}
 
+	raw_data = (uint32_t *)malloc(RAW_DATA_SIZE);
 	targ.buffer = (unsigned char *)malloc(BUFSIZE);
 	if(targ.buffer == 0) {
 		printf("err: no memory for targ.buffer!\n");
