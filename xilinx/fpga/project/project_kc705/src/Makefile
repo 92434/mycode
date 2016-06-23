@@ -6,14 +6,14 @@ SUB_DIRS := driver app
 
 include $(ADD_TARGET)
 
-KBUILD_CFLAGS += -DKC705_DVBS2
-#KBUILD_CFLAGS += -DKC705_CSA
-#KBUILD_CFLAGS += -DKC705_FMC_GPIO
+#export SUBJECT += KC705_DVBS2
+export SUBJECT += KC705_CSA
+#export SUBJECT += KC705_FMC_GPIO
 
 install:
 	sudo insmod driver/kc705-module.ko
 
-ifeq ($(KBUILD_CFLAGS), -DKC705_DVBS2)
+ifeq ($(SUBJECT), KC705_DVBS2)
 	sudo insmod driver/i2c-gpio.ko
 	sudo insmod driver/kc705_i2c_master.ko
 	sudo insmod driver/i2c-dev.ko
@@ -29,7 +29,7 @@ endif
 uninstall:
 #	make start_dma
 
-ifeq ($(KBUILD_CFLAGS), -DKC705_DVBS2)
+ifeq ($(SUBJECT), KC705_DVBS2)
 	-sudo rmmod kc705_spi_device
 	-sudo rmmod spidev
 	-sudo rmmod spi_bitbang
