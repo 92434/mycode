@@ -70,17 +70,18 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	localparam [1:0] IDLE = 2'b00; // This is the initial/idle state
 
 	localparam [1:0] INIT_COUNTER = 2'b01; // This state initializes the counter, ones the counter reaches C_M_START_COUNT count, the state machine changes state to INIT_WRITE
-	localparam [1:0] SEND_STREAM = 2'b10; // In this state the stream data is output through M_AXIS_TDATA
+	localparam [1:0] PREPARE_DATA = 2'b10; // This state initializes the counter, ones the counter reaches C_M_START_COUNT count, the state machine changes state to INIT_WRITE
+	localparam [1:0] SEND_STREAM = 2'b11; // In this state the stream data is output through M_AXIS_TDATA
 
 	// State variable
 	reg [1:0] mst_exec_state = IDLE;
 
 	// Example design FIFO read pointer
-	reg [bit_num - 1:0] read_pointer;
+	reg [bit_num - 1:0] read_pointer = 0;
 
 	// AXI Stream internal signals
 	//wait counter. The master waits for the user defined number of clock cycles before initiating a transfer.
-	reg [WAIT_COUNT_BITS : 0] count;
+	reg [WAIT_COUNT_BITS : 0] count = C_M_START_COUNT;
 	//streaming data valid
 	wire axis_tvalid;
 	wire axis_tlast;
@@ -99,21 +100,23 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	assign M_AXIS_TLAST = axis_tlast;
 	assign M_AXIS_TSTRB = {(C_M_AXIS_TDATA_WIDTH / 8){1'b1}};
 
-	wire ren;
+	reg ren_0 = 0;
 	// Control state machine implementation
 	always @(posedge M_AXIS_ACLK) begin
 		// Synchronous reset (active low)
 		if (!M_AXIS_ARESETN) begin
 			mst_exec_state <= IDLE;
+			ren_0 <= 0;
 		end
 		else begin
+			ren_0 <= 0;
 			case (mst_exec_state)
 				// The slave starts accepting tdata when
 				// there tvalid is asserted to mark the
 				// presence of valid streaming data
 				IDLE: begin
 					if(r_ready == 1) begin
-						count <= 0;
+						count <= C_M_START_COUNT;
 						mst_exec_state <= INIT_COUNTER;
 					end
 					else begin
@@ -124,12 +127,21 @@ module axi4_stream_master_v1_0_M00_AXIS #
 				// there tvalid is asserted to mark the
 				// presence of valid streaming data
 				INIT_COUNTER: begin
-					if(count == C_M_START_COUNT - 1) begin
+					if(count == 0) begin
+						mst_exec_state <= PREPARE_DATA;
+					end
+					else begin
+
+						count <= count - 1;
+					end
+				end
+
+				PREPARE_DATA: begin
+					if(ren_0 == 1) begin
 						mst_exec_state <= SEND_STREAM;
 					end
 					else begin
-						count <= count + 1;
-						mst_exec_state <= INIT_COUNTER;
+						ren_0 <= 1;
 					end
 				end
 
@@ -137,6 +149,7 @@ module axi4_stream_master_v1_0_M00_AXIS #
 					// The example design streaming master functionality starts
 					// when the master drives output tdata from the FIFO and the slave
 					// has finished storing the S_AXIS_TDATA
+
 					if(axis_tlast == 1) begin
 						mst_exec_state <= IDLE;
 					end
@@ -154,12 +167,21 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	//axis_tvalid is asserted when the control state machine's state is SEND_STREAM and
 	//number of output streaming data is less than the NUMBER_OF_OUTPUT_WORDS.
 	assign axis_tvalid = (mst_exec_state == SEND_STREAM) ? 1 : 0;
-	assign ren = (axis_tvalid == 1 && M_AXIS_TREADY == 1) ? 1 : 0;
+
+	wire data_valid;
+	assign data_valid = ((axis_tvalid == 1) && (M_AXIS_TREADY == 1)) ? 1 : 0;
+
 
 	// AXI tlast generation
-	// axis_tlast is asserted number of output streaming data is NUMBER_OF_OUTPUT_WORDS - 1
+	// axis_tlast is asserted number of output streaming data is NUMBER_OF_OUTPUT_WORDS
 	// (0 to NUMBER_OF_OUTPUT_WORDS - 1)
-	assign axis_tlast = (ren == 1 && read_pointer == NUMBER_OF_OUTPUT_WORDS - 1) ? 1 : 0;
+	assign axis_tlast = ((data_valid == 1) && (read_pointer >= NUMBER_OF_OUTPUT_WORDS - 1)) ? 1 : 0;
+
+	wire ren_1;
+	assign ren_1 = ((data_valid == 1) && (read_pointer < NUMBER_OF_OUTPUT_WORDS - 1)) ? 1 : 0;
+
+	wire ren;
+	assign ren = ((ren_0 == 0) && (ren_1 == 0)) ? 0 : 1;
 
 	//read_pointer pointer
 	always@(posedge M_AXIS_ACLK) begin
@@ -169,8 +191,8 @@ module axi4_stream_master_v1_0_M00_AXIS #
 		else begin
 			// read pointer is incremented after every read from the FIFO
 			// when FIFO read signal is enabled.
-			if (ren == 1) begin
-				if(read_pointer == (NUMBER_OF_OUTPUT_WORDS - 1)) begin
+			if(data_valid == 1) begin
+				if(read_pointer >= NUMBER_OF_OUTPUT_WORDS - 1) begin
 					read_pointer <= 0;
 				end
 				else begin

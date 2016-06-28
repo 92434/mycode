@@ -125,6 +125,13 @@ module tb #(
 					end
 				end
 				1: begin
+					if(ren == 1) begin
+						r_state <= 2;
+					end
+					else begin//error
+					end
+				end
+				2: begin
 					if(rdata_reg + 1 == rdata) begin
 					end
 					else begin
@@ -132,9 +139,9 @@ module tb #(
 					end
 					rdata_reg <= rdata;
 
-					r_state <= 2;
+					r_state <= 3;
 				end
-				2: begin
+				3: begin
 					if((rcount >= 0) && (rcount < 100 - 1)) begin
 						rcount <= rcount + 1;
 					end

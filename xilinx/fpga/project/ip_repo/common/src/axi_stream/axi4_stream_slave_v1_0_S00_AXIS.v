@@ -63,10 +63,10 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 
 	wire axis_tready;
 	// State variable
-	reg mst_exec_state;
+	reg mst_exec_state = 0;
 
 	// FIFO write pointer
-	reg [bit_num - 1 : 0] write_pointer;
+	reg [bit_num - 1 : 0] write_pointer = 0;
 	// sink has accepted all the streaming data and stored in FIFO
 	//
 	wire writes_done;
@@ -124,10 +124,7 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 		end
 	end
 
-	wire error_full_use;
-	assign error_full_use = (error_full == 0 && error_full_reg == 0) ? 0 : 1;
-
-	assign axis_tready = ((S_AXIS_TVALID == 1) && (mst_exec_state == WRITE_FIFO) && (error_full_use == 0));
+	assign axis_tready = ((S_AXIS_TVALID == 1) && (mst_exec_state == WRITE_FIFO) && (error_full == 0));
 
 	wire wen;
 	assign wen = axis_tready;

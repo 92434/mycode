@@ -66,7 +66,7 @@ module my_fifo #
 		end
 	end
 
-	always @(negedge rclk) begin
+	always @(posedge rclk) begin
 		if(rst_n == 0) begin
 			r_index <= 0;
 		end
