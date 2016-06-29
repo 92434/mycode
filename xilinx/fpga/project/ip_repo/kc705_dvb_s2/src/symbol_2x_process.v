@@ -21,7 +21,8 @@ module symbol_2x_process # (
 	wire [31 : 0] symbol_2x_out_origin_fifo;
 	assign symbol_2x_out_origin = {symbol_2x_re_out_origin, symbol_2x_im_out_origin};
 
-	reg r_enable = 0;
+	wire r_enable;
+	reg r_enable_reg = 0;
 	wire r_ready;
 	wire error_full;
 	wire error_empty;
@@ -43,18 +44,14 @@ module symbol_2x_process # (
 			.error_empty(error_empty)
 		);
 
+	assign r_enable = r_ready;
+
 	always @(posedge fs_en2) begin
 		if(rst_n == 0) begin
-			r_enable <= 0;
+			r_enable_reg <= 0;
 		end
 		else begin
-			r_enable <= 0;
-
-			if(r_ready == 1) begin
-				r_enable <= 1;
-			end
-			else begin
-			end
+			r_enable_reg <= r_enable;
 		end
 	end
 
@@ -67,7 +64,7 @@ module symbol_2x_process # (
 		else begin
 			symbol_2x_oe_enable <= 0;
 
-			if(r_enable == 1) begin
+			if(r_enable_reg == 1) begin
 				symbol_2x_oe_enable <= 1;
 				symbol_2x_out_origin_fifo_reg <= symbol_2x_out_origin_fifo;
 			end

@@ -114,23 +114,13 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 	// The example design sink is always ready to accept the S_AXIS_TDATA until
 	// the FIFO is not filled with NUMBER_OF_INPUT_WORDS number of input words.
 	
-	reg error_full_reg = 0;
-	always @(posedge S_AXIS_ACLK) begin
-		if(S_AXIS_ARESETN == 0) begin
-			error_full_reg <= 1;
-		end
-		else begin
-			error_full_reg <= error_full;
-		end
-	end
-
 	assign axis_tready = ((S_AXIS_TVALID == 1) && (mst_exec_state == WRITE_FIFO) && (error_full == 0));
 
 	wire wen;
 	assign wen = axis_tready;
 
 	wire s_axis_wlast;
-	assign s_axis_wlast = (wen == 1 && write_pointer == (NUMBER_OF_INPUT_WORDS - 1)) ? 1 : 0;
+	assign s_axis_wlast = ((wen == 1) && (write_pointer >= NUMBER_OF_INPUT_WORDS - 1)) ? 1 : 0;
 	assign writes_done = ((s_axis_wlast == 1) || (S_AXIS_TLAST == 1)) ? 1 : 0;
 
 	always@(posedge S_AXIS_ACLK) begin
@@ -141,7 +131,7 @@ module axi4_stream_slave_v1_0_S00_AXIS #
 			// write pointer is incremented after every write to the FIFO
 			// when FIFO write signal is enabled.
 			if(wen == 1) begin
-				if(write_pointer == (NUMBER_OF_INPUT_WORDS - 1)) begin
+				if(write_pointer >= NUMBER_OF_INPUT_WORDS - 1) begin
 					write_pointer <= 0;
 				end
 				else begin

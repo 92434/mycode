@@ -67,14 +67,14 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	// Define the states of state machine
 	// The control state machine oversees the writing of input streaming data to the FIFO,
 	// and outputs the streaming data from the FIFO
-	localparam [1:0] IDLE = 2'b00; // This is the initial/idle state
-
-	localparam [1:0] INIT_COUNTER = 2'b01; // This state initializes the counter, ones the counter reaches C_M_START_COUNT count, the state machine changes state to INIT_WRITE
-	localparam [1:0] PREPARE_DATA = 2'b10; // This state initializes the counter, ones the counter reaches C_M_START_COUNT count, the state machine changes state to INIT_WRITE
-	localparam [1:0] SEND_STREAM = 2'b11; // In this state the stream data is output through M_AXIS_TDATA
+	localparam integer IDLE = 0; // This is the initial/idle state
+	localparam integer INIT_COUNTER = 1; // This state initializes the counter, ones the counter reaches C_M_START_COUNT count, the state machine changes state to INIT_WRITE
+	localparam integer PREPARE_1 = 2;
+	localparam integer PREPARE_2 = 3; // This state initializes the counter, ones the counter reaches C_M_START_COUNT count, the state machine changes state to INIT_WRITE
+	localparam integer SEND_STREAM = 4;
 
 	// State variable
-	reg [1:0] mst_exec_state = IDLE;
+	integer mst_exec_state = IDLE;
 
 	// Example design FIFO read pointer
 	reg [bit_num - 1:0] read_pointer = 0;
@@ -128,7 +128,7 @@ module axi4_stream_master_v1_0_M00_AXIS #
 				// presence of valid streaming data
 				INIT_COUNTER: begin
 					if(count == 0) begin
-						mst_exec_state <= PREPARE_DATA;
+						mst_exec_state <= PREPARE_1;
 					end
 					else begin
 
@@ -136,12 +136,18 @@ module axi4_stream_master_v1_0_M00_AXIS #
 					end
 				end
 
-				PREPARE_DATA: begin
+				PREPARE_1: begin
+					ren_0 <= 1;
+
+					mst_exec_state <= PREPARE_2;
+				end
+
+				PREPARE_2: begin
 					if(ren_0 == 1) begin
 						mst_exec_state <= SEND_STREAM;
 					end
 					else begin
-						ren_0 <= 1;
+						mst_exec_state <= IDLE;
 					end
 				end
 

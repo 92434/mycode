@@ -155,6 +155,14 @@ module csa_calc_logic_wrap_tb #(
 					r_state <= 2;
 				end
 				2: begin
+					if(csa_out_ren[current_r_index] == 1) begin
+						r_state <= 3;
+					end
+					else begin
+						r_state <= 0;
+					end
+				end
+				3: begin
 					csa_calc_logic_block_o <= csa_out[current_r_index][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 					csa_calc_logic_in_o <= csa_out[current_r_index][AXI_DATA_WIDTH * 3 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1];
 					csa_calc_logic_times_o <= csa_out[current_r_index][AXI_DATA_WIDTH * 4 - 1 : AXI_DATA_WIDTH * 3];
@@ -162,13 +170,13 @@ module csa_calc_logic_wrap_tb #(
 					csa_calc_logic_out <= csa_out[current_r_index][AXI_DATA_WIDTH * 7 - 1 : AXI_DATA_WIDTH * 5];
 
 					csa_ready <= 1;
-					if(csa_calc_logic_block_o_reg + 1 == csa_out[current_r_index][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0]) begin
+					if(csa_calc_logic_block_o_reg + 1 == csa_calc_logic_block_o) begin
 					end
 					else begin
 						csa_error <= 1;
 					end
 
-					csa_calc_logic_block_o_reg <= csa_out[current_r_index][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					csa_calc_logic_block_o_reg <= csa_calc_logic_block_o;
 
 					r_state <= 0;
 				end

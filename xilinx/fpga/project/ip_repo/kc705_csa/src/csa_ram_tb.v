@@ -245,42 +245,46 @@ module csa_ram_tb #(
 				end
 				1: begin
 					csa_out_ren <= 1;
-					csa_calc_logic_block_o <= csa_out_rdata;
 
 					r_state <= 2;
 				end
 				2: begin
 					csa_out_ren <= 1;
-					csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0] <= csa_out_rdata;
+					csa_calc_logic_block_o <= csa_out_rdata;
 
 					r_state <= 3;
 				end
 				3: begin
 					csa_out_ren <= 1;
-					csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1] <= csa_out_rdata[AXI_DATA_WIDTH * 1 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 0];
+					csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0] <= csa_out_rdata;
 
 					r_state <= 4;
 				end
 				4: begin
 					csa_out_ren <= 1;
-					csa_calc_logic_times_o <= csa_out_rdata;
+					csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1] <= csa_out_rdata[AXI_DATA_WIDTH * 1 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 0];
 
 					r_state <= 5;
 				end
 				5: begin
 					csa_out_ren <= 1;
-					csa_calc_logic_times_start_o <= csa_out_rdata;
+					csa_calc_logic_times_o <= csa_out_rdata;
 
 					r_state <= 6;
 				end
 				6: begin
 					csa_out_ren <= 1;
-					csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0] <= csa_out_rdata;
+					csa_calc_logic_times_start_o <= csa_out_rdata;
 
 					r_state <= 7;
 				end
 				7: begin
+					csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0] <= csa_out_rdata;
+					r_state <= 8;
+				end
+				8: begin
 					csa_calc_logic_out[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1] <= csa_out_rdata;
+
 					csa_ready <= 1;
 					if(csa_calc_logic_block_o_reg + 1 == csa_calc_logic_block_o) begin
 					end

@@ -111,4 +111,29 @@ module csa_calc_logic_tb #(
 			.csa_calc_logic_times_start_o(csa_calc_logic_times_start_o),
 			.csa_calc_logic_out(csa_calc_logic_out)
 		);
+
+	reg [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in_o_reg = 0;
+	reg error_reg = 0;
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
+			csa_calc_logic_in_o_reg <= 0;
+			error_reg <= 0;
+		end
+		else begin
+			error_reg <= 0;
+
+			if(csa_calc_logic_ready == 1) begin
+				if(csa_calc_logic_in_o_reg + 1 == csa_calc_logic_in_o) begin
+				end
+				else begin
+					error_reg <= 1;
+				end
+
+				csa_calc_logic_in_o_reg <= csa_calc_logic_in_o;
+			end
+			else begin
+			end
+		end
+	end
+
 endmodule

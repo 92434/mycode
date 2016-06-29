@@ -222,7 +222,6 @@ module csa_ram #(
 			csa_in_ren <= 0;
 			csa_in_wen <= 0;
 
-
 			if(csa_current_channel_changed == 1) begin
 				csa_in_valid <= 0;
 			end
@@ -240,47 +239,50 @@ module csa_ram #(
 					end
 				end
 				1: begin
-					csa_calc_logic_block <= csa_in_rdata;
-
 					csa_in_ren <= 1;
 
 					w_state <= 2;
 				end
 				2: begin
-					csa_calc_logic_in[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0] <= csa_in_rdata;
+					csa_calc_logic_block <= csa_in_rdata;
 
 					csa_in_ren <= 1;
 
 					w_state <= 3;
 				end
 				3: begin
-					csa_calc_logic_in[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1] <= csa_in_rdata[AXI_DATA_WIDTH * 1 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 0];
+					csa_calc_logic_in[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0] <= csa_in_rdata;
 
 					csa_in_ren <= 1;
 
 					w_state <= 4;
 				end
 				4: begin
-					csa_calc_logic_times <= csa_in_rdata;
+					csa_calc_logic_in[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1] <= csa_in_rdata[AXI_DATA_WIDTH * 1 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 0];
 
 					csa_in_ren <= 1;
 
 					w_state <= 5;
 				end
 				5: begin
-					csa_calc_logic_times_start <= csa_in_rdata;
+					csa_calc_logic_times <= csa_in_rdata;
 
 					w_state <= 6;
 				end
 				6: begin
+					csa_calc_logic_times_start <= csa_in_rdata;
+
+					w_state <= 7;
+				end
+				7: begin
 					if(csa_in_full[w_index] == 0) begin
 
-						w_state <= 7;
+						w_state <= 8;
 					end
 					else begin
 					end
 				end
-				7 : begin
+				8: begin
 					csa_in_wen[w_index] <= 1;
 					if(w_index == csa_current_channel) begin
 						csa_in_valid <= 1;
@@ -293,9 +295,9 @@ module csa_ram #(
 					else begin
 					end
 
-					w_state <= 8;
+					w_state <= 9;
 				end
-				8: begin
+				9: begin
 					if(w_index == CSA_CALC_INST_NUM - 1) begin
 						w_index <= 0;
 					end
@@ -361,6 +363,14 @@ module csa_ram #(
 					r_state <= 2;
 				end
 				2: begin
+					if(csa_out_ren[r_index] == 1) begin
+						r_state <= 3;
+					end
+					else begin
+						r_state <= 0;
+					end
+				end
+				3: begin
 					csa_calc_logic_block_o <= csa_out[r_index][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 					csa_calc_logic_in_o <= csa_out[r_index][AXI_DATA_WIDTH * 3 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1];
 					csa_calc_logic_times_o <= csa_out[r_index][AXI_DATA_WIDTH * 4 - 1 : AXI_DATA_WIDTH * 3];
@@ -380,55 +390,55 @@ module csa_ram #(
 					else begin
 					end
 
-					r_state <= 3;
-				end
-				3: begin
-					if(csa_out_error_full == 0) begin
-						csa_out_wen <= 1;
-						csa_out_wdata <= csa_calc_logic_block_o;
-					end
-					else begin
-					end
-
 					r_state <= 4;
 				end
 				4: begin
-					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					if(csa_out_error_full == 0) begin
+						csa_out_wen <= 1;
+						csa_out_wdata <= csa_calc_logic_block_o;
 
-					r_state <= 5;
+						r_state <= 5;
+					end
+					else begin
+					end
 				end
 				5: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};
+					csa_out_wdata <= csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 
 					r_state <= 6;
 				end
 				6: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_times_o;
+					csa_out_wdata <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};
 
 					r_state <= 7;
 				end
 				7: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_times_start_o;
+					csa_out_wdata <= csa_calc_logic_times_o;
 
 					r_state <= 8;
 				end
 				8: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					csa_out_wdata <= csa_calc_logic_times_start_o;
 
 					r_state <= 9;
 				end
 				9: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
+					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 
 					r_state <= 10;
 				end
 				10: begin
+					csa_out_wen <= 1;
+					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
+
+					r_state <= 11;
+				end
+				11: begin
 					if(r_index == CSA_CALC_INST_NUM - 1) begin
 						r_index <= 0;
 					end

@@ -38,8 +38,13 @@ module csa_calc_logic #(
 		end
 	end
 
+	reg fifo_ready_reg_19 = 0;
 	reg fifo_ready_reg_20 = 0;
 	reg fifo_ready_reg_21 = 0;
+
+	reg fifo_ren_reg_19 = 0;
+	reg fifo_ren_reg_20 = 0;
+	reg fifo_ren_reg_21 = 0;
 
 	wire [CYPHER_DATA_WIDTH - 1 : 0] cb_out;
 
@@ -184,10 +189,15 @@ module csa_calc_logic #(
 
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
+			fifo_ren <= 0;
+
+			fifo_ready_reg_19 <= 0;
 			fifo_ready_reg_20 <= 0;
 			fifo_ready_reg_21 <= 0;
 
-			fifo_ren <= 0;
+			fifo_ren_reg_19 <= 0;
+			fifo_ren_reg_20 <= 0;
+			fifo_ren_reg_21 <= 0;
 
 			csa_calc_logic_ready <= 0;
 
@@ -340,10 +350,15 @@ module csa_calc_logic #(
 			csa_calc_logic_times_start_reg_21 <= 0;
 		end
 		else begin
-			fifo_ready_reg_20 <= fifo_ready;
+			fifo_ren <= 0;
+
+			fifo_ready_reg_19 <= fifo_ready;
+			fifo_ready_reg_20 <= fifo_ready_reg_19;
 			fifo_ready_reg_21 <= fifo_ready_reg_20;
 
-			fifo_ren <= 0;
+			fifo_ren_reg_19 <= fifo_ren;
+			fifo_ren_reg_20 <= fifo_ren_reg_19;
+			fifo_ren_reg_21 <= fifo_ren_reg_20;
 
 			csa_calc_logic_ready <= 0;
 
@@ -492,8 +507,8 @@ module csa_calc_logic #(
 			else begin
 			end
 
-			if(csa_calc_logic_times_left_reg_19 <= 0) begin
-				if(fifo_ready == 1) begin//data is ready
+			if(csa_calc_logic_times_left_reg_18 <= 0) begin
+				if((fifo_ready == 1) && (fifo_ren == 0)) begin//data is ready
 					fifo_ren <= 1;
 				end
 				else begin
@@ -524,16 +539,21 @@ module csa_calc_logic #(
 			else begin
 			end
 
+			//fifo_ready_reg_21 == 1 && fifo_ren_reg_21 == 1----should not read
+			//fifo_ready_reg_21 == 1 && fifo_ren_reg_21 == 0----read
+			//fifo_ready_reg_21 == 0 && fifo_ren_reg_21 == 1----error
+			//fifo_ready_reg_21 == 0 && fifo_ren_reg_21 == 0----no data
 			if(csa_calc_logic_times_left_reg_21 <= 0) begin
-				if(fifo_ready_reg_21 == 0) begin//data is not ready
+				if((fifo_ready_reg_21 == 1) && (fifo_ren_reg_21 == 0)) begin
+					//read a new data
+				end
+				else begin//data is not ready
 					csa_calc_logic_block_reg <= 0;
 					csa_calc_logic_in_reg <= 0;
 					csa_calc_logic_times_reg <= 0;
 					csa_calc_logic_times_start_reg <= 0;
 					csa_calc_logic_times_left_reg <= 0;
 					cb_out_reg <= 0;//for debug
-				end
-				else begin
 				end
 			end
 			else begin

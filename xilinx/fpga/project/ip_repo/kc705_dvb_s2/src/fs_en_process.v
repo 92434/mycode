@@ -38,7 +38,7 @@ module fs_en_process # (
 	assign sys_clk_using = sys_clk;
 
 	wire rdata;
-	reg r_enable = 0;
+	wire r_enable;
 	wire r_ready;
 	wire error_full;
 	wire error_empty;
@@ -60,20 +60,7 @@ module fs_en_process # (
 			.error_empty(error_empty)
 		);
 
-	always @(posedge sys_clk_using) begin
-		if(rst_n == 0) begin
-			r_enable <= 0;
-		end
-		else begin
-			r_enable <= 0;
-
-			if(r_ready == 1) begin
-				r_enable <= 1;
-			end
-			else begin
-			end
-		end
-	end
+	assign r_enable = r_ready;
 
 	always @(posedge sys_clk_using) begin
 		if(rst_n == 0) begin
