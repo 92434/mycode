@@ -1,0 +1,54 @@
+一：安装Aircrack-ng
+//安装依赖软件包
+sudo apt-get install build-essential libssl-dev iw
+
+//下载软件包并解压缩
+wget http://download.aircrack-ng.org/aircrack-ng-1.1.tar.gz
+tar -zxvf aircrack-ng-1.1.tar.gz
+cd aircrack-ng-1.1
+
+//进入目录后，用gedit编辑器打开 common.mak
+gedit common.mak
+修改下面的行:
+CFLAGS ?= -g -W -Wall -Werror -O3
+
+//修改后的结果：
+CFLAGS ?= -g -W -Wall -O3
+
+//执行安装
+make
+sudo make install
+
+二：安装Reaver
+这个网址下载 reaver 源代码 http://code.google.com/p/reaver-wps
+wget http://reaver-wps.googlecode.com/files/ ... 1.4.tar.gz
+
+解压 tar -xzvf reaver-1.4.tar.gz
+
+安装必要的软件依赖库和工具
+在您编译 reaver 前需要先安装 pcaplib 等工具，后面还需要 aircrack-ng
+sudo apt-get install libpcap-dev sqlite3 libsqlite3-dev libpcap0.8-dev
+
+编译和安装
+配置和编译 Reaver
+cd reaver-1.4
+cd src
+./configure
+make
+
+安装 Reaver
+sudo make install
+
+三：安装libssl0.9.8（libcrypto.so.0和libssl.so.0）
+sudo apt-get install libssl0.9.8
+
+四：安装minidwep-gtk.deb
+在这个网址下载minidwep-gtk-30419-ubuntu1204.deb
+viewtopic.php?f=39&t=372058&start=0
+
+双击安装
+
+五：运行minidwep-gtk
+sudo minidwep-gtk
+
+好了，到这里就安装好了，现在你想干啥就干啥
