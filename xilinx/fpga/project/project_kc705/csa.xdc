@@ -63,8 +63,8 @@ set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[7]}]
 # ----------------------------------------------------------------------------------------------------
 # bitstream constrain
 # ----------------------------------------------------------------------------------------------------
-
-set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
+set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]
+set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
 
 ##Encryption Settings
 #set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]

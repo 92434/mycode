@@ -27,7 +27,7 @@ module i2s_receiver_wapper #(
 	localparam integer I2S_DATA_BIT_WIDTH = 24;
 	localparam integer FIFO_DATA_WIDTH = 16;
 
-	reg [I2S_RECEIVER_NUM - 1 : 0] local_r_enable;
+	reg [I2S_RECEIVER_NUM - 1 : 0] local_r_enable = 0;
 
 	wire [FIFO_DATA_WIDTH - 1 : 0] local_rdata [I2S_RECEIVER_NUM - 1:0];
 
@@ -67,31 +67,31 @@ module i2s_receiver_wapper #(
 	localparam integer LOCAL_BULK_OF_DATA = 15;
 
 	integer i2s_index = 0;
-	integer cache_state = 0;
+	integer i2s_index_reg = 0;
 	integer local_rdata_count = 0;
+	reg [I2S_RECEIVER_NUM - 1 : 0] local_r_enable_reg = 0;
+
+	integer cache_state = 0;
 
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			local_r_enable <= 0;
-			wen <= 0;
 
 			i2s_index <= 0;
+			i2s_index_reg <= 0;
 			local_rdata_count <= 0;
-
-			wdata <= 0;
+			local_r_enable_reg <= 0;
 
 			cache_state <= 0;
 		end
 		else begin
 			local_r_enable <= 0;
-			wen <= 0;
+			local_r_enable_reg <= local_r_enable;
+			i2s_index_reg <= i2s_index;
 
 			case(cache_state)
 				0: begin
-
 					if(local_r_ready[i2s_index] == 1) begin
-						local_r_enable[i2s_index] <= 1;
-
 						local_rdata_count <= 0;
 
 						cache_state <= 1;
@@ -107,17 +107,11 @@ module i2s_receiver_wapper #(
 				end
 				1: begin
 					if((local_rdata_count >= 0) && (local_rdata_count < LOCAL_BULK_OF_DATA)) begin
-						if(local_rdata_count != LOCAL_BULK_OF_DATA - 1) begin
-							local_r_enable[i2s_index] <= 1;
-						end
-
-						wen <= 1;
-						wdata <= {{(FIFO_DATA_WIDTH){1'b0}}, local_rdata[i2s_index]};
-
+						local_r_enable[i2s_index] <= 1;
 
 						local_rdata_count <= local_rdata_count + 1;
 					end
-					else begin
+					else begin//local_rdata_count == LOCAL_BULK_OF_DATA
 						if((i2s_index >= 0) && (i2s_index < I2S_RECEIVER_NUM - 1)) begin
 							i2s_index <= i2s_index + 1;
 						end
@@ -134,4 +128,23 @@ module i2s_receiver_wapper #(
 			endcase
 		end
 	end
+
+	always @(posedge wclk) begin
+		if(rst_n == 0) begin
+			wen <= 0;
+			wdata <= 0;
+
+		end
+		else begin
+			wen <= 0;
+
+			if(local_r_enable_reg[i2s_index_reg] == 1) begin
+				wen <= 1;
+				wdata <= {{(FIFO_DATA_WIDTH){1'b0}}, local_rdata[i2s_index_reg]};
+			end
+			else begin
+			end
+		end
+	end
+
 endmodule

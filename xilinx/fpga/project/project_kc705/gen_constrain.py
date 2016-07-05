@@ -838,7 +838,8 @@ def gen_myip_constrain():
 
 def gen_bitstream_constrain():
 	txt = """
-set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
+set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]
+set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
 
 ##Encryption Settings
 #set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]

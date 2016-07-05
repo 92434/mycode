@@ -1,6 +1,6 @@
 `timescale 1ns/1ns
 
-module receive_data_from_i2s #
+module i2s_slave_interface #
 	(
 		parameter integer I2S_DATA_BIT_WIDTH = 24
 	)
@@ -16,38 +16,37 @@ module receive_data_from_i2s #
 
 
 
-	integer count = I2S_DATA_BIT_WIDTH;
 	reg lrstate = 0;
+	integer count = I2S_DATA_BIT_WIDTH;
 
 	always @(posedge bclk) begin
 		if(rst_n == 0'b0) begin
+			i2s_received_data[I2S_DATA_BIT_WIDTH] <= lrclk;
 			s_data_valid <= 0;
 			lrstate <= lrclk;
-			i2s_received_data[I2S_DATA_BIT_WIDTH] <= lrclk;
 			count <= I2S_DATA_BIT_WIDTH - 1;
 		end
 		else begin
+			s_data_valid <= 0;
+			
 			if(lrstate != lrclk) begin
-				s_data_valid <= 0;
-				lrstate <= lrclk;
 				i2s_received_data[I2S_DATA_BIT_WIDTH] <= lrclk;
+				lrstate <= lrclk;
 				count <= I2S_DATA_BIT_WIDTH - 1;
 			end
 			else begin
-				if(s_data_valid == 0) begin
-					i2s_received_data[count] <= sdata;
+				i2s_received_data[count] <= sdata;
 
-					if((count > 0) && (count < I2S_DATA_BIT_WIDTH)) begin
-						count <= count - 1;
-					end
-					else begin
-						s_data_valid <= 1;
-					end
+				if((count > 0) && (count <= I2S_DATA_BIT_WIDTH - 1)) begin
+					count <= count - 1;
 				end
-				else begin
+				else if(count == 0) begin//count == 0
+					s_data_valid <= 1;
+					count <= I2S_DATA_BIT_WIDTH;
+				end
+				else begin//count == I2S_DATA_BIT_WIDTH
 				end
 			end
 		end
 	end
-
 endmodule
