@@ -4,13 +4,7 @@
 #include "pcie_tr_thread.h"
 #include "utils/xiaofei_debug.h"
 #include "eg9013f_nz_fb.h"
-#if defined(KC705_DVBS2)
-#include "dvbs2_conf/dvbs2_dma_config.h"
-#elif defined(KC705_CSA)
-#include "csa_conf/csa_dma_config.h"
-#elif defined(KC705_FMC_GPIO)
-#include "fmc_gpio_conf/fmc_gpio_dma_config.h"
-#endif
+#include "dma_conf.h"
 #include "axi_cdma.h"
 #include "axi_dma.h"
 #include "pseudo_dma.h"

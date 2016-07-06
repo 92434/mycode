@@ -7,8 +7,9 @@ SUB_DIRS := driver app
 include $(ADD_TARGET)
 
 #export SUBJECT += KC705_DVBS2
-export SUBJECT += KC705_CSA
+#export SUBJECT += KC705_CSA
 #export SUBJECT += KC705_FMC_GPIO
+export SUBJECT += KC705_I2S_RECEIVER_TEST
 
 install:
 	sudo insmod driver/kc705-module.ko

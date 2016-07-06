@@ -408,7 +408,7 @@ io_des_map = {
 		'FMC_LPC_LA23_P' : 'SPI_SCK',
 }
 
-#io_des_map = {}
+io_des_map = {}
 
 def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, start, count):
 	print '-' * 100
@@ -486,13 +486,13 @@ def gen_kc705_pins_resistor(support_package_pins, kc705_pins, pin_resistor_map):
 	kc705_pins_resistor = []
 	for i in kc705_pins:
 		if not i[0] in support_package_pins.values():
-			#print '%s can not be controled!' %(str(i))
+			print '%s can not be controled!' %(str(i))
 			continue
 		if not i[1] in ['J2', 'J22']:
-			#print '%s is not for fmc!' %(str(i))
+			print '%s is not for fmc!' %(str(i))
 			continue
 		if not i[3] in pin_resistor_map.keys():
-			#print '%s can not find resistor!' %(str(i))
+			print '%s can not find resistor!' %(str(i))
 			continue
 
 		kc705_pins_resistor.append(
@@ -685,7 +685,7 @@ myip_fmc_signal = [
 	('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
 ]
 
-#myip_fmc_signal = []
+myip_fmc_signal = []
 
 def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 	constrain = []
@@ -760,7 +760,7 @@ def gen_myip_constrain():
 		('IO_L4N_T0_33', 'Y10', 'lcm_data[7]', 'LVCMOS15'),
 	]
 
-#	myip_extra_signal = []
+	myip_extra_signal = []
 
 	extra_property = {
 		#'i2s_receiver_bclk': ['CLOCK_DEDICATED_ROUTE FALSE'],
@@ -803,6 +803,8 @@ def gen_myip_constrain():
 		'symbol_2x_im_out[14]' : ['slew FAST'],
 		'symbol_2x_im_out[15]' : ['slew FAST'],
 	}
+
+        extra_property = []
 
 	fmc_io_stand_except = [
 	]
