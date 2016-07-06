@@ -10,6 +10,8 @@ list_buffer_t *init_list_buffer(void) {
 		goto exit;
 	}
 
+	mutex_init(&list->list_buffer_lock);
+
 exit:
 	return list;
 }
@@ -114,29 +116,35 @@ release_list:
 
 int read_buffer(char *buffer, int size, list_buffer_t *list) {
 	char *data;
-	buffer_node_t *node;
+	buffer_node_t *read_node;
+	buffer_node_t local_node;
 	int read_count = 0;
 	int read_start, read_end;
 	int read_offset, write_offset;
 
-	node = list_entry(list->read, buffer_node_t, list);
-	read_offset = node->read_offset;
-	write_offset = node->write_offset;
+	mutex_lock(&list->list_buffer_lock);
+	read_node = list_entry(list->read, buffer_node_t, list);
+	local_node = *read_node;
+	mutex_unlock(&list->list_buffer_lock);
+
+
+	read_offset = local_node.read_offset;
+	write_offset = local_node.write_offset;
 
 	read_start = read_offset;
 	read_end = read_start + size;
 
-	if(read_end > node->size) {
-		read_end = node->size;
+	if(read_end > local_node.size) {
+		read_end = local_node.size;
 	}
 
 	if((read_start <= write_offset) && (write_offset < read_end)) {
 		read_end = write_offset;
 	}
 
-	//myprintf("read node:%p(%d-%d)\n", (void *)node, read_start, read_end);
+	//myprintf("read read_node:%p(%d-%d)\n", (void *)read_node, read_start, read_end);
 
-	data = node->buffer + read_start;
+	data = local_node.buffer + read_start;
 
 	read_count = read_end - read_start;
 
@@ -144,57 +152,64 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 		memcpy(buffer, data, read_count);
 	}
 
-	if(read_end == node->size) {
-		list->read = list->read->next;
-	}
+	mutex_lock(&list->list_buffer_lock);
+	read_node->read_offset = read_end;
 
-	node->read_offset = read_end;
+	if(read_end == local_node.size) {
+		list->read = list->read->next;
+		read_node = list_entry(list->read, buffer_node_t, list);
+		read_node->read_offset = 0;
+	}
+	mutex_unlock(&list->list_buffer_lock);
 
 	return read_count;
 }
 
 int write_buffer(char *buffer, int size, list_buffer_t *list) {
 	char *data;
-	buffer_node_t *node;
+	buffer_node_t *write_node;
+	buffer_node_t *read_node;
+	buffer_node_t local_node;
+	buffer_node_t local_read_node;
 	int write_count = 0;
 	int write_start, write_end;
 	int read_offset, write_offset;
 
-	node = list_entry(list->write, buffer_node_t, list);
-	read_offset = node->read_offset;
-	write_offset = node->write_offset;
+	mutex_lock(&list->list_buffer_lock);
+	write_node = list_entry(list->write, buffer_node_t, list);
+	read_node = list_entry(list->read, buffer_node_t, list);
+	local_node = *write_node;
+	local_read_node = *read_node;
+	mutex_unlock(&list->list_buffer_lock);
 
-	if(write_offset == node->size) {
-		write_start = 0;
-	} else {
-		write_start = write_offset;
-	}
+	read_offset = local_node.read_offset;
+	write_offset = local_node.write_offset;
+
+	write_start = write_offset;
 
 	write_end = write_start + size;
-	if(write_end > node->size) {
-		write_end = node->size;
+	if(write_end > local_node.size) {
+		write_end = local_node.size;
 	}
 	
 	{
-		buffer_node_t *read_node;
-		read_node = list_entry(list->read, buffer_node_t, list);
 
 		if(
 				(list->read == list->write)
 				&& (write_start < read_offset)
 				&& (read_offset <= write_end)
 				) {
-			myprintf("will overwrite at:%p(%d-%d)-%p(%d)!\n", (void *)node, write_start, write_end, (void *)read_node, read_offset);
+			myprintf("will overwrite at:%p(%d-%d)-%p(%d)!\n", (void *)write_node, write_start, write_end, (void *)read_node, read_offset);
 			if(list->disable_overwrite) {
 				write_count = -1;
 				return write_count;
 			}
 		} else if(
 				(list->read == list->write->next)
-				&& (write_end == node->size)
-				&& (read_node->read_offset == 0)
+				&& (write_end == local_node.size)
+				&& (local_read_node.read_offset == 0)
 				) {
-			myprintf("will overwrite at:%p(%d-%d)-%p(%d)!\n", (void *)node, write_start, write_end, (void *)read_node, read_node->read_offset);
+			myprintf("will overwrite at:%p(%d-%d)-%p(%d)!\n", (void *)write_node, write_start, write_end, (void *)read_node, local_read_node.read_offset);
 			if(list->disable_overwrite) {
 				write_count = -1;
 				return write_count;
@@ -202,9 +217,9 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 		}
 	}
 
-	data = node->buffer + write_start;
+	data = local_node.buffer + write_start;
 
-	//myprintf("write node:%p(%d-%d)\n", (void *)node, write_start, write_end);
+	//myprintf("write write_node:%p(%d-%d)\n", (void *)write_node, write_start, write_end);
 
 	write_count = write_end - write_start;
 
@@ -212,15 +227,15 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 		memcpy(data, buffer, write_count);
 	}
 
-	if(write_end == node->size) {
+	mutex_lock(&list->list_buffer_lock);
+	write_node->write_offset = write_end;
+
+	if(write_end == write_node->size) {
 		list->write = list->write->next;
+		write_node = list_entry(list->write, buffer_node_t, list);
+		write_node->write_offset = 0;
 	}
-
-	if(read_offset == node->size) {
-		node->read_offset = 0;
-	}
-
-	node->write_offset = write_end;
+	mutex_unlock(&list->list_buffer_lock);
 
 	return write_count;
 }
@@ -238,8 +253,10 @@ int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, li
 	}
 
 	if(write_node != NULL) {
+		mutex_lock(&list->list_buffer_lock);
 		node = list_entry(list->write, buffer_node_t, list);
 		*write_node = *node;
+		mutex_unlock(&list->list_buffer_lock);
 
 		if(write_node->write_offset == write_node->size) {
 			write_node->write_offset = 0;
@@ -254,8 +271,10 @@ int get_buffer_node_info(buffer_node_t *write_node, buffer_node_t *read_node, li
 
 
 	if(read_node != NULL) {
+		mutex_lock(&list->list_buffer_lock);
 		node = list_entry(list->read, buffer_node_t, list);
 		*read_node = *node;
+		mutex_unlock(&list->list_buffer_lock);
 
 		read_offset = read_node->read_offset;
 		write_offset = read_node->write_offset;
@@ -301,6 +320,7 @@ void reset_list_buffer(list_buffer_t *list) {
 		return;
 	}
 
+	mutex_lock(&list->list_buffer_lock);
 	list_for_each_entry_safe(node, node_next, list->first, list) {
 		node->write_offset = node->read_offset = 0;
 	}
@@ -308,4 +328,6 @@ void reset_list_buffer(list_buffer_t *list) {
 	node->write_offset = node->read_offset = 0;
 
 	list->write = list->read = list->first;
+
+	mutex_unlock(&list->list_buffer_lock);
 }

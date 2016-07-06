@@ -1,6 +1,7 @@
 #ifndef _XIAOFEI_LIST_BUFFER_H
 #define _XIAOFEI_LIST_BUFFER_H
 #include <linux/list.h>
+#include <linux/mutex.h>
 
 typedef struct _buffer_node {
 	struct list_head list;
@@ -20,6 +21,7 @@ typedef struct _list_buffer {
 	struct list_head *read;
 	struct list_head *write;
 	bool disable_overwrite;
+	struct mutex list_buffer_lock;
 } list_buffer_t;
 
 list_buffer_t *init_list_buffer(void);
