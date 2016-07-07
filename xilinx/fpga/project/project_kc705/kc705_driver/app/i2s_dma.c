@@ -16,7 +16,7 @@ unsigned int raw_data[] = {
 };
 #define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
 
-#define BUFSIZE (15 * 4)
+#define BUFSIZE (15 * 4 * 32)
 
 static int stop = 0;
 
@@ -54,44 +54,43 @@ void *read_fn(void *arg) {
 	tv.tv_usec=0;
 
 	while(stop == 0) {
+		if(toread > 0) {
+			FD_ZERO(&rfds);
+			FD_ZERO(&efds);
+			FD_SET(targ->fd, &rfds);
+			FD_SET(targ->fd, &efds);
 
-		FD_ZERO(&rfds);
-		FD_ZERO(&efds);
-		FD_SET(targ->fd, &rfds);
-		FD_SET(targ->fd, &efds);
-
-		if(select(targ->fd + 1, &rfds, NULL, &efds, &tv) > 0) {
-			if(FD_ISSET(targ->fd, &rfds)) {
-				//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-				nread = read(targ->fd, targ->buffer + (BUFSIZE - toread), toread);
-				if(nread < 0) {
-					printf("%s\n", strerror(errno));
-					return NULL;
-				}
-
-				toread -= nread;
-
-				if(toread == 0) {
-					int i;
-					uint32_t *data = (uint32_t *)targ->buffer;
-
-					toread = BUFSIZE;
-
-					//printf("read %d!\n", nread);
-					for(i = 0; i < toread / sizeof(uint32_t); i++) {
-						if((i != 0) && (i % BUFSIZE == 0)) {
-							printf("\n");
-						}
-						printf("%04x ", data[i] & 0xffff);
+			if(select(targ->fd + 1, &rfds, NULL, &efds, &tv) > 0) {
+				if(FD_ISSET(targ->fd, &rfds)) {
+					//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
+					nread = read(targ->fd, targ->buffer + (BUFSIZE - toread), toread);
+					if(nread < 0) {
+						printf("%s\n", strerror(errno));
+						return NULL;
 					}
+
+					toread -= nread;
+
+				}
+				if(FD_ISSET(targ->fd, &efds)) {
+					//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
+				}
+			}
+		} else {
+			int i;
+			uint32_t *data = (uint32_t *)targ->buffer;
+
+			toread = BUFSIZE;
+
+			//printf("read %d!\n", nread);
+			for(i = 0; i < BUFSIZE / sizeof(uint32_t); i++) {
+				if((i != 0) && (i % 15 == 0)) {
 					printf("\n");
 				}
+				printf("%04x ", data[i] & 0xffff);
 			}
-			if(FD_ISSET(targ->fd, &efds)) {
-				//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-			}
+			printf("\n");
 		}
-
 		//return NULL;
 	}
 	return NULL;

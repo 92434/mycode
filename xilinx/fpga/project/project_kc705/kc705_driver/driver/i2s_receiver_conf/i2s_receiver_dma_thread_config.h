@@ -21,7 +21,7 @@ static int i2s_receiver_dma_receiver_thread(void *ppara) {
 dma_thread_info_t i2s_receiver_dma_threads[] = {
 	{
 		.t = &i2s_receiver_dma_receiver_thread,
-		.thread_name = "i2s_receiver_receiver"
+		.thread_name = "i2s_receiver"
 	},
 };
 
