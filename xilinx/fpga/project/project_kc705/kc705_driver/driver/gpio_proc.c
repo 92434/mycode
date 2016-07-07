@@ -47,15 +47,13 @@ gpio_proc_t *my_search(struct rb_root *root, int gpio) {
 	return NULL;
 }
 
-int my_insert(struct rb_root *root, int gpio) {
+gpio_proc_t *my_insert(struct rb_root *root, int gpio) {
 	struct rb_node **new = &(root->rb_node), *parent = NULL;
-	int rtn = 0;
 
 	gpio_proc_t *data = (gpio_proc_t *)vzalloc(sizeof(gpio_proc_t));
 	if(data == NULL) {
-		rtn = -1;
 		mydebug("\n");
-		return rtn;
+		return NULL;
 	}
 
 	data->gpio = gpio;
@@ -71,9 +69,8 @@ int my_insert(struct rb_root *root, int gpio) {
 		else if (result > 0)
 			new = &((*new)->rb_right);
 		else {
-			rtn = -1;
-			mydebug("\n");
-			return rtn;
+			vfree(data);
+			return this;
 		}
 	}
 
@@ -81,7 +78,7 @@ int my_insert(struct rb_root *root, int gpio) {
 	rb_link_node(&data->node, parent, new);
 	rb_insert_color(&data->node, root);
 
-	return rtn;
+	return data;
 }
 
 int my_eraser(struct rb_root *root, int gpio) {
@@ -207,6 +204,7 @@ static ssize_t gpio_export_write(struct file *file, const char __user *buffer, s
 	char cmd[32];
 	size_t size;
 	int gpio;
+	gpio_proc_t *data;
 
 	//mydebug("\n");
 	size = sizeof(cmd);
@@ -216,29 +214,36 @@ static ssize_t gpio_export_write(struct file *file, const char __user *buffer, s
 	if (copy_from_user(cmd, buffer, size))
 		return -EFAULT;
 
-	if (sscanf(cmd, "%d", &gpio) == 1) {
-		gpio_proc_t *data;
-		//mydebug("export pin:%d\n", gpio);
-		if(gpio_request(gpio, NULL) != 0) {
-			mydebug("export pin error:%d\n", gpio);
-			return count;
-		}
-
-		snprintf(cmd, sizeof(cmd), "%d", gpio);
-		my_insert(&mytree, gpio);
-		data = my_search(&mytree, gpio);
-		if(data == NULL) {
-			mydebug("\n");
-			return count;
-		}
-
-		proc_create_data(cmd,
-				0666,
-				gpio_proc_dir,
-				&gpio_ops,
-				data);
+	if (sscanf(cmd, "%d", &gpio) != 1) {
+		mydebug("\n");
+		return count;
 	}
 
+	//mydebug("export pin:%d\n", gpio);
+	if(gpio_request(gpio, NULL) != 0) {
+		mydebug("gpio_request error:%d\n", gpio);
+		return count;
+	}
+
+	snprintf(cmd, sizeof(cmd), "%d", gpio);
+
+	data = my_search(&mytree, gpio);
+	if(data != NULL) {
+		mydebug("\n");
+		return count;
+	}
+
+	data = my_insert(&mytree, gpio);
+	if(data == NULL) {
+		mydebug("\n");
+		return count;
+	}
+
+	proc_create_data(cmd,
+			0666,
+			gpio_proc_dir,
+			&gpio_ops,
+			data);
 
 	return count;
 }
