@@ -20,232 +20,6 @@ def gen_gpio_ports(gpio_groups):
 			ports.append(i + '[' + str(j) + ']')
 	return ports
 
-package_pins = {
-	'H29': 'FMC_C2M_PG_LS',
-	'C27': 'FMC_HPC_CLK0_M2C_N',
-	'D27': 'FMC_HPC_CLK0_M2C_P',
-	'D18': 'FMC_HPC_CLK1_M2C_N',
-	'D17': 'FMC_HPC_CLK1_M2C_P',
-	'D1': 'FMC_HPC_DP0_C2M_N',
-	'D2': 'FMC_HPC_DP0_C2M_P',
-	'E3': 'FMC_HPC_DP0_M2C_N',
-	'E4': 'FMC_HPC_DP0_M2C_P',
-	'C3': 'FMC_HPC_DP1_C2M_N',
-	'C4': 'FMC_HPC_DP1_C2M_P',
-	'D5': 'FMC_HPC_DP1_M2C_N',
-	'D6': 'FMC_HPC_DP1_M2C_P',
-	'B1': 'FMC_HPC_DP2_C2M_N',
-	'B2': 'FMC_HPC_DP2_C2M_P',
-	'B5': 'FMC_HPC_DP2_M2C_N',
-	'B6': 'FMC_HPC_DP2_M2C_P',
-	'A3': 'FMC_HPC_DP3_C2M_N',
-	'A4': 'FMC_HPC_DP3_C2M_P',
-	'A7': 'FMC_HPC_DP3_M2C_N',
-	'A8': 'FMC_HPC_DP3_M2C_P',
-	'C7': 'FMC_HPC_GBTCLK0_M2C_C_N',
-	'C8': 'FMC_HPC_GBTCLK0_M2C_C_P',
-	'E7': 'FMC_HPC_GBTCLK1_M2C_C_N',
-	'E8': 'FMC_HPC_GBTCLK1_M2C_C_P',
-	'D13': 'FMC_HPC_HA00_CC_N',
-	'D12': 'FMC_HPC_HA00_CC_P',
-	'G14': 'FMC_HPC_HA01_CC_N',
-	'H14': 'FMC_HPC_HA01_CC_P',
-	'C11': 'FMC_HPC_HA02_N',
-	'D11': 'FMC_HPC_HA02_P',
-	'B12': 'FMC_HPC_HA03_N',
-	'C12': 'FMC_HPC_HA03_P',
-	'E11': 'FMC_HPC_HA04_N',
-	'F11': 'FMC_HPC_HA04_P',
-	'E16': 'FMC_HPC_HA05_N',
-	'F15': 'FMC_HPC_HA05_P',
-	'C14': 'FMC_HPC_HA06_N',
-	'D14': 'FMC_HPC_HA06_P',
-	'A15': 'FMC_HPC_HA07_N',
-	'B14': 'FMC_HPC_HA07_P',
-	'E15': 'FMC_HPC_HA08_N',
-	'E14': 'FMC_HPC_HA08_P',
-	'E13': 'FMC_HPC_HA09_N',
-	'F12': 'FMC_HPC_HA09_P',
-	'A12': 'FMC_HPC_HA10_N',
-	'A11': 'FMC_HPC_HA10_P',
-	'A13': 'FMC_HPC_HA11_N',
-	'B13': 'FMC_HPC_HA11_P',
-	'B15': 'FMC_HPC_HA12_N',
-	'C15': 'FMC_HPC_HA12_P',
-	'K16': 'FMC_HPC_HA13_N',
-	'L16': 'FMC_HPC_HA13_P',
-	'H16': 'FMC_HPC_HA14_N',
-	'J16': 'FMC_HPC_HA14_P',
-	'G15': 'FMC_HPC_HA15_N',
-	'H15': 'FMC_HPC_HA15_P',
-	'K15': 'FMC_HPC_HA16_N',
-	'L15': 'FMC_HPC_HA16_P',
-	'F13': 'FMC_HPC_HA17_CC_N',
-	'G13': 'FMC_HPC_HA17_CC_P',
-	'J14': 'FMC_HPC_HA18_N',
-	'K14': 'FMC_HPC_HA18_P',
-	'H12': 'FMC_HPC_HA19_N',
-	'H11': 'FMC_HPC_HA19_P',
-	'J13': 'FMC_HPC_HA20_N',
-	'K13': 'FMC_HPC_HA20_P',
-	'J12': 'FMC_HPC_HA21_N',
-	'J11': 'FMC_HPC_HA21_P',
-	'K11': 'FMC_HPC_HA22_N',
-	'L11': 'FMC_HPC_HA22_P',
-	'L13': 'FMC_HPC_HA23_N',
-	'L12': 'FMC_HPC_HA23_P',
-	'B25': 'FMC_HPC_LA00_CC_N',
-	'C25': 'FMC_HPC_LA00_CC_P',
-	'C26': 'FMC_HPC_LA01_CC_N',
-	'D26': 'FMC_HPC_LA01_CC_P',
-	'H25': 'FMC_HPC_LA02_N',
-	'H24': 'FMC_HPC_LA02_P',
-	'H27': 'FMC_HPC_LA03_N',
-	'H26': 'FMC_HPC_LA03_P',
-	'F28': 'FMC_HPC_LA04_N',
-	'G28': 'FMC_HPC_LA04_P',
-	'F30': 'FMC_HPC_LA05_N',
-	'G29': 'FMC_HPC_LA05_P',
-	'G30': 'FMC_HPC_LA06_N',
-	'H30': 'FMC_HPC_LA06_P',
-	'D28': 'FMC_HPC_LA07_N',
-	'E28': 'FMC_HPC_LA07_P',
-	'E30': 'FMC_HPC_LA08_N',
-	'E29': 'FMC_HPC_LA08_P',
-	'A30': 'FMC_HPC_LA09_N',
-	'B30': 'FMC_HPC_LA09_P',
-	'C30': 'FMC_HPC_LA10_N',
-	'D29': 'FMC_HPC_LA10_P',
-	'F27': 'FMC_HPC_LA11_N',
-	'G27': 'FMC_HPC_LA11_P',
-	'B29': 'FMC_HPC_LA12_N',
-	'C29': 'FMC_HPC_LA12_P',
-	'A26': 'FMC_HPC_LA13_N',
-	'A25': 'FMC_HPC_LA13_P',
-	'A28': 'FMC_HPC_LA14_N',
-	'B28': 'FMC_HPC_LA14_P',
-	'B24': 'FMC_HPC_LA15_N',
-	'C24': 'FMC_HPC_LA15_P',
-	'A27': 'FMC_HPC_LA16_N',
-	'B27': 'FMC_HPC_LA16_P',
-	'E20': 'FMC_HPC_LA17_CC_N',
-	'F20': 'FMC_HPC_LA17_CC_P',
-	'E21': 'FMC_HPC_LA18_CC_N',
-	'F21': 'FMC_HPC_LA18_CC_P',
-	'F18': 'FMC_HPC_LA19_N',
-	'G18': 'FMC_HPC_LA19_P',
-	'D19': 'FMC_HPC_LA20_N',
-	'E19': 'FMC_HPC_LA20_P',
-	'A21': 'FMC_HPC_LA21_N',
-	'A20': 'FMC_HPC_LA21_P',
-	'B20': 'FMC_HPC_LA22_N',
-	'C20': 'FMC_HPC_LA22_P',
-	'A22': 'FMC_HPC_LA23_N',
-	'B22': 'FMC_HPC_LA23_P',
-	'A17': 'FMC_HPC_LA24_N',
-	'A16': 'FMC_HPC_LA24_P',
-	'F17': 'FMC_HPC_LA25_N',
-	'G17': 'FMC_HPC_LA25_P',
-	'A18': 'FMC_HPC_LA26_N',
-	'B18': 'FMC_HPC_LA26_P',
-	'B19': 'FMC_HPC_LA27_N',
-	'C19': 'FMC_HPC_LA27_P',
-	'C16': 'FMC_HPC_LA28_N',
-	'D16': 'FMC_HPC_LA28_P',
-	'B17': 'FMC_HPC_LA29_N',
-	'C17': 'FMC_HPC_LA29_P',
-	'C22': 'FMC_HPC_LA30_N',
-	'D22': 'FMC_HPC_LA30_P',
-	'F22': 'FMC_HPC_LA31_N',
-	'G22': 'FMC_HPC_LA31_P',
-	'C21': 'FMC_HPC_LA32_N',
-	'D21': 'FMC_HPC_LA32_P',
-	'H22': 'FMC_HPC_LA33_N',
-	'H21': 'FMC_HPC_LA33_P',
-	'J29': 'FMC_HPC_PG_M2C_LS',
-	'M20': 'FMC_HPC_PRSNT_M2C_B_LS',
-	'AG23': 'FMC_LPC_CLK0_M2C_N',
-	'AF22': 'FMC_LPC_CLK0_M2C_P',
-	'AH29': 'FMC_LPC_CLK1_M2C_N',
-	'AG29': 'FMC_LPC_CLK1_M2C_P',
-	'F1': 'FMC_LPC_DP0_C2M_N',
-	'F2': 'FMC_LPC_DP0_C2M_P',
-	'F5': 'FMC_LPC_DP0_M2C_N',
-	'F6': 'FMC_LPC_DP0_M2C_P',
-	'N7': 'FMC_LPC_GBTCLK0_M2C_C_N',
-	'N8': 'FMC_LPC_GBTCLK0_M2C_C_P',
-	'AE24': 'FMC_LPC_LA00_CC_N',
-	'AD23': 'FMC_LPC_LA00_CC_P',
-	'AF23': 'FMC_LPC_LA01_CC_N',
-	'AE23': 'FMC_LPC_LA01_CC_P',
-	'AF21': 'FMC_LPC_LA02_N',
-	'AF20': 'FMC_LPC_LA02_P',
-	'AH20': 'FMC_LPC_LA03_N',
-	'AG20': 'FMC_LPC_LA03_P',
-	'AJ21': 'FMC_LPC_LA04_N',
-	'AH21': 'FMC_LPC_LA04_P',
-	'AH22': 'FMC_LPC_LA05_N',
-	'AG22': 'FMC_LPC_LA05_P',
-	'AK21': 'FMC_LPC_LA06_N',
-	'AK20': 'FMC_LPC_LA06_P',
-	'AH25': 'FMC_LPC_LA07_N',
-	'AG25': 'FMC_LPC_LA07_P',
-	'AJ23': 'FMC_LPC_LA08_N',
-	'AJ22': 'FMC_LPC_LA08_P',
-	'AK24': 'FMC_LPC_LA09_N',
-	'AK23': 'FMC_LPC_LA09_P',
-	'AK25': 'FMC_LPC_LA10_N',
-	'AJ24': 'FMC_LPC_LA10_P',
-	'AF25': 'FMC_LPC_LA11_N',
-	'AE25': 'FMC_LPC_LA11_P',
-	'AB20': 'FMC_LPC_LA12_N',
-	'AA20': 'FMC_LPC_LA12_P',
-	'AC25': 'FMC_LPC_LA13_N',
-	'AB24': 'FMC_LPC_LA13_P',
-	'AE21': 'FMC_LPC_LA14_N',
-	'AD21': 'FMC_LPC_LA14_P',
-	'AD24': 'FMC_LPC_LA15_N',
-	'AC24': 'FMC_LPC_LA15_P',
-	'AD22': 'FMC_LPC_LA16_N',
-	'AC22': 'FMC_LPC_LA16_P',
-	'AC27': 'FMC_LPC_LA17_CC_N',
-	'AB27': 'FMC_LPC_LA17_CC_P',
-	'AD28': 'FMC_LPC_LA18_CC_N',
-	'AD27': 'FMC_LPC_LA18_CC_P',
-	'AK26': 'FMC_LPC_LA19_N',
-	'AJ26': 'FMC_LPC_LA19_P',
-	'AF27': 'FMC_LPC_LA20_N',
-	'AF26': 'FMC_LPC_LA20_P',
-	'AG28': 'FMC_LPC_LA21_N',
-	'AG27': 'FMC_LPC_LA21_P',
-	'AK28': 'FMC_LPC_LA22_N',
-	'AJ27': 'FMC_LPC_LA22_P',
-	'AH27': 'FMC_LPC_LA23_N',
-	'AH26': 'FMC_LPC_LA23_P',
-	'AH30': 'FMC_LPC_LA24_N',
-	'AG30': 'FMC_LPC_LA24_P',
-	'AD26': 'FMC_LPC_LA25_N',
-	'AC26': 'FMC_LPC_LA25_P',
-	'AK30': 'FMC_LPC_LA26_N',
-	'AK29': 'FMC_LPC_LA26_P',
-	'AJ29': 'FMC_LPC_LA27_N',
-	'AJ28': 'FMC_LPC_LA27_P',
-	'AF30': 'FMC_LPC_LA28_N',
-	'AE30': 'FMC_LPC_LA28_P',
-	'AF28': 'FMC_LPC_LA29_N',
-	'AE28': 'FMC_LPC_LA29_P',
-	'AB30': 'FMC_LPC_LA30_N',
-	'AB29': 'FMC_LPC_LA30_P',
-	'AE29': 'FMC_LPC_LA31_N',
-	'AD29': 'FMC_LPC_LA31_P',
-	'AA30': 'FMC_LPC_LA32_N',
-	'Y30': 'FMC_LPC_LA32_P',
-	'AC30': 'FMC_LPC_LA33_N',
-	'AC29': 'FMC_LPC_LA33_P',
-	'J22': 'FMC_LPC_PRSNT_M2C_B_LS',
-	'J27': 'FMC_VADJ_ON_B_LS',
-}
-
 unsupport_loc = [
 	'F2',
 	'F5',
@@ -274,19 +48,6 @@ unsupport_loc = [
 	'D2',
 	'D1',
 ]
-
-def gen_support_package_pins(package_pins, unsupport_loc):
-	print '-' * 100
-	print 'all package_pins'
-	print '-' * 100
-	for i in package_pins.items():
-		print '封装pin:%-20s网络:%-20s' %(i[0], i[1])
-
-	pins = {}
-	for i, j in package_pins.items():
-		if not i in unsupport_loc:
-			pins.update({i:j})
-	return pins
 
 def constrain_key_gpio(x):
 	io, pin, gpio = x
@@ -410,7 +171,7 @@ io_des_map = {
 
 io_des_map = {}
 
-def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, start, count):
+def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_des, fmc_type, start, count):
 	print '-' * 100
 	print '%s gpio pin number for driver' %(fmc_type)
 	print '-' * 100
@@ -418,8 +179,6 @@ def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, 
 	print 'start', start
 	if (start % (32 * 2)) != 0:
 		start = 32 * 2 * ((start / (32 * 2)) + 1)
-
-	pins_resistor = hpc_lpc_pins_resistor_map.get(fmc_type)
 
 	gpio_boundary = 180
 
@@ -436,11 +195,13 @@ def get_gpios_pin_no_for_driver(constrain, hpc_lpc_pins_resistor_map, fmc_type, 
 		io_pin_no_map.update({io: pin_no})
 
 	
-	for i in pins_resistor:
+	for i in hpc_lpc_pins_des:
 		#print '%s\t%s\t%s' %(io_pin_no_map.get(i[0][0]), i[1], str(i))
-		des = io_des_map.get(i[0][0])
-		des = '(%s)' %des if des != None else ''
-                print '%s\t%s\t%s%s' %(io_pin_no_map.get(i[0][0]), i[1], i[0][0], des)
+		pin_no = io_pin_no_map.get(i[0][0])
+		if pin_no:
+			des = io_des_map.get(i[0][0])
+			des = '(%s)' %des if des != None else ''
+			print '%-20s%-20s%-20s%-20s' %(pin_no, i[1], i[0][0], des)
 
 def kc705_pins_resistor_key_resistor(x):
 	r = x[1]
@@ -465,33 +226,51 @@ def gen_fmc_pin_resistor():
 		fmc_pin_resistor.append((i[5], i[1] + '.' + i[2]))
 	fmc_pin_resistor.append(('F1', 'R113.1'))
 	fmc_pin_resistor.append(('H2', 'R62.1'))
+	print '-' * 100
+	print 'fmc_pin_resistor info'
+	print '-' * 100
+	for i in fmc_pin_resistor:
+		print i
+	print 'total:', len(fmc_pin_resistor)
 	return fmc_pin_resistor
 
-def gen_kc705_pins():
+def gen_kc705_signals():
 	content = ''
 
-	with open('kc705.txt') as f:
+	with open('kc705_signals.txt') as f:
 		content = f.read()
 	pattern = re.compile(r'\*SIGNAL\* (.*) \d+ \d+\r\n\s*([^\-\s]+)-([^\.]+)\.([^\s]+)')
 	result = pattern.findall(content)
-	kc705_pins = sorted(result, key = lambda x:(kc705_pins_key(x)))
-	kc705_pins.append(('FMC_LPC_PRSNT_M2C_B_LS', 'J2', 'E', 'H2'))
-	kc705_pins.append(('FMC_HPC_PRSNT_M2C_B_LS', 'J22', 'I', 'H2'))
-	kc705_pins.append(('FMC_HPC_PG_M2C_LS', 'J22', 'F', 'F1'))
-	kc705_pins.append(('FMC_C2M_PG_LS', 'J22', 'D', 'D1'))#not valid
-	#print kc705_pins
-	return kc705_pins
+	kc705_signals = sorted(result, key = lambda x:(kc705_pins_key(x)))
+	kc705_signals.append(('FMC_LPC_PRSNT_M2C_B_LS', 'J2', 'E', 'H2'))
+	kc705_signals.append(('FMC_HPC_PRSNT_M2C_B_LS', 'J22', 'I', 'H2'))
+	kc705_signals.append(('FMC_HPC_PG_M2C_LS', 'J22', 'F', 'F1'))
+	kc705_signals.append(('FMC_C2M_PG_LS', 'J22', 'D', 'D1'))#not valid
+	print '-' * 100
+	print 'kc705_signals info'
+	print '-' * 100
+	for i in kc705_signals:
+		print i
+	print 'total:', len(kc705_signals)
+	return kc705_signals
 
-def gen_kc705_pins_resistor(support_package_pins, kc705_pins, pin_resistor_map):
+def gen_kc705_pins_resistor(unsupport_loc, kc705_signals, fmc_pin_resistor):
 	kc705_pins_resistor = []
-	for i in kc705_pins:
-		if not i[0] in support_package_pins.values():
+	fmc_pins = [x[0] for x in fmc_pin_resistor]
+	print 'fmc_pins:', fmc_pins
+	pin_resistor_map = {}
+	for i in fmc_pin_resistor:
+		item = {i[0] : i[1]}
+		pin_resistor_map.update(item)
+
+	for i in kc705_signals:
+		if i[3] in unsupport_loc:
 			print '%s can not be controled!' %(str(i))
 			continue
 		if not i[1] in ['J2', 'J22']:
 			print '%s is not for fmc!' %(str(i))
 			continue
-		if not i[3] in pin_resistor_map.keys():
+		if not i[3] in fmc_pins:
 			print '%s can not find resistor!' %(str(i))
 			continue
 
@@ -504,7 +283,7 @@ def gen_kc705_pins_resistor(support_package_pins, kc705_pins, pin_resistor_map):
 
 	kc705_pins_resistor = sorted(kc705_pins_resistor, key = lambda x:(gpio_pins_resistor_key(x)), reverse = True)
 	print '-' * 100
-	print 'kc705 package pins info'
+	print 'kc705_pins_resistor info'
 	print '-' * 100
 	for i in kc705_pins_resistor:
 		print i
@@ -525,6 +304,12 @@ def gen_resistor_kc705_pins_resistor_map(kc705_pins_resistor):
 			resistor_kc705_pins_resistor_map.update({int(key): []})
 
 		resistor_kc705_pins_resistor_map.get(int(key)).append(i)
+
+	print '-' * 100
+	print 'resistor_kc705_pins_resistor_map info'
+	print '-' * 100
+	for i in resistor_kc705_pins_resistor_map.items():
+		print i
 
 	return resistor_kc705_pins_resistor_map
 
@@ -553,8 +338,61 @@ def gen_hpc_lpc_pins_resistor_map(resistor_kc705_pins_resistor_map):
 					hpc_lpc_pins_resistor_map.get('LPC').append(vv)
 				else:
 					print 'ERROR:pin %s is not for hpc or lpc!' %(str(vv))
+
+	for i in hpc_lpc_pins_resistor_map.items():
+		print '-' * 100
+		print 'hpc_lpc_pins_resistor_map %s info' %(i[0])
+		print '-' * 100
+		for j in i[1]:
+			print j
+
 	return hpc_lpc_pins_resistor_map
 
+def gen_hpc_lpc_pins_des_map(unsupport_loc, kc705_package_pin_nets):
+	hpc_lpc_pins_des_map = {}
+	hpc_lpc_pins_des_map.update({'HPC': []})
+	hpc_lpc_pins_des_map.update({'LPC': []})
+	hpc_lpc_pins_des_map.update({'unused_fmc': []})
+
+	gpio_pins = [
+		('Y30', 'SOMI'),
+		('AA30', 'MOSI'),
+		('AB29', 'SCLK'),
+		('AB30', '74138GA(CS)'),
+		('AC29', '74138GB'),
+		('AC30', '74138GC'),
+		('AB27', 'SPI_S0'),
+		('AC27', 'SPI_S1'),
+		('AD29', 'SPI_S2'),
+		('AE29', 'SPI_S3'),
+	]
+
+	for i in gpio_pins:
+		if i[0] in unsupport_loc:
+			continue
+
+		if not i[0] in kc705_package_pin_nets.keys():
+			print '%s can not find this package pin!' %(str(i))
+			continue
+
+		net = kc705_package_pin_nets.get(i[0])
+		v = ((net,'NULL', 'NULL', i[0]), i[1])
+		if net.startswith('FMC_HPC'):
+			hpc_lpc_pins_des_map.get('HPC').append(v)
+		elif net.startswith('FMC_LPC'):
+			hpc_lpc_pins_des_map.get('LPC').append(v)
+		else:
+			hpc_lpc_pins_des_map.get('unused_fmc').append(v)
+			print 'ERROR:pin %s is not for hpc or lpc!' %(str(v))
+
+	for i in hpc_lpc_pins_des_map.items():
+		print '-' * 100
+		print 'hpc_lpc_pins_des_map %s info' %(i[0])
+		print '-' * 100
+		for j in i[1]:
+			print j
+
+	return hpc_lpc_pins_des_map
 
 def gen_default_contrain():
 	txt = """
@@ -622,88 +460,9 @@ set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[7]}]
 	print '#', '-' * 100
 	print txt
 
-myip_fmc_signal = [
-	('FMC_LPC_LA25_P', 'mpeg_clk'),
-	('FMC_LPC_LA29_P', 'mpeg_valid'),
-	('FMC_LPC_LA24_P', 'mpeg_data[0]'),
-	('FMC_LPC_LA24_N', 'mpeg_data[1]'),
-	('FMC_LPC_LA26_P', 'mpeg_data[2]'),
-	('FMC_LPC_LA31_P', 'mpeg_data[3]'),
-	('FMC_LPC_LA31_N', 'mpeg_data[4]'),
-	('FMC_LPC_LA28_P', 'mpeg_data[5]'),
-	('FMC_LPC_LA28_N', 'mpeg_data[6]'),
-	('FMC_LPC_LA29_N', 'mpeg_data[7]'),
-	('FMC_LPC_LA25_N', 'mpeg_sync'),
 
-	#('FMC_HPC_HA23_N', 'ts_out_sync'),
-	#('FMC_HPC_HA23_P', 'slot0_out_dump_flag'),
-
-	('FMC_LPC_LA10_P', 'symbol_2x_oe'),
-		
-	('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
-	('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
-	('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
-	('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
-	('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
-	('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
-	('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
-	('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
-	('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
-	('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
-	('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
-	('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
-	('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
-	('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
-	('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
-	('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
-
-	('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
-	('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
-	('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
-	('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
-	('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
-	('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
-	('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
-	('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
-	('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
-	('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
-	('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
-	('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
-	('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
-	('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
-	('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
-	('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
-
-	('FMC_LPC_LA22_N', 'clk_out2'),
-	('FMC_LPC_LA21_P', 'clk_out3'),
-
-	('FMC_LPC_LA20_P', 'clk_out4'),
-
-	('FMC_LPC_LA32_N', 'asi_out_p'),
-	('FMC_LPC_LA33_N', 'asi_out_n'),
-
-	('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
-]
-
-myip_fmc_signal = []
-
-def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
+def gen_fmc_gpio_constrain(kc705_package_pin_nets, hpc_lpc_pins, fmc_type, start):
 	constrain = []
-
-	pins_resistor = hpc_lpc_pins_resistor_map.get(fmc_type)
-	myip_fmc_ios = []
-	for io, signal in myip_fmc_signal:
-		myip_fmc_ios.append(io)
-
-	signal_index = []
-	for i in range(len(pins_resistor)):
-		pin, resistor = pins_resistor[i]
-		io = pin[0]
-		if io in myip_fmc_ios:
-			signal_index.append(i)
-	signal_index.reverse()
-	for i in signal_index:
-		pins_resistor.pop(i)
 
 	ports = gen_gpio_ports(gpio_groups)
 
@@ -712,21 +471,27 @@ def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 
 	ports = ports[start:]
 
-	if len(pins_resistor) <= len(ports):
-		ports = ports[:len(pins_resistor)]
+	for i in hpc_lpc_pins:
+		if not i[0] in kc705_package_pin_nets.values():
+			hpc_lpc_pins.remove(i)
+		else:
+			try:
+				kc705_package_pin_nets.pop(i[3])
+			except:
+				#print '#%s not in kc705_package_pin_nets' %(str(i))
+				hpc_lpc_pins.remove(i)
+
+	if len(hpc_lpc_pins) <= len(ports):
+		ports = ports[:len(hpc_lpc_pins)]
 	else:
 		print "gpio bank is not enough!"
 		return constrain
 
-	io_pin_map = {}
-	for pin, io in package_pins.items():
-		io_pin_map.update({io: pin})
-
 	for i in range(len(ports)):
 		gpio = ports[i]
-		pin_resistor = pins_resistor[i]
-		io = pin_resistor[0][0]
-		pin = io_pin_map.get(io)
+		pins = hpc_lpc_pins[i]
+		io = pins[0]
+		pin = pins[3]
 
 		constrain.append((io, pin, gpio))
 
@@ -741,7 +506,72 @@ def gen_constrain(hpc_lpc_pins_resistor_map, fmc_type, start):
 
 	return constrain
 
-def gen_myip_constrain():
+def gen_myip_constrain(kc705_package_pin_nets):
+	myip_io_des_signals = [
+		('FMC_LPC_LA25_P', 'mpeg_clk'),
+		('FMC_LPC_LA29_P', 'mpeg_valid'),
+		('FMC_LPC_LA24_P', 'mpeg_data[0]'),
+		('FMC_LPC_LA24_N', 'mpeg_data[1]'),
+		('FMC_LPC_LA26_P', 'mpeg_data[2]'),
+		('FMC_LPC_LA31_P', 'mpeg_data[3]'),
+		('FMC_LPC_LA31_N', 'mpeg_data[4]'),
+		('FMC_LPC_LA28_P', 'mpeg_data[5]'),
+		('FMC_LPC_LA28_N', 'mpeg_data[6]'),
+		('FMC_LPC_LA29_N', 'mpeg_data[7]'),
+		('FMC_LPC_LA25_N', 'mpeg_sync'),
+
+		#('FMC_HPC_HA23_N', 'ts_out_sync'),
+		#('FMC_HPC_HA23_P', 'slot0_out_dump_flag'),
+
+		('FMC_LPC_LA10_P', 'symbol_2x_oe'),
+			
+		('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
+		('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
+		('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
+		('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
+		('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
+		('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
+		('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
+		('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
+		('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
+		('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
+		('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
+		('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
+		('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
+		('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
+		('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
+		('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
+
+		('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
+		('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
+		('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
+		('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
+		('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
+		('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
+		('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
+		('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
+		('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
+		('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
+		('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
+		('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
+		('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
+		('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
+		('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
+		('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
+
+		('FMC_LPC_LA22_N', 'clk_out2'),
+		('FMC_LPC_LA21_P', 'clk_out3'),
+
+		('FMC_LPC_LA20_P', 'clk_out4'),
+
+		('FMC_LPC_LA32_N', 'asi_out_p'),
+		('FMC_LPC_LA33_N', 'asi_out_n'),
+
+		('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
+	]
+
+	myip_io_des_signals = []
+
 	myip_extra_signal = [
 		#('XADC_GPIO_0', 'AB25', 'clk_out1', 'LVCMOS15'),
 		#('USER_SMA_GPIO_P', 'Y23', 'asi_out', 'LVCMOS15'),
@@ -804,7 +634,7 @@ def gen_myip_constrain():
 		'symbol_2x_im_out[15]' : ['slew FAST'],
 	}
 
-        extra_property = []
+        extra_property = {}
 
 	fmc_io_stand_except = [
 	]
@@ -815,10 +645,78 @@ def gen_myip_constrain():
 	print '#', '-' * 100
 
 	io_pin_map = {}
-	for pin, io in package_pins.items():
+	for pin, io in kc705_package_pin_nets.items():
 		io_pin_map.update({io: pin})
 
-	for io, signal in myip_fmc_signal:
+	myip_package_pins_des = [
+		('AE30', 'BRCK[0]'),
+		('AF30', 'LRCK[0]'),
+		('AG30', 'DOUT[0]'),
+
+		('AH30', 'BRCK[1]'),
+		('AK29', 'LRCK[1]'),
+		('AK30', 'DOUT[1]'),
+
+		('AJ28', 'BRCK[2]'),
+		('AJ29', 'LRCK[2]'),
+		('AG27', 'DOUT[2]'),
+
+		('AG28', 'BRCK[3]'),
+		('AH26', 'LRCK[3]'),
+		('AH27', 'DOUT[3]'),
+
+		('AJ27', 'BRCK[4]'),
+		('AK28', 'LRCK[4]'),
+		('AJ26', 'DOUT[4]'),
+
+		('AK26', 'BRCK[5]'),
+		('AF26', 'LRCK[5]'),
+		('AF27', 'DOUT[5]'),
+
+		('AC26', 'BRCK[6]'),
+		('AD26', 'LRCK[6]'),
+		('AE25', 'DOUT[6]'),
+
+		('AF25', 'BRCK[7]'),
+		('AC24', 'LRCK[7]'),
+		('AD24', 'DOUT[7]'),
+
+		('AJ24', 'BRCK[8]'),
+		('AK25', 'LRCK[8]'),
+		('AJ22', 'DOUT[8]'),
+
+		('AJ23', 'BRCK[9]'),
+		('AG22', 'LRCK[9]'),
+		('AH22', 'DOUT[9]'),
+
+		('AD23', 'BRCK[10]'),
+		('AE24', 'LRCK[10]'),
+		('AC22', 'DOUT[10]'),
+
+		('AD22', 'BRCK[11]'),
+		('AF20', 'LRCK[11]'),
+		('AF21', 'DOUT[11]'),
+
+		('AG20', 'BRCK[12]'),
+		('AH20', 'LRCK[12]'),
+		('AK20', 'DOUT[12]'),
+
+		('AK21', 'BRCK[13]'),
+		('AE23', 'LRCK[13]'),
+		('AF23', 'DOUT[13]'),
+
+		('AB24', 'BRCK[14]'),
+		('AC25', 'LRCK[14]'),
+		('AK23', 'DOUT[14]'),
+
+		('AK24', 'BRCK[15]'),
+		('AD21', 'LRCK[15]'),
+		('AE21', 'DOUT[15]'),
+	]
+
+	io_stand_except = []
+
+	for io, signal in myip_io_des_signals:
 		pin = io_pin_map.get(io)
 		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, signal)
 		if not io in fmc_io_stand_except:
@@ -837,6 +735,22 @@ def gen_myip_constrain():
 			continue
 		for p in extra_list:
 			print 'set_property %s [get_nets {%s}]' %(p, signal)
+
+	for pin, signal in myip_package_pins_des:
+		io = kc705_package_pin_nets.pop(pin)
+		if not io:
+			print 'xiaofei:pin not in kc705_package_pin_nets!'
+			continue
+
+		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(io, pin, signal)
+		if not io in io_stand_except:
+			print 'set_property IOSTANDARD LVCMOS15 [get_ports {%s}]' %(signal)
+		extra_list = extra_property.get(signal)
+		if not extra_list:
+			continue
+		for p in extra_list:
+			print 'set_property %s [get_nets {%s}]' %(p, signal)
+
 
 def gen_bitstream_constrain():
 	txt = """
@@ -857,55 +771,92 @@ set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
 
 
 
-def gen_unused_pin_io(support_package_pins, kc705_pins_resistor):
+def gen_unused_pin_io(kc705_package_pin_nets, kc705_pins_resistor):
 	print '-' * 100
 	print 'package pins for unused'
 	print '-' * 100
-	for i, j in package_pins.items():
-		if not j in support_package_pins.values():
-			print '封装pin:%-20s网络:%-20s' %(i, j)
 	ios = [ x[0][0] for x in kc705_pins_resistor ]
-	for i, j in support_package_pins.items():
-		if not j in ios:
-			print '封装pin:%-20s网络:%-20s' %(i, j)
+	for i in kc705_package_pin_nets.items():
+		if not i[1] in ios:
+			print '封装pin:%-20s网络:%-20s' %(i[0], i[1])
+
+def gen_kc705_package_pin_nets():
+	kc705_package_pin_nets = {}
+	lines = []
+	with open('kc705_package_pin_nets.txt') as f:
+		lines = f.read().splitlines()
+
+	for i in lines:
+		l = i.split()
+		item = {l[0] : l[1]}
+		if len(l) == 2:
+			kc705_package_pin_nets.update(item)
+
+	print '-' * 100
+	print 'kc705_package_pin_nets info'
+	print '-' * 100
+	for i in kc705_package_pin_nets.items():
+		print i
+	print 'total:', len(kc705_package_pin_nets)
+
+	return kc705_package_pin_nets
+
+def gen_kc705_io_package_pins():
+	kc705_io_package_pins = {}
+	lines = []
+	with open('kc705_io_package_pins.txt') as f:
+		lines = f.read().splitlines()
+
+	for i in lines:
+		l = i.split()
+		item = {l[0] : l[1]}
+		if len(l) == 8:
+			kc705_io_package_pins.update(item)
+
+	print '-' * 100
+	print 'kc705_io_package_pins info'
+	print '-' * 100
+	for i in kc705_io_package_pins.items():
+		print i
+	print 'total:', len(kc705_io_package_pins)
+
+	return kc705_io_package_pins
 
 def gen_kc705_constrain():
-	#从网表中提取kc705的pin脚与网络的关系
-	kc705_pins = gen_kc705_pins()
-	#print kc705_pins
+	kc705_signals = gen_kc705_signals()
 
-	#从网表中提取fmc的pin脚与网络的关系
 	fmc_pin_resistor = gen_fmc_pin_resistor()
-	#print fmc_pin_resistor
 
-	pin_resistor_map = {}
-	for i in fmc_pin_resistor:
-		pin_resistor_map.update({i[0]: i[1]})
+	kc705_package_pin_nets = gen_kc705_package_pin_nets()
 
-	support_package_pins = gen_support_package_pins(package_pins, unsupport_loc)
+	kc705_io_package_pins = gen_kc705_io_package_pins()
 
 	#建立板上package_pins与fmc端口之间的关联
-	kc705_pins_resistor = gen_kc705_pins_resistor(support_package_pins, kc705_pins, pin_resistor_map)
-
-	#哪些package_pin没有用上？
-	gen_unused_pin_io(support_package_pins, kc705_pins_resistor)
-
+	kc705_pins_resistor = gen_kc705_pins_resistor(unsupport_loc, kc705_signals, fmc_pin_resistor)
 	resistor_kc705_pins_resistor_map = gen_resistor_kc705_pins_resistor_map(kc705_pins_resistor)
-	hpc_lpc_pins_resistor_map = gen_hpc_lpc_pins_resistor_map(resistor_kc705_pins_resistor_map)
+	hpc_lpc_pins_des_map = gen_hpc_lpc_pins_resistor_map(resistor_kc705_pins_resistor_map)
+	hpc_lpc_pins_des_map = gen_hpc_lpc_pins_des_map(unsupport_loc, kc705_package_pin_nets)
+	hpc_pins = [x[0] for x in hpc_lpc_pins_des_map.get('HPC')]
+	lpc_pins = [x[0] for x in hpc_lpc_pins_des_map.get('LPC')]
+	hpc_pins_des = hpc_lpc_pins_des_map.get('HPC')
+	lpc_pins_des = hpc_lpc_pins_des_map.get('LPC')
+
+	##哪些package_pin没有用上？
+	#gen_unused_pin_io(kc705_package_pin_nets, kc705_pins_resistor)
 
 	#输出固定约束
 	gen_default_contrain()
 
-	#输出fmc板上电阻与kc705的映射关系
-	hpc_constrain = gen_constrain(hpc_lpc_pins_resistor_map, 'HPC', 0)
-	lpc_constrain = gen_constrain(hpc_lpc_pins_resistor_map, 'LPC', len(hpc_constrain))
-	
-	gen_myip_constrain()
+	gen_myip_constrain(kc705_package_pin_nets)
 
+	#输出fmc板上电阻与kc705的映射关系
+	hpc_constrain = gen_fmc_gpio_constrain(kc705_package_pin_nets, hpc_pins, 'HPC', 0)
+	lpc_constrain = gen_fmc_gpio_constrain(kc705_package_pin_nets, lpc_pins, 'LPC', len(hpc_constrain))
+	
 	gen_bitstream_constrain()
 
-	get_gpios_pin_no_for_driver(hpc_constrain, hpc_lpc_pins_resistor_map, 'HPC', 0, len(hpc_constrain))
-	get_gpios_pin_no_for_driver(lpc_constrain, hpc_lpc_pins_resistor_map, 'LPC', len(hpc_constrain), len(lpc_constrain))
+	get_gpios_pin_no_for_driver(hpc_constrain, hpc_pins_des, 'HPC', 0, len(hpc_constrain))
+	get_gpios_pin_no_for_driver(lpc_constrain, lpc_pins_des, 'LPC', len(hpc_constrain), len(lpc_constrain))
 	print 'total', len(hpc_constrain) + len(lpc_constrain)
 
 	#打印pin号
