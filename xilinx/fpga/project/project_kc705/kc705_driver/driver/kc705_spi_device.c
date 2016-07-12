@@ -17,10 +17,10 @@
 #include <linux/slab.h> /* kmalloc, kfree */
 #include <linux/spi/spi.h>
 #include <linux/spi/spi_gpio.h>
+
+#include "interface_conf.h"
+
 #define MY_NAME "spidev_device"
-//#define CS 160//FMC_LPC_LA19_N
-#define CS 169//FMC_LPC_LA32_P
-//#define CS 165//FMC_LPC_LA22_P
 
 #define SPI_BUS_NUM 1
 
@@ -32,7 +32,7 @@ static struct spi_board_info kc705_spi_info = {
 		.max_speed_hz = 4000000,	/* max spi clock (SCK) speed in HZ */
 		.bus_num = SPI_BUS_NUM,
 		.chip_select = 0,
-		.controller_data = (void *)CS,
+		.controller_data = (void *)SPI_CS,
 		.mode = SPI_MODE_0,
 };
 

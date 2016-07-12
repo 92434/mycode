@@ -17,20 +17,14 @@
 #include <linux/slab.h> /* kmalloc, kfree */
 #include <linux/spi/spi.h>
 #include <linux/spi/spi_gpio.h>
+#include "interface_conf.h"
 
-//164 : s0//FMC_LPC_LA22_P
-//158 : s1//FMC_LPC_LA19_P
-//160 : s2//FMC_LPC_LA19_N
-
-#define MISO 166//FMC_LPC_LA20_N
-#define MOSI 172//FMC_LPC_LA23_N
-#define SCK 173//FMC_LPC_LA23_P
 #define SPI_BUS_NUM 1
 
 static struct spi_gpio_platform_data spi_gpio_cfg = {
-	.sck		= SCK,
-	.mosi		= MOSI,
-	.miso		= MISO,
+	.sck		= SPI_SCK,
+	.mosi		= SPI_MOSI,
+	.miso		= SPI_MISO,
 	.num_chipselect = 1,
 };
 

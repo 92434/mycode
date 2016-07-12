@@ -27,6 +27,13 @@ LOCAL_LDFLAGS := -pthread
 app_name := i2s_dma
 include $(BUILD_APP)
 
+app_c_files := i2s_spi_dev.c
+app_c_files += utils.c
+LOCAL_CFLAGS := -I$(shell pwd)/../driver
+LOCAL_LDFLAGS := -pthread
+app_name := i2s_spi_dev
+include $(BUILD_APP)
+
 app_c_files := tsp_regs.c
 app_c_files += utils.c
 LOCAL_CFLAGS := -I$(shell pwd)/../driver

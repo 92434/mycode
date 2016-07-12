@@ -17,15 +17,16 @@
 #include <linux/slab.h> /* kmalloc, kfree */
 #include <linux/i2c.h>
 #include <linux/i2c-gpio.h>
+
+#include "interface_conf.h"
+
 #define MY_NAME "kc705_i2c"
 
-#define SDA0 158 //FMC_LPC_LA30_P
-#define SCL0 157 //FMC_LPC_LA30_N
 #define I2C_BUS_NUM (-1)
 
 static struct i2c_gpio_platform_data i2c_gpio_data = {
-	.sda_pin		= SDA0,
-	.scl_pin		= SCL0,
+	.sda_pin		= IIC_SDA0,
+	.scl_pin		= IIC_SCL0,
 	.sda_is_open_drain	= 0,
 	.scl_is_open_drain	= 0,
 	.udelay			= 10,

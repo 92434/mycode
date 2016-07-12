@@ -11,14 +11,24 @@ include $(ADD_TARGET)
 #export SUBJECT += KC705_FMC_GPIO
 export SUBJECT += KC705_I2S_RECEIVER_TEST
 
+
+ifeq ($(SUBJECT), KC705_DVBS2)
+	NEED_I2C := YES
+	NEED_SPI := YES
+else ifeq ($(SUBJECT), KC705_I2S_RECEIVER_TEST)
+	NEED_SPI := YES
+endif
+
 install:
 	sudo insmod driver/kc705-module.ko
 
-ifeq ($(SUBJECT), KC705_DVBS2)
+ifeq ($(NEED_I2C), YES)
 	sudo insmod driver/i2c-gpio.ko
 	sudo insmod driver/kc705_i2c_master.ko
 	sudo insmod driver/i2c-dev.ko
+endif
 
+ifeq ($(NEED_SPI), YES)
 	sudo insmod driver/spi-gpio-all.ko
 	sudo insmod driver/kc705_spi_master.ko
 	sudo insmod driver/spidev.ko
@@ -30,13 +40,15 @@ endif
 uninstall:
 #	make start_dma
 
-ifeq ($(SUBJECT), KC705_DVBS2)
+ifeq ($(NEED_SPI), YES)
 	-sudo rmmod kc705_spi_device
 	-sudo rmmod spidev
 	-sudo rmmod spi_bitbang
 	-sudo rmmod kc705_spi_master
 	-sudo rmmod spi_gpio_all
+endif
 
+ifeq ($(NEED_I2C), YES)
 	-sudo rmmod i2c-dev
 	-sudo rmmod kc705_i2c_master
 	-sudo rmmod i2c_gpio
