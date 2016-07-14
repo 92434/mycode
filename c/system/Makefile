@@ -15,6 +15,7 @@ c_files += test_settimer.c
 c_files += test_getopt.cpp
 c_files += test_optparse.cpp
 c_files += timer.c
+c_files += time.c
 include $(BUILD_BINS)
 
 $(target_files) : $(local_lib_src)/$(out_dir)/lib/libxiaofei.a
