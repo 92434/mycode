@@ -273,138 +273,138 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	#	('LCD_DB7_LS', 'lcm_data[7]'),
 	#]
 
-	map_extra_net_property_port_property = {
-		'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#map_extra_net_property_port_property = {
+	#	'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'bclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-		'bclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	}
+	#	'bclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'lrclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	#'sdata[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#}
 
 
-	list_pin_port = [
-		('AE30', 'bclk[0]'),
-		('AF30', 'lrclk[0]'),
-		('AG30', 'sdata[0]'),
+	#list_pin_port = [
+	#	('AE30', 'bclk[0]'),
+	#	('AF30', 'lrclk[0]'),
+	#	('AG30', 'sdata[0]'),
 
-		('AH30', 'bclk[1]'),
-		('AK29', 'lrclk[1]'),
-		('AK30', 'sdata[1]'),
+	#	('AH30', 'bclk[1]'),
+	#	('AK29', 'lrclk[1]'),
+	#	('AK30', 'sdata[1]'),
 
-		('AJ28', 'bclk[2]'),
-		('AJ29', 'lrclk[2]'),
-		('AG27', 'sdata[2]'),
+	#	('AJ28', 'bclk[2]'),
+	#	('AJ29', 'lrclk[2]'),
+	#	('AG27', 'sdata[2]'),
 
-		('AG28', 'bclk[3]'),
-		('AH26', 'lrclk[3]'),
-		('AH27', 'sdata[3]'),
+	#	('AG28', 'bclk[3]'),
+	#	('AH26', 'lrclk[3]'),
+	#	('AH27', 'sdata[3]'),
 
-		('AJ27', 'bclk[4]'),
-		('AK28', 'lrclk[4]'),
-		('AJ26', 'sdata[4]'),
+	#	('AJ27', 'bclk[4]'),
+	#	('AK28', 'lrclk[4]'),
+	#	('AJ26', 'sdata[4]'),
 
-		('AK26', 'bclk[5]'),
-		('AF26', 'lrclk[5]'),
-		('AF27', 'sdata[5]'),
+	#	('AK26', 'bclk[5]'),
+	#	('AF26', 'lrclk[5]'),
+	#	('AF27', 'sdata[5]'),
 
-		('AC26', 'bclk[6]'),
-		('AD26', 'lrclk[6]'),
-		('AE25', 'sdata[6]'),
+	#	('AC26', 'bclk[6]'),
+	#	('AD26', 'lrclk[6]'),
+	#	('AE25', 'sdata[6]'),
 
-		('AF25', 'bclk[7]'),
-		('AC24', 'lrclk[7]'),
-		('AD24', 'sdata[7]'),
+	#	('AF25', 'bclk[7]'),
+	#	('AC24', 'lrclk[7]'),
+	#	('AD24', 'sdata[7]'),
 
-		('AJ24', 'bclk[8]'),
-		('AK25', 'lrclk[8]'),
-		('AJ22', 'sdata[8]'),
+	#	('AJ24', 'bclk[8]'),
+	#	('AK25', 'lrclk[8]'),
+	#	('AJ22', 'sdata[8]'),
 
-		('AJ23', 'bclk[9]'),
-		('AG22', 'lrclk[9]'),
-		('AH22', 'sdata[9]'),
+	#	('AJ23', 'bclk[9]'),
+	#	('AG22', 'lrclk[9]'),
+	#	('AH22', 'sdata[9]'),
 
-		('AD23', 'bclk[10]'),
-		('AE24', 'lrclk[10]'),
-		('AC22', 'sdata[10]'),
+	#	('AD23', 'bclk[10]'),
+	#	('AE24', 'lrclk[10]'),
+	#	('AC22', 'sdata[10]'),
 
-		('AD22', 'bclk[11]'),
-		('AF20', 'lrclk[11]'),
-		('AF21', 'sdata[11]'),
+	#	('AD22', 'bclk[11]'),
+	#	('AF20', 'lrclk[11]'),
+	#	('AF21', 'sdata[11]'),
 
-		('AG20', 'bclk[12]'),
-		('AH20', 'lrclk[12]'),
-		('AK20', 'sdata[12]'),
+	#	('AG20', 'bclk[12]'),
+	#	('AH20', 'lrclk[12]'),
+	#	('AK20', 'sdata[12]'),
 
-		('AK21', 'bclk[13]'),
-		('AE23', 'lrclk[13]'),
-		('AF23', 'sdata[13]'),
+	#	('AK21', 'bclk[13]'),
+	#	('AE23', 'lrclk[13]'),
+	#	('AF23', 'sdata[13]'),
 
-		('AB24', 'bclk[14]'),
-		('AC25', 'lrclk[14]'),
-		('AK23', 'sdata[14]'),
+	#	('AB24', 'bclk[14]'),
+	#	('AC25', 'lrclk[14]'),
+	#	('AK23', 'sdata[14]'),
 
-		('AK24', 'bclk[15]'),
-		('AD21', 'lrclk[15]'),
-		('AE21', 'sdata[15]'),
-	]
+	#	('AK24', 'bclk[15]'),
+	#	('AD21', 'lrclk[15]'),
+	#	('AE21', 'sdata[15]'),
+	#]
 
 	for pin, port in list_pin_port:
 		list_extra_des = []
@@ -464,9 +464,9 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 		('AE29', 'SPI_S3'),
 	]
 
-	for pin, des in list_pin_des:
-	#des = None
-	#for pin, net in map_kc705_pin_net.items():
+	#for pin, des in list_pin_des:
+	des = None
+	for pin, net in map_kc705_pin_net.items():
 		net = map_kc705_pin_net.pop(pin, None)
 		if net:
 			resistor = None
@@ -497,11 +497,11 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 def gen_default_contrain():
 	txt = """
 # Sys Clock Pins
-#set_property PACKAGE_PIN AD11 [get_ports MIG_SYS_CLK_clk_n]
-#set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_n]
+set_property PACKAGE_PIN AD11 [get_ports MIG_SYS_CLK_clk_n]
+set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_n]
 
-#set_property PACKAGE_PIN AD12 [get_ports MIG_SYS_CLK_clk_p]
-#set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_p]
+set_property PACKAGE_PIN AD12 [get_ports MIG_SYS_CLK_clk_p]
+set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_p]
 
 # Sys Reset Pins
 set_property PACKAGE_PIN AB7 [get_ports reset]
@@ -641,7 +641,7 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 def gen_bitstream_constrain():
 	txt = """
 set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]
-set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
+set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design]
 
 ##Encryption Settings
 #set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]
