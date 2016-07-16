@@ -51,17 +51,17 @@ module iic_slave #
 		// 4 ticks = 83nS @ 48MHz
 		parameter integer SDA_DEL_LEN = 4,
 
-		parameter integer OPT_MEM_ADDR_BITS = 8
+		parameter integer IIC_OPT_MEM_ADDR_BITS = 8
 	)
 	(
 		// Users to add ports here
 		output wire wen,
 		output wire [7 : 0] wdata,
-		output wire [OPT_MEM_ADDR_BITS - 1 : 0] waddr,
+		output wire [IIC_OPT_MEM_ADDR_BITS - 1 : 0] waddr,
 
 		output wire ren,
 		input wire [7 : 0] rdata,
-		output wire [OPT_MEM_ADDR_BITS - 1 : 0] raddr,
+		output wire [IIC_OPT_MEM_ADDR_BITS - 1 : 0] raddr,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -94,7 +94,8 @@ module iic_slave #
 		if(rst_n == 1'b0) begin
 			rst_n_pipe <= 2'b00;
 		end
-		else begin rst_n_pipe <= {rst_n_pipe[0], 1'b1};
+		else begin
+			rst_n_pipe <= {rst_n_pipe[0], 1'b1};
 		end
 	end
 
@@ -216,9 +217,9 @@ module iic_slave #
 			.fifo_rdata(fifo_rdata)
 		);
 	// Add user logic here
-	localparam integer ADDR_BYTES_COUNT = OPT_MEM_ADDR_BITS / 8;
+	localparam integer ADDR_BYTES_COUNT = IIC_OPT_MEM_ADDR_BITS / 8;
 
-	reg [OPT_MEM_ADDR_BITS - 1 : 0] addr = 0;
+	reg [IIC_OPT_MEM_ADDR_BITS - 1 : 0] addr = 0;
 	reg [7 : 0] addr_bytes_count = 0;
 	reg [7 : 0] wdata_bytes_count = 0;
 	reg [7 : 0] rdata_bytes_count = 0;
@@ -248,6 +249,8 @@ module iic_slave #
 				addr_bytes_count <= 0;
 				wdata_bytes_count <= 0;
 				rdata_bytes_count <= 0;
+			end
+			else begin
 			end
 		end
 	end

@@ -274,6 +274,15 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	#]
 
 	#map_extra_net_property_port_property = {
+	#	'iic_scl': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#}
+
+	list_net_port = [
+		('FMC_HPC_LA28_P', 'iic_scl'),
+		('FMC_HPC_LA21_P', 'iic_sda'),
+	]
+
+	#map_extra_net_property_port_property = {
 	#	'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	#	#'lrclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	#	#'sdata[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
@@ -451,22 +460,30 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 	map_gpio_if_list_net_pin_des_resistor.update({'LPC': []})
 	map_gpio_if_list_net_pin_des_resistor.update({'OTHER': []})
 
-	list_pin_des = [
-		('Y30', 'SOMI'),
-		('AA30', 'MOSI'),
-		('AB29', 'SCLK'),
-		('AB30', '74138GA(CS)'),
-		('AC29', '74138GB'),
-		('AC30', '74138GC'),
-		('AB27', 'SPI_S0'),
-		('AC27', 'SPI_S1'),
-		('AD29', 'SPI_S2'),
-		('AE29', 'SPI_S3'),
+	list_pin_des = []
+	list_net_des = []
+
+	#list_pin_des = [
+	#	('Y30', 'SOMI'),
+	#	('AA30', 'MOSI'),
+	#	('AB29', 'SCLK'),
+	#	('AB30', '74138GA(CS)'),
+	#	('AC29', '74138GB'),
+	#	('AC30', '74138GC'),
+	#	('AB27', 'SPI_S0'),
+	#	('AC27', 'SPI_S1'),
+	#	('AD29', 'SPI_S2'),
+	#	('AE29', 'SPI_S3'),
+	#]
+
+	list_net_des = [
+		('FMC_HPC_LA30_P', 'master_scl'),
+		('FMC_HPC_LA24_P', 'master_sda'),
 	]
 
-	#for pin, des in list_pin_des:
-	des = None
-	for pin, net in map_kc705_pin_net.items():
+	for pin, des in list_pin_des:
+	#des = None
+	#for pin, net in map_kc705_pin_net.items():
 		net = map_kc705_pin_net.pop(pin, None)
 		if net:
 			resistor = None
@@ -484,6 +501,26 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 			else:
 				map_gpio_if_list_net_pin_des_resistor.get('OTHER').append(v)
 
+	for net, des in list_net_des:
+		for i, j in map_kc705_pin_net.items():
+			if j == net:
+				map_kc705_pin_net.pop(i, None)
+				resistor = None
+				pin = i
+				for k, group, part, l in list_kc705_net_group_part_pin:
+					if net == k:
+						if group in ['J2', 'J22']:
+							for m, n in list_fmc_pin_resistor:
+								if l == m:
+									resistor = n
+				v = (net, pin, des, resistor)
+				if net.startswith('FMC_HPC'):
+					map_gpio_if_list_net_pin_des_resistor.get('HPC').append(v)
+				elif net.startswith('FMC_LPC'):
+					map_gpio_if_list_net_pin_des_resistor.get('LPC').append(v)
+				else:
+					map_gpio_if_list_net_pin_des_resistor.get('OTHER').append(v)
+
 	for i in map_gpio_if_list_net_pin_des_resistor.items():
 		print '-' * 100
 		print 'map_gpio_if_list_net_pin_des_resistor %s info' %(i[0])
@@ -497,11 +534,11 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 def gen_default_contrain():
 	txt = """
 # Sys Clock Pins
-set_property PACKAGE_PIN AD11 [get_ports MIG_SYS_CLK_clk_n]
-set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_n]
+#set_property PACKAGE_PIN AD11 [get_ports MIG_SYS_CLK_clk_n]
+#set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_n]
 
-set_property PACKAGE_PIN AD12 [get_ports MIG_SYS_CLK_clk_p]
-set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_p]
+#set_property PACKAGE_PIN AD12 [get_ports MIG_SYS_CLK_clk_p]
+#set_property IOSTANDARD DIFF_SSTL15 [get_ports MIG_SYS_CLK_clk_p]
 
 # Sys Reset Pins
 set_property PACKAGE_PIN AB7 [get_ports reset]
@@ -641,7 +678,8 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 def gen_bitstream_constrain():
 	txt = """
 set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]
-set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design]
+set_property BITSTREAM.CONFIG.CONFIGRATE 40 [current_design]
+set_property BITSTREAM.CONFIG.SPI_FALL_EDGE YES [current_design]
 
 ##Encryption Settings
 #set_property BITSTREAM.ENCRYPTION.ENCRYPT YES [current_design]

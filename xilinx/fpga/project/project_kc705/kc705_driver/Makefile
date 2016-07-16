@@ -6,10 +6,11 @@ SUB_DIRS := driver app
 
 include $(ADD_TARGET)
 
-#export SUBJECT += KC705_DVBS2
-#export SUBJECT += KC705_CSA
-#export SUBJECT += KC705_FMC_GPIO
-export SUBJECT += KC705_I2S_RECEIVER_TEST
+#export SUBJECT := KC705_DVBS2
+#export SUBJECT := KC705_CSA
+#export SUBJECT := KC705_FMC_GPIO
+#export SUBJECT := KC705_I2S_RECEIVER_TEST
+export SUBJECT := KC705_IIC_SLAVE
 
 
 ifeq ($(SUBJECT), KC705_DVBS2)
@@ -17,6 +18,8 @@ ifeq ($(SUBJECT), KC705_DVBS2)
 	NEED_SPI := YES
 else ifeq ($(SUBJECT), KC705_I2S_RECEIVER_TEST)
 	NEED_SPI := YES
+else ifeq ($(SUBJECT), KC705_IIC_SLAVE)
+	NEED_I2C := YES
 endif
 
 install:

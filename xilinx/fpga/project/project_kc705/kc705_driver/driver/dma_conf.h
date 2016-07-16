@@ -9,6 +9,8 @@
 #include "fmc_gpio_conf/fmc_gpio_dma_config.h"
 #elif defined(KC705_I2S_RECEIVER_TEST)
 #include "i2s_receiver_conf/i2s_receiver_dma_config.h"
+#elif defined(KC705_IIC_SLAVE)
+#include "iic_slave_conf/iic_slave_dma_config.h"
 #endif
 
 #endif //#define _DMA_CONF_H

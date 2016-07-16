@@ -43,6 +43,15 @@
 #define IIC_SDA0 (-1)
 #define IIC_SCL0 (-1)
 
+#elif defined(KC705_IIC_SLAVE)
+
+#define SPI_MISO (-1)
+#define SPI_MOSI (-1)
+#define SPI_SCK (-1)
+#define SPI_CS (-1)
+#define IIC_SDA0 (179)
+#define IIC_SCL0 (178)
+
 #endif
 
 

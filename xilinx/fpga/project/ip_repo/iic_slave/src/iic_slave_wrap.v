@@ -192,7 +192,7 @@ module iic_slave_wrap #
 	iic_slave # ( 
 			.I2C_ADDRESS(I2C_ADDRESS),
 
-			.OPT_MEM_ADDR_BITS(IIC_OPT_MEM_ADDR_BITS)
+			.IIC_OPT_MEM_ADDR_BITS(IIC_OPT_MEM_ADDR_BITS)
 		) iic_slave_inst (
 			.wen(iic_wen),
 			.wdata(iic_wdata),

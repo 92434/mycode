@@ -282,7 +282,7 @@ module tb #
 			.SCL_DEL_LEN(SCL_DEL_LEN),
 			.SDA_DEL_LEN(SDA_DEL_LEN),
 
-			.OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS)
+			.IIC_OPT_MEM_ADDR_BITS(OPT_MEM_ADDR_BITS)
 		) iic_slave_inst (
 			.wen(wen),
 			.wdata(wdata),
