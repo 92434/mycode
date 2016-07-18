@@ -86,9 +86,14 @@ module iic_slave_interface #(
 				case(state)
 					`STATE_START_CONDITION: begin//repeat start condition
 						start_stop_det_enable <= 1;
-						data_bit_count <= 0;
 
-						state <= `STATE_IN_I2C_ADDRESS;
+						if(scl_in == 1) begin
+							data_bit_count <= 0;
+
+							state <= `STATE_IN_I2C_ADDRESS;
+						end
+						else begin
+						end
 					end
 					`STATE_IN_I2C_ADDRESS: begin
 						if(scl_in == 0) begin
