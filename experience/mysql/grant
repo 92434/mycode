@@ -1,0 +1,36 @@
+查看MYSQL数据库中所有用户
+mysql>SELECT DISTINCT CONCAT('User: ''',user,'''@''',host,''';') AS query FROM mysql.user;
+
+show grants for root@'localhost';
+show grants for root@'localhost';
+show grants for webgametest@10.3.18.158;
+
+mysql> select * from mysql.user where user='cactiuser';
+
+不但grants可以查看用户权限，还可以授予MySQL用户权限 创建、修改、删除 MySQL 数据表结构权限哦
+
+grant 创建、修改、删除 MySQL 数据表结构权限。
+grant create on testdb.* to developer@'192.168.0.%';
+grant alter  on testdb.* to developer@'192.168.0.%';
+grant drop   on testdb.* to developer@'192.168.0.%';
+
+grant 操作 MySQL 外键权限。
+grant references on testdb.* to developer@'192.168.0.%';
+
+grant 操作 MySQL 临时表权限。
+grant create temporary tables on testdb.* to developer@'192.168.0.%';
+
+grant 操作 MySQL 索引权限。
+grant index on  testdb.* to developer@'192.168.0.%';
+
+grant 操作 MySQL 视图、查看视图源代码权限。
+grant create view on testdb.* to developer@'192.168.0.%';
+grant show   view on testdb.* to developer@'192.168.0.%';
+
+grant 操作 MySQL 存储过程、函数权限。
+grant create routine on testdb.* to developer@'192.168.0.%';  -- now, can show procedure status
+grant alter  routine on testdb.* to developer@'192.168.0.%';  -- now, you can drop a procedure
+grant execute        on testdb.* to developer@'192.168.0.%';
+
+grant all privileges on *.* to user@domain
+revoke all privileges on *.* from user@domain
