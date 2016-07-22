@@ -1,7 +1,7 @@
 #ifndef _DMA_CONF_H
 #define _DMA_CONF_H
 
-#if defined(KC705_DVBS2)
+#if defined(DVBS2)
 #include "dvbs2_conf/dvbs2_dma_config.h"
 #elif defined(KC705_CSA)
 #include "csa_conf/csa_dma_config.h"
@@ -11,6 +11,8 @@
 #include "i2s_receiver_conf/i2s_receiver_dma_config.h"
 #elif defined(KC705_IIC_SLAVE)
 #include "iic_slave_conf/iic_slave_dma_config.h"
+#elif defined(KC705_DVBS2)
+#include "kc705_dvbs2_conf/kc705_dvbs2_dma_config.h"
 #endif
 
 #endif //#define _DMA_CONF_H

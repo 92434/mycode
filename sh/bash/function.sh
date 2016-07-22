@@ -346,3 +346,7 @@ function xrandr_addmode() {
 function chcst() {
 	sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtim
 }
+
+function check_net_ports() {
+	netstat -anp
+}

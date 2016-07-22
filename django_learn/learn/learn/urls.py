@@ -22,5 +22,6 @@ urlpatterns = [
 	url(r'^app1/', include('app1.urls', namespace="app1")),
 	url(r'^jquery/', include('jquery.urls', namespace="jquery")),
 	url(r'^blog/', include('blog.urls', namespace="blog")),
+	url(r'^image/', include('image.urls', namespace="image")),
 	#url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(settings.BASE_DIR, 'blog/static')}),
 ]

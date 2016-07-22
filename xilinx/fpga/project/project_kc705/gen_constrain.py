@@ -277,10 +277,10 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	#	'iic_scl': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	#}
 
-	list_net_port = [
-		('FMC_HPC_LA28_P', 'iic_scl'),
-		('FMC_HPC_LA21_P', 'iic_sda'),
-	]
+	#list_net_port = [
+	#	('FMC_HPC_LA28_P', 'iic_scl'),
+	#	('FMC_HPC_LA21_P', 'iic_sda'),
+	#]
 
 	#map_extra_net_property_port_property = {
 	#	'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
@@ -347,6 +347,67 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	#	#'lrclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	#	#'sdata[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	#}
+
+
+	map_extra_net_property_port_property = {
+		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	}
+
+	list_net_port = [
+		('FMC_HPC_HA00_CC_P', 'mpeg_clk'),
+		('FMC_HPC_HA01_CC_P', 'mpeg_sync'),
+		('FMC_HPC_HA05_N', 'mpeg_valid'),
+		('FMC_HPC_HA00_CC_N', 'mpeg_data[0]'),
+		('FMC_HPC_HA01_CC_N', 'mpeg_data[1]'),
+		('FMC_HPC_HA02_P', 'mpeg_data[2]'),
+		('FMC_HPC_HA04_P', 'mpeg_data[3]'),
+		('FMC_HPC_HA03_N', 'mpeg_data[4]'),
+		('FMC_HPC_HA04_N', 'mpeg_data[5]'),
+		('FMC_HPC_HA05_P', 'mpeg_data[6]'),
+		('FMC_HPC_HA06_P', 'mpeg_data[7]'),
+
+		('FMC_HPC_HA10_P', 'asi_out_p'),
+		('FMC_HPC_HA10_N', 'asi_out_n'),
+
+		('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
+
+		('FMC_LPC_LA10_P', 'symbol_2x_oe'),
+	      
+		('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
+		('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
+		('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
+		('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
+		('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
+		('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
+		('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
+		('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
+		('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
+		('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
+		('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
+		('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
+		('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
+		('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
+		('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
+		('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
+
+		('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
+		('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
+		('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
+		('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
+		('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
+		('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
+		('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
+		('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
+		('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
+		('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
+		('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
+		('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
+		('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
+		('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
+		('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
+		('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
+	]
 
 
 	#list_pin_port = [
@@ -476,9 +537,41 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 	#	('AE29', 'SPI_S3'),
 	#]
 
+	#list_net_des = [
+	#	('FMC_HPC_LA30_P', 'master_scl'),
+	#	('FMC_HPC_LA24_P', 'master_sda'),
+	#]
 	list_net_des = [
-		('FMC_HPC_LA30_P', 'master_scl'),
-		('FMC_HPC_LA24_P', 'master_sda'),
+		('FMC_HPC_HA03_P', 'i2c_sck'),
+		('FMC_HPC_HA02_N', 'i2c_sda'),
+
+		('FMC_LPC_LA21_N', 'spi_clk'),
+		('FMC_LPC_LA19_P', 'spi_mosi'),
+		('FMC_LPC_LA19_N', 'spi_miso'),
+
+		('FMC_LPC_LA22_P', '74138G2A'),
+		('FMC_LPC_LA15_N', 'spi_s0'),
+		('FMC_LPC_CLK0_M2C_N', 'spi_s1'),
+		('FMC_LPC_PRSNT_M2C_B_LS', 'spi_s2'),
+
+		('FMC_HPC_HA06_N', 'lnb1_on_off'),
+		('FMC_HPC_HA08_P', 'TUNB_3.3V_ON'),
+		('FMC_LPC_LA20_N', 'AD9125_INTB'),
+		('FMC_LPC_CLK1_M2C_N', 'AD5375_DSOP'),
+
+		('FMC_HPC_HA08_N', 'undefined'),
+		('FMC_HPC_HA12_P', 'undefined'),
+		('FMC_HPC_HA12_N', 'undefined'),
+		('FMC_HPC_HA14_P', 'undefined'),
+		('FMC_HPC_HA07_P', 'undefined'),
+		('FMC_HPC_HA07_N', 'undefined'),
+		('FMC_HPC_HA09_P', 'undefined'),
+		('FMC_HPC_HA09_N', 'undefined'),
+		('FMC_HPC_HA11_P', 'undefined'),
+		('FMC_HPC_HA11_N', 'undefined'),
+		('FMC_HPC_HA13_P', 'undefined'),
+		('FMC_HPC_HA13_N', 'undefined'),
+		('FMC_HPC_HA14_N', 'undefined'),
 	]
 
 	for pin, des in list_pin_des:
@@ -599,7 +692,7 @@ set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[7]}]
 
 def gen_ip_constrain(list_ip_net_pin_port_des):
 	print '#', '-' * 100
-	print '#', 'generator ip constrain'
+	print '#', 'ip constrain'
 	print '#', '-' * 100
 
 	for net, pin, port, des in list_ip_net_pin_port_des:
@@ -612,7 +705,7 @@ def gen_ip_constrain(list_ip_net_pin_port_des):
 def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 	list_net_pin_des_resistor_gpio_gpio_no = []
 	start = 0
-	top_pin_no = 180
+	top_pin_no = 256
 	gpio_no = 0
 
 	list_gpio_groups = [
@@ -634,7 +727,7 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 			list_gpio_ports.append(i + '[' + str(j) + ']')
 
 	print '#', '-' * 100
-	print '#', 'generator gpio constrain'
+	print '#', 'gpio constrain'
 	print '#', '-' * 100
 
 	for i, j in map_gpio_if_list_net_pin_des_resistor.items():
@@ -650,10 +743,11 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 			continue
 
 		print '#', '-' * 100
-		print '#', 'generator gpio constrain for %s' %(i)
+		print '#', 'gpio constrain for %s' %(i)
 		print '#', '-' * 100
 
-		top_pin_no = 180
+		#top_pin_no = 256
+		base_pin_no = 0
 
 		for k in range(list_len):
 			bank = k / 32
@@ -667,12 +761,12 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 			print '\n#%s, %s, %s, %d\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(net, des, resistor, gpio_no, pin, gpio)
 			print 'set_property IOSTANDARD LVCMOS15 [get_ports {%s}]' %(gpio)
 
-		top_pin_no = gpio_no
+		top_pin_no = base_pin_no
 
 		start += list_len
 		if (start % 32) != 0:
 			start = 32 * ((start / 32) + 1)
-	
+
 	return list_net_pin_des_resistor_gpio_gpio_no
 
 def gen_bitstream_constrain():
@@ -714,7 +808,7 @@ def gen_gpio_test_list(list_net_pin_des_resistor_gpio_gpio_no):
 	
 
 	print '#', '-' * 100
-	print '#', 'generator test fmc data'
+	print '#', 'test fmc data'
 	print '#', '-' * 100
 
 	list_test_gpio_resistor_net = []

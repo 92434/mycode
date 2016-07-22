@@ -2,7 +2,7 @@
 #define _INTERFACE_IO_H
 
 
-#if defined(KC705_DVBS2)
+#if defined(DVBS2)
 
 //164 : s0//FMC_LPC_LA22_P
 //158 : s1//FMC_LPC_LA19_P
@@ -51,6 +51,15 @@
 #define SPI_CS (-1)
 #define IIC_SDA0 (179)
 #define IIC_SCL0 (178)
+
+#elif defined(KC705_DVBS2)
+
+#define SPI_MISO (232)
+#define SPI_MOSI (231)
+#define SPI_SCK (230)
+#define SPI_CS (233)
+#define IIC_SDA0 (240)
+#define IIC_SCL0 (239)
 
 #endif
 

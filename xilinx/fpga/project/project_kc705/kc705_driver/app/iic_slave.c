@@ -158,42 +158,44 @@ void main_proc(thread_arg_t *arg) {
 		int i;
 
 		//iic_slave_dump
-		printf("%s\n", "-------------------------------------------------");
+		//printf("%s\n", "-------------------------------------------------");
 		for(i = 0; i < TOTAL_REGS; i++) {
 			read_regs(i);
-			printf("dump %s: %08x(%d)\n", reg_name[i], pdata_r[0], pdata_r[0]);
+			//printf("dump %s: %08x(%d)\n", reg_name[i], pdata_r[0], pdata_r[0]);
 		}
 
 		//write iic_slave
-		printf("%s\n", "-------------------------------------------------");
+		//printf("%s\n", "-------------------------------------------------");
 		*paddr = 0x0000;
 		for(i = 0; i < TOTAL_REGS; i++) {
 			pdata[i] = count + i;
-			printf("write %s: %08x(%d)\n", reg_name[i], pdata[i], pdata[i]);
+			//printf("write %s: %08x(%d)\n", reg_name[i], pdata[i], pdata[i]);
 		}
 		count++;
 
 		write(targ->fd_master, buff, 2 + BUFSIZE);
 
 		//iic_slave_dump
-		printf("%s\n", "-------------------------------------------------");
+		//printf("%s\n", "-------------------------------------------------");
 		for(i = 0; i < TOTAL_REGS; i++) {
 			read_regs(i);
-			printf("dump %s: %08x(%d)\n", reg_name[i], pdata_r[0], pdata_r[0]);
+			//printf("dump %s: %08x(%d)\n", reg_name[i], pdata_r[0], pdata_r[0]);
 		}
 
 		//read iic_slave
-		printf("%s\n", "-------------------------------------------------");
+		//printf("%s\n", "-------------------------------------------------");
 		for(i = 0; i < TOTAL_REGS; i++) {
 			pdata[i] = 0;
 		}
 		write(targ->fd_master, buff, 2);
 		read(targ->fd_master, buff + 2, BUFSIZE);
 		for(i = 0; i < TOTAL_REGS; i++) {
-			printf("read %s: %08x(%d)\n", reg_name[i], pdata[i], pdata[i]);
+			//printf("read %s: %08x(%d)\n", reg_name[i], pdata[i], pdata[i]);
 		}
+		read_regs(0);
+		printf("%s: %08x(%08x) %24d(%24d)\n", reg_name[0], pdata[0], pdata_r[0], pdata[0], pdata_r[0]);
 
-		sleep(1);
+		//sleep(1);
 
 		//break;
 	}
