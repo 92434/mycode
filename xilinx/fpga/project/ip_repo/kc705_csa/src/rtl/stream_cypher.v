@@ -56,7 +56,6 @@ wire               po;
 wire               qo;
 wire               ro;
 wire   [8 *8-1 : 0]cbo;
-wire   [8 *8-1 : 0]cbo1;
 //reg init0,init1;
 assign Ainit = { 
                 4'b0,         4'b0,
@@ -143,7 +142,7 @@ stream_8bytes stream_8bytes_calc(
                        ,.ro(ro)
                        ,.cb(cbo)
                 );
-		assign cbo1=cbo ^ 64'h00a5d7b0d65e93b5;
-		r_func R_f(cbo1[55:0],cb[47:0]);
+		assign cb=cbo ^ 64'h00a5d7b0d65e93b5;
+
 
 endmodule
