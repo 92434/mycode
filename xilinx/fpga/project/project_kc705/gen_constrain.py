@@ -673,16 +673,16 @@ set_property PACKAGE_PIN AB9 [get_ports {EXT_LEDS[3]}]
 set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[3]}]
 
 set_property PACKAGE_PIN AE26 [get_ports {EXT_LEDS[4]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[4]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[4]}]
 
 set_property PACKAGE_PIN G19 [get_ports {EXT_LEDS[5]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[5]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[5]}]
 
 set_property PACKAGE_PIN E18 [get_ports {EXT_LEDS[6]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[6]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[6]}]
 
 set_property PACKAGE_PIN F16 [get_ports {EXT_LEDS[7]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[7]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[7]}]
 	"""
 
 	print '#', '-' * 100
@@ -697,7 +697,7 @@ def gen_ip_constrain(list_ip_net_pin_port_des):
 
 	for net, pin, port, des in list_ip_net_pin_port_des:
 		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(net, pin, port)
-		print 'set_property IOSTANDARD LVCMOS15 [get_ports {%s}]' %(port)
+		print 'set_property IOSTANDARD LVCMOS25 [get_ports {%s}]' %(port)
 		if des:
 			for i in des:
 				print i
@@ -758,7 +758,7 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 			item = (net, pin, des, resistor, gpio, gpio_no)
 			list_net_pin_des_resistor_gpio_gpio_no.append(item)
 			print '\n#%s, %s, %s, %d\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(net, des, resistor, gpio_no, pin, gpio)
-			print 'set_property IOSTANDARD LVCMOS15 [get_ports {%s}]' %(gpio)
+			print 'set_property IOSTANDARD LVCMOS25 [get_ports {%s}]' %(gpio)
 
 		top_pin_no = base_pin_no
 
