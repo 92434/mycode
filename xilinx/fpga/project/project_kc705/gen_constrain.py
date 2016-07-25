@@ -746,7 +746,6 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 		print '#', 'gpio constrain for %s' %(i)
 		print '#', '-' * 100
 
-		#top_pin_no = 256
 		base_pin_no = 0
 
 		for k in range(list_len):
