@@ -2,7 +2,7 @@
 
 module ck_processer #(
 		parameter integer AXI_DATA_WIDTH = 32,
-		parameter integer CSA_CALC_IN_WIDTH = 8 * 6,
+		parameter integer CSA_CALC_IN_WIDTH = 8 * 8,
 		parameter integer CYPHER_DATA_WIDTH = 8 * 8
 	)
 	(

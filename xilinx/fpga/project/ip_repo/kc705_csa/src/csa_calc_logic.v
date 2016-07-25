@@ -4,7 +4,7 @@ module csa_calc_logic #(
 		parameter integer ID = 0,
 
 		parameter integer CYPHER_DATA_WIDTH = 8 * 8,
-		parameter integer CSA_CALC_IN_WIDTH = 8 * 6,
+		parameter integer CSA_CALC_IN_WIDTH = 8 * 8,
 		parameter integer CSA_CALC_OUT_WIDTH = 8 * 8
 	)
 	(

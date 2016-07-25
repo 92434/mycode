@@ -4,7 +4,7 @@ module csa_calc_logic_wrap #(
 		parameter integer AXI_DATA_WIDTH = 32,
 
 		parameter integer CYPHER_DATA_WIDTH = 8 * 8,
-		parameter integer CSA_CALC_IN_WIDTH = 8 * 6,
+		parameter integer CSA_CALC_IN_WIDTH = 8 * 8,
 		parameter integer CSA_CALC_OUT_WIDTH = 8 * 8,
 
 		parameter integer CSA_IN_PARAMETER_LENGTH = AXI_DATA_WIDTH * 5,

@@ -97,7 +97,7 @@ module csa_wrap #
 	localparam integer OPT_MEM_ADDR_BITS = C_S00_AXI_ADDR_WIDTH - ADDR_LSB;
 
 	localparam integer CYPHER_DATA_WIDTH = 8 * 8;
-	localparam integer CSA_CALC_IN_WIDTH = 8 * 6;
+	localparam integer CSA_CALC_IN_WIDTH = 8 * 8;
 	localparam integer CSA_CALC_OUT_WIDTH = 8 * 8;
 
 	localparam integer CSA_IN_PARAMETER_LENGTH = AXI_DATA_WIDTH * 5;
