@@ -270,7 +270,7 @@ void *kc705_add_gpio_chip(uint8_t *base_addr, int ngpios, int *pngpio, char *nam
 		} else {
 			kc705_gpio_chip->gpio_channel[i].initilized = true;
 		}
-		mydebug("kc705_gpio_chip->gpio_channel[i].chip.base:%d\n", kc705_gpio_chip->gpio_channel[i].chip.base);
+		mydebug("kc705_gpio_chip->gpio_channel[%d].chip.base:%d\n", i, kc705_gpio_chip->gpio_channel[i].chip.base);
 	}
 	
 	ret = (void *)kc705_gpio_chip;
@@ -284,6 +284,7 @@ void kc705_remove_gpio_chip(void *ppara) {
 	for(i = 0; i < GPIO_CHIP_CHANNEL_SIZE; i++) {
 		if(kc705_gpio_chip->gpio_channel[i].initilized) {
 			gpiochip_remove(&(kc705_gpio_chip->gpio_channel[i].chip));
+			mydebug("kc705_gpio_chip->gpio_channel[%d].chip.base:%d\n", i, kc705_gpio_chip->gpio_channel[i].chip.base);
 		}
 	}
 
