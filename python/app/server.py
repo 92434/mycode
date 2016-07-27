@@ -3,9 +3,7 @@ import logging.handlers
 import cPickle
 import struct
 
-import sys
-sys.path.append('/home/xiaofei/workspace/code/mycode/python/utils')
-import log
+from log import *
 
 #rd, wr, ex = select.select([self.socket.fileno()],  [], [],  self.timeout)
 #if rd:
@@ -24,7 +22,7 @@ class MyHandler(SocketServer.StreamRequestHandler):
 		else:
 			name = record.name
 		#print "name:%s" %(name)
-		logger = log.get_logger(name)
+		logger = get_logger(name)
 		#print "logger:%s" %(logger)
 		# N.B. EVERY record gets logged. This is because Logger.handle
 		# is normally called AFTER logger-level filtering. If you want
@@ -41,21 +39,22 @@ class MyHandler(SocketServer.StreamRequestHandler):
 
 		print 'connection from:', addr
 
-		data = self.connection.recv(4)
-		if len(data) < 4:
-			return
+		while True:
+			data = self.connection.recv(4)
+			if len(data) < 4:
+				return
 
-		data_len = struct.unpack(">L", data)[0]
-		#print 'data_len:%d' %(data_len)
-		data = self.connection.recv(data_len)
-		#print 'data:%s' %(data)
-		while len(data) < data_len:
-			data = data + self.connection.recv(data_len - len(data))
-		raw_data = self.unPickle(data)
-		#print 'raw_data:%s' %(raw_data)
-		record = logging.makeLogRecord(raw_data)
-		#print 'record:%s' %(record)
-		self.handleLogRecord(record)
+			data_len = struct.unpack(">L", data)[0]
+			#print 'data_len:%d' %(data_len)
+			data = self.connection.recv(data_len)
+			#print 'data:%s' %(data)
+			while len(data) < data_len:
+				data = data + self.connection.recv(data_len - len(data))
+			raw_data = self.unPickle(data)
+			#print 'raw_data:%s' %(raw_data)
+			record = logging.makeLogRecord(raw_data)
+			#print 'record:%s' %(record)
+			self.handleLogRecord(record)
 
 def log_server(ip = 'localhost', port = logging.handlers.DEFAULT_TCP_LOGGING_PORT):
 	server = SocketServer.ThreadingTCPServer((ip, logging.handlers.DEFAULT_TCP_LOGGING_PORT), MyHandler)

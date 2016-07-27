@@ -80,7 +80,7 @@ def get_logger(logger_name = 'my_logger'):
 	else:
 		return simple_logger()
 
-logger = get_logger(None)
+logger = get_logger()
 
 if __name__ == '__main__':
 	logger.debug("debug message")

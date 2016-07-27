@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
-
-sys.path.append('/home/xiaofei/workspace/code/mycode/python/utils')
-import log
-logger = log.get_logger()
+from log import *
 
 class base(object):
 	def __init__(self, *args, **kwargs):

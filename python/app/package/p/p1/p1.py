@@ -2,6 +2,7 @@
 import traceback
 import sys
 print traceback.extract_stack()[-1][:-1]
+from log import *
 
 def get_dict_type(d):
 	print '*' * 100
@@ -13,6 +14,7 @@ def get_dict_type(d):
 
 def p1_main(argv):
 	print traceback.extract_stack()[-1][:-1]
+	logger.debug('')
 	print argv
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import traceback
 from p.p1.p1 import get_dict_type, p1_main
+from log import *
 
 if __name__ == "__main__":
-	print traceback.extract_stack()[-1][:-1]
+	logger.debug('')
 	print dir(p1_main)
 	d = {}
 	get_dict_type(d)
