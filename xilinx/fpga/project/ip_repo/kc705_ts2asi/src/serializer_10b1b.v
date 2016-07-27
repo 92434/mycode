@@ -74,9 +74,9 @@ module serializer_10b1b(/*AUTOARG*/
    parameter [2:0]
 		CNT_RESET   = 3'b000,
 		CNT_STATE1  = 3'b001,
-		CNT_STATE2  = 3'b011,
-		CNT_STATE3  = 3'b010,
-		CNT_STATE4  = 3'b110;
+		CNT_STATE2  = 3'b010,
+		CNT_STATE3  = 3'b011,
+		CNT_STATE4  = 3'b100;
    
 
    // Internal clk registers
@@ -95,49 +95,56 @@ module serializer_10b1b(/*AUTOARG*/
    reg [1:0]   sdata_slice;
    
    // Synchronous process for word rate registers
-  always @(posedge sclk_0)
-     if (reset)
-	  start_bit <= 1'b0;
-     else if (ce)
-       begin
-	  din_10b_R <= din_10b;
-	  start_bit <= 1'b1;
-      end 
+	always @(posedge sclk_0) begin
+		if(reset == 1) begin
+			start_bit <= 1'b0;
+		end
+		else begin
+			start_bit <= 1'b0;
+			if(ce == 1) begin
+				din_10b_R <= din_10b;
+				start_bit <= 1'b1;
+			end
+			else begin
+			end
+		end
+	begin
+	end 
+	end
 
   assign start = start_bit;
 
   assign sout_data = din_10b;
 
-  // Synchronous process for serial half bit-rate clock
-   // gray code counter.
-   always @(posedge sclk_0)
-     begin
-	sdata_slice_R <= sdata_slice;
-	if (reset) 
-	   cnt_curr_state <= CNT_RESET;
-	else
-	  cnt_curr_state <= cnt_next_state;
-     end // always @ (posedge sclk)
+	// Synchronous process for serial half bit-rate clock
+	// gray code counter.
+	always @(posedge sclk_0) begin
+		if(reset == 1) begin
+			cnt_curr_state <= CNT_RESET;
+		end
+		else begin
+			sdata_slice_R <= sdata_slice;
+			cnt_curr_state <= cnt_next_state;
+		end
+	end // always @ (posedge sclk)
    
 
-   // Gray code counter next state logic
-   always @ (*)
-     begin
-	case (cnt_curr_state)
-	  CNT_RESET  : begin
-	     if (start_bit)  // Align counter with word boundaries
-	       cnt_next_state <= CNT_STATE1;
-	     else
-	       cnt_next_state <= CNT_RESET;
-	  end
-	  
-	  CNT_STATE1 : cnt_next_state <= CNT_STATE2;
-	  CNT_STATE2 : cnt_next_state <= CNT_STATE3;
-	  CNT_STATE3 : cnt_next_state <= CNT_STATE4;
-	  CNT_STATE4 : cnt_next_state <= CNT_RESET;
-	  default    : cnt_next_state <= CNT_RESET;
-	endcase // case(cnt_curr_state)
-     end   
+	// Gray code counter next state logic
+	always @ (*) begin
+		case (cnt_curr_state)
+		CNT_RESET: begin
+			if (start_bit)  // Align counter with word boundaries
+				cnt_next_state <= CNT_STATE1;
+			else
+				cnt_next_state <= CNT_RESET;
+		end
+		CNT_STATE1: cnt_next_state <= CNT_STATE2;
+		CNT_STATE2: cnt_next_state <= CNT_STATE3;
+		CNT_STATE3: cnt_next_state <= CNT_STATE4;
+		CNT_STATE4: cnt_next_state <= CNT_RESET;
+		default: cnt_next_state <= CNT_RESET;
+		endcase // case(cnt_curr_state)
+	end   
 	      
 
    // Simple 2-bit wide mux for slicing 10-bit word into 2-bit chunks
