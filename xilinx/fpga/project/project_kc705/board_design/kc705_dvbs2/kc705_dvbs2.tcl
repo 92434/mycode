@@ -173,7 +173,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi_dma_0, and set properties
   set axi_dma_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma:7.1 axi_dma_0 ]
-  set_property -dict [ list CONFIG.c_include_sg {0} CONFIG.c_sg_include_stscntrl_strm {0}  ] $axi_dma_0
+  set_property -dict [ list CONFIG.c_include_sg {0}  ] $axi_dma_0
 
   # Create instance: axi_gpio_0, and set properties
   set axi_gpio_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0 ]
@@ -189,7 +189,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: clk_wiz_0, and set properties
   set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.1 clk_wiz_0 ]
-  set_property -dict [ list CONFIG.CLKOUT1_JITTER {122.344} CONFIG.CLKOUT1_PHASE_ERROR {97.646} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {135.000} CONFIG.MMCM_CLKFBOUT_MULT_F {10.125} CONFIG.MMCM_CLKOUT0_DIVIDE_F {7.500}  ] $clk_wiz_0
+  set_property -dict [ list CONFIG.CLKOUT1_JITTER {122.344} CONFIG.CLKOUT1_PHASE_ERROR {97.646} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {135.000}  ] $clk_wiz_0
 
   # Create instance: intr_hub_0, and set properties
   set intr_hub_0 [ create_bd_cell -type ip -vlnv xiaofei:user:intr_hub:1.0 intr_hub_0 ]
@@ -257,7 +257,7 @@ proc create_root_design { parentCell } {
   connect_bd_net -net kc705_pcie_ext_0_pcie_refclk_100MHz [get_bd_pins axi_pcie_0/REFCLK] [get_bd_pins clk_wiz_0/clk_in1] [get_bd_pins kc705_pcie_ext_0/pcie_refclk_100MHz] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
   connect_bd_net -net kc705_ts2asi_0_asi_out_n [get_bd_ports asi_out_n] [get_bd_pins kc705_ts2asi_0/asi_out_n]
   connect_bd_net -net kc705_ts2asi_0_asi_out_p [get_bd_ports asi_out_p] [get_bd_pins kc705_ts2asi_0/asi_out_p]
-  connect_bd_net -net kc705_ts2asi_0_ce_R0 [get_bd_pins asi_dump_0/ce] [get_bd_pins kc705_ts2asi_0/ce_R0]
+  connect_bd_net -net kc705_ts2asi_0_ce_R1 [get_bd_pins asi_dump_0/ce] [get_bd_pins kc705_ts2asi_0/ce_R1]
   connect_bd_net -net kc705_ts2asi_0_sout_data [get_bd_pins asi_dump_0/ts_data] [get_bd_pins kc705_ts2asi_0/sout_data]
   connect_bd_net -net kc705_ts2asi_0_ts_clk [get_bd_pins kc705_dvb_s2_0/ts_clk_h264out] [get_bd_pins kc705_ts2asi_0/ts_clk]
   connect_bd_net -net kc705_ts2asi_0_ts_data [get_bd_pins kc705_dvb_s2_0/ts_din_h264out] [get_bd_pins kc705_ts2asi_0/ts_data]
