@@ -2,7 +2,6 @@
 
 import traceback
 
-
 def decorator(*args, **kwargs):
 	print traceback.extract_stack()[-1][:-1]
 	print 'args', args
