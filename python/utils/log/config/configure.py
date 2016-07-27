@@ -52,8 +52,9 @@ class my_filter(logging.Filter):
 def gen_debug_file():
 	tm = time.localtime()
 	cwd = os.getcwd()
-	dirname = os.path.join(os.getcwd(), '.log', '%04d-%02d-%02d_%02d%02d%02d' %(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec))
-	debug_file = os.path.join(dirname, 'debug.log')
+	dirname = os.path.join(os.getcwd(), '.log', )
+	filename = '%04d-%02d-%02d_%02d%02d%02d_%s' %(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 'debug.log')
+	debug_file = os.path.join(dirname, filename)
 	if not os.path.exists(dirname):
 		os.makedirs(dirname)
 	return debug_file
