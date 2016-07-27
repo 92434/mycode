@@ -98,6 +98,9 @@ class base(object):
 
 class derived(base):
 	def __init__(self, *args, **kwargs):
+		txt = str(super(derived, self))
+		logger.debug(txt)
+		super(derived, self).__init__(*args, **kwargs)
 		txt = "\nself.__class__:%s\nargs:%s\nkwargs:%s\n" %(
 			self.__class__,
 			args,

@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 import logging
 import logging.config
+import time
 import os
 
 file_config_content = """
@@ -32,26 +34,7 @@ args=(sys.stdout,)
 format=%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s
 datefmt=
 """
-
-config_filepath = 'logging.conf'
-
-def test_logging_file_config():
-	with open(config_filepath, 'w+') as f:
-		f.write(file_config_content)
-	
-	logging.config.fileConfig("logging.conf")
-
-	os.remove(config_filepath)
-
-	#create logger
-	logger = logging.getLogger("simpleExample")
-	 
-	#"application" code
-	logger.debug("debug message")
-	logger.info("info message")
-	logger.warn("warn message")
-	logger.error("error message")
-	logger.critical("critical message")
+file_config_filepath = '/tmp/file_config.conf'
 
 class my_filter(logging.Filter):
 	def __init__(self, param=None):
@@ -66,7 +49,17 @@ class my_filter(logging.Filter):
 			return True
 		return True
 
-my_config = {
+def gen_debug_file():
+	tm = time.localtime()
+	cwd = os.getcwd()
+	dirname = os.path.join(os.getcwd(), '.log', '%04d-%02d-%02d_%02d%02d%02d' %(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec))
+	debug_file = os.path.join(dirname, 'debug.log')
+	if not os.path.exists(dirname):
+		os.makedirs(dirname)
+	return debug_file
+debug_file = gen_debug_file()
+
+dict_config = {
 	'version': 1,
 	'disable_existing_loggers': False,
 	'formatters': {
@@ -94,7 +87,8 @@ my_config = {
 		'file': {
 			'level': 'DEBUG',
 			'class': 'logging.FileHandler',
-			'filename': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'debug.log'),
+			#'filename': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'debug.log'),
+			'filename': debug_file,
 			'formatter': 'myformatter',
 			'filters': ['special']
 		},
@@ -130,51 +124,3 @@ my_config = {
 		},
 	},
 }
-
-def test_logging_dict_config():
-	logging.config.dictConfig(my_config)
-
-	#create logger
-	logger = logging.getLogger("my_logger")
-	 
-	#"application" code
-	logger.debug("debug message")
-	logger.info("info message")
-	logger.warn("warn message")
-	logger.error("error message")
-	logger.critical("critical message")
-
-def test_logging_simple_config():
-	# create logger with "spam_application"
-	logger = logging.getLogger("spam_application")
-	logger.setLevel(logging.DEBUG)
-	# create file handler which logs even debug messages
-	fh = logging.FileHandler(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'debug.log'))
-	fh.setLevel(logging.DEBUG)
-	# create console handler with a higher log level
-	ch = logging.StreamHandler()
-	ch.setLevel(logging.ERROR)
-	# create formatter and add it to the handlers
-	fh_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-	fh.setFormatter(fh_formatter)
-	ch_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-	ch.setFormatter(ch_formatter)
-	# add the handlers to the logger
-	logger.addHandler(ch)
-	logger.addHandler(fh)
-
-	#"application" code
-	logger.debug("debug message")
-	logger.info("info message")
-	logger.warn("warn message")
-	logger.error("error message")
-	logger.critical("critical message")
-
-
-if __name__ == '__main__':
-	print '*' * 100
-	#test_logging_file_config()
-	print '*' * 100
-	test_logging_dict_config()
-	print '*' * 100
-	#test_logging_simple_config()
