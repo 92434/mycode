@@ -27,7 +27,6 @@ LOG_COLORS = {
 }
 
 def color(txt = '', level = 'DEBUG'):
-	print LOG_COLORS.get(level) %(txt)
 	return LOG_COLORS.get(level) %(txt)
 
 def file_configure(filename_user):
