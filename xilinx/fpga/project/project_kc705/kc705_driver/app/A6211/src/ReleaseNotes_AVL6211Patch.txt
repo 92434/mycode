@@ -1,0 +1,26 @@
+AVL6211 Firmware Patch 1.0.2   8/05/2010
+	What's new:
+		1. Improved power consumption of AVL6211 in sleep mode.
+	
+	Modified files:
+		1. \AVL6211_patch.dat, AVL6211_patch.dat.c
+
+
+AVL6211 Firmware Patch 1.0.1   8/03/2010
+	What's new:
+		1. Improved packet error rate performance in DVBS mode for symbol rates < 3Msps.
+	
+	Modified files:
+		1. \AVL6211_patch.dat, AVL6211_patch.dat.c
+
+
+AVL6211 Firmware Patch 1.0.0   6/04/2010
+	What's new:
+		1. Initial Firmware Patch Release.
+	
+	 Modified files:
+		1. All files are new.
+
+			
+
+
