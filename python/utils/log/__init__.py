@@ -74,13 +74,13 @@ def get_log(configure = None):
 	else:
 		return dict_configure(None)
 
-def get_logger(logger_name = None):
+def get_logger(logger_name = 'my_logger'):
 	if logger_name:
 		return get_log().getLogger(logger_name)
 	else:
 		return simple_logger()
 
-logger = get_logger('my_logger')
+logger = get_logger(None)
 
 if __name__ == '__main__':
 	logger.debug("debug message")
