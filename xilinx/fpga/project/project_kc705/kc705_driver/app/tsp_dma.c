@@ -16,7 +16,7 @@ unsigned int raw_data[] = {
 };
 #define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
 
-#define BUFSIZE (16 * 4)
+#define BUFSIZE (128 * 4)
 
 static int stop = 0;
 

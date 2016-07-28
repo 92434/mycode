@@ -3,6 +3,15 @@ import os
 from log import *
 
 class base(object):
+	def __new__(self, *args, **kwargs):
+		obj = super(base, self).__new__(self, *args, **kwargs)
+		txt = "\ncls:%s\nargs:%s\nkwargs:%s\n" %(
+			self,
+			args,
+			kwargs
+		)
+		logger.debug(txt)
+		return obj
 	def __init__(self, *args, **kwargs):
 		txt = "\nself.__class__:%s\nargs:%s\nkwargs:%s\n" %(
 			self.__class__,
@@ -13,9 +22,16 @@ class base(object):
 
 
 class derived(base):
-	def __init__(self, *args, **kwargs):
-		txt = str(super(derived, self))
+	def __new__(self, *args, **kwargs):
+		obj = super(derived, self).__new__(self, *args, **kwargs)
+		txt = "\ncls:%s\nargs:%s\nkwargs:%s\n" %(
+			self,
+			args,
+			kwargs
+		)
 		logger.debug(txt)
+		return obj
+	def __init__(self, *args, **kwargs):
 		super(derived, self).__init__(*args, **kwargs)
 		txt = "\nself.__class__:%s\nargs:%s\nkwargs:%s\n" %(
 			self.__class__,

@@ -10,6 +10,9 @@ module asi_dump_wrap #
 
 
 		// Parameters of Axi Master Bus Interface M00_AXIS
+		parameter integer NUMBER_OF_OUTPUT_WORDS = 128,
+		parameter integer BULK_OF_DATA = 128,
+		parameter integer BULK_DEPTH = 16,
 		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
 		parameter integer C_M00_AXIS_START_COUNT = 32
 	)
@@ -43,6 +46,9 @@ module asi_dump_wrap #
 
 	// Instantiation of Axi Bus Interface M00_AXIS
 	axi4_stream_master_v1_0 # (
+		.NUMBER_OF_OUTPUT_WORDS(NUMBER_OF_OUTPUT_WORDS),
+		.BULK_OF_DATA(BULK_OF_DATA),
+		.BULK_DEPTH(BULK_DEPTH),
 		.C_M00_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH),
 		.C_M00_AXIS_START_COUNT(C_M00_AXIS_START_COUNT)
 	) axi4_stream_master_v1_0_inst (

@@ -82,9 +82,35 @@ static dma_static_config_info_t dma_info[] = {
 		.is_auto_receive = false,
 #endif//#if 1
 
-		.receive_bulk_size = 16 * 4,
+		.receive_bulk_size = 128 * 4,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
-		.devname = "asi_dma",//after asi
+		.devname = "tsp_dma",
+	},
+#endif//#if ENABLE_DMA
+
+#if ENABLE_DMA
+	{
+		.dma_lite_offset = OFFSET_AXI_DMA_LITE_1,
+		.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
+		.pcie_bar_map_ctl_offset_1 = AXIBAR2PCIEBAR_1U,
+		.pcie_map_bar_axi_addr_0 = BASE_AXI_PCIe_BAR0,
+		.pcie_map_bar_axi_addr_1 = BASE_AXI_PCIe_BAR1,
+		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
+
+		.dma_type = AXI_DMA,
+#if 1
+		.dma_thread = dma_threads,
+		.dma_thread_count = DMA_THREAD_COUNT, 
+		.is_auto_receive = true,
+#else//#if 1
+		.dma_thread = NULL,
+		.dma_thread_count = 0, 
+		.is_auto_receive = false,
+#endif//#if 1
+
+		.receive_bulk_size = 128 * 4,
+		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+		.devname = "asi_dma",
 	},
 #endif//#if ENABLE_DMA
 
