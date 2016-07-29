@@ -1,7 +1,7 @@
 include $(default_rules)
 
-SUB_DIRS :=  driver app
+#all_dirs := $(strip $(call all-dirs-under))
+
+SUB_DIRS := driver app
 
 include $(ADD_TARGET)
-
-.PHONY: $(PHONY)

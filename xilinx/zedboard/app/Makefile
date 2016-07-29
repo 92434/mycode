@@ -11,7 +11,9 @@ LDFLAGS += -static
 c_files := uio_test.c
 c_files += glyphy/glyphy_test.c
 glyphy/glyphy_test.c.LOCAL_CFLAGS := -I$(shell pwd)/../driver/glyphy
-c_files += i2s/spidev.c
+include $(BUILD_BINS)
+
+c_files := i2s/spidev.c
 c_files += i2s/my_i2s_receiver.c
 i2s/my_i2s_receiver.c.LOCAL_CFLAGS := -I$(shell pwd)/../driver/i2s/i2s_receiver
 include $(BUILD_BINS)
