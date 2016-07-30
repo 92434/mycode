@@ -354,60 +354,60 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 		'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	}
 
-	list_net_port = [
-		('FMC_HPC_HA00_CC_P', 'mpeg_clk'),
-		('FMC_HPC_HA01_CC_P', 'mpeg_sync'),
-		('FMC_HPC_HA05_N', 'mpeg_valid'),
-		('FMC_HPC_HA00_CC_N', 'mpeg_data[0]'),
-		('FMC_HPC_HA01_CC_N', 'mpeg_data[1]'),
-		('FMC_HPC_HA02_P', 'mpeg_data[2]'),
-		('FMC_HPC_HA04_P', 'mpeg_data[3]'),
-		('FMC_HPC_HA03_N', 'mpeg_data[4]'),
-		('FMC_HPC_HA04_N', 'mpeg_data[5]'),
-		('FMC_HPC_HA05_P', 'mpeg_data[6]'),
-		('FMC_HPC_HA06_P', 'mpeg_data[7]'),
+	#list_net_port = [
+	#	('FMC_HPC_HA00_CC_P', 'mpeg_clk'),
+	#	('FMC_HPC_HA01_CC_P', 'mpeg_sync'),
+	#	('FMC_HPC_HA05_N', 'mpeg_valid'),
+	#	('FMC_HPC_HA00_CC_N', 'mpeg_data[0]'),
+	#	('FMC_HPC_HA01_CC_N', 'mpeg_data[1]'),
+	#	('FMC_HPC_HA02_P', 'mpeg_data[2]'),
+	#	('FMC_HPC_HA04_P', 'mpeg_data[3]'),
+	#	('FMC_HPC_HA03_N', 'mpeg_data[4]'),
+	#	('FMC_HPC_HA04_N', 'mpeg_data[5]'),
+	#	('FMC_HPC_HA05_P', 'mpeg_data[6]'),
+	#	('FMC_HPC_HA06_P', 'mpeg_data[7]'),
 
-		('FMC_HPC_HA10_P', 'asi_out_p'),
-		('FMC_HPC_HA10_N', 'asi_out_n'),
+	#	('FMC_HPC_HA10_P', 'asi_out_p'),
+	#	('FMC_HPC_HA10_N', 'asi_out_n'),
 
-		('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
+	#	('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
 
-		('FMC_LPC_LA10_P', 'symbol_2x_oe'),
-	      
-		('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
-		('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
-		('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
-		('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
-		('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
-		('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
-		('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
-		('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
-		('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
-		('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
-		('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
-		('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
-		('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
-		('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
-		('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
-		('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
+	#	('FMC_LPC_LA10_P', 'symbol_2x_oe'),
+	#      
+	#	('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
+	#	('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
+	#	('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
+	#	('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
+	#	('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
+	#	('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
+	#	('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
+	#	('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
+	#	('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
+	#	('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
+	#	('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
+	#	('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
+	#	('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
+	#	('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
+	#	('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
+	#	('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
 
-		('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
-		('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
-		('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
-		('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
-		('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
-		('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
-		('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
-		('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
-		('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
-		('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
-		('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
-		('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
-		('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
-		('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
-		('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
-		('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
-	]
+	#	('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
+	#	('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
+	#	('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
+	#	('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
+	#	('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
+	#	('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
+	#	('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
+	#	('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
+	#	('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
+	#	('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
+	#	('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
+	#	('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
+	#	('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
+	#	('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
+	#	('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
+	#	('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
+	#]
 
 
 	#list_pin_port = [
@@ -476,6 +476,62 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	#	('AE21', 'sdata[15]'),
 	#]
 
+
+	list_pin_port = [
+		('D12', 'mpeg_clk'),
+		('H14', 'mpeg_sync'),
+		('E16', 'mpeg_valid'),
+		('D13', 'mpeg_data[0]'),
+		('G14', 'mpeg_data[1]'),
+		('D11', 'mpeg_data[2]'),
+		('F11', 'mpeg_data[3]'),
+		('B12', 'mpeg_data[4]'),
+		('E11', 'mpeg_data[5]'),
+		('F15', 'mpeg_data[6]'),
+		('D14', 'mpeg_data[7]'),
+
+		('A11', 'asi_out_p'),
+		('A12', 'asi_out_n'),
+
+		('G23', 'fs_0p5_en'),
+
+		('H25', 'symbol_2x_oe'),
+	      
+		('H24', 'symbol_2x_re_out[0]'),
+		('H26', 'symbol_2x_re_out[1]'),
+		('B25', 'symbol_2x_re_out[2]'),
+		('C26', 'symbol_2x_re_out[3]'),
+		('C25', 'symbol_2x_re_out[4]'),
+		('D26', 'symbol_2x_re_out[5]'),
+		('D18', 'symbol_2x_re_out[6]'),
+		('C27', 'symbol_2x_re_out[7]'),
+		('D17', 'symbol_2x_re_out[8]'),
+		('D27', 'symbol_2x_re_out[9]'),
+		('K19', 'symbol_2x_re_out[10]'),
+		('K20', 'symbol_2x_re_out[11]'),
+		('L17', 'symbol_2x_re_out[12]'),
+		('L18', 'symbol_2x_re_out[13]'),
+		('J19', 'symbol_2x_re_out[14]'),
+		('H19', 'symbol_2x_re_out[15]'),
+
+		('C30', 'symbol_2x_im_out[0]'),
+		('F27', 'symbol_2x_im_out[1]'),
+		('D29', 'symbol_2x_im_out[2]'),
+		('G27', 'symbol_2x_im_out[3]'),
+		('E30', 'symbol_2x_im_out[4]'),
+		('A30', 'symbol_2x_im_out[5]'),
+		('E29', 'symbol_2x_im_out[6]'),
+		('B30', 'symbol_2x_im_out[7]'),
+		('G30', 'symbol_2x_im_out[8]'),
+		('D28', 'symbol_2x_im_out[9]'),
+		('H30', 'symbol_2x_im_out[10]'),
+		('E28', 'symbol_2x_im_out[11]'),
+		('F28', 'symbol_2x_im_out[12]'),
+		('F30', 'symbol_2x_im_out[13]'),
+		('G28', 'symbol_2x_im_out[14]'),
+		('G29', 'symbol_2x_im_out[15]'),
+	]
+
 	for pin, port in list_pin_port:
 		list_extra_des = []
 		list_extra_net_property_property = map_extra_net_property_port_property.get(port, None)
@@ -536,50 +592,82 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 	#	('AD29', 'SPI_S2'),
 	#	('AE29', 'SPI_S3'),
 	#]
+	list_pin_des = [
+		('C12', 'i2c_sck'),
+		('C11', 'i2c_sda'),
+
+		('A23', 'spi_clk'),
+		('D23', 'spi_mosi'),
+		('E25', 'spi_miso'),
+
+		('F26', '74138G2A'),
+		('E23', 'spi_s0'),
+		('F25', 'spi_s1'),
+		('E24', 'spi_s2'),
+
+		('C14', 'lnb1_on_off'),
+		('E14', 'TUNB_3.3V_ON'),
+		('AF27', 'AD9125_INTB'),
+		('AH29', 'AD5375_DSOP'),
+
+		('E15', 'undefined'),
+		('C15', 'undefined'),
+		('B15', 'undefined'),
+		('J16', 'undefined'),
+		('B14', 'undefined'),
+		('A15', 'undefined'),
+		('F12', 'undefined'),
+		('E13', 'undefined'),
+		('B13', 'undefined'),
+		('A13', 'undefined'),
+		('L16', 'undefined'),
+		('K16', 'undefined'),
+		('H16', 'undefined'),
+	]
 
 	#list_net_des = [
 	#	('FMC_HPC_LA30_P', 'master_scl'),
 	#	('FMC_HPC_LA24_P', 'master_sda'),
 	#]
-	list_net_des = [
-		('FMC_HPC_HA03_P', 'i2c_sck'),
-		('FMC_HPC_HA02_N', 'i2c_sda'),
+	#list_net_des = [
+	#	('FMC_HPC_HA03_P', 'i2c_sck'),
+	#	('FMC_HPC_HA02_N', 'i2c_sda'),
 
-		('FMC_LPC_LA21_N', 'spi_clk'),
-		('FMC_LPC_LA19_P', 'spi_mosi'),
-		('FMC_LPC_LA19_N', 'spi_miso'),
+	#	('FMC_LPC_LA21_N', 'spi_clk'),
+	#	('FMC_LPC_LA19_P', 'spi_mosi'),
+	#	('FMC_LPC_LA19_N', 'spi_miso'),
 
-		('FMC_LPC_LA22_P', '74138G2A'),
-		('FMC_LPC_LA15_N', 'spi_s0'),
-		('FMC_LPC_CLK0_M2C_N', 'spi_s1'),
-		('FMC_LPC_PRSNT_M2C_B_LS', 'spi_s2'),
+	#	('FMC_LPC_LA22_P', '74138G2A'),
+	#	('FMC_LPC_LA15_N', 'spi_s0'),
+	#	('FMC_LPC_CLK0_M2C_N', 'spi_s1'),
+	#	('FMC_LPC_PRSNT_M2C_B_LS', 'spi_s2'),
 
-		('FMC_HPC_HA06_N', 'lnb1_on_off'),
-		('FMC_HPC_HA08_P', 'TUNB_3.3V_ON'),
-		('FMC_LPC_LA20_N', 'AD9125_INTB'),
-		('FMC_LPC_CLK1_M2C_N', 'AD5375_DSOP'),
+	#	('FMC_HPC_HA06_N', 'lnb1_on_off'),
+	#	('FMC_HPC_HA08_P', 'TUNB_3.3V_ON'),
+	#	('FMC_LPC_LA20_N', 'AD9125_INTB'),
+	#	('FMC_LPC_CLK1_M2C_N', 'AD5375_DSOP'),
 
-		('FMC_HPC_HA08_N', 'undefined'),
-		('FMC_HPC_HA12_P', 'undefined'),
-		('FMC_HPC_HA12_N', 'undefined'),
-		('FMC_HPC_HA14_P', 'undefined'),
-		('FMC_HPC_HA07_P', 'undefined'),
-		('FMC_HPC_HA07_N', 'undefined'),
-		('FMC_HPC_HA09_P', 'undefined'),
-		('FMC_HPC_HA09_N', 'undefined'),
-		('FMC_HPC_HA11_P', 'undefined'),
-		('FMC_HPC_HA11_N', 'undefined'),
-		('FMC_HPC_HA13_P', 'undefined'),
-		('FMC_HPC_HA13_N', 'undefined'),
-		('FMC_HPC_HA14_N', 'undefined'),
-	]
+	#	('FMC_HPC_HA08_N', 'undefined'),
+	#	('FMC_HPC_HA12_P', 'undefined'),
+	#	('FMC_HPC_HA12_N', 'undefined'),
+	#	('FMC_HPC_HA14_P', 'undefined'),
+	#	('FMC_HPC_HA07_P', 'undefined'),
+	#	('FMC_HPC_HA07_N', 'undefined'),
+	#	('FMC_HPC_HA09_P', 'undefined'),
+	#	('FMC_HPC_HA09_N', 'undefined'),
+	#	('FMC_HPC_HA11_P', 'undefined'),
+	#	('FMC_HPC_HA11_N', 'undefined'),
+	#	('FMC_HPC_HA13_P', 'undefined'),
+	#	('FMC_HPC_HA13_N', 'undefined'),
+	#	('FMC_HPC_HA14_N', 'undefined'),
+	#]
 
 	for pin, des in list_pin_des:
 	#des = None
 	#for pin, net in map_kc705_pin_net.items():
 		net = map_kc705_pin_net.pop(pin, None)
 		if net:
-			resistor = None
+			resistor = 'undefined'
 			for i, group, part, j in list_kc705_net_group_part_pin:
 				if net == i:
 					if group in ['J2', 'J22']:
@@ -598,7 +686,7 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 		for i, j in map_kc705_pin_net.items():
 			if j == net:
 				map_kc705_pin_net.pop(i, None)
-				resistor = None
+				resistor = 'undefined'
 				pin = i
 				for k, group, part, l in list_kc705_net_group_part_pin:
 					if net == k:
@@ -763,8 +851,8 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 		top_pin_no = base_pin_no
 
 		start += list_len
-		if (start % 32) != 0:
-			start = 32 * ((start / 32) + 1)
+		#if (start % 32) != 0:
+		#	start = 32 * ((start / 32) + 1)
 
 	return list_net_pin_des_resistor_gpio_gpio_no
 

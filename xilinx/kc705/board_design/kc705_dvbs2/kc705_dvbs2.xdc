@@ -117,141 +117,141 @@ set_property IOSTANDARD LVCMOS25 [get_ports {asi_out_p}]
 set_property PACKAGE_PIN A12 [get_ports {asi_out_n}]
 set_property IOSTANDARD LVCMOS25 [get_ports {asi_out_n}]
 
-#FMC_LPC_CLK0_M2C_P
-set_property PACKAGE_PIN AF22 [get_ports {fs_0p5_en}]
+#HDMI_R_D10
+set_property PACKAGE_PIN G23 [get_ports {fs_0p5_en}]
 set_property IOSTANDARD LVCMOS25 [get_ports {fs_0p5_en}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {fs_0p5_en}]
 
-#FMC_LPC_LA10_P
-set_property PACKAGE_PIN AJ24 [get_ports {symbol_2x_oe}]
+#FMC_HPC_LA02_N
+set_property PACKAGE_PIN H25 [get_ports {symbol_2x_oe}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_oe}]
 
-#FMC_LPC_LA00_CC_P
-set_property PACKAGE_PIN AD23 [get_ports {symbol_2x_re_out[0]}]
+#FMC_HPC_LA02_P
+set_property PACKAGE_PIN H24 [get_ports {symbol_2x_re_out[0]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[0]}]
 
-#FMC_LPC_LA02_P
-set_property PACKAGE_PIN AF20 [get_ports {symbol_2x_re_out[1]}]
+#FMC_HPC_LA03_P
+set_property PACKAGE_PIN H26 [get_ports {symbol_2x_re_out[1]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[1]}]
 
-#FMC_LPC_LA00_CC_N
-set_property PACKAGE_PIN AE24 [get_ports {symbol_2x_re_out[2]}]
+#FMC_HPC_LA00_CC_N
+set_property PACKAGE_PIN B25 [get_ports {symbol_2x_re_out[2]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[2]}]
 
-#FMC_LPC_LA02_N
-set_property PACKAGE_PIN AF21 [get_ports {symbol_2x_re_out[3]}]
+#FMC_HPC_LA01_CC_N
+set_property PACKAGE_PIN C26 [get_ports {symbol_2x_re_out[3]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[3]}]
 
-#FMC_LPC_LA03_P
-set_property PACKAGE_PIN AG20 [get_ports {symbol_2x_re_out[4]}]
+#FMC_HPC_LA00_CC_P
+set_property PACKAGE_PIN C25 [get_ports {symbol_2x_re_out[4]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[4]}]
 
-#FMC_LPC_LA04_P
-set_property PACKAGE_PIN AH21 [get_ports {symbol_2x_re_out[5]}]
+#FMC_HPC_LA01_CC_P
+set_property PACKAGE_PIN D26 [get_ports {symbol_2x_re_out[5]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[5]}]
 
-#FMC_LPC_LA03_N
-set_property PACKAGE_PIN AH20 [get_ports {symbol_2x_re_out[6]}]
+#FMC_HPC_CLK1_M2C_N
+set_property PACKAGE_PIN D18 [get_ports {symbol_2x_re_out[6]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[6]}]
 
-#FMC_LPC_LA04_N
-set_property PACKAGE_PIN AJ21 [get_ports {symbol_2x_re_out[7]}]
+#FMC_HPC_CLK0_M2C_N
+set_property PACKAGE_PIN C27 [get_ports {symbol_2x_re_out[7]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[7]}]
 
-#FMC_LPC_LA07_P
-set_property PACKAGE_PIN AG25 [get_ports {symbol_2x_re_out[8]}]
+#FMC_HPC_CLK1_M2C_P
+set_property PACKAGE_PIN D17 [get_ports {symbol_2x_re_out[8]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[8]}]
 
-#FMC_LPC_LA08_P
-set_property PACKAGE_PIN AJ22 [get_ports {symbol_2x_re_out[9]}]
+#FMC_HPC_CLK0_M2C_P
+set_property PACKAGE_PIN D27 [get_ports {symbol_2x_re_out[9]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[9]}]
 
-#FMC_LPC_LA01_CC_P
-set_property PACKAGE_PIN AE23 [get_ports {symbol_2x_re_out[10]}]
+#HDMI_R_D16
+set_property PACKAGE_PIN K19 [get_ports {symbol_2x_re_out[10]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[10]}]
 
-#FMC_LPC_LA01_CC_N
-set_property PACKAGE_PIN AF23 [get_ports {symbol_2x_re_out[11]}]
+#HDMI_R_D17
+set_property PACKAGE_PIN K20 [get_ports {symbol_2x_re_out[11]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[11]}]
 
-#FMC_LPC_LA06_P
-set_property PACKAGE_PIN AK20 [get_ports {symbol_2x_re_out[12]}]
+#HDMI_R_D14
+set_property PACKAGE_PIN L17 [get_ports {symbol_2x_re_out[12]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[12]}]
 
-#FMC_LPC_LA06_N
-set_property PACKAGE_PIN AK21 [get_ports {symbol_2x_re_out[13]}]
+#HDMI_R_D15
+set_property PACKAGE_PIN L18 [get_ports {symbol_2x_re_out[13]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[13]}]
 
-#FMC_LPC_LA05_P
-set_property PACKAGE_PIN AG22 [get_ports {symbol_2x_re_out[14]}]
+#HDMI_R_D12
+set_property PACKAGE_PIN J19 [get_ports {symbol_2x_re_out[14]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[14]}]
 
-#FMC_LPC_LA05_N
-set_property PACKAGE_PIN AH22 [get_ports {symbol_2x_re_out[15]}]
+#HDMI_R_D13
+set_property PACKAGE_PIN H19 [get_ports {symbol_2x_re_out[15]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_re_out[15]}]
 
-#FMC_LPC_LA10_N
-set_property PACKAGE_PIN AK25 [get_ports {symbol_2x_im_out[0]}]
+#FMC_HPC_LA10_N
+set_property PACKAGE_PIN C30 [get_ports {symbol_2x_im_out[0]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[0]}]
 
-#FMC_LPC_LA09_P
-set_property PACKAGE_PIN AK23 [get_ports {symbol_2x_im_out[1]}]
+#FMC_HPC_LA11_N
+set_property PACKAGE_PIN F27 [get_ports {symbol_2x_im_out[1]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[1]}]
 
-#FMC_LPC_LA09_N
-set_property PACKAGE_PIN AK24 [get_ports {symbol_2x_im_out[2]}]
+#FMC_HPC_LA10_P
+set_property PACKAGE_PIN D29 [get_ports {symbol_2x_im_out[2]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[2]}]
 
-#FMC_LPC_LA13_P
-set_property PACKAGE_PIN AB24 [get_ports {symbol_2x_im_out[3]}]
+#FMC_HPC_LA11_P
+set_property PACKAGE_PIN G27 [get_ports {symbol_2x_im_out[3]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[3]}]
 
-#FMC_LPC_LA14_P
-set_property PACKAGE_PIN AD21 [get_ports {symbol_2x_im_out[4]}]
+#FMC_HPC_LA08_N
+set_property PACKAGE_PIN E30 [get_ports {symbol_2x_im_out[4]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[4]}]
 
-#FMC_LPC_LA13_N
-set_property PACKAGE_PIN AC25 [get_ports {symbol_2x_im_out[5]}]
+#FMC_HPC_LA09_N
+set_property PACKAGE_PIN A30 [get_ports {symbol_2x_im_out[5]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[5]}]
 
-#FMC_LPC_LA14_N
-set_property PACKAGE_PIN AE21 [get_ports {symbol_2x_im_out[6]}]
+#FMC_HPC_LA08_P
+set_property PACKAGE_PIN E29 [get_ports {symbol_2x_im_out[6]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[6]}]
 
-#FMC_LPC_LA07_N
-set_property PACKAGE_PIN AH25 [get_ports {symbol_2x_im_out[7]}]
+#FMC_HPC_LA09_P
+set_property PACKAGE_PIN B30 [get_ports {symbol_2x_im_out[7]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[7]}]
 
-#FMC_LPC_LA08_N
-set_property PACKAGE_PIN AJ23 [get_ports {symbol_2x_im_out[8]}]
+#FMC_HPC_LA06_N
+set_property PACKAGE_PIN G30 [get_ports {symbol_2x_im_out[8]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[8]}]
 
-#FMC_LPC_LA12_P
-set_property PACKAGE_PIN AA20 [get_ports {symbol_2x_im_out[9]}]
+#FMC_HPC_LA07_N
+set_property PACKAGE_PIN D28 [get_ports {symbol_2x_im_out[9]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[9]}]
 
-#FMC_LPC_LA11_P
-set_property PACKAGE_PIN AE25 [get_ports {symbol_2x_im_out[10]}]
+#FMC_HPC_LA06_P
+set_property PACKAGE_PIN H30 [get_ports {symbol_2x_im_out[10]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[10]}]
 
-#FMC_LPC_LA12_N
-set_property PACKAGE_PIN AB20 [get_ports {symbol_2x_im_out[11]}]
+#FMC_HPC_LA07_P
+set_property PACKAGE_PIN E28 [get_ports {symbol_2x_im_out[11]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[11]}]
 
-#FMC_LPC_LA11_N
-set_property PACKAGE_PIN AF25 [get_ports {symbol_2x_im_out[12]}]
+#FMC_HPC_LA04_N
+set_property PACKAGE_PIN F28 [get_ports {symbol_2x_im_out[12]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[12]}]
 
-#FMC_LPC_LA16_P
-set_property PACKAGE_PIN AC22 [get_ports {symbol_2x_im_out[13]}]
+#FMC_HPC_LA05_N
+set_property PACKAGE_PIN F30 [get_ports {symbol_2x_im_out[13]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[13]}]
 
-#FMC_LPC_LA16_N
-set_property PACKAGE_PIN AD22 [get_ports {symbol_2x_im_out[14]}]
+#FMC_HPC_LA04_P
+set_property PACKAGE_PIN G28 [get_ports {symbol_2x_im_out[14]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[14]}]
 
-#FMC_LPC_LA15_P
-set_property PACKAGE_PIN AC24 [get_ports {symbol_2x_im_out[15]}]
+#FMC_HPC_LA05_P
+set_property PACKAGE_PIN G29 [get_ports {symbol_2x_im_out[15]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {symbol_2x_im_out[15]}]
 # ----------------------------------------------------------------------------------------------------
 # gpio constrain
@@ -328,44 +328,47 @@ set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[15]}]
 set_property PACKAGE_PIN H16 [get_ports {gpio_tri_io[16]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[16]}]
 # ----------------------------------------------------------------------------------------------------
+# gpio constrain for OTHER
+# ----------------------------------------------------------------------------------------------------
+
+#HDMI_R_D1, spi_clk, undefined, 232
+set_property PACKAGE_PIN A23 [get_ports {gpio_tri_io[17]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[17]}]
+
+#HDMI_R_D3, spi_mosi, undefined, 233
+set_property PACKAGE_PIN D23 [get_ports {gpio_tri_io[18]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[18]}]
+
+#HDMI_R_D5, spi_miso, undefined, 234
+set_property PACKAGE_PIN E25 [get_ports {gpio_tri_io[19]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[19]}]
+
+#HDMI_R_D8, 74138G2A, undefined, 235
+set_property PACKAGE_PIN F26 [get_ports {gpio_tri_io[20]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[20]}]
+
+#HDMI_R_D2, spi_s0, undefined, 236
+set_property PACKAGE_PIN E23 [get_ports {gpio_tri_io[21]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[21]}]
+
+#HDMI_R_D4, spi_s1, undefined, 237
+set_property PACKAGE_PIN F25 [get_ports {gpio_tri_io[22]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[22]}]
+
+#HDMI_R_D6, spi_s2, undefined, 238
+set_property PACKAGE_PIN E24 [get_ports {gpio_tri_io[23]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[23]}]
+# ----------------------------------------------------------------------------------------------------
 # gpio constrain for LPC
 # ----------------------------------------------------------------------------------------------------
 
-#FMC_LPC_LA21_N, spi_clk, R78.1, 230
-set_property PACKAGE_PIN AG28 [get_ports {gpio2_tri_io[0]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {gpio2_tri_io[0]}]
+#FMC_LPC_LA20_N, AD9125_INTB, R51.1, 230
+set_property PACKAGE_PIN AF27 [get_ports {gpio_tri_io[24]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[24]}]
 
-#FMC_LPC_LA19_P, spi_mosi, R75.1, 231
-set_property PACKAGE_PIN AJ26 [get_ports {gpio2_tri_io[1]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {gpio2_tri_io[1]}]
-
-#FMC_LPC_LA19_N, spi_miso, R76.1, 232
-set_property PACKAGE_PIN AK26 [get_ports {gpio2_tri_io[2]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {gpio2_tri_io[2]}]
-
-#FMC_LPC_LA22_P, 74138G2A, R52.1, 233
-set_property PACKAGE_PIN AJ27 [get_ports {gpio2_tri_io[3]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {gpio2_tri_io[3]}]
-
-#FMC_LPC_LA15_N, spi_s0, R74.1, 234
-set_property PACKAGE_PIN AD24 [get_ports {gpio2_tri_io[4]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {gpio2_tri_io[4]}]
-
-#FMC_LPC_CLK0_M2C_N, spi_s1, R64.1, 235
-set_property PACKAGE_PIN AG23 [get_ports {gpio2_tri_io[5]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {gpio2_tri_io[5]}]
-
-#FMC_LPC_PRSNT_M2C_B_LS, spi_s2, R62.1, 236
-set_property PACKAGE_PIN J22 [get_ports {gpio2_tri_io[6]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {gpio2_tri_io[6]}]
-
-#FMC_LPC_LA20_N, AD9125_INTB, R51.1, 237
-set_property PACKAGE_PIN AF27 [get_ports {gpio2_tri_io[7]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {gpio2_tri_io[7]}]
-
-#FMC_LPC_CLK1_M2C_N, AD5375_DSOP, R39.1, 238
-set_property PACKAGE_PIN AH29 [get_ports {gpio2_tri_io[8]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {gpio2_tri_io[8]}]
+#FMC_LPC_CLK1_M2C_N, AD5375_DSOP, R39.1, 231
+set_property PACKAGE_PIN AH29 [get_ports {gpio_tri_io[25]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[25]}]
 # ----------------------------------------------------------------------------------------------------
 # bitstream constrain
 # ----------------------------------------------------------------------------------------------------
