@@ -54,12 +54,12 @@
 
 #elif defined(KC705_DVBS2)
 
-#define SPI_MISO (232)
-#define SPI_MOSI (231)
-#define SPI_SCK (230)
-#define SPI_CS (233)
-#define IIC_SDA0 (240)
-#define IIC_SCL0 (239)
+#define SPI_MISO (249)
+#define SPI_MOSI (248)
+#define SPI_SCK (247)
+#define SPI_CS (250)
+#define IIC_SDA0 (231)
+#define IIC_SCL0 (230)
 
 #endif
 
