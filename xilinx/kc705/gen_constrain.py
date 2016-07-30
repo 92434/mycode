@@ -818,7 +818,14 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 	print '#', 'gpio constrain'
 	print '#', '-' * 100
 
+	common_list_net_pin_des_resistor = []
 	for i, j in map_gpio_if_list_net_pin_des_resistor.items():
+		common_list_net_pin_des_resistor.extend(j)
+	map_common_list_net_pin_des_resistor = {}
+	map_common_list_net_pin_des_resistor.update({'common gpio' : common_list_net_pin_des_resistor})
+
+	#for i, j in map_gpio_if_list_net_pin_des_resistor.items():
+	for i, j in map_common_list_net_pin_des_resistor.items():
 		list_len = len(j)
 
 		if list_len == 0:
@@ -830,9 +837,9 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 			#print , "gpio bank is not enough!"
 			continue
 
-		print '#', '-' * 100
-		print '#', 'gpio constrain for %s' %(i)
-		print '#', '-' * 100
+		#print '#', '-' * 100
+		#print '#', 'gpio constrain for %s' %(i)
+		#print '#', '-' * 100
 
 		base_pin_no = 0
 
