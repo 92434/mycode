@@ -1,0 +1,14 @@
+>>> User.objects.__class__
+<class 'django.contrib.auth.models.UserManager'>
+>>> User.objects.__class__.__base__
+<class 'django.contrib.auth.models.BaseUserManager'>
+>>> User.objects.__class__.__base__.__base__
+<class 'django.db.models.manager.Manager'>
+>>> User.objects.__class__.__base__.__base__.__base__
+<class 'django.db.models.manager.BaseManagerFromQuerySet'>
+>>> User.objects.__class__.__base__.__base__.__base__.__base__
+<class 'django.db.models.manager.BaseManager'>
+>>> User.objects.__class__.__base__.__base__.__base__.__base__.__base__
+<type 'object'>
+>>> User.objects.__class__.__base__.__base__.__base__.__base__.__base__
+<type 'object'>
