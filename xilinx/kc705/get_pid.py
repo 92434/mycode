@@ -44,7 +44,7 @@ def get_pid(data_file):
 			if not list_data[i + 0] == '47':
 				break
 			
-			int_id = int(list_data[i + 1] + list_data[i + 2], 16)
+			int_id = (int(list_data[i + 1] + list_data[i + 2], 16) & 0x1fff)
 			tuple_count_list_packetpos = map_id_tuple_count_list_packetpos.get(int_id, None)
 			count = 0
 			list_packetpos = []
@@ -60,18 +60,25 @@ def get_pid(data_file):
 
 	return list_data, map_id_tuple_count_list_packetpos
 
+def id_key(x):
+	int_id, tuple_count_list_packetpos = x
+	return int_id
+
 if __name__ == "__main__":
 	list_data, map_id_tuple_count_list_packetpos = get_pid(sys.argv[1])
 
 	print 'ids:'
-	for int_id, tuple_count_list_packetpos in map_id_tuple_count_list_packetpos.items():
+	items = map_id_tuple_count_list_packetpos.items()
+	items = sorted(items, key = lambda x:(id_key(x)))
+
+	for int_id, tuple_count_list_packetpos in items:
 		count, list_packetpos = tuple_count_list_packetpos
-		txt = 'id:%04x : count:%d' %(int_id & 0x1fff, count)
+		txt = 'id:%04x: count:%d' %(int_id, count)
 		print txt
 
-		txt = ''
-		for i in list_packetpos:
-			txt = ''
-			for j in range(i, i + 188, 1):
-				txt += '%s ' %(list_data[j])
-			print txt
+		#txt = ''
+		#for i in list_packetpos:
+		#	txt = ''
+		#	for j in range(i, i + 188, 1):
+		#		txt += '%s ' %(list_data[j])
+		#	print txt
