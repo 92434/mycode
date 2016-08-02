@@ -110,9 +110,9 @@ dict_config = {
 			'filters': ['special']
 		},
 		'console': {
-			'level': 'ERROR',
+			'level': 'DEBUG',
 			'class': 'logging.StreamHandler',
-			'formatter': 'simple',
+			'formatter': 'myformatter',
 			'filters': ['special'],
 		},
 	},
