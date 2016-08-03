@@ -1,0 +1,14 @@
+while true; do busybox getty -n -L ttyS2 115200 vt100 -l /system/bin/sh;done
+busybox ash
+PS1='$(precmd)$USER@$HOSTNAME:${PWD:-?} # '
+
+/data/serial_test /dev/ttyGS0 &
+/data/serial_test /dev/ttyGS1 &
+/data/serial_test /dev/ttyGS2 &
+/data/serial_test /dev/ttyGS3 &
+/data/serial_test /dev/ttyS3 &
+
+echo a>/proc/acts_hcd
+echo c>/proc/acts_hcd
+
+cat /sys/kernel/debug/usb/devices
