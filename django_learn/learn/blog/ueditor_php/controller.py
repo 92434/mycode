@@ -6,9 +6,12 @@ import os
 import json
 import urllib
 import base64
+import logging
 
 import config
 from utils import *
+
+logger = logging.getLogger('django.request')
 
 @csrf_exempt
 def controller(request):
@@ -178,7 +181,7 @@ def catcher_remote_image(request, upload_config):
 		catcher_info = get_http_response_state(state = state)
 		catcher_info.update(
 			{
-				"url": urllib.basejoin(config.django_settings.STATIC_URL, file_path.lstrip('/')),
+				"url": urllib.basejoin(config.ueditor_php_config.get('url_static_dir', config.django_settings.STATIC_URL), file_path.lstrip('/')),
 				"size": os.path.getsize(local_file_path),
 				"title": os.path.basename(remote_file_name),
 				"original": remote_file_name,
@@ -249,7 +252,7 @@ def up_base64(request, upload_config):
 	return_info = get_http_response_state(state = state)
 	return_info.update(
 		{
-			'url': urllib.basejoin(config.django_settings.STATIC_URL, file_path.lstrip('/')),#保存后的文件名称
+			'url': urllib.basejoin(config.ueditor_php_config.get('url_static_dir', config.django_settings.STATIC_URL), file_path.lstrip('/')),#保存后的文件名称
 			'original': upload_file_name,#原始文件名
 			'type': upload_original_ext,
 			'size': upload_file_size
@@ -334,7 +337,7 @@ def upload(request, upload_config):
 	return_info = get_http_response_state(state = state)
 	return_info.update(
 		{
-			'url': urllib.basejoin(config.django_settings.STATIC_URL, file_path.lstrip('/')),#保存后的文件名称
+			'url': urllib.basejoin(config.ueditor_php_config.get('url_static_dir', config.django_settings.STATIC_URL), file_path.lstrip('/')),#保存后的文件名称
 			'original': upload_file_name,#原始文件名
 			'type': upload_original_ext,
 			'size': upload_file_size

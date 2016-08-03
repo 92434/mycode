@@ -13,6 +13,7 @@ Including another URLconf
 	1. Add an import:  from blog import urls as blog_urls
 	2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
+import os
 from django.conf.urls import include, url
 from django.contrib import admin
 from learn import settings
@@ -23,5 +24,5 @@ urlpatterns = [
 	url(r'^jquery/', include('jquery.urls', namespace="jquery")),
 	url(r'^blog/', include('blog.urls', namespace="blog")),
 	url(r'^image/', include('image.urls', namespace="image")),
-	#url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(settings.BASE_DIR, 'blog/static')}),
+	url(r'^static/blog/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(settings.BASE_DIR, 'blog/static')}),
 ]

@@ -4,6 +4,8 @@ from learn import settings as django_settings
 
 # 前后端通信相关的配置,注释只允许使用多行方式 
 ueditor_php_config = { # 上传图片配置项 
+    "static_dir": "/blog/static", 
+
     "imageActionName": "uploadimage", # 执行上传图片的action名称 
     "imageFieldName": "upfile", # 提交的图片表单名称 
     "imageMaxSize": 2048000, # 上传大小限制，单位B 
@@ -52,7 +54,7 @@ ueditor_php_config = { # 上传图片配置项
     # 上传视频配置 
     "videoActionName": "uploadvideo", # 执行上传视频的action名称 
     "videoFieldName": "upfile", # 提交的视频表单名称 
-    "videoPathFormat": "/ueditor/php/upload/image/%(year)s%(month)s%(day)s/%(hour)s%(min)s%(sec)s%(rnd)s", # 上传保存路径,可以自定义保存路径和文件名格式 
+    "videoPathFormat": "/ueditor/php/upload/video/%(year)s%(month)s%(day)s/%(hour)s%(min)s%(sec)s%(rnd)s", # 上传保存路径,可以自定义保存路径和文件名格式 
     "videoUrlPrefix": "", # 视频访问路径前缀 
     "videoMaxSize": 102400000, # 上传大小限制，单位B，默认100MB 
     "videoAllowFiles": [

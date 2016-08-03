@@ -80,7 +80,7 @@ def list_get_files(base_dir, path, allow_types):
 			if ext in allow_types:
 				files.append(
 					{
-						"url": urllib.basejoin(config.django_settings.STATIC_URL, item_path.lstrip('/')),
+						"url": urllib.basejoin(config.ueditor_php_config.get('url_static_dir', config.django_settings.STATIC_URL), item_path.lstrip('/')),
 						"mtime": os.path.getmtime(item_full_path)
 					}
 				)

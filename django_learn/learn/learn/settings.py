@@ -161,6 +161,7 @@ MEDIA_URL = 'static/media/'
 
 UEDITOR_SETTINGS = {
 		'config': {
-			'static_dir': '/blog/static'
+			'static_dir': '/blog/static/',
+			'url_static_dir': '/static/blog/'
 		}
 }
