@@ -1,0 +1,11 @@
+过滤百度全站显式图片url
+$image,domin=baidu.com
+
+过滤class
+baidu.com##.app-bg
+
+过滤小页面
+||baidu.com/page.html
+
+过滤gif
+||baidu.com/*.gif
