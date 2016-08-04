@@ -11,6 +11,7 @@ typedef struct sid_t {
 } sid_t;
 
 int init_dvb_process(void);
+int destroy_dvb_process(void);
 void handle_psi_packet(uint8_t *p_ts);
 int get_pat_result(sid_t *pp_sids_out);
 #endif

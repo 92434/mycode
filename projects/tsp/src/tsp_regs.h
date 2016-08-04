@@ -53,6 +53,12 @@ typedef struct{
 	tsp_replacer_dual replacer_dual[COMMON_REPLACER_SIZE];
 }_tsp_container;
 
+typedef struct{
+	unsigned short sid;
+	unsigned short video_pid;
+	unsigned short audio_pid[5];
+	unsigned short pcr_pid;
+}_pmt_result;
 
 int init_tsp_reg(char *dev);
 int tsp_monitor_read(thread_arg_t *targ,unsigned short pid, int slot_idx, unsigned char *ts_buf);

@@ -19,8 +19,8 @@
 //#define false (1 == 0)
 
 
-
 static _tsp_container* tsp_container=NULL;
+static _pmt_result pmt_result[MAX_PROGRAM_NUM];
 
 
 int read_regs(thread_arg_t *targ, int addr, int count) {
@@ -617,6 +617,50 @@ int tsp_add_dual_slot_pid(thread_arg_t *targ,unsigned short pid){
 	return -1;
 }
 
+static void parse_pmt(uint8_t *p_pmt, _pmt_result* pmt_array)
+{
+	uint8_t *p_es;
+    uint8_t i=0,j = 0;
+	unsigned short pid=0,streamtype=0;
+	pmt_array->sid= pmt_get_program(p_pmt);
+	pmt_array->pcr_pid=pmt_get_pcrpid(p_pmt);
+	while ((p_es = pmt_get_es(p_pmt, j)) != NULL) {
+        j++;
+        pid=pmtn_get_pid(p_es);
+		streamtype=pmtn_get_streamtype(p_es);
+		switch(streamtype){
+			case 0x01:
+			case 0x02:
+			case 0x10:
+			case 0x1B:
+			case 0x42:
+				pmt_array->video_pid=pid;
+				break;
+			case 0x03:
+			case 0x04:
+			case 0x0F:
+			case 0x11:
+			{
+				for(i=0;i<5;i++){
+					if(pmt_array->audio_pid[i]==pid)
+						break;
+				}
+				if(i==5){
+					for(i=0;i<5;i++){
+						if(pmt_array->audio_pid[i]==0){
+							pmt_array->audio_pid[i]=pid;
+							break;
+						}
+					}
+				}
+				break;
+			}
+			default:
+				break;
+		}
+    }
+}
+
 int init_tsp_reg(char *dev) {
 	int ret = 0;
 	int i;
@@ -675,6 +719,7 @@ int init_tsp_reg(char *dev) {
 		return ret;
 	}
 	memset(sids,0,MAX_PROGRAM_NUM*sizeof(sid_t));
+	memset(&pmt_result,0,MAX_PROGRAM_NUM*sizeof(_pmt_result));
 	init_dvb_process();
 	while(1){
 		read_bytes=tsp_monitor_read(&targ,0, 0, ts_buf);
@@ -685,15 +730,18 @@ int init_tsp_reg(char *dev) {
 			
 			if(service_num>0){
 				for(i=0;i<service_num;i++){
-					sleep(2);
 					TRACE("[%d]pmt pid:%d\n",i,sids[i].i_pmt_pid);
 					read_bytes=tsp_monitor_read(&targ,sids[i].i_pmt_pid, 0, ts_buf);
-					handle_psi_packet(ts_buf);
+					if(read_bytes==PACK_BYTE_SIZE){
+						handle_psi_packet(ts_buf);
+						parse_pmt(ts_section(ts_buf),&pmt_result[i]);
+					}
 				}
 			}
 		}
 		break;
 	}
+	destroy_dvb_process();
 	//read_write(&targ);
 	if(targ.buffer){
 		free(targ.buffer);
