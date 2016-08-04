@@ -25,4 +25,5 @@ urlpatterns = [
 	url(r'^blog/', include('blog.urls', namespace="blog")),
 	url(r'^image/', include('image.urls', namespace="image")),
 	url(r'^static/blog/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(settings.BASE_DIR, 'blog/static')}),
+	url(r'^static/admin/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(os.path.dirname(admin.__file__), 'static/admin')}),
 ]
