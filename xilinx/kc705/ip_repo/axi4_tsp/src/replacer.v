@@ -148,7 +148,6 @@ module replacer #(
 	reg [7 : 0] mpeg_data_d1 = 0;
 	reg [7 : 0] mpeg_data_d2 = 0;
 	reg [7 : 0] mpeg_data_d3 = 0;
-	reg updated = 0;
 
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
@@ -158,10 +157,8 @@ module replacer #(
 			mpeg_data_d1 <= 0;
 			mpeg_data_d2 <= 0;
 			mpeg_data_d3 <= 0;
-			updated <= 0;
 		end
 		else begin
-			updated <= 0;
 			if(mpeg_valid == 1) begin
 				mpeg_sync_d1 <= mpeg_sync;
 				mpeg_sync_d2 <= mpeg_sync_d1;
@@ -169,7 +166,6 @@ module replacer #(
 				mpeg_data_d1 <= mpeg_data;
 				mpeg_data_d2 <= mpeg_data_d1;
 				mpeg_data_d3 <= mpeg_data_d2;
-				updated <= 1;
 			end
 			else begin
 			end
@@ -194,6 +190,15 @@ module replacer #(
 	wire [8 - 1 : 0] cur_ram_data;
 	assign cur_ram_data = ram_for_data[ram_match_index / 4][(8 * (ram_match_index % 4) + 7) -: 8];
 
+	wire payload_unit_start_indicator;
+	assign payload_unit_start_indicator = (ts_out_group_index == 0) ? 1'b1 : 1'b0;
+
+	wire [1 : 0] transport_scrambling_control;
+	assign transport_scrambling_control = (ts_out_group_index == 0) ? 2'b00 : 2'b01;
+
+	wire [1 : 0] adaption_field_control;
+	assign adaption_field_control = 2'b11;
+
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
 			matched_pid <= 0;
@@ -201,6 +206,7 @@ module replacer #(
 
 			ts_out_group_index <= 0;
 			matched_index <= 0;
+
 			ts_out <= 0;
 			ts_out_valid <= 0;
 			ts_out_sync <= 0;
@@ -208,61 +214,90 @@ module replacer #(
 			matched_count <= 0;
 		end
 		else begin
+			ts_out_valid <= 0;
 			matched_state <= matched_pid;
 
-			if(matched_pid == 1) begin
-				if(base_data == 1) begin
-					if(updated == 1) begin
+			if(mpeg_valid == 1) begin
+				if(matched_pid == 1) begin
+					if(base_data == 1) begin
+						ts_out_valid <= 1;
+						ts_out_sync <= mpeg_sync_d3;
 						ts_out <= mpeg_data_d3;
 					end
 					else begin
-					end
-				end
-				else begin
-					if((updated == 1) && (matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
-						ts_out <= (matched_index == 3) ? {cur_ram_data[8 - 1 : 4], mpeg_data_d3[4 - 1 : 0]} : cur_ram_data;
-						
-						if(matched_index == (PACK_BYTE_SIZE - 1)) begin
-							if((ts_out_group_index >= 0) && (ts_out_group_index < REPLACE_DATA_GROUPS - 1)) begin
-								ts_out_group_index <= ts_out_group_index + 1;
+						//typedef struct TS_packet_header
+						//{
+						//    unsigned sync_byte                        : 8; //同步字节, 固定为0x47,表示后面的是一个TS分组
+						//    unsigned transport_error_indicator        : 1; //传输误码指示符
+						//    unsigned payload_unit_start_indicator    : 1; //有效荷载单元起始指示符
+						//   
+						//    unsigned transport_priority              : 1; //传输优先, 1表示高优先级,传输机制可能用到，解码用不着
+						//    unsigned PID                            : 13; //PID
+						//    unsigned transport_scrambling_control    : 2; //传输加扰控制 
+						//    unsigned adaption_field_control            : 2; //自适应控制 01仅含有效负载，10仅含调整字段，11含有调整字段和有效负载。为00解码器不进行处理
+						//    unsigned continuity_counter                : 4; //连续计数器 一个4bit的计数器，范围0-15
+						//} TS_packet_header;
+						//
+						//需要修改的
+						//payload_unit_start_indicator 1->1 2->0 1-6
+						//PID 2-0,1,2,3,4 3-0,1,2,3,4,5,6,7
+						//transport_scrambling_control 1->00 2->01 3-6,7
+						//adaption_field_control 1->11 2->11 3-4,5
+						if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
+							ts_out_valid <= 1;
+							ts_out_sync <= mpeg_sync_d3;
+
+							if(matched_index == 1) begin
+								ts_out <= {mpeg_data_d3[7], payload_unit_start_indicator, mpeg_data_d3[5], cur_ram_data[5 - 1 : 0]};
+							end
+							else if(matched_index == 3) begin
+								ts_out <= {transport_scrambling_control, adaption_field_control, mpeg_data_d3[3 : 0]};
 							end
 							else begin
-								ts_out_group_index <= 0;
+								ts_out <= cur_ram_data;
 							end
+							
+							if(matched_index == (PACK_BYTE_SIZE - 1)) begin
+								if((ts_out_group_index >= 0) && (ts_out_group_index < REPLACE_DATA_GROUPS - 1)) begin
+									ts_out_group_index <= ts_out_group_index + 1;
+								end
+								else begin
+									ts_out_group_index <= 0;
+								end
+							end
+							else begin
+							end
+							matched_index <= matched_index + 1;
 						end
 						else begin
 						end
-						matched_index <= matched_index + 1;
 					end
-					else begin
-					end
-				end
 
-				ts_out_valid <= (updated == 1) ? 1 : 0;
-				ts_out_sync <= (updated == 1) ? mpeg_sync_d3 : 0;
-			end
-			else begin
-			end
-
-			if(base_data == 1) begin
-				matched_pid <= 1;
-			end
-			else begin
-				if((mpeg_valid == 1) && (mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
-					if((match_states != 0) && (match_enable == 1)) begin
-						matched_pid <= 1;
-
-						matched_index <= 0;
-						matched_count <= matched_count + 1;
-					end
-					else begin
-						matched_pid <= 0;
-					end
 				end
 				else begin
 				end
-			end
 
+				if(base_data == 1) begin
+					matched_pid <= 1;
+				end
+				else begin
+					if((mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
+						if((match_states != 0) && (match_enable == 1)) begin
+							matched_pid <= 1;
+
+							matched_index <= 0;
+							matched_count <= matched_count + 1;
+						end
+						else begin
+							matched_pid <= 0;
+						end
+					end
+					else begin
+					end
+				end
+			end
+			else begin
+			end
 		end
 	end
 endmodule

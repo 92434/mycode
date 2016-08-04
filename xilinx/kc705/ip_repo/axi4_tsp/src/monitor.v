@@ -71,6 +71,9 @@ module monitor #(
 
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] matched_index = PACK_BYTE_SIZE;
 
+	wire ram_data_valid;
+	assign ram_data_valid = ({ram_for_data[0][13 - 1 : 8], ram_for_data[0][24 - 1 : 16]} == ram_for_pid) ? 1 : 0;
+
 	integer pump_data_state = 0;
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] pump_data_index = 0;
 	always @(posedge clk) begin
@@ -96,7 +99,7 @@ module monitor #(
 					end
 				end
 				1: begin
-					if(matched_index == PACK_BYTE_SIZE) begin
+					if((matched_index == PACK_BYTE_SIZE) && (ram_data_valid == 1)) begin
 						pump_data_state <= 2;
 					end
 					else begin
@@ -129,7 +132,6 @@ module monitor #(
 	reg [7 : 0] mpeg_data_d2 = 0;
 	reg [7 : 0] mpeg_data_d3 = 0;
 
-	reg updated = 0;
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
 			mpeg_sync_d1 <= 0;
@@ -138,11 +140,8 @@ module monitor #(
 			mpeg_data_d1 <= 0;
 			mpeg_data_d2 <= 0;
 			mpeg_data_d3 <= 0;
-			updated <= 0;
 		end
 		else begin
-			updated <= 0;
-
 			if(mpeg_valid == 1) begin
 				mpeg_sync_d1 <= mpeg_sync;
 				mpeg_sync_d2 <= mpeg_sync_d1;
@@ -150,7 +149,6 @@ module monitor #(
 				mpeg_data_d1 <= mpeg_data;
 				mpeg_data_d2 <= mpeg_data_d1;
 				mpeg_data_d3 <= mpeg_data_d2;
-				updated <= 1;
 			end
 			else begin
 			end
@@ -170,35 +168,37 @@ module monitor #(
 			matched_count <= 0;
 		end
 		else begin
-			if((updated == 1) && (matched_pid == 1)) begin
-				if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
-					ram_for_data[matched_index / 4][(8 * (matched_index % 4)) +: 8] <= mpeg_data_d3;
+			if(mpeg_valid == 1) begin
+				if(matched_pid == 1) begin
+					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
+						ram_for_data[matched_index / 4][(8 * (matched_index % 4)) +: 8] <= mpeg_data_d3;
 
-					matched_index <= matched_index + 1;
-				end
-				else begin
-				end
-			end
-			else begin
-			end
-
-			if((mpeg_valid == 1) && (mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
-				if((match_states != 0) && (match_enable == 1)) begin
-					matched_pid <= 1;
-
-					if(pump_data_state == 0) begin
-						matched_index <= 0;
+						matched_index <= matched_index + 1;
 					end
 					else begin
 					end
-					matched_count <= matched_count + 1;
 				end
 				else begin
-					matched_pid <= 0;
+				end
+
+				if((mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
+					if((match_states != 0) && (match_enable == 1)) begin
+						matched_pid <= 1;
+
+						matched_index <= 0;
+
+						matched_count <= matched_count + 1;
+					end
+					else begin
+						matched_pid <= 0;
+					end
+				end
+				else begin
 				end
 			end
 			else begin
 			end
+
 		end
 	end
 endmodule
