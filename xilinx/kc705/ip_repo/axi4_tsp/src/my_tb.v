@@ -3,12 +3,12 @@
 module tb #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer OPT_MEM_ADDR_BITS = 10,
-		parameter integer MONITOR_FILTER_NUM = 32,
-		parameter integer REPLACER_FILTER_NUM = 33,
+		parameter integer MONITOR_FILTER_NUM = 1,
+		parameter integer REPLACER_FILTER_NUM = 9,
 		parameter integer REPLACE_MATCH_PID_COUNT = 1,
 		parameter integer REPLACE_DATA_GROUPS = 1,
 		parameter integer COMMON_REPLACER_FILTER_NUM = 1,
-		parameter integer COMMON_REPLACE_MATCH_PID_COUNT = 32,
+		parameter integer COMMON_REPLACE_MATCH_PID_COUNT = 16,
 		parameter integer COMMON_REPLACE_DATA_GROUPS = 2
 	)
 	(
