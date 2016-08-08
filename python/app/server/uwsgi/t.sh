@@ -22,7 +22,7 @@ function stop_tengine() {
 }
 
 function process_opt() {
-	while getopts isk arguments 2>/dev/null; do
+	while getopts "isk" arguments 2>/dev/null; do
 		#echo "arguments is $arguments"
 		case $arguments in
 			i)
@@ -42,6 +42,7 @@ function process_opt() {
 
 				echo -e "\t-i:install;"
 				echo -e "\t-s:start;"
+				echo -e "\t-k:stop;"
 				return
 				;;
 		esac
