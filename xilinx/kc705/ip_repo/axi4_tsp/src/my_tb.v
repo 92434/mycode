@@ -22,7 +22,7 @@ module tb #(
 
 	localparam integer ADDR_PID_INDEX = ADDR_INDEX + 1;
 
-	localparam integer ADDR_PID = ADDR_PID_INDEX + 1;//{{15{1'b0}}, 1'b(pid_enable), {3{1'b0}}, 13'b(pid)}
+	localparam integer ADDR_PID = ADDR_PID_INDEX + 1;//{{14{1'b0}}, 1'b(pid_change_enable), 1'b(pid_enable), {3{1'b0}}, 13'b(pid)}
 
 	localparam integer ADDR_MATCH_ENABLE = ADDR_PID + 1;
 
@@ -119,7 +119,26 @@ module tb #(
 		end
 	end
 
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] read_delay = 0;
+	reg read_delay = 0;
+	reg read_delay_0 = 0;
+	reg read_delay_1 = 0;
+	reg read_delay_2 = 0;
+	reg read_delay_3 = 0;
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
+			read_delay_0 <= 0;
+			read_delay_1 <= 0;
+			read_delay_2 <= 0;
+			read_delay_3 <= 0;
+		end
+		else begin
+			read_delay_0 <= read_delay;
+			read_delay_1 <= read_delay_0;
+			read_delay_2 <= read_delay_1;
+			read_delay_3 <= read_delay_2;
+		end
+	end
+
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] state_test = 0;
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] write_data_index = 0;
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] read_data_index = 0;
@@ -129,8 +148,10 @@ module tb #(
 		if(rst_n == 0) begin
 			state_test <= 0;
 			write_data_index <= 0;
+			read_delay <= 0;
 		end
 		else begin
+			read_delay <= 0;
 			if(start_test_replacer == 1) begin
 				case(state_test)
 					0: begin
@@ -138,7 +159,7 @@ module tb #(
 					end
 					1: begin
 						waddr <= ADDR_INDEX;
-						wdata <= REPLACER_PID_BASE + 0;
+						wdata <= REPLACER_PID_BASE + REPLACER_FILTER_NUM - 1;
 						wen <= 1;
 						ren <= 0;
 
@@ -152,7 +173,7 @@ module tb #(
 					end
 					3: begin
 						waddr <= ADDR_PID;
-						wdata <= {{15{1'b0}}, 1'b1, {3{1'b0}}, 13'h157f};
+						wdata <= {{14{1'b0}}, 1'b0, 1'b1, {3{1'b0}}, 13'h0191};
 
 						write_data_index <= 0;
 						state_test <= 4;
@@ -175,26 +196,26 @@ module tb #(
 					end
 					6: begin
 						waddr <= ADDR_INDEX;
-						wdata <= REPLACER_PID_BASE + 1;
+						wdata <= REPLACER_PID_BASE + REPLACER_FILTER_NUM - 1;
 
 						state_test <= 7;
 					end
 					7: begin
 						waddr <= ADDR_PID_INDEX;
-						wdata <= 0;
+						wdata <= 1;
 
 						state_test <= 8;
 					end
 					8: begin
 						waddr <= ADDR_PID;
-						wdata <= {{15{1'b0}}, 1'b1, {3{1'b0}}, 13'h0191};
+						wdata <= {{14{1'b0}}, 1'b0, 1'b1, {3{1'b0}}, 13'h157f};
 
 						write_data_index <= 0;
 						state_test <= 9;
 					end
 					9: begin
 						if((write_data_index >= 0) && (write_data_index < PACK_BYTE_SIZE)) begin
-							waddr <= ADDR_TS_DATA_BASE/* + PACK_BYTE_SIZE / 4*/ + write_data_index / 4;
+							waddr <= ADDR_TS_DATA_BASE + PACK_BYTE_SIZE / 4 + write_data_index / 4;
 							wdata <= {filter2[write_data_index + 3], filter2[write_data_index + 2], filter2[write_data_index + 1], filter2[write_data_index + 0]};
 							write_data_index <= write_data_index + 4;
 						end
@@ -210,257 +231,146 @@ module tb #(
 					end
 					11: begin
 						waddr <= ADDR_INDEX;
-						wdata <= REPLACER_PID_BASE + 0;
+						wdata <= REPLACER_PID_BASE + REPLACER_FILTER_NUM - 1;
 						state_test <= 12;
 					end
 					12: begin
 						waddr <= ADDR_READ_REQUEST;
 						wdata <= 0;
 						state_test <= 13;
+						read_delay <= 1;
 					end
 					13: begin
-						raddr <= ADDR_READ_REQUEST;
-						wen <= 0;
-						ren <= 1;
-
-						state_test <= 14;
-						read_delay <= 0;
+						if(read_delay_3 == 1) begin
+							wen <= 0;
+							ren <= 1;
+							raddr <= ADDR_READ_REQUEST;
+							state_test <= 14;
+						end
+						else begin
+						end
 					end
 					14: begin
-						if(read_delay == 5) begin
-							raddr <= ADDR_READ_REQUEST;
+						if(rdata == 1) begin
 							state_test <= 15;
 						end
 						else begin
-							read_delay <= read_delay + 1;
 						end
 					end
 					15: begin
-						if(rdata == 1) begin
-							state_test <= 16;
-						end
-						else begin
-						end
-					end
-					16: begin
 						if((read_data_index >= 0) && (read_data_index < PACK_WORD_SIZE)) begin
 							raddr <= ADDR_TS_DATA_BASE + read_data_index;
 							read_data_index <= read_data_index + 1;
 						end
 						else begin
-							state_test <= 17;
+							state_test <= 16;
 							read_data_index <= 0;
 						end
 					end
-					17: begin
+					16: begin
 						wen <= 1;
 						ren <= 0;
 						waddr <= ADDR_INDEX;
-						wdata <= REPLACER_PID_BASE + 1;
-						state_test <= 18;
+						wdata <= REPLACER_PID_BASE + REPLACER_FILTER_NUM - 1;
+						state_test <= 17;
 					end
-					18: begin
+					17: begin
 						waddr <= ADDR_READ_REQUEST;
 						wdata <= 0;
-						state_test <= 19;
+						state_test <= 18;
+						read_delay <= 1;
+					end
+					18: begin
+						if(read_delay_3 == 1) begin
+							wen <= 0;
+							ren <= 1;
+							raddr <= ADDR_READ_REQUEST;
+							state_test <= 19;
+						end
+						else begin
+						end
 					end
 					19: begin
-						wen <= 0;
-						ren <= 1;
-						raddr <= ADDR_READ_REQUEST;
-						state_test <= 20;
-						read_delay <= 0;
+						if(rdata == 1) begin
+							state_test <= 20;
+						end
+						else begin
+						end
 					end
 					20: begin
-						if(read_delay == 5) begin
-							raddr <= ADDR_READ_REQUEST;
-							state_test <= 21;
-						end
-						else begin
-							read_delay <= read_delay + 1;
-						end
-					end
-					21: begin
-						if(rdata == 1) begin
-							state_test <= 22;
-						end
-						else begin
-						end
-					end
-					22: begin
 						if((read_data_index >= 0) && (read_data_index < PACK_WORD_SIZE)) begin
-							raddr <= ADDR_TS_DATA_BASE + /*PACK_BYTE_SIZE / 4 + */read_data_index;
+							raddr <= ADDR_TS_DATA_BASE + PACK_BYTE_SIZE / 4 + read_data_index;
 							read_data_index <= read_data_index + 1;
 						end
 						else begin
-							state_test <= 23;
+							state_test <= 21;
 							read_data_index <= 0;
 						end
 					end
-					23: begin
+					21: begin
 						wen <= 1;
 						ren <= 0;
 						waddr <= ADDR_INDEX;
 						wdata <= 0;
+
+						state_test <= 22;
+					end
+					22: begin
+						waddr <= ADDR_PID_INDEX;
+						wdata <= 0;
+
+						state_test <= 23;
+					end
+					23: begin
+						waddr <= ADDR_PID;
+						wdata <= {{14{1'b0}}, 1'b0, 1'b1, {3{1'b0}}, 13'h157f};
 
 						state_test <= 24;
 					end
 					24: begin
-						waddr <= ADDR_PID_INDEX;
-						wdata <= 0;
+						waddr <= ADDR_MATCH_ENABLE;
+						wdata <= 1;
 
 						state_test <= 25;
 					end
-					25: begin
-						waddr <= ADDR_PID;
-						wdata <= {{15{1'b0}}, 1'b1, {3{1'b0}}, 13'h157f};
+					25: begin//start
+						wen <= 1;
+						ren <= 0;
 
+						waddr <= ADDR_INDEX;
+						wdata <= 0;
 						state_test <= 26;
 					end
 					26: begin
-						waddr <= ADDR_MATCH_ENABLE;
-						wdata <= 1;
-
+						waddr <= ADDR_READ_REQUEST;
+						wdata <= 0;
 						state_test <= 27;
+						read_delay <= 1;
 					end
 					27: begin
-						waddr <= ADDR_INDEX;
-						wdata <= 1;
-
-						state_test <= 28;
+						if(read_delay_3 == 1) begin
+							wen <= 0;
+							ren <= 1;
+							raddr <= ADDR_READ_REQUEST;
+							state_test <= 28;
+						end
+						else begin
+						end
 					end
 					28: begin
-						waddr <= ADDR_PID_INDEX;
-						wdata <= 0;
-
-						state_test <= 29;
+						if(rdata == 1) begin
+							state_test <= 29;
+						end
+						else begin
+						end
 					end
 					29: begin
-						waddr <= ADDR_PID;
-						wdata <= {{15{1'b0}}, 1'b1, {3{1'b0}}, 13'h0191};
-
-						state_test <= 30;
-					end
-					30: begin
-						waddr <= ADDR_MATCH_ENABLE;
-						wdata <= 1;
-
-						state_test <= 31;
-					end
-					31: begin//start
-						wen <= 1;
-						ren <= 0;
-
-						waddr <= ADDR_INDEX;
-						wdata <= 0;
-						state_test <= 32;
-					end
-					32: begin
-						if(mpeg_sync == 1) begin
-							read_delay <= 0;
-							state_test <= 33;
-						end
-						else begin
-						end
-					end
-					33: begin
-						if(read_delay == 20) begin
-							waddr <= ADDR_READ_REQUEST;
-							wdata <= 0;
-							state_test <= 34;
-						end
-						else begin
-							read_delay <= read_delay + 1;
-						end
-					end
-					34: begin
-						wen <= 0;
-						ren <= 1;
-						raddr <= ADDR_READ_REQUEST;
-						state_test <= 35;
-						read_delay <= 0;
-					end
-					35: begin
-						if(read_delay == 5) begin
-							raddr <= ADDR_READ_REQUEST;
-							state_test <= 36;
-						end
-						else begin
-							read_delay <= read_delay + 1;
-						end
-					end
-					36: begin
-						if(rdata == 1) begin
-							state_test <= 37;
-						end
-						else begin
-						end
-					end
-					37: begin
 						if((read_data_index >= 0) && (read_data_index < PACK_WORD_SIZE)) begin
 							raddr <= ADDR_TS_DATA_BASE + read_data_index;
 							read_data_index <= read_data_index + 1;
 						end
 						else begin
-							state_test <= 38;
-							read_data_index <= 0;
-						end
-					end
-					38: begin
-						wen <= 1;
-						ren <= 0;
-						waddr <= ADDR_INDEX;
-						wdata <= 1;
-						state_test <= 39;
-					end
-					39: begin
-						if(mpeg_sync == 1) begin
-							read_delay <= 0;
-							state_test <= 40;
-						end
-						else begin
-						end
-					end
-					40: begin
-						if(read_delay == 20) begin
-							waddr <= ADDR_READ_REQUEST;
-							wdata <= 0;
-							state_test <= 41;
-						end
-						else begin
-							read_delay <= read_delay + 1;
-						end
-					end
-					41: begin
-						wen <= 0;
-						ren <= 1;
-						raddr <= ADDR_READ_REQUEST;
-						state_test <= 42;
-						read_delay <= 0;
-					end
-					42: begin
-						if(read_delay == 5) begin
-							raddr <= ADDR_READ_REQUEST;
-							state_test <= 43;
-						end
-						else begin
-							read_delay <= read_delay + 1;
-						end
-					end
-					43: begin
-						if(rdata == 1) begin
-							state_test <= 44;
-						end
-						else begin
-						end
-					end
-					44: begin
-						if((read_data_index >= 0) && (read_data_index < PACK_WORD_SIZE)) begin
-							raddr <= ADDR_TS_DATA_BASE + read_data_index;
-							read_data_index <= read_data_index + 1;
-						end
-						else begin
-							state_test <= 31;
+							state_test <= 25;
 							read_data_index <= 0;
 						end
 					end
