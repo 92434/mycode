@@ -30,7 +30,7 @@ typedef enum {
 } addr_t;
 
 #define ADDR_OFFSET(addr) (addr * 4)
-#define PID_INFO(ENABLE, PID) (((ENABLE == 0 ? 0 : 1) << 16)/*match enable*/ + PID)
+#define PID_INFO(CHANGE, ENABLE, PID) (((CHANGE == 0 ? 0 : 1) << 17)/*change enable*/ + ((ENABLE == 0 ? 0 : 1) << 16)/*match enable*/ + PID)
 
 #define BUFSIZE (PACK_BYTE_SIZE * 2)
 
@@ -126,11 +126,11 @@ int select_pid_slot(thread_arg_t *targ, uint32_t pid_slot) {
 	return ret;
 }
 
-int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable) {
+int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable, bool pid_change) {
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
-	*pbuffer = PID_INFO(pid_enable ? 1 : 0, pid);
+	*pbuffer = PID_INFO(pid_change, pid_enable, pid);
 	ret = write_regs(targ, ADDR_PID, sizeof(uint32_t));
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -140,7 +140,7 @@ int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable) {
 	return ret;
 }
 
-int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable) {
+int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable, bool *pid_change) {
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
@@ -151,6 +151,7 @@ int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable) {
 	}
 	*pid = *pbuffer & 0xffff;
 	*pid_enable = (((*pbuffer >> 16) & 1) == 0) ? false : true;
+	*pid_change = (((*pbuffer >> 17) & 1) == 0) ? false : true;
 	return ret;
 }
 
@@ -329,6 +330,7 @@ int test_set(thread_arg_t *targ) {
 		for(j = 0; j < pid_slot; j++) {//pid_slot
 			uint32_t pid;
 			bool pid_enable;
+			bool pid_change;
 
 			switch(j) {
 				case 0:
@@ -336,36 +338,43 @@ int test_set(thread_arg_t *targ) {
 						case 0:
 							pid = 0x0205;
 							pid_enable = true;
+							pid_change = true;
 							break;
 						case 1:
 							pid = 0x0533;
 							pid_enable = true;
+							pid_change = true;
 							break;
 						case 2:
 							pid = 0x0534;
 							pid_enable = true;
+							pid_change = true;
 							break;
 						case 9:
 							pid = 0x0000;
 							pid_enable = true;
+							pid_change = true;
 							break;
 						default:
 							pid = 0x0000;
 							pid_enable = false;
+							pid_change = false;
 							break;
 					}
 					break;
 				case 9:
 					pid = 0x0001;
 					pid_enable = true;
+					pid_change = true;
 					break;
 				default:
 					pid = 0x0000;
 					pid_enable = false;
+					pid_change = false;
 					break;
 			}
 			select_pid_slot(targ, j);
-			set_pid(targ, pid, pid_enable);
+			set_pid(targ, pid, pid_enable, pid_change);
 		}
 
 		write_ts_data(targ, tx_size, i);
@@ -399,14 +408,15 @@ int test_get(thread_arg_t *targ) {
 		for(j = 0; j < pid_slot; j++) {//pid_slot
 			uint32_t pid;
 			bool pid_enable;
+			bool pid_change;
 
 			switch(j) {
 				default:
 					break;
 			}
 			select_pid_slot(targ, j);
-			get_pid(targ, &pid, &pid_enable);
-			printf("pid: %08x; pid_enable: %s\n", pid, pid_enable ? "true" : "false");
+			get_pid(targ, &pid, &pid_enable, &pid_change);
+			printf("pid: %08x; pid_enable: %s; pid_change: %s\n", pid, pid_enable ? "true" : "false", pid_change ? "true" : "false");
 		}
 
 		get_matched_count(targ, &matched_count);
