@@ -3,22 +3,6 @@
 #include "utils/xiaofei_debug.h"
 #include "utils/xiaofei_kthread.h"
 
-int tr_wait(pcie_dma_t *dma, struct completion *tr_cmp) {
-	int ret = 0;
-	//unsigned long tmo;
-
-	//tmo = msecs_to_jiffies(1000);
-	//tmo = wait_for_completion_timeout(tr_cmp, tmo);
-	//if (0 == tmo) {
-	//	myprintf("(%d)%s:tr_wait timed out!\n", task_pid_nr(current), dma->dev_name);
-	//	ret = -1;
-	//}
-
-	wait_for_completion(tr_cmp);
-
-	return ret;
-}
-
 int tr_wakeup(struct completion *tr_cmp) {
 	int ret = 0;
 
@@ -110,7 +94,10 @@ int put_pcie_tr(pcie_dma_t *dma,
 	wake_up(&(kc705_pci_dev->tr_wq));
 
 	if(ret > 0) {
-		tr_wait(tr.dma, tr.tr_cmp);
+		unsigned long tmo;
+		tmo = msecs_to_jiffies(1000);
+		tmo = wait_for_completion_timeout(tr.tr_cmp, tmo);
+		myprintf_once((0 == tmo), "%s:dma tr time out!\n", dma->devname);
 	}
 
 	vfree(tr.tr_cmp);
