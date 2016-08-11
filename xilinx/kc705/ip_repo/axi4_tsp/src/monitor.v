@@ -72,7 +72,7 @@ module monitor #(
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] matched_index = PACK_BYTE_SIZE;
 
 	wire ram_data_valid;
-	assign ram_data_valid = ({ram_for_data[0][13 - 1 : 8], ram_for_data[0][24 - 1 : 16]} == ram_for_pid) ? 1 : 0;
+	assign ram_data_valid = (({ram_for_data[0][13 - 1 : 8], ram_for_data[0][24 - 1 : 16]} == ram_for_pid) && (ram_for_data[0][8 - 1 : 0] == 8'h47)) ? 1 : 0;
 
 	integer pump_data_state = 0;
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] pump_data_index = 0;
