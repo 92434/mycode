@@ -125,7 +125,6 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 	mutex_lock(&list->list_buffer_lock);
 	read_node = list_entry(list->read, buffer_node_t, list);
 	local_node = *read_node;
-	mutex_unlock(&list->list_buffer_lock);
 
 
 	read_offset = local_node.read_offset;
@@ -152,7 +151,6 @@ int read_buffer(char *buffer, int size, list_buffer_t *list) {
 		memcpy(buffer, data, read_count);
 	}
 
-	mutex_lock(&list->list_buffer_lock);
 	read_node->read_offset = read_end;
 
 	if(read_end == local_node.size) {
@@ -180,7 +178,6 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 	read_node = list_entry(list->read, buffer_node_t, list);
 	local_node = *write_node;
 	local_read_node = *read_node;
-	mutex_unlock(&list->list_buffer_lock);
 
 	read_offset = local_node.read_offset;
 	write_offset = local_node.write_offset;
@@ -227,7 +224,6 @@ int write_buffer(char *buffer, int size, list_buffer_t *list) {
 		memcpy(data, buffer, write_count);
 	}
 
-	mutex_lock(&list->list_buffer_lock);
 	write_node->write_offset = write_end;
 
 	if(write_end == write_node->size) {

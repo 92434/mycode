@@ -148,7 +148,7 @@ typedef struct {
 	struct task_struct **dma_thread;
 	int total_dma_thread_count;
 
-	spinlock_t pcie_tr_list_lock;
+	//spinlock_t pcie_tr_list_lock;
 	list_buffer_t *pcie_tr_list;
 	struct task_struct *pcie_tr_thread;
 	wait_queue_head_t tr_wq;

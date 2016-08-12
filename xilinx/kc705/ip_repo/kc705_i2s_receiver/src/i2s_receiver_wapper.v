@@ -25,7 +25,7 @@ module i2s_receiver_wapper #(
 	);
 	
 	localparam integer I2S_DATA_BIT_WIDTH = 24;
-	localparam integer FIFO_DATA_WIDTH = 16;
+	localparam integer FIFO_DATA_WIDTH = 32;
 
 	reg [I2S_RECEIVER_NUM - 1 : 0] local_r_enable = 0;
 
@@ -64,7 +64,9 @@ module i2s_receiver_wapper #(
 	endgenerate
 
 
-	localparam integer LOCAL_BULK_OF_DATA = 15;
+	localparam integer I2S_DATA_VALID_BYTE_WIDTH = 2;
+	localparam integer PACKAGE_BYTE_COUNT = 174;
+	localparam integer LOCAL_BULK_OF_DATA = PACKAGE_BYTE_COUNT / I2S_DATA_VALID_BYTE_WIDTH;
 
 	integer i2s_index = 0;
 	integer i2s_index_reg = 0;
@@ -120,7 +122,6 @@ module i2s_receiver_wapper #(
 						end
 
 						cache_state <= 0;
-
 					end
 				end
 				default: begin

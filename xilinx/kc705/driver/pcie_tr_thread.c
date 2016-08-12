@@ -17,7 +17,7 @@ int alloc_pcie_tr(kc705_pci_dev_t *kc705_pci_dev) {
 	int ret = 0;
 	pcie_tr_t *tr_buffer;
 
-	spin_lock_init(&kc705_pci_dev->pcie_tr_list_lock);
+	//spin_lock_init(&kc705_pci_dev->pcie_tr_list_lock);
 
 	kc705_pci_dev->pcie_tr_list = init_list_buffer();
 	if(kc705_pci_dev->pcie_tr_list == NULL) {
@@ -88,16 +88,13 @@ int put_pcie_tr(pcie_dma_t *dma,
 		init_completion(tr.tr_cmp);
 	}
 
-	spin_lock(&kc705_pci_dev->pcie_tr_list_lock);
+	//spin_lock(&kc705_pci_dev->pcie_tr_list_lock);
 	ret = write_buffer((char *)&tr, sizeof(pcie_tr_t), kc705_pci_dev->pcie_tr_list);
-	spin_unlock(&kc705_pci_dev->pcie_tr_list_lock);
+	//spin_unlock(&kc705_pci_dev->pcie_tr_list_lock);
 	wake_up(&(kc705_pci_dev->tr_wq));
 
 	if(ret > 0) {
-		unsigned long tmo;
-		tmo = msecs_to_jiffies(1000);
-		tmo = wait_for_completion_timeout(tr.tr_cmp, tmo);
-		myprintf_once((0 == tmo), "%s:dma tr time out!\n", dma->devname);
+		wait_for_completion(tr_cmp);
 	}
 
 	vfree(tr.tr_cmp);
@@ -109,9 +106,9 @@ alloc_tr_cmp_failed:
 static int get_pcie_tr(kc705_pci_dev_t *kc705_pci_dev, pcie_tr_t *tr) {
 	int ret;
 
-	spin_lock(&kc705_pci_dev->pcie_tr_list_lock);
+	//spin_lock(&kc705_pci_dev->pcie_tr_list_lock);
 	ret = read_buffer((char *)tr, sizeof(pcie_tr_t), kc705_pci_dev->pcie_tr_list);
-	spin_unlock(&kc705_pci_dev->pcie_tr_list_lock);
+	//spin_unlock(&kc705_pci_dev->pcie_tr_list_lock);
 
 	return ret;
 }

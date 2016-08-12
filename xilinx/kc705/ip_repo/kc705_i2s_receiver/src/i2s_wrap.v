@@ -5,7 +5,7 @@ module i2s_wrap #
 	(
 		// Users to add parameters here
 		parameter integer I2S_RECEIVER_NUM = 32,
-		parameter integer NUMBER_OF_OUTPUT_WORDS = 15,
+		parameter integer NUMBER_OF_OUTPUT_WORDS = 174 / 2,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -44,7 +44,7 @@ module i2s_wrap #
 		input wire m00_axis_tready
 	);
 
-	localparam integer BULK_OF_DATA = 15;
+	localparam integer BULK_OF_DATA = 174 / 2;
 	localparam integer BULK_DEPTH = 32 * 10;
 
 	wire wclk;

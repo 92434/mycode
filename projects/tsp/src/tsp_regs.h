@@ -64,7 +64,7 @@ typedef struct{
 int init_tsp_reg(char *dev);
 int tsp_monitor_read(thread_arg_t *targ,unsigned short pid, int slot_idx, unsigned char *ts_buf);
 int tsp_monitor_stop(thread_arg_t *targ, int slot_idx);
-int tsp_clear_single_slot(thread_arg_t *targ,unsigned short pid);
+int tsp_clear_single_slot_withpid(thread_arg_t *targ,unsigned short pid);
 int tsp_replace_single_tspack(thread_arg_t *targ,unsigned short pid, unsigned char *ts_buf);
 int tsp_clear_dualslot_by_pid(thread_arg_t *targ,unsigned short pid);
 int tsp_clear_dual_slot(thread_arg_t *targ, int slot_idx);
