@@ -64,258 +64,254 @@ set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[7]}]
 # ip constrain
 # ----------------------------------------------------------------------------------------------------
 
-#FMC_LPC_LA28_P
+#FMC_LPC_LA05_P
 set_property PACKAGE_PIN AG22 [get_ports {bclk[0]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[0]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[0]}]
 
-#FMC_LPC_LA28_N
+#FMC_LPC_LA05_N
 set_property PACKAGE_PIN AH22 [get_ports {lrclk[0]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[0]}]
 
-#FMC_LPC_LA24_P
+#FMC_LPC_LA00_CC_P
 set_property PACKAGE_PIN AD23 [get_ports {sdata[0]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[0]}]
 
-#FMC_LPC_LA24_N
+#FMC_LPC_LA00_CC_N
 set_property PACKAGE_PIN AE24 [get_ports {bclk[1]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[1]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[1]}]
 
-#FMC_LPC_LA26_P
+#FMC_LPC_LA16_P
 set_property PACKAGE_PIN AC22 [get_ports {lrclk[1]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[1]}]
 
-#FMC_LPC_LA26_N
+#FMC_LPC_LA16_N
 set_property PACKAGE_PIN AD22 [get_ports {sdata[1]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[1]}]
 
-#FMC_LPC_LA27_P
+#FMC_LPC_LA02_P
 set_property PACKAGE_PIN AF20 [get_ports {bclk[2]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[2]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[2]}]
 
-#FMC_LPC_LA27_N
+#FMC_LPC_LA02_N
 set_property PACKAGE_PIN AF21 [get_ports {lrclk[2]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[2]}]
 
-#FMC_LPC_LA21_P
+#FMC_LPC_LA03_P
 set_property PACKAGE_PIN AG20 [get_ports {sdata[2]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[2]}]
 
-#FMC_LPC_LA21_N
+#FMC_LPC_LA03_N
 set_property PACKAGE_PIN AH20 [get_ports {bclk[3]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[3]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[3]}]
 
-#FMC_LPC_LA23_P
+#FMC_LPC_LA06_P
 set_property PACKAGE_PIN AK20 [get_ports {lrclk[3]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[3]}]
 
-#FMC_LPC_LA23_N
+#FMC_LPC_LA06_N
 set_property PACKAGE_PIN AK21 [get_ports {sdata[3]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[3]}]
 
-#FMC_LPC_LA22_P
+#FMC_LPC_LA01_CC_P
 set_property PACKAGE_PIN AE23 [get_ports {bclk[4]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[4]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[4]}]
 
-#FMC_LPC_LA22_N
+#FMC_LPC_LA01_CC_N
 set_property PACKAGE_PIN AF23 [get_ports {lrclk[4]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[4]}]
 
-#FMC_LPC_LA19_P
+#FMC_LPC_LA13_P
 set_property PACKAGE_PIN AB24 [get_ports {sdata[4]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[4]}]
 
-#FMC_LPC_LA19_N
+#FMC_LPC_LA13_N
 set_property PACKAGE_PIN AC25 [get_ports {bclk[5]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[5]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[5]}]
 
-#FMC_LPC_LA20_P
+#FMC_LPC_LA09_P
 set_property PACKAGE_PIN AK23 [get_ports {lrclk[5]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[5]}]
 
-#FMC_LPC_LA20_N
+#FMC_LPC_LA09_N
 set_property PACKAGE_PIN AK24 [get_ports {sdata[5]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[5]}]
 
-#FMC_LPC_LA25_P
-set_property PACKAGE_PIN  Y30 [get_ports {bclk[6]}]
+#FMC_LPC_LA32_P
+set_property PACKAGE_PIN Y30 [get_ports {bclk[6]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[6]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[6]}]
 
-#FMC_LPC_LA25_N
+#FMC_LPC_LA32_N
 set_property PACKAGE_PIN AA30 [get_ports {lrclk[6]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[6]}]
 
-#FMC_LPC_LA11_P
+#FMC_LPC_LA30_P
 set_property PACKAGE_PIN AB29 [get_ports {sdata[6]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[6]}]
 
-#FMC_LPC_LA11_N
+#FMC_LPC_LA30_N
 set_property PACKAGE_PIN AB30 [get_ports {bclk[7]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[7]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[7]}]
 
-#FMC_LPC_LA15_P
+#FMC_LPC_LA33_P
 set_property PACKAGE_PIN AC29 [get_ports {lrclk[7]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[7]}]
 
-#FMC_LPC_LA15_N
+#FMC_LPC_LA33_N
 set_property PACKAGE_PIN AC30 [get_ports {sdata[7]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[7]}]
 
-#FMC_LPC_LA10_P
+#FMC_LPC_LA17_CC_P
 set_property PACKAGE_PIN AB27 [get_ports {bclk[8]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[8]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[8]}]
 
-#FMC_LPC_LA10_N
+#FMC_LPC_LA17_CC_N
 set_property PACKAGE_PIN AC27 [get_ports {lrclk[8]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[8]}]
 
-#FMC_LPC_LA08_P
+#FMC_LPC_LA31_P
 set_property PACKAGE_PIN AD29 [get_ports {sdata[8]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[8]}]
 
-#FMC_LPC_LA08_N
+#FMC_LPC_LA31_N
 set_property PACKAGE_PIN AE29 [get_ports {bclk[9]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[9]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[9]}]
 
-#FMC_LPC_LA05_P
+#FMC_LPC_LA28_P
 set_property PACKAGE_PIN AE30 [get_ports {lrclk[9]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[9]}]
 
-#FMC_LPC_LA05_N
+#FMC_LPC_LA28_N
 set_property PACKAGE_PIN AF30 [get_ports {sdata[9]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[9]}]
 
-#FMC_LPC_LA00_CC_P
+#FMC_LPC_LA29_P
 set_property PACKAGE_PIN AE28 [get_ports {bclk[10]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[10]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[10]}]
 
-#FMC_LPC_LA00_CC_N
+#FMC_LPC_LA29_N
 set_property PACKAGE_PIN AF28 [get_ports {lrclk[10]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[10]}]
 
-#FMC_LPC_LA16_P
+#FMC_LPC_LA24_P
 set_property PACKAGE_PIN AG30 [get_ports {sdata[10]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[10]}]
 
-#FMC_LPC_LA16_N
+#FMC_LPC_LA24_N
 set_property PACKAGE_PIN AH30 [get_ports {bclk[11]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[11]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[11]}]
 
-#FMC_LPC_LA02_P
+#FMC_LPC_LA26_P
 set_property PACKAGE_PIN AK29 [get_ports {lrclk[11]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[11]}]
 
-#FMC_LPC_LA02_N
+#FMC_LPC_LA26_N
 set_property PACKAGE_PIN AK30 [get_ports {sdata[11]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[11]}]
 
-#FMC_LPC_LA03_P
+#FMC_LPC_LA27_P
 set_property PACKAGE_PIN AJ28 [get_ports {bclk[12]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[12]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[12]}]
 
-#FMC_LPC_LA03_N
+#FMC_LPC_LA27_N
 set_property PACKAGE_PIN AJ29 [get_ports {lrclk[12]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[12]}]
 
-#FMC_LPC_LA06_P
+#FMC_LPC_LA21_P
 set_property PACKAGE_PIN AG27 [get_ports {sdata[12]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[12]}]
 
-#FMC_LPC_LA06_N
+#FMC_LPC_LA21_N
 set_property PACKAGE_PIN AG28 [get_ports {bclk[13]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[13]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[13]}]
 
-#FMC_LPC_LA01_CC_P
+#FMC_LPC_LA23_P
 set_property PACKAGE_PIN AH26 [get_ports {lrclk[13]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[13]}]
 
-#FMC_LPC_LA01_CC_N
+#FMC_LPC_LA23_N
 set_property PACKAGE_PIN AH27 [get_ports {sdata[13]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[13]}]
 
-#FMC_LPC_LA13_P
+#FMC_LPC_LA22_P
 set_property PACKAGE_PIN AJ27 [get_ports {bclk[14]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[14]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[14]}]
 
-#FMC_LPC_LA13_N
+#FMC_LPC_LA22_N
 set_property PACKAGE_PIN AK28 [get_ports {lrclk[14]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[14]}]
 
-#FMC_LPC_LA09_P
+#FMC_LPC_LA19_P
 set_property PACKAGE_PIN AJ26 [get_ports {sdata[14]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[14]}]
 
-#FMC_LPC_LA09_N
+#FMC_LPC_LA19_N
 set_property PACKAGE_PIN AK26 [get_ports {bclk[15]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {bclk[15]}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {bclk[15]}]
 
-#FMC_LPC_LA14_P
+#FMC_LPC_LA20_P
 set_property PACKAGE_PIN AF26 [get_ports {lrclk[15]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {lrclk[15]}]
 
-#FMC_LPC_LA14_N
+#FMC_LPC_LA20_N
 set_property PACKAGE_PIN AF27 [get_ports {sdata[15]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {sdata[15]}]
 # ----------------------------------------------------------------------------------------------------
 # gpio constrain
 # ----------------------------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------
-# gpio constrain for LPC
-# ----------------------------------------------------------------------------------------------------
 
-#FMC_LPC_LA32_P, SOMI, R85.1, 246
-#swamp AC26 => AD26
+#FMC_LPC_LA25_N, SOMI, R55.1, 246
 set_property PACKAGE_PIN AD26 [get_ports {gpio_tri_io[0]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[0]}]
 
-#FMC_LPC_LA32_N, MOSI, R86.1, 247
+#FMC_LPC_LA25_P, MOSI, R54.1, 247
 set_property PACKAGE_PIN AC26 [get_ports {gpio_tri_io[1]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[1]}]
 
-#FMC_LPC_LA30_P, SCLK, R83.1, 248
+#FMC_LPC_LA11_P, SCLK, R71.1, 248
 set_property PACKAGE_PIN AE25 [get_ports {gpio_tri_io[2]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[2]}]
 
-#FMC_LPC_LA30_N, 74138GA(CS), R84.1, 249
+#FMC_LPC_LA11_N, 74138GA(CS), R72.1, 249
 set_property PACKAGE_PIN AF25 [get_ports {gpio_tri_io[3]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[3]}]
 
-#FMC_LPC_LA33_P, 74138GB, R60.1, 250//AD21->AC24 for resettest
+#FMC_LPC_LA14_P, 74138GB, R9.1, 250
 set_property PACKAGE_PIN AD21 [get_ports {gpio_tri_io[4]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[4]}]
 
-#FMC_LPC_LA33_N, 74138GC, R61.1, 251
+#FMC_LPC_LA15_N, 74138GC, R74.1, 251
 set_property PACKAGE_PIN AD24 [get_ports {gpio_tri_io[5]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[5]}]
 
-#FMC_LPC_LA17_CC_P, SPI_S0, R28.1, 252
+#FMC_LPC_LA10_P, SPI_S0, R7.1, 252
 set_property PACKAGE_PIN AJ24 [get_ports {gpio_tri_io[6]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[6]}]
 
-#FMC_LPC_LA17_CC_N, SPI_S1, R29.1, 253
+#FMC_LPC_LA10_N, SPI_S1, R8.1, 253
 set_property PACKAGE_PIN AK25 [get_ports {gpio_tri_io[7]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[7]}]
 
-#FMC_LPC_LA31_P, SPI_S2, R58.1, 254
+#FMC_LPC_LA08_P, SPI_S2, R44.1, 254
 set_property PACKAGE_PIN AJ22 [get_ports {gpio_tri_io[8]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[8]}]
 
-#FMC_LPC_LA31_N, SPI_S3, R59.1, 255
+#FMC_LPC_LA08_N, SPI_S3, R45.1, 255
 set_property PACKAGE_PIN AJ23 [get_ports {gpio_tri_io[9]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[9]}]
 # ----------------------------------------------------------------------------------------------------

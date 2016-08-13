@@ -2,7 +2,7 @@
 
 module tb #
 	(
-		parameter integer I2S_RECEIVER_NUM = 32,
+		parameter integer I2S_RECEIVER_NUM = 16,
 
 		parameter integer C_M00_AXIS_TDATA_WIDTH = 32,
 		parameter integer C_M00_AXIS_START_COUNT = 1

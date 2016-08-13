@@ -2,7 +2,7 @@
 
 module i2s_receiver_wapper #(
 		parameter integer ID_WIDTH = 5,
-		parameter integer I2S_RECEIVER_NUM = 32,
+		parameter integer I2S_RECEIVER_NUM = 16,
 
 		parameter integer C_M_AXIS_TDATA_WIDTH = 32
 	)

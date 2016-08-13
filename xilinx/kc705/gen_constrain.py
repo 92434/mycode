@@ -282,77 +282,77 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	#	('FMC_HPC_LA21_P', 'iic_sda'),
 	#]
 
-	#map_extra_net_property_port_property = {
-	#	'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#}
-
-
 	map_extra_net_property_port_property = {
-		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	}
+
+
+	#map_extra_net_property_port_property = {
+	#	'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#	'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	#}
 
 	#list_net_port = [
 	#	('FMC_HPC_HA00_CC_P', 'mpeg_clk'),
@@ -410,127 +410,111 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	#]
 
 
-	#list_pin_port = [
-	#	('AE30', 'bclk[0]'),
-	#	('AF30', 'lrclk[0]'),
-	#	('AG30', 'sdata[0]'),
-
-	#	('AH30', 'bclk[1]'),
-	#	('AK29', 'lrclk[1]'),
-	#	('AK30', 'sdata[1]'),
-
-	#	('AJ28', 'bclk[2]'),
-	#	('AJ29', 'lrclk[2]'),
-	#	('AG27', 'sdata[2]'),
-
-	#	('AG28', 'bclk[3]'),
-	#	('AH26', 'lrclk[3]'),
-	#	('AH27', 'sdata[3]'),
-
-	#	('AJ27', 'bclk[4]'),
-	#	('AK28', 'lrclk[4]'),
-	#	('AJ26', 'sdata[4]'),
-
-	#	('AK26', 'bclk[5]'),
-	#	('AF26', 'lrclk[5]'),
-	#	('AF27', 'sdata[5]'),
-
-	#	('AC26', 'bclk[6]'),
-	#	('AD26', 'lrclk[6]'),
-	#	('AE25', 'sdata[6]'),
-
-	#	('AF25', 'bclk[7]'),
-	#	('AC24', 'lrclk[7]'),
-	#	('AD24', 'sdata[7]'),
-
-	#	('AJ24', 'bclk[8]'),
-	#	('AK25', 'lrclk[8]'),
-	#	('AJ22', 'sdata[8]'),
-
-	#	('AJ23', 'bclk[9]'),
-	#	('AG22', 'lrclk[9]'),
-	#	('AH22', 'sdata[9]'),
-
-	#	('AD23', 'bclk[10]'),
-	#	('AE24', 'lrclk[10]'),
-	#	('AC22', 'sdata[10]'),
-
-	#	('AD22', 'bclk[11]'),
-	#	('AF20', 'lrclk[11]'),
-	#	('AF21', 'sdata[11]'),
-
-	#	('AG20', 'bclk[12]'),
-	#	('AH20', 'lrclk[12]'),
-	#	('AK20', 'sdata[12]'),
-
-	#	('AK21', 'bclk[13]'),
-	#	('AE23', 'lrclk[13]'),
-	#	('AF23', 'sdata[13]'),
-
-	#	('AB24', 'bclk[14]'),
-	#	('AC25', 'lrclk[14]'),
-	#	('AK23', 'sdata[14]'),
-
-	#	('AK24', 'bclk[15]'),
-	#	('AD21', 'lrclk[15]'),
-	#	('AE21', 'sdata[15]'),
-	#]
-
-
 	list_pin_port = [
-		('D12', 'mpeg_clk'),
-		('H14', 'mpeg_sync'),
-		('E16', 'mpeg_valid'),
-		('D13', 'mpeg_data[0]'),
-		('G14', 'mpeg_data[1]'),
-		('D11', 'mpeg_data[2]'),
-		('F11', 'mpeg_data[3]'),
-		('B12', 'mpeg_data[4]'),
-		('E11', 'mpeg_data[5]'),
-		('F15', 'mpeg_data[6]'),
-		('D14', 'mpeg_data[7]'),
-
-		('A11', 'asi_out_p'),
-		('A12', 'asi_out_n'),
-
-		('G23', 'fs_0p5_en'),
-
-		('H25', 'symbol_2x_oe'),
-	      
-		('H24', 'symbol_2x_re_out[0]'),
-		('H26', 'symbol_2x_re_out[1]'),
-		('B25', 'symbol_2x_re_out[2]'),
-		('C26', 'symbol_2x_re_out[3]'),
-		('C25', 'symbol_2x_re_out[4]'),
-		('D26', 'symbol_2x_re_out[5]'),
-		('D18', 'symbol_2x_re_out[6]'),
-		('C27', 'symbol_2x_re_out[7]'),
-		('D17', 'symbol_2x_re_out[8]'),
-		('D27', 'symbol_2x_re_out[9]'),
-		('K19', 'symbol_2x_re_out[10]'),
-		('K20', 'symbol_2x_re_out[11]'),
-		('L17', 'symbol_2x_re_out[12]'),
-		('L18', 'symbol_2x_re_out[13]'),
-		('J19', 'symbol_2x_re_out[14]'),
-		('H19', 'symbol_2x_re_out[15]'),
-
-		('C30', 'symbol_2x_im_out[0]'),
-		('F27', 'symbol_2x_im_out[1]'),
-		('D29', 'symbol_2x_im_out[2]'),
-		('G27', 'symbol_2x_im_out[3]'),
-		('E30', 'symbol_2x_im_out[4]'),
-		('A30', 'symbol_2x_im_out[5]'),
-		('E29', 'symbol_2x_im_out[6]'),
-		('B30', 'symbol_2x_im_out[7]'),
-		('G30', 'symbol_2x_im_out[8]'),
-		('D28', 'symbol_2x_im_out[9]'),
-		('H30', 'symbol_2x_im_out[10]'),
-		('E28', 'symbol_2x_im_out[11]'),
-		('F28', 'symbol_2x_im_out[12]'),
-		('F30', 'symbol_2x_im_out[13]'),
-		('G28', 'symbol_2x_im_out[14]'),
-		('G29', 'symbol_2x_im_out[15]'),
+		('AG22', 'bclk[0]'),
+		('AH22', 'lrclk[0]'),
+		('AD23', 'sdata[0]'),
+		('AE24', 'bclk[1]'),
+		('AC22', 'lrclk[1]'),
+		('AD22', 'sdata[1]'),
+		('AF20', 'bclk[2]'),
+		('AF21', 'lrclk[2]'),
+		('AG20', 'sdata[2]'),
+		('AH20', 'bclk[3]'),
+		('AK20', 'lrclk[3]'),
+		('AK21', 'sdata[3]'),
+		('AE23', 'bclk[4]'),
+		('AF23', 'lrclk[4]'),
+		('AB24', 'sdata[4]'),
+		('AC25', 'bclk[5]'),
+		('AK23', 'lrclk[5]'),
+		('AK24', 'sdata[5]'),
+		('Y30', 'bclk[6]'),
+		('AA30', 'lrclk[6]'),
+		('AB29', 'sdata[6]'),
+		('AB30', 'bclk[7]'),
+		('AC29', 'lrclk[7]'),
+		('AC30', 'sdata[7]'),
+		('AB27', 'bclk[8]'),
+		('AC27', 'lrclk[8]'),
+		('AD29', 'sdata[8]'),
+		('AE29', 'bclk[9]'),
+		('AE30', 'lrclk[9]'),
+		('AF30', 'sdata[9]'),
+		('AE28', 'bclk[10]'),
+		('AF28', 'lrclk[10]'),
+		('AG30', 'sdata[10]'),
+		('AH30', 'bclk[11]'),
+		('AK29', 'lrclk[11]'),
+		('AK30', 'sdata[11]'),
+		('AJ28', 'bclk[12]'),
+		('AJ29', 'lrclk[12]'),
+		('AG27', 'sdata[12]'),
+		('AG28', 'bclk[13]'),
+		('AH26', 'lrclk[13]'),
+		('AH27', 'sdata[13]'),
+		('AJ27', 'bclk[14]'),
+		('AK28', 'lrclk[14]'),
+		('AJ26', 'sdata[14]'),
+		('AK26', 'bclk[15]'),
+		('AF26', 'lrclk[15]'),
+		('AF27', 'sdata[15]'),
 	]
+
+	#list_pin_port = [
+	#	('D12', 'mpeg_clk'),
+	#	('H14', 'mpeg_sync'),
+	#	('E16', 'mpeg_valid'),
+	#	('D13', 'mpeg_data[0]'),
+	#	('G14', 'mpeg_data[1]'),
+	#	('D11', 'mpeg_data[2]'),
+	#	('F11', 'mpeg_data[3]'),
+	#	('B12', 'mpeg_data[4]'),
+	#	('E11', 'mpeg_data[5]'),
+	#	('F15', 'mpeg_data[6]'),
+	#	('D14', 'mpeg_data[7]'),
+
+	#	('A11', 'asi_out_p'),
+	#	('A12', 'asi_out_n'),
+
+	#	('G23', 'fs_0p5_en'),
+
+	#	('H25', 'symbol_2x_oe'),
+	#      
+	#	('H24', 'symbol_2x_re_out[0]'),
+	#	('H26', 'symbol_2x_re_out[1]'),
+	#	('B25', 'symbol_2x_re_out[2]'),
+	#	('C26', 'symbol_2x_re_out[3]'),
+	#	('C25', 'symbol_2x_re_out[4]'),
+	#	('D26', 'symbol_2x_re_out[5]'),
+	#	('D18', 'symbol_2x_re_out[6]'),
+	#	('C27', 'symbol_2x_re_out[7]'),
+	#	('D17', 'symbol_2x_re_out[8]'),
+	#	('D27', 'symbol_2x_re_out[9]'),
+	#	('K19', 'symbol_2x_re_out[10]'),
+	#	('K20', 'symbol_2x_re_out[11]'),
+	#	('L17', 'symbol_2x_re_out[12]'),
+	#	('L18', 'symbol_2x_re_out[13]'),
+	#	('J19', 'symbol_2x_re_out[14]'),
+	#	('H19', 'symbol_2x_re_out[15]'),
+
+	#	('C30', 'symbol_2x_im_out[0]'),
+	#	('F27', 'symbol_2x_im_out[1]'),
+	#	('D29', 'symbol_2x_im_out[2]'),
+	#	('G27', 'symbol_2x_im_out[3]'),
+	#	('E30', 'symbol_2x_im_out[4]'),
+	#	('A30', 'symbol_2x_im_out[5]'),
+	#	('E29', 'symbol_2x_im_out[6]'),
+	#	('B30', 'symbol_2x_im_out[7]'),
+	#	('G30', 'symbol_2x_im_out[8]'),
+	#	('D28', 'symbol_2x_im_out[9]'),
+	#	('H30', 'symbol_2x_im_out[10]'),
+	#	('E28', 'symbol_2x_im_out[11]'),
+	#	('F28', 'symbol_2x_im_out[12]'),
+	#	('F30', 'symbol_2x_im_out[13]'),
+	#	('G28', 'symbol_2x_im_out[14]'),
+	#	('G29', 'symbol_2x_im_out[15]'),
+	#]
 
 	for pin, port in list_pin_port:
 		list_extra_des = []
@@ -580,50 +564,51 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 	list_pin_des = []
 	list_net_des = []
 
-	#list_pin_des = [
-	#	('Y30', 'SOMI'),
-	#	('AA30', 'MOSI'),
-	#	('AB29', 'SCLK'),
-	#	('AB30', '74138GA(CS)'),
-	#	('AC29', '74138GB'),
-	#	('AC30', '74138GC'),
-	#	('AB27', 'SPI_S0'),
-	#	('AC27', 'SPI_S1'),
-	#	('AD29', 'SPI_S2'),
-	#	('AE29', 'SPI_S3'),
-	#]
 	list_pin_des = [
-		('C12', 'i2c_sck'),
-		('C11', 'i2c_sda'),
-
-		('A23', 'spi_clk'),
-		('D23', 'spi_mosi'),
-		('E25', 'spi_miso'),
-
-		('F26', '74138G2A'),
-		('E23', 'spi_s0'),
-		('F25', 'spi_s1'),
-		('E24', 'spi_s2'),
-
-		('C14', 'lnb1_on_off'),
-		('E14', 'TUNB_3.3V_ON'),
-		('AF27', 'AD9125_INTB'),
-		('AH29', 'AD5375_DSOP'),
-
-		('E15', 'undefined'),
-		('C15', 'undefined'),
-		('B15', 'undefined'),
-		('J16', 'undefined'),
-		('B14', 'undefined'),
-		('A15', 'undefined'),
-		('F12', 'undefined'),
-		('E13', 'undefined'),
-		('B13', 'undefined'),
-		('A13', 'undefined'),
-		('L16', 'undefined'),
-		('K16', 'undefined'),
-		('H16', 'undefined'),
+		('AD26', 'SOMI'),
+		('AC26', 'MOSI'),
+		('AE25', 'SCLK'),
+		('AF25', '74138GA(CS)'),
+		('AD21', '74138GB'),
+		('AD24', '74138GC'),
+		('AJ24', 'SPI_S0'),
+		('AK25', 'SPI_S1'),
+		('AJ22', 'SPI_S2'),
+		('AJ23', 'SPI_S3'),
 	]
+
+	#list_pin_des = [
+	#	('C12', 'i2c_sck'),
+	#	('C11', 'i2c_sda'),
+
+	#	('A23', 'spi_clk'),
+	#	('D23', 'spi_mosi'),
+	#	('E25', 'spi_miso'),
+
+	#	('F26', '74138G2A'),
+	#	('E23', 'spi_s0'),
+	#	('F25', 'spi_s1'),
+	#	('E24', 'spi_s2'),
+
+	#	('C14', 'lnb1_on_off'),
+	#	('E14', 'TUNB_3.3V_ON'),
+	#	('AF27', 'AD9125_INTB'),
+	#	('AH29', 'AD5375_DSOP'),
+
+	#	('E15', 'undefined'),
+	#	('C15', 'undefined'),
+	#	('B15', 'undefined'),
+	#	('J16', 'undefined'),
+	#	('B14', 'undefined'),
+	#	('A15', 'undefined'),
+	#	('F12', 'undefined'),
+	#	('E13', 'undefined'),
+	#	('B13', 'undefined'),
+	#	('A13', 'undefined'),
+	#	('L16', 'undefined'),
+	#	('K16', 'undefined'),
+	#	('H16', 'undefined'),
+	#]
 
 	#list_net_des = [
 	#	('FMC_HPC_LA30_P', 'master_scl'),

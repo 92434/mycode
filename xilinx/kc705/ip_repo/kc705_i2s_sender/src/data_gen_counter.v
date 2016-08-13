@@ -10,9 +10,9 @@ module data_gen_counter #
 		output reg [I2S_SENDER_TEST_DATA_WIDTH - 1:0] data_source = 0
 	);
 
-	localparam integer HEADER_BYTE_COUNT = 5;
+	localparam integer HEADER_DATA_COUNT = 5;
 	localparam integer DATA_WIDTH = 16;
-	localparam integer HEADER_WIDTH = DATA_WIDTH * HEADER_BYTE_COUNT;
+	localparam integer HEADER_WIDTH = DATA_WIDTH * HEADER_DATA_COUNT;
 
 	reg [HEADER_WIDTH - 1 : 0] header = {16'h0B77, 16'hA1DD, 16'h4240, 16'h2F84, 16'h2B03};
 
