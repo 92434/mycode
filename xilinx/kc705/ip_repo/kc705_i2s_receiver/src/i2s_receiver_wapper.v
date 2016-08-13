@@ -1,6 +1,8 @@
 `timescale 1 ns / 1 ps
 
 module i2s_receiver_wapper #(
+		parameter integer BULK_OF_DATA = 174 / 2,
+
 		parameter integer ID_WIDTH = 5,
 		parameter integer I2S_RECEIVER_NUM = 16,
 
@@ -24,8 +26,7 @@ module i2s_receiver_wapper #(
 		output wire [I2S_RECEIVER_NUM - 1 : 0] local_error_empty
 	);
 	
-	localparam integer I2S_DATA_BIT_WIDTH = 24;
-	localparam integer FIFO_DATA_WIDTH = 32;
+	localparam integer FIFO_DATA_WIDTH = C_M_AXIS_TDATA_WIDTH;
 
 	reg [I2S_RECEIVER_NUM - 1 : 0] local_r_enable = 0;
 
@@ -40,9 +41,8 @@ module i2s_receiver_wapper #(
 			localparam integer id = i;
 
 			i2s_receiver #(
-					.C_M_AXIS_TDATA_WIDTH(C_M_AXIS_TDATA_WIDTH),
-					.I2S_DATA_BIT_WIDTH(I2S_DATA_BIT_WIDTH),
 					.FIFO_DATA_WIDTH(FIFO_DATA_WIDTH),
+					.BULK_OF_DATA(BULK_OF_DATA),
 					.ID(id),
 					.ID_WIDTH(5)
 				) receiver_inst (
@@ -63,10 +63,6 @@ module i2s_receiver_wapper #(
 		end
 	endgenerate
 
-
-	localparam integer I2S_DATA_VALID_BYTE_WIDTH = 2;
-	localparam integer PACKAGE_BYTE_COUNT = 174;
-	localparam integer LOCAL_BULK_OF_DATA = PACKAGE_BYTE_COUNT / I2S_DATA_VALID_BYTE_WIDTH;
 
 	integer i2s_index = 0;
 	integer i2s_index_reg = 0;
@@ -108,12 +104,12 @@ module i2s_receiver_wapper #(
 					end
 				end
 				1: begin
-					if((local_rdata_count >= 0) && (local_rdata_count < LOCAL_BULK_OF_DATA)) begin
+					if((local_rdata_count >= 0) && (local_rdata_count < BULK_OF_DATA)) begin
 						local_r_enable[i2s_index] <= 1;
 
 						local_rdata_count <= local_rdata_count + 1;
 					end
-					else begin//local_rdata_count == LOCAL_BULK_OF_DATA
+					else begin//local_rdata_count == BULK_OF_DATA
 						if((i2s_index >= 0) && (i2s_index < I2S_RECEIVER_NUM - 1)) begin
 							i2s_index <= i2s_index + 1;
 						end
