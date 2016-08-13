@@ -118,7 +118,7 @@ set_property PACKAGE_PIN A12 [get_ports {asi_out_n}]
 set_property IOSTANDARD LVCMOS25 [get_ports {asi_out_n}]
 
 #HDMI_R_D10
-set_property PACKAGE_PIN G23 [get_ports {fs_0p5_en}]
+set_property PACKAGE_PIN C29 [get_ports {fs_0p5_en}]
 set_property IOSTANDARD LVCMOS25 [get_ports {fs_0p5_en}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {fs_0p5_en}]
 

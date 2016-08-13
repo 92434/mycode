@@ -141,7 +141,7 @@ module i2s_receiver_wapper #(
 
 			if(local_r_enable_reg[i2s_index_reg] == 1) begin
 				wen <= 1;
-				wdata <= {{(FIFO_DATA_WIDTH){1'b0}}, local_rdata[i2s_index_reg]};
+				wdata <= local_rdata[i2s_index_reg];
 			end
 			else begin
 			end

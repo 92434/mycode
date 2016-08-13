@@ -39,8 +39,8 @@ static dma_static_config_info_t dma_info[] = {
 		.is_auto_receive = false,
 #endif//#if 1
 
-		.receive_bulk_size = 15 * 4,
-		.send_bulk_size = 15 * 4,
+		.receive_bulk_size = 87 * 4,
+		.send_bulk_size = 87 * 4,
 		.devname = "i2s_receiver_dma",
 	},
 };

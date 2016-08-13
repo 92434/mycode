@@ -36,10 +36,10 @@
 
 #elif defined(KC705_I2S_RECEIVER_TEST)
 
-#define SPI_MISO (170)
-#define SPI_MOSI (171)
-#define SPI_SCK (172)
-#define SPI_CS (173)
+#define SPI_MISO (246)
+#define SPI_MOSI (247)
+#define SPI_SCK (248)
+#define SPI_CS (249)
 #define IIC_SDA0 (-1)
 #define IIC_SCL0 (-1)
 

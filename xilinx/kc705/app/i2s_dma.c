@@ -16,7 +16,7 @@ unsigned int raw_data[] = {
 };
 #define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
 
-#define BUFSIZE (15 * 4 * 32)
+#define BUFSIZE (87 * 4 * 32)
 
 static int stop = 0;
 
@@ -84,7 +84,7 @@ void *read_fn(void *arg) {
 
 			//printf("read %d!\n", nread);
 			for(i = 0; i < BUFSIZE / sizeof(uint32_t); i++) {
-				if((i != 0) && (i % 15 == 0)) {
+				if((i != 0) && (i % 16 == 0)) {
 					printf("\n");
 				}
 				printf("%04x ", data[i] & 0xffff);
