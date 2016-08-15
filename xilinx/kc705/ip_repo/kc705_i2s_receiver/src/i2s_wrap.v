@@ -76,12 +76,10 @@ module i2s_wrap #
 		.m00_axis_tready(m00_axis_tready)
 	);
 
-	localparam integer ID_WIDTH = 5;
 	// Add user logic here
 	i2s_receiver_wapper #(
 		.BULK_OF_DATA(BULK_OF_DATA),
 
-		.ID_WIDTH(ID_WIDTH),
 		.I2S_RECEIVER_NUM(I2S_RECEIVER_NUM),
 
 		.C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH)

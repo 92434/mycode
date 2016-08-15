@@ -3,8 +3,7 @@
 module i2s_receiver # (
 		parameter integer FIFO_DATA_WIDTH = 32,
 		parameter integer BULK_OF_DATA = 174 / 2,
-		parameter integer ID = 0,
-		parameter integer ID_WIDTH = 5
+		parameter integer ID = 0
 	) (
 		input wire rst_n,
 		input wire clk,
@@ -112,16 +111,19 @@ module i2s_receiver # (
 
 	reg w_enable = 0;
 	integer cache_index = 0;
+	integer cache_index_reg = 0;
 	integer cache_state = 0;
 	always @(posedge bclk) begin
 		if(rst_n == 0) begin
 			w_enable <= 0;
 			cache_index <= 0;
+			cache_index_reg <= 0;
 
 			cache_state <= 0;
 		end
 		else begin 
 			w_enable <= 0;
+			cache_index_reg <= cache_index;
 
 			case(cache_state)
 				0: begin
@@ -153,11 +155,17 @@ module i2s_receiver # (
 		end
 	end
 
+	localparam integer ID_WIDTH = 5;
+	localparam integer PACKET_INDEX_WIDTH = 8;
+
+	wire [PACKET_INDEX_WIDTH - 1 : 0] packet_index;
+	assign packet_index = cache_index_reg[PACKET_INDEX_WIDTH - 1 : 0];
+
 	wire [ID_WIDTH - 1 : 0] id;
 	assign id = ID[ID_WIDTH - 1 : 0];
 
 	wire [FIFO_DATA_WIDTH - 1 : 0] wdata;
-	assign wdata = {{(FIFO_DATA_WIDTH - ID_WIDTH - DATA_WIDTH){1'b0}}, id, i2s_data_reg_2};
+	assign wdata = {packet_index, {(FIFO_DATA_WIDTH - PACKET_INDEX_WIDTH - ID_WIDTH - I2S_DATA_VALID_BIT_WIDTH){1'b0}}, id, i2s_data_reg_2};
 
 	my_fifo # (
 			.DATA_WIDTH(FIFO_DATA_WIDTH),

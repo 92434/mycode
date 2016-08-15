@@ -3,7 +3,6 @@
 module i2s_receiver_wapper #(
 		parameter integer BULK_OF_DATA = 174 / 2,
 
-		parameter integer ID_WIDTH = 5,
 		parameter integer I2S_RECEIVER_NUM = 16,
 
 		parameter integer C_M_AXIS_TDATA_WIDTH = 32
@@ -43,8 +42,7 @@ module i2s_receiver_wapper #(
 			i2s_receiver #(
 					.FIFO_DATA_WIDTH(FIFO_DATA_WIDTH),
 					.BULK_OF_DATA(BULK_OF_DATA),
-					.ID(id),
-					.ID_WIDTH(5)
+					.ID(id)
 				) receiver_inst (
 					.clk(clk),
 					.rst_n(rst_n),
