@@ -17,7 +17,7 @@ module i2s_slave_interface #
 
 
 	reg lrstate = 0;
-	integer count = I2S_DATA_BIT_WIDTH;
+	reg [8 - 1 : 0] count = I2S_DATA_BIT_WIDTH;
 
 	always @(posedge bclk) begin
 		if(rst_n == 0'b0) begin

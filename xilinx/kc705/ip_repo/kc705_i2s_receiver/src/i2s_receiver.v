@@ -45,6 +45,8 @@ module i2s_receiver # (
 
 	localparam integer BULK_DEPTH = 32;
 
+	localparam integer PACKET_INDEX_WIDTH = 8;
+
 	wire [I2S_DATA_VALID_BIT_WIDTH - 1 : 0] i2s_data;
 	assign i2s_data = i2s_received_data[DATA_WIDTH * 3 - 1 -: I2S_DATA_VALID_BIT_WIDTH];
 
@@ -62,30 +64,6 @@ module i2s_receiver # (
 		end
 	end
 
-	reg s_data_valid_reg = 0;
-	reg s_data_valid_reg_1 = 0;
-	reg [I2S_DATA_VALID_BIT_WIDTH - 1 : 0] i2s_data_reg = 0;
-	reg [I2S_DATA_VALID_BIT_WIDTH - 1 : 0] i2s_data_reg_1 = 0;
-	reg [I2S_DATA_VALID_BIT_WIDTH - 1 : 0] i2s_data_reg_2 = 0;
-	always @(posedge bclk) begin
-		if(rst_n == 0) begin
-			s_data_valid_reg <= 0;
-			s_data_valid_reg_1 <= 0;
-
-			i2s_data_reg <= 0;
-			i2s_data_reg_1 <= 0;
-			i2s_data_reg_2 <= 0;
-		end
-		else begin
-			s_data_valid_reg <= s_data_valid;
-			s_data_valid_reg_1 <= s_data_valid_reg;
-
-			i2s_data_reg <= i2s_data_cache[DATA_WIDTH * HEADER_BYTE_COUNT - 1 -: DATA_WIDTH * 2];//s_data_valid
-			i2s_data_reg_1 <= i2s_data_reg;//s_data_valid_reg
-			i2s_data_reg_2 <= i2s_data_reg_1;//s_data_valid_reg_1
-		end
-	end
-	
 	wire [DATA_WIDTH * HEADER_BYTE_COUNT - 1 : 0]header;
 	assign header = {8'h0B, 8'h77, 8'hA1, 8'hDD, 8'h42, 8'h40, 8'h2F, 8'h84, 8'h2B, 8'h03};
 
@@ -108,27 +86,30 @@ module i2s_receiver # (
 		end
 	end
 
+	reg s_data_valid_reg = 0;
+	reg s_data_valid_reg_1 = 0;
 
 	reg w_enable = 0;
-	integer cache_index = 0;
-	integer cache_index_reg = 0;
-	integer cache_state = 0;
+	reg [PACKET_INDEX_WIDTH - 1 : 0] cache_count = 0;
+	reg [PACKET_INDEX_WIDTH - 1 : 0] cache_index = 0;
+	reg [PACKET_INDEX_WIDTH - 1 : 0] cache_state = 0;
 	always @(posedge bclk) begin
 		if(rst_n == 0) begin
 			w_enable <= 0;
+
+			cache_count <= 0;
+
 			cache_index <= 0;
-			cache_index_reg <= 0;
 
 			cache_state <= 0;
 		end
 		else begin 
 			w_enable <= 0;
-			cache_index_reg <= cache_index;
 
 			case(cache_state)
 				0: begin
 					if(need_cache_i2s_data == 1) begin
-						cache_index <= 0;
+						cache_count <= 0;
 
 						cache_state <= 1;
 					end
@@ -136,11 +117,12 @@ module i2s_receiver # (
 					end
 				end
 				1: begin
-					if((cache_index >= 0) && (cache_index < BULK_OF_DATA)) begin
+					if((cache_count >= 0) && (cache_count < BULK_OF_DATA)) begin
 						if(s_data_valid_reg_1 == 1) begin
 							w_enable <= 1;
+							cache_index <= cache_count;
 
-							cache_index <= cache_index + 1;
+							cache_count <= cache_count + 1;
 						end
 						else begin
 						end
@@ -150,22 +132,43 @@ module i2s_receiver # (
 					end
 				end
 				default: begin
+					cache_state <= 0;
 				end
 			endcase
 		end
 	end
 
-	localparam integer ID_WIDTH = 5;
-	localparam integer PACKET_INDEX_WIDTH = 8;
+	reg [I2S_DATA_VALID_BIT_WIDTH - 1 : 0] i2s_data_reg = 0;
+	reg [I2S_DATA_VALID_BIT_WIDTH - 1 : 0] i2s_data_reg_1 = 0;
+	reg [I2S_DATA_VALID_BIT_WIDTH - 1 : 0] i2s_data_reg_2 = 0;
 
-	wire [PACKET_INDEX_WIDTH - 1 : 0] packet_index;
-	assign packet_index = cache_index_reg[PACKET_INDEX_WIDTH - 1 : 0];
+	always @(posedge bclk) begin
+		if(rst_n == 0) begin
+			s_data_valid_reg <= 0;
+			s_data_valid_reg_1 <= 0;
+
+			i2s_data_reg <= 0;
+			i2s_data_reg_1 <= 0;
+			i2s_data_reg_2 <= 0;
+		end
+		else begin
+			s_data_valid_reg <= s_data_valid;
+			s_data_valid_reg_1 <= s_data_valid_reg;
+
+			i2s_data_reg <= i2s_data_cache[DATA_WIDTH * HEADER_BYTE_COUNT - 1 -: DATA_WIDTH * 2];//s_data_valid
+			i2s_data_reg_1 <= i2s_data_reg;//s_data_valid_reg
+			i2s_data_reg_2 <= i2s_data_reg_1;//s_data_valid_reg_1
+		end
+	end
+	
+
+	localparam integer ID_WIDTH = 5;
 
 	wire [ID_WIDTH - 1 : 0] id;
 	assign id = ID[ID_WIDTH - 1 : 0];
 
 	wire [FIFO_DATA_WIDTH - 1 : 0] wdata;
-	assign wdata = {packet_index, {(FIFO_DATA_WIDTH - PACKET_INDEX_WIDTH - ID_WIDTH - I2S_DATA_VALID_BIT_WIDTH){1'b0}}, id, i2s_data_reg_2};
+	assign wdata = {cache_index, {(FIFO_DATA_WIDTH - PACKET_INDEX_WIDTH - ID_WIDTH - I2S_DATA_VALID_BIT_WIDTH){1'b0}}, id, i2s_data_reg_2};
 
 	my_fifo # (
 			.DATA_WIDTH(FIFO_DATA_WIDTH),

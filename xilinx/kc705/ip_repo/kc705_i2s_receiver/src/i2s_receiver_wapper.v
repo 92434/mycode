@@ -62,69 +62,92 @@ module i2s_receiver_wapper #(
 	endgenerate
 
 
-	integer i2s_index = 0;
-	integer i2s_index_reg = 0;
-	integer local_rdata_count = 0;
-	reg [I2S_RECEIVER_NUM - 1 : 0] local_r_enable_reg = 0;
+	reg [8 - 1 : 0] i2s_index = 0;
 
-	integer cache_state = 0;
+	reg [8 - 1 : 0] local_rdata_count = 0;
+
+	reg [8 - 1 : 0] local_rdata_index = 0;
+
+	reg [8 - 1 : 0] cache_state = 0;
 
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			local_r_enable <= 0;
 
 			i2s_index <= 0;
-			i2s_index_reg <= 0;
+
 			local_rdata_count <= 0;
-			local_r_enable_reg <= 0;
+
+			local_rdata_index <= 0;
 
 			cache_state <= 0;
 		end
 		else begin
 			local_r_enable <= 0;
-			local_r_enable_reg <= local_r_enable;
-			i2s_index_reg <= i2s_index;
 
 			case(cache_state)
 				0: begin
+					if((i2s_index >= 0) && (i2s_index < I2S_RECEIVER_NUM - 1)) begin
+						i2s_index <= i2s_index + 1;
+					end
+					else begin
+						i2s_index <= 0;
+					end
+
+					cache_state <= 1;
+				end
+				1: begin
 					if(local_r_ready[i2s_index] == 1) begin
 						local_rdata_count <= 0;
 
-						cache_state <= 1;
+						cache_state <= 2;
 					end
 					else begin
-						if((i2s_index >= 0) && (i2s_index < I2S_RECEIVER_NUM - 1)) begin
-							i2s_index <= i2s_index + 1;
-						end
-						else begin
-							i2s_index <= 0;
-						end
+						cache_state <= 0;
 					end
 				end
-				1: begin
+				2: begin
 					if((local_rdata_count >= 0) && (local_rdata_count < BULK_OF_DATA)) begin
 						local_r_enable[i2s_index] <= 1;
+						local_rdata_index <= local_rdata_count;
 
 						local_rdata_count <= local_rdata_count + 1;
 					end
 					else begin//local_rdata_count == BULK_OF_DATA
-						if((i2s_index >= 0) && (i2s_index < I2S_RECEIVER_NUM - 1)) begin
-							i2s_index <= i2s_index + 1;
-						end
-						else begin
-							i2s_index <= 0;
-						end
-
 						cache_state <= 0;
 					end
 				end
 				default: begin
+					cache_state <= 0;
 				end
 			endcase
 		end
 	end
 
-	always @(posedge wclk) begin
+	reg [I2S_RECEIVER_NUM - 1 : 0] local_r_enable_reg = 0;
+
+	reg [8 - 1 : 0] i2s_index_reg = 0;
+
+	reg [8 - 1 : 0] local_rdata_index_reg = 0;
+
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
+			local_r_enable_reg <= 0;
+
+			i2s_index_reg <= 0;
+
+			local_rdata_index_reg <= 0;
+		end
+		else begin
+			local_r_enable_reg <= local_r_enable;
+
+			i2s_index_reg <= i2s_index;
+
+			local_rdata_index_reg <= local_rdata_index;
+		end
+	end
+
+	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			wen <= 0;
 			wdata <= 0;
@@ -135,7 +158,7 @@ module i2s_receiver_wapper #(
 
 			if(local_r_enable_reg[i2s_index_reg] == 1) begin
 				wen <= 1;
-				wdata <= local_rdata[i2s_index_reg];
+				wdata <= {local_rdata[i2s_index_reg][32 - 1 : 24], local_rdata_index_reg, local_rdata[i2s_index_reg][16 - 1 : 0]};
 			end
 			else begin
 			end

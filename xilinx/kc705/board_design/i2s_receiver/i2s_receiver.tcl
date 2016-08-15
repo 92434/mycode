@@ -158,7 +158,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi_dma_0, and set properties
   set axi_dma_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma:7.1 axi_dma_0 ]
-  set_property -dict [ list CONFIG.c_include_sg {0} CONFIG.c_mm2s_burst_size {128} CONFIG.c_s2mm_burst_size {128}  ] $axi_dma_0
+  set_property -dict [ list CONFIG.c_include_mm2s_dre {1} CONFIG.c_include_sg {0} CONFIG.c_mm2s_burst_size {128} CONFIG.c_s2mm_burst_size {128}  ] $axi_dma_0
 
   # Create instance: axi_gpio_0, and set properties
   set axi_gpio_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0 ]

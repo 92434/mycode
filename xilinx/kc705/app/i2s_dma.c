@@ -16,7 +16,7 @@ unsigned int raw_data[] = {
 };
 #define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
 
-#define BUFSIZE (87 * 4 * 32)
+#define BUFSIZE (87 * 4 * 1)
 
 static int stop = 0;
 
@@ -45,7 +45,7 @@ void *read_fn(void *arg) {
 	struct timeval tv;
 	fd_set rfds;
 	fd_set efds;
-	int nread;
+	int nread = 0;
 	int toread = BUFSIZE;
 
 	//printids("read_fn: ");
@@ -54,7 +54,7 @@ void *read_fn(void *arg) {
 	tv.tv_usec=0;
 
 	while(stop == 0) {
-		if(toread > 0) {
+		if((toread > 0) && (nread == 0)) {
 			FD_ZERO(&rfds);
 			FD_ZERO(&efds);
 			FD_SET(targ->fd, &rfds);
@@ -83,13 +83,14 @@ void *read_fn(void *arg) {
 			toread = BUFSIZE;
 
 			//printf("read %d!\n", nread);
-			for(i = 0; i < BUFSIZE / sizeof(uint32_t); i++) {
+			for(i = 0; i < nread / sizeof(uint32_t); i++) {
 				if((i != 0) && (i % 16 == 0)) {
 					printf("\n");
 				}
-				printf("%04x ", data[i] & 0xffff);
+				printf("%02d%02d%04x ", ((data[i] >> 24) & 0xff), ((data[i] >> 16) & 0xff), (data[i] & 0xffff));
 			}
 			printf("\n");
+			nread = 0;
 		}
 		//return NULL;
 	}
