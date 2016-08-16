@@ -84,6 +84,7 @@ module i2s_receiver_wapper #(
 		end
 		else begin
 			local_r_enable <= 0;
+			local_rdata_index <= 0;
 
 			case(cache_state)
 				0: begin
@@ -98,8 +99,6 @@ module i2s_receiver_wapper #(
 				end
 				1: begin
 					if(local_r_ready[i2s_index] == 1) begin
-						local_rdata_count <= 0;
-
 						cache_state <= 2;
 					end
 					else begin
@@ -107,13 +106,18 @@ module i2s_receiver_wapper #(
 					end
 				end
 				2: begin
+					local_rdata_count <= 0;
+
+					cache_state <= 3;
+				end
+				3: begin
 					if((local_rdata_count >= 0) && (local_rdata_count < BULK_OF_DATA)) begin
 						local_r_enable[i2s_index] <= 1;
 						local_rdata_index <= local_rdata_count;
 
 						local_rdata_count <= local_rdata_count + 1;
 					end
-					else begin//local_rdata_count == BULK_OF_DATA
+					else begin
 						cache_state <= 0;
 					end
 				end
@@ -158,7 +162,7 @@ module i2s_receiver_wapper #(
 
 			if(local_r_enable_reg[i2s_index_reg] == 1) begin
 				wen <= 1;
-				wdata <= {local_rdata[i2s_index_reg][32 - 1 : 24], local_rdata_index_reg, local_rdata[i2s_index_reg][16 - 1 : 0]};
+				wdata <= {local_rdata[i2s_index_reg][32 - 1 : 24], local_rdata_index_reg[8 - 1 : 0], local_rdata[i2s_index_reg][16 - 1 : 0]};
 			end
 			else begin
 			end

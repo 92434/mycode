@@ -105,6 +105,7 @@ module i2s_receiver # (
 		end
 		else begin 
 			w_enable <= 0;
+			cache_index <= 0;
 
 			case(cache_state)
 				0: begin

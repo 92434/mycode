@@ -83,13 +83,25 @@ void *read_fn(void *arg) {
 			toread = BUFSIZE;
 
 			//printf("read %d!\n", nread);
-			for(i = 0; i < nread / sizeof(uint32_t); i++) {
-				if((i != 0) && (i % 16 == 0)) {
+			if(nread > 0) {
+				if(
+					((data[0] & 0xffff) == 0x0b77)
+					&& ((data[1] & 0xffff) == 0xa1dd)
+					&& ((data[2] & 0xffff) == 0x4240)
+					&& ((data[3] & 0xffff) == 0x2f84)
+					&& ((data[4] & 0xffff) == 0x2b03)
+				) {
+					for(i = 0; i < nread / sizeof(uint32_t); i++) {
+						if((i != 0) && (i % 16 == 0)) {
+							printf("\n");
+						}
+						printf("%02d%02d%04x ", ((data[i] >> 24) & 0xff), ((data[i] >> 16) & 0xff), (data[i] & 0xffff));
+					}
 					printf("\n");
+				} else {
 				}
-				printf("%02d%02d%04x ", ((data[i] >> 24) & 0xff), ((data[i] >> 16) & 0xff), (data[i] & 0xffff));
 			}
-			printf("\n");
+
 			nread = 0;
 		}
 		//return NULL;

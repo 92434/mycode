@@ -154,7 +154,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi_dma_0, and set properties
   set axi_dma_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma:7.1 axi_dma_0 ]
-  set_property -dict [ list CONFIG.c_include_sg {0} CONFIG.c_mm2s_burst_size {128} CONFIG.c_s2mm_burst_size {128}  ] $axi_dma_0
+  set_property -dict [ list CONFIG.c_include_mm2s_dre {1} CONFIG.c_include_sg {0} CONFIG.c_mm2s_burst_size {128} CONFIG.c_s2mm_burst_size {128}  ] $axi_dma_0
 
   # Create instance: axi_interconnect_0, and set properties
   set axi_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0 ]
@@ -173,7 +173,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: kc705_i2s_sender_0, and set properties
   set kc705_i2s_sender_0 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_i2s_sender:1.0 kc705_i2s_sender_0 ]
-  set_property -dict [ list CONFIG.I2S_RECEIVER_NUM {32}  ] $kc705_i2s_sender_0
+  set_property -dict [ list CONFIG.I2S_RECEIVER_NUM {16}  ] $kc705_i2s_sender_0
 
   # Create instance: kc705_pcie_ext_0, and set properties
   set kc705_pcie_ext_0 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_pcie_ext:1.0 kc705_pcie_ext_0 ]
