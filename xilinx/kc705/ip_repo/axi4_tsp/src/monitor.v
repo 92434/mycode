@@ -120,6 +120,7 @@ module monitor #(
 					end
 				end
 				default: begin
+					pump_data_state <= 0;
 				end
 			endcase
 		end
