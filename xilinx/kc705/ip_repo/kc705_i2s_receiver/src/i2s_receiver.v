@@ -75,6 +75,7 @@ module i2s_receiver # (
 		else begin
 			need_cache_i2s_data <= 0;
 			if(s_data_valid == 1) begin
+				//if(header[DATA_WIDTH * HEADER_BYTE_COUNT - 1 : 0] == i2s_data_cache[DATA_WIDTH * HEADER_BYTE_COUNT - 1 : 0]) begin
 				if(header[DATA_WIDTH * HEADER_BYTE_COUNT - 1 -: DATA_WIDTH * 2] == i2s_data_cache[DATA_WIDTH * HEADER_BYTE_COUNT - 1 -: DATA_WIDTH * 2]) begin
 					need_cache_i2s_data <= 1;
 				end

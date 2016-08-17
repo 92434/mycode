@@ -162,7 +162,8 @@ module i2s_receiver_wapper #(
 
 			if(local_r_enable_reg[i2s_index_reg] == 1) begin
 				wen <= 1;
-				wdata <= {local_rdata[i2s_index_reg][32 - 1 : 24], local_rdata_index_reg[8 - 1 : 0], local_rdata[i2s_index_reg][16 - 1 : 0]};
+				//wdata <= {local_rdata[i2s_index_reg][32 - 1 : 24], local_rdata_index_reg[8 - 1 : 0], local_rdata[i2s_index_reg][16 - 1 : 0]};
+				wdata <= local_rdata[i2s_index_reg];
 			end
 			else begin
 			end

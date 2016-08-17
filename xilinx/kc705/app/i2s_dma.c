@@ -79,6 +79,7 @@ void *read_fn(void *arg) {
 		} else {
 			int i;
 			uint32_t *data = (uint32_t *)targ->buffer;
+			static uint16_t last_data = 0;
 
 			toread = BUFSIZE;
 
@@ -86,18 +87,29 @@ void *read_fn(void *arg) {
 			if(nread > 0) {
 				if(
 					((data[0] & 0xffff) == 0x0b77)
-					&& ((data[1] & 0xffff) == 0xa1dd)
-					&& ((data[2] & 0xffff) == 0x4240)
-					&& ((data[3] & 0xffff) == 0x2f84)
-					&& ((data[4] & 0xffff) == 0x2b03)
+					//&& ((data[1] & 0xffff) == 0xa1dd)
+					//&& ((data[2] & 0xffff) == 0x4240)
+					//&& ((data[3] & 0xffff) == 0x2f84)
+					//&& ((data[4] & 0xffff) == 0x2b03)
+					//&& ((data[5] & 0xffff) == 0x8143)
+					//&& ((data[6] & 0xffff) == 0x4339)
+					//&& ((data[7] & 0xffff) == 0xfa53)
+					//&& (last_data != (data[86] & 0xffff))
 				) {
 					for(i = 0; i < nread / sizeof(uint32_t); i++) {
 						if((i != 0) && (i % 16 == 0)) {
 							printf("\n");
 						}
-						printf("%02d%02d%04x ", ((data[i] >> 24) & 0xff), ((data[i] >> 16) & 0xff), (data[i] & 0xffff));
+						//printf("%02d%02d%04x ", ((data[i] >> 24) & 0xff), ((data[i] >> 16) & 0xff), (data[i] & 0xffff));
+						printf("%02x %02x ", ((data[i] >> 8) & 0xff), ((data[i] >> 0) & 0xff));
 					}
 					printf("\n");
+
+					//if((data[86] & 0xffff) != last_data + 1) {
+					//	printf("last:%04x, now:%04x\n", last_data, (data[86] & 0xffff));
+					//}
+
+					last_data = (data[86] & 0xffff);
 				} else {
 				}
 			}
