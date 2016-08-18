@@ -282,7 +282,7 @@ module tsp_ram #(
 	wire [REPLACER_FILTER_NUM : 0] replacers_update_data_request;
 	wire [REPLACER_FILTER_NUM : 0] replacers_pump_data_request;
 	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_ram_for_pid [0 : REPLACER_FILTER_NUM];
-	wire [C_S_AXI_DATA_WIDTH - 1 : 0] replacers_pts [0 : REPLACER_FILTER_NUM];
+	wire [PTS_DATA_WIDTH - 1 : 0] replacers_pts [0 : REPLACER_FILTER_NUM];
 
 
 	//for output

@@ -9,6 +9,8 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <pthread.h>
+#include <bitstream/mpeg/pes.h>
+#include <bitstream/dvb/si.h>
 #include "common_fun.h"
 #include "utils.h"
 #include "tsp_regs.h"
@@ -377,14 +379,14 @@ int tsp_monitor_read(thread_arg_t *targ,unsigned short pid, int slot_idx, unsign
 	//unsigned short pid1=0;
 	if(targ==NULL||ts_buf==NULL||slot_idx>=TOTAL_SLOT_SIZE)
 		return -1;
-	TRACE("tsp_monitor_read,pid:%d,slot_idx:%d\n",pid,slot_idx);
+	//TRACE("tsp_monitor_read,pid:%d,slot_idx:%d\n",pid,slot_idx);
 	select_slot(targ, slot_idx);
 	select_pid_slot(targ, 0);
 	set_pid(targ, pid, true, 0);
 	set_slot_enable(targ, true);
 	ret=read_ts_data(targ, PACK_BYTE_SIZE);
 	if(ret==PACK_BYTE_SIZE){
-		dump_packet("monitor",targ->buffer,PACK_BYTE_SIZE);
+		//dump_packet("monitor",targ->buffer,PACK_BYTE_SIZE);
 		tsp_container->monitor[slot_idx].inuse=1;
 		tsp_container->monitor[slot_idx].pid=pid;
 		memcpy(tsp_container->monitor[slot_idx].ts_pack,targ->buffer,ret);
@@ -821,7 +823,7 @@ unsigned char pid_ac3[188*2]={
 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x24,0x45,0x1c,
 0xc1,0x6d,0xdb,0x13,0xe6,0xb5,0x93,0x5e,0xd6,0xb0,0xd7,0xa5,};
 
-#define AC3_AUDIO_PID 512
+#define TEST_PID 650
 
 int init_tsp_reg(char *dev) {
 	int ret = 0;
@@ -892,18 +894,48 @@ int init_tsp_reg(char *dev) {
 		TRACE("tsp_replace_dual_tspack fail,ret:%d\n",ret);
 	}
 	*/
-	//int read_bytes=0;
-	uint64_t i_pcr;
+	int header_size;
+	uint64_t pts=0;
+	uint8_t *p_ts;
 	unsigned char ts_buf[PACK_BYTE_SIZE]={0};
 	while(1){
 		memset(pid_array,0,sizeof(pid_array));
-		tsp_monitor_read(&targ, AC3_AUDIO_PID, 0, ts_buf);
+		tsp_monitor_read(&targ, TEST_PID, 0, ts_buf);
+		p_ts=ts_buf;
+		header_size = TS_HEADER_SIZE + (ts_has_adaptation(p_ts) ? 1+ ts_get_adaptation(p_ts) : 0) ;
+		if(ts_get_unitstart(p_ts) &&pes_validate(p_ts+TS_HEADER_SIZE)){//has pes header
+			if(pes_validate_header(p_ts + header_size) &&pes_has_pts(p_ts + header_size)
+                		&&pes_validate_pts(p_ts + header_size)){
+                //pes_payload_len=pes_get_length(p_ts + header_size)-pes_get_headerlength(p_ts + header_size);
+				pts=pes_get_pts(p_ts + header_size);
+				header_size = TS_HEADER_SIZE + (ts_has_adaptation(pid_ac3) ? 1+ ts_get_adaptation(pid_ac3) : 0) ;
+				pes_set_pts(pid_ac3+header_size,pts);
+				//printf("========pid:%0d=======pts:%0lx=============\n",t_pid,pts);
+				pid_array[0]=TEST_PID;
+				if(1){
+					static int tm=0;
+					int cur_tm=(int)time((time_t *) 0);
+					if(cur_tm-tm>=2){
+						pid_ac3[188-2]++;
+						tm=cur_tm;
+						TRACE("replace byte:%02x\n",pid_ac3[188-2]);
+					}
+				}
+				ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
+				if(ret<0){
+					TRACE("tsp_replace_dual_tspack fail,ret:%d\n",ret);
+				}
+				cs_sleepms(10);
+				tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
+			}
+		}
+		/*
 		if(ts_has_adaptation(ts_buf)){
 			 if ( ts_get_adaptation(ts_buf) &&
                 tsaf_has_pcr(ts_buf)){
                 i_pcr = tsaf_get_pcr(ts_buf);
 				tsaf_set_pcr(pid_ac3,i_pcr);
-				pid_array[0]=AC3_AUDIO_PID;
+				pid_array[0]=TEST_PID;
 				ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
 				if(ret<0){
 					TRACE("tsp_replace_dual_tspack fail,ret:%d\n",ret);
@@ -911,8 +943,8 @@ int init_tsp_reg(char *dev) {
 				cs_sleepms(10);
 				tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
 			 }
-		}
-		cs_sleepms(20);
+		}*/
+		cs_sleepms(10);
 		#if 0
 		pid_ac3[188-2]++;
 		TRACE("replace byte:%02x\n",pid_ac3[188-2]);

@@ -170,6 +170,47 @@ int get_matched_count(thread_arg_t *targ, uint32_t *matched_count) {
 	return ret;
 }
 
+int set_pts(thread_arg_t *targ, uint32_t pts_low, uint32_t pts_high) {
+	int ret = 0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	*pbuffer = pts_low;
+	ret = write_regs(targ, ADDR_PTS_LOW, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+
+	*pbuffer = pts_high;
+	ret = write_regs(targ, ADDR_PTS_HIGH, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+
+	return ret;
+}
+
+int get_pts(thread_arg_t *targ, uint32_t *pts_low, uint32_t *pts_high) {
+	int ret = 0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	ret = read_regs(targ, ADDR_PTS_LOW, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+	*pts_low = *pbuffer;
+
+	ret = read_regs(targ, ADDR_PTS_HIGH, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+	*pts_high = *pbuffer;
+	return ret;
+}
+
 int set_slot_enable(thread_arg_t *targ, bool slot_enable) {
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
@@ -279,6 +320,7 @@ int read_ts_data(thread_arg_t *targ, int rx_size) {
 			return -1;
 		}
 		i++;
+		usleep(10000);
 	}
 
 	ret = read_regs(targ, ADDR_TS_DATA_BASE, rx_size);//will valid after 3 clock
@@ -338,7 +380,7 @@ int test_set(thread_arg_t *targ) {
 				case 0:
 					switch(i) {
 						case 0:
-							pid = 0x0205;
+							pid = 0x0000;
 							pid_enable = true;
 							pid_change = true;
 							break;
@@ -377,6 +419,7 @@ int test_set(thread_arg_t *targ) {
 			}
 			select_pid_slot(targ, j);
 			set_pid(targ, pid, pid_enable, pid_change);
+			set_pts(targ, 0x12345678, 0x12345678);
 		}
 
 		write_ts_data(targ, tx_size, i);
@@ -411,6 +454,7 @@ int test_get(thread_arg_t *targ) {
 			uint32_t pid;
 			bool pid_enable;
 			bool pid_change;
+			uint32_t pts_low, pts_high;
 
 			switch(j) {
 				default:
@@ -418,7 +462,8 @@ int test_get(thread_arg_t *targ) {
 			}
 			select_pid_slot(targ, j);
 			get_pid(targ, &pid, &pid_enable, &pid_change);
-			printf("pid: %08x; pid_enable: %s; pid_change: %s\n", pid, pid_enable ? "true" : "false", pid_change ? "true" : "false");
+			get_pts(targ, &pts_low, &pts_high);
+			printf("pid: %08x; pid_enable: %s; pid_change: %s; pts:%08x%08x\n", pid, pid_enable ? "true" : "false", pid_change ? "true" : "false", pts_high, pts_low);
 		}
 
 		get_matched_count(targ, &matched_count);

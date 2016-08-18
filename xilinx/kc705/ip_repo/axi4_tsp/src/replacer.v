@@ -274,11 +274,11 @@ module replacer #(
 	wire [8 - 1 : 0] pts_2;
 	wire [8 - 1 : 0] pts_3;
 	wire [8 - 1 : 0] pts_4;
-	assign pts_0 = (ts_out_group_index == 0) ? {4'b0010, pts_data[32 : 30], 1'b1} : mpeg_data_d3;
-	assign pts_1 = (ts_out_group_index == 0) ? pts_data[29 : 22] : mpeg_data_d3;
-	assign pts_2 = (ts_out_group_index == 0) ? {pts_data[21 : 15], 1'b1} : mpeg_data_d3;
-	assign pts_3 = (ts_out_group_index == 0) ? pts_data[14 : 7] : mpeg_data_d3;
-	assign pts_4 = (ts_out_group_index == 0) ? {pts_data[8 : 2], 1'b1} : mpeg_data_d3;
+	assign pts_0 = ((ts_out_group_index == 0) && (REPLACE_DATA_GROUPS == 2)) ? {4'b0010, pts_data[32 : 30], 1'b1} : mpeg_data_d3;
+	assign pts_1 = ((ts_out_group_index == 0) && (REPLACE_DATA_GROUPS == 2)) ? pts_data[29 : 22] : mpeg_data_d3;
+	assign pts_2 = ((ts_out_group_index == 0) && (REPLACE_DATA_GROUPS == 2)) ? {pts_data[21 : 15], 1'b1} : mpeg_data_d3;
+	assign pts_3 = ((ts_out_group_index == 0) && (REPLACE_DATA_GROUPS == 2)) ? pts_data[14 : 7] : mpeg_data_d3;
+	assign pts_4 = ((ts_out_group_index == 0) && (REPLACE_DATA_GROUPS == 2)) ? {pts_data[8 : 2], 1'b1} : mpeg_data_d3;
 	
 	reg [PTS_DATA_WIDTH - 1 : 0] pts_data = 0;
 
