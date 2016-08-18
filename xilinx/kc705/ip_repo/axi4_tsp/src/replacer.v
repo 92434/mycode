@@ -3,7 +3,9 @@
 module replacer #(
 		parameter integer C_S_AXI_DATA_WIDTH = 32,
 		parameter integer REPLACE_MATCH_PID_COUNT = 1,
-		parameter integer REPLACE_DATA_GROUPS = 1
+		parameter integer REPLACE_DATA_GROUPS = 1,
+		parameter integer PTS_DATA_WIDTH = 64
+
 	)
 	(
 		output reg [C_S_AXI_DATA_WIDTH - 1 : 0] matched_count = 0,
@@ -20,6 +22,11 @@ module replacer #(
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] pid,
 
 		output wire [C_S_AXI_DATA_WIDTH - 1 : 0] out_pid,
+
+		input wire update_pts_request,
+		input wire [PTS_DATA_WIDTH - 1 : 0] pts,
+
+		output wire [PTS_DATA_WIDTH - 1 : 0] out_pts,
 
 		input wire update_data_request,
 		input wire [C_S_AXI_DATA_WIDTH - 1 : 0] in_data,
@@ -64,13 +71,19 @@ module replacer #(
 
 	assign out_pid = {{(PID_PAD1_WIDTH){1'b0}}, pid_change_enable[pid_index], pid_match_enable[pid_index], {(PID_PAD0_WIDTH){1'b0}}, ram_for_pid[pid_index]};
 
-	integer index = 0;
+	reg [PTS_DATA_WIDTH - 1 : 0] pts_data_per_pid[0 : REPLACE_MATCH_PID_COUNT - 1];
+
+	assign out_pts = pts_data_per_pid[pid_index];
+
+	integer update_pid_index = 0;
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
-			for(index = 0; index < REPLACE_MATCH_PID_COUNT; index = index + 1) begin
-				ram_for_pid[index] <= 0;
-				pid_match_enable[index] <= 0;
-				pid_change_enable[index] <= 0;
+			update_pid_index <= 0;
+
+			for(update_pid_index = 0; update_pid_index < REPLACE_MATCH_PID_COUNT; update_pid_index = update_pid_index + 1) begin
+				ram_for_pid[update_pid_index] <= 0;
+				pid_match_enable[update_pid_index] <= 0;
+				pid_change_enable[update_pid_index] <= 0;
 			end
 		end
 		else begin
@@ -81,6 +94,53 @@ module replacer #(
 					pid_change_enable[pid_index] <= cur_pid_change_enable;
 				end
 				else begin
+				end
+			end
+			else begin
+			end
+		end
+	end
+
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] pts_delta = 1389;
+	reg inc_pts = 0;
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
+			pts_delta <= 1389;
+			inc_pts <= 0;
+		end
+		else begin
+			inc_pts <= 0;
+
+			if(pts_delta > 1) begin
+				pts_delta <= pts_delta - 1;
+			end
+			else begin
+				pts_delta <= 1389;
+				inc_pts <= 1;
+			end
+		end
+	end
+
+	integer update_pts_index = 0;
+	always @(posedge clk) begin
+		if(rst_n == 0) begin
+			update_pts_index <= 0;
+
+			for(update_pts_index = 0; update_pts_index < REPLACE_MATCH_PID_COUNT; update_pts_index = update_pts_index + 1) begin
+				pts_data_per_pid[update_pts_index] <= 0;
+			end
+		end
+		else begin
+			if(update_pts_request == 1) begin
+				if((pid_index >= 0) && (pid_index < REPLACE_MATCH_PID_COUNT)) begin
+					pts_data_per_pid[pid_index] <= pts;
+				end
+				else begin
+				end
+			end
+			else if(inc_pts == 1) begin
+				for(update_pts_index = 0; update_pts_index < REPLACE_MATCH_PID_COUNT; update_pts_index = update_pts_index + 1) begin
+					pts_data_per_pid[pid_index] <= pts_data_per_pid[pid_index] + 1;
 				end
 			end
 			else begin
@@ -206,8 +266,21 @@ module replacer #(
 	wire payload_unit_start_indicator;
 	assign payload_unit_start_indicator = (ts_out_group_index == 0) ? 1'b1 : 1'b0;
 
-	wire [1 : 0] transport_scrambling_control;
-	assign transport_scrambling_control = (ts_out_group_index == 0) ? 2'b00 : 2'b01;
+	//wire [1 : 0] transport_scrambling_control;
+	//assign transport_scrambling_control = (ts_out_group_index == 0) ? 2'b00 : 2'b01;
+
+	wire [8 - 1 : 0] pts_0;
+	wire [8 - 1 : 0] pts_1;
+	wire [8 - 1 : 0] pts_2;
+	wire [8 - 1 : 0] pts_3;
+	wire [8 - 1 : 0] pts_4;
+	assign pts_0 = (ts_out_group_index == 0) ? {4'b0010, pts_data[32 : 30], 1'b1} : mpeg_data_d3;
+	assign pts_1 = (ts_out_group_index == 0) ? pts_data[29 : 22] : mpeg_data_d3;
+	assign pts_2 = (ts_out_group_index == 0) ? {pts_data[21 : 15], 1'b1} : mpeg_data_d3;
+	assign pts_3 = (ts_out_group_index == 0) ? pts_data[14 : 7] : mpeg_data_d3;
+	assign pts_4 = (ts_out_group_index == 0) ? {pts_data[8 : 2], 1'b1} : mpeg_data_d3;
+	
+	reg [PTS_DATA_WIDTH - 1 : 0] pts_data = 0;
 
 	wire [1 : 0] adaption_field_control;
 	assign adaption_field_control = 2'b11;
@@ -226,6 +299,8 @@ module replacer #(
 
 			ts_out_group_index <= 0;
 			matched_packet_index <= 0;
+
+			pts_data <= 0;
 
 			ts_out <= 0;
 			ts_out_valid <= 0;
@@ -285,7 +360,23 @@ module replacer #(
 								end
 							end
 							else if(matched_packet_index == 3) begin
-								ts_out <= {transport_scrambling_control, adaption_field_control, mpeg_data_d3[3 : 0]};
+								//ts_out <= {transport_scrambling_control, adaption_field_control, mpeg_data_d3[3 : 0]};
+								ts_out <= {mpeg_data_d3[7 : 6], adaption_field_control, mpeg_data_d3[3 : 0]};
+							end
+							else if(matched_packet_index == 24) begin
+								ts_out <= pts_0;
+							end
+							else if(matched_packet_index == 25) begin
+								ts_out <= pts_1;
+							end
+							else if(matched_packet_index == 26) begin
+								ts_out <= pts_2;
+							end
+							else if(matched_packet_index == 27) begin
+								ts_out <= pts_3;
+							end
+							else if(matched_packet_index == 28) begin
+								ts_out <= pts_4;
 							end
 							else begin
 								ts_out <= cur_ram_data;
@@ -326,6 +417,8 @@ module replacer #(
 									else begin
 										ts_out_group_index_per_pid[pid_slot_index] <= 0;
 									end
+
+									pts_data <= pts_data_per_pid[pid_slot_index];
 								end
 								else begin
 								end

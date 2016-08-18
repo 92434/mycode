@@ -405,33 +405,12 @@ int tsp_monitor_stop(thread_arg_t *targ, int slot_idx){
 	memset(&(tsp_container->monitor[slot_idx]),0,sizeof(tsp_monitor));
 	return ret;
 }
-/*
-int tsp_clear_single_slot(thread_arg_t *targ,unsigned short pid){
-	int i,ret=0;
-	for(i=MONITOR_SIZE;i<MONITOR_SIZE+REPLACER_SIZE;i++){//single
-		if(pid==tsp_container->replacer_single[i].pid&&tsp_container->replacer_single[i].inuse==1){
-			break;
-		}
-	}
-	if(i>=MONITOR_SIZE+REPLACER_SIZE){
-		TRACE("[tsp_clear_single_slot]can not find the slot for pid:(0x%0x)\n",pid);
-		return -2;
-	}
-	else{
-		memset(&(tsp_container->replacer_single[i]),0,sizeof(tsp_replacer_single));
-		ret=select_slot(targ, i);
-		ret|=select_pid_slot(targ, 0);
-		ret|=set_pid(targ, pid, false, 0);
-		ret|=set_slot_enable(targ, false);
-	}
-	return ret;
-}
-*/
 
 int tsp_clear_single_slot_withpid(thread_arg_t *targ,unsigned short pid){
 	int i,ret=0;
 	for(i=MONITOR_SIZE;i<MONITOR_SIZE+REPLACER_SIZE;i++){//single
-		if(pid==tsp_container->replacer_single[i].pid&&tsp_container->replacer_single[i].inuse==1){
+		if(pid==tsp_container->replacer_single[i-MONITOR_SIZE].pid
+			&&tsp_container->replacer_single[i-MONITOR_SIZE].inuse==1){
 			break;
 		}
 	}
@@ -440,7 +419,7 @@ int tsp_clear_single_slot_withpid(thread_arg_t *targ,unsigned short pid){
 		return -2;
 	}
 	else{
-		memset(&(tsp_container->replacer_single[i]),0,sizeof(tsp_replacer_single));
+		memset(&(tsp_container->replacer_single[i-MONITOR_SIZE]),0,sizeof(tsp_replacer_single));
 		ret=select_slot(targ, i);
 		ret|=select_pid_slot(targ, 0);
 		ret|=set_pid(targ, pid, false, 0);
@@ -455,9 +434,10 @@ int tsp_replace_single_tspack(thread_arg_t *targ,unsigned short pid, unsigned ch
 	if(targ==NULL||ts_buf==NULL)
 		return -1;
 	for(i=MONITOR_SIZE;i<MONITOR_SIZE+REPLACER_SIZE;i++){//single
-		if(pid==tsp_container->replacer_single[i].pid&&tsp_container->replacer_single[i].inuse==1){
-			if(memcmp(ts_buf,tsp_container->replacer_single[i].ts_pack,PACK_BYTE_SIZE)){
-				memcpy(tsp_container->replacer_single[i].ts_pack,ts_buf,PACK_BYTE_SIZE);
+		if(pid==tsp_container->replacer_single[i-MONITOR_SIZE].pid
+			&&tsp_container->replacer_single[i-MONITOR_SIZE].inuse==1){
+			if(memcmp(ts_buf,tsp_container->replacer_single[i-MONITOR_SIZE].ts_pack,PACK_BYTE_SIZE)){
+				memcpy(tsp_container->replacer_single[i-MONITOR_SIZE].ts_pack,ts_buf,PACK_BYTE_SIZE);
 				reset=1;
 			}
 			break;
@@ -466,11 +446,11 @@ int tsp_replace_single_tspack(thread_arg_t *targ,unsigned short pid, unsigned ch
 	
 	if(i>=MONITOR_SIZE+REPLACER_SIZE){
 		for(i=MONITOR_SIZE;i<MONITOR_SIZE+REPLACER_SIZE;i++){
-			if(tsp_container->replacer_single[i].inuse==0){
-				tsp_container->replacer_single[i].inuse=1;
-				tsp_container->replacer_single[i].pid=pid;
-				tsp_container->replacer_single[i].slot_idx=i;
-				memcpy(tsp_container->replacer_single[i].ts_pack,ts_buf,PACK_BYTE_SIZE);
+			if(tsp_container->replacer_single[i-MONITOR_SIZE].inuse==0){
+				tsp_container->replacer_single[i-MONITOR_SIZE].inuse=1;
+				tsp_container->replacer_single[i-MONITOR_SIZE].pid=pid;
+				tsp_container->replacer_single[i-MONITOR_SIZE].slot_idx=i;
+				memcpy(tsp_container->replacer_single[i-MONITOR_SIZE].ts_pack,ts_buf,PACK_BYTE_SIZE);
 				reset=1;
 				break;
 			}
@@ -500,7 +480,8 @@ int tsp_clear_dualslot_by_pid(thread_arg_t *targ,unsigned short pid){
 	int i,j,ret=0;
 	for(i=MONITOR_SIZE+REPLACER_SIZE;i<TOTAL_SLOT_SIZE;i++){//dual
 		for(j=0;j<DUAL_SLOT_PID_COUNT;j++)
-			if(pid==tsp_container->replacer_dual[i].pid[j]&&tsp_container->replacer_dual[i].inuse==1){
+			if(pid==tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].pid[j]
+				&&tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].inuse==1){
 				break;
 			}
 	}
@@ -509,7 +490,7 @@ int tsp_clear_dualslot_by_pid(thread_arg_t *targ,unsigned short pid){
 		return -2;
 	}
 	else{
-		tsp_container->replacer_dual[i].pid[j]=0;
+		tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].pid[j]=0;
 		ret=select_slot(targ, i);
 		ret|=select_pid_slot(targ, j);
 		ret|=set_pid(targ, pid, false, 0);
@@ -527,7 +508,7 @@ int tsp_clear_replace_slot(thread_arg_t *targ, int slot_idx){
 	if(slot_idx>=MONITOR_SIZE&&slot_idx<MONITOR_SIZE+REPLACER_SIZE)
 		memset(&(tsp_container->replacer_single[slot_idx-MONITOR_SIZE]),0,sizeof(tsp_replacer_single));
 	else if(slot_idx>=MONITOR_SIZE+REPLACER_SIZE&&slot_idx<TOTAL_SLOT_SIZE)
-		memset(&(tsp_container->replacer_dual[slot_idx-MONITOR_SIZE]),0,sizeof(tsp_replacer_single));
+		memset(&(tsp_container->replacer_dual[slot_idx-MONITOR_SIZE-REPLACER_SIZE]),0,sizeof(tsp_replacer_single));
 	else
 		return -1;
 	return ret;
@@ -539,9 +520,9 @@ int tsp_replace_dual_tspack(thread_arg_t *targ,unsigned short *pid_array, int pi
 	if(targ==NULL||ts_buf==NULL||pid_array==NULL||pid_num>DUAL_SLOT_PID_COUNT)
 		return -1;
 	for(i=MONITOR_SIZE+REPLACER_SIZE;i<TOTAL_SLOT_SIZE;i++){//dual
-		if(memcmp(ts_buf,tsp_container->replacer_dual[i].ts_pack,2*PACK_BYTE_SIZE)==0){
+		if(memcmp(ts_buf,tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].ts_pack,2*PACK_BYTE_SIZE)==0){
 			for(j=0;j<pid_num;j++)
-				tsp_container->replacer_dual[i].pid[j]=pid_array[j];
+				tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].pid[j]=pid_array[j];
 			reset=1;
 			break;
 		}
@@ -549,12 +530,12 @@ int tsp_replace_dual_tspack(thread_arg_t *targ,unsigned short *pid_array, int pi
 	
 	if(i>=TOTAL_SLOT_SIZE){
 		for(i=MONITOR_SIZE+REPLACER_SIZE;i<TOTAL_SLOT_SIZE;i++){
-			if(tsp_container->replacer_dual[i].inuse==0){
-				tsp_container->replacer_dual[i].inuse=1;
-				tsp_container->replacer_dual[i].slot_idx=i;
-				memcpy(tsp_container->replacer_dual[i].ts_pack,ts_buf,2*PACK_BYTE_SIZE);
+			if(tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].inuse==0){
+				tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].inuse=1;
+				tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].slot_idx=i;
+				memcpy(tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].ts_pack,ts_buf,2*PACK_BYTE_SIZE);
 				for(j=0;j<pid_num;j++)
-					tsp_container->replacer_dual[i].pid[j]=pid_array[j];
+					tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].pid[j]=pid_array[j];
 				reset=1;
 				break;
 			}
@@ -588,18 +569,18 @@ int tsp_add_dual_slot_pid(thread_arg_t *targ,unsigned short pid){
 		return -1;
 	for(i=MONITOR_SIZE+REPLACER_SIZE;i<TOTAL_SLOT_SIZE;i++){//dual
 		for(j=0;j<DUAL_SLOT_PID_COUNT;j++){
-			if(tsp_container->replacer_dual[i].pid[j]==pid)//already exist
+			if(tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].pid[j]==pid)//already exist
 				return 1;
 		}
 	}
 	for(i=MONITOR_SIZE+REPLACER_SIZE;i<TOTAL_SLOT_SIZE;i++){//dual
 		for(j=0;j<DUAL_SLOT_PID_COUNT;j++){
-			if(tsp_container->replacer_dual[i].pid[j]==0){
+			if(tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].pid[j]==0){
 				ret=select_slot(targ, i);
 				ret|=select_pid_slot(targ, j);
 				ret|=set_pid(targ, pid, 1, 0);
 				ret|=set_slot_enable(targ, 1);
-				tsp_container->replacer_dual[i].pid[j]=pid;
+				tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].pid[j]=pid;
 				return 0;
 			}
 		}
@@ -792,7 +773,7 @@ int tsp_get_program_info(thread_arg_t *targ, sid_t *sids){
 					if(read_bytes==PACK_BYTE_SIZE&&ts_get_unitstart(ts_buf)==1){
 						handle_psi_packet(ts_buf);
 						parse_pmt(ts_section(ts_buf),&pmt_result[i]);
-						if(pmt_result[i].video_pid!=0){
+						if(0){//pmt_result[i].video_pid!=0){
 							int pmt_valid=0;
 							uint8_t *p_pmt_sec=NULL;
 							tsp_modify_pmt_toac3(ts_buf,&pmt_result[i],new_pmt);
@@ -813,20 +794,6 @@ int tsp_get_program_info(thread_arg_t *targ, sid_t *sids){
 	return ret;
 }
 
-unsigned char pid_3002[188]={
-0x47,0x74,0x99,0x1f,0x00,0x02,0xb0,0x1d,0x0b,0xba,0xc5,0x00,0x00,0xf4,0x11,0xf0,
-0x00,0x02,0xf4,0x11,0xf0,0x03,0x52,0x01,0x01,0x04,0xe4,0x75,0xf0,0x03,0x52,0x01,
-0x02,0xe1,0x5a,0x1b,0x53,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff
-};
 unsigned char pid_ac3[188*2]={
 0x47,0x41,0x05,0x35,0x0a,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,
 0x00,0x01,0xbd,0x00,0xb6,0x80,0x80,0x05,0x21,0x00,0x01,0x00,0x01,0x0b,0x77,0xa1,
@@ -853,12 +820,16 @@ unsigned char pid_ac3[188*2]={
 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x24,0x45,0x1c,
 0xc1,0x6d,0xdb,0x13,0xe6,0xb5,0x93,0x5e,0xd6,0xb0,0xd7,0xa5,};
+
+#define AC3_AUDIO_PID 512
+
 int init_tsp_reg(char *dev) {
 	int ret = 0;
 	int i,j,audio_pid_cnt=0;
 	unsigned short pid_array[DUAL_SLOT_PID_COUNT]={0};
 	sid_t *sids=NULL;//[MAX_PROGRAM_NUM];
 	thread_arg_t targ;
+
 	if ((targ.fd = open(dev, O_RDWR))<0) {
 		printf("err: can't open device(%s)!(%s)\n", dev, strerror(errno));
 		ret = -1;
@@ -915,13 +886,47 @@ int init_tsp_reg(char *dev) {
 			}
 		}
 	}
-	
+	/*
 	ret=tsp_replace_dual_tspack(&targ,pid_array, audio_pid_cnt, pid_ac3);
 	if(ret<0){
 		TRACE("tsp_replace_dual_tspack fail,ret:%d\n",ret);
 	}
+	*/
+	//int read_bytes=0;
+	uint64_t i_pcr;
+	unsigned char ts_buf[PACK_BYTE_SIZE]={0};
 	while(1){
-		break;
+		memset(pid_array,0,sizeof(pid_array));
+		tsp_monitor_read(&targ, AC3_AUDIO_PID, 0, ts_buf);
+		if(ts_has_adaptation(ts_buf)){
+			 if ( ts_get_adaptation(ts_buf) &&
+                tsaf_has_pcr(ts_buf)){
+                i_pcr = tsaf_get_pcr(ts_buf);
+				tsaf_set_pcr(pid_ac3,i_pcr);
+				pid_array[0]=AC3_AUDIO_PID;
+				ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
+				if(ret<0){
+					TRACE("tsp_replace_dual_tspack fail,ret:%d\n",ret);
+				}
+				cs_sleepms(10);
+				tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
+			 }
+		}
+		cs_sleepms(20);
+		#if 0
+		pid_ac3[188-2]++;
+		TRACE("replace byte:%02x\n",pid_ac3[188-2]);
+		
+		ret=tsp_replace_dual_tspack(&targ,pid_array, audio_pid_cnt, pid_ac3);
+		if(ret<0){
+			TRACE("tsp_replace_dual_tspack fail,ret:%d\n",ret);
+		}
+		
+		
+		cs_sleepms(20);
+		tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
+		cs_sleepms(500);
+		#endif
 	}
 //tsp_exit:
 	destroy_dvb_process();
