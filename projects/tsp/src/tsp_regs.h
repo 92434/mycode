@@ -10,10 +10,13 @@ typedef enum {
 	ADDR_PID,
 	ADDR_MATCH_ENABLE,
 	ADDR_READ_REQUEST,
+	ADDR_PTS_LOW,
+	ADDR_PTS_HIGH,
 	ADDR_MATCHED_COUNT,
 	ADDR_TS_DATA_BASE = 128,
 	ADDR_TS_DATA_END = ADDR_TS_DATA_BASE + PACK_WORD_SIZE * 2,
 } addr_t;
+
 
 #define ADDR_OFFSET(addr) (addr * 4)
 //#define PID_INFO(ENABLE, PID) (((ENABLE == 0 ? 0 : 1) << 16)/*match enable*/ + PID)

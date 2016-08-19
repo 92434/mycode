@@ -111,7 +111,7 @@ module replacer #(
 		else begin
 			inc_pts <= 0;
 
-			if(pts_delta > 1) begin
+			if(pts_delta > 0) begin
 				pts_delta <= pts_delta - 1;
 			end
 			else begin
@@ -125,10 +125,6 @@ module replacer #(
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
 			update_pts_index <= 0;
-
-			for(update_pts_index = 0; update_pts_index < REPLACE_MATCH_PID_COUNT; update_pts_index = update_pts_index + 1) begin
-				pts_data_per_pid[update_pts_index] <= 0;
-			end
 		end
 		else begin
 			if(update_pts_request == 1) begin
@@ -140,7 +136,7 @@ module replacer #(
 			end
 			else if(inc_pts == 1) begin
 				for(update_pts_index = 0; update_pts_index < REPLACE_MATCH_PID_COUNT; update_pts_index = update_pts_index + 1) begin
-					pts_data_per_pid[pid_index] <= pts_data_per_pid[pid_index] + 1;
+					pts_data_per_pid[update_pts_index] <= pts_data_per_pid[update_pts_index] + 1;
 				end
 			end
 			else begin
@@ -274,11 +270,11 @@ module replacer #(
 	wire [8 - 1 : 0] pts_2;
 	wire [8 - 1 : 0] pts_3;
 	wire [8 - 1 : 0] pts_4;
-	assign pts_0 = ((ts_out_group_index == 0) && (REPLACE_DATA_GROUPS == 2)) ? {4'b0010, pts_data[32 : 30], 1'b1} : mpeg_data_d3;
-	assign pts_1 = ((ts_out_group_index == 0) && (REPLACE_DATA_GROUPS == 2)) ? pts_data[29 : 22] : mpeg_data_d3;
-	assign pts_2 = ((ts_out_group_index == 0) && (REPLACE_DATA_GROUPS == 2)) ? {pts_data[21 : 15], 1'b1} : mpeg_data_d3;
-	assign pts_3 = ((ts_out_group_index == 0) && (REPLACE_DATA_GROUPS == 2)) ? pts_data[14 : 7] : mpeg_data_d3;
-	assign pts_4 = ((ts_out_group_index == 0) && (REPLACE_DATA_GROUPS == 2)) ? {pts_data[8 : 2], 1'b1} : mpeg_data_d3;
+	assign pts_0 = (ts_out_group_index > 0) ? cur_ram_data : {4'b0010, pts_data[32 : 30], 1'b1};
+	assign pts_1 = (ts_out_group_index > 0) ? cur_ram_data : pts_data[29 : 22];
+	assign pts_2 = (ts_out_group_index > 0) ? cur_ram_data : {pts_data[21 : 15], 1'b1};
+	assign pts_3 = (ts_out_group_index > 0) ? cur_ram_data : pts_data[14 : 7];
+	assign pts_4 = (ts_out_group_index > 0) ? cur_ram_data : {pts_data[8 : 2], 1'b1};
 	
 	reg [PTS_DATA_WIDTH - 1 : 0] pts_data = 0;
 

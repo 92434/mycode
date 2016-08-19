@@ -43,6 +43,48 @@ int write_regs(thread_arg_t *targ, int addr, int count) {
 	return nwrite;
 }
 
+int write_pts(thread_arg_t *targ, uint64_t pts){
+	int ret = 0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	*pbuffer = (uint32_t)pts;
+	TRACE("write low:%x\n",*pbuffer);
+	ret = write_regs(targ, ADDR_PTS_LOW, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+	*pbuffer = (uint32_t)(pts>>32);
+	TRACE("write high:%x\n",*pbuffer);
+	ret = write_regs(targ, ADDR_PTS_HIGH, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+	return ret;
+}
+
+uint64_t read_pts(thread_arg_t *targ){
+	uint64_t pts = 0;
+	int ret=0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+
+	ret = read_regs(targ, ADDR_PTS_LOW , sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+	pts|=(*pbuffer);
+	TRACE("read low:%x\n",*pbuffer);
+	ret = read_regs(targ, ADDR_PTS_HIGH, sizeof(uint32_t));
+	if (ret < 0) {
+		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		return ret;
+	}
+	pts|=((uint64_t)(*pbuffer))<<32;
+	TRACE("read high:%x\n",*pbuffer);
+	return pts;
+}
 
 
 int select_slot(thread_arg_t *targ, uint32_t slot) {
@@ -823,6 +865,20 @@ unsigned char pid_ac3[188*2]={
 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x24,0x45,0x1c,
 0xc1,0x6d,0xdb,0x13,0xe6,0xb5,0x93,0x5e,0xd6,0xb0,0xd7,0xa5,};
 
+void test1(thread_arg_t *targ, uint8_t *p_ts){
+	uint64_t pts=0x1f2b5b3ad;//read_pts(targ);
+	int header_size = TS_HEADER_SIZE + (ts_has_adaptation(p_ts) ? 1+ ts_get_adaptation(p_ts) : 0) ;
+	if(ts_get_unitstart(p_ts) &&pes_validate(p_ts+header_size)){//has pes header
+		if(pes_validate_header(p_ts + header_size)/* &&pes_has_pts(p_ts + header_size)
+            		&&pes_validate_pts(p_ts + header_size)*/){
+            //pts=pes_get_pts(p_ts + header_size);
+            pes_set_pts(p_ts + header_size, pts);
+			TRACE("pts:%lx\n",pts);
+			dump_packet("new",p_ts,188);
+		}
+	}
+}
+
 #define TEST_PID 650
 
 int init_tsp_reg(char *dev) {
@@ -831,7 +887,7 @@ int init_tsp_reg(char *dev) {
 	unsigned short pid_array[DUAL_SLOT_PID_COUNT]={0};
 	sid_t *sids=NULL;//[MAX_PROGRAM_NUM];
 	thread_arg_t targ;
-
+	
 	if ((targ.fd = open(dev, O_RDWR))<0) {
 		printf("err: can't open device(%s)!(%s)\n", dev, strerror(errno));
 		ret = -1;
@@ -868,7 +924,6 @@ int init_tsp_reg(char *dev) {
 		TRACE("tsp_get_program_info fail,ret:%d\n",ret);
 	}
 	else{
-
 		for(i=0;i<MAX_PROGRAM_NUM;i++){
 			if(pmt_result[i].sid!=0){
 				TRACE("idx:%d,sid:%d,video_pid:%d,audio:",i,pmt_result[i].sid,pmt_result[i].video_pid);
@@ -903,30 +958,36 @@ int init_tsp_reg(char *dev) {
 		tsp_monitor_read(&targ, TEST_PID, 0, ts_buf);
 		p_ts=ts_buf;
 		header_size = TS_HEADER_SIZE + (ts_has_adaptation(p_ts) ? 1+ ts_get_adaptation(p_ts) : 0) ;
-		if(ts_get_unitstart(p_ts) &&pes_validate(p_ts+TS_HEADER_SIZE)){//has pes header
+		if(ts_get_unitstart(p_ts) &&pes_validate(p_ts+header_size)){//has pes header
 			if(pes_validate_header(p_ts + header_size) &&pes_has_pts(p_ts + header_size)
                 		&&pes_validate_pts(p_ts + header_size)){
                 //pes_payload_len=pes_get_length(p_ts + header_size)-pes_get_headerlength(p_ts + header_size);
 				pts=pes_get_pts(p_ts + header_size);
 				header_size = TS_HEADER_SIZE + (ts_has_adaptation(pid_ac3) ? 1+ ts_get_adaptation(pid_ac3) : 0) ;
-				pes_set_pts(pid_ac3+header_size,pts);
-				//printf("========pid:%0d=======pts:%0lx=============\n",t_pid,pts);
+				
+				printf("========pid:%0d=======pts:%0lx=============\n",TEST_PID,pts);
 				pid_array[0]=TEST_PID;
 				if(1){
 					static int tm=0;
 					int cur_tm=(int)time((time_t *) 0);
-					if(cur_tm-tm>=2){
+					if(cur_tm-tm>=5){
+						
+						//pes_set_pts(pid_ac3+header_size,pts);
 						pid_ac3[188-2]++;
 						tm=cur_tm;
 						TRACE("replace byte:%02x\n",pid_ac3[188-2]);
+						tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
+						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
+						write_pts(&targ,pts);
+						test1(&targ, pid_ac3);
 					}
 				}
-				ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
+				
 				if(ret<0){
 					TRACE("tsp_replace_dual_tspack fail,ret:%d\n",ret);
 				}
-				cs_sleepms(10);
-				tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
+				//cs_sleepms(10);
+				
 			}
 		}
 		/*

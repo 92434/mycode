@@ -38,6 +38,7 @@
 
 #include <bitstream/mpeg/ts.h>
 #include <bitstream/mpeg/psi.h>
+#include <bitstream/mpeg/pes.h>
 #include <bitstream/dvb/si.h>
 #include <bitstream/dvb/si_print.h>
 #include <bitstream/mpeg/psi_print.h>
