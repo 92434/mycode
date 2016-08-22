@@ -6,10 +6,10 @@ module tsp_ram #(
 
 		parameter integer MONITOR_FILTER_NUM = 1,
 		parameter integer REPLACER_FILTER_NUM = 9,
-		parameter integer REPLACE_MATCH_PID_COUNT = 1,
-		parameter integer REPLACE_DATA_GROUPS = 1,
 		parameter integer COMMON_REPLACER_FILTER_NUM = 1,
+		parameter integer REPLACE_MATCH_PID_COUNT = 1,
 		parameter integer COMMON_REPLACE_MATCH_PID_COUNT = 16,
+		parameter integer REPLACE_DATA_GROUPS = 1,
 		parameter integer COMMON_REPLACE_DATA_GROUPS = 2
 	)
 	(

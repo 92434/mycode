@@ -173,7 +173,7 @@ module tb #(
 					end
 					3: begin
 						waddr <= ADDR_PID;
-						wdata <= {{14{1'b0}}, 1'b0, 1'b1, {3{1'b0}}, 13'h0191};
+						wdata <= {{13{1'b0}}, 1'b0, 1'b0, 1'b1, {3{1'b0}}, 13'h0191};
 
 						write_data_index <= 0;
 						state_test <= 4;
@@ -208,7 +208,7 @@ module tb #(
 					end
 					8: begin
 						waddr <= ADDR_PID;
-						wdata <= {{14{1'b0}}, 1'b0, 1'b1, {3{1'b0}}, 13'h157f};
+						wdata <= {{13{1'b0}}, 1'b1, 1'b0, 1'b1, {3{1'b0}}, 13'h157f};
 
 						write_data_index <= 0;
 						state_test <= 9;
@@ -323,7 +323,7 @@ module tb #(
 					end
 					23: begin
 						waddr <= ADDR_PID;
-						wdata <= {{14{1'b0}}, 1'b0, 1'b1, {3{1'b0}}, 13'h157f};
+						wdata <= {{13{1'b0}}, 1'b0, 1'b0, 1'b1, {3{1'b0}}, 13'h157f};
 
 						state_test <= 24;
 					end

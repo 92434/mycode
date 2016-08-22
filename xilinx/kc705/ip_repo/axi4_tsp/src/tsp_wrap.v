@@ -5,11 +5,7 @@ module tsp_wrap #
 		// Users to add parameters here
 		parameter integer MONITOR_FILTER_NUM = 1,
 		parameter integer REPLACER_FILTER_NUM = 9,
-		parameter integer REPLACE_MATCH_PID_COUNT = 1,
-		parameter integer REPLACE_DATA_GROUPS = 1,
 		parameter integer COMMON_REPLACER_FILTER_NUM = 1,
-		parameter integer COMMON_REPLACE_MATCH_PID_COUNT = 16,
-		parameter integer COMMON_REPLACE_DATA_GROUPS = 2,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -99,6 +95,11 @@ module tsp_wrap #
 	localparam integer ADDR_LSB = clogb2((C_S00_AXI_DATA_WIDTH / 8) - 1);
 
 	localparam integer OPT_MEM_ADDR_BITS = C_S00_AXI_ADDR_WIDTH - ADDR_LSB;
+
+	localparam integer REPLACE_MATCH_PID_COUNT = 1;
+	localparam integer COMMON_REPLACE_MATCH_PID_COUNT = 16;
+	localparam integer REPLACE_DATA_GROUPS = 1;
+	localparam integer COMMON_REPLACE_DATA_GROUPS = 2;
 
 	wire clk;
 	wire rst_n;
@@ -195,10 +196,10 @@ module tsp_wrap #
 
 			.MONITOR_FILTER_NUM(MONITOR_FILTER_NUM),
 			.REPLACER_FILTER_NUM(REPLACER_FILTER_NUM),
-			.REPLACE_MATCH_PID_COUNT(REPLACE_MATCH_PID_COUNT),
-			.REPLACE_DATA_GROUPS(REPLACE_DATA_GROUPS),
 			.COMMON_REPLACER_FILTER_NUM(COMMON_REPLACER_FILTER_NUM),
+			.REPLACE_MATCH_PID_COUNT(REPLACE_MATCH_PID_COUNT),
 			.COMMON_REPLACE_MATCH_PID_COUNT(COMMON_REPLACE_MATCH_PID_COUNT),
+			.REPLACE_DATA_GROUPS(REPLACE_DATA_GROUPS),
 			.COMMON_REPLACE_DATA_GROUPS(COMMON_REPLACE_DATA_GROUPS)
 		) tsp_ram_inst(
 			.clk(clk),
