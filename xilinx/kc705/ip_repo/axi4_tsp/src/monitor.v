@@ -159,7 +159,7 @@ module monitor #(
 	reg matched_pid = 0;
 
 	wire match_states;
-	assign match_states = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid) && (pid_match_enable == 1)) ? 1 : 0;
+	assign match_states = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid) && (pid_match_enable == 1) && (match_enable == 1)) ? 1 : 0;
 
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
@@ -183,7 +183,7 @@ module monitor #(
 				end
 
 				if((mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
-					if((match_states != 0) && (match_enable == 1)) begin
+					if(match_states != 0) begin
 						matched_pid <= 1;
 
 						matched_index <= 0;

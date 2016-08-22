@@ -240,15 +240,21 @@ module replacer #(
 		end
 	end
 
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] pid_slot_index = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ts_out_group_index_per_pid[0 : REPLACE_MATCH_PID_COUNT - 1];
+	wire [0 : REPLACE_MATCH_PID_COUNT - 1] pid_match_enable_wire;
+	wire [0 : REPLACE_MATCH_PID_COUNT - 1] pid_replace_enable;
 	wire [REPLACE_MATCH_PID_COUNT - 1 : 0] match_states;
 	wire [REPLACE_MATCH_PID_COUNT - 1 : 0] change_pid_states;
 	wire [REPLACE_MATCH_PID_COUNT - 1 : 0] pts_pid_states;
 	genvar i;
 	generate for (i = 0; i < REPLACE_MATCH_PID_COUNT; i = i + 1)
 		begin : matcher
-			assign match_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_match_enable[i] == 1)) ? 1 : 0;
-			assign change_pid_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_match_enable[i] == 1) && (pid_change_enable[i] == 1)) ? 1 : 0;
-			assign pts_pid_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_match_enable[i] == 1) && (pid_pts_enable[i] == 1)) ? 1 : 0;
+			assign pid_match_enable_wire[i] = ((pid_match_enable[i] == 1) && (match_enable == 1)) ? 1 : 0;
+			assign pid_replace_enable[i] = ((pid_match_enable_wire[i] == 0) && (ts_out_group_index_per_pid[i] == 0)) ? 0 : 1;
+			assign match_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_replace_enable[i] == 1)) ? 1 : 0;
+			assign change_pid_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_replace_enable[i] == 1) && (pid_change_enable[i] == 1)) ? 1 : 0;
+			assign pts_pid_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_replace_enable[i] == 1) && (pid_pts_enable[i] == 1)) ? 1 : 0;
 		end
 	endgenerate
 
@@ -256,9 +262,6 @@ module replacer #(
 	reg change_pid = 0;
 	reg pts_pid = 0;
 
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] pid_slot_index = 0;
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ts_out_group_index_per_pid[0 : REPLACE_MATCH_PID_COUNT - 1];
-	
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ts_out_group_index = 0;
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] matched_packet_index = 0;
 
@@ -428,7 +431,7 @@ module replacer #(
 				end
 				else begin
 					if((mpeg_sync_d2 == 1) && (mpeg_data_d2 == 8'h47)) begin
-						if((match_states != 0) && (match_enable == 1)) begin
+						if(match_states != 0) begin
 							matched_pid <= 1;
 
 							if(change_pid_states != 0) begin
