@@ -9,6 +9,8 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <pthread.h>
+#include <sys/time.h>
+#include <time.h>
 #include "kc705.h"
 
 
@@ -39,6 +41,16 @@ typedef struct {
 	int fd;
 	unsigned char *buffer;
 } thread_arg_t;
+
+
+unsigned int sz_constant[] = {
+	0x0b77, 0xa1dd, 0x4240, 0x2f84, 0x2b03, 0x8143, 0x4339, 0xfa53, 0x2fe6, 0x0c1f, 0x344d, 0x7205, 0x5609, 0xfc64, 0x8f03, 0x679c,
+	0x3aa1, 0xee1f, 0x6c51, 0xa601, 0x8e45, 0x50a6, 0x0700, 0x8f01, 0x3a3f, 0x0031, 0xa47e, 0xefc3, 0x004f, 0x1e06, 0xe475, 0xaa42,
+	0xe580, 0xcb23, 0xb18d, 0x3325, 0x203c, 0xd37d, 0x7c09, 0x5c4a, 0xe6c2, 0xaa69, 0x807a, 0xba12, 0x186e, 0x13e4, 0x0e85, 0xdfb8,
+	0x2c4d, 0x59da, 0xd6b1, 0x006e, 0x857a, 0x1866, 0x30ec, 0x262e, 0x4e33, 0x4b38, 0xc1ce, 0x513d, 0x203c, 0x0a65, 0x7589, 0x9267,
+	0xae94, 0x34b7, 0x4044, 0x276b, 0xc054, 0xdf24, 0x97c1, 0x48b3, 0x9560, 0x90d6, 0x5c6a, 0x12a5, 0x0053, 0x8bb1, 0x7e00, 0x8924,
+	0x451c, 0xc16d, 0xdb13, 0xe6b5, 0x935e, 0xd6b0, 0xd7a5
+};
 
 void *read_fn(void *arg) {
 	thread_arg_t *targ = (thread_arg_t *)arg;
@@ -80,6 +92,7 @@ void *read_fn(void *arg) {
 			int i;
 			uint32_t *data = (uint32_t *)targ->buffer;
 			static uint16_t last_data = 0;
+			static unsigned char last_byte = 0;
 
 			toread = BUFSIZE;
 
@@ -87,27 +100,76 @@ void *read_fn(void *arg) {
 			if(nread > 0) {
 				if(
 					((data[0] & 0xffff) == 0x0b77)
-					//&& ((data[1] & 0xffff) == 0xa1dd)
-					//&& ((data[2] & 0xffff) == 0x4240)
-					//&& ((data[3] & 0xffff) == 0x2f84)
-					//&& ((data[4] & 0xffff) == 0x2b03)
-					//&& ((data[5] & 0xffff) == 0x8143)
-					//&& ((data[6] & 0xffff) == 0x4339)
-					//&& ((data[7] & 0xffff) == 0xfa53)
+					&& ((data[1] & 0xffff) == 0xa1dd)
+					&& ((data[2] & 0xffff) == 0x4240)
+					&& ((data[3] & 0xffff) == 0x2f84)
+					&& ((data[4] & 0xffff) == 0x2b03)
+					&& ((data[5] & 0xffff) == 0x8143)
+					&& ((data[6] & 0xffff) == 0x4339)
+					&& ((data[7] & 0xffff) == 0xfa53)
 					//&& (last_data != (data[86] & 0xffff))
+					//&& (last_byte != (data[79] & 0xff))
+					//&& (0x01 == ((data[78] >> 8) & 0xff))
+					//&& (0x01 == ((data[79]) & 0xff))
 				) {
+					char *msg_start = "";
+					char *msg_end = "";
+					int nread_reg = 0;
+					for(i = 0; i < nread / sizeof(uint32_t); i++) {
+						if((sz_constant[i] & 0xffff) != (data[i] & 0xffff)) {
+							if(
+								(i == 78)
+							) {
+							} else {
+								nread_reg = nread;
+							}
+						} else {
+						}
+					}
+					nread = nread_reg;
 					for(i = 0; i < nread / sizeof(uint32_t); i++) {
 						if((i != 0) && (i % 16 == 0)) {
 							printf("\n");
 						}
 						//printf("%02d%02d%04x ", ((data[i] >> 24) & 0xff), ((data[i] >> 16) & 0xff), (data[i] & 0xffff));
-						printf("%02x %02x ", ((data[i] >> 8) & 0xff), ((data[i] >> 0) & 0xff));
+						if((sz_constant[i] & 0xffff) != (data[i] & 0xffff)) {
+							if(
+								(i == 78)
+							) {
+								msg_start = "";
+								msg_end = "";
+							} else {
+								msg_start = "\033[31m";
+								msg_end = "\033[0m";
+							}
+						} else {
+							msg_start = "";
+							msg_end = "";
+						}
+						printf("%s%02x %02x %s", msg_start, ((data[i] >> 8) & 0xff), ((data[i] >> 0) & 0xff), msg_end);
 					}
-					printf("\n");
+					{
+        					struct timeval tv0;
+        					struct timezone tz0;
+						static int count = 0;
+
+						gettimeofday(&tv0, &tz0);
+						printf("tv0.tv_sec:%d\n", (int)tv0.tv_sec);
+						printf("tv0.tv_usec:%d\n", (int)tv0.tv_usec);
+						if(nread != 0) {
+							count = 0;
+							printf("[tv0.tv_sec:%d, tv0.tv_usec:%d]%d\n", (int)tv0.tv_sec, (int)tv0.tv_usec, count);
+						} else {
+							count += 1;
+							printf("[tv0.tv_sec:%d, tv0.tv_usec:%d]%d\n", (int)tv0.tv_sec, (int)tv0.tv_usec, count);
+						}
+					}
 
 					//if((data[86] & 0xffff) != last_data + 1) {
 					//	printf("last:%04x, now:%04x\n", last_data, (data[86] & 0xffff));
 					//}
+
+					last_byte = (data[79] & 0xff);
 
 					last_data = (data[86] & 0xffff);
 				} else {
