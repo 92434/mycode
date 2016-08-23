@@ -27,7 +27,8 @@ static void test_performance(kc705_pci_dev_t *kc705_pci_dev) {
 		long unsigned int tx_speed = get_op_tx_count(dma);
 		long unsigned int rx_speed = get_op_rx_count(dma);
 
-		printk("DMA[%02d](MB/s)|U:%4lu.%06lu|D:%4lu.%06lu|A:%4lu.%06lu\n",
+		printk("%-20s[%02d](MB/s)|U:%4lu.%06lu|D:%4lu.%06lu|A:%4lu.%06lu\n",
+			dma->devname,
 			i,
 			tx_speed / SPEED_MB, (1000 * 1000) * (tx_speed % SPEED_MB) / SPEED_MB,
 			rx_speed / SPEED_MB, (1000 * 1000) * (rx_speed % SPEED_MB) / SPEED_MB,
@@ -38,7 +39,8 @@ static void test_performance(kc705_pci_dev_t *kc705_pci_dev) {
 
 	}
 
-	printk("all    (MB/s)|U:%4lu.%06lu|D:%4lu.%06lu|A:%4lu.%06lu\n",
+	printk("%-24s(MB/s)|U:%4lu.%06lu|D:%4lu.%06lu|A:%4lu.%06lu\n",
+		"all",
 		total_tx_speed / SPEED_MB, (1000 * 1000) * (total_tx_speed % SPEED_MB) / SPEED_MB,
 		total_rx_speed / SPEED_MB, (1000 * 1000) * (total_rx_speed % SPEED_MB) / SPEED_MB,
 		(total_tx_speed + total_rx_speed) / SPEED_MB, (1000 * 1000) * ((total_tx_speed + total_rx_speed) % SPEED_MB) / SPEED_MB);
