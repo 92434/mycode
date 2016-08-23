@@ -318,7 +318,7 @@ function print_color() {
 				CTRL="\033[${STYLE};${FG};${BG}m"
 				echo -en "${CTRL}"
 				echo -n "${STYLE};${FG};${BG}"
-				echo -en "\033[0m"
+				echo -en "\033[0m "
 			done
 			echo
 		done
