@@ -56,24 +56,24 @@ module replacer #(
 	localparam integer PID_PAD0_WIDTH = 3;
 	localparam integer PID_MATCH_ENABLE_WIDTH = 1;
 	localparam integer PID_CHANGE_ENABLE_WIDTH = 1;
-	localparam integer PID_PTS_ENABLE_WIDTH = 1;
+	localparam integer PID_COMMON_SLOT_SPECIAL_FEATURE_ENABLE_WIDTH = 1;
 	localparam integer PID_PAD1_WIDTH = 13;
 
 	reg [PID_PID_WIDTH - 1 : 0] ram_for_pid[0 : REPLACE_MATCH_PID_COUNT - 1];
 	reg [PID_MATCH_ENABLE_WIDTH - 1 : 0] pid_match_enable[0 : REPLACE_MATCH_PID_COUNT - 1];
 	reg [PID_CHANGE_ENABLE_WIDTH - 1 : 0] pid_change_enable[0 : REPLACE_MATCH_PID_COUNT - 1];
-	reg [PID_CHANGE_ENABLE_WIDTH - 1 : 0] pid_pts_enable[0 : REPLACE_MATCH_PID_COUNT - 1];
+	reg [PID_CHANGE_ENABLE_WIDTH - 1 : 0] pid_common_slot_special_feature_enable[0 : REPLACE_MATCH_PID_COUNT - 1];
 	wire [PID_PID_WIDTH - 1 : 0] cur_pid_pid;
 	wire [PID_MATCH_ENABLE_WIDTH - 1 : 0] cur_pid_match_enable;
 	wire [PID_CHANGE_ENABLE_WIDTH - 1 : 0] cur_pid_change_enable;
-	wire [PID_CHANGE_ENABLE_WIDTH - 1 : 0] cur_pid_pts_enable;
+	wire [PID_CHANGE_ENABLE_WIDTH - 1 : 0] cur_pid_common_slot_special_feature_enable;
 
 	assign cur_pid_pid = pid[PID_PID_WIDTH - 1 : 0];
 	assign cur_pid_match_enable = pid[PID_PID_WIDTH + PID_PAD0_WIDTH + PID_MATCH_ENABLE_WIDTH - 1 : PID_PID_WIDTH + PID_PAD0_WIDTH];
 	assign cur_pid_change_enable = pid[PID_PID_WIDTH + PID_PAD0_WIDTH + PID_MATCH_ENABLE_WIDTH + PID_CHANGE_ENABLE_WIDTH - 1 : PID_PID_WIDTH + PID_PAD0_WIDTH + PID_MATCH_ENABLE_WIDTH];
-	assign cur_pid_pts_enable = pid[PID_PID_WIDTH + PID_PAD0_WIDTH + PID_MATCH_ENABLE_WIDTH + PID_CHANGE_ENABLE_WIDTH + PID_PTS_ENABLE_WIDTH - 1 : PID_PID_WIDTH + PID_PAD0_WIDTH + PID_MATCH_ENABLE_WIDTH + PID_CHANGE_ENABLE_WIDTH];
+	assign cur_pid_common_slot_special_feature_enable = pid[PID_PID_WIDTH + PID_PAD0_WIDTH + PID_MATCH_ENABLE_WIDTH + PID_CHANGE_ENABLE_WIDTH + PID_COMMON_SLOT_SPECIAL_FEATURE_ENABLE_WIDTH - 1 : PID_PID_WIDTH + PID_PAD0_WIDTH + PID_MATCH_ENABLE_WIDTH + PID_CHANGE_ENABLE_WIDTH];
 
-	assign out_pid = {{(PID_PAD1_WIDTH){1'b0}}, pid_pts_enable[pid_index], pid_change_enable[pid_index], pid_match_enable[pid_index], {(PID_PAD0_WIDTH){1'b0}}, ram_for_pid[pid_index]};
+	assign out_pid = {{(PID_PAD1_WIDTH){1'b0}}, pid_common_slot_special_feature_enable[pid_index], pid_change_enable[pid_index], pid_match_enable[pid_index], {(PID_PAD0_WIDTH){1'b0}}, ram_for_pid[pid_index]};
 
 	reg [PTS_DATA_WIDTH - 1 : 0] pts_data_per_pid[0 : REPLACE_MATCH_PID_COUNT - 1];
 
@@ -88,7 +88,7 @@ module replacer #(
 				ram_for_pid[update_pid_index] <= 0;
 				pid_match_enable[update_pid_index] <= 0;
 				pid_change_enable[update_pid_index] <= 0;
-				pid_pts_enable[update_pid_index] <= 0;
+				pid_common_slot_special_feature_enable[update_pid_index] <= 0;
 			end
 		end
 		else begin
@@ -97,7 +97,7 @@ module replacer #(
 					ram_for_pid[pid_index] <= cur_pid_pid;
 					pid_match_enable[pid_index] <= cur_pid_match_enable;
 					pid_change_enable[pid_index] <= cur_pid_change_enable;
-					pid_pts_enable[pid_index] <= cur_pid_pts_enable;
+					pid_common_slot_special_feature_enable[pid_index] <= cur_pid_common_slot_special_feature_enable;
 				end
 				else begin
 				end
@@ -246,7 +246,7 @@ module replacer #(
 	wire [0 : REPLACE_MATCH_PID_COUNT - 1] pid_replace_enable;
 	wire [REPLACE_MATCH_PID_COUNT - 1 : 0] match_states;
 	wire [REPLACE_MATCH_PID_COUNT - 1 : 0] change_pid_states;
-	wire [REPLACE_MATCH_PID_COUNT - 1 : 0] pts_pid_states;
+	wire [REPLACE_MATCH_PID_COUNT - 1 : 0] pid_common_slot_special_feature_enable_states;
 	genvar i;
 	generate for (i = 0; i < REPLACE_MATCH_PID_COUNT; i = i + 1)
 		begin : matcher
@@ -254,13 +254,13 @@ module replacer #(
 			assign pid_replace_enable[i] = ((pid_match_enable_wire[i] == 0) && (ts_out_group_index_per_pid[i] == 0)) ? 0 : 1;
 			assign match_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_replace_enable[i] == 1)) ? 1 : 0;
 			assign change_pid_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_replace_enable[i] == 1) && (pid_change_enable[i] == 1)) ? 1 : 0;
-			assign pts_pid_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_replace_enable[i] == 1) && (pid_pts_enable[i] == 1)) ? 1 : 0;
+			assign pid_common_slot_special_feature_enable_states[i] = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid[i]) && (pid_replace_enable[i] == 1) && (pid_common_slot_special_feature_enable[i] == 1)) ? 1 : 0;
 		end
 	endgenerate
 
 	reg matched_pid = 0;
 	reg change_pid = 0;
-	reg pts_pid = 0;
+	reg common_slot_special_feature_enable = 0;
 
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] ts_out_group_index = 0;
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] matched_packet_index = 0;
@@ -299,7 +299,7 @@ module replacer #(
 
 			matched_pid <= 0;
 			change_pid <= 0;
-			pts_pid <= 0;
+			common_slot_special_feature_enable <= 0;
 
 			pid_slot_index <= 0;
 			for(pid_slot_index = 0; pid_slot_index < REPLACE_MATCH_PID_COUNT; pid_slot_index = pid_slot_index + 1) begin
@@ -370,10 +370,15 @@ module replacer #(
 							end
 							else if(matched_packet_index == 3) begin
 								//ts_out <= {transport_scrambling_control, adaption_field_control, mpeg_data_d3[3 : 0]};
-								ts_out <= {mpeg_data_d3[7 : 6], adaption_field_control, mpeg_data_d3[3 : 0]};
+								if(common_slot_special_feature_enable == 1) begin
+									ts_out <= {mpeg_data_d3[7 : 6], adaption_field_control, mpeg_data_d3[3 : 0]};
+								end
+								else begin
+									ts_out <= mpeg_data_d3;
+								end
 							end
 							else if(matched_packet_index == 24) begin
-								if(pts_pid == 1) begin
+								if(common_slot_special_feature_enable == 1) begin
 									ts_out <= pts_0;
 								end
 								else begin
@@ -381,7 +386,7 @@ module replacer #(
 								end
 							end
 							else if(matched_packet_index == 25) begin
-								if(pts_pid == 1) begin
+								if(common_slot_special_feature_enable == 1) begin
 									ts_out <= pts_1;
 								end
 								else begin
@@ -389,7 +394,7 @@ module replacer #(
 								end
 							end
 							else if(matched_packet_index == 26) begin
-								if(pts_pid == 1) begin
+								if(common_slot_special_feature_enable == 1) begin
 									ts_out <= pts_2;
 								end
 								else begin
@@ -397,7 +402,7 @@ module replacer #(
 								end
 							end
 							else if(matched_packet_index == 27) begin
-								if(pts_pid == 1) begin
+								if(common_slot_special_feature_enable == 1) begin
 									ts_out <= pts_3;
 								end
 								else begin
@@ -405,7 +410,7 @@ module replacer #(
 								end
 							end
 							else if(matched_packet_index == 28) begin
-								if(pts_pid == 1) begin
+								if(common_slot_special_feature_enable == 1) begin
 									ts_out <= pts_4;
 								end
 								else begin
@@ -441,11 +446,11 @@ module replacer #(
 								change_pid <= 0;
 							end
 
-							if(pts_pid_states != 0) begin
-								pts_pid <= 1;
+							if(pid_common_slot_special_feature_enable_states != 0) begin
+								common_slot_special_feature_enable <= 1;
 							end
 							else begin
-								pts_pid <= 0;
+								common_slot_special_feature_enable <= 0;
 							end
 
 
