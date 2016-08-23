@@ -20,7 +20,8 @@
 //#define true (1 == 1)
 //#define false (1 == 0)
 
-
+#define TEST_PID 0x201//0x28a//1141//
+#define SELECT_PMT_PID 0x100
 static _tsp_container* tsp_container=NULL;
 static _pmt_result pmt_result[MAX_PROGRAM_NUM];
 
@@ -115,11 +116,11 @@ int select_pid_slot(thread_arg_t *targ, uint32_t pid_slot) {
 	return ret;
 }
 
-int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable, bool pid_change) {
+int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable, bool pid_change, bool pid_pts) {
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
-	*pbuffer = PID_INFO(pid_change, pid_enable, pid);
+	*pbuffer = PID_INFO(pid_pts, pid_change, pid_enable, pid);
 	ret = write_regs(targ, ADDR_PID, sizeof(uint32_t));
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -129,7 +130,7 @@ int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable, bool pid_change) 
 	return ret;
 }
 
-int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable, bool *pid_change) {
+int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable, bool *pid_change, bool *pid_pts) {
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
@@ -141,8 +142,10 @@ int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable, bool *pid_chang
 	*pid = *pbuffer & 0xffff;
 	*pid_enable = (((*pbuffer >> 16) & 1) == 0) ? false : true;
 	*pid_change = (((*pbuffer >> 17) & 1) == 0) ? false : true;
+	*pid_pts = (((*pbuffer >> 18) & 1) == 0) ? false : true;
 	return ret;
 }
+
 
 
 int get_matched_count(thread_arg_t *targ, uint32_t *matched_count) {
@@ -184,6 +187,16 @@ int get_slot_enable(thread_arg_t *targ, bool *slot_enable) {
 
 	*slot_enable = (*pbuffer == 1) ? true : false;
 
+	return ret;
+}
+
+int write_scramble_flag(thread_arg_t *targ, int slot, uint8_t *p_ts, int scramble){
+	int ret=0;
+	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
+	ret=select_slot(targ, slot);
+	ts_set_scrambling(p_ts, (uint8_t)scramble);
+	memcpy(pbuffer,p_ts,4);
+	ret = write_regs(targ, ADDR_TS_DATA_BASE + PACK_WORD_SIZE, 4);
 	return ret;
 }
 
@@ -255,166 +268,7 @@ int read_ts_data(thread_arg_t *targ, int rx_size) {
 	*/
 	return ret;
 }
-/*
-int test_set(thread_arg_t *targ) {
-	int ret = 0;
-	int i;
 
-	for(i = 0; i < MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE; i++) {//slot
-		int j;
-
-		int pid_slot = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 16 : 1;
-		int tx_size = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 188 * 2 : ((i >= MONITOR_SIZE) && (i <  MONITOR_SIZE + REPLACER_SIZE)) ? 188 : 0;
-		bool slot_enable;
-
-		switch(i) {
-			case 0:
-				slot_enable = true;
-				break;
-			case 1:
-				slot_enable = true;
-				break;
-			case 2:
-				slot_enable = true;
-				break;
-			case 9:
-				slot_enable = true;
-				break;
-			default:
-				slot_enable = false;
-				break;
-		}
-
-		select_slot(targ, i);
-		for(j = 0; j < pid_slot; j++) {//pid_slot
-			uint32_t pid;
-			bool pid_enable;
-
-			switch(j) {
-				case 0:
-					switch(i) {
-						case 0:
-							pid = 0x0205;
-							pid_enable = true;
-							break;
-						case 1:
-							pid = 0x0533;
-							pid_enable = true;
-							break;
-						case 2:
-							pid = 0x0534;
-							pid_enable = true;
-							break;
-						case 9:
-							pid = 0x0000;
-							pid_enable = true;
-							break;
-						default:
-							pid = 0x0000;
-							pid_enable = false;
-							break;
-					}
-					break;
-				case 9:
-					pid = 0x0001;
-					pid_enable = true;
-					break;
-				default:
-					pid = 0x0000;
-					pid_enable = false;
-					break;
-			}
-			select_pid_slot(targ, j);
-			set_pid(targ, pid, pid_enable);
-		}
-
-		write_ts_data(targ, tx_size, i);
-
-		set_slot_enable(targ, slot_enable);
-	}
-
-	return ret;
-}
-
-int test_get(thread_arg_t *targ) {
-	int ret = 0;
-	int i;
-
-	for(i = 0; i < MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE; i++) {//slot
-		int j;
-
-		int pid_slot = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 16 : 1;
-		int rx_size = (i == MONITOR_SIZE + REPLACER_SIZE + COMMON_REPLACER_SIZE - 1) ? 188 * 2 : ((i >= 0) && (i <  MONITOR_SIZE + REPLACER_SIZE)) ? 188 : 0;
-		bool slot_enable;
-		uint32_t matched_count;
-
-		switch(i) {
-			default:
-				break;
-		}
-
-		select_slot(targ, i);
-		printf("slot %d:\n", i);
-
-		for(j = 0; j < pid_slot; j++) {//pid_slot
-			uint32_t pid;
-			bool pid_enable;
-
-			switch(j) {
-				default:
-					break;
-			}
-			select_pid_slot(targ, j);
-			get_pid(targ, &pid, &pid_enable);
-			printf("pid: %08x; pid_enable: %s\n", pid, pid_enable ? "true" : "false");
-		}
-
-		get_matched_count(targ, &matched_count);
-		get_slot_enable(targ, &slot_enable);
-		printf("slot_enable %s; matched_count: %08x(%d)\n", slot_enable ? "true" : "false", matched_count, matched_count);
-
-		read_ts_data(targ, rx_size);
-	}
-
-	return ret;
-}
-
-void main_proc(thread_arg_t *arg) {
-	thread_arg_t *targ = (thread_arg_t *)arg;
-
-	//printids("main_proc: ");
-
-	while(tsp_stop == 0) {
-		test_set(targ);
-		test_get(targ);
-		return;
-	}
-}
-
-int read_write(thread_arg_t *targ) {
-	int err;
-	pthread_t rtid;
-	pthread_t wtid;
-
-	err = pthread_create(&rtid, NULL, read_fn, targ);
-	if (err != 0) {
-		printf("can't create thread: %s\n", strerror(err));
-	}
-
-	err = pthread_create(&wtid, NULL, write_fn, targ);
-	if (err != 0) {
-		printf("can't create thread: %s\n", strerror(err));
-	}
-
-	main_proc(targ);
-
-	//printids("main thread:");
-	pthread_join(rtid,NULL);
-	pthread_join(wtid,NULL);
-
-	return EXIT_SUCCESS;
-}
-*/
 int tsp_monitor_read(thread_arg_t *targ,unsigned short pid, int slot_idx, unsigned char *ts_buf){
 	int ret=0;
 	//int i;
@@ -424,7 +278,7 @@ int tsp_monitor_read(thread_arg_t *targ,unsigned short pid, int slot_idx, unsign
 	//TRACE("tsp_monitor_read,pid:%d,slot_idx:%d\n",pid,slot_idx);
 	select_slot(targ, slot_idx);
 	select_pid_slot(targ, 0);
-	set_pid(targ, pid, true, 0);
+	set_pid(targ, pid, true, 0, 0);
 	set_slot_enable(targ, true);
 	ret=read_ts_data(targ, PACK_BYTE_SIZE);
 	if(ret==PACK_BYTE_SIZE){
@@ -466,7 +320,7 @@ int tsp_clear_single_slot_withpid(thread_arg_t *targ,unsigned short pid){
 		memset(&(tsp_container->replacer_single[i-MONITOR_SIZE]),0,sizeof(tsp_replacer_single));
 		ret=select_slot(targ, i);
 		ret|=select_pid_slot(targ, 0);
-		ret|=set_pid(targ, pid, false, 0);
+		ret|=set_pid(targ, pid, false, 0, 0);
 		ret|=set_slot_enable(targ, false);
 	}
 	return ret;
@@ -511,7 +365,7 @@ int tsp_replace_single_tspack(thread_arg_t *targ,unsigned short pid, unsigned ch
 	if(reset){
 		ret=select_slot(targ, i);
 		ret|=select_pid_slot(targ, 0);
-		ret|=set_pid(targ, pid, 1, 1);
+		ret|=set_pid(targ, pid, 1, 1, 0);
 		memcpy(targ->buffer,ts_buf,PACK_BYTE_SIZE);
 		ret|=write_ts_data(targ, PACK_BYTE_SIZE, i);
 		ret|=set_slot_enable(targ, 1);
@@ -537,7 +391,7 @@ int tsp_clear_dualslot_by_pid(thread_arg_t *targ,unsigned short pid){
 		tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].pid[j]=0;
 		ret=select_slot(targ, i);
 		ret|=select_pid_slot(targ, j);
-		ret|=set_pid(targ, pid, false, 0);
+		ret|=set_pid(targ, pid, false, 0, 0);
 	}
 	return ret;
 }
@@ -597,7 +451,7 @@ int tsp_replace_dual_tspack(thread_arg_t *targ,unsigned short *pid_array, int pi
 		ret=select_slot(targ, i);
 		for(j=0;j<pid_num;j++){
 			ret|=select_pid_slot(targ, j);
-			ret|=set_pid(targ, pid_array[j], 1, 0);
+			ret|=set_pid(targ, pid_array[j], 1, 0, 1);
 		}
 		memcpy(targ->buffer,ts_buf,2*PACK_BYTE_SIZE);
 		ret|=write_ts_data(targ, 2*PACK_BYTE_SIZE, i);
@@ -622,7 +476,7 @@ int tsp_add_dual_slot_pid(thread_arg_t *targ,unsigned short pid){
 			if(tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].pid[j]==0){
 				ret=select_slot(targ, i);
 				ret|=select_pid_slot(targ, j);
-				ret|=set_pid(targ, pid, 1, 0);
+				ret|=set_pid(targ, pid, 1, 0, 1);
 				ret|=set_slot_enable(targ, 1);
 				tsp_container->replacer_dual[i-(MONITOR_SIZE+REPLACER_SIZE)].pid[j]=pid;
 				return 0;
@@ -817,16 +671,17 @@ int tsp_get_program_info(thread_arg_t *targ, sid_t *sids){
 					if(read_bytes==PACK_BYTE_SIZE&&ts_get_unitstart(ts_buf)==1){
 						handle_psi_packet(ts_buf);
 						parse_pmt(ts_section(ts_buf),&pmt_result[i]);
-						if(0){//pmt_result[i].video_pid!=0){
+						if(pmt_result[i].video_pid!=0){
 							int pmt_valid=0;
 							uint8_t *p_pmt_sec=NULL;
 							tsp_modify_pmt_toac3(ts_buf,&pmt_result[i],new_pmt);
 							dump_packet("new pmt",new_pmt,PACK_BYTE_SIZE);
 							p_pmt_sec=ts_section(new_pmt);
-							psi_set_crc(p_pmt_sec);
+							//psi_set_crc(p_pmt_sec);
 							pmt_valid=pmt_validate(p_pmt_sec);
 							TRACE("pmt_valid:%d\n",pmt_valid);
-							tsp_replace_single_tspack(targ,sids[i].i_pmt_pid,new_pmt);
+							if(SELECT_PMT_PID==sids[i].i_pmt_pid)
+								tsp_replace_single_tspack(targ,sids[i].i_pmt_pid,new_pmt);
 						}
 						break;
 					}
@@ -866,20 +721,19 @@ unsigned char pid_ac3[188*2]={
 0xc1,0x6d,0xdb,0x13,0xe6,0xb5,0x93,0x5e,0xd6,0xb0,0xd7,0xa5,};
 
 void test1(thread_arg_t *targ, uint8_t *p_ts){
-	uint64_t pts=0x1f2b5b3ad;//read_pts(targ);
+	uint64_t pts=read_pts(targ);
 	int header_size = TS_HEADER_SIZE + (ts_has_adaptation(p_ts) ? 1+ ts_get_adaptation(p_ts) : 0) ;
 	if(ts_get_unitstart(p_ts) &&pes_validate(p_ts+header_size)){//has pes header
 		if(pes_validate_header(p_ts + header_size)/* &&pes_has_pts(p_ts + header_size)
             		&&pes_validate_pts(p_ts + header_size)*/){
             //pts=pes_get_pts(p_ts + header_size);
             pes_set_pts(p_ts + header_size, pts);
-			TRACE("pts:%lx\n",pts);
-			dump_packet("new",p_ts,188);
+			TRACE("read pts from replacer:%lx\n",pts);
+			//dump_packet("new",p_ts,188);
 		}
 	}
 }
 
-#define TEST_PID 650
 
 int init_tsp_reg(char *dev) {
 	int ret = 0;
@@ -953,7 +807,8 @@ int init_tsp_reg(char *dev) {
 	uint64_t pts=0;
 	uint8_t *p_ts;
 	unsigned char ts_buf[PACK_BYTE_SIZE]={0};
-	while(1){
+	//int i_scrambling=0;
+	while(0){
 		memset(pid_array,0,sizeof(pid_array));
 		tsp_monitor_read(&targ, TEST_PID, 0, ts_buf);
 		p_ts=ts_buf;
@@ -965,22 +820,64 @@ int init_tsp_reg(char *dev) {
 				pts=pes_get_pts(p_ts + header_size);
 				header_size = TS_HEADER_SIZE + (ts_has_adaptation(pid_ac3) ? 1+ ts_get_adaptation(pid_ac3) : 0) ;
 				
-				printf("========pid:%0d=======pts:%0lx=============\n",TEST_PID,pts);
+				printf("========pid:%0d=======pts:%lx=============\n",TEST_PID,pts);
 				pid_array[0]=TEST_PID;
+				//ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
+				//cs_sleepms(20);
 				if(1){
 					static int tm=0;
+					uint64_t pts_replacer=0;
 					int cur_tm=(int)time((time_t *) 0);
-					if(cur_tm-tm>=5){
-						
-						//pes_set_pts(pid_ac3+header_size,pts);
+					if(cur_tm-tm>=2){
 						pid_ac3[188-2]++;
 						tm=cur_tm;
-						TRACE("replace byte:%02x\n",pid_ac3[188-2]);
-						tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
-						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
-						write_pts(&targ,pts);
-						test1(&targ, pid_ac3);
 					}
+						//tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
+						//pid_ac3[188-3]=0;
+						//ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
+						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
+						pts_replacer=read_pts(&targ);
+						TRACE("read pts from replacer :%lx \n",pts_replacer);
+						write_pts(&targ,pts);
+						TRACE("replace byte:%02x,[%ld], interval: %f\n",
+							pid_ac3[188-2],pts_replacer-pts,((float)(pts_replacer-pts))*100/9);
+						cs_sleepms(10);
+						//sleep(1000);
+						/*i_scrambling=1;
+						//write 0 and scramble
+						pid_ac3[188-3]=0;
+						ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
+						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
+						cs_sleepms(10);
+						//write 1
+						pid_ac3[188-3]=1;
+						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
+						cs_sleepms(20);//valid data
+						
+						//write_scramble_flag(&targ, TOTAL_SLOT_SIZE-1, pid_ac3+PACK_BYTE_SIZE, i_scrambling);
+						//cs_sleepms(1);
+						//ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
+						
+						
+						
+						cs_sleepms(200);
+						
+
+						//none scramble
+						i_scrambling=0;
+						write_scramble_flag(&targ, TOTAL_SLOT_SIZE-1, pid_ac3+PACK_BYTE_SIZE, i_scrambling);
+						cs_sleepms(1);
+						//write 0
+						pid_ac3[188-3]=0;
+						ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
+						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
+						
+						cs_sleepms(2);*/
+						
+						tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
+						cs_sleepms(10);
+						
+					
 				}
 				
 				if(ret<0){
@@ -1005,7 +902,7 @@ int init_tsp_reg(char *dev) {
 				tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
 			 }
 		}*/
-		cs_sleepms(10);
+		//cs_sleepms(10);
 		#if 0
 		pid_ac3[188-2]++;
 		TRACE("replace byte:%02x\n",pid_ac3[188-2]);

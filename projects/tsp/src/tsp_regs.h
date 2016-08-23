@@ -20,7 +20,8 @@ typedef enum {
 
 #define ADDR_OFFSET(addr) (addr * 4)
 //#define PID_INFO(ENABLE, PID) (((ENABLE == 0 ? 0 : 1) << 16)/*match enable*/ + PID)
-#define PID_INFO(CHANGE, ENABLE, PID) (((CHANGE == 0 ? 0 : 1) << 17)/*change enable*/ + ((ENABLE == 0 ? 0 : 1) << 16)/*match enable*/ + PID)
+//#define PID_INFO(CHANGE, ENABLE, PID) (((CHANGE == 0 ? 0 : 1) << 17)/*change enable*/ + ((ENABLE == 0 ? 0 : 1) << 16)/*match enable*/ + PID)
+#define PID_INFO(PTS, CHANGE, ENABLE, PID) (((PTS == 0 ? 0 : 1) << 18)/*pts enable*/ + ((CHANGE == 0 ? 0 : 1) << 17)/*change enable*/ + ((ENABLE == 0 ? 0 : 1) << 16)/*match enable*/ + PID)
 
 #define TSP_BUFSIZE (PACK_BYTE_SIZE * 2)
 
