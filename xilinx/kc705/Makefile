@@ -11,7 +11,8 @@ include $(ADD_TARGET)
 #export SUBJECT := KC705_FMC_GPIO
 #export SUBJECT := KC705_I2S_RECEIVER_TEST
 #export SUBJECT := KC705_IIC_SLAVE
-export SUBJECT := KC705_DVBS2
+#export SUBJECT := KC705_DVBS2
+export SUBJECT := KC705_TSP
 
 
 ifeq ($(SUBJECT), DVBS2)
@@ -24,6 +25,8 @@ else ifeq ($(SUBJECT), KC705_IIC_SLAVE)
 else ifeq ($(SUBJECT), KC705_DVBS2)
 	NEED_I2C := YES
 	NEED_SPI := YES
+else ifeq ($(SUBJECT), KC705_TSP)
+	NEED_I2C := YES
 endif
 
 install:

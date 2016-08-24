@@ -13,6 +13,8 @@
 #include "iic_slave_conf/iic_slave_pcie_config.h"
 #elif defined(KC705_DVBS2)
 #include "kc705_dvbs2_conf/kc705_dvbs2_pcie_config.h"
+#elif defined(KC705_TSP)
+#include "kc705_tsp_conf/kc705_tsp_pcie_config.h"
 #endif
 
 #endif //#define _PCIE_CONF_H

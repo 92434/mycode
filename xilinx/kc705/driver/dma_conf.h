@@ -13,6 +13,8 @@
 #include "iic_slave_conf/iic_slave_dma_config.h"
 #elif defined(KC705_DVBS2)
 #include "kc705_dvbs2_conf/kc705_dvbs2_dma_config.h"
+#elif defined(KC705_TSP)
+#include "kc705_tsp_conf/kc705_tsp_dma_config.h"
 #endif
 
 #endif //#define _DMA_CONF_H

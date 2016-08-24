@@ -290,8 +290,8 @@ module replacer #(
 	
 	reg [PTS_DATA_WIDTH - 1 : 0] pts_data = 0;
 
-	wire [1 : 0] adaption_field_control;
-	assign adaption_field_control = 2'b11;
+	//wire [1 : 0] adaption_field_control;
+	//assign adaption_field_control = 2'b11;
 
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
@@ -370,12 +370,7 @@ module replacer #(
 							end
 							else if(matched_packet_index == 3) begin
 								//ts_out <= {transport_scrambling_control, adaption_field_control, mpeg_data_d3[3 : 0]};
-								if(common_slot_special_feature_enable == 1) begin
-									ts_out <= {mpeg_data_d3[7 : 6], adaption_field_control, mpeg_data_d3[3 : 0]};
-								end
-								else begin
-									ts_out <= mpeg_data_d3;
-								end
+								ts_out <= {cur_ram_data[7 : 4], mpeg_data_d3[3 : 0]};
 							end
 							else if(matched_packet_index == 24) begin
 								if(common_slot_special_feature_enable == 1) begin

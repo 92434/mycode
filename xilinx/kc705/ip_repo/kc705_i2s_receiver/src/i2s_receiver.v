@@ -56,7 +56,8 @@ module i2s_receiver # (
 	reg [I2S_DATA_VALID_BIT_WIDTH - 1 : 0] i2s_data_reg_5 = 0;
 
 	wire matched;
-	assign matched = ((i2s_data_reg_0 == 16'h2b03) && (i2s_data_reg_1 == 16'h2f84) && (i2s_data_reg_2 == 16'h4240) && (i2s_data_reg_3 == 16'ha1dd) && (i2s_data_reg_4 == 16'h0b77)) ? 1 : 0;
+	//assign matched = ((i2s_data_reg_0 == 16'h2b03) && (i2s_data_reg_1 == 16'h2f84) && (i2s_data_reg_2 == 16'h4240) && (i2s_data_reg_3 == 16'ha1dd) && (i2s_data_reg_4 == 16'h0b77)) ? 1 : 0;
+	assign matched = ((i2s_data_reg_4 == 16'h0b77)) ? 1 : 0;
 
 	always @(posedge bclk) begin
 		if(rst_n == 0) begin

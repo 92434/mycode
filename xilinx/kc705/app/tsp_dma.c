@@ -37,6 +37,7 @@ void printids(const char *s) {
 
 typedef struct {
 	int fd;
+	FILE *ts_fd;
 	unsigned char *buffer;
 } thread_arg_t;
 
@@ -90,13 +91,16 @@ void *read_fn(void *arg) {
 					toread = BUFSIZE;
 
 					//printf("read %d!\n", nread);
-					for(i = 0; i < toread / sizeof(uint32_t); i++) {
-						if((i != 0) && (i % 4 == 0)) {
-							printf("\n");
-						}
-						print_ts_word(data[i]);
+					//for(i = 0; i < toread / sizeof(uint32_t); i++) {
+					//	if((i != 0) && (i % 4 == 0)) {
+					//		printf("\n");
+					//	}
+					//	print_ts_word(data[i]);
+					//}
+					//printf("\n");
+					if(targ->ts_fd != 0) {
+						fwrite(targ->buffer, sizeof(unsigned char), nread, targ->ts_fd);
 					}
-					printf("\n");
 				}
 			}
 			if(FD_ISSET(targ->fd, &efds)) {
@@ -158,6 +162,7 @@ int main(int argc, char **argv) {
 	int ret = 0;
 
 	char *dev = argv[1];
+	char *ts_file = argv[2];
 
 	thread_arg_t targ;
 	int flags;
@@ -173,6 +178,12 @@ int main(int argc, char **argv) {
 
 	if ((targ.fd = open(dev, O_RDWR))<0) {
 		printf("err: can't open device(%s)!(%s)\n", dev, strerror(errno));
+		ret = -1;
+		return ret;
+	}
+
+	if ((argc == 3) && ((targ.ts_fd = (FILE *)fopen(ts_file, "w+")) == 0)) {
+		printf("err: can't open ts_file(%s)!(%s)\n", ts_file, strerror(errno));
 		ret = -1;
 		return ret;
 	}
@@ -211,6 +222,10 @@ int main(int argc, char **argv) {
 	read_write(&targ);
 
 	free(targ.buffer);
+
+	if(targ.ts_fd != 0) {
+		fclose(targ.ts_fd);
+	}
 
 	close(targ.fd);
 
