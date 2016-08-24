@@ -32,7 +32,7 @@ typedef enum {
 } addr_t;
 
 #define ADDR_OFFSET(addr) (addr * 4)
-#define PID_INFO(PTS, CHANGE, ENABLE, PID) (((PTS == 0 ? 0 : 1) << 18)/*pts enable*/ + ((CHANGE == 0 ? 0 : 1) << 17)/*change enable*/ + ((ENABLE == 0 ? 0 : 1) << 16)/*match enable*/ + PID)
+#define PID_INFO(COMMON_SLOT_SPECIAL_FEATURE, CHANGE, ENABLE, PID) (((COMMON_SLOT_SPECIAL_FEATURE == 0 ? 0 : 1) << 18)/*common slot special feature enable*/ + ((CHANGE == 0 ? 0 : 1) << 17)/*change enable*/ + ((ENABLE == 0 ? 0 : 1) << 16)/*match enable*/ + PID)
 
 #define BUFSIZE (PACK_BYTE_SIZE * 2)
 
@@ -128,11 +128,11 @@ int select_pid_slot(thread_arg_t *targ, uint32_t pid_slot) {
 	return ret;
 }
 
-int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable, bool pid_change, bool pid_pts) {
+int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable, bool pid_change, bool pid_common_slot_special_feature) {
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
-	*pbuffer = PID_INFO(pid_pts, pid_change, pid_enable, pid);
+	*pbuffer = PID_INFO(pid_common_slot_special_feature, pid_change, pid_enable, pid);
 	ret = write_regs(targ, ADDR_PID, sizeof(uint32_t));
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -142,7 +142,7 @@ int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable, bool pid_change, 
 	return ret;
 }
 
-int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable, bool *pid_change, bool *pid_pts) {
+int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable, bool *pid_change, bool *pid_common_slot_special_feature) {
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
@@ -154,7 +154,7 @@ int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable, bool *pid_chang
 	*pid = *pbuffer & 0xffff;
 	*pid_enable = (((*pbuffer >> 16) & 1) == 0) ? false : true;
 	*pid_change = (((*pbuffer >> 17) & 1) == 0) ? false : true;
-	*pid_pts = (((*pbuffer >> 18) & 1) == 0) ? false : true;
+	*pid_common_slot_special_feature = (((*pbuffer >> 18) & 1) == 0) ? false : true;
 	return ret;
 }
 
@@ -382,7 +382,7 @@ int test_set(thread_arg_t *targ) {
 			uint32_t pid;
 			bool pid_enable;
 			bool pid_change;
-			bool pid_pts;
+			bool pid_common_slot_special_feature;
 
 			switch(j) {
 				case 0:
@@ -391,31 +391,31 @@ int test_set(thread_arg_t *targ) {
 							pid = 0x0000;
 							pid_enable = true;
 							pid_change = false;
-							pid_pts = false;
+							pid_common_slot_special_feature = false;
 							break;
 						case 1:
 							pid = 0x0533;
 							pid_enable = true;
 							pid_change = true;
-							pid_pts = false;
+							pid_common_slot_special_feature = false;
 							break;
 						case 2:
 							pid = 0x0534;
 							pid_enable = true;
 							pid_change = true;
-							pid_pts = false;
+							pid_common_slot_special_feature = false;
 							break;
 						case 9:
 							pid = 0x0000;
 							pid_enable = true;
 							pid_change = true;
-							pid_pts = false;
+							pid_common_slot_special_feature = false;
 							break;
 						default:
 							pid = 0x0000;
 							pid_enable = false;
 							pid_change = false;
-							pid_pts = false;
+							pid_common_slot_special_feature = false;
 							break;
 					}
 					break;
@@ -423,17 +423,17 @@ int test_set(thread_arg_t *targ) {
 					pid = 0x0001;
 					pid_enable = true;
 					pid_change = true;
-					pid_pts = true;
+					pid_common_slot_special_feature = true;
 					break;
 				default:
 					pid = 0x0000;
 					pid_enable = false;
 					pid_change = false;
-					pid_pts = false;
+					pid_common_slot_special_feature = false;
 					break;
 			}
 			select_pid_slot(targ, j);
-			set_pid(targ, pid, pid_enable, pid_change, pid_pts);
+			set_pid(targ, pid, pid_enable, pid_change, pid_common_slot_special_feature);
 			set_pts(targ, 0x12345678, 0x12345678);
 		}
 
@@ -469,7 +469,7 @@ int test_get(thread_arg_t *targ) {
 			uint32_t pid;
 			bool pid_enable;
 			bool pid_change;
-			bool pid_pts;
+			bool pid_common_slot_special_feature;
 			uint32_t pts_low, pts_high;
 
 			switch(j) {
@@ -477,9 +477,9 @@ int test_get(thread_arg_t *targ) {
 					break;
 			}
 			select_pid_slot(targ, j);
-			get_pid(targ, &pid, &pid_enable, &pid_change, &pid_pts);
+			get_pid(targ, &pid, &pid_enable, &pid_change, &pid_common_slot_special_feature);
 			get_pts(targ, &pts_low, &pts_high);
-			printf("pid: %08x; pid_enable: %s; pid_change: %s; pid_pts: %s; pts:%08x%08x\n", pid, pid_enable ? "true" : "false", pid_change ? "true" : "false", pid_pts ? "true" : "false", pts_high, pts_low);
+			printf("pid: %08x; pid_enable: %s; pid_change: %s; pid_common_slot_special_feature: %s; pts:%08x%08x\n", pid, pid_enable ? "true" : "false", pid_change ? "true" : "false", pid_common_slot_special_feature ? "true" : "false", pts_high, pts_low);
 		}
 
 		get_matched_count(targ, &matched_count);
