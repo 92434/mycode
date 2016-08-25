@@ -20,12 +20,90 @@
 //#define true (1 == 1)
 //#define false (1 == 0)
 
-#define TEST_PID 0x201//0x28a//1141//
-#define SELECT_PMT_PID 0x100
+#define TEST_PID 0x201//1141//0x28a//0x265//
+#define SELECT_PMT_PID 0x100//0x100//
+#define SELECT_PMT_PID1 0x164
 static _tsp_container* tsp_container=NULL;
 static _pmt_result pmt_result[MAX_PROGRAM_NUM];
 
+#if 1
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <inttypes.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <getopt.h>
+#include <iconv.h>
+#include <bitstream/dvb/si_print.h>
+#include <bitstream/mpeg/psi_print.h>
+static const char *psz_native_encoding = "UTF-8";
+static const char *psz_current_encoding = "";
+static iconv_t iconv_handle = (iconv_t)-1;
+static print_type_t i_print_type = PRINT_TEXT;
 
+static void print_wrapper(void *_unused, const char *psz_format, ...)
+{
+    char psz_fmt[strlen(psz_format) + 2];
+    va_list args;
+    va_start(args, psz_format);
+    strcpy(psz_fmt, psz_format);
+    strcat(psz_fmt, "\n");
+    vprintf(psz_fmt, args);
+    va_end(args);
+}
+
+static char *iconv_append_null(const char *p_string, size_t i_length)
+{
+    char *psz_string = malloc(i_length + 1);
+    memcpy(psz_string, p_string, i_length);
+    psz_string[i_length] = '\0';
+    return psz_string;
+}
+
+static char *iconv_wrapper(void *_unused, const char *psz_encoding,
+                           char *p_string, size_t i_length)
+{
+    char *psz_string, *p;
+    size_t i_out_length;
+
+    if (!strcmp(psz_encoding, psz_native_encoding))
+        return iconv_append_null(p_string, i_length);
+
+    if (iconv_handle != (iconv_t)-1 &&
+        strcmp(psz_encoding, psz_current_encoding)) {
+        iconv_close(iconv_handle);
+        iconv_handle = (iconv_t)-1;
+    }
+
+    if (iconv_handle == (iconv_t)-1)
+        iconv_handle = iconv_open(psz_native_encoding, psz_encoding);
+    if (iconv_handle == (iconv_t)-1) {
+        fprintf(stderr, "couldn't convert from %s to %s (%m)\n", psz_encoding,
+                psz_native_encoding);
+        return iconv_append_null(p_string, i_length);
+    }
+    psz_current_encoding = psz_encoding;
+
+    /* converted strings can be up to six times larger */
+    i_out_length = i_length * 6;
+    p = psz_string = malloc(i_out_length);
+    if (iconv(iconv_handle, &p_string, &i_length, &p, &i_out_length) == -1) {
+        fprintf(stderr, "couldn't convert from %s to %s (%m)\n", psz_encoding,
+                psz_native_encoding);
+        free(psz_string);
+        return iconv_append_null(p_string, i_length);
+    }
+    if (i_length)
+        fprintf(stderr, "partial conversion from %s to %s\n", psz_encoding,
+                psz_native_encoding);
+
+    *p = '\0';
+    return psz_string;
+}
+#endif
 int read_regs(thread_arg_t *targ, int addr, int count) {
 	int nread;
 
@@ -594,6 +672,7 @@ int tsp_modify_pmt_toac3(uint8_t *ts, _pmt_result* pmt_array,uint8_t *new_buf){
 	cursor+=(p_es-ts);
 	while ((p_es = pmt_get_es(p_pmt, j)) != NULL) {
         j++;
+		find_pid=0;
         pid=pmtn_get_pid(p_es);
 		desc_seg_len=5+pmtn_get_desclength(p_es);
 		TRACE("pid:%0x,desc_seg_len:%0x\n",pid,desc_seg_len);
@@ -650,7 +729,36 @@ int tsp_modify_pmt_toac3(uint8_t *ts, _pmt_result* pmt_array,uint8_t *new_buf){
 	psi_set_length(new_buf+5,cursor-5-3);
 	return 0;
 }
+uint8_t pmt_data[188]={
 
+0x47,0x41,0x00,0x11,0x00,
+0x02,0xb0,0x34,
+0x00,0x01,0xd5,0x00,0x00,0xfc,0x16,0xf0,0x06,0x09,0x04,0x26,0x00,0xff,0xff,
+0x02,0xe2,0x64,0xf0,0x00,
+0x06,0xe2,0x65,0xf0,0x0b,0x6A,0x03,0xC0,0x44,0x08,0x0a,0x04,0x74,0x75,0x72,0x01,
+0x06,0xe4,0x60,0xf0,0x07,0x56,0x05,0x74,0x75,0x72,0x09,0x64,
+0x28,0x98,0x87,0x2c,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+/*0x47,0x41,0x00,0x1e,0x00,0x02,0xb0,0x2f,0x00,0x01,0xd5,0x00,0x00,0xfc,0x16,0xf0,
+0x06,0x09,0x04,0x26,0x00,0xff,0xff,0x02,0xe2,0x64,0xf0,0x00,0x03,0xe2,0x65,0xf0,
+0x06,0x0a,0x04,0x74,0x75,0x72,0x01,0x06,0xe4,0x60,0xf0,0x07,0x56,0x05,0x74,0x75,
+0x72,0x09,0x64,0x28,0x98,0x87,0x2c,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff*/
+};
 int tsp_get_program_info(thread_arg_t *targ, sid_t *sids){
 	int i,ret=-1;
 	int read_bytes=0;
@@ -667,6 +775,8 @@ int tsp_get_program_info(thread_arg_t *targ, sid_t *sids){
 			for(i=0;i<service_num;i++){
 				TRACE("[%d]pmt pid:%d\n",i,sids[i].i_pmt_pid);
 				while(sids[i].i_pmt_pid!=0){
+					if(!(SELECT_PMT_PID==sids[i].i_pmt_pid))
+						break;
 					read_bytes=tsp_monitor_read(targ,sids[i].i_pmt_pid, 0, ts_buf);//PMT
 					if(read_bytes==PACK_BYTE_SIZE&&ts_get_unitstart(ts_buf)==1){
 						handle_psi_packet(ts_buf);
@@ -674,14 +784,19 @@ int tsp_get_program_info(thread_arg_t *targ, sid_t *sids){
 						if(pmt_result[i].video_pid!=0){
 							int pmt_valid=0;
 							uint8_t *p_pmt_sec=NULL;
+							
+							dump_packet("ori pmt",ts_buf,PACK_BYTE_SIZE);
 							tsp_modify_pmt_toac3(ts_buf,&pmt_result[i],new_pmt);
-							dump_packet("new pmt",new_pmt,PACK_BYTE_SIZE);
+							//if(SELECT_PMT_PID==sids[i].i_pmt_pid)
+								//memcpy(new_pmt,pmt_data,PACK_BYTE_SIZE);
 							p_pmt_sec=ts_section(new_pmt);
-							//psi_set_crc(p_pmt_sec);
+							psi_set_crc(p_pmt_sec);
 							pmt_valid=pmt_validate(p_pmt_sec);
+							dump_packet("new pmt",new_pmt,PACK_BYTE_SIZE);
 							TRACE("pmt_valid:%d\n",pmt_valid);
-							if(SELECT_PMT_PID==sids[i].i_pmt_pid)
-								tsp_replace_single_tspack(targ,sids[i].i_pmt_pid,new_pmt);
+							pmt_print(ts_section(new_pmt), print_wrapper, NULL, iconv_wrapper, NULL,
+                 				i_print_type);
+							tsp_replace_single_tspack(targ,sids[i].i_pmt_pid,new_pmt);
 						}
 						break;
 					}
@@ -807,19 +922,22 @@ int init_tsp_reg(char *dev) {
 	uint64_t pts=0;
 	uint8_t *p_ts;
 	unsigned char ts_buf[PACK_BYTE_SIZE]={0};
-	//int i_scrambling=0;
-	while(0){
+	int i_scrambling=0b10;
+	ts_set_scrambling(pid_ac3, 0);
+	ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
+	while(1){
 		memset(pid_array,0,sizeof(pid_array));
 		tsp_monitor_read(&targ, TEST_PID, 0, ts_buf);
 		p_ts=ts_buf;
 		header_size = TS_HEADER_SIZE + (ts_has_adaptation(p_ts) ? 1+ ts_get_adaptation(p_ts) : 0) ;
+		goto jump;
 		if(ts_get_unitstart(p_ts) &&pes_validate(p_ts+header_size)){//has pes header
 			if(pes_validate_header(p_ts + header_size) &&pes_has_pts(p_ts + header_size)
                 		&&pes_validate_pts(p_ts + header_size)){
                 //pes_payload_len=pes_get_length(p_ts + header_size)-pes_get_headerlength(p_ts + header_size);
 				pts=pes_get_pts(p_ts + header_size);
 				header_size = TS_HEADER_SIZE + (ts_has_adaptation(pid_ac3) ? 1+ ts_get_adaptation(pid_ac3) : 0) ;
-				
+				jump:
 				printf("========pid:%0d=======pts:%lx=============\n",TEST_PID,pts);
 				pid_array[0]=TEST_PID;
 				//ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
@@ -841,7 +959,7 @@ int init_tsp_reg(char *dev) {
 						write_pts(&targ,pts);
 						TRACE("replace byte:%02x,[%ld], interval: %f\n",
 							pid_ac3[188-2],pts_replacer-pts,((float)(pts_replacer-pts))*100/9);
-						cs_sleepms(10);
+						cs_sleepms(50);
 						//sleep(1000);
 						/*i_scrambling=1;
 						//write 0 and scramble
@@ -875,7 +993,7 @@ int init_tsp_reg(char *dev) {
 						cs_sleepms(2);*/
 						
 						tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
-						cs_sleepms(10);
+						cs_sleepms(50);
 						
 					
 				}
@@ -902,7 +1020,7 @@ int init_tsp_reg(char *dev) {
 				tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
 			 }
 		}*/
-		//cs_sleepms(10);
+		cs_sleepms(10);
 		#if 0
 		pid_ac3[188-2]++;
 		TRACE("replace byte:%02x\n",pid_ac3[188-2]);

@@ -126,7 +126,7 @@ void *read_fn(void *arg) {
 						} else {
 						}
 					}
-					nread = nread_reg;
+					//nread = nread_reg;
 					for(i = 0; i < nread / sizeof(uint32_t); i++) {
 						if((i != 0) && (i % 16 == 0)) {
 							printf("\n");
@@ -154,15 +154,12 @@ void *read_fn(void *arg) {
 						static int count = 0;
 
 						gettimeofday(&tv0, &tz0);
-						printf("tv0.tv_sec:%d\n", (int)tv0.tv_sec);
-						printf("tv0.tv_usec:%d\n", (int)tv0.tv_usec);
 						if(nread != 0) {
 							count = 0;
-							printf("[tv0.tv_sec:%d, tv0.tv_usec:%d]%d\n", (int)tv0.tv_sec, (int)tv0.tv_usec, count);
 						} else {
 							count += 1;
-							printf("[tv0.tv_sec:%d, tv0.tv_usec:%d]%d\n", (int)tv0.tv_sec, (int)tv0.tv_usec, count);
 						}
+						printf("\n[tv0.tv_sec:%d, tv0.tv_usec:%d]%d\n", (int)tv0.tv_sec, (int)tv0.tv_usec, count);
 					}
 
 					//if((data[86] & 0xffff) != last_data + 1) {

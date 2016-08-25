@@ -271,8 +271,8 @@ module replacer #(
 	wire [8 - 1 : 0] cur_ram_data;
 	assign cur_ram_data = (matched_packet_index == PACK_BYTE_SIZE) ? 8'b00 : (ram_for_data[ram_match_index / 4][(8 * (ram_match_index % 4) + 7) -: 8]);
 
-	wire payload_unit_start_indicator;
-	assign payload_unit_start_indicator = (ts_out_group_index == 0) ? 1'b1 : 1'b0;
+	//wire payload_unit_start_indicator;
+	//assign payload_unit_start_indicator = (ts_out_group_index == 0) ? 1'b1 : 1'b0;
 
 	//wire [1 : 0] transport_scrambling_control;
 	//assign transport_scrambling_control = (ts_out_group_index == 0) ? 2'b00 : 2'b01;
@@ -354,10 +354,12 @@ module replacer #(
 							if(matched_packet_index == 1) begin
 								//in common replacer, packet pid reserved!
 								if(change_pid == 0) begin
-									ts_out <= {mpeg_data_d3[7], payload_unit_start_indicator, mpeg_data_d3[5], mpeg_data_d3[5 - 1 : 0]};
+									//ts_out <= {mpeg_data_d3[7], payload_unit_start_indicator, mpeg_data_d3[5], mpeg_data_d3[5 - 1 : 0]};
+									ts_out <= {mpeg_data_d3[7], cur_ram_data[6], mpeg_data_d3[5], mpeg_data_d3[5 - 1 : 0]};
 								end
 								else begin
-									ts_out <= {mpeg_data_d3[7], payload_unit_start_indicator, mpeg_data_d3[5], cur_ram_data[5 - 1 : 0]};
+									//ts_out <= {mpeg_data_d3[7], payload_unit_start_indicator, mpeg_data_d3[5], cur_ram_data[5 - 1 : 0]};
+									ts_out <= {mpeg_data_d3[7], cur_ram_data[6], mpeg_data_d3[5], cur_ram_data[5 - 1 : 0]};
 								end
 							end
 							else if(matched_packet_index == 2) begin
