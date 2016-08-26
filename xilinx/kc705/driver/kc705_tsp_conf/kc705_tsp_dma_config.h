@@ -19,10 +19,10 @@ typedef struct dma_static_config {
 	char *devname;
 } dma_static_config_info_t;
 
+#define DEFINED_TSP_MINI 0
 #define ENABLE_DMA 1
 
 static dma_static_config_info_t dma_info[] = {
-//#if ENABLE_DMA
 	{
 		.dma_lite_offset = OFFSET_AXI_TSP_LITE,
 		.pcie_bar_map_ctl_offset_0 = 0,
@@ -40,8 +40,8 @@ static dma_static_config_info_t dma_info[] = {
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
 		.devname = "tsp_regs",
 	},
-//#endif//#if ENABLE_DMA
 
+#if DEFINED_TSP_MINI
 #if ENABLE_DMA
 	{
 		.dma_lite_offset = OFFSET_AXI_DMA_LITE_0,
@@ -93,6 +93,7 @@ static dma_static_config_info_t dma_info[] = {
 		.devname = "asi_dma",
 	},
 #endif//#if ENABLE_DMA
+#endif//#if DEFINED_TSP_MINI
 
 };
 
