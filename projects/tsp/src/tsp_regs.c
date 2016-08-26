@@ -20,9 +20,9 @@
 //#define true (1 == 1)
 //#define false (1 == 0)
 
-#define TEST_PID 0x201//1141//0x28a//0x265//
+#define TEST_PID 0x201//1141//0x265//0x28a//
 #define SELECT_PMT_PID 0x100//0x100//
-#define SELECT_PMT_PID1 0x164
+
 static _tsp_container* tsp_container=NULL;
 static _pmt_result pmt_result[MAX_PROGRAM_NUM];
 
@@ -360,7 +360,7 @@ int tsp_monitor_read(thread_arg_t *targ,unsigned short pid, int slot_idx, unsign
 	set_slot_enable(targ, true);
 	ret=read_ts_data(targ, PACK_BYTE_SIZE);
 	if(ret==PACK_BYTE_SIZE){
-		//dump_packet("monitor",targ->buffer,PACK_BYTE_SIZE);
+		dump_packet("monitor",targ->buffer,PACK_BYTE_SIZE);
 		tsp_container->monitor[slot_idx].inuse=1;
 		tsp_container->monitor[slot_idx].pid=pid;
 		memcpy(tsp_container->monitor[slot_idx].ts_pack,targ->buffer,ret);
@@ -787,8 +787,6 @@ int tsp_get_program_info(thread_arg_t *targ, sid_t *sids){
 							
 							dump_packet("ori pmt",ts_buf,PACK_BYTE_SIZE);
 							tsp_modify_pmt_toac3(ts_buf,&pmt_result[i],new_pmt);
-							//if(SELECT_PMT_PID==sids[i].i_pmt_pid)
-								//memcpy(new_pmt,pmt_data,PACK_BYTE_SIZE);
 							p_pmt_sec=ts_section(new_pmt);
 							psi_set_crc(p_pmt_sec);
 							pmt_valid=pmt_validate(p_pmt_sec);
@@ -922,9 +920,11 @@ int init_tsp_reg(char *dev) {
 	uint64_t pts=0;
 	uint8_t *p_ts;
 	unsigned char ts_buf[PACK_BYTE_SIZE]={0};
+	#if 1
 	int i_scrambling=0b10;
 	ts_set_scrambling(pid_ac3, 0);
 	ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
+	#endif
 	while(1){
 		memset(pid_array,0,sizeof(pid_array));
 		tsp_monitor_read(&targ, TEST_PID, 0, ts_buf);
@@ -960,37 +960,6 @@ int init_tsp_reg(char *dev) {
 						TRACE("replace byte:%02x,[%ld], interval: %f\n",
 							pid_ac3[188-2],pts_replacer-pts,((float)(pts_replacer-pts))*100/9);
 						cs_sleepms(50);
-						//sleep(1000);
-						/*i_scrambling=1;
-						//write 0 and scramble
-						pid_ac3[188-3]=0;
-						ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
-						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
-						cs_sleepms(10);
-						//write 1
-						pid_ac3[188-3]=1;
-						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
-						cs_sleepms(20);//valid data
-						
-						//write_scramble_flag(&targ, TOTAL_SLOT_SIZE-1, pid_ac3+PACK_BYTE_SIZE, i_scrambling);
-						//cs_sleepms(1);
-						//ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
-						
-						
-						
-						cs_sleepms(200);
-						
-
-						//none scramble
-						i_scrambling=0;
-						write_scramble_flag(&targ, TOTAL_SLOT_SIZE-1, pid_ac3+PACK_BYTE_SIZE, i_scrambling);
-						cs_sleepms(1);
-						//write 0
-						pid_ac3[188-3]=0;
-						ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
-						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
-						
-						cs_sleepms(2);*/
 						
 						tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
 						cs_sleepms(50);
@@ -1005,36 +974,8 @@ int init_tsp_reg(char *dev) {
 				
 			}
 		}
-		/*
-		if(ts_has_adaptation(ts_buf)){
-			 if ( ts_get_adaptation(ts_buf) &&
-                tsaf_has_pcr(ts_buf)){
-                i_pcr = tsaf_get_pcr(ts_buf);
-				tsaf_set_pcr(pid_ac3,i_pcr);
-				pid_array[0]=TEST_PID;
-				ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
-				if(ret<0){
-					TRACE("tsp_replace_dual_tspack fail,ret:%d\n",ret);
-				}
-				cs_sleepms(10);
-				tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
-			 }
-		}*/
+		
 		cs_sleepms(10);
-		#if 0
-		pid_ac3[188-2]++;
-		TRACE("replace byte:%02x\n",pid_ac3[188-2]);
-		
-		ret=tsp_replace_dual_tspack(&targ,pid_array, audio_pid_cnt, pid_ac3);
-		if(ret<0){
-			TRACE("tsp_replace_dual_tspack fail,ret:%d\n",ret);
-		}
-		
-		
-		cs_sleepms(20);
-		tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
-		cs_sleepms(500);
-		#endif
 	}
 //tsp_exit:
 	destroy_dvb_process();
