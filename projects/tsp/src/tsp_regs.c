@@ -21,7 +21,7 @@
 //#define false (1 == 0)
 
 #define TEST_PID 0x201//1141//0x265//0x28a//
-#define SELECT_PMT_PID 0x100//0x100//
+#define SELECT_PMT_PID 0x100//0x479//
 
 static _tsp_container* tsp_container=NULL;
 static _pmt_result pmt_result[MAX_PROGRAM_NUM];
@@ -325,7 +325,7 @@ int read_ts_data(thread_arg_t *targ, int rx_size) {
 			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 			return -1;
 		}
-		cs_sleepms(2);
+		cs_sleepms(3);
 		i++;
 	}
 
@@ -765,7 +765,8 @@ int tsp_get_program_info(thread_arg_t *targ, sid_t *sids){
 	int service_num=0;
 	unsigned char ts_buf[PACK_BYTE_SIZE]={0},new_pmt[PACK_BYTE_SIZE]={0};
 	memset(&pmt_result,0,MAX_PROGRAM_NUM*sizeof(_pmt_result));
-	
+
+parse_pat:
 	read_bytes=tsp_monitor_read(targ, 0, 0, ts_buf);//PAT
 	if(read_bytes==PACK_BYTE_SIZE){
 		handle_psi_packet(ts_buf);
@@ -801,6 +802,10 @@ int tsp_get_program_info(thread_arg_t *targ, sid_t *sids){
 				}
 			}
 			ret=0;
+		}
+		else{
+			cs_sleepms(10);
+			goto parse_pat;
 		}
 	}
 	return ret;
@@ -886,7 +891,11 @@ int init_tsp_reg(char *dev) {
 	}
 	//goto tsp_exit;
 	init_dvb_process();
-	ret=tsp_get_program_info(&targ, sids);
+	for(i=0;i<50;i++){
+		ret=tsp_get_program_info(&targ, sids);
+		if(ret==0)
+			break;
+	}
 	if(ret<0){
 		TRACE("tsp_get_program_info fail,ret:%d\n",ret);
 	}
