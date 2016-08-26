@@ -99,7 +99,7 @@ module monitor #(
 					end
 				end
 				1: begin
-					if((matched_index >= PACK_BYTE_SIZE - 1) && (ram_data_valid == 1)) begin
+					if((matched_index == PACK_BYTE_SIZE - 1) && (ram_data_valid == 1)) begin
 						pump_data_state <= 2;
 					end
 					else begin

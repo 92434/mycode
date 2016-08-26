@@ -364,13 +364,13 @@ int test_set(thread_arg_t *targ) {
 				slot_enable = true;
 				break;
 			case 1:
-				slot_enable = true;
+				slot_enable = false;
 				break;
 			case 2:
-				slot_enable = true;
+				slot_enable = false;
 				break;
 			case 9:
-				slot_enable = true;
+				slot_enable = false;
 				break;
 			default:
 				slot_enable = false;
@@ -395,20 +395,20 @@ int test_set(thread_arg_t *targ) {
 							break;
 						case 1:
 							pid = 0x0533;
-							pid_enable = true;
-							pid_change = true;
+							pid_enable = false;
+							pid_change = false;
 							pid_common_slot_special_feature = false;
 							break;
 						case 2:
 							pid = 0x0534;
-							pid_enable = true;
-							pid_change = true;
+							pid_enable = false;
+							pid_change = false;
 							pid_common_slot_special_feature = false;
 							break;
 						case 9:
 							pid = 0x0000;
-							pid_enable = true;
-							pid_change = true;
+							pid_enable = false;
+							pid_change = false;
 							pid_common_slot_special_feature = false;
 							break;
 						default:
@@ -421,9 +421,9 @@ int test_set(thread_arg_t *targ) {
 					break;
 				case 9:
 					pid = 0x0001;
-					pid_enable = true;
-					pid_change = true;
-					pid_common_slot_special_feature = true;
+					pid_enable = false;
+					pid_change = false;
+					pid_common_slot_special_feature = false;
 					break;
 				default:
 					pid = 0x0000;
