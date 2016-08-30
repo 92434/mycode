@@ -49,9 +49,9 @@ output 		reg    signed [15:0]			symbol_1x_im_out = 0//,
 //parameter SYS_Baud_mode = 2'b01;// 00:10M; 01:25M;
 
 wire                             fs_en;
-wire                             fs_en2;
+//wire                             fs_en2;
 
-wire                            fs_en_1cycle_1dly;
+//wire                            fs_en_1cycle_1dly;
 
 //fs_transform uut_fs_transform(
 //.hard_rst_n(hard_rst_n),// modified by 2014.09.22

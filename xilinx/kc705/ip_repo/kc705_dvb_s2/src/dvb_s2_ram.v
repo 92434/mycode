@@ -51,7 +51,7 @@ module dvb_s2_ram #(
 	// for write command
 	//
 	//00
-	reg [C_S_AXI_DATA_WIDTH - 1 : 0] power_on_switch_reg = 0;
+	reg [C_S_AXI_DATA_WIDTH - 1 : 0] power_on_switch_reg = 1;
 	//01
 	reg [C_S_AXI_DATA_WIDTH - 1 : 0] mod_mode_cfg_reg = 0;
 	//02
@@ -133,6 +133,7 @@ module dvb_s2_ram #(
 
 	always @(posedge clk) begin
 		if(rst_n == 0) begin
+			power_on_switch_reg <= 1;
 			mod_mode_cfg_reg <= 0;
 			ldpc_mode_cfg_reg <= 6;
 			frame_mode_cfg_reg <= 0;
