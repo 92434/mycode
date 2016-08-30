@@ -20,8 +20,9 @@
 //#define true (1 == 1)
 //#define false (1 == 0)
 
-#define TEST_PID 0x201//1141//0x265//0x28a//
-#define SELECT_PMT_PID 0x100//0x479//
+#define TEST_PID 0x28a//0x2cb//0x201//1141//0x265//
+#define VIDEO_PID 0x200//0x267
+#define SELECT_PMT_PID 0x100//0x13b//0x479//
 
 static _tsp_container* tsp_container=NULL;
 static _pmt_result pmt_result[MAX_PROGRAM_NUM];
@@ -360,7 +361,7 @@ int tsp_monitor_read(thread_arg_t *targ,unsigned short pid, int slot_idx, unsign
 	set_slot_enable(targ, true);
 	ret=read_ts_data(targ, PACK_BYTE_SIZE);
 	if(ret==PACK_BYTE_SIZE){
-		dump_packet("monitor",targ->buffer,PACK_BYTE_SIZE);
+		//dump_packet("monitor",targ->buffer,PACK_BYTE_SIZE);
 		tsp_container->monitor[slot_idx].inuse=1;
 		tsp_container->monitor[slot_idx].pid=pid;
 		memcpy(tsp_container->monitor[slot_idx].ts_pack,targ->buffer,ret);
@@ -852,14 +853,25 @@ void test1(thread_arg_t *targ, uint8_t *p_ts){
 	}
 }
 
-
+void test2(){
+	uint64_t pcr=0;
+	uint8_t *p_ts;
+	uint8_t a[64]={0x47,0x00,0x80,0x29,0xb7,0x10,0xb7,0xf9,0xfd,0xfc,0x7e,0x05};//00:19:03:11:42
+	//uint8_t b[64]={0x47,0x00,0x80,0x29,0xb7,0x10,0xb7,0xfa,0x01,0x8e,0xfe,0x28};//00:19:03:11:44
+	p_ts=a;
+	if(ts_has_adaptation(p_ts)&&tsaf_has_pcr(p_ts)){
+		pcr=tsaf_get_pcr(p_ts);
+		TRACE("pcr:%ld\n",pcr);
+	}
+}
 int init_tsp_reg(char *dev) {
 	int ret = 0;
 	int i,j,audio_pid_cnt=0;
 	unsigned short pid_array[DUAL_SLOT_PID_COUNT]={0};
 	sid_t *sids=NULL;//[MAX_PROGRAM_NUM];
 	thread_arg_t targ;
-	
+	//test2();
+	//return 0;
 	if ((targ.fd = open(dev, O_RDWR))<0) {
 		printf("err: can't open device(%s)!(%s)\n", dev, strerror(errno));
 		ret = -1;
@@ -926,32 +938,43 @@ int init_tsp_reg(char *dev) {
 	}
 	*/
 	int header_size;
-	uint64_t pts=0;
+	uint64_t pts=0,pcr=0;
 	uint8_t *p_ts;
 	unsigned char ts_buf[PACK_BYTE_SIZE]={0};
-	#if 1
+	#if 0
 	int i_scrambling=0b10;
 	ts_set_scrambling(pid_ac3, 0);
 	ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
 	#endif
+	p_ts=ts_buf;
 	while(1){
+		pts=pcr=0;
 		memset(pid_array,0,sizeof(pid_array));
+		memset(ts_buf,0,PACK_BYTE_SIZE);
+		tsp_monitor_read(&targ, VIDEO_PID, 0, ts_buf);
+		if(ts_get_unitstart(p_ts)&&ts_has_adaptation(p_ts)&&tsaf_has_pcr(p_ts)){
+			pcr=tsaf_get_pcr(p_ts);
+			TRACE("pcr:%lx\n",pcr);
+		}
+		//cs_sleepms(10);
+		//continue;
+		memset(ts_buf,0,PACK_BYTE_SIZE);
 		tsp_monitor_read(&targ, TEST_PID, 0, ts_buf);
-		p_ts=ts_buf;
 		header_size = TS_HEADER_SIZE + (ts_has_adaptation(p_ts) ? 1+ ts_get_adaptation(p_ts) : 0) ;
-		goto jump;
+		
+		//goto jump;
 		if(ts_get_unitstart(p_ts) &&pes_validate(p_ts+header_size)){//has pes header
 			if(pes_validate_header(p_ts + header_size) &&pes_has_pts(p_ts + header_size)
                 		&&pes_validate_pts(p_ts + header_size)){
                 //pes_payload_len=pes_get_length(p_ts + header_size)-pes_get_headerlength(p_ts + header_size);
 				pts=pes_get_pts(p_ts + header_size);
 				header_size = TS_HEADER_SIZE + (ts_has_adaptation(pid_ac3) ? 1+ ts_get_adaptation(pid_ac3) : 0) ;
-				jump:
-				printf("========pid:%0d=======pts:%lx=============\n",TEST_PID,pts);
+				//jump:
+				printf("========pid:%0d=======pts:%lx======pcr:%lx=======\n",TEST_PID,pts,pcr);
 				pid_array[0]=TEST_PID;
 				//ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
 				//cs_sleepms(20);
-				if(1){
+				if(0){
 					static int tm=0;
 					uint64_t pts_replacer=0;
 					int cur_tm=(int)time((time_t *) 0);
@@ -965,13 +988,13 @@ int init_tsp_reg(char *dev) {
 						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
 						pts_replacer=read_pts(&targ);
 						TRACE("read pts from replacer :%lx \n",pts_replacer);
-						write_pts(&targ,pts);
+						if(pts>0) write_pts(&targ,pts);
 						TRACE("replace byte:%02x,[%ld], interval: %f\n",
 							pid_ac3[188-2],pts_replacer-pts,((float)(pts_replacer-pts))*100/9);
-						cs_sleepms(50);
+						cs_sleepms(10);
 						
 						tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
-						cs_sleepms(50);
+						cs_sleepms(10);
 						
 					
 				}

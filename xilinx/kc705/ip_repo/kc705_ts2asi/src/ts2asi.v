@@ -130,7 +130,8 @@ module ts2asi #(
 
 	my_fifo #(
 			.DATA_WIDTH(FIFO_DATA_WIDTH),
-			.BULK_OF_DATA(1)
+			.BULK_OF_DATA(4),
+			.BULK_DEPTH(8)
 		) xiaofei_fifo (
 			.rst_n(rst_n),
 			.wclk(din_clk),

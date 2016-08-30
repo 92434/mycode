@@ -213,37 +213,37 @@ module dvb_s2_ram #(
 						rdata <= power_on_switch_reg;
 					end
 					1: begin
-						rdata <= mod_mode_cfg;
+						rdata <= mod_mode_cfg_reg;
 					end
 					2: begin
-						rdata <= ldpc_mode_cfg;
+						rdata <= ldpc_mode_cfg_reg;
 					end
 					3: begin
-						rdata <= frame_mode_cfg;
+						rdata <= frame_mode_cfg_reg;
 					end
 					4: begin
-						rdata <= pilot_mode_cfg;
+						rdata <= pilot_mode_cfg_reg;
 					end
 					5: begin
-						rdata <= srrc_mode;
+						rdata <= srrc_mode_reg;
 					end
 					6: begin
-						rdata <= dvb_s_convolution_mode;
+						rdata <= dvb_s_convolution_mode_reg;
 					end
 					7: begin
-						rdata <= dvb_s_mode;
+						rdata <= dvb_s_mode_reg;
 					end
 					8: begin
-						rdata <= TS_Source_mode;
+						rdata <= TS_Source_mode_reg;
 					end
 					9: begin
 						rdata <= SYS_Freq_Num_reg;
 					end
 					10: begin
-						rdata <= SYS_Baud_Num;
+						rdata <= SYS_Baud_Num_reg;
 					end
 					11: begin
-						rdata <= Freq_Inv_mode;
+						rdata <= Freq_Inv_mode_reg;
 					end
 					12: begin
 						rdata <= fs_en2_count_reg;
