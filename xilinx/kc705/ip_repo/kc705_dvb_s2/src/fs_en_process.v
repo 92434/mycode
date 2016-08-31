@@ -33,6 +33,7 @@ module fs_en_process # (
 
 	wire rdata;
 	reg r_enable = 0;
+	reg r_enable_reg = 0;
 	wire r_ready;
 	wire error_full;
 	wire error_empty;
@@ -57,9 +58,12 @@ module fs_en_process # (
 	always @(posedge sys_clk) begin
 		if(rst_n == 0) begin
 			r_enable <= 0;
+			r_enable_reg <= 0;
 		end
 		else begin
 			r_enable <= 0;
+			r_enable_reg <= r_enable;
+
 			if(r_ready == 1) begin
 				r_enable <= 1;
 			end
@@ -68,6 +72,5 @@ module fs_en_process # (
 		end
 	end
 
-	//assign fs_en_on_sys_clk = (r_enable == 1) ? sys_clk : 0;
-	assign fs_en_on_sys_clk = (r_enable == 1) ? 1 : 0;
+	assign fs_en_on_sys_clk = r_enable_reg;
 endmodule

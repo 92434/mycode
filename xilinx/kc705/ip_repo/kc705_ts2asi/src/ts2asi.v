@@ -99,13 +99,13 @@ module ts2asi #(
 		end
 		else begin
 			r_enable <= 0;
+			r_enable_R <= r_enable;
 
 			if((ce == 1) && (r_ready == 1)) begin
 				r_enable <= 1;
 			end
 			else begin
 			end
-			r_enable_R <= r_enable;
 		end
 	end
 
