@@ -75,7 +75,8 @@ vn y "+y
 vn p "+p
 
 "format code
-nmap <S-F> <Esc>:call CodeFormat()<CR>
+"nmap <S-F> <Esc>:call CodeFormat()<CR>
+nmap <silent> <leader>ff <Esc>:call CodeFormat()<CR>
 
 function! Path()
 	":echo substitute(expand("%:p:h"), ".*", "\\U\\0", "")
