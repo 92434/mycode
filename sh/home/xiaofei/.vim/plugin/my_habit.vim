@@ -74,6 +74,9 @@ nmap <F5> :call UpdateFile()<CR>
 vn y "+y
 vn p "+p
 
+"format code
+nmap <S-F> <Esc>:call CodeFormat()<CR>
+
 function! Path()
 	":echo substitute(expand("%:p:h"), ".*", "\\U\\0", "")
 	"echo expand("%:p")
@@ -84,3 +87,33 @@ endfunction
 function! UpdateFile()
 	:e
 endfunction
+
+
+"调用AStyle程序，进行代码美化
+func CodeFormat()
+	"取得当前光标所在行号
+	let lineNum = line(".")
+	"C源程序
+	if &filetype == 'c'
+		"执行调用外部程序的命令
+		exec "%! astyle -A3Lfpjk3NS"
+	"H头文件(文件类型识别为cpp)，CPP源程序
+	elseif &filetype == 'cpp'
+		"执行调用外部程序的命令
+		exec "%! astyle -A3Lfpjk3NS"
+	"JAVA源程序
+	elseif &filetype == 'java'
+		"执行调用外部程序的命令
+		exec "%! astyle -A2Lfpjk3NS"
+	"JS源程序
+	elseif &filetype == 'js'
+		"执行调用外部程序的命令
+		call g:Jsbeautify()
+	else
+		"提示信息
+		echo "不支持".&filetype."文件类型。"
+	endif
+	"返回先前光标所在行
+	exec lineNum
+endfunc
+"映射代码美化函数到Shift+f快捷键
