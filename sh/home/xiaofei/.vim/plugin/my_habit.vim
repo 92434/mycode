@@ -97,22 +97,23 @@ func CodeFormat()
 	"C源程序
 	if &filetype == 'c'
 		"执行调用外部程序的命令
-		exec "%! astyle -A3Lfpjk3NS"
+		exec "%! astyle -A8Lfpjk3NST"
 	"H头文件(文件类型识别为cpp)，CPP源程序
 	elseif &filetype == 'cpp'
 		"执行调用外部程序的命令
-		exec "%! astyle -A3Lfpjk3NS"
+		exec "%! astyle -A8Lfpjk3NST"
 	"JAVA源程序
 	elseif &filetype == 'java'
 		"执行调用外部程序的命令
 		exec "%! astyle -A2Lfpjk3NS"
 	"JS源程序
-	elseif &filetype == 'js'
+	elseif &filetype == 'javascript'
 		"执行调用外部程序的命令
 		call g:Jsbeautify()
 	else
 		"提示信息
-		echo "不支持".&filetype."文件类型。"
+		echo "不支持".&filetype."文件类型。按c类型处理-_-"
+		exec "%! astyle -A8Lfpjk3NST"
 	endif
 	"返回先前光标所在行
 	exec lineNum
