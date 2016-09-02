@@ -90,32 +90,32 @@ function! UpdateFile()
 endfunction
 
 
-"µ÷ÓÃAStyle³ÌÐò£¬½øÐÐ´úÂëÃÀ»¯
+"è°ƒç”¨AStyleç¨‹åºï¼Œè¿›è¡Œä»£ç ç¾ŽåŒ–
 func CodeFormat()
-	"È¡µÃµ±Ç°¹â±êËùÔÚÐÐºÅ
+	"å–å¾—å½“å‰å…‰æ ‡æ‰€åœ¨è¡Œå·
 	let lineNum = line(".")
-	"CÔ´³ÌÐò
+	"Cæºç¨‹åº
 	if &filetype == 'c'
-		"Ö´ÐÐµ÷ÓÃÍâ²¿³ÌÐòµÄÃüÁî
+		"æ‰§è¡Œè°ƒç”¨å¤–éƒ¨ç¨‹åºçš„å‘½ä»¤
 		exec "%! astyle -A8Lfpjk3NST"
-	"HÍ·ÎÄ¼þ(ÎÄ¼þÀàÐÍÊ¶±ðÎªcpp)£¬CPPÔ´³ÌÐò
+	"Hå¤´æ–‡ä»¶(æ–‡ä»¶ç±»åž‹è¯†åˆ«ä¸ºcpp)ï¼ŒCPPæºç¨‹åº
 	elseif &filetype == 'cpp'
-		"Ö´ÐÐµ÷ÓÃÍâ²¿³ÌÐòµÄÃüÁî
+		"æ‰§è¡Œè°ƒç”¨å¤–éƒ¨ç¨‹åºçš„å‘½ä»¤
 		exec "%! astyle -A8Lfpjk3NST"
-	"JAVAÔ´³ÌÐò
+	"JAVAæºç¨‹åº
 	elseif &filetype == 'java'
-		"Ö´ÐÐµ÷ÓÃÍâ²¿³ÌÐòµÄÃüÁî
+		"æ‰§è¡Œè°ƒç”¨å¤–éƒ¨ç¨‹åºçš„å‘½ä»¤
 		exec "%! astyle -A2Lfpjk3NS"
-	"JSÔ´³ÌÐò
+	"JSæºç¨‹åº
 	elseif &filetype == 'javascript'
-		"Ö´ÐÐµ÷ÓÃÍâ²¿³ÌÐòµÄÃüÁî
+		"æ‰§è¡Œè°ƒç”¨å¤–éƒ¨ç¨‹åºçš„å‘½ä»¤
 		call g:Jsbeautify()
 	else
-		"ÌáÊ¾ÐÅÏ¢
-		echo "²»Ö§³Ö".&filetype."ÎÄ¼þÀàÐÍ¡£°´cÀàÐÍ´¦Àí-_-"
+		"æç¤ºä¿¡æ¯
+		echo "ä¸æ”¯æŒ".&filetype."æ–‡ä»¶ç±»åž‹ã€‚æŒ‰cç±»åž‹å¤„ç†-_-"
 		exec "%! astyle -A8Lfpjk3NST"
 	endif
-	"·µ»ØÏÈÇ°¹â±êËùÔÚÐÐ
+	"è¿”å›žå…ˆå‰å…‰æ ‡æ‰€åœ¨è¡Œ
 	exec lineNum
 endfunc
-"Ó³Éä´úÂëÃÀ»¯º¯Êýµ½Shift+f¿ì½Ý¼ü
+"æ˜ å°„ä»£ç ç¾ŽåŒ–å‡½æ•°åˆ°Shift+få¿«æ·é”®

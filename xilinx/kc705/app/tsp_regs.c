@@ -1,10 +1,10 @@
-#include <stdio.h>     
-#include <unistd.h>    
+#include <stdio.h>
+#include <unistd.h>
 #include <signal.h>
-#include <stdlib.h>   
-#include <errno.h>    
+#include <stdlib.h>
+#include <errno.h>
 #include <string.h>
-#include <fcntl.h>    
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
@@ -42,14 +42,16 @@ typedef enum {
 
 static int stop = 0;
 
-static void default_sig_action(int signo, siginfo_t *info, void *context) {
+static void default_sig_action(int signo, siginfo_t *info, void *context)
+{
 	printf("xiaofei:%s called! info->si_signo:%d\n", __func__, info->si_signo);
 	stop = 1;
 
 	return;
 }
 
-void printids(const char *s) {
+void printids(const char *s)
+{
 	pid_t pid;
 	pthread_t tid;
 	pid = getpid();
@@ -62,7 +64,8 @@ typedef struct {
 	unsigned char *buffer;
 } thread_arg_t;
 
-int read_regs(thread_arg_t *targ, int addr, int count) {
+int read_regs(thread_arg_t *targ, int addr, int count)
+{
 	int nread;
 
 	lseek(targ->fd, ADDR_OFFSET(addr), SEEK_SET);
@@ -71,7 +74,8 @@ int read_regs(thread_arg_t *targ, int addr, int count) {
 	return nread;
 }
 
-int write_regs(thread_arg_t *targ, int addr, int count) {
+int write_regs(thread_arg_t *targ, int addr, int count)
+{
 	int nwrite;
 
 	lseek(targ->fd, ADDR_OFFSET(addr), SEEK_SET);
@@ -80,7 +84,8 @@ int write_regs(thread_arg_t *targ, int addr, int count) {
 	return nwrite;
 }
 
-void *read_fn(void *arg) {
+void *read_fn(void *arg)
+{
 	thread_arg_t *targ = (thread_arg_t *)arg;
 
 	//printids("read_fn: ");
@@ -88,24 +93,29 @@ void *read_fn(void *arg) {
 	while(stop == 0) {
 		return NULL;
 	}
+
 	return NULL;
 }
 
-void *write_fn(void *arg) {
+void *write_fn(void *arg)
+{
 	thread_arg_t *targ = (thread_arg_t *)arg;
 
 	while(stop == 0) {
 		return NULL;
 	}
+
 	return NULL;
 }
 
-int select_slot(thread_arg_t *targ, uint32_t slot) {
+int select_slot(thread_arg_t *targ, uint32_t slot)
+{
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
 	*pbuffer = slot;//
 	ret = write_regs(targ, ADDR_INDEX, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
@@ -114,12 +124,14 @@ int select_slot(thread_arg_t *targ, uint32_t slot) {
 	return ret;
 }
 
-int select_pid_slot(thread_arg_t *targ, uint32_t pid_slot) {
+int select_pid_slot(thread_arg_t *targ, uint32_t pid_slot)
+{
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
 	*pbuffer = pid_slot;//
 	ret = write_regs(targ, ADDR_PID_INDEX, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
@@ -128,12 +140,14 @@ int select_pid_slot(thread_arg_t *targ, uint32_t pid_slot) {
 	return ret;
 }
 
-int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable, bool pid_change, bool pid_common_slot_special_feature) {
+int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable, bool pid_change, bool pid_common_slot_special_feature)
+{
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
 	*pbuffer = PID_INFO(pid_common_slot_special_feature, pid_change, pid_enable, pid);
 	ret = write_regs(targ, ADDR_PID, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
@@ -142,15 +156,18 @@ int set_pid(thread_arg_t *targ, uint32_t pid, bool pid_enable, bool pid_change, 
 	return ret;
 }
 
-int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable, bool *pid_change, bool *pid_common_slot_special_feature) {
+int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable, bool *pid_change, bool *pid_common_slot_special_feature)
+{
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
 	ret = read_regs(targ, ADDR_PID, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
 	}
+
 	*pid = *pbuffer & 0xffff;
 	*pid_enable = (((*pbuffer >> 16) & 1) == 0) ? false : true;
 	*pid_change = (((*pbuffer >> 17) & 1) == 0) ? false : true;
@@ -158,25 +175,30 @@ int get_pid(thread_arg_t *targ, uint32_t *pid, bool *pid_enable, bool *pid_chang
 	return ret;
 }
 
-int get_matched_count(thread_arg_t *targ, uint32_t *matched_count) {
+int get_matched_count(thread_arg_t *targ, uint32_t *matched_count)
+{
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
 	ret = read_regs(targ, ADDR_MATCHED_COUNT, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
 	}
-	*matched_count = *pbuffer; 
+
+	*matched_count = *pbuffer;
 	return ret;
 }
 
-int set_pts(thread_arg_t *targ, uint32_t pts_low, uint32_t pts_high) {
+int set_pts(thread_arg_t *targ, uint32_t pts_low, uint32_t pts_high)
+{
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
 	*pbuffer = pts_low;
 	ret = write_regs(targ, ADDR_PTS_LOW, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
@@ -184,6 +206,7 @@ int set_pts(thread_arg_t *targ, uint32_t pts_low, uint32_t pts_high) {
 
 	*pbuffer = pts_high;
 	ret = write_regs(targ, ADDR_PTS_HIGH, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
@@ -192,32 +215,39 @@ int set_pts(thread_arg_t *targ, uint32_t pts_low, uint32_t pts_high) {
 	return ret;
 }
 
-int get_pts(thread_arg_t *targ, uint32_t *pts_low, uint32_t *pts_high) {
+int get_pts(thread_arg_t *targ, uint32_t *pts_low, uint32_t *pts_high)
+{
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
 	ret = read_regs(targ, ADDR_PTS_LOW, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
 	}
+
 	*pts_low = *pbuffer;
 
 	ret = read_regs(targ, ADDR_PTS_HIGH, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
 	}
+
 	*pts_high = *pbuffer;
 	return ret;
 }
 
-int set_slot_enable(thread_arg_t *targ, bool slot_enable) {
+int set_slot_enable(thread_arg_t *targ, bool slot_enable)
+{
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
 	*pbuffer = slot_enable ? 1 : 0;//
 	ret = write_regs(targ, ADDR_MATCH_ENABLE, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
@@ -226,11 +256,13 @@ int set_slot_enable(thread_arg_t *targ, bool slot_enable) {
 	return ret;
 }
 
-int get_slot_enable(thread_arg_t *targ, bool *slot_enable) {
+int get_slot_enable(thread_arg_t *targ, bool *slot_enable)
+{
 	int ret = 0;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
 
 	ret = read_regs(targ, ADDR_MATCH_ENABLE, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
@@ -241,7 +273,8 @@ int get_slot_enable(thread_arg_t *targ, bool *slot_enable) {
 	return ret;
 }
 
-int write_ts_data(thread_arg_t *targ, int tx_size, unsigned char slot) {
+int write_ts_data(thread_arg_t *targ, int tx_size, unsigned char slot)
+{
 	int ret = 0;
 	int i;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
@@ -289,6 +322,7 @@ int write_ts_data(thread_arg_t *targ, int tx_size, unsigned char slot) {
 	}
 
 	ret = write_regs(targ, ADDR_TS_DATA_BASE, tx_size);
+
 	if (ret < 0) {
 		printf("tx_size:%d\n", tx_size);
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -298,7 +332,8 @@ int write_ts_data(thread_arg_t *targ, int tx_size, unsigned char slot) {
 	return ret;
 }
 
-int read_ts_data(thread_arg_t *targ, int rx_size) {
+int read_ts_data(thread_arg_t *targ, int rx_size)
+{
 	int ret = 0;
 	int i;
 	uint32_t *pbuffer = (uint32_t *)(targ->buffer);
@@ -309,6 +344,7 @@ int read_ts_data(thread_arg_t *targ, int rx_size) {
 
 	*pbuffer = 0;//any value
 	ret = write_regs(targ, ADDR_READ_REQUEST, sizeof(uint32_t));
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
@@ -316,39 +352,48 @@ int read_ts_data(thread_arg_t *targ, int rx_size) {
 
 	*pbuffer = 0;
 	i = 0;
+
 	while(*pbuffer != 1) {
 		ret = read_regs(targ, ADDR_READ_REQUEST, sizeof(uint32_t));
+
 		if (ret < 0) {
 			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 			return ret;
 		}
+
 		if(i >= 200) {
 			printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 			return -1;
 		}
+
 		i++;
 		usleep(10000);
 	}
 
 	ret = read_regs(targ, ADDR_TS_DATA_BASE, rx_size);//will valid after 3 clock
+
 	if (ret < 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
 	}
 
 	printf("\n");
+
 	for(i = 0; i < rx_size; i++) {
 		if((i != 0) && (i % 16 == 0)) {
 			printf("\n");
 		}
+
 		printf("%02x ", targ->buffer[i]);
 	}
+
 	printf("\n");
 
 	return ret;
 }
 
-int test_set(thread_arg_t *targ) {
+int test_set(thread_arg_t *targ)
+{
 	int ret = 0;
 	int i;
 
@@ -378,6 +423,7 @@ int test_set(thread_arg_t *targ) {
 		}
 
 		select_slot(targ, i);
+
 		for(j = 0; j < pid_slot; j++) {//pid_slot
 			uint32_t pid;
 			bool pid_enable;
@@ -386,6 +432,7 @@ int test_set(thread_arg_t *targ) {
 
 			switch(j) {
 				case 0:
+
 					switch(i) {
 						case 0:
 							pid = 0x0000;
@@ -418,6 +465,7 @@ int test_set(thread_arg_t *targ) {
 							pid_common_slot_special_feature = false;
 							break;
 					}
+
 					break;
 				case 9:
 					pid = 0x0001;
@@ -432,6 +480,7 @@ int test_set(thread_arg_t *targ) {
 					pid_common_slot_special_feature = false;
 					break;
 			}
+
 			select_pid_slot(targ, j);
 			set_pid(targ, pid, pid_enable, pid_change, pid_common_slot_special_feature);
 			set_pts(targ, 0x12345678, 0x12345678);
@@ -445,7 +494,8 @@ int test_set(thread_arg_t *targ) {
 	return ret;
 }
 
-int test_get(thread_arg_t *targ) {
+int test_get(thread_arg_t *targ)
+{
 	int ret = 0;
 	int i;
 
@@ -476,6 +526,7 @@ int test_get(thread_arg_t *targ) {
 				default:
 					break;
 			}
+
 			select_pid_slot(targ, j);
 			get_pid(targ, &pid, &pid_enable, &pid_change, &pid_common_slot_special_feature);
 			get_pts(targ, &pts_low, &pts_high);
@@ -492,7 +543,8 @@ int test_get(thread_arg_t *targ) {
 	return ret;
 }
 
-void main_proc(thread_arg_t *arg) {
+void main_proc(thread_arg_t *arg)
+{
 	thread_arg_t *targ = (thread_arg_t *)arg;
 
 	//printids("main_proc: ");
@@ -504,17 +556,20 @@ void main_proc(thread_arg_t *arg) {
 	}
 }
 
-int read_write(thread_arg_t *targ) {
+int read_write(thread_arg_t *targ)
+{
 	int err;
 	pthread_t rtid;
 	pthread_t wtid;
 
 	err = pthread_create(&rtid, NULL, read_fn, targ);
+
 	if (err != 0) {
 		printf("can't create thread: %s\n", strerror(err));
 	}
 
 	err = pthread_create(&wtid, NULL, write_fn, targ);
+
 	if (err != 0) {
 		printf("can't create thread: %s\n", strerror(err));
 	}
@@ -522,13 +577,14 @@ int read_write(thread_arg_t *targ) {
 	main_proc(targ);
 
 	//printids("main thread:");
-	pthread_join(rtid,NULL);
-	pthread_join(wtid,NULL);
+	pthread_join(rtid, NULL);
+	pthread_join(wtid, NULL);
 
 	return EXIT_SUCCESS;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 	int ret = 0;
 
 	char *dev = argv[1];
@@ -545,7 +601,7 @@ int main(int argc, char **argv) {
 		return ret;
 	}
 
-	if ((targ.fd = open(dev, O_RDWR))<0) {
+	if ((targ.fd = open(dev, O_RDWR)) < 0) {
 		printf("err: can't open device(%s)!(%s)\n", dev, strerror(errno));
 		ret = -1;
 		return ret;
@@ -556,10 +612,12 @@ int main(int argc, char **argv) {
 	//fcntl(targ.fd, F_SETFL, flags | O_NONBLOCK);
 
 	ret = ioctl(targ.fd, PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE, &mmap_size);
+
 	if (ret != 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
 	}
+
 	printf("mmap_size:%d(%x)\n", mmap_size, mmap_size);
 
 	//mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, targ.fd, (off_t)0);
@@ -576,6 +634,7 @@ int main(int argc, char **argv) {
 	}
 
 	targ.buffer = (unsigned char *)malloc(BUFSIZE);
+
 	if(targ.buffer == 0) {
 		printf("err: no memory for targ.buffer!\n");
 		ret = -1;
