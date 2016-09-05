@@ -176,7 +176,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: axi_gpio_0, and set properties
   set axi_gpio_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0 ]
-  set_property -dict [ list CONFIG.C_GPIO2_WIDTH {32} CONFIG.C_GPIO_WIDTH {26} CONFIG.C_INTERRUPT_PRESENT {0} CONFIG.C_IS_DUAL {0}  ] $axi_gpio_0
+  set_property -dict [ list CONFIG.C_GPIO_WIDTH {17} CONFIG.C_INTERRUPT_PRESENT {0} CONFIG.C_IS_DUAL {0}  ] $axi_gpio_0
 
   # Create instance: axi_interconnect_0, and set properties
   set axi_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0 ]

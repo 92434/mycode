@@ -60,8 +60,7 @@ module ts2asi #(
 		output wire error_full,
 		output wire error_empty,
 
-		output reg ce_R0 = 0,
-		output reg ce_R1 = 0,
+		output reg ce_R2 = 0,
 		output reg ce, //Clock enable for parallel domain
 		output reg [4 : 0] ce_sr,
 		output wire start,
@@ -69,19 +68,23 @@ module ts2asi #(
 		output wire [7:0] din_8b_R_debug
 	);
 
-
+	reg ce_R0 = 0;
+	reg ce_R1 = 0;
 	// Tx clock enable generation
 	always @(posedge clk) begin
 		if (rst_n == 0) begin
 			ce_sr <= 5'b00001;
+			ce <= 1'b0;
 			ce_R0 <= 0;
 			ce_R1 <= 0;
-			ce <= 1'b0;
+			ce_R2 <= 0;
 		end
 		else begin
+			ce <= ce_sr[4];
 			ce_R0 <= ce;
 			ce_R1 <= ce_R0;
-			ce <= ce_sr[4];
+			ce_R2 <= ce_R1;
+
 			ce_sr <= {ce_sr[3:0], ce_sr[4]};
 		end
 	end 
@@ -95,11 +98,12 @@ module ts2asi #(
 
 	always @(posedge clk) begin
 		if (rst_n == 0) begin
+			r_enable <= 0;
 			r_enable_R <= 0;
 		end
 		else begin
-			r_enable <= 0;
 			r_enable_R <= r_enable;
+			r_enable <= 0;
 
 			if((ce == 1) && (r_ready == 1)) begin
 				r_enable <= 1;
@@ -114,7 +118,7 @@ module ts2asi #(
 			dout <= 0;
 		end
 		else begin
-			if(r_enable == 1) begin
+			if(r_enable_R == 1) begin
 				dout <= rdata;
 			end
 			else begin
@@ -155,7 +159,7 @@ module ts2asi #(
 		.din(dout[7 : 0]),
 		.kin(dout[8]),
 		.clk(clk),
-		.ce(ce_R1),
+		.ce(ce_R2),
 		.dout(data_enc10b),
 		.valid(),
 		.code_err());
@@ -168,7 +172,7 @@ module ts2asi #(
 		.start(start),
 		.sclk_0(clk),
 		.sclk_180(~clk),
-		.ce(ce_R1),
+		.ce(ce_R2),
 		.reset(~rst_n),
 		.din_10b(data_enc10b),
 		.sdout_p(asi_out_p),

@@ -99,7 +99,7 @@ module monitor #(
 					end
 				end
 				1: begin
-					if((matched_index == PACK_BYTE_SIZE) && (ram_data_valid == 1)) begin
+					if((matched_index == PACK_BYTE_SIZE - 1) && (ram_data_valid == 1)) begin
 						pump_data_state <= 2;
 					end
 					else begin
@@ -161,6 +161,11 @@ module monitor #(
 	wire match_states;
 	assign match_states = (({mpeg_data_d1[5 - 1 : 0], mpeg_data} == ram_for_pid) && (pid_match_enable == 1) && (match_enable == 1)) ? 1 : 0;
 
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] matched_word_index;
+	wire [C_S_AXI_DATA_WIDTH - 1 : 0] matched_index_word_offset;
+	assign matched_word_index = matched_index / 4;
+	assign matched_index_word_offset = (8 * (matched_index % 4));
+
 	always @(posedge mpeg_clk) begin
 		if(rst_n == 0) begin
 			matched_pid <= 0;
@@ -172,7 +177,7 @@ module monitor #(
 			if(mpeg_valid == 1) begin
 				if(matched_pid == 1) begin
 					if((matched_index >= 0) && (matched_index < PACK_BYTE_SIZE)) begin
-						ram_for_data[matched_index / 4][(8 * (matched_index % 4)) +: 8] <= mpeg_data_d3;
+						ram_for_data[matched_word_index][matched_index_word_offset +: 8] <= mpeg_data_d3;
 
 						matched_index <= matched_index + 1;
 					end

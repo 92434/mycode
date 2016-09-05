@@ -40,7 +40,7 @@ module testbench #(
 	wire [FIFO_DATA_WIDTH - 1 : 0] din;
 	wire [FIFO_DATA_WIDTH - 1 : 0] rdata;
 	wire [FIFO_DATA_WIDTH - 1 : 0] dout;
-	wire ce_R1;
+	wire ce_R2;
 	wire ce;
 	wire [4 : 0] ce_sr;
 	wire r_enable;
@@ -139,7 +139,7 @@ module testbench #(
 			.error_full(error_full),
 			.error_empty(error_empty),
 
-			.ce_R1(ce_R1),
+			.ce_R2(ce_R2),
 			.ce(ce),
 			.ce_sr(ce_sr),
 			.start(start),

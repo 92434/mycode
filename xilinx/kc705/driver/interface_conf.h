@@ -63,12 +63,12 @@
 
 #elif defined(KC705_TSP)
 
-#define SPI_MISO (249)
-#define SPI_MOSI (248)
-#define SPI_SCK (247)
-#define SPI_CS (250)
-#define IIC_SDA0 (231)
-#define IIC_SCL0 (230)
+#define SPI_MISO (-1)
+#define SPI_MOSI (-1)
+#define SPI_SCK (-1)
+#define SPI_CS (-1)
+#define IIC_SDA0 (240)
+#define IIC_SCL0 (239)
 #endif
 
 #endif //ifndef _INTERFACE_IO_H
