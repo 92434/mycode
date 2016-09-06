@@ -145,274 +145,277 @@ def remove_unused_pin(map_kc705_pin_net):
 		print i
 	print 'total:', len(list_unsupport_pin_net)
 
-def get_list_ip_net_pin_port_des(map_kc705_pin_net):
-	list_ip_net_pin_port_des = []
-
-	map_extra_net_property_port_property = {}
-	list_net_port = []
-	map_extra_net_property_net_property = {}
-	list_pin_port = []
-
-	#map_extra_net_property_port_property = {
-	#	'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'symbol_2x_oe' : ['slew FAST'],
-
-	#	'symbol_2x_re_out[0]' : ['slew FAST'],
-	#	'symbol_2x_re_out[1]' : ['slew FAST'],
-	#	'symbol_2x_re_out[2]' : ['slew FAST'],
-	#	'symbol_2x_re_out[3]' : ['slew FAST'],
-	#	'symbol_2x_re_out[4]' : ['slew FAST'],
-	#	'symbol_2x_re_out[5]' : ['slew FAST'],
-	#	'symbol_2x_re_out[6]' : ['slew FAST'],
-	#	'symbol_2x_re_out[7]' : ['slew FAST'],
-	#	'symbol_2x_re_out[8]' : ['slew FAST'],
-	#	'symbol_2x_re_out[9]' : ['slew FAST'],
-	#	'symbol_2x_re_out[10]' : ['slew FAST'],
-	#	'symbol_2x_re_out[11]' : ['slew FAST'],
-	#	'symbol_2x_re_out[12]' : ['slew FAST'],
-	#	'symbol_2x_re_out[13]' : ['slew FAST'],
-	#	'symbol_2x_re_out[14]' : ['slew FAST'],
-	#	'symbol_2x_re_out[15]' : ['slew FAST'],
-
-	#	'symbol_2x_im_out[0]' : ['slew FAST'],
-	#	'symbol_2x_im_out[1]' : ['slew FAST'],
-	#	'symbol_2x_im_out[2]' : ['slew FAST'],
-	#	'symbol_2x_im_out[3]' : ['slew FAST'],
-	#	'symbol_2x_im_out[4]' : ['slew FAST'],
-	#	'symbol_2x_im_out[5]' : ['slew FAST'],
-	#	'symbol_2x_im_out[6]' : ['slew FAST'],
-	#	'symbol_2x_im_out[7]' : ['slew FAST'],
-	#	'symbol_2x_im_out[8]' : ['slew FAST'],
-	#	'symbol_2x_im_out[9]' : ['slew FAST'],
-	#	'symbol_2x_im_out[10]' : ['slew FAST'],
-	#	'symbol_2x_im_out[11]' : ['slew FAST'],
-	#	'symbol_2x_im_out[12]' : ['slew FAST'],
-	#	'symbol_2x_im_out[13]' : ['slew FAST'],
-	#	'symbol_2x_im_out[14]' : ['slew FAST'],
-	#	'symbol_2x_im_out[15]' : ['slew FAST'],
-	#}
-	#
-	#list_net_port = [
-	#	('FMC_LPC_LA25_P', 'mpeg_clk'),
-	#	('FMC_LPC_LA29_P', 'mpeg_valid'),
-	#	('FMC_LPC_LA24_P', 'mpeg_data[0]'),
-	#	('FMC_LPC_LA24_N', 'mpeg_data[1]'),
-	#	('FMC_LPC_LA26_P', 'mpeg_data[2]'),
-	#	('FMC_LPC_LA31_P', 'mpeg_data[3]'),
-	#	('FMC_LPC_LA31_N', 'mpeg_data[4]'),
-	#	('FMC_LPC_LA28_P', 'mpeg_data[5]'),
-	#	('FMC_LPC_LA28_N', 'mpeg_data[6]'),
-	#	('FMC_LPC_LA29_N', 'mpeg_data[7]'),
-	#	('FMC_LPC_LA25_N', 'mpeg_sync'),
-
-	#	#('FMC_HPC_HA23_N', 'ts_out_sync'),
-	#	#('FMC_HPC_HA23_P', 'slot0_out_dump_flag'),
-
-	#	('FMC_LPC_LA10_P', 'symbol_2x_oe'),
-	#		
-	#	('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
-	#	('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
-	#	('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
-	#	('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
-	#	('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
-	#	('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
-	#	('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
-	#	('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
-	#	('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
-	#	('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
-	#	('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
-	#	('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
-	#	('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
-	#	('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
-	#	('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
-	#	('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
-
-	#	('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
-	#	('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
-	#	('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
-	#	('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
-	#	('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
-	#	('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
-	#	('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
-	#	('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
-	#	('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
-	#	('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
-	#	('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
-	#	('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
-	#	('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
-	#	('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
-	#	('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
-	#	('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
-
-	#	('FMC_LPC_LA22_N', 'clk_out2'),
-	#	('FMC_LPC_LA21_P', 'clk_out3'),
-
-	#	('FMC_LPC_LA20_P', 'clk_out4'),
-
-	#	('FMC_LPC_LA32_N', 'asi_out_p'),
-	#	('FMC_LPC_LA33_N', 'asi_out_n'),
-
-	#	('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
-
-	#	#('XADC_GPIO_0', 'clk_out1'),
-	#	#('USER_SMA_GPIO_P', 'asi_out'),
-	#	#('LCD_DB4_LS', 'asi_out'),
-	#	#('GPIO_SW_E', 'asi_out'),
-	#	('LCD_E_LS', 'lcm_din'),
-	#	('LCD_RS_LS', 'lcm_lp'),
-	#	('LCD_RW_LS', 'lcm_xscl'),
-	#	('XADC_GPIO_0', 'lcm_data[0]'),
-	#	('XADC_GPIO_1', 'lcm_data[1]'),
-	#	('XADC_GPIO_2', 'lcm_data[2]'),
-	#	('XADC_GPIO_3', 'lcm_data[3]'),
-	#	('LCD_DB4_LS', 'lcm_data[4]'),
-	#	('LCD_DB5_LS', 'lcm_data[5]'),
-	#	('LCD_DB6_LS', 'lcm_data[6]'),
-	#	('LCD_DB7_LS', 'lcm_data[7]'),
-	#]
-
-	#map_extra_net_property_port_property = {
-	#	'iic_scl': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#}
-
-	#list_net_port = [
-	#	('FMC_HPC_LA28_P', 'iic_scl'),
-	#	('FMC_HPC_LA21_P', 'iic_sda'),
-	#]
-
-	#map_extra_net_property_port_property = {
-	#	'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-	#	'bclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'lrclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	#'sdata[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#}
 
 
-	#map_extra_net_property_port_property = {
-	#	'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#	'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	#}
+def map_extra_net_property_port_property_iic_slave():
+	map_extra_net_property_port_property = {
+		'iic_scl': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	}
 
-	#list_net_port = [
-	#	('FMC_HPC_HA00_CC_P', 'mpeg_clk'),
-	#	('FMC_HPC_HA01_CC_P', 'mpeg_sync'),
-	#	('FMC_HPC_HA05_N', 'mpeg_valid'),
-	#	('FMC_HPC_HA00_CC_N', 'mpeg_data[0]'),
-	#	('FMC_HPC_HA01_CC_N', 'mpeg_data[1]'),
-	#	('FMC_HPC_HA02_P', 'mpeg_data[2]'),
-	#	('FMC_HPC_HA04_P', 'mpeg_data[3]'),
-	#	('FMC_HPC_HA03_N', 'mpeg_data[4]'),
-	#	('FMC_HPC_HA04_N', 'mpeg_data[5]'),
-	#	('FMC_HPC_HA05_P', 'mpeg_data[6]'),
-	#	('FMC_HPC_HA06_P', 'mpeg_data[7]'),
+	return map_extra_net_property_port_property
 
-	#	('FMC_HPC_HA10_P', 'asi_out_p'),
-	#	('FMC_HPC_HA10_N', 'asi_out_n'),
+def list_net_port_iic_slave():
+	list_net_port = [
+		('FMC_HPC_LA28_P', 'iic_scl'),
+		('FMC_HPC_LA21_P', 'iic_sda'),
+	]
 
-	#	('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
+	return list_net_port
 
-	#	('FMC_LPC_LA10_P', 'symbol_2x_oe'),
-	#      
-	#	('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
-	#	('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
-	#	('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
-	#	('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
-	#	('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
-	#	('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
-	#	('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
-	#	('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
-	#	('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
-	#	('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
-	#	('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
-	#	('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
-	#	('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
-	#	('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
-	#	('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
-	#	('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
+def map_extra_net_property_port_property_new_i2s_board():
+	map_extra_net_property_port_property = {
+		'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-	#	('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
-	#	('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
-	#	('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
-	#	('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
-	#	('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
-	#	('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
-	#	('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
-	#	('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
-	#	('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
-	#	('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
-	#	('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
-	#	('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
-	#	('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
-	#	('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
-	#	('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
-	#	('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
-	#]
+		'bclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
+		'bclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+
+		'bclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'lrclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'sdata[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	}
+
+	return map_extra_net_property_port_property
+
+def list_pin_port_new_i2s_board():
+	list_pin_port = [
+		('AG22', 'bclk[0]'),
+		('AH22', 'lrclk[0]'),
+		('AD23', 'sdata[0]'),
+		('AE24', 'bclk[1]'),
+		('AC22', 'lrclk[1]'),
+		('AD22', 'sdata[1]'),
+		('AF20', 'bclk[2]'),
+		('AF21', 'lrclk[2]'),
+		('AG20', 'sdata[2]'),
+		('AH20', 'bclk[3]'),
+		('AK20', 'lrclk[3]'),
+		('AK21', 'sdata[3]'),
+		('AE23', 'bclk[4]'),
+		('AF23', 'lrclk[4]'),
+		('AB24', 'sdata[4]'),
+		('AC25', 'bclk[5]'),
+		('AK23', 'lrclk[5]'),
+		('AK24', 'sdata[5]'),
+		('Y30', 'bclk[6]'),
+		('AA30', 'lrclk[6]'),
+		('AB29', 'sdata[6]'),
+		('AB30', 'bclk[7]'),
+		('AC29', 'lrclk[7]'),
+		('AC30', 'sdata[7]'),
+		('AB27', 'bclk[8]'),
+		('AC27', 'lrclk[8]'),
+		('AD29', 'sdata[8]'),
+		('AE29', 'bclk[9]'),
+		('AE30', 'lrclk[9]'),
+		('AF30', 'sdata[9]'),
+		('AE28', 'bclk[10]'),
+		('AF28', 'lrclk[10]'),
+		('AG30', 'sdata[10]'),
+		('AH30', 'bclk[11]'),
+		('AK29', 'lrclk[11]'),
+		('AK30', 'sdata[11]'),
+		('AJ28', 'bclk[12]'),
+		('AJ29', 'lrclk[12]'),
+		('AG27', 'sdata[12]'),
+		('AG28', 'bclk[13]'),
+		('AH26', 'lrclk[13]'),
+		('AH27', 'sdata[13]'),
+		('AJ27', 'bclk[14]'),
+		('AK28', 'lrclk[14]'),
+		('AJ26', 'sdata[14]'),
+		('AK26', 'bclk[15]'),
+		('AF26', 'lrclk[15]'),
+		('AF27', 'sdata[15]'),
+	]
+
+	return list_net_port
+def map_extra_net_property_port_property_new_tsp_board_j94():
+	map_extra_net_property_port_property = {
+		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
+	}
+
+	return map_extra_net_property_port_property
+
+def list_pin_port_new_tsp_board_j94():
+	list_pin_port = [
+		('D12', 'mpeg_clk'),
+		('H14', 'mpeg_sync'),
+		('E16', 'mpeg_valid'),
+		('D13', 'mpeg_data[0]'),
+		('G14', 'mpeg_data[1]'),
+		('D11', 'mpeg_data[2]'),
+		('F11', 'mpeg_data[3]'),
+		('B12', 'mpeg_data[4]'),
+		('E11', 'mpeg_data[5]'),
+		('F15', 'mpeg_data[6]'),
+		('D14', 'mpeg_data[7]'),
+
+		('A11', 'asi_out_p'),
+		('A12', 'asi_out_n'),
+
+		#('C29', 'fs_0p5_en'),#???G23
+
+		#('H25', 'symbol_2x_oe'),
+	      
+		#('H24', 'symbol_2x_re_out[0]'),
+		#('H26', 'symbol_2x_re_out[1]'),
+		#('B25', 'symbol_2x_re_out[2]'),
+		#('C26', 'symbol_2x_re_out[3]'),
+		#('C25', 'symbol_2x_re_out[4]'),
+		#('D26', 'symbol_2x_re_out[5]'),
+		#('D18', 'symbol_2x_re_out[6]'),
+		#('C27', 'symbol_2x_re_out[7]'),
+		#('D17', 'symbol_2x_re_out[8]'),
+		#('D27', 'symbol_2x_re_out[9]'),
+		#('K19', 'symbol_2x_re_out[10]'),
+		#('K20', 'symbol_2x_re_out[11]'),
+		#('L17', 'symbol_2x_re_out[12]'),
+		#('L18', 'symbol_2x_re_out[13]'),
+		#('J19', 'symbol_2x_re_out[14]'),
+		#('H19', 'symbol_2x_re_out[15]'),
+
+		#('C30', 'symbol_2x_im_out[0]'),
+		#('F27', 'symbol_2x_im_out[1]'),
+		#('D29', 'symbol_2x_im_out[2]'),
+		#('G27', 'symbol_2x_im_out[3]'),
+		#('E30', 'symbol_2x_im_out[4]'),
+		#('A30', 'symbol_2x_im_out[5]'),
+		#('E29', 'symbol_2x_im_out[6]'),
+		#('B30', 'symbol_2x_im_out[7]'),
+		#('G30', 'symbol_2x_im_out[8]'),
+		#('D28', 'symbol_2x_im_out[9]'),
+		#('H30', 'symbol_2x_im_out[10]'),
+		#('E28', 'symbol_2x_im_out[11]'),
+		#('F28', 'symbol_2x_im_out[12]'),
+		#('F30', 'symbol_2x_im_out[13]'),
+		#('G28', 'symbol_2x_im_out[14]'),
+		#('G29', 'symbol_2x_im_out[15]'),
+	]
+
+	return list_pin_port
+
+def list_net_port_new_tsp_board_j94():
+	list_net_port = [
+		('FMC_HPC_HA00_CC_P', 'mpeg_clk'),
+		('FMC_HPC_HA01_CC_P', 'mpeg_sync'),
+		('FMC_HPC_HA05_N', 'mpeg_valid'),
+		('FMC_HPC_HA00_CC_N', 'mpeg_data[0]'),
+		('FMC_HPC_HA01_CC_N', 'mpeg_data[1]'),
+		('FMC_HPC_HA02_P', 'mpeg_data[2]'),
+		('FMC_HPC_HA04_P', 'mpeg_data[3]'),
+		('FMC_HPC_HA03_N', 'mpeg_data[4]'),
+		('FMC_HPC_HA04_N', 'mpeg_data[5]'),
+		('FMC_HPC_HA05_P', 'mpeg_data[6]'),
+		('FMC_HPC_HA06_P', 'mpeg_data[7]'),
+
+		('FMC_HPC_HA10_P', 'asi_out_p'),
+		('FMC_HPC_HA10_N', 'asi_out_n'),
+
+		#('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
+
+		#('FMC_LPC_LA10_P', 'symbol_2x_oe'),
+	      
+		#('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
+		#('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
+		#('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
+		#('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
+		#('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
+		#('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
+		#('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
+		#('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
+		#('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
+		#('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
+		#('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
+		#('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
+		#('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
+		#('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
+		#('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
+		#('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
+
+		#('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
+		#('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
+		#('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
+		#('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
+		#('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
+		#('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
+		#('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
+		#('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
+		#('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
+		#('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
+		#('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
+		#('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
+		#('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
+		#('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
+		#('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
+		#('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
+	]
+
+	return list_net_port
+
+def map_extra_net_property_port_property_new_tsp_board_j97():
 	map_extra_net_property_port_property = {
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	}
 
+	return map_extra_net_property_port_property
+
+def list_net_port_new_tsp_board_j97():
 	list_net_port = [
 		('FMC_HPC_LA13_P', 'mpeg_clk'),
 		('FMC_HPC_LA14_P', 'mpeg_sync'),
@@ -428,114 +431,147 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 
 		('FMC_HPC_LA23_P', 'asi_out_p'),
 		('FMC_HPC_LA23_N', 'asi_out_n'),
-
 	]
 
-	#list_pin_port = [
-	#	('AG22', 'bclk[0]'),
-	#	('AH22', 'lrclk[0]'),
-	#	('AD23', 'sdata[0]'),
-	#	('AE24', 'bclk[1]'),
-	#	('AC22', 'lrclk[1]'),
-	#	('AD22', 'sdata[1]'),
-	#	('AF20', 'bclk[2]'),
-	#	('AF21', 'lrclk[2]'),
-	#	('AG20', 'sdata[2]'),
-	#	('AH20', 'bclk[3]'),
-	#	('AK20', 'lrclk[3]'),
-	#	('AK21', 'sdata[3]'),
-	#	('AE23', 'bclk[4]'),
-	#	('AF23', 'lrclk[4]'),
-	#	('AB24', 'sdata[4]'),
-	#	('AC25', 'bclk[5]'),
-	#	('AK23', 'lrclk[5]'),
-	#	('AK24', 'sdata[5]'),
-	#	('Y30', 'bclk[6]'),
-	#	('AA30', 'lrclk[6]'),
-	#	('AB29', 'sdata[6]'),
-	#	('AB30', 'bclk[7]'),
-	#	('AC29', 'lrclk[7]'),
-	#	('AC30', 'sdata[7]'),
-	#	('AB27', 'bclk[8]'),
-	#	('AC27', 'lrclk[8]'),
-	#	('AD29', 'sdata[8]'),
-	#	('AE29', 'bclk[9]'),
-	#	('AE30', 'lrclk[9]'),
-	#	('AF30', 'sdata[9]'),
-	#	('AE28', 'bclk[10]'),
-	#	('AF28', 'lrclk[10]'),
-	#	('AG30', 'sdata[10]'),
-	#	('AH30', 'bclk[11]'),
-	#	('AK29', 'lrclk[11]'),
-	#	('AK30', 'sdata[11]'),
-	#	('AJ28', 'bclk[12]'),
-	#	('AJ29', 'lrclk[12]'),
-	#	('AG27', 'sdata[12]'),
-	#	('AG28', 'bclk[13]'),
-	#	('AH26', 'lrclk[13]'),
-	#	('AH27', 'sdata[13]'),
-	#	('AJ27', 'bclk[14]'),
-	#	('AK28', 'lrclk[14]'),
-	#	('AJ26', 'sdata[14]'),
-	#	('AK26', 'bclk[15]'),
-	#	('AF26', 'lrclk[15]'),
-	#	('AF27', 'sdata[15]'),
-	#]
+	return list_net_port
 
-	#list_pin_port = [
-	#	('D12', 'mpeg_clk'),
-	#	('H14', 'mpeg_sync'),
-	#	('E16', 'mpeg_valid'),
-	#	('D13', 'mpeg_data[0]'),
-	#	('G14', 'mpeg_data[1]'),
-	#	('D11', 'mpeg_data[2]'),
-	#	('F11', 'mpeg_data[3]'),
-	#	('B12', 'mpeg_data[4]'),
-	#	('E11', 'mpeg_data[5]'),
-	#	('F15', 'mpeg_data[6]'),
-	#	('D14', 'mpeg_data[7]'),
+def map_extra_net_property_port_property_old_tsp_board_20160906():
+	map_extra_net_property_port_property = {
+		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
+		#'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
-	#	#('A11', 'asi_out_p'),
-	#	#('A12', 'asi_out_n'),
+		#'symbol_2x_oe' : ['slew FAST'],
 
-	#	('C29', 'fs_0p5_en'),#???G23
+		#'symbol_2x_re_out[0]' : ['slew FAST'],
+		#'symbol_2x_re_out[1]' : ['slew FAST'],
+		#'symbol_2x_re_out[2]' : ['slew FAST'],
+		#'symbol_2x_re_out[3]' : ['slew FAST'],
+		#'symbol_2x_re_out[4]' : ['slew FAST'],
+		#'symbol_2x_re_out[5]' : ['slew FAST'],
+		#'symbol_2x_re_out[6]' : ['slew FAST'],
+		#'symbol_2x_re_out[7]' : ['slew FAST'],
+		#'symbol_2x_re_out[8]' : ['slew FAST'],
+		#'symbol_2x_re_out[9]' : ['slew FAST'],
+		#'symbol_2x_re_out[10]' : ['slew FAST'],
+		#'symbol_2x_re_out[11]' : ['slew FAST'],
+		#'symbol_2x_re_out[12]' : ['slew FAST'],
+		#'symbol_2x_re_out[13]' : ['slew FAST'],
+		#'symbol_2x_re_out[14]' : ['slew FAST'],
+		#'symbol_2x_re_out[15]' : ['slew FAST'],
 
-	#	('H25', 'symbol_2x_oe'),
-	#      
-	#	('H24', 'symbol_2x_re_out[0]'),
-	#	('H26', 'symbol_2x_re_out[1]'),
-	#	('B25', 'symbol_2x_re_out[2]'),
-	#	('C26', 'symbol_2x_re_out[3]'),
-	#	('C25', 'symbol_2x_re_out[4]'),
-	#	('D26', 'symbol_2x_re_out[5]'),
-	#	('D18', 'symbol_2x_re_out[6]'),
-	#	('C27', 'symbol_2x_re_out[7]'),
-	#	('D17', 'symbol_2x_re_out[8]'),
-	#	('D27', 'symbol_2x_re_out[9]'),
-	#	('K19', 'symbol_2x_re_out[10]'),
-	#	('K20', 'symbol_2x_re_out[11]'),
-	#	('L17', 'symbol_2x_re_out[12]'),
-	#	('L18', 'symbol_2x_re_out[13]'),
-	#	('J19', 'symbol_2x_re_out[14]'),
-	#	('H19', 'symbol_2x_re_out[15]'),
+		#'symbol_2x_im_out[0]' : ['slew FAST'],
+		#'symbol_2x_im_out[1]' : ['slew FAST'],
+		#'symbol_2x_im_out[2]' : ['slew FAST'],
+		#'symbol_2x_im_out[3]' : ['slew FAST'],
+		#'symbol_2x_im_out[4]' : ['slew FAST'],
+		#'symbol_2x_im_out[5]' : ['slew FAST'],
+		#'symbol_2x_im_out[6]' : ['slew FAST'],
+		#'symbol_2x_im_out[7]' : ['slew FAST'],
+		#'symbol_2x_im_out[8]' : ['slew FAST'],
+		#'symbol_2x_im_out[9]' : ['slew FAST'],
+		#'symbol_2x_im_out[10]' : ['slew FAST'],
+		#'symbol_2x_im_out[11]' : ['slew FAST'],
+		#'symbol_2x_im_out[12]' : ['slew FAST'],
+		#'symbol_2x_im_out[13]' : ['slew FAST'],
+		#'symbol_2x_im_out[14]' : ['slew FAST'],
+		#'symbol_2x_im_out[15]' : ['slew FAST'],
+	}
 
-	#	('C30', 'symbol_2x_im_out[0]'),
-	#	('F27', 'symbol_2x_im_out[1]'),
-	#	('D29', 'symbol_2x_im_out[2]'),
-	#	('G27', 'symbol_2x_im_out[3]'),
-	#	('E30', 'symbol_2x_im_out[4]'),
-	#	('A30', 'symbol_2x_im_out[5]'),
-	#	('E29', 'symbol_2x_im_out[6]'),
-	#	('B30', 'symbol_2x_im_out[7]'),
-	#	('G30', 'symbol_2x_im_out[8]'),
-	#	('D28', 'symbol_2x_im_out[9]'),
-	#	('H30', 'symbol_2x_im_out[10]'),
-	#	('E28', 'symbol_2x_im_out[11]'),
-	#	('F28', 'symbol_2x_im_out[12]'),
-	#	('F30', 'symbol_2x_im_out[13]'),
-	#	('G28', 'symbol_2x_im_out[14]'),
-	#	('G29', 'symbol_2x_im_out[15]'),
-	#]
+	return map_extra_net_property_port_property
+
+def list_net_port_old_tsp_board_20160906():
+	list_net_port = [
+		('FMC_LPC_LA25_P', 'mpeg_clk'),
+		('FMC_LPC_LA29_P', 'mpeg_valid'),
+		('FMC_LPC_LA24_P', 'mpeg_data[0]'),
+		('FMC_LPC_LA24_N', 'mpeg_data[1]'),
+		('FMC_LPC_LA26_P', 'mpeg_data[2]'),
+		('FMC_LPC_LA31_P', 'mpeg_data[3]'),
+		('FMC_LPC_LA31_N', 'mpeg_data[4]'),
+		('FMC_LPC_LA28_P', 'mpeg_data[5]'),
+		('FMC_LPC_LA28_N', 'mpeg_data[6]'),
+		('FMC_LPC_LA29_N', 'mpeg_data[7]'),
+		('FMC_LPC_LA25_N', 'mpeg_sync'),
+
+		#('FMC_HPC_HA23_N', 'ts_out_sync'),
+		#('FMC_HPC_HA23_P', 'slot0_out_dump_flag'),
+
+		#('FMC_LPC_LA10_P', 'symbol_2x_oe'),
+		#	
+		#('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
+		#('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
+		#('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
+		#('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
+		#('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
+		#('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
+		#('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
+		#('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
+		#('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
+		#('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
+		#('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
+		#('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
+		#('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
+		#('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
+		#('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
+		#('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
+
+		#('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
+		#('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
+		#('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
+		#('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
+		#('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
+		#('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
+		#('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
+		#('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
+		#('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
+		#('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
+		#('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
+		#('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
+		#('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
+		#('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
+		#('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
+		#('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
+
+		#('FMC_LPC_LA22_N', 'clk_out2'),
+		#('FMC_LPC_LA21_P', 'clk_out3'),
+
+		#('FMC_LPC_LA20_P', 'clk_out4'),
+
+		('FMC_LPC_LA32_N', 'asi_out_p'),
+		('FMC_LPC_LA33_N', 'asi_out_n'),
+
+		#('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
+
+		##('XADC_GPIO_0', 'clk_out1'),
+		##('USER_SMA_GPIO_P', 'asi_out'),
+		##('LCD_DB4_LS', 'asi_out'),
+		##('GPIO_SW_E', 'asi_out'),
+		#('LCD_E_LS', 'lcm_din'),
+		#('LCD_RS_LS', 'lcm_lp'),
+		#('LCD_RW_LS', 'lcm_xscl'),
+		#('XADC_GPIO_0', 'lcm_data[0]'),
+		#('XADC_GPIO_1', 'lcm_data[1]'),
+		#('XADC_GPIO_2', 'lcm_data[2]'),
+		#('XADC_GPIO_3', 'lcm_data[3]'),
+		#('LCD_DB4_LS', 'lcm_data[4]'),
+		#('LCD_DB5_LS', 'lcm_data[5]'),
+		#('LCD_DB6_LS', 'lcm_data[6]'),
+		#('LCD_DB7_LS', 'lcm_data[7]'),
+	]
+
+	return list_net_port
+
+
+def get_list_ip_net_pin_port_des(map_kc705_pin_net):
+	list_ip_net_pin_port_des = []
+
+	map_extra_net_property_port_property = {}
+	list_net_port = []
+	map_extra_net_property_net_property = {}
+	list_pin_port = []
+
+	map_extra_net_property_port_property = map_extra_net_property_port_property_new_tsp_board_j94()
+	list_net_port = list_net_port_new_tsp_board_j94()
 
 	for pin, port in list_pin_port:
 		list_extra_des = []
@@ -576,98 +612,95 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 
 	return list_ip_net_pin_port_des
 
-def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_group_part_pin, list_fmc_pin_resistor):
-	map_gpio_if_list_net_pin_des_resistor = {}
-	map_gpio_if_list_net_pin_des_resistor.update({'HPC': []})
-	map_gpio_if_list_net_pin_des_resistor.update({'LPC': []})
-	map_gpio_if_list_net_pin_des_resistor.update({'OTHER': []})
+def list_pin_des_new_i2s_board():
+	list_pin_des = [
+		('AD26', 'SOMI'),
+		('AC26', 'MOSI'),
+		('AE25', 'SCLK'),
+		('AF25', '74138GA(CS)'),
+		('AD21', '74138GB'),
+		('AD24', '74138GC'),
+		('AJ24', 'SPI_S0'),
+		('AK25', 'SPI_S1'),
+		('AJ22', 'SPI_S2'),
+		('AJ23', 'SPI_S3'),
+	]
 
-	list_pin_des = []
-	list_net_des = []
+	return list_pin_des
 
-	#list_pin_des = [
-	#	('AD26', 'SOMI'),
-	#	('AC26', 'MOSI'),
-	#	('AE25', 'SCLK'),
-	#	('AF25', '74138GA(CS)'),
-	#	('AD21', '74138GB'),
-	#	('AD24', '74138GC'),
-	#	('AJ24', 'SPI_S0'),
-	#	('AK25', 'SPI_S1'),
-	#	('AJ22', 'SPI_S2'),
-	#	('AJ23', 'SPI_S3'),
-	#]
+def list_pin_des_new_tsp_board_j94():
+	list_pin_des = [
+		('C12', 'i2c_sck'),
+		('C11', 'i2c_sda'),
 
-	#list_pin_des = [
-	#	('C12', 'i2c_sck'),
-	#	('C11', 'i2c_sda'),
+		#('A23', 'spi_clk'),
+		#('D23', 'spi_mosi'),
+		#('E25', 'spi_miso'),
 
-	#	('A23', 'spi_clk'),
-	#	('D23', 'spi_mosi'),
-	#	('E25', 'spi_miso'),
+		#('F26', '74138G2A'),
+		#('E23', 'spi_s0'),
+		#('F25', 'spi_s1'),
+		#('E24', 'spi_s2'),
 
-	#	('F26', '74138G2A'),
-	#	('E23', 'spi_s0'),
-	#	('F25', 'spi_s1'),
-	#	('E24', 'spi_s2'),
+		('C14', 'lnb1_on_off'),
+		('E14', 'TUNB_3.3V_ON'),
+		#('AF27', 'AD9125_INTB'),
+		#('AH29', 'AD5375_DSOP'),
 
-	#	('C14', 'lnb1_on_off'),
-	#	('E14', 'TUNB_3.3V_ON'),
-	#	('AF27', 'AD9125_INTB'),
-	#	('AH29', 'AD5375_DSOP'),
+		('E15', 'undefined'),
+		('C15', 'undefined'),
+		('B15', 'undefined'),
+		('J16', 'undefined'),
+		('B14', 'undefined'),
+		('A15', 'undefined'),
+		('F12', 'undefined'),
+		('E13', 'undefined'),
+		('B13', 'undefined'),
+		('A13', 'undefined'),
+		('L16', 'undefined'),
+		('K16', 'undefined'),
+		('H16', 'undefined'),
+	]
 
-	#	('E15', 'undefined'),
-	#	('C15', 'undefined'),
-	#	('B15', 'undefined'),
-	#	('J16', 'undefined'),
-	#	('B14', 'undefined'),
-	#	('A15', 'undefined'),
-	#	('F12', 'undefined'),
-	#	('E13', 'undefined'),
-	#	('B13', 'undefined'),
-	#	('A13', 'undefined'),
-	#	('L16', 'undefined'),
-	#	('K16', 'undefined'),
-	#	('H16', 'undefined'),
-	#]
+	return list_pin_des
 
-	#list_net_des = [
-	#	('FMC_HPC_LA30_P', 'master_scl'),
-	#	('FMC_HPC_LA24_P', 'master_sda'),
-	#]
-	#list_net_des = [
-	#	('FMC_HPC_HA03_P', 'i2c_sck'),
-	#	('FMC_HPC_HA02_N', 'i2c_sda'),
+def list_net_des_new_tsp_board_j94():
+	list_net_des = [
+		('FMC_HPC_HA03_P', 'i2c_sck'),
+		('FMC_HPC_HA02_N', 'i2c_sda'),
 
-	#	('FMC_LPC_LA21_N', 'spi_clk'),
-	#	('FMC_LPC_LA19_P', 'spi_mosi'),
-	#	('FMC_LPC_LA19_N', 'spi_miso'),
+		#('FMC_LPC_LA21_N', 'spi_clk'),
+		#('FMC_LPC_LA19_P', 'spi_mosi'),
+		#('FMC_LPC_LA19_N', 'spi_miso'),
 
-	#	('FMC_LPC_LA22_P', '74138G2A'),
-	#	('FMC_LPC_LA15_N', 'spi_s0'),
-	#	('FMC_LPC_CLK0_M2C_N', 'spi_s1'),
-	#	('FMC_LPC_PRSNT_M2C_B_LS', 'spi_s2'),
+		#('FMC_LPC_LA22_P', '74138G2A'),
+		#('FMC_LPC_LA15_N', 'spi_s0'),
+		#('FMC_LPC_CLK0_M2C_N', 'spi_s1'),
+		#('FMC_LPC_PRSNT_M2C_B_LS', 'spi_s2'),
 
-	#	('FMC_HPC_HA06_N', 'lnb1_on_off'),
-	#	('FMC_HPC_HA08_P', 'TUNB_3.3V_ON'),
-	#	('FMC_LPC_LA20_N', 'AD9125_INTB'),
-	#	('FMC_LPC_CLK1_M2C_N', 'AD5375_DSOP'),
+		('FMC_HPC_HA06_N', 'lnb1_on_off'),
+		('FMC_HPC_HA08_P', 'TUNB_3.3V_ON'),
+		#('FMC_LPC_LA20_N', 'AD9125_INTB'),
+		#('FMC_LPC_CLK1_M2C_N', 'AD5375_DSOP'),
 
-	#	('FMC_HPC_HA08_N', 'undefined'),
-	#	('FMC_HPC_HA12_P', 'undefined'),
-	#	('FMC_HPC_HA12_N', 'undefined'),
-	#	('FMC_HPC_HA14_P', 'undefined'),
-	#	('FMC_HPC_HA07_P', 'undefined'),
-	#	('FMC_HPC_HA07_N', 'undefined'),
-	#	('FMC_HPC_HA09_P', 'undefined'),
-	#	('FMC_HPC_HA09_N', 'undefined'),
-	#	('FMC_HPC_HA11_P', 'undefined'),
-	#	('FMC_HPC_HA11_N', 'undefined'),
-	#	('FMC_HPC_HA13_P', 'undefined'),
-	#	('FMC_HPC_HA13_N', 'undefined'),
-	#	('FMC_HPC_HA14_N', 'undefined'),
-	#]
+		('FMC_HPC_HA08_N', 'undefined'),
+		('FMC_HPC_HA12_P', 'undefined'),
+		('FMC_HPC_HA12_N', 'undefined'),
+		('FMC_HPC_HA14_P', 'undefined'),
+		('FMC_HPC_HA07_P', 'undefined'),
+		('FMC_HPC_HA07_N', 'undefined'),
+		('FMC_HPC_HA09_P', 'undefined'),
+		('FMC_HPC_HA09_N', 'undefined'),
+		('FMC_HPC_HA11_P', 'undefined'),
+		('FMC_HPC_HA11_N', 'undefined'),
+		('FMC_HPC_HA13_P', 'undefined'),
+		('FMC_HPC_HA13_N', 'undefined'),
+		('FMC_HPC_HA14_N', 'undefined'),
+	]
+	
+	return list_net_des
 
+def list_net_des_new_tsp_board_j97():
 	list_net_des = [
 		('FMC_HPC_LA16_P', 'i2c_sck'),
 		('FMC_HPC_LA15_N', 'i2c_sda'),
@@ -689,6 +722,33 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 		('FMC_HPC_LA26_N', 'undefined'),
 		('FMC_HPC_LA27_N', 'undefined'),
 	]
+
+	return list_net_des
+
+def list_net_des_iic_slave():
+	list_net_des = [
+		('FMC_HPC_LA30_P', 'master_scl'),
+		('FMC_HPC_LA24_P', 'master_sda'),
+	]
+
+	return list_net_des
+
+def list_net_des_old_tsp_board_20160906():
+	list_net_des = [
+	]
+
+	return list_net_des
+
+def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_group_part_pin, list_fmc_pin_resistor):
+	map_gpio_if_list_net_pin_des_resistor = {}
+	map_gpio_if_list_net_pin_des_resistor.update({'HPC': []})
+	map_gpio_if_list_net_pin_des_resistor.update({'LPC': []})
+	map_gpio_if_list_net_pin_des_resistor.update({'OTHER': []})
+
+	list_pin_des = []
+	list_net_des = []
+	
+	list_net_des = list_net_des_new_tsp_board_j94()
 
 	for pin, des in list_pin_des:
 	#des = None
