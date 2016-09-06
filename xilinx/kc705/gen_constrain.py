@@ -570,11 +570,11 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	map_extra_net_property_net_property = {}
 	list_pin_port = []
 
-	#map_extra_net_property_port_property = map_extra_net_property_port_property_new_tsp_board_j94()
-	#list_net_port = list_net_port_new_tsp_board_j94()
+	map_extra_net_property_port_property = map_extra_net_property_port_property_new_tsp_board_j94()
+	list_net_port = list_net_port_new_tsp_board_j94()
 
-	map_extra_net_property_port_property = map_extra_net_property_port_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
-	list_net_port = list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
+	#map_extra_net_property_port_property = map_extra_net_property_port_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
+	#list_net_port = list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 
 	for pin, port in list_pin_port:
 		list_extra_des = []
@@ -757,8 +757,8 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 	list_pin_des = []
 	list_net_des = []
 	
-	#list_net_des = list_net_des_new_tsp_board_j94()
-	list_net_des = list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
+	list_net_des = list_net_des_new_tsp_board_j94()
+	#list_net_des = list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 
 	for pin, des in list_pin_des:
 	#des = None
@@ -891,8 +891,8 @@ def gen_ip_constrain(list_ip_net_pin_port_des):
 def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 	list_net_pin_des_resistor_gpio_gpio_no = []
 	start = 0
-	#top_pin_no = 256
-	top_pin_no = 180
+	top_pin_no = 256
+	#top_pin_no = 180
 	gpio_no = 0
 
 	list_gpio_groups = [

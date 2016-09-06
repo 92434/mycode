@@ -64,68 +64,68 @@ set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[7]}]
 # ip constrain
 # ----------------------------------------------------------------------------------------------------
 
-#FMC_LPC_LA25_P
-set_property PACKAGE_PIN AC26 [get_ports {mpeg_clk}]
+#FMC_HPC_HA00_CC_P
+set_property PACKAGE_PIN D12 [get_ports {mpeg_clk}]
 set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_clk}]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {mpeg_clk}]
 
-#FMC_LPC_LA29_P
-set_property PACKAGE_PIN AE28 [get_ports {mpeg_valid}]
-set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_valid}]
-
-#FMC_LPC_LA24_P
-set_property PACKAGE_PIN AG30 [get_ports {mpeg_data[0]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[0]}]
-
-#FMC_LPC_LA24_N
-set_property PACKAGE_PIN AH30 [get_ports {mpeg_data[1]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[1]}]
-
-#FMC_LPC_LA26_P
-set_property PACKAGE_PIN AK29 [get_ports {mpeg_data[2]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[2]}]
-
-#FMC_LPC_LA31_P
-set_property PACKAGE_PIN AD29 [get_ports {mpeg_data[3]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[3]}]
-
-#FMC_LPC_LA31_N
-set_property PACKAGE_PIN AE29 [get_ports {mpeg_data[4]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[4]}]
-
-#FMC_LPC_LA28_P
-set_property PACKAGE_PIN AE30 [get_ports {mpeg_data[5]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[5]}]
-
-#FMC_LPC_LA28_N
-set_property PACKAGE_PIN AF30 [get_ports {mpeg_data[6]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[6]}]
-
-#FMC_LPC_LA29_N
-set_property PACKAGE_PIN AF28 [get_ports {mpeg_data[7]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[7]}]
-
-#FMC_LPC_LA25_N
-set_property PACKAGE_PIN AD26 [get_ports {mpeg_sync}]
+#FMC_HPC_HA01_CC_P
+set_property PACKAGE_PIN H14 [get_ports {mpeg_sync}]
 set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_sync}]
 
-#FMC_LPC_LA32_N
-set_property PACKAGE_PIN AA30 [get_ports {asi_out_p}]
+#FMC_HPC_HA05_N
+set_property PACKAGE_PIN E16 [get_ports {mpeg_valid}]
+set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_valid}]
+
+#FMC_HPC_HA00_CC_N
+set_property PACKAGE_PIN D13 [get_ports {mpeg_data[0]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[0]}]
+
+#FMC_HPC_HA01_CC_N
+set_property PACKAGE_PIN G14 [get_ports {mpeg_data[1]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[1]}]
+
+#FMC_HPC_HA02_P
+set_property PACKAGE_PIN D11 [get_ports {mpeg_data[2]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[2]}]
+
+#FMC_HPC_HA04_P
+set_property PACKAGE_PIN F11 [get_ports {mpeg_data[3]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[3]}]
+
+#FMC_HPC_HA03_N
+set_property PACKAGE_PIN B12 [get_ports {mpeg_data[4]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[4]}]
+
+#FMC_HPC_HA04_N
+set_property PACKAGE_PIN E11 [get_ports {mpeg_data[5]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[5]}]
+
+#FMC_HPC_HA05_P
+set_property PACKAGE_PIN F15 [get_ports {mpeg_data[6]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[6]}]
+
+#FMC_HPC_HA06_P
+set_property PACKAGE_PIN D14 [get_ports {mpeg_data[7]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {mpeg_data[7]}]
+
+#FMC_HPC_HA10_P
+set_property PACKAGE_PIN A11 [get_ports {asi_out_p}]
 set_property IOSTANDARD LVCMOS25 [get_ports {asi_out_p}]
 
-#FMC_LPC_LA33_N
-set_property PACKAGE_PIN AC30 [get_ports {asi_out_n}]
+#FMC_HPC_HA10_N
+set_property PACKAGE_PIN A12 [get_ports {asi_out_n}]
 set_property IOSTANDARD LVCMOS25 [get_ports {asi_out_n}]
 # ----------------------------------------------------------------------------------------------------
 # gpio constrain
 # ----------------------------------------------------------------------------------------------------
 
-#FMC_LPC_LA30_N, i2c_sck, R84.1, 178
-set_property PACKAGE_PIN AB30 [get_ports {gpio_tri_io[0]}]
+#FMC_HPC_HA03_P, i2c_sck, R126.1, 254
+set_property PACKAGE_PIN C12 [get_ports {gpio_tri_io[0]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[0]}]
 
-#FMC_LPC_LA30_P, i2c_sda, R83.1, 179
-set_property PACKAGE_PIN AB29 [get_ports {gpio_tri_io[1]}]
+#FMC_HPC_HA02_N, i2c_sda, R139.1, 255
+set_property PACKAGE_PIN C11 [get_ports {gpio_tri_io[1]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[1]}]
 # ----------------------------------------------------------------------------------------------------
 # bitstream constrain
