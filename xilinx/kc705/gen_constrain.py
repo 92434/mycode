@@ -435,7 +435,7 @@ def list_net_port_new_tsp_board_j97():
 
 	return list_net_port
 
-def map_extra_net_property_port_property_old_tsp_board_20160906():
+def map_extra_net_property_port_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 	map_extra_net_property_port_property = {
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		#'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
@@ -479,7 +479,7 @@ def map_extra_net_property_port_property_old_tsp_board_20160906():
 
 	return map_extra_net_property_port_property
 
-def list_net_port_old_tsp_board_20160906():
+def list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 	list_net_port = [
 		('FMC_LPC_LA25_P', 'mpeg_clk'),
 		('FMC_LPC_LA29_P', 'mpeg_valid'),
@@ -570,8 +570,11 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	map_extra_net_property_net_property = {}
 	list_pin_port = []
 
-	map_extra_net_property_port_property = map_extra_net_property_port_property_new_tsp_board_j94()
-	list_net_port = list_net_port_new_tsp_board_j94()
+	#map_extra_net_property_port_property = map_extra_net_property_port_property_new_tsp_board_j94()
+	#list_net_port = list_net_port_new_tsp_board_j94()
+
+	map_extra_net_property_port_property = map_extra_net_property_port_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
+	list_net_port = list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 
 	for pin, port in list_pin_port:
 		list_extra_des = []
@@ -678,24 +681,24 @@ def list_net_des_new_tsp_board_j94():
 		#('FMC_LPC_CLK0_M2C_N', 'spi_s1'),
 		#('FMC_LPC_PRSNT_M2C_B_LS', 'spi_s2'),
 
-		('FMC_HPC_HA06_N', 'lnb1_on_off'),
-		('FMC_HPC_HA08_P', 'TUNB_3.3V_ON'),
+		#('FMC_HPC_HA06_N', 'lnb1_on_off'),
+		#('FMC_HPC_HA08_P', 'TUNB_3.3V_ON'),
 		#('FMC_LPC_LA20_N', 'AD9125_INTB'),
 		#('FMC_LPC_CLK1_M2C_N', 'AD5375_DSOP'),
 
-		('FMC_HPC_HA08_N', 'undefined'),
-		('FMC_HPC_HA12_P', 'undefined'),
-		('FMC_HPC_HA12_N', 'undefined'),
-		('FMC_HPC_HA14_P', 'undefined'),
-		('FMC_HPC_HA07_P', 'undefined'),
-		('FMC_HPC_HA07_N', 'undefined'),
-		('FMC_HPC_HA09_P', 'undefined'),
-		('FMC_HPC_HA09_N', 'undefined'),
-		('FMC_HPC_HA11_P', 'undefined'),
-		('FMC_HPC_HA11_N', 'undefined'),
-		('FMC_HPC_HA13_P', 'undefined'),
-		('FMC_HPC_HA13_N', 'undefined'),
-		('FMC_HPC_HA14_N', 'undefined'),
+		#('FMC_HPC_HA08_N', 'undefined'),
+		#('FMC_HPC_HA12_P', 'undefined'),
+		#('FMC_HPC_HA12_N', 'undefined'),
+		#('FMC_HPC_HA14_P', 'undefined'),
+		#('FMC_HPC_HA07_P', 'undefined'),
+		#('FMC_HPC_HA07_N', 'undefined'),
+		#('FMC_HPC_HA09_P', 'undefined'),
+		#('FMC_HPC_HA09_N', 'undefined'),
+		#('FMC_HPC_HA11_P', 'undefined'),
+		#('FMC_HPC_HA11_N', 'undefined'),
+		#('FMC_HPC_HA13_P', 'undefined'),
+		#('FMC_HPC_HA13_N', 'undefined'),
+		#('FMC_HPC_HA14_N', 'undefined'),
 	]
 	
 	return list_net_des
@@ -705,22 +708,22 @@ def list_net_des_new_tsp_board_j97():
 		('FMC_HPC_LA16_P', 'i2c_sck'),
 		('FMC_HPC_LA15_N', 'i2c_sda'),
 
-		('FMC_HPC_LA19_N', 'lnb1_on_off'),
-		('FMC_HPC_LA21_P', 'TUNB_3.3V_ON'),
+		#('FMC_HPC_LA19_N', 'lnb1_on_off'),
+		#('FMC_HPC_LA21_P', 'TUNB_3.3V_ON'),
 
-		('FMC_HPC_LA21_N', 'undefined'),
-		('FMC_HPC_LA25_P', 'undefined'),
-		('FMC_HPC_LA25_N', 'undefined'),
-		('FMC_HPC_LA27_P', 'undefined'),
-		('FMC_HPC_LA20_P', 'undefined'),
-		('FMC_HPC_LA20_N', 'undefined'),
-		('FMC_HPC_LA22_P', 'undefined'),
-		('FMC_HPC_LA22_N', 'undefined'),
-		('FMC_HPC_LA24_P', 'undefined'),
-		('FMC_HPC_LA24_N', 'undefined'),
-		('FMC_HPC_LA26_P', 'undefined'),
-		('FMC_HPC_LA26_N', 'undefined'),
-		('FMC_HPC_LA27_N', 'undefined'),
+		#('FMC_HPC_LA21_N', 'undefined'),
+		#('FMC_HPC_LA25_P', 'undefined'),
+		#('FMC_HPC_LA25_N', 'undefined'),
+		#('FMC_HPC_LA27_P', 'undefined'),
+		#('FMC_HPC_LA20_P', 'undefined'),
+		#('FMC_HPC_LA20_N', 'undefined'),
+		#('FMC_HPC_LA22_P', 'undefined'),
+		#('FMC_HPC_LA22_N', 'undefined'),
+		#('FMC_HPC_LA24_P', 'undefined'),
+		#('FMC_HPC_LA24_N', 'undefined'),
+		#('FMC_HPC_LA26_P', 'undefined'),
+		#('FMC_HPC_LA26_N', 'undefined'),
+		#('FMC_HPC_LA27_N', 'undefined'),
 	]
 
 	return list_net_des
@@ -733,8 +736,14 @@ def list_net_des_iic_slave():
 
 	return list_net_des
 
-def list_net_des_old_tsp_board_20160906():
+def list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 	list_net_des = [
+		('FMC_LPC_LA30_N', 'i2c_sck'),
+		('FMC_LPC_LA30_P', 'i2c_sda'),
+		#('FMC_LPC_LA23_P', 'spi_clk'),
+		#('FMC_LPC_LA23_N', 'spi_mosi'),
+		#('FMC_LPC_LA20_N', 'spi_miso'),
+		#('FMC_LPC_LA32_P', 'spi_cs'),
 	]
 
 	return list_net_des
@@ -748,7 +757,8 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 	list_pin_des = []
 	list_net_des = []
 	
-	list_net_des = list_net_des_new_tsp_board_j94()
+	#list_net_des = list_net_des_new_tsp_board_j94()
+	list_net_des = list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 
 	for pin, des in list_pin_des:
 	#des = None
@@ -881,7 +891,8 @@ def gen_ip_constrain(list_ip_net_pin_port_des):
 def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 	list_net_pin_des_resistor_gpio_gpio_no = []
 	start = 0
-	top_pin_no = 256
+	#top_pin_no = 256
+	top_pin_no = 180
 	gpio_no = 0
 
 	list_gpio_groups = [
