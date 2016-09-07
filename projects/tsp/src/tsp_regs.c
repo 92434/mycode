@@ -20,9 +20,9 @@
 //#define true (1 == 1)
 //#define false (1 == 0)
 
-#define TEST_PID 0x265//0x2cb//0x28a//0x201//1141//
-#define VIDEO_PID 0x1c17//0x267//0x200//
-#define SELECT_PMT_PID 0x164//0x13b//0x100//0x479//
+#define TEST_PID 0x2ca//6122//0x265//0x28a//0x201//1141//
+#define VIDEO_PID 0x266//0x200//0x17de//
+#define SELECT_PMT_PID 0x13a//0x100//0x479//
 
 static _tsp_container* tsp_container=NULL;
 static _pmt_result pmt_result[MAX_PROGRAM_NUM];
@@ -361,7 +361,7 @@ int tsp_monitor_read(thread_arg_t *targ,unsigned short pid, int slot_idx, unsign
 	set_slot_enable(targ, true);
 	ret=read_ts_data(targ, PACK_BYTE_SIZE);
 	if(ret==PACK_BYTE_SIZE){
-		//dump_packet("monitor",targ->buffer,PACK_BYTE_SIZE);
+		dump_packet("monitor",targ->buffer,PACK_BYTE_SIZE);
 		tsp_container->monitor[slot_idx].inuse=1;
 		tsp_container->monitor[slot_idx].pid=pid;
 		memcpy(tsp_container->monitor[slot_idx].ts_pack,targ->buffer,ret);
@@ -854,15 +854,23 @@ void test1(thread_arg_t *targ, uint8_t *p_ts){
 }
 
 void test2(){
+	#include <time.h>
+	#define CLOCK_FREQ UINT64_C(90000)
+
+	struct timespec ts;
 	uint64_t pcr=0;
 	uint8_t *p_ts;
-	uint8_t a[64]={0x47,0x00,0x80,0x29,0xb7,0x10,0xb7,0xf9,0xfd,0xfc,0x7e,0x05};//00:19:03:11:42
-	//uint8_t b[64]={0x47,0x00,0x80,0x29,0xb7,0x10,0xb7,0xfa,0x01,0x8e,0xfe,0x28};//00:19:03:11:44
+	//uint8_t a[64]={0x47,0x00,0x80,0x29,0xb7,0x10,0xb7,0xf9,0xfd,0xfc,0x7e,0x05};//00:19:03:11:42
+	uint8_t a[64]={0x47,0x00,0x80,0x29,0xb7,0x10,0xb7,0xfa,0x01,0x8e,0xfe,0x28};//00:19:03:11:44
 	p_ts=a;
 	if(ts_has_adaptation(p_ts)&&tsaf_has_pcr(p_ts)){
 		pcr=tsaf_get_pcr(p_ts);
-		TRACE("pcr:%ld\n",pcr);
+		TRACE("pcr:%ld,0x%lx\n",pcr,pcr);
 	}
+	ts.tv_sec=19*3600+3*60+11;
+	ts.tv_nsec=440*1000*1000;
+	TRACE("tick:%lx\n",((uint64_t)ts.tv_sec * CLOCK_FREQ)
+            + ((uint64_t)ts.tv_nsec * (CLOCK_FREQ / 10000) / 100000));
 }
 int init_tsp_reg(char *dev) {
 	int ret = 0;
@@ -988,10 +996,10 @@ int init_tsp_reg(char *dev) {
 						if(pts>0) write_pts(&targ,pts);
 						TRACE("replace byte:%02x,[%ld], interval: %f\n",
 							pid_ac3[188-2],pts_replacer-pts,((float)(pts_replacer-pts))*100/9);
-						cs_sleepms(10);
+						cs_sleepms(50);
 						
 						tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
-						cs_sleepms(10);
+						cs_sleepms(50);
 						
 					
 				}
