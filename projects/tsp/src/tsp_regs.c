@@ -950,7 +950,7 @@ int init_tsp_reg(char *dev) {
 	uint8_t *p_ts;
 	unsigned char ts_buf[PACK_BYTE_SIZE]={0};
 	#if 1
-	int i_scrambling=0b10;
+	int i_scrambling=3;//2 or 3 ;should change always
 	ts_set_scrambling(pid_ac3, 0);
 	ts_set_scrambling(pid_ac3+PACK_BYTE_SIZE, i_scrambling);
 	#endif
@@ -982,13 +982,13 @@ int init_tsp_reg(char *dev) {
 				printf("========pid:%0d=======pts:%lx======pcr:%lx=======(interval:%ld)\n",TEST_PID,pts,pcr,pts-pcr);
 				pid_array[0]=TEST_PID;
 				if(1){
-					static int tm=0;
+					//static int tm=0;
 					uint64_t pts_replacer=0;
-					int cur_tm=(int)time((time_t *) 0);
-					if(cur_tm-tm>=2){
-						pid_ac3[188-2]++;
-						tm=cur_tm;
-					}
+					//int cur_tm=(int)time((time_t *) 0);
+					//if(cur_tm-tm>=2){
+					//	pid_ac3[188-2]++;
+					//	tm=cur_tm;
+					//}
 						//tsp_clear_replace_slot(&targ,TOTAL_SLOT_SIZE-1);
 						ret=tsp_replace_dual_tspack(&targ,pid_array, 1, pid_ac3);
 						pts_replacer=read_pts(&targ);
