@@ -284,6 +284,8 @@ function main() {
 	adb shell pm clear com.xiaomi.gamecenter.sdk.service
 	adb shell pm clear com.android.browser
 	adb shell pm clear com.kugou.android
+	adb shell pm clear com.sinovatech.unicom.ui
+	adb shell pm clear com.kingpoint.gmcchh
 
 	#uninstall
 	#adb shell pm uninstall com.sohu.inputmethod.sogou.xiaomi
