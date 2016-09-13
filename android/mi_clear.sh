@@ -267,25 +267,51 @@
 #  deleting all data associated with that user
 
 function main() {
-	local ip=
+	#local ip=
 
-	ip="$1"
-	if [ -z "$ip" ]; then
-		echo "error!!!";
-		return;
-	fi
+	#ip="$1"
+	#if [ -z "$ip" ]; then
+	#	echo "ip:$ip";
+	#	return;
+	#fi
 
-	adb connect $*
-	adb root
+	#adb connect $*
+	#adb root
 
 	#clear
 	#adb shell pm clear com.sohu.inputmethod.sogou.xiaomi
+	echo adb shell pm clear com.xiaomi.gamecenter
 	adb shell pm clear com.xiaomi.gamecenter
+	echo adb shell pm clear com.xiaomi.gamecenter.sdk.service
 	adb shell pm clear com.xiaomi.gamecenter.sdk.service
+	echo adb shell pm clear com.android.browser
 	adb shell pm clear com.android.browser
+	echo adb shell pm clear com.kugou.android
 	adb shell pm clear com.kugou.android
+	echo adb shell pm clear com.sinovatech.unicom.ui
 	adb shell pm clear com.sinovatech.unicom.ui
+	echo adb shell pm clear com.kingpoint.gmcchh
 	adb shell pm clear com.kingpoint.gmcchh
+	echo adb shell pm clear com.example.android.apis
+	adb shell pm clear com.example.android.apis
+	echo adb shell pm clear com.cleanmaster.sdk
+	adb shell pm clear com.cleanmaster.sdk
+	echo adb shell pm clear com.android.email
+	adb shell pm clear com.android.email
+	echo adb shell pm clear com.handsgo.jiakao.android
+	adb shell pm clear com.handsgo.jiakao.android
+	echo adb shell pm clear com.miui.voip
+	adb shell pm clear com.miui.voip
+	echo adb shell pm clear com.miui.yellowpage
+	adb shell pm clear com.miui.yellowpage
+	echo adb shell pm clear com.miui.mipub
+	adb shell pm clear com.miui.mipub
+	echo adb shell pm clear com.miui.player
+	adb shell pm clear com.miui.player
+	echo adb shell pm clear com.xiaomi.market
+	adb shell pm clear com.xiaomi.market
+	echo adb shell pm clear com.icbc
+	adb shell pm clear com.icbc
 
 	#uninstall
 	#adb shell pm uninstall com.sohu.inputmethod.sogou.xiaomi
