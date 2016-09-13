@@ -19,12 +19,12 @@ typedef struct dma_static_config {
 	char *devname;
 } dma_static_config_info_t;
 
-#define DEFINED_TSP_MINI 0
+#define DEFINED_TSP 2
 #define ENABLE_DMA 1
 
 static dma_static_config_info_t dma_info[] = {
 	{
-		.dma_lite_offset = OFFSET_AXI_TSP_LITE,
+		.dma_lite_offset = OFFSET_AXI_TSP_LITE_0,
 		.pcie_bar_map_ctl_offset_0 = 0,
 		.pcie_bar_map_ctl_offset_1 = 0,
 		.pcie_map_bar_axi_addr_0 = 0,
@@ -38,11 +38,64 @@ static dma_static_config_info_t dma_info[] = {
 
 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
-		.devname = "tsp_regs",
+		.devname = "tsp_regs_0",
 	},
+#if (DEFINED_TSP == 2)
+	{
+		.dma_lite_offset = OFFSET_AXI_TSP_LITE_1,
+		.pcie_bar_map_ctl_offset_0 = 0,
+		.pcie_bar_map_ctl_offset_1 = 0,
+		.pcie_map_bar_axi_addr_0 = 0,
+		.pcie_map_bar_axi_addr_1 = 0,
+		.dma_bar_map_num = MIN_BAR_MAP_MEMORY,
 
-#if DEFINED_TSP_MINI
-#if ENABLE_DMA
+		.dma_type = PSEUDO_DMA,
+		.dma_thread = NULL,
+		.dma_thread_count = 0, 
+		.is_auto_receive = false,
+
+		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
+		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+		.devname = "tsp_regs_1",
+	},
+	{
+		.dma_lite_offset = OFFSET_AXI_TSP_LITE_2,
+		.pcie_bar_map_ctl_offset_0 = 0,
+		.pcie_bar_map_ctl_offset_1 = 0,
+		.pcie_map_bar_axi_addr_0 = 0,
+		.pcie_map_bar_axi_addr_1 = 0,
+		.dma_bar_map_num = MIN_BAR_MAP_MEMORY,
+
+		.dma_type = PSEUDO_DMA,
+		.dma_thread = NULL,
+		.dma_thread_count = 0, 
+		.is_auto_receive = false,
+
+		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
+		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+		.devname = "tsp_regs_2",
+	},
+	{
+		.dma_lite_offset = OFFSET_AXI_TSP_LITE_3,
+		.pcie_bar_map_ctl_offset_0 = 0,
+		.pcie_bar_map_ctl_offset_1 = 0,
+		.pcie_map_bar_axi_addr_0 = 0,
+		.pcie_map_bar_axi_addr_1 = 0,
+		.dma_bar_map_num = MIN_BAR_MAP_MEMORY,
+
+		.dma_type = PSEUDO_DMA,
+		.dma_thread = NULL,
+		.dma_thread_count = 0, 
+		.is_auto_receive = false,
+
+		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
+		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+		.devname = "tsp_regs_3",
+	},
+#endif//if (DEFINED_TSP == 0)
+
+#if (DEFINED_TSP == 0)
+#if (ENABLE_DMA == 1)
 	{
 		.dma_lite_offset = OFFSET_AXI_DMA_LITE_0,
 		.pcie_bar_map_ctl_offset_0 = AXIBAR2PCIEBAR_0U,
@@ -66,7 +119,7 @@ static dma_static_config_info_t dma_info[] = {
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
 		.devname = "tsp_dma",
 	},
-#endif//#if ENABLE_DMA
+#endif//#if (ENABLE_DMA == 1)
 
 #if ENABLE_DMA
 	{
@@ -93,7 +146,7 @@ static dma_static_config_info_t dma_info[] = {
 		.devname = "asi_dma",
 	},
 #endif//#if ENABLE_DMA
-#endif//#if DEFINED_TSP_MINI
+#endif//#if (DEFINED_TSP == 0)
 
 };
 
