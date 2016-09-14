@@ -8,16 +8,25 @@ function start_logcat() {
 		return
 	fi
 
-	local pid=$(adb shell busybox ps | grep "$package" | awk '{print $1}')
+	local pids=($(adb shell busybox ps | grep "$package" | awk '{print $1}'))
 
-	if [ -z "$pid" ]; then
-		echo "pid:$pid";
+	if [ -z "$pids" ]; then
+		echo "pids:$pids";
 		return;
 	fi
 
 	shift
 
-	adb logcat $@ -v brief "*:V" | grep "$pid):"
+	local pattern
+	local i
+
+	for((i=0; i<${#pids[@]}; i++));do
+		pattern=${pattern:+$pattern\\|}${pids[i]}
+	done
+
+	echo $pattern
+
+	adb logcat $@ -v brief "*:V" | grep "$pattern):"
 }
 
 start_logcat $@
