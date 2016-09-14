@@ -21,12 +21,10 @@ function start_logcat() {
 	local i
 
 	for((i=0; i<${#pids[@]}; i++));do
-		pattern=${pattern:+$pattern\\|}${pids[i]}
+		pattern=${pattern:+$pattern\\|}"${pids[i]}):"
 	done
 
-	echo $pattern
-
-	adb logcat $@ -v brief "*:V" | grep "$pattern):"
+	adb logcat $@ -v brief "*:V" | grep -e "$pattern"
 }
 
 start_logcat $@
