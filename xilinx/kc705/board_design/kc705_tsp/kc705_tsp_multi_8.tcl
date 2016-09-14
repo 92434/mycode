@@ -154,26 +154,50 @@ proc create_root_design { parentCell } {
   set asi_out_n_1 [ create_bd_port -dir O asi_out_n_1 ]
   set asi_out_n_2 [ create_bd_port -dir O asi_out_n_2 ]
   set asi_out_n_3 [ create_bd_port -dir O asi_out_n_3 ]
+  set asi_out_n_4 [ create_bd_port -dir O asi_out_n_4 ]
+  set asi_out_n_5 [ create_bd_port -dir O asi_out_n_5 ]
+  set asi_out_n_6 [ create_bd_port -dir O asi_out_n_6 ]
+  set asi_out_n_7 [ create_bd_port -dir O asi_out_n_7 ]
   set asi_out_p [ create_bd_port -dir O asi_out_p ]
   set asi_out_p_1 [ create_bd_port -dir O asi_out_p_1 ]
   set asi_out_p_2 [ create_bd_port -dir O asi_out_p_2 ]
   set asi_out_p_3 [ create_bd_port -dir O asi_out_p_3 ]
+  set asi_out_p_4 [ create_bd_port -dir O asi_out_p_4 ]
+  set asi_out_p_5 [ create_bd_port -dir O asi_out_p_5 ]
+  set asi_out_p_6 [ create_bd_port -dir O asi_out_p_6 ]
+  set asi_out_p_7 [ create_bd_port -dir O asi_out_p_7 ]
   set mpeg_clk [ create_bd_port -dir I mpeg_clk ]
   set mpeg_clk_1 [ create_bd_port -dir I mpeg_clk_1 ]
   set mpeg_clk_2 [ create_bd_port -dir I mpeg_clk_2 ]
   set mpeg_clk_3 [ create_bd_port -dir I mpeg_clk_3 ]
+  set mpeg_clk_4 [ create_bd_port -dir I mpeg_clk_4 ]
+  set mpeg_clk_5 [ create_bd_port -dir I mpeg_clk_5 ]
+  set mpeg_clk_6 [ create_bd_port -dir I mpeg_clk_6 ]
+  set mpeg_clk_7 [ create_bd_port -dir I mpeg_clk_7 ]
   set mpeg_data [ create_bd_port -dir I -from 7 -to 0 mpeg_data ]
   set mpeg_data_1 [ create_bd_port -dir I -from 7 -to 0 mpeg_data_1 ]
   set mpeg_data_2 [ create_bd_port -dir I -from 7 -to 0 mpeg_data_2 ]
   set mpeg_data_3 [ create_bd_port -dir I -from 7 -to 0 mpeg_data_3 ]
+  set mpeg_data_4 [ create_bd_port -dir I -from 7 -to 0 mpeg_data_4 ]
+  set mpeg_data_5 [ create_bd_port -dir I -from 7 -to 0 mpeg_data_5 ]
+  set mpeg_data_6 [ create_bd_port -dir I -from 7 -to 0 mpeg_data_6 ]
+  set mpeg_data_7 [ create_bd_port -dir I -from 7 -to 0 mpeg_data_7 ]
   set mpeg_sync [ create_bd_port -dir I mpeg_sync ]
   set mpeg_sync_1 [ create_bd_port -dir I mpeg_sync_1 ]
   set mpeg_sync_2 [ create_bd_port -dir I mpeg_sync_2 ]
   set mpeg_sync_3 [ create_bd_port -dir I mpeg_sync_3 ]
+  set mpeg_sync_4 [ create_bd_port -dir I mpeg_sync_4 ]
+  set mpeg_sync_5 [ create_bd_port -dir I mpeg_sync_5 ]
+  set mpeg_sync_6 [ create_bd_port -dir I mpeg_sync_6 ]
+  set mpeg_sync_7 [ create_bd_port -dir I mpeg_sync_7 ]
   set mpeg_valid [ create_bd_port -dir I mpeg_valid ]
   set mpeg_valid_1 [ create_bd_port -dir I mpeg_valid_1 ]
   set mpeg_valid_2 [ create_bd_port -dir I mpeg_valid_2 ]
   set mpeg_valid_3 [ create_bd_port -dir I mpeg_valid_3 ]
+  set mpeg_valid_4 [ create_bd_port -dir I mpeg_valid_4 ]
+  set mpeg_valid_5 [ create_bd_port -dir I mpeg_valid_5 ]
+  set mpeg_valid_6 [ create_bd_port -dir I mpeg_valid_6 ]
+  set mpeg_valid_7 [ create_bd_port -dir I mpeg_valid_7 ]
   set reset [ create_bd_port -dir I -type rst reset ]
   set_property -dict [ list CONFIG.POLARITY {ACTIVE_HIGH}  ] $reset
 
@@ -189,13 +213,25 @@ proc create_root_design { parentCell } {
   # Create instance: axi4_tsp_3, and set properties
   set axi4_tsp_3 [ create_bd_cell -type ip -vlnv xiaofei:user:axi4_tsp:1.0 axi4_tsp_3 ]
 
+  # Create instance: axi4_tsp_4, and set properties
+  set axi4_tsp_4 [ create_bd_cell -type ip -vlnv xiaofei:user:axi4_tsp:1.0 axi4_tsp_4 ]
+
+  # Create instance: axi4_tsp_5, and set properties
+  set axi4_tsp_5 [ create_bd_cell -type ip -vlnv xiaofei:user:axi4_tsp:1.0 axi4_tsp_5 ]
+
+  # Create instance: axi4_tsp_6, and set properties
+  set axi4_tsp_6 [ create_bd_cell -type ip -vlnv xiaofei:user:axi4_tsp:1.0 axi4_tsp_6 ]
+
+  # Create instance: axi4_tsp_7, and set properties
+  set axi4_tsp_7 [ create_bd_cell -type ip -vlnv xiaofei:user:axi4_tsp:1.0 axi4_tsp_7 ]
+
   # Create instance: axi_gpio_0, and set properties
   set axi_gpio_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0 ]
-  set_property -dict [ list CONFIG.C_GPIO_WIDTH {4} CONFIG.C_INTERRUPT_PRESENT {0} CONFIG.C_IS_DUAL {0}  ] $axi_gpio_0
+  set_property -dict [ list CONFIG.C_GPIO_WIDTH {8} CONFIG.C_INTERRUPT_PRESENT {0} CONFIG.C_IS_DUAL {0}  ] $axi_gpio_0
 
   # Create instance: axi_interconnect_0, and set properties
   set axi_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0 ]
-  set_property -dict [ list CONFIG.NUM_MI {7} CONFIG.NUM_SI {1}  ] $axi_interconnect_0
+  set_property -dict [ list CONFIG.NUM_MI {11} CONFIG.NUM_SI {1}  ] $axi_interconnect_0
 
   # Create instance: axi_pcie_0, and set properties
   set axi_pcie_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_pcie:2.5 axi_pcie_0 ]
@@ -220,6 +256,18 @@ proc create_root_design { parentCell } {
   # Create instance: kc705_ts2asi_3, and set properties
   set kc705_ts2asi_3 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_ts2asi:1.0 kc705_ts2asi_3 ]
 
+  # Create instance: kc705_ts2asi_4, and set properties
+  set kc705_ts2asi_4 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_ts2asi:1.0 kc705_ts2asi_4 ]
+
+  # Create instance: kc705_ts2asi_5, and set properties
+  set kc705_ts2asi_5 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_ts2asi:1.0 kc705_ts2asi_5 ]
+
+  # Create instance: kc705_ts2asi_6, and set properties
+  set kc705_ts2asi_6 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_ts2asi:1.0 kc705_ts2asi_6 ]
+
+  # Create instance: kc705_ts2asi_7, and set properties
+  set kc705_ts2asi_7 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_ts2asi:1.0 kc705_ts2asi_7 ]
+
   # Create instance: proc_sys_reset_0, and set properties
   set proc_sys_reset_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_0 ]
 
@@ -240,9 +288,13 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net axi_interconnect_0_M04_AXI [get_bd_intf_pins axi4_tsp_1/s00_axi] [get_bd_intf_pins axi_interconnect_0/M04_AXI]
   connect_bd_intf_net -intf_net axi_interconnect_0_M05_AXI [get_bd_intf_pins axi4_tsp_2/s00_axi] [get_bd_intf_pins axi_interconnect_0/M05_AXI]
   connect_bd_intf_net -intf_net axi_interconnect_0_M06_AXI [get_bd_intf_pins axi4_tsp_3/s00_axi] [get_bd_intf_pins axi_interconnect_0/M06_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_0_M07_AXI [get_bd_intf_pins axi4_tsp_4/s00_axi] [get_bd_intf_pins axi_interconnect_0/M07_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_0_M08_AXI [get_bd_intf_pins axi4_tsp_5/s00_axi] [get_bd_intf_pins axi_interconnect_0/M08_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_0_M09_AXI [get_bd_intf_pins axi4_tsp_6/s00_axi] [get_bd_intf_pins axi_interconnect_0/M09_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_0_M10_AXI [get_bd_intf_pins axi4_tsp_7/s00_axi] [get_bd_intf_pins axi_interconnect_0/M10_AXI]
 
   # Create port connections
-  connect_bd_net -net ARESETN_1 [get_bd_pins axi_interconnect_0/ARESETN] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins axi_interconnect_0/M01_ARESETN] [get_bd_pins axi_interconnect_0/M02_ARESETN] [get_bd_pins axi_interconnect_0/M03_ARESETN] [get_bd_pins axi_interconnect_0/M04_ARESETN] [get_bd_pins axi_interconnect_0/M05_ARESETN] [get_bd_pins axi_interconnect_0/M06_ARESETN] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins proc_sys_reset_0/interconnect_aresetn]
+  connect_bd_net -net ARESETN_1 [get_bd_pins axi_interconnect_0/ARESETN] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins axi_interconnect_0/M01_ARESETN] [get_bd_pins axi_interconnect_0/M02_ARESETN] [get_bd_pins axi_interconnect_0/M03_ARESETN] [get_bd_pins axi_interconnect_0/M04_ARESETN] [get_bd_pins axi_interconnect_0/M05_ARESETN] [get_bd_pins axi_interconnect_0/M06_ARESETN] [get_bd_pins axi_interconnect_0/M07_ARESETN] [get_bd_pins axi_interconnect_0/M08_ARESETN] [get_bd_pins axi_interconnect_0/M09_ARESETN] [get_bd_pins axi_interconnect_0/M10_ARESETN] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins proc_sys_reset_0/interconnect_aresetn]
   connect_bd_net -net EXT_PCIE_REFCLK_N_1 [get_bd_ports EXT_PCIE_REFCLK_N] [get_bd_pins kc705_pcie_ext_0/EXT_PCIE_REFCLK_N]
   connect_bd_net -net EXT_PCIE_REFCLK_P_1 [get_bd_ports EXT_PCIE_REFCLK_P] [get_bd_pins kc705_pcie_ext_0/EXT_PCIE_REFCLK_P]
   connect_bd_net -net axi4_tsp_0_ts_out [get_bd_pins axi4_tsp_0/ts_out] [get_bd_pins kc705_ts2asi_0/din_8b]
@@ -261,10 +313,26 @@ proc create_root_design { parentCell } {
   connect_bd_net -net axi4_tsp_3_ts_out_clk [get_bd_pins axi4_tsp_3/ts_out_clk] [get_bd_pins kc705_ts2asi_3/din_clk]
   connect_bd_net -net axi4_tsp_3_ts_out_sync [get_bd_pins axi4_tsp_3/ts_out_sync] [get_bd_pins kc705_ts2asi_3/sync]
   connect_bd_net -net axi4_tsp_3_ts_out_valid [get_bd_pins axi4_tsp_3/ts_out_valid] [get_bd_pins kc705_ts2asi_3/valid]
-  connect_bd_net -net axi_pcie_0_axi_aclk_out [get_bd_pins axi4_tsp_0/s00_axi_aclk] [get_bd_pins axi4_tsp_1/s00_axi_aclk] [get_bd_pins axi4_tsp_2/s00_axi_aclk] [get_bd_pins axi4_tsp_3/s00_axi_aclk] [get_bd_pins axi_gpio_0/s_axi_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/M02_ACLK] [get_bd_pins axi_interconnect_0/M03_ACLK] [get_bd_pins axi_interconnect_0/M04_ACLK] [get_bd_pins axi_interconnect_0/M05_ACLK] [get_bd_pins axi_interconnect_0/M06_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_pcie_0/axi_aclk_out] [get_bd_pins kc705_pcie_ext_0/pcie_clk_125MHz]
+  connect_bd_net -net axi4_tsp_4_ts_out [get_bd_pins axi4_tsp_4/ts_out] [get_bd_pins kc705_ts2asi_4/din_8b]
+  connect_bd_net -net axi4_tsp_4_ts_out_clk [get_bd_pins axi4_tsp_4/ts_out_clk] [get_bd_pins kc705_ts2asi_4/din_clk]
+  connect_bd_net -net axi4_tsp_4_ts_out_sync [get_bd_pins axi4_tsp_4/ts_out_sync] [get_bd_pins kc705_ts2asi_4/sync]
+  connect_bd_net -net axi4_tsp_4_ts_out_valid [get_bd_pins axi4_tsp_4/ts_out_valid] [get_bd_pins kc705_ts2asi_4/valid]
+  connect_bd_net -net axi4_tsp_5_ts_out [get_bd_pins axi4_tsp_5/ts_out] [get_bd_pins kc705_ts2asi_5/din_8b]
+  connect_bd_net -net axi4_tsp_5_ts_out_clk [get_bd_pins axi4_tsp_5/ts_out_clk] [get_bd_pins kc705_ts2asi_5/din_clk]
+  connect_bd_net -net axi4_tsp_5_ts_out_sync [get_bd_pins axi4_tsp_5/ts_out_sync] [get_bd_pins kc705_ts2asi_5/sync]
+  connect_bd_net -net axi4_tsp_5_ts_out_valid [get_bd_pins axi4_tsp_5/ts_out_valid] [get_bd_pins kc705_ts2asi_5/valid]
+  connect_bd_net -net axi4_tsp_6_ts_out [get_bd_pins axi4_tsp_6/ts_out] [get_bd_pins kc705_ts2asi_6/din_8b]
+  connect_bd_net -net axi4_tsp_6_ts_out_clk [get_bd_pins axi4_tsp_6/ts_out_clk] [get_bd_pins kc705_ts2asi_6/din_clk]
+  connect_bd_net -net axi4_tsp_6_ts_out_sync [get_bd_pins axi4_tsp_6/ts_out_sync] [get_bd_pins kc705_ts2asi_6/sync]
+  connect_bd_net -net axi4_tsp_6_ts_out_valid [get_bd_pins axi4_tsp_6/ts_out_valid] [get_bd_pins kc705_ts2asi_6/valid]
+  connect_bd_net -net axi4_tsp_7_ts_out [get_bd_pins axi4_tsp_7/ts_out] [get_bd_pins kc705_ts2asi_7/din_8b]
+  connect_bd_net -net axi4_tsp_7_ts_out_clk [get_bd_pins axi4_tsp_7/ts_out_clk] [get_bd_pins kc705_ts2asi_7/din_clk]
+  connect_bd_net -net axi4_tsp_7_ts_out_sync [get_bd_pins axi4_tsp_7/ts_out_sync] [get_bd_pins kc705_ts2asi_7/sync]
+  connect_bd_net -net axi4_tsp_7_ts_out_valid [get_bd_pins axi4_tsp_7/ts_out_valid] [get_bd_pins kc705_ts2asi_7/valid]
+  connect_bd_net -net axi_pcie_0_axi_aclk_out [get_bd_pins axi4_tsp_0/s00_axi_aclk] [get_bd_pins axi4_tsp_1/s00_axi_aclk] [get_bd_pins axi4_tsp_2/s00_axi_aclk] [get_bd_pins axi4_tsp_3/s00_axi_aclk] [get_bd_pins axi4_tsp_4/s00_axi_aclk] [get_bd_pins axi4_tsp_5/s00_axi_aclk] [get_bd_pins axi4_tsp_6/s00_axi_aclk] [get_bd_pins axi4_tsp_7/s00_axi_aclk] [get_bd_pins axi_gpio_0/s_axi_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/M02_ACLK] [get_bd_pins axi_interconnect_0/M03_ACLK] [get_bd_pins axi_interconnect_0/M04_ACLK] [get_bd_pins axi_interconnect_0/M05_ACLK] [get_bd_pins axi_interconnect_0/M06_ACLK] [get_bd_pins axi_interconnect_0/M07_ACLK] [get_bd_pins axi_interconnect_0/M08_ACLK] [get_bd_pins axi_interconnect_0/M09_ACLK] [get_bd_pins axi_interconnect_0/M10_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_pcie_0/axi_aclk_out] [get_bd_pins kc705_pcie_ext_0/pcie_clk_125MHz]
   connect_bd_net -net axi_pcie_0_axi_ctl_aclk_out [get_bd_pins axi_interconnect_0/M01_ACLK] [get_bd_pins axi_pcie_0/axi_ctl_aclk_out]
   connect_bd_net -net axi_pcie_0_mmcm_lock [get_bd_pins axi_pcie_0/mmcm_lock] [get_bd_pins kc705_pcie_ext_0/pcie_mmcm_locked]
-  connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins kc705_ts2asi_0/clk] [get_bd_pins kc705_ts2asi_1/clk] [get_bd_pins kc705_ts2asi_2/clk] [get_bd_pins kc705_ts2asi_3/clk]
+  connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins kc705_ts2asi_0/clk] [get_bd_pins kc705_ts2asi_1/clk] [get_bd_pins kc705_ts2asi_2/clk] [get_bd_pins kc705_ts2asi_3/clk] [get_bd_pins kc705_ts2asi_4/clk] [get_bd_pins kc705_ts2asi_5/clk] [get_bd_pins kc705_ts2asi_6/clk] [get_bd_pins kc705_ts2asi_7/clk]
   connect_bd_net -net kc705_pcie_ext_0_EXT_LEDS [get_bd_ports EXT_LEDS] [get_bd_pins kc705_pcie_ext_0/EXT_LEDS]
   connect_bd_net -net kc705_pcie_ext_0_mmcms_locked [get_bd_pins kc705_pcie_ext_0/mmcms_locked] [get_bd_pins proc_sys_reset_0/dcm_locked]
   connect_bd_net -net kc705_pcie_ext_0_pcie_refclk_100MHz [get_bd_pins axi_pcie_0/REFCLK] [get_bd_pins clk_wiz_0/clk_in1] [get_bd_pins kc705_pcie_ext_0/pcie_refclk_100MHz] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
@@ -276,23 +344,47 @@ proc create_root_design { parentCell } {
   connect_bd_net -net kc705_ts2asi_2_asi_out_p [get_bd_ports asi_out_p_2] [get_bd_pins kc705_ts2asi_2/asi_out_p]
   connect_bd_net -net kc705_ts2asi_3_asi_out_n [get_bd_ports asi_out_n_3] [get_bd_pins kc705_ts2asi_3/asi_out_n]
   connect_bd_net -net kc705_ts2asi_3_asi_out_p [get_bd_ports asi_out_p_3] [get_bd_pins kc705_ts2asi_3/asi_out_p]
+  connect_bd_net -net kc705_ts2asi_4_asi_out_n [get_bd_ports asi_out_n_4] [get_bd_pins kc705_ts2asi_4/asi_out_n]
+  connect_bd_net -net kc705_ts2asi_4_asi_out_p [get_bd_ports asi_out_p_4] [get_bd_pins kc705_ts2asi_4/asi_out_p]
+  connect_bd_net -net kc705_ts2asi_5_asi_out_n [get_bd_ports asi_out_n_5] [get_bd_pins kc705_ts2asi_5/asi_out_n]
+  connect_bd_net -net kc705_ts2asi_5_asi_out_p [get_bd_ports asi_out_p_5] [get_bd_pins kc705_ts2asi_5/asi_out_p]
+  connect_bd_net -net kc705_ts2asi_6_asi_out_n [get_bd_ports asi_out_n_6] [get_bd_pins kc705_ts2asi_6/asi_out_n]
+  connect_bd_net -net kc705_ts2asi_6_asi_out_p [get_bd_ports asi_out_p_6] [get_bd_pins kc705_ts2asi_6/asi_out_p]
+  connect_bd_net -net kc705_ts2asi_7_asi_out_n [get_bd_ports asi_out_n_7] [get_bd_pins kc705_ts2asi_7/asi_out_n]
+  connect_bd_net -net kc705_ts2asi_7_asi_out_p [get_bd_ports asi_out_p_7] [get_bd_pins kc705_ts2asi_7/asi_out_p]
   connect_bd_net -net mpeg_clk_1 [get_bd_ports mpeg_clk] [get_bd_pins axi4_tsp_0/mpeg_clk]
   connect_bd_net -net mpeg_clk_1_1 [get_bd_ports mpeg_clk_1] [get_bd_pins axi4_tsp_1/mpeg_clk]
   connect_bd_net -net mpeg_clk_2_1 [get_bd_ports mpeg_clk_2] [get_bd_pins axi4_tsp_2/mpeg_clk]
   connect_bd_net -net mpeg_clk_3_1 [get_bd_ports mpeg_clk_3] [get_bd_pins axi4_tsp_3/mpeg_clk]
+  connect_bd_net -net mpeg_clk_4_1 [get_bd_ports mpeg_clk_4] [get_bd_pins axi4_tsp_4/mpeg_clk]
+  connect_bd_net -net mpeg_clk_5_1 [get_bd_ports mpeg_clk_5] [get_bd_pins axi4_tsp_5/mpeg_clk]
+  connect_bd_net -net mpeg_clk_6_1 [get_bd_ports mpeg_clk_6] [get_bd_pins axi4_tsp_6/mpeg_clk]
+  connect_bd_net -net mpeg_clk_7_1 [get_bd_ports mpeg_clk_7] [get_bd_pins axi4_tsp_7/mpeg_clk]
   connect_bd_net -net mpeg_data_1 [get_bd_ports mpeg_data] [get_bd_pins axi4_tsp_0/mpeg_data]
   connect_bd_net -net mpeg_data_1_1 [get_bd_ports mpeg_data_1] [get_bd_pins axi4_tsp_1/mpeg_data]
   connect_bd_net -net mpeg_data_2_1 [get_bd_ports mpeg_data_2] [get_bd_pins axi4_tsp_2/mpeg_data]
   connect_bd_net -net mpeg_data_3_1 [get_bd_ports mpeg_data_3] [get_bd_pins axi4_tsp_3/mpeg_data]
+  connect_bd_net -net mpeg_data_4_1 [get_bd_ports mpeg_data_4] [get_bd_pins axi4_tsp_4/mpeg_data]
+  connect_bd_net -net mpeg_data_5_1 [get_bd_ports mpeg_data_5] [get_bd_pins axi4_tsp_5/mpeg_data]
+  connect_bd_net -net mpeg_data_6_1 [get_bd_ports mpeg_data_6] [get_bd_pins axi4_tsp_6/mpeg_data]
+  connect_bd_net -net mpeg_data_7_1 [get_bd_ports mpeg_data_7] [get_bd_pins axi4_tsp_7/mpeg_data]
   connect_bd_net -net mpeg_sync_1 [get_bd_ports mpeg_sync] [get_bd_pins axi4_tsp_0/mpeg_sync]
   connect_bd_net -net mpeg_sync_1_1 [get_bd_ports mpeg_sync_1] [get_bd_pins axi4_tsp_1/mpeg_sync]
   connect_bd_net -net mpeg_sync_2_1 [get_bd_ports mpeg_sync_2] [get_bd_pins axi4_tsp_2/mpeg_sync]
   connect_bd_net -net mpeg_sync_3_1 [get_bd_ports mpeg_sync_3] [get_bd_pins axi4_tsp_3/mpeg_sync]
+  connect_bd_net -net mpeg_sync_4_1 [get_bd_ports mpeg_sync_4] [get_bd_pins axi4_tsp_4/mpeg_sync]
+  connect_bd_net -net mpeg_sync_5_1 [get_bd_ports mpeg_sync_5] [get_bd_pins axi4_tsp_5/mpeg_sync]
+  connect_bd_net -net mpeg_sync_6_1 [get_bd_ports mpeg_sync_6] [get_bd_pins axi4_tsp_6/mpeg_sync]
+  connect_bd_net -net mpeg_sync_7_1 [get_bd_ports mpeg_sync_7] [get_bd_pins axi4_tsp_7/mpeg_sync]
   connect_bd_net -net mpeg_valid_1 [get_bd_ports mpeg_valid] [get_bd_pins axi4_tsp_0/mpeg_valid]
   connect_bd_net -net mpeg_valid_1_1 [get_bd_ports mpeg_valid_1] [get_bd_pins axi4_tsp_1/mpeg_valid]
   connect_bd_net -net mpeg_valid_2_1 [get_bd_ports mpeg_valid_2] [get_bd_pins axi4_tsp_2/mpeg_valid]
   connect_bd_net -net mpeg_valid_3_1 [get_bd_ports mpeg_valid_3] [get_bd_pins axi4_tsp_3/mpeg_valid]
-  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins axi4_tsp_0/s00_axi_aresetn] [get_bd_pins axi4_tsp_1/s00_axi_aresetn] [get_bd_pins axi4_tsp_2/s00_axi_aresetn] [get_bd_pins axi4_tsp_3/s00_axi_aresetn] [get_bd_pins axi_gpio_0/s_axi_aresetn] [get_bd_pins axi_pcie_0/axi_aresetn] [get_bd_pins kc705_ts2asi_0/rst_n] [get_bd_pins kc705_ts2asi_1/rst_n] [get_bd_pins kc705_ts2asi_2/rst_n] [get_bd_pins kc705_ts2asi_3/rst_n] [get_bd_pins proc_sys_reset_0/peripheral_aresetn]
+  connect_bd_net -net mpeg_valid_4_1 [get_bd_ports mpeg_valid_4] [get_bd_pins axi4_tsp_4/mpeg_valid]
+  connect_bd_net -net mpeg_valid_5_1 [get_bd_ports mpeg_valid_5] [get_bd_pins axi4_tsp_5/mpeg_valid]
+  connect_bd_net -net mpeg_valid_6_1 [get_bd_ports mpeg_valid_6] [get_bd_pins axi4_tsp_6/mpeg_valid]
+  connect_bd_net -net mpeg_valid_7_1 [get_bd_ports mpeg_valid_7] [get_bd_pins axi4_tsp_7/mpeg_valid]
+  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins axi4_tsp_0/s00_axi_aresetn] [get_bd_pins axi4_tsp_1/s00_axi_aresetn] [get_bd_pins axi4_tsp_2/s00_axi_aresetn] [get_bd_pins axi4_tsp_3/s00_axi_aresetn] [get_bd_pins axi4_tsp_4/s00_axi_aresetn] [get_bd_pins axi4_tsp_5/s00_axi_aresetn] [get_bd_pins axi4_tsp_6/s00_axi_aresetn] [get_bd_pins axi4_tsp_7/s00_axi_aresetn] [get_bd_pins axi_gpio_0/s_axi_aresetn] [get_bd_pins axi_pcie_0/axi_aresetn] [get_bd_pins kc705_ts2asi_0/rst_n] [get_bd_pins kc705_ts2asi_1/rst_n] [get_bd_pins kc705_ts2asi_2/rst_n] [get_bd_pins kc705_ts2asi_3/rst_n] [get_bd_pins kc705_ts2asi_4/rst_n] [get_bd_pins kc705_ts2asi_5/rst_n] [get_bd_pins kc705_ts2asi_6/rst_n] [get_bd_pins kc705_ts2asi_7/rst_n] [get_bd_pins proc_sys_reset_0/peripheral_aresetn]
   connect_bd_net -net proc_sys_reset_0_peripheral_reset [get_bd_pins clk_wiz_0/reset] [get_bd_pins proc_sys_reset_0/peripheral_reset]
   connect_bd_net -net reset_1 [get_bd_ports reset] [get_bd_pins kc705_pcie_ext_0/EXT_SYS_RST] [get_bd_pins proc_sys_reset_0/ext_reset_in]
   connect_bd_net -net xlconstant_0_dout [get_bd_pins axi_pcie_0/MSI_Vector_Num] [get_bd_pins xlconstant_0/dout]
@@ -303,6 +395,10 @@ proc create_root_design { parentCell } {
   create_bd_addr_seg -range 0x1000 -offset 0x81003000 [get_bd_addr_spaces axi_pcie_0/M_AXI] [get_bd_addr_segs axi4_tsp_1/s00_axi/reg0] SEG_axi4_tsp_1_reg0
   create_bd_addr_seg -range 0x1000 -offset 0x81004000 [get_bd_addr_spaces axi_pcie_0/M_AXI] [get_bd_addr_segs axi4_tsp_2/s00_axi/reg0] SEG_axi4_tsp_2_reg0
   create_bd_addr_seg -range 0x1000 -offset 0x81005000 [get_bd_addr_spaces axi_pcie_0/M_AXI] [get_bd_addr_segs axi4_tsp_3/s00_axi/reg0] SEG_axi4_tsp_3_reg0
+  create_bd_addr_seg -range 0x1000 -offset 0x81006000 [get_bd_addr_spaces axi_pcie_0/M_AXI] [get_bd_addr_segs axi4_tsp_4/s00_axi/reg0] SEG_axi4_tsp_4_reg0
+  create_bd_addr_seg -range 0x1000 -offset 0x81007000 [get_bd_addr_spaces axi_pcie_0/M_AXI] [get_bd_addr_segs axi4_tsp_5/s00_axi/reg0] SEG_axi4_tsp_5_reg0
+  create_bd_addr_seg -range 0x1000 -offset 0x81008000 [get_bd_addr_spaces axi_pcie_0/M_AXI] [get_bd_addr_segs axi4_tsp_6/s00_axi/reg0] SEG_axi4_tsp_6_reg0
+  create_bd_addr_seg -range 0x1000 -offset 0x81009000 [get_bd_addr_spaces axi_pcie_0/M_AXI] [get_bd_addr_segs axi4_tsp_7/s00_axi/reg0] SEG_axi4_tsp_7_reg0
   create_bd_addr_seg -range 0x1000 -offset 0x81001000 [get_bd_addr_spaces axi_pcie_0/M_AXI] [get_bd_addr_segs axi_gpio_0/S_AXI/Reg] SEG_axi_gpio_0_Reg
   create_bd_addr_seg -range 0x10000 -offset 0x80000000 [get_bd_addr_spaces axi_pcie_0/M_AXI] [get_bd_addr_segs axi_pcie_0/S_AXI/BAR0] SEG_axi_pcie_0_BAR0
   create_bd_addr_seg -range 0x10000 -offset 0x80010000 [get_bd_addr_spaces axi_pcie_0/M_AXI] [get_bd_addr_segs axi_pcie_0/S_AXI/BAR1] SEG_axi_pcie_0_BAR1
