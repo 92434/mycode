@@ -1,0 +1,159 @@
+ 最近在研究手机热点的建立。HTC手机比较坑爹，首先一个，是不能按常规的办法修改 SSID, BSSID,
+
+在网上搜了下，有篇博客把这个问题解决了，请参考：http://blog.csdn.net/mengweiqi33/article/details/8494441
+
+
+然后就发现HTC手机热点是建好了，但是其他手机去连它，怎么也连不上，后来发现，使用静态IP能解决这个问题，但太麻烦了。
+
+研究了下通过手动配置HTC的WiFi热点程序 com.htc.WiFiRouter 里面有一个Local DHCP的配置,把它勾上就能自动获取IP。
+
+但要怎么样用代码实现呢这下坑爹了。
+
+
+研究了半天，还是只有把HTC独有的类给它全部dump出来，代码如下
+
+
+[java] view plaincopy
+
+    public void dumpHTCWifiFunction2(){  
+             Log.e(TAG, "dumpHTCWifiFunction2++");  
+    //      Method[] classMethods = null;  
+            Field localField1;  
+              
+            Field[] fieldlist;  
+            WifiConfiguration apConfig = new WifiConfiguration();  
+            try {  
+                localField1 = WifiConfiguration.class.getDeclaredField("mWifiApProfile");  
+                  localField1.setAccessible(true);  
+      
+                    Object localObject2 = localField1.get(apConfig);  
+      
+                    localField1.setAccessible(false);  
+                      
+                    if(localObject2!=null){  
+                        fieldlist = localObject2.getClass().getDeclaredFields();  
+                          
+                        for (int i = 0;i < fieldlist.length; i++)  
+      
+                        {  
+      
+                            Log.e(TAG, "found api: "+ fieldlist[i].getName());  
+      
+                        }  
+                    }  
+                      
+                      
+            } catch (NoSuchFieldException e) {  
+                // TODO Auto-generated catch block  
+                e.printStackTrace();  
+            } catch (IllegalArgumentException e) {  
+                // TODO Auto-generated catch block  
+                e.printStackTrace();  
+            } catch (IllegalAccessException e) {  
+                // TODO Auto-generated catch block  
+                e.printStackTrace();  
+            }  
+      
+            Log.e(TAG, "dumpHTCWifiFunction2--");  
+        }  
+
+
+12-28 11:06:29.956: E/MainActivity(3253): dumpHTCWifiFunction2++
+12-28 11:06:29.966: E/MainActivity(3253): found api: DEFAULT_DHCP_MAX_AP_CONNECTION
+12-28 11:06:29.966: E/MainActivity(3253): found api: DEFAULT_MAX_AP_CONNECTION
+12-28 11:06:29.976: E/MainActivity(3253): found api: DHCP_MAX_AP_CONNECTION
+12-28 11:06:29.976: E/MainActivity(3253): found api: MAX_AP_CONNECTION
+12-28 11:06:29.976: E/MainActivity(3253): found api: OPEN
+12-28 11:06:29.976: E/MainActivity(3253): found api: WEP
+12-28 11:06:29.986: E/MainActivity(3253): found api: WPA
+12-28 11:06:29.986: E/MainActivity(3253): found api: WPA2
+12-28 11:06:29.986: E/MainActivity(3253): found api: BSSID
+12-28 11:06:29.996: E/MainActivity(3253): found api: SSID
+12-28 11:06:29.996: E/MainActivity(3253): found api: blocklist
+12-28 11:06:29.996: E/MainActivity(3253): found api: whitelist
+12-28 11:06:29.996: E/MainActivity(3253): found api: this$0
+12-28 11:06:30.006: E/MainActivity(3253): found api: startingIP
+12-28 11:06:30.006: E/MainActivity(3253): found api: dhcpSubnetMask
+12-28 11:06:30.016: E/MainActivity(3253): found api: dnsIPAddr1
+12-28 11:06:30.016: E/MainActivity(3253): found api: dnsIPAddr2
+12-28 11:06:30.016: E/MainActivity(3253): found api: secureType
+12-28 11:06:30.016: E/MainActivity(3253): found api: key
+12-28 11:06:30.016: E/MainActivity(3253): found api: ipAddress
+12-28 11:06:30.016: E/MainActivity(3253): found api: hiddenSSID
+12-28 11:06:30.016: E/MainActivity(3253): found api: maxConns
+12-28 11:06:30.016: E/MainActivity(3253): found api: maxDhcpClients
+12-28 11:06:30.026: E/MainActivity(3253): found api: enableMacFilter
+12-28 11:06:30.026: E/MainActivity(3253): found api: sleepPolicy
+12-28 11:06:30.026: E/MainActivity(3253): found api: dhcpEnable
+12-28 11:06:30.026: E/MainActivity(3253): found api: connectionArray
+12-28 11:06:30.026: E/MainActivity(3253): found api: channel
+12-28 11:06:30.026: E/MainActivity(3253): dumpHTCWifiFunction2--
+
+
+发现了 dhcpEnable 这个成员变量，刚开始猜它是boolean变量，但错了，在设置的时候会发生错误。
+
+干脆把它的类型也打印出来吧，打印语句改为：
+
+Log.e(TAG, "found api: "+ fieldlist[i].getName()+" type:"+fieldlist[i].toString());
+
+
+found api: dhcpEnable type:public int android.net.wifi.WifiConfiguration$HotspotProfile.dhcpEnable
+
+原来它是int型变量,估且猜它是1为enable. 设置之后，果然可以。
+
+
+完整代码如下：
+
+[java] view plaincopy
+
+    private boolean setWifiSSIDForHTC(WifiConfiguration apConfig) {  
+            boolean successed = true;  
+              
+    //      WifiConfiguration mnetConfig = new WifiConfiguration();  
+            Field localField1;  
+      
+                            try {  
+      
+                                localField1 = WifiConfiguration.class.getDeclaredField("mWifiApProfile");  
+      
+                                localField1.setAccessible(true);  
+      
+                                Object localObject2 = localField1.get(apConfig);  
+      
+                                localField1.setAccessible(false);  
+                                if(localObject2!=null){  
+      
+                                    Field localField5 = localObject2.getClass().getDeclaredField("SSID");  
+      
+                                    localField5.setAccessible(true);  
+      
+                                    localField5.set(localObject2, apConfig.SSID);// netConfig.SSID);  
+      
+                                    localField5.setAccessible(false);  
+      
+                                    Field localField4 = localObject2.getClass().getDeclaredField("BSSID");  
+      
+                                    localField4.setAccessible(true);  
+      
+                                    localField4.set(localObject2, apConfig.BSSID);//netConfig.BSSID);  
+      
+                                    localField4.setAccessible(false);  
+                                      
+                                    Field localField6 = localObject2.getClass().getDeclaredField("dhcpEnable");  
+      
+                                    localField6.setAccessible(true);  
+      
+    //                                localField6.set(localObject2, "true");//netConfig.BSSID);  
+                                    localField6.setInt(localObject2, 1);  
+      
+                                    localField6.setAccessible(false);  
+      
+                                }  
+      
+                            } catch(Exception e) {  
+      
+                                e.printStackTrace();  
+      
+                            }  
+            return successed;  
+        }  

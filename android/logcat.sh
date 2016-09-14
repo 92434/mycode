@@ -17,7 +17,7 @@ function start_logcat() {
 
 	shift
 
-	adb logcat $@ -v brief "*:V" | grep $pid
+	adb logcat $@ -v brief "*:V" | grep "$pid):"
 }
 
 start_logcat $@
