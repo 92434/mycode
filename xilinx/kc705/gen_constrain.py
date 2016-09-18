@@ -605,7 +605,7 @@ def list_net_port_multi_tsp():
 		('FMC_HPC_LA29_P', 'asi_out_p_1'),#29
 		('FMC_HPC_LA29_N', 'asi_out_n_1'),#31
 
-		#96
+		#j96
 		('FMC_HPC_CLK1_M2C_P', 'mpeg_clk_2'),#5
 		('FMC_HPC_CLK0_M2C_P', 'mpeg_sync_2'),#6
 		('FMC_HPC_LA03_N', 'mpeg_valid_2'),#18
@@ -831,10 +831,18 @@ def list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 
 def list_net_des_multi_tsp():
 	list_net_des = [
-		('FMC_LPC_LA33_P', 'i2c_s0'),
-		('FMC_LPC_LA33_N', 'i2c_s1'),
-		('FMC_LPC_LA30_P', 'i2c_sda'),
-		('FMC_LPC_LA30_N', 'i2c_sck'),
+		#j94
+		('FMC_HPC_HA03_P', 'i2c_sck'),#10
+		('FMC_HPC_HA02_N', 'i2c_sda'),#11
+		#j95
+		('FMC_HPC_HA18_P', 'i2c_sck_1'),#10
+		('FMC_HPC_HA17_CC_N', 'i2c_sda_1'),#11
+		#j96
+		('FMC_HPC_LA01_CC_P', 'i2c_sck_2'),#10
+		('FMC_HPC_LA00_CC_N', 'i2c_sda_2'),#11
+		#j97
+		('FMC_HPC_LA16_P', 'i2c_sck_3'),#10
+		('FMC_HPC_LA15_N', 'i2c_sda_3'),#11
 	]
 
 	return list_net_des

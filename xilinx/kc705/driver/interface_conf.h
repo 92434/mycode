@@ -62,13 +62,29 @@
 #define IIC_SCL0 (230)
 
 #elif defined(KC705_TSP)
+#define DEFINED_TSP 2
 
 #define SPI_MISO (-1)
 #define SPI_MOSI (-1)
 #define SPI_SCK (-1)
 #define SPI_CS (-1)
+#if (DEFINED_TSP == 0)
 #define IIC_SDA0 (254)
 #define IIC_SCL0 (255)
+#elif (DEFINED_TSP == 1)
+#define IIC_SDA0 (254)
+#define IIC_SCL0 (255)
+#elif (DEFINED_TSP == 2)
+#warning("DEFINED_TSP == 2")
+#define IIC_SCL0 (248)
+#define IIC_SDA0 (249)
+#define IIC_SCL1 (250)
+#define IIC_SDA1 (251)
+#define IIC_SCL2 (252)
+#define IIC_SDA2 (253)
+#define IIC_SCL3 (254)
+#define IIC_SDA3 (255)
+#endif//if (DEFINED_TSP == 0)
 #endif
 
 #endif //ifndef _INTERFACE_IO_H

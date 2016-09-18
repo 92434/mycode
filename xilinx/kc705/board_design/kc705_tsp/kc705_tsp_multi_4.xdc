@@ -279,21 +279,37 @@ set_property IOSTANDARD LVCMOS25 [get_ports {asi_out_n_3}]
 # gpio constrain
 # ----------------------------------------------------------------------------------------------------
 
-#FMC_LPC_LA33_P, i2c_s0, R60.1, 252
-set_property PACKAGE_PIN AC29 [get_ports {gpio_tri_io[0]}]
+#FMC_HPC_HA03_P, i2c_sck, R126.1, 248
+set_property PACKAGE_PIN C12 [get_ports {gpio_tri_io[0]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[0]}]
 
-#FMC_LPC_LA33_N, i2c_s1, R61.1, 253
-set_property PACKAGE_PIN AC30 [get_ports {gpio_tri_io[1]}]
+#FMC_HPC_HA02_N, i2c_sda, R139.1, 249
+set_property PACKAGE_PIN C11 [get_ports {gpio_tri_io[1]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[1]}]
 
-#FMC_LPC_LA30_P, i2c_sda, R83.1, 254
-set_property PACKAGE_PIN AB29 [get_ports {gpio_tri_io[2]}]
+#FMC_HPC_HA18_P, i2c_sck_1, R134.1, 250
+set_property PACKAGE_PIN K14 [get_ports {gpio_tri_io[2]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[2]}]
 
-#FMC_LPC_LA30_N, i2c_sck, R84.1, 255
-set_property PACKAGE_PIN AB30 [get_ports {gpio_tri_io[3]}]
+#FMC_HPC_HA17_CC_N, i2c_sda_1, R145.1, 251
+set_property PACKAGE_PIN F13 [get_ports {gpio_tri_io[3]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[3]}]
+
+#FMC_HPC_LA01_CC_P, i2c_sck_2, R20.1, 252
+set_property PACKAGE_PIN D26 [get_ports {gpio_tri_io[4]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[4]}]
+
+#FMC_HPC_LA00_CC_N, i2c_sda_2, R41.1, 253
+set_property PACKAGE_PIN B25 [get_ports {gpio_tri_io[5]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[5]}]
+
+#FMC_HPC_LA16_P, i2c_sck_3, R48.1, 254
+set_property PACKAGE_PIN B27 [get_ports {gpio_tri_io[6]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[6]}]
+
+#FMC_HPC_LA15_N, i2c_sda_3, R74.1, 255
+set_property PACKAGE_PIN B24 [get_ports {gpio_tri_io[7]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[7]}]
 # ----------------------------------------------------------------------------------------------------
 # bitstream constrain
 # ----------------------------------------------------------------------------------------------------

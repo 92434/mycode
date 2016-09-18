@@ -312,6 +312,10 @@ function main() {
 	adb shell pm clear com.xiaomi.market
 	echo adb shell pm clear com.icbc
 	adb shell pm clear com.icbc
+	echo adb shell pm clear com.miui.video
+	adb shell pm clear com.miui.video
+	echo adb shell pm clear com.MobileTicket
+	adb shell pm clear com.MobileTicket
 
 	#uninstall
 	#adb shell pm uninstall com.sohu.inputmethod.sogou.xiaomi
