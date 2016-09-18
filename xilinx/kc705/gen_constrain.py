@@ -573,215 +573,69 @@ def map_extra_net_property_port_property_multi_tsp():
 
 def list_net_port_multi_tsp():
 	list_net_port = [
-		('FMC_HPC_HA00_CC_P', 'mpeg_clk'),
-		('FMC_HPC_HA01_CC_P', 'mpeg_sync'),
-		('FMC_HPC_HA05_N', 'mpeg_valid'),
-		('FMC_HPC_HA00_CC_N', 'mpeg_data[0]'),
-		('FMC_HPC_HA01_CC_N', 'mpeg_data[1]'),
-		('FMC_HPC_HA02_P', 'mpeg_data[2]'),
-		('FMC_HPC_HA04_P', 'mpeg_data[3]'),
-		('FMC_HPC_HA03_N', 'mpeg_data[4]'),
-		('FMC_HPC_HA04_N', 'mpeg_data[5]'),
-		('FMC_HPC_HA05_P', 'mpeg_data[6]'),
-		('FMC_HPC_HA06_P', 'mpeg_data[7]'),
+		#j94
+		('FMC_HPC_HA00_CC_P', 'mpeg_clk'),#5
+		('FMC_HPC_HA01_CC_P', 'mpeg_sync'),#6
+		('FMC_HPC_HA05_N', 'mpeg_valid'),#18
+		('FMC_HPC_HA00_CC_N', 'mpeg_data[0]'),#7
+		('FMC_HPC_HA01_CC_N', 'mpeg_data[1]'),#8
+		('FMC_HPC_HA02_P', 'mpeg_data[2]'),#9
+		('FMC_HPC_HA04_P', 'mpeg_data[3]'),#13
+		('FMC_HPC_HA03_N', 'mpeg_data[4]'),#12
+		('FMC_HPC_HA04_N', 'mpeg_data[5]'),#17
+		('FMC_HPC_HA05_P', 'mpeg_data[6]'),#14
+		('FMC_HPC_HA06_P', 'mpeg_data[7]'),#19
 
-		('FMC_HPC_HA10_P', 'asi_out_p'),
-		('FMC_HPC_HA10_N', 'asi_out_n'),
+		('FMC_HPC_HA10_P', 'asi_out_p'),#29
+		('FMC_HPC_HA10_N', 'asi_out_n'),#31
+		
+		#j95
+		('FMC_HPC_HA15_P', 'mpeg_clk_1'),#5
+		('FMC_HPC_HA16_P', 'mpeg_sync_1'),#6
+		('FMC_HPC_HA20_N', 'mpeg_valid_1'),#18
+		('FMC_HPC_HA15_N', 'mpeg_data_1[0]'),#7
+		('FMC_HPC_HA16_N', 'mpeg_data_1[1]'),#8
+		('FMC_HPC_HA17_CC_P', 'mpeg_data_1[2]'),#9
+		('FMC_HPC_HA19_P', 'mpeg_data_1[3]'),#13
+		('FMC_HPC_HA18_N', 'mpeg_data_1[4]'),#12
+		('FMC_HPC_HA19_N', 'mpeg_data_1[5]'),#17
+		('FMC_HPC_HA20_P', 'mpeg_data_1[6]'),#14
+		('FMC_HPC_HA21_P', 'mpeg_data_1[7]'),#19
 
-		('FMC_HPC_LA11_P', 'mpeg_clk_1'),
-		('FMC_HPC_LA04_P', 'mpeg_sync_1'),
-		('FMC_HPC_LA05_P', 'mpeg_valid_1'),
-		('FMC_HPC_LA31_N', 'mpeg_data_1[0]'),
-		('FMC_HPC_LA18_CC_P', 'mpeg_data_1[1]'),
-		('FMC_HPC_LA31_P', 'mpeg_data_1[2]'),
-		('FMC_HPC_HA17_CC_P', 'mpeg_data_1[3]'),
-		('FMC_HPC_HA16_N', 'mpeg_data_1[4]'),
-		('FMC_HPC_LA30_N', 'mpeg_data_1[5]'),
-		('FMC_HPC_LA22_P', 'mpeg_data_1[6]'),
-		('FMC_HPC_LA32_N', 'mpeg_data_1[7]'),
+		('FMC_HPC_LA29_P', 'asi_out_p_1'),#29
+		('FMC_HPC_LA29_N', 'asi_out_n_1'),#31
 
-		('FMC_HPC_LA01_CC_N', 'asi_out_p_1'),
-		('FMC_HPC_CLK0_M2C_N', 'asi_out_n_1'),
+		#96
+		('FMC_HPC_CLK1_M2C_P', 'mpeg_clk_2'),#5
+		('FMC_HPC_CLK0_M2C_P', 'mpeg_sync_2'),#6
+		('FMC_HPC_LA03_N', 'mpeg_valid_2'),#18
+		('FMC_HPC_CLK1_M2C_N', 'mpeg_data_2[0]'),#7
+		('FMC_HPC_CLK0_M2C_N', 'mpeg_data_2[1]'),#8
+		('FMC_HPC_LA00_CC_P', 'mpeg_data_2[2]'),#9
+		('FMC_HPC_LA02_P', 'mpeg_data_2[3]'),#13
+		('FMC_HPC_LA01_CC_N', 'mpeg_data_2[4]'),#12
+		('FMC_HPC_LA02_N', 'mpeg_data_2[5]'),#17
+		('FMC_HPC_LA03_P', 'mpeg_data_2[6]'),#14
+		('FMC_HPC_LA04_P', 'mpeg_data_2[7]'),#19
 
-		('FMC_HPC_LA23_N', 'mpeg_clk_2'),
-		('FMC_HPC_LA04_N', 'mpeg_sync_2'),
-		('FMC_HPC_LA06_N', 'mpeg_valid_2'),
-		('FMC_HPC_HA20_P', 'mpeg_data_2[0]'),
-		('FMC_HPC_LA12_N', 'mpeg_data_2[1]'),
-		('FMC_HPC_LA14_P', 'mpeg_data_2[2]'),
-		('FMC_HPC_LA16_P', 'mpeg_data_2[3]'),
-		('FMC_HPC_LA00_CC_N', 'mpeg_data_2[4]'),
-		('FMC_HPC_LA15_N', 'mpeg_data_2[5]'),
-		('FMC_HPC_LA23_P', 'mpeg_data_2[6]'),
-		('FMC_HPC_LA22_N', 'mpeg_data_2[7]'),
+		('FMC_HPC_LA08_P', 'asi_out_p_2'),#29
+		('FMC_HPC_LA08_N', 'asi_out_n_2'),#31
+		
+		#j97
+		('FMC_HPC_LA13_P', 'mpeg_clk_3'),#5
+		('FMC_HPC_LA14_P', 'mpeg_sync_3'),#6
+		('FMC_HPC_LA18_CC_N', 'mpeg_valid_3'),#18
+		('FMC_HPC_LA13_N', 'mpeg_data_3[0]'),#7
+		('FMC_HPC_LA14_N', 'mpeg_data_3[1]'),#8
+		('FMC_HPC_LA15_P', 'mpeg_data_3[2]'),#9
+		('FMC_HPC_LA17_CC_P', 'mpeg_data_3[3]'),#13
+		('FMC_HPC_LA16_N', 'mpeg_data_3[4]'),#12
+		('FMC_HPC_LA17_CC_N', 'mpeg_data_3[5]'),#17
+		('FMC_HPC_LA18_CC_P', 'mpeg_data_3[6]'),#14
+		('FMC_HPC_LA19_P', 'mpeg_data_3[7]'),#19
 
-		('FMC_HPC_LA14_N', 'asi_out_p_2'),
-		('FMC_HPC_LA17_CC_P', 'asi_out_n_2'),
-
-		('FMC_HPC_LA11_N', 'mpeg_clk_3'),
-		('FMC_HPC_PG_M2C_LS', 'mpeg_sync_3'),
-		('FMC_HPC_HA16_P', 'mpeg_valid_3'),
-		('FMC_HPC_HA13_P', 'mpeg_data_3[0]'),
-		('FMC_HPC_HA22_P', 'mpeg_data_3[1]'),
-		('FMC_HPC_HA23_P', 'mpeg_data_3[2]'),
-		('FMC_HPC_HA23_N', 'mpeg_data_3[3]'),
-		('FMC_HPC_HA19_P', 'mpeg_data_3[4]'),
-		('FMC_HPC_HA19_N', 'mpeg_data_3[5]'),
-		('FMC_HPC_HA15_P', 'mpeg_data_3[6]'),
-		('FMC_HPC_HA14_N', 'mpeg_data_3[7]'),
-
-		('FMC_HPC_CLK1_M2C_N', 'asi_out_p_3'),
-		('FMC_HPC_LA20_N', 'asi_out_n_3'),
-
-		('FMC_HPC_LA17_CC_N', 'mpeg_clk_4'),
-		('FMC_HPC_LA18_CC_N', 'mpeg_sync_4'),
-		('FMC_HPC_LA07_P', 'mpeg_valid_4'),
-		('FMC_HPC_LA08_P', 'mpeg_data_4[0]'),
-		('FMC_HPC_LA19_P', 'mpeg_data_4[1]'),
-		('FMC_HPC_HA15_N', 'mpeg_data_4[2]'),
-		('FMC_HPC_LA21_P', 'mpeg_data_4[3]'),
-		('FMC_HPC_LA13_P', 'mpeg_data_4[4]'),
-		('FMC_HPC_LA13_N', 'mpeg_data_4[5]'),
-		('FMC_HPC_LA16_N', 'mpeg_data_4[6]'),
-		('FMC_HPC_HA18_P', 'mpeg_data_4[7]'),
-
-		('FMC_HPC_HA13_N', 'asi_out_p_4'),
-		('FMC_HPC_LA27_P', 'asi_out_n_4'),
-
-		('FMC_HPC_HA03_P', 'mpeg_clk_5'),
-		('FMC_HPC_HA02_N', 'mpeg_sync_5'),
-		('FMC_HPC_LA29_P', 'mpeg_valid_5'),
-		('FMC_HPC_LA28_N', 'mpeg_data_5[0]'),
-		('FMC_HPC_HA12_P', 'mpeg_data_5[1]'),
-		('FMC_HPC_HA06_N', 'mpeg_data_5[2]'),
-		('FMC_HPC_LA15_P', 'mpeg_data_5[3]'),
-		('FMC_HPC_LA00_CC_P', 'mpeg_data_5[4]'),
-		('FMC_HPC_LA06_P', 'mpeg_data_5[5]'),
-		('FMC_HPC_HA07_N', 'mpeg_data_5[6]'),
-		('FMC_HPC_LA12_P', 'mpeg_data_5[7]'),
-
-		('FMC_HPC_LA33_N', 'asi_out_p_5'),
-		('FMC_HPC_LA05_N', 'asi_out_n_5'),
-
-		('FMC_HPC_HA20_N', 'mpeg_clk_6'),
-		('FMC_HPC_LA28_P', 'mpeg_sync_6'),
-		('FMC_HPC_CLK1_M2C_P', 'mpeg_valid_6'),
-		('FMC_HPC_LA10_N', 'mpeg_data_6[0]'),
-		('FMC_HPC_LA02_N', 'mpeg_data_6[1]'),
-		('FMC_HPC_LA03_P', 'mpeg_data_6[2]'),
-		('FMC_HPC_LA33_P', 'mpeg_data_6[3]'),
-		('FMC_HPC_LA09_P', 'mpeg_data_6[4]'),
-		('FMC_HPC_LA19_N', 'mpeg_data_6[5]'),
-		('FMC_HPC_HA09_P', 'mpeg_data_6[6]'),
-		('FMC_HPC_HA17_CC_N', 'mpeg_data_6[7]'),
-
-		('FMC_HPC_LA25_N', 'asi_out_p_6'),
-		('FMC_HPC_LA03_N', 'asi_out_n_6'),
-
-		('FMC_HPC_LA21_N', 'mpeg_clk_7'),
-		('FMC_HPC_LA29_N', 'mpeg_sync_7'),
-		('FMC_HPC_HA07_P', 'mpeg_valid_7'),
-		('FMC_HPC_HA12_N', 'mpeg_data_7[0]'),
-		('FMC_HPC_HA11_P', 'mpeg_data_7[1]'),
-		('FMC_HPC_LA26_P', 'mpeg_data_7[2]'),
-		('FMC_HPC_LA27_N', 'mpeg_data_7[3]'),
-		('FMC_HPC_LA09_N', 'mpeg_data_7[4]'),
-		('FMC_HPC_HA14_P', 'mpeg_data_7[5]'),
-		('FMC_HPC_HA18_N', 'mpeg_data_7[6]'),
-		('FMC_HPC_HA21_N', 'mpeg_data_7[7]'),
-
-		('FMC_HPC_HA21_P', 'asi_out_p_7'),
-		('FMC_HPC_LA10_P', 'asi_out_n_7'),
-
-		('FMC_HPC_LA07_N', 'mpeg_clk_8'),
-		('FMC_HPC_LA32_P', 'mpeg_sync_8'),
-		('FMC_HPC_LA30_P', 'mpeg_valid_8'),
-		('FMC_HPC_CLK0_M2C_P', 'mpeg_data_8[0]'),
-		('FMC_HPC_LA01_CC_P', 'mpeg_data_8[1]'),
-		('FMC_HPC_LA20_P', 'mpeg_data_8[2]'),
-		('FMC_HPC_HA09_N', 'mpeg_data_8[3]'),
-		('FMC_HPC_HA08_N', 'mpeg_data_8[4]'),
-		('FMC_HPC_LA24_N', 'mpeg_data_8[5]'),
-		('FMC_HPC_LA24_P', 'mpeg_data_8[6]'),
-		('FMC_HPC_HA11_N', 'mpeg_data_8[7]'),
-
-		('FMC_HPC_HA08_P', 'asi_out_p_8'),
-		('FMC_HPC_LA26_N', 'asi_out_n_8'),
-
-		('FMC_HPC_HA22_N', 'mpeg_clk_9'),
-		('FMC_HPC_LA08_N', 'mpeg_sync_9'),
-		('FMC_HPC_LA25_P', 'mpeg_valid_9'),
-		('FMC_LPC_PRSNT_M2C_B_LS', 'mpeg_data_9[0]'),
-		('FMC_LPC_LA24_N', 'mpeg_data_9[1]'),
-		('FMC_LPC_LA26_P', 'mpeg_data_9[2]'),
-		('FMC_LPC_LA21_N', 'mpeg_data_9[3]'),
-		('FMC_LPC_CLK1_M2C_P', 'mpeg_data_9[4]'),
-		('FMC_LPC_LA21_P', 'mpeg_data_9[5]'),
-		('FMC_LPC_LA07_P', 'mpeg_data_9[6]'),
-		('FMC_LPC_LA05_P', 'mpeg_data_9[7]'),
-
-		('FMC_LPC_CLK0_M2C_N', 'asi_out_p_9'),
-		('FMC_LPC_LA03_P', 'asi_out_n_9'),
-
-		('FMC_LPC_LA28_P', 'mpeg_clk_10'),
-		('FMC_LPC_LA00_CC_P', 'mpeg_sync_10'),
-		('FMC_LPC_LA16_N', 'mpeg_valid_10'),
-		('FMC_LPC_LA25_N', 'mpeg_data_10[0]'),
-		('FMC_LPC_LA31_P', 'mpeg_data_10[1]'),
-		('FMC_LPC_LA18_CC_N', 'mpeg_data_10[2]'),
-		('FMC_LPC_LA33_N', 'mpeg_data_10[3]'),
-		('FMC_LPC_LA26_N', 'mpeg_data_10[4]'),
-		('FMC_LPC_LA01_CC_N', 'mpeg_data_10[5]'),
-		('FMC_LPC_LA02_P', 'mpeg_data_10[6]'),
-		('FMC_LPC_LA11_N', 'mpeg_data_10[7]'),
-
-		('FMC_LPC_LA29_N', 'asi_out_p_10'),
-		('FMC_LPC_LA12_P', 'asi_out_n_10'),
-
-		('FMC_LPC_LA14_P', 'mpeg_clk_11'),
-		('FMC_LPC_LA15_N', 'mpeg_sync_11'),
-		('FMC_LPC_LA18_CC_P', 'mpeg_valid_11'),
-		('FMC_LPC_LA19_P', 'mpeg_data_11[0]'),
-		('FMC_LPC_LA22_N', 'mpeg_data_11[1]'),
-		('FMC_LPC_LA09_P', 'mpeg_data_11[2]'),
-		('FMC_LPC_LA19_N', 'mpeg_data_11[3]'),
-		('FMC_LPC_LA09_N', 'mpeg_data_11[4]'),
-		('FMC_LPC_LA10_N', 'mpeg_data_11[5]'),
-		('FMC_LPC_LA00_CC_N', 'mpeg_data_11[6]'),
-		('FMC_LPC_LA11_P', 'mpeg_data_11[7]'),
-
-		('FMC_LPC_LA14_N', 'asi_out_p_11'),
-		('FMC_LPC_LA01_CC_P', 'asi_out_n_11'),
-
-		('FMC_LPC_LA29_P', 'mpeg_clk_12'),
-		('FMC_LPC_LA31_N', 'mpeg_sync_12'),
-		('FMC_LPC_CLK1_M2C_N', 'mpeg_valid_12'),
-		('FMC_LPC_LA07_N', 'mpeg_data_12[0]'),
-		('FMC_LPC_LA23_N', 'mpeg_data_12[1]'),
-		('FMC_LPC_LA23_P', 'mpeg_data_12[2]'),
-		('FMC_LPC_LA04_P', 'mpeg_data_12[3]'),
-		('FMC_LPC_LA03_N', 'mpeg_data_12[4]'),
-		('FMC_LPC_LA05_N', 'mpeg_data_12[5]'),
-		('FMC_LPC_LA16_P', 'mpeg_data_12[6]'),
-		('FMC_LPC_LA25_P', 'mpeg_data_12[7]'),
-
-		('FMC_LPC_LA17_CC_N', 'asi_out_p_12'),
-		('FMC_LPC_LA15_P', 'asi_out_n_12'),
-
-		('FMC_LPC_LA13_N', 'mpeg_clk_13'),
-		('FMC_LPC_LA33_P', 'mpeg_sync_13'),
-		('FMC_LPC_LA28_N', 'mpeg_valid_13'),
-		('FMC_LPC_LA27_N', 'mpeg_data_13[0]'),
-		('FMC_LPC_LA27_P', 'mpeg_data_13[1]'),
-		('FMC_LPC_LA22_P', 'mpeg_data_13[2]'),
-		('FMC_LPC_LA24_P', 'mpeg_data_13[3]'),
-		('FMC_LPC_LA10_P', 'mpeg_data_13[4]'),
-		('FMC_LPC_LA08_N', 'mpeg_data_13[5]'),
-		('FMC_LPC_LA08_P', 'mpeg_data_13[6]'),
-		('FMC_LPC_LA04_N', 'mpeg_data_13[7]'),
-
-		('FMC_LPC_LA32_P', 'asi_out_p_13'),
-		('FMC_LPC_LA32_N', 'asi_out_n_13'),
+		('FMC_HPC_LA23_P', 'asi_out_p_3'),#29
+		('FMC_HPC_LA23_N', 'asi_out_n_3'),#31
 	]
 
 	return list_net_port
@@ -977,14 +831,10 @@ def list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 
 def list_net_des_multi_tsp():
 	list_net_des = [
-		('FMC_HPC_PRSNT_M2C_B_LS', 'i2c_s0'),
-		('FMC_HPC_LA02_P', 'i2c_s1'),
-		('FMC_LPC_LA06_P', 'i2c_s2'),
-		('FMC_LPC_LA06_N', 'i2c_s3'),
-		('FMC_LPC_LA17_CC_P', 'i2c_s4'),
-		('FMC_LPC_LA13_P', 'i2c_s5'),
-		('FMC_LPC_LA30_N', 'i2c_sck'),
+		('FMC_LPC_LA33_P', 'i2c_s0'),
+		('FMC_LPC_LA33_N', 'i2c_s1'),
 		('FMC_LPC_LA30_P', 'i2c_sda'),
+		('FMC_LPC_LA30_N', 'i2c_sck'),
 	]
 
 	return list_net_des

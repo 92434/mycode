@@ -67,8 +67,8 @@
 #define SPI_MOSI (-1)
 #define SPI_SCK (-1)
 #define SPI_CS (-1)
-#define IIC_SDA0 (255)
-#define IIC_SCL0 (254)
+#define IIC_SDA0 (254)
+#define IIC_SCL0 (255)
 #endif
 
 #endif //ifndef _INTERFACE_IO_H
