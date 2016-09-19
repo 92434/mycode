@@ -29,10 +29,11 @@ static void i2c_gpio_setsda_dir(void *data, int state)
 {
 	struct i2c_gpio_platform_data *pdata = data;
 
-	if (state)
+	if (state) {
 		gpio_direction_input(pdata->sda_pin);
-	else
+	} else {
 		gpio_direction_output(pdata->sda_pin, 0);
+	}
 }
 
 /*
@@ -52,10 +53,11 @@ static void i2c_gpio_setscl_dir(void *data, int state)
 {
 	struct i2c_gpio_platform_data *pdata = data;
 
-	if (state)
+	if (state) {
 		gpio_direction_input(pdata->scl_pin);
-	else
+	} else {
 		gpio_direction_output(pdata->scl_pin, 0);
+	}
 }
 
 /*
@@ -86,20 +88,22 @@ static int i2c_gpio_getscl(void *data)
 }
 
 static int of_i2c_gpio_get_pins(struct device_node *np,
-				unsigned int *sda_pin, unsigned int *scl_pin)
+								unsigned int *sda_pin, unsigned int *scl_pin)
 {
-	if (of_gpio_count(np) < 2)
+	if (of_gpio_count(np) < 2) {
 		return -ENODEV;
+	}
 
 	*sda_pin = of_get_gpio(np, 0);
 	*scl_pin = of_get_gpio(np, 1);
 
-	if (*sda_pin == -EPROBE_DEFER || *scl_pin == -EPROBE_DEFER)
+	if (*sda_pin == -EPROBE_DEFER || *scl_pin == -EPROBE_DEFER) {
 		return -EPROBE_DEFER;
+	}
 
 	if (!gpio_is_valid(*sda_pin) || !gpio_is_valid(*scl_pin)) {
 		pr_err("%s: invalid GPIO pins, sda=%d/scl=%d\n",
-		       np->full_name, *sda_pin, *scl_pin);
+			   np->full_name, *sda_pin, *scl_pin);
 		return -ENODEV;
 	}
 
@@ -107,14 +111,15 @@ static int of_i2c_gpio_get_pins(struct device_node *np,
 }
 
 static void of_i2c_gpio_get_props(struct device_node *np,
-				  struct i2c_gpio_platform_data *pdata)
+								  struct i2c_gpio_platform_data *pdata)
 {
 	u32 reg;
 
 	of_property_read_u32(np, "i2c-gpio,delay-us", &pdata->udelay);
 
-	if (!of_property_read_u32(np, "i2c-gpio,timeout-ms", &reg))
+	if (!of_property_read_u32(np, "i2c-gpio,timeout-ms", &reg)) {
 		pdata->timeout = msecs_to_jiffies(reg);
+	}
 
 	pdata->sda_is_open_drain =
 		of_property_read_bool(np, "i2c-gpio,sda-open-drain");
@@ -136,33 +141,47 @@ static int i2c_gpio_probe(struct platform_device *pdev)
 	/* First get the GPIO pins; if it fails, we'll defer the probe. */
 	if (pdev->dev.of_node) {
 		ret = of_i2c_gpio_get_pins(pdev->dev.of_node,
-					   &sda_pin, &scl_pin);
-		if (ret)
+								   &sda_pin, &scl_pin);
+
+		if (ret) {
 			return ret;
+		}
 	} else {
-		if (!dev_get_platdata(&pdev->dev))
+		if (!dev_get_platdata(&pdev->dev)) {
 			return -ENXIO;
+		}
+
 		pdata = dev_get_platdata(&pdev->dev);
 		sda_pin = pdata->sda_pin;
 		scl_pin = pdata->scl_pin;
 	}
 
 	ret = devm_gpio_request(&pdev->dev, sda_pin, "sda");
+
 	if (ret) {
-		if (ret == -EINVAL)
-			ret = -EPROBE_DEFER;	/* Try again later */
+		if (ret == -EINVAL) {
+			ret = -EPROBE_DEFER;    /* Try again later */
+		}
+
 		return ret;
 	}
+
 	ret = devm_gpio_request(&pdev->dev, scl_pin, "scl");
+
 	if (ret) {
-		if (ret == -EINVAL)
-			ret = -EPROBE_DEFER;	/* Try again later */
+		if (ret == -EINVAL) {
+			ret = -EPROBE_DEFER;    /* Try again later */
+		}
+
 		return ret;
 	}
 
 	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
-	if (!priv)
+
+	if (!priv) {
 		return -ENOMEM;
+	}
+
 	adap = &priv->adap;
 	bit_data = &priv->bit_data;
 	pdata = &priv->pdata;
@@ -191,29 +210,35 @@ static int i2c_gpio_probe(struct platform_device *pdev)
 		bit_data->setscl = i2c_gpio_setscl_dir;
 	}
 
-	if (!pdata->scl_is_output_only)
+	if (!pdata->scl_is_output_only) {
 		bit_data->getscl = i2c_gpio_getscl;
+	}
+
 	bit_data->getsda = i2c_gpio_getsda;
 
-	if (pdata->udelay)
+	if (pdata->udelay) {
 		bit_data->udelay = pdata->udelay;
-	else if (pdata->scl_is_output_only)
-		bit_data->udelay = 50;			/* 10 kHz */
-	else
-		bit_data->udelay = 5;			/* 100 kHz */
+	} else if (pdata->scl_is_output_only) {
+		bit_data->udelay = 50;    /* 10 kHz */
+	} else {
+		bit_data->udelay = 5;    /* 100 kHz */
+	}
 
-	if (pdata->timeout)
+	if (pdata->timeout) {
 		bit_data->timeout = pdata->timeout;
-	else
-		bit_data->timeout = HZ / 10;		/* 100 ms */
+	} else {
+		bit_data->timeout = HZ / 10;    /* 100 ms */
+	}
 
 	bit_data->data = pdata;
 
 	adap->owner = THIS_MODULE;
-	if (pdev->dev.of_node)
+
+	if (pdev->dev.of_node) {
 		strlcpy(adap->name, dev_name(&pdev->dev), sizeof(adap->name));
-	else
+	} else {
 		snprintf(adap->name, sizeof(adap->name), "i2c-gpio%d", pdev->id);
+	}
 
 	adap->algo_data = bit_data;
 	adap->class = I2C_CLASS_HWMON | I2C_CLASS_SPD;
@@ -222,15 +247,17 @@ static int i2c_gpio_probe(struct platform_device *pdev)
 
 	adap->nr = pdev->id;
 	ret = i2c_bit_add_numbered_bus(adap);
-	if (ret)
+
+	if (ret) {
 		return ret;
+	}
 
 	platform_set_drvdata(pdev, priv);
 
 	dev_info(&pdev->dev, "using pins %u (SDA) and %u (SCL%s)\n",
-		 pdata->sda_pin, pdata->scl_pin,
-		 pdata->scl_is_output_only
-		 ? ", no clock stretching" : "");
+			 pdata->sda_pin, pdata->scl_pin,
+			 pdata->scl_is_output_only
+			 ? ", no clock stretching" : "");
 
 	return 0;
 }
@@ -253,11 +280,29 @@ static const struct of_device_id i2c_gpio_dt_ids[] = {
 	{ .compatible = "i2c-gpio", },
 	{ /* sentinel */ }
 };
-
 MODULE_DEVICE_TABLE(of, i2c_gpio_dt_ids);
 #endif
 
+static const struct platform_device_id i2c_gpio_driver_ids[] = {
+	{
+		.name           = "i2c-gpio_0",
+	}, 
+	{
+		.name           = "i2c-gpio_1",
+	}, 
+	{
+		.name           = "i2c-gpio_2",
+	}, 
+	{
+		.name           = "i2c-gpio_3",
+	}, 
+	{
+	}
+};
+MODULE_DEVICE_TABLE(platform, i2c_gpio_driver_ids);
+
 static struct platform_driver i2c_gpio_driver = {
+	.id_table	= i2c_gpio_driver_ids,
 	.driver		= {
 		.name	= "i2c-gpio",
 		.owner	= THIS_MODULE,
@@ -272,8 +317,10 @@ static int __init i2c_gpio_init(void)
 	int ret;
 
 	ret = platform_driver_register(&i2c_gpio_driver);
-	if (ret)
+
+	if (ret) {
 		printk(KERN_ERR "i2c-gpio: probe failed: %d\n", ret);
+	}
 
 	return ret;
 }

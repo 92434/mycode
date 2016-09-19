@@ -25,8 +25,8 @@
 #define I2C_BUS_NUM (-1)
 
 static struct i2c_gpio_platform_data i2c_gpio_data = {
-	.sda_pin		= IIC_SDA0,
-	.scl_pin		= IIC_SCL0,
+	.sda_pin		= IIC_SDA0 - 76,
+	.scl_pin		= IIC_SCL0 - 76,
 	.sda_is_open_drain	= 0,
 	.scl_is_open_drain	= 0,
 	.udelay			= 10,
@@ -72,7 +72,7 @@ static void release_gpio(struct device *dev)
 }
 
 static struct platform_device i2c_gpio_device = {
-	.name		= "i2c-gpio",
+	.name		= "i2c-gpio_0",
 	.id		= I2C_BUS_NUM,
 	.dev		= {
 		.platform_data	= &i2c_gpio_data,
@@ -83,7 +83,7 @@ static struct platform_device i2c_gpio_device = {
 #if (DEFINED_TSP == 2)
 #warning("DEFINED_TSP == 2")
 static struct platform_device i2c_gpio_device_1 = {
-	.name		= "i2c-gpio",
+	.name		= "i2c-gpio_1",
 	.id		= I2C_BUS_NUM,
 	.dev		= {
 		.platform_data	= &i2c_gpio_data_1,
@@ -91,7 +91,7 @@ static struct platform_device i2c_gpio_device_1 = {
 	},
 };
 static struct platform_device i2c_gpio_device_2 = {
-	.name		= "i2c-gpio",
+	.name		= "i2c-gpio_2",
 	.id		= I2C_BUS_NUM,
 	.dev		= {
 		.platform_data	= &i2c_gpio_data_2,
@@ -99,7 +99,7 @@ static struct platform_device i2c_gpio_device_2 = {
 	},
 };
 static struct platform_device i2c_gpio_device_3 = {
-	.name		= "i2c-gpio",
+	.name		= "i2c-gpio_3",
 	.id		= I2C_BUS_NUM,
 	.dev		= {
 		.platform_data	= &i2c_gpio_data_3,
