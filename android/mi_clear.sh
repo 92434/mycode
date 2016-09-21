@@ -418,6 +418,11 @@ function main() {
 		adb shell pm uninstall com.xiaomi.payment
 	fi
 
+	if [ -n "$(package_exist com.xiaomi.jr)" ]; then
+		echo adb shell pm uninstall com.xiaomi.jr
+		adb shell pm uninstall com.xiaomi.jr
+	fi
+
 	echo adb shell busybox mount -o remount,ro,seclabel,relatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 	adb shell busybox mount -o remount,ro,seclabel,relatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 }
