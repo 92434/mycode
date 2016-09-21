@@ -146,13 +146,321 @@ def remove_unused_pin(map_kc705_pin_net):
 	print 'total:', len(list_unsupport_pin_net)
 
 
+#cat log | sed 's/:\|(\|)/ /g' | awk '{print $1":"$5":"$3":"$6}' | sed 's/\([^:]\+\):\([^:]\+\):\([^:]\+\):\([^:]\+\)/\1 : \"\2\",\n\3 : \"\4\",/g' | sed -e "s/\"/'/g"
+def get_newboard_map_slot_map_portnum_pin():
+	map_slot_map_portnum_pin = {
+		'J102' : {
+			5 : 'Y30',
+			6 : 'AA30',
+			7 : 'AB29',
+			8 : 'AB30',
+			9 : 'AC29',
+			10 : 'AC30',
+			11 : 'AB27',
+			12 : 'AC27',
+			13 : 'AD29',
+			14 : 'AE29',
+			17 : 'AE30',
+			18 : 'AF30',
+			19 : 'AE28',
+			20 : 'AF28',
+			21 : 'AG30',
+			22 : 'AH30',
+			23 : 'AK29',
+			24 : 'AK30',
+			25 : 'AJ28',
+			26 : 'AJ29',
+			29 : 'AG27',
+			30 : 'AG28',
+			31 : 'AH26',
+			32 : 'AH27',
+			33 : 'AJ27',
+			34 : 'AK28',
+			35 : 'AJ26',
+			36 : 'AK26',
+			37 : 'AF26',
+			38 : 'AF27',
+		},
+		'J101' : {
+			5 : 'AC26',
+			6 : 'AD26',
+			7 : 'AE25',
+			8 : 'AF25',
+			9 : 'AC24',
+			10 : 'AD24',
+			11 : 'AJ24',
+			12 : 'AK25',
+			13 : 'AJ22',
+			14 : 'AJ23',
+			17 : 'AG22',
+			18 : 'AH22',
+			19 : 'AD23',
+			20 : 'AE24',
+			21 : 'AC22',
+			22 : 'AD22',
+			23 : 'AF20',
+			24 : 'AF21',
+			25 : 'AG20',
+			26 : 'AH20',
+			29 : 'AK20',
+			30 : 'AK21',
+			31 : 'AE23',
+			32 : 'AF23',
+			33 : 'AB24',
+			34 : 'AC25',
+			35 : 'AK23',
+			36 : 'AK24',
+			37 : 'AD21',
+			38 : 'AE21',
+		},
+		'J96' : {
+			5 : 'D17',
+			6 : 'D27',
+			7 : 'D18',
+			8 : 'C27',
+			9 : 'C25',
+			10 : 'D26',
+			11 : 'B25',
+			12 : 'C26',
+			13 : 'H24',
+			14 : 'H26',
+			17 : 'H25',
+			18 : 'H27',
+			19 : 'G28',
+			20 : 'G29',
+			21 : 'F28',
+			22 : 'F30',
+			23 : 'H30',
+			24 : 'E28',
+			25 : 'G30',
+			26 : 'D28',
+			29 : 'E29',
+			30 : 'B30',
+			31 : 'E30',
+			32 : 'A30',
+			33 : 'D29',
+			34 : 'G27',
+			35 : 'C30',
+			36 : 'F27',
+			37 : 'C29',
+			38 : 'B29',
+		},
+		'J86' : {
+			5 : 'D21',
+			6 : 'C21',
+			7 : 'D16',
+			8 : 'E18',
+			9 : 'C16',
+			10 : 'F16',
+			11 : 'K18',
+			12 : 'J18',
+			13 : 'H20',
+			14 : 'G20',
+			17 : 'J17',
+			18 : 'H17',
+			19 : 'B23',
+			20 : 'A23',
+			21 : 'E23',
+			22 : 'D23',
+			23 : 'F25',
+			24 : 'E25',
+			25 : 'E24',
+			26 : 'D24',
+			29 : 'F26',
+			30 : 'E26',
+			31 : 'G23',
+			32 : 'G24',
+			33 : 'J19',
+			34 : 'H19',
+			35 : 'L17',
+			36 : 'L18',
+			37 : 'K19',
+			38 : 'K20',
+		},
+		'J97' : {
+			5 : 'A25',
+			6 : 'B28',
+			7 : 'A26',
+			8 : 'A28',
+			9 : 'C24',
+			10 : 'B27',
+			11 : 'B24',
+			12 : 'A27',
+			13 : 'F20',
+			14 : 'F21',
+			17 : 'E20',
+			18 : 'E21',
+			19 : 'G18',
+			20 : 'E19',
+			21 : 'F18',
+			22 : 'D19',
+			23 : 'A20',
+			24 : 'C20',
+			25 : 'A21',
+			26 : 'B20',
+			29 : 'B22',
+			30 : 'A16',
+			31 : 'A22',
+			32 : 'A17',
+			33 : 'G17',
+			34 : 'B18',
+			35 : 'F17',
+			36 : 'A18',
+			37 : 'C19',
+			38 : 'B19',
+		},
+		'J95' : {
+			5 : 'H15',
+			6 : 'L15',
+			7 : 'G15',
+			8 : 'K15',
+			9 : 'G13',
+			10 : 'K14',
+			11 : 'F13',
+			12 : 'J14',
+			13 : 'H11',
+			14 : 'K13',
+			17 : 'H12',
+			18 : 'J13',
+			19 : 'J11',
+			20 : 'L11',
+			21 : 'J12',
+			22 : 'K11',
+			23 : 'L12',
+			25 : 'L13',
+			26 : 'G19',
+			29 : 'C17',
+			30 : 'D22',
+			31 : 'B17',
+			32 : 'C22',
+			33 : 'G22',
+			35 : 'F22',
+			37 : 'H21',
+			38 : 'H22',
+		},
+		'J94' : {
+			5 : 'D12',
+			6 : 'H14',
+			7 : 'D13',
+			8 : 'G14',
+			9 : 'D11',
+			10 : 'C12',
+			11 : 'C11',
+			12 : 'B12',
+			13 : 'F11',
+			14 : 'F15',
+			17 : 'E11',
+			18 : 'E16',
+			19 : 'D14',
+			20 : 'B14',
+			21 : 'C14',
+			22 : 'A15',
+			23 : 'E14',
+			24 : 'F12',
+			25 : 'E15',
+			26 : 'E13',
+			29 : 'A11',
+			30 : 'B13',
+			31 : 'A12',
+			32 : 'A13',
+			33 : 'C15',
+			34 : 'L16',
+			35 : 'B15',
+			36 : 'K16',
+			37 : 'J16',
+			38 : 'H16',
+		},
+		'J82' : {
+			3 : 'N30',
+			5 : 'U30',
+			6 : 'L20',
+			7 : 'T25',
+			8 : 'U25',
+			9 : 'R19',
+			10 : 'U28',
+			11 : 'T26',
+			12 : 'T27',
+			13 : 'R28',
+			14 : 'T28',
+			17 : 'V26',
+			18 : 'U27',
+			19 : 'R30',
+			20 : 'W19',
+			21 : 'J21',
+			22 : 'R23',
+			23 : 'K30',
+			24 : 'M27',
+			25 : 'N29',
+			26 : 'M28',
+			29 : 'N25',
+			30 : 'N27',
+			31 : 'L28',
+			32 : 'M29',
+			33 : 'K26',
+			34 : 'J26',
+			35 : 'J28',
+			36 : 'L30',
+			37 : 'J29',
+		},
+		'J98' : {
+			5 : 'L25',
+			6 : 'AA26',
+			7 : 'K25',
+			8 : 'Y26',
+			9 : 'M20',
+			10 : 'Y25',
+			11 : 'P19',
+			12 : 'NIL',
+			13 : 'NIL',
+			14 : 'NIL',
+			17 : 'AVP',
+			18 : 'J23',
+			19 : 'AVN',
+			20 : 'J24',
+			21 : 'L22',
+			22 : 'THD',
+			23 : 'L23',
+			24 : 'THD',
+			25 : 'AB25',
+			26 : 'AA25',
+			29 : 'AB28',
+			30 : 'AA27',
+			31 : 'AH24',
+			32 : 'Y14',
+			33 : 'Y20',
+			34 : 'AB14',
+			35 : 'NIL',
+			36 : 'AG17',
+			37 : 'NIL',
+			38 : 'NIL',
+		},
+		'J87' : {
+			3 : 'G7',
+			4 : 'B1',
+			5 : 'G8',
+			6 : 'B2',
+			7 : 'A8',
+			8 : 'B5',
+			9 : 'A4',
+			10 : 'B6',
+			13 : 'A3',
+			14 : 'A7',
+			15 : 'C8',
+			16 : 'E8',
+			17 : 'C7',
+			18 : 'E7',
+		},
+	}
 
-def map_extra_net_property_port_property_iic_slave():
-	map_extra_net_property_port_property = {
+	return map_slot_map_portnum_pin
+
+
+def map_port_property_iic_slave():
+	map_port_property = {
 		'iic_scl': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	}
 
-	return map_extra_net_property_port_property
+	return map_port_property
 
 def list_net_port_iic_slave():
 	list_net_port = [
@@ -162,8 +470,8 @@ def list_net_port_iic_slave():
 
 	return list_net_port
 
-def map_extra_net_property_port_property_new_i2s_board():
-	map_extra_net_property_port_property = {
+def map_port_property_new_i2s_board():
+	map_port_property = {
 		'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		#'lrclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		#'sdata[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
@@ -229,7 +537,7 @@ def map_extra_net_property_port_property_new_i2s_board():
 		#'sdata[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	}
 
-	return map_extra_net_property_port_property
+	return map_port_property
 
 def list_pin_port_new_i2s_board():
 	list_pin_port = [
@@ -284,13 +592,14 @@ def list_pin_port_new_i2s_board():
 	]
 
 	return list_net_port
-def map_extra_net_property_port_property_new_tsp_board_j94():
-	map_extra_net_property_port_property = {
+
+def map_port_property_new_tsp_board_j94():
+	map_port_property = {
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		#'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	}
 
-	return map_extra_net_property_port_property
+	return map_port_property
 
 def list_pin_port_new_tsp_board_j94():
 	list_pin_port = [
@@ -408,12 +717,12 @@ def list_net_port_new_tsp_board_j94():
 
 	return list_net_port
 
-def map_extra_net_property_port_property_new_tsp_board_j97():
-	map_extra_net_property_port_property = {
+def map_port_property_new_tsp_board_j97():
+	map_port_property = {
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	}
 
-	return map_extra_net_property_port_property
+	return map_port_property
 
 def list_net_port_new_tsp_board_j97():
 	list_net_port = [
@@ -435,8 +744,8 @@ def list_net_port_new_tsp_board_j97():
 
 	return list_net_port
 
-def map_extra_net_property_port_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
-	map_extra_net_property_port_property = {
+def map_port_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
+	map_port_property = {
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		#'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
 
@@ -477,7 +786,7 @@ def map_extra_net_property_port_property_old_tsp_board_2ab42e394123204b24255388e
 		#'symbol_2x_im_out[15]' : ['slew FAST'],
 	}
 
-	return map_extra_net_property_port_property
+	return map_port_property
 
 def list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 	list_net_port = [
@@ -561,15 +870,15 @@ def list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 
 	return list_net_port
 
-def map_extra_net_property_port_property_multi_tsp():
-	map_extra_net_property_port_property = {
+def map_port_property_multi_tsp():
+	map_port_property = {
 		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		'mpeg_clk_1': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		'mpeg_clk_2': ['CLOCK_DEDICATED_ROUTE FALSE'],
 		'mpeg_clk_3': ['CLOCK_DEDICATED_ROUTE FALSE'],
 	}
 
-	return map_extra_net_property_port_property
+	return map_port_property
 
 def list_net_port_multi_tsp():
 	list_net_port = [
@@ -640,28 +949,128 @@ def list_net_port_multi_tsp():
 
 	return list_net_port
 
+#s:('.*', \('.*'\)),\#\(.*\):\2 \: \1,:gc
+def list_pin_port_multi_tsp():
+	list_pin_port = []
+
+	list_slot_list_portnum_port = [
+		(
+			'J94',
+			[
+				(5, 'mpeg_clk'),
+				(6, 'mpeg_sync'),
+				(18, 'mpeg_valid'),
+				(7, 'mpeg_data[0]'),
+				(8, 'mpeg_data[1]'),
+				(9, 'mpeg_data[2]'),
+				(13, 'mpeg_data[3]'),
+				(12, 'mpeg_data[4]'),
+				(17, 'mpeg_data[5]'),
+				(14, 'mpeg_data[6]'),
+				(19, 'mpeg_data[7]'),
+
+				(29, 'asi_out_p'),
+				(31, 'asi_out_n'),
+			]
+		),
+		(
+			'J95',
+			[
+				(5, 'mpeg_clk_1'),
+				(6, 'mpeg_sync_1'),
+				(18, 'mpeg_valid_1'),
+				(7, 'mpeg_data_1[0]'),
+				(8, 'mpeg_data_1[1]'),
+				(9, 'mpeg_data_1[2]'),
+				(13, 'mpeg_data_1[3]'),
+				(12, 'mpeg_data_1[4]'),
+				(17, 'mpeg_data_1[5]'),
+				(14, 'mpeg_data_1[6]'),
+				(19, 'mpeg_data_1[7]'),
+
+				(29, 'asi_out_p_1'),
+				(31, 'asi_out_n_1'),
+			]
+			),
+		(
+		'J96',
+			[
+				(5, 'mpeg_clk_2'),
+				(6, 'mpeg_sync_2'),
+				(18, 'mpeg_valid_2'),
+				(7, 'mpeg_data_2[0]'),
+				(8, 'mpeg_data_2[1]'),
+				(9, 'mpeg_data_2[2]'),
+				(13, 'mpeg_data_2[3]'),
+				(12, 'mpeg_data_2[4]'),
+				(17, 'mpeg_data_2[5]'),
+				(14, 'mpeg_data_2[6]'),
+				(19, 'mpeg_data_2[7]'),
+
+				(29, 'asi_out_p_2'),
+				(31, 'asi_out_n_2'),
+			]
+		),
+		(
+			'J97',
+			[
+				(5, 'mpeg_clk_3'),
+				(6, 'mpeg_sync_3'),
+				(18, 'mpeg_valid_3'),
+				(7, 'mpeg_data_3[0]'),
+				(8, 'mpeg_data_3[1]'),
+				(9, 'mpeg_data_3[2]'),
+				(13, 'mpeg_data_3[3]'),
+				(12, 'mpeg_data_3[4]'),
+				(17, 'mpeg_data_3[5]'),
+				(14, 'mpeg_data_3[6]'),
+				(19, 'mpeg_data_3[7]'),
+
+				(29, 'asi_out_p_3'),
+				(31, 'asi_out_n_3'),
+			]
+		),
+	]
+
+	map_slot_map_portnum_pin = get_newboard_map_slot_map_portnum_pin()
+
+	for slot, list_portnum_port in list_slot_list_portnum_port:
+		map_portnum_pin = map_slot_map_portnum_pin.get(slot, None)
+		if not map_portnum_pin:
+			continue
+		for portnum, port in list_portnum_port:
+			pin = map_portnum_pin.get(portnum, None)
+			if not pin:
+				continue
+			item = (pin, port)
+			list_pin_port.append(item)
+	
+	return list_pin_port
+	
+
 def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	list_ip_net_pin_port_des = []
 
-	map_extra_net_property_port_property = {}
+	map_port_property = {}
 	list_net_port = []
-	map_extra_net_property_net_property = {}
+	map_net_property = {}
 	list_pin_port = []
 
-	#map_extra_net_property_port_property = map_extra_net_property_port_property_new_tsp_board_j94()
+	#map_port_property = map_port_property_new_tsp_board_j94()
 	#list_net_port = list_net_port_new_tsp_board_j94()
 
-	#map_extra_net_property_port_property = map_extra_net_property_port_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
+	#map_port_property = map_port_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 	#list_net_port = list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 
-	map_extra_net_property_port_property = map_extra_net_property_port_property_multi_tsp()
-	list_net_port = list_net_port_multi_tsp()
+	map_port_property = map_port_property_multi_tsp()
+	list_pin_port = list_pin_port_multi_tsp()
+	#list_net_port = list_net_port_multi_tsp()
 
 	for pin, port in list_pin_port:
 		list_extra_des = []
-		list_extra_net_property_property = map_extra_net_property_port_property.get(port, None)
-		if list_extra_net_property_property:
-			for i in list_extra_net_property_property:
+		list_property = map_port_property.get(port, None)
+		if list_property:
+			for i in list_property:
 				list_extra_des.append('set_property %s [get_nets {%s}]' %(i, port))
 
 		net = map_kc705_pin_net.pop(pin, None)
@@ -674,9 +1083,9 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 	for net, port in list_net_port:
 		list_extra_des = []
 
-		list_extra_net_property_property = map_extra_net_property_port_property.get(port)
-		if list_extra_net_property_property:
-			for i in list_extra_net_property_property:
+		list_property = map_port_property.get(port)
+		if list_property:
+			for i in list_property:
 				list_extra_des.append('set_property %s [get_nets {%s}]' %(i, port))
 
 		for i, j in map_kc705_pin_net.items():
