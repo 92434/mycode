@@ -286,8 +286,8 @@ function main() {
 	#adb connect $*
 	#adb root
 
-	echo adb shell busybox mount -o remount,rw,seclabel,relatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
-	adb shell busybox mount -o remount,rw,seclabel,relatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	echo adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 
 	echo adb shell pm clear com.android.browser
 	adb shell pm clear com.android.browser
@@ -423,8 +423,8 @@ function main() {
 		adb shell pm uninstall com.xiaomi.jr
 	fi
 
-	echo adb shell busybox mount -o remount,ro,seclabel,relatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
-	adb shell busybox mount -o remount,ro,seclabel,relatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	echo adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 }
 
 main $@
