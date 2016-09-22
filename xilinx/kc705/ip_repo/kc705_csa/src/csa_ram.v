@@ -58,17 +58,31 @@ module csa_ram #(
 	localparam integer ADDR_OUT_DATA_4 = ADDR_OUT_DATA_3 + 1;
 	localparam integer ADDR_OUT_DATA_5 = ADDR_OUT_DATA_4 + 1;
 	localparam integer ADDR_OUT_DATA_6 = ADDR_OUT_DATA_5 + 1;
-	localparam integer ADDR_RESET = ADDR_OUT_DATA_6 + 1;
+	localparam integer ADDR_DATA_CATCH_COUNT_INDEX = ADDR_OUT_DATA_6 + 1;
+	localparam integer ADDR_DATA_CATCH_COUNT_LOW = ADDR_DATA_CATCH_COUNT_INDEX + 1;
+	localparam integer ADDR_DATA_CATCH_COUNT_HIGH = ADDR_DATA_CATCH_COUNT_LOW + 1;
+	localparam integer ADDR_RESET = ADDR_DATA_CATCH_COUNT_HIGH + 1;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
 	reg user_rst_n_reg = 1;
 	reg user_rst_n_reg_1 = 1;
+	reg [CSA_CALC_OUT_WIDTH - 1 : 0] ram_data_catch_count[0 : 8'hff];
+
+	reg [8 - 1 : 0] data_catch_count_index_reg = 0;
+
+	wire [AXI_DATA_WIDTH - 1 : 0] data_catch_count_low_wire;
+	assign data_catch_count_low_wire = ram_data_catch_count[data_catch_count_index_reg][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+
+	wire [AXI_DATA_WIDTH - 1 : 0] data_catch_count_high_wire;
+	assign data_catch_count_high_wire = ram_data_catch_count[data_catch_count_index_reg][AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
 
 	always @(posedge axi_mm_clk) begin
 		if(s00_axi_aresetn == 0) begin
 			csa_current_channel <= 0;
 			csa_current_channel_changed <= 0;
+
+			data_catch_count_index_reg <= 0;
 		end
 		else begin
 			csa_current_channel_changed <= 0;
@@ -84,6 +98,9 @@ module csa_ram #(
 						end
 						else begin
 						end
+					end
+					ADDR_DATA_CATCH_COUNT_INDEX: begin
+						data_catch_count_index_reg <= wdata[8 - 1 : 0];
 					end
 					ADDR_RESET: begin
 						user_rst_n_reg <= 0;
@@ -167,6 +184,15 @@ module csa_ram #(
 					end
 					ADDR_OUT_DATA_6: begin
 						rdata <= csa_out_6;
+					end
+					ADDR_DATA_CATCH_COUNT_INDEX: begin
+						rdata <= data_catch_count_index_reg;
+					end
+					ADDR_DATA_CATCH_COUNT_LOW: begin
+						rdata <= data_catch_count_low_wire;
+					end
+					ADDR_DATA_CATCH_COUNT_HIGH: begin
+						rdata <= data_catch_count_high_wire;
 					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};
@@ -321,6 +347,7 @@ module csa_ram #(
 	reg [AXI_DATA_WIDTH - 1 : 0] r_index = 0;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] r_state = 0;
+	reg data_catch_enable = 0;
 	always @(posedge csa_out_wclk) begin
 		if(rst_n == 0) begin
 			csa_out_valid <= 0;
@@ -337,10 +364,14 @@ module csa_ram #(
 
 			r_state <= 0;
 			r_index <= 0;
+
+			data_catch_enable <= 0;
 		end
 		else begin
 			csa_out_ren <= 0;
 			csa_out_wen <= 0;
+
+			data_catch_enable <= 0;
 
 			if(csa_current_channel_changed == 1) begin
 				csa_out_valid <= 0;
@@ -429,6 +460,7 @@ module csa_ram #(
 				9: begin
 					csa_out_wen <= 1;
 					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					data_catch_enable <= 1;
 
 					r_state <= 10;
 				end
@@ -487,4 +519,24 @@ module csa_ram #(
 				);
 		end
 	endgenerate
+
+
+	wire [8 - 1 : 0] ram_data_catch_index;
+	assign ram_data_catch_index = csa_out_wdata[8 - 1 : 0];
+
+	reg [8 - 1 : 0] ram_data_catch_count_index = 0;
+	always @(posedge csa_out_wclk) begin
+		if(user_rst_n == 0) begin
+			for(ram_data_catch_count_index = 0; ram_data_catch_count_index <= 8'hff; ram_data_catch_count_index = ram_data_catch_count_index + 1) begin
+				ram_data_catch_count[ram_data_catch_count_index] <= 0;
+			end
+		end
+		else begin
+			if(data_catch_enable == 1) begin
+				ram_data_catch_count[ram_data_catch_index] <= ram_data_catch_count[ram_data_catch_index] + 1;
+			end
+			else begin
+			end
+		end
+	end
 endmodule

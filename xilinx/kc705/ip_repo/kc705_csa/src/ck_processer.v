@@ -16,9 +16,9 @@ module ck_processer #(
 	);
 
 	assign ck_out[7:0]  =(init==1)?((block[31:30]==2'b01)?(in[7:0]^((loops))):in[7:0]):((cb[7:0])^((loops)));
-	assign ck_out[15:8] =(init==1)?((block[31:30]==2'b01)?((in[15:8]^in[55:48])^((loops)>>8)):in[15:8]):((cb[15:8]^cb[55:48])^((loops)>>8));
+	assign ck_out[15:8] =(init==1)?((block[31:30]==2'b01)?(in[15:8]^((loops)>>8)):in[15:8]):((cb[15:8])^((loops)>>8));
 	assign ck_out[23:16]=(init==1)?(in[23:16]):(cb[23:16]);
-	assign ck_out[31:24]=(init==1)?((block[31:30]==2'b01)?((in[7:0]^((loops)))+((in[15:8]^in[55:48])^((loops)>>8))+in[23:16]):(in[7:0]+in[15:8]+in[23:16])):((cb[7:0]^((loops)))+((cb[15:8]^cb[55:48])^((loops)>>8))+cb[23:16]);
+	assign ck_out[31:24]=(init==1)?((block[31:30]==2'b01)?((in[7:0]^((loops)))+(in[15:8]^((loops)>>8))+in[23:16]):(in[7:0]+in[15:8]+in[23:16])):(((cb[7:0])^((loops)))+((cb[15:8])^((loops)>>8))+cb[23:16]);
 	assign ck_out[39:32]=(init==1)?in[31:24]:cb[31:24];
 	assign ck_out[47:40]=(init==1)?in[39:32]:cb[39:32];
 	assign ck_out[55:48]=(init==1)?((block[31:30]==2'b01)?in[47:40]:0):cb[47:40];
