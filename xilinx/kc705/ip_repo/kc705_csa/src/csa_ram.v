@@ -524,10 +524,10 @@ module csa_ram #(
 	wire [8 - 1 : 0] ram_data_catch_index;
 	assign ram_data_catch_index = csa_out_wdata[8 - 1 : 0];
 
-	reg [8 - 1 : 0] ram_data_catch_count_index = 0;
+	reg [AXI_DATA_WIDTH - 1 : 0] ram_data_catch_count_index = 0;
 	always @(posedge csa_out_wclk) begin
 		if(user_rst_n == 0) begin
-			for(ram_data_catch_count_index = 0; ram_data_catch_count_index <= 8'hff; ram_data_catch_count_index = ram_data_catch_count_index + 1) begin
+			for(ram_data_catch_count_index = 0; ram_data_catch_count_index < 256; ram_data_catch_count_index = ram_data_catch_count_index + 1) begin
 				ram_data_catch_count[ram_data_catch_count_index] <= 0;
 			end
 		end
