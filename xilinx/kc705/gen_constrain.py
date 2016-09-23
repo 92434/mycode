@@ -60,84 +60,62 @@ def gen_list_fmc_pin_resistor():
 	print 'total:', len(list_fmc_pin_resistor)
 	return list_fmc_pin_resistor
 
-def gen_map_kc705_pin_net():
-	map_kc705_pin_net = {}
-	lines = []
-	with open('kc705_package_pin_nets.txt') as f:
-		lines = f.read().splitlines()
-
-	for i in lines:
-		l = i.split()
-		item = {l[0] : l[1]}
-		if len(l) == 2:
-			map_kc705_pin_net.update(item)
-
-	print '-' * 100
-	print 'map_kc705_pin_net info'
-	print '-' * 100
-	for i in map_kc705_pin_net.items():
-		print i
-	print 'total:', len(map_kc705_pin_net)
-
-	return map_kc705_pin_net
-
-def gen_map_kc705_pin_iotype():
-	map_kc705_pin_iotype = {}
+def gen_kc705_list_pin_iotype():
+	list_pin_iotype = []
 	lines = []
 	with open('kc705_io_package_pins.txt') as f:
 		lines = f.read().splitlines()
 
 	for i in lines:
 		l = i.split()
-		item = {l[0] : l[1]}
 		if len(l) == 8:
-			map_kc705_pin_iotype.update(item)
+			pin_iotype = (l[0], l[1])
+			list_pin_iotype.append(pin_iotype)
 
 	print '-' * 100
-	print 'map_kc705_pin_iotype info'
+	print 'list_pin_iotype info'
 	print '-' * 100
-	for i in map_kc705_pin_iotype.items():
+	for i in list_pin_iotype:
 		print i
-	print 'total:', len(map_kc705_pin_iotype)
+	print 'total:', len(list_pin_iotype)
 
-	return map_kc705_pin_iotype
+	return list_pin_iotype
 
-def remove_unused_pin(map_kc705_pin_net):
+def kc705_gen_list_pin_net(list_pin_iotype):
+	list_pin_net = []
+	lines = []
+	with open('kc705_package_pin_nets.txt') as f:
+		lines = f.read().splitlines()
+
+	for i in lines:
+		l = i.split()
+		if len(l) == 2:
+			for pin, iotype in list_pin_iotype:
+				if pin == l[0]:
+					pin_net = (l[0], l[1])
+					list_pin_net.append(pin_net)
+					break
+
+	print '-' * 100
+	print 'list_pin_net info'
+	print '-' * 100
+	for i in list_pin_net:
+		print i
+	print 'total:', len(list_pin_net)
+
+	return list_pin_net
+
+def remove_unused_pin(list_pin_net):
 	list_unsupport_pin_net = []
 	unsupport_pin = [
-		'F2',
-		'F5',
-		'F6',
-		'C8',
-		'C3',
-		'C7',
-		'C4',
-		'F1',
-		'B5',
-		'B6',
-		'B1',
-		'B2',
-		'E8',
-		'E4',
-		'E7',
-		'E3',
-		'N8',
-		'N7',
-		'A3',
-		'A4',
-		'A7',
-		'A8',
-		'D6',
-		'D5',
-		'D2',
-		'D1',
 	]
 	
 	for i in unsupport_pin:
-		if i in map_kc705_pin_net.keys():
-			net = map_kc705_pin_net.pop(i)
-			item = (i, net)
-			list_unsupport_pin_net.append(item)
+		for pin_net in list_pin_net:
+			if pin_net[0] == i:
+				list_pin_net.remove(pin_net)
+				list_unsupport_pin_net.append(pin_net)
+				break
 	print '-' * 100
 	print 'list_unsupport_pin_net info'
 	print '-' * 100
@@ -487,198 +465,6 @@ def list_net_port_iic_slave():
 
 	return list_net_port
 
-def map_port_list_property_new_i2s_board():
-	map_port_list_property = {
-		'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	}
-
-	return map_port_list_property
-
-def map_port_list_property_new_i2s_board():
-	map_port_list_property = {
-		'bclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[0]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[1]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[2]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[3]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[4]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[5]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[6]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[7]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[8]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[9]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[10]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[11]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[12]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[13]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[14]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-
-		'bclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'lrclk[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'sdata[15]': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	}
-
-	return map_port_list_property
-
-def list_pin_port_new_i2s_board():
-	list_pin_port = [
-		('AG22', 'bclk[0]'),
-		('AH22', 'lrclk[0]'),
-		('AD23', 'sdata[0]'),
-		('AE24', 'bclk[1]'),
-		('AC22', 'lrclk[1]'),
-		('AD22', 'sdata[1]'),
-		('AF20', 'bclk[2]'),
-		('AF21', 'lrclk[2]'),
-		('AG20', 'sdata[2]'),
-		('AH20', 'bclk[3]'),
-		('AK20', 'lrclk[3]'),
-		('AK21', 'sdata[3]'),
-		('AE23', 'bclk[4]'),
-		('AF23', 'lrclk[4]'),
-		('AB24', 'sdata[4]'),
-		('AC25', 'bclk[5]'),
-		('AK23', 'lrclk[5]'),
-		('AK24', 'sdata[5]'),
-		('Y30', 'bclk[6]'),
-		('AA30', 'lrclk[6]'),
-		('AB29', 'sdata[6]'),
-		('AB30', 'bclk[7]'),
-		('AC29', 'lrclk[7]'),
-		('AC30', 'sdata[7]'),
-		('AB27', 'bclk[8]'),
-		('AC27', 'lrclk[8]'),
-		('AD29', 'sdata[8]'),
-		('AE29', 'bclk[9]'),
-		('AE30', 'lrclk[9]'),
-		('AF30', 'sdata[9]'),
-		('AE28', 'bclk[10]'),
-		('AF28', 'lrclk[10]'),
-		('AG30', 'sdata[10]'),
-		('AH30', 'bclk[11]'),
-		('AK29', 'lrclk[11]'),
-		('AK30', 'sdata[11]'),
-		('AJ28', 'bclk[12]'),
-		('AJ29', 'lrclk[12]'),
-		('AG27', 'sdata[12]'),
-		('AG28', 'bclk[13]'),
-		('AH26', 'lrclk[13]'),
-		('AH27', 'sdata[13]'),
-		('AJ27', 'bclk[14]'),
-		('AK28', 'lrclk[14]'),
-		('AJ26', 'sdata[14]'),
-		('AK26', 'bclk[15]'),
-		('AF26', 'lrclk[15]'),
-		('AF27', 'sdata[15]'),
-	]
-
-	return list_net_port
-
 #list_port_width_list_port_name = [
 #	(32, ['gpio']),
 #	(32, ['gpio2']),
@@ -722,40 +508,44 @@ def map_port_list_property_new_i2s_board_multi():
 
 	return map_port_list_property
 
-def get_list_pin_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_tuple_slots, list_index_portnum):
-	list_pin = []
+def get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum):
+	list_pin_net = []
 
 	list_err_msg = []
-	for i in range(len(list_tuple_slots)):
+	for i in range(len(list_list_slots)):
 		for index, portnum in list_index_portnum:
-			slot = list_tuple_slots[i][index]
-			for slot_, list_portnum_pin_net in list_slot_list_portnum_pin_net:
+			slot = list_list_slots[i][index]
+			list_portnum_pin_net = None
+			for slot_, list_portnum_pin_net_ in list_slot_list_portnum_pin_net:
 				if slot_ == slot:
-					pin = None
-					for portnum_, pin_, net in list_portnum_pin_net:
+					list_portnum_pin_net = list_portnum_pin_net_
+					item = None
+					for portnum_, pin, net in list_portnum_pin_net:
 						if portnum_ == portnum:
-							pin = pin_
-							list_pin.append(pin)
+							item = (pin, net)
+							list_pin_net.append(item)
 							break
-					if not pin:
-						msg = 'slot:%s portnum:%s' %(slot, portnum)
-						list_err_msg.append(msg)
-						list_pin.append('xiaofei')
+					if not item:
+						err_msg = '\nslot:%s portnum:%s not exist!' %(slot, portnum)
+						list_err_msg.append(err_msg)
 					break
+			if not list_portnum_pin_net:
+				err_msg = '\nslot:%s not exist!' %(slot)
+				list_err_msg.append(err_msg)
 	if len(list_err_msg):
 		err_txt = ''
 		for err_msg in list_err_msg:
-			err_txt += "%s\n" %(err_msg)
+			err_txt += "\n%s" %(err_msg)
 		raise Exception(err_txt)
-	return list_pin
+	return list_pin_net
 
 def list_pin_port_new_i2s_board_multi():
 	list_pin_port = []
 
-	list_tuple_slots = [
-		('J101', 'J102'),
-		('J86', 'J96'),
-		('J95', 'J97')
+	list_list_slots = [
+		['J101', 'J102'],
+		['J86', 'J96'],
+		#['J95', 'J97']
 	]
 
 	J101 = 0
@@ -812,7 +602,7 @@ def list_pin_port_new_i2s_board_multi():
 	]
 
 
-	ip_num = len(list_tuple_slots)
+	ip_num = len(list_list_slots)
 	list_port_width_list_port_name = [
 		(16, ['bclk', 'lrclk', 'sdata']),
 	]
@@ -820,168 +610,17 @@ def list_pin_port_new_i2s_board_multi():
 	list_all_ports_name = get_list_all_ports_name(ip_num, list_port_width_list_port_name, str_append)
 
 	list_slot_list_portnum_pin_net = get_list_slot_list_portnum_pin_net()
-	list_pin = get_list_pin_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_tuple_slots, list_index_portnum_for_i2s_16_inst)
+	list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_i2s_16_inst)
 
-	if len(list_all_ports_name) != len(list_pin):
-		str_status = 'list_all_ports_name:%d list_pin:%d' %(len(list_all_ports_name), len(list_pin))
+	if len(list_all_ports_name) != len(list_pin_net):
+		str_status = 'list_all_ports_name:%d list_pin_net:%d' %(len(list_all_ports_name), len(list_pin_net))
 		raise Exception('')
 
 	for i in range(len(list_all_ports_name)):
-		item = (list_pin[i], list_all_ports_name[i])
+		item = (list_pin_net[i][0], list_all_ports_name[i])
 		list_pin_port.append(item)
 			
 	return list_pin_port
-
-def map_port_list_property_new_tsp_board_j94():
-	map_port_list_property = {
-		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		#'fs_0p5_en': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	}
-
-	return map_port_list_property
-
-def list_pin_port_new_tsp_board_j94():
-	list_pin_port = [
-		('D12', 'mpeg_clk'),
-		('H14', 'mpeg_sync'),
-		('E16', 'mpeg_valid'),
-		('D13', 'mpeg_data[0]'),
-		('G14', 'mpeg_data[1]'),
-		('D11', 'mpeg_data[2]'),
-		('F11', 'mpeg_data[3]'),
-		('B12', 'mpeg_data[4]'),
-		('E11', 'mpeg_data[5]'),
-		('F15', 'mpeg_data[6]'),
-		('D14', 'mpeg_data[7]'),
-
-		('A11', 'asi_out_p'),
-		('A12', 'asi_out_n'),
-
-		#('C29', 'fs_0p5_en'),#???G23
-
-		#('H25', 'symbol_2x_oe'),
-	      
-		#('H24', 'symbol_2x_re_out[0]'),
-		#('H26', 'symbol_2x_re_out[1]'),
-		#('B25', 'symbol_2x_re_out[2]'),
-		#('C26', 'symbol_2x_re_out[3]'),
-		#('C25', 'symbol_2x_re_out[4]'),
-		#('D26', 'symbol_2x_re_out[5]'),
-		#('D18', 'symbol_2x_re_out[6]'),
-		#('C27', 'symbol_2x_re_out[7]'),
-		#('D17', 'symbol_2x_re_out[8]'),
-		#('D27', 'symbol_2x_re_out[9]'),
-		#('K19', 'symbol_2x_re_out[10]'),
-		#('K20', 'symbol_2x_re_out[11]'),
-		#('L17', 'symbol_2x_re_out[12]'),
-		#('L18', 'symbol_2x_re_out[13]'),
-		#('J19', 'symbol_2x_re_out[14]'),
-		#('H19', 'symbol_2x_re_out[15]'),
-
-		#('C30', 'symbol_2x_im_out[0]'),
-		#('F27', 'symbol_2x_im_out[1]'),
-		#('D29', 'symbol_2x_im_out[2]'),
-		#('G27', 'symbol_2x_im_out[3]'),
-		#('E30', 'symbol_2x_im_out[4]'),
-		#('A30', 'symbol_2x_im_out[5]'),
-		#('E29', 'symbol_2x_im_out[6]'),
-		#('B30', 'symbol_2x_im_out[7]'),
-		#('G30', 'symbol_2x_im_out[8]'),
-		#('D28', 'symbol_2x_im_out[9]'),
-		#('H30', 'symbol_2x_im_out[10]'),
-		#('E28', 'symbol_2x_im_out[11]'),
-		#('F28', 'symbol_2x_im_out[12]'),
-		#('F30', 'symbol_2x_im_out[13]'),
-		#('G28', 'symbol_2x_im_out[14]'),
-		#('G29', 'symbol_2x_im_out[15]'),
-	]
-
-	return list_pin_port
-
-def list_net_port_new_tsp_board_j94():
-	list_net_port = [
-		('FMC_HPC_HA00_CC_P', 'mpeg_clk'),
-		('FMC_HPC_HA01_CC_P', 'mpeg_sync'),
-		('FMC_HPC_HA05_N', 'mpeg_valid'),
-		('FMC_HPC_HA00_CC_N', 'mpeg_data[0]'),
-		('FMC_HPC_HA01_CC_N', 'mpeg_data[1]'),
-		('FMC_HPC_HA02_P', 'mpeg_data[2]'),
-		('FMC_HPC_HA04_P', 'mpeg_data[3]'),
-		('FMC_HPC_HA03_N', 'mpeg_data[4]'),
-		('FMC_HPC_HA04_N', 'mpeg_data[5]'),
-		('FMC_HPC_HA05_P', 'mpeg_data[6]'),
-		('FMC_HPC_HA06_P', 'mpeg_data[7]'),
-
-		('FMC_HPC_HA10_P', 'asi_out_p'),
-		('FMC_HPC_HA10_N', 'asi_out_n'),
-
-		#('FMC_LPC_CLK0_M2C_P', 'fs_0p5_en'),
-
-		#('FMC_LPC_LA10_P', 'symbol_2x_oe'),
-	      
-		#('FMC_LPC_LA00_CC_P', 'symbol_2x_re_out[0]'),
-		#('FMC_LPC_LA02_P', 'symbol_2x_re_out[1]'),
-		#('FMC_LPC_LA00_CC_N', 'symbol_2x_re_out[2]'),
-		#('FMC_LPC_LA02_N', 'symbol_2x_re_out[3]'),
-		#('FMC_LPC_LA03_P', 'symbol_2x_re_out[4]'),
-		#('FMC_LPC_LA04_P', 'symbol_2x_re_out[5]'),
-		#('FMC_LPC_LA03_N', 'symbol_2x_re_out[6]'),
-		#('FMC_LPC_LA04_N', 'symbol_2x_re_out[7]'),
-		#('FMC_LPC_LA07_P', 'symbol_2x_re_out[8]'),
-		#('FMC_LPC_LA08_P', 'symbol_2x_re_out[9]'),
-		#('FMC_LPC_LA01_CC_P', 'symbol_2x_re_out[10]'),
-		#('FMC_LPC_LA01_CC_N', 'symbol_2x_re_out[11]'),
-		#('FMC_LPC_LA06_P', 'symbol_2x_re_out[12]'),
-		#('FMC_LPC_LA06_N', 'symbol_2x_re_out[13]'),
-		#('FMC_LPC_LA05_P', 'symbol_2x_re_out[14]'),
-		#('FMC_LPC_LA05_N', 'symbol_2x_re_out[15]'),
-
-		#('FMC_LPC_LA10_N', 'symbol_2x_im_out[0]'),
-		#('FMC_LPC_LA09_P', 'symbol_2x_im_out[1]'),
-		#('FMC_LPC_LA09_N', 'symbol_2x_im_out[2]'),
-		#('FMC_LPC_LA13_P', 'symbol_2x_im_out[3]'),
-		#('FMC_LPC_LA14_P', 'symbol_2x_im_out[4]'),
-		#('FMC_LPC_LA13_N', 'symbol_2x_im_out[5]'),
-		#('FMC_LPC_LA14_N', 'symbol_2x_im_out[6]'),
-		#('FMC_LPC_LA07_N', 'symbol_2x_im_out[7]'),
-		#('FMC_LPC_LA08_N', 'symbol_2x_im_out[8]'),
-		#('FMC_LPC_LA12_P', 'symbol_2x_im_out[9]'),
-		#('FMC_LPC_LA11_P', 'symbol_2x_im_out[10]'),
-		#('FMC_LPC_LA12_N', 'symbol_2x_im_out[11]'),
-		#('FMC_LPC_LA11_N', 'symbol_2x_im_out[12]'),
-		#('FMC_LPC_LA16_P', 'symbol_2x_im_out[13]'),
-		#('FMC_LPC_LA16_N', 'symbol_2x_im_out[14]'),
-		#('FMC_LPC_LA15_P', 'symbol_2x_im_out[15]'),
-	]
-
-	return list_net_port
-
-def map_port_list_property_new_tsp_board_j97():
-	map_port_list_property = {
-		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	}
-
-	return map_port_list_property
-
-def list_net_port_new_tsp_board_j97():
-	list_net_port = [
-		('FMC_HPC_LA13_P', 'mpeg_clk'),
-		('FMC_HPC_LA14_P', 'mpeg_sync'),
-		('FMC_HPC_LA18_CC_N', 'mpeg_valid'),
-		('FMC_HPC_LA13_N', 'mpeg_data[0]'),
-		('FMC_HPC_LA14_N', 'mpeg_data[1]'),
-		('FMC_HPC_LA15_P', 'mpeg_data[2]'),
-		('FMC_HPC_LA17_CC_P', 'mpeg_data[3]'),
-		('FMC_HPC_LA16_N', 'mpeg_data[4]'),
-		('FMC_HPC_LA17_CC_N', 'mpeg_data[5]'),
-		('FMC_HPC_LA18_CC_P', 'mpeg_data[6]'),
-		('FMC_HPC_LA19_P', 'mpeg_data[7]'),
-
-		('FMC_HPC_LA23_P', 'asi_out_p'),
-		('FMC_HPC_LA23_N', 'asi_out_n'),
-	]
-
-	return list_net_port
 
 def map_port_list_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 	map_port_list_property = {
@@ -1110,217 +749,90 @@ def list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 	return list_net_port
 
 def map_port_list_property_multi_tsp():
-	map_port_list_property = {
-		'mpeg_clk': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		'mpeg_clk_1': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		'mpeg_clk_2': ['CLOCK_DEDICATED_ROUTE FALSE'],
-		'mpeg_clk_3': ['CLOCK_DEDICATED_ROUTE FALSE'],
-	}
+	map_port_list_property = {}
+
+	ip_num = 4
+	list_port_width_list_port_name = [
+		(1, ['mpeg_clk']),
+	]
+	str_append = ''
+	list_all_ports_name = get_list_all_ports_name(ip_num, list_port_width_list_port_name, str_append)
+	list_property = ['CLOCK_DEDICATED_ROUTE FALSE']
+	for i in list_all_ports_name:
+		item = {i : list_property}
+		map_port_list_property.update(item)
 
 	return map_port_list_property
 
-def list_net_port_multi_tsp():
-	list_net_port = [
-		#j94
-		('FMC_HPC_HA00_CC_P', 'mpeg_clk'),#5
-		('FMC_HPC_HA01_CC_P', 'mpeg_sync'),#6
-		('FMC_HPC_HA05_N', 'mpeg_valid'),#18
-		('FMC_HPC_HA00_CC_N', 'mpeg_data[0]'),#7
-		('FMC_HPC_HA01_CC_N', 'mpeg_data[1]'),#8
-		('FMC_HPC_HA02_P', 'mpeg_data[2]'),#9
-		('FMC_HPC_HA04_P', 'mpeg_data[3]'),#13
-		('FMC_HPC_HA03_N', 'mpeg_data[4]'),#12
-		('FMC_HPC_HA04_N', 'mpeg_data[5]'),#17
-		('FMC_HPC_HA05_P', 'mpeg_data[6]'),#14
-		('FMC_HPC_HA06_P', 'mpeg_data[7]'),#19
-
-		('FMC_HPC_HA10_P', 'asi_out_p'),#29
-		('FMC_HPC_HA10_N', 'asi_out_n'),#31
-		
-		#j95
-		('FMC_HPC_HA15_P', 'mpeg_clk_1'),#5
-		('FMC_HPC_HA16_P', 'mpeg_sync_1'),#6
-		('FMC_HPC_HA20_N', 'mpeg_valid_1'),#18
-		('FMC_HPC_HA15_N', 'mpeg_data_1[0]'),#7
-		('FMC_HPC_HA16_N', 'mpeg_data_1[1]'),#8
-		('FMC_HPC_HA17_CC_P', 'mpeg_data_1[2]'),#9
-		('FMC_HPC_HA19_P', 'mpeg_data_1[3]'),#13
-		('FMC_HPC_HA18_N', 'mpeg_data_1[4]'),#12
-		('FMC_HPC_HA19_N', 'mpeg_data_1[5]'),#17
-		('FMC_HPC_HA20_P', 'mpeg_data_1[6]'),#14
-		('FMC_HPC_HA21_P', 'mpeg_data_1[7]'),#19
-
-		('FMC_HPC_LA29_P', 'asi_out_p_1'),#29
-		('FMC_HPC_LA29_N', 'asi_out_n_1'),#31
-
-		#j96
-		('FMC_HPC_CLK1_M2C_P', 'mpeg_clk_2'),#5
-		('FMC_HPC_CLK0_M2C_P', 'mpeg_sync_2'),#6
-		('FMC_HPC_LA03_N', 'mpeg_valid_2'),#18
-		('FMC_HPC_CLK1_M2C_N', 'mpeg_data_2[0]'),#7
-		('FMC_HPC_CLK0_M2C_N', 'mpeg_data_2[1]'),#8
-		('FMC_HPC_LA00_CC_P', 'mpeg_data_2[2]'),#9
-		('FMC_HPC_LA02_P', 'mpeg_data_2[3]'),#13
-		('FMC_HPC_LA01_CC_N', 'mpeg_data_2[4]'),#12
-		('FMC_HPC_LA02_N', 'mpeg_data_2[5]'),#17
-		('FMC_HPC_LA03_P', 'mpeg_data_2[6]'),#14
-		('FMC_HPC_LA04_P', 'mpeg_data_2[7]'),#19
-
-		('FMC_HPC_LA08_P', 'asi_out_p_2'),#29
-		('FMC_HPC_LA08_N', 'asi_out_n_2'),#31
-		
-		#j97
-		('FMC_HPC_LA13_P', 'mpeg_clk_3'),#5
-		('FMC_HPC_LA14_P', 'mpeg_sync_3'),#6
-		('FMC_HPC_LA18_CC_N', 'mpeg_valid_3'),#18
-		('FMC_HPC_LA13_N', 'mpeg_data_3[0]'),#7
-		('FMC_HPC_LA14_N', 'mpeg_data_3[1]'),#8
-		('FMC_HPC_LA15_P', 'mpeg_data_3[2]'),#9
-		('FMC_HPC_LA17_CC_P', 'mpeg_data_3[3]'),#13
-		('FMC_HPC_LA16_N', 'mpeg_data_3[4]'),#12
-		('FMC_HPC_LA17_CC_N', 'mpeg_data_3[5]'),#17
-		('FMC_HPC_LA18_CC_P', 'mpeg_data_3[6]'),#14
-		('FMC_HPC_LA19_P', 'mpeg_data_3[7]'),#19
-
-		('FMC_HPC_LA23_P', 'asi_out_p_3'),#29
-		('FMC_HPC_LA23_N', 'asi_out_n_3'),#31
-	]
-
-	return list_net_port
-
-#s:('.*', \('.*'\)),\#\(.*\):\2 \: \1,:gc
-def get_list_slot_list_portnum_port_multi_tsp():
-	list_slot_list_portnum_port = [
-		(
-			'J94',
-			[
-				(5, 'mpeg_clk'),
-				(6, 'mpeg_sync'),
-				(18, 'mpeg_valid'),
-				(7, 'mpeg_data[0]'),
-				(8, 'mpeg_data[1]'),
-				(9, 'mpeg_data[2]'),
-				(13, 'mpeg_data[3]'),
-				(12, 'mpeg_data[4]'),
-				(17, 'mpeg_data[5]'),
-				(14, 'mpeg_data[6]'),
-				(19, 'mpeg_data[7]'),
-
-				(29, 'asi_out_p'),
-				(31, 'asi_out_n'),
-			]
-		),
-		(
-			'J95',
-			[
-				(5, 'mpeg_clk_1'),
-				(6, 'mpeg_sync_1'),
-				(18, 'mpeg_valid_1'),
-				(7, 'mpeg_data_1[0]'),
-				(8, 'mpeg_data_1[1]'),
-				(9, 'mpeg_data_1[2]'),
-				(13, 'mpeg_data_1[3]'),
-				(12, 'mpeg_data_1[4]'),
-				(17, 'mpeg_data_1[5]'),
-				(14, 'mpeg_data_1[6]'),
-				(19, 'mpeg_data_1[7]'),
-
-				(29, 'asi_out_p_1'),
-				(31, 'asi_out_n_1'),
-			]
-			),
-		(
-		'J96',
-			[
-				(5, 'mpeg_clk_2'),
-				(6, 'mpeg_sync_2'),
-				(18, 'mpeg_valid_2'),
-				(7, 'mpeg_data_2[0]'),
-				(8, 'mpeg_data_2[1]'),
-				(9, 'mpeg_data_2[2]'),
-				(13, 'mpeg_data_2[3]'),
-				(12, 'mpeg_data_2[4]'),
-				(17, 'mpeg_data_2[5]'),
-				(14, 'mpeg_data_2[6]'),
-				(19, 'mpeg_data_2[7]'),
-
-				(29, 'asi_out_p_2'),
-				(31, 'asi_out_n_2'),
-			]
-		),
-		(
-			'J97',
-			[
-				(5, 'mpeg_clk_3'),
-				(6, 'mpeg_sync_3'),
-				(18, 'mpeg_valid_3'),
-				(7, 'mpeg_data_3[0]'),
-				(8, 'mpeg_data_3[1]'),
-				(9, 'mpeg_data_3[2]'),
-				(13, 'mpeg_data_3[3]'),
-				(12, 'mpeg_data_3[4]'),
-				(17, 'mpeg_data_3[5]'),
-				(14, 'mpeg_data_3[6]'),
-				(19, 'mpeg_data_3[7]'),
-
-				(29, 'asi_out_p_3'),
-				(31, 'asi_out_n_3'),
-			]
-		),
-	]
-
-	return list_slot_list_portnum_port
-	
-def get_list_pin_port_from_list_slot_list_portnum_port(list_slot_list_portnum_port):
+def list_pin_port_new_board_multi_tsp():
 	list_pin_port = []
 
+	list_list_slots = [
+		['J94'],
+		['J95'],
+		['J96'],
+		['J97']
+	]
+
+	J94 = 0
+	list_index_portnum_for_i2s_16_inst = [
+		(J94, 5),
+		(J94, 6),
+		(J94, 18),
+		(J94, 7),
+		(J94, 8),
+		(J94, 9),
+		(J94, 13),
+		(J94, 12),
+		(J94, 17),
+		(J94, 14),
+		(J94, 19),
+
+		(J94, 29),
+		(J94, 31),
+	]
+
+
+	ip_num = len(list_list_slots)
+	list_port_width_list_port_name = [
+		(1, ['mpeg_clk', 'mpeg_sync', 'mpeg_valid']),
+		(8, ['mpeg_data']),
+		(1, ['asi_out_p', 'asi_out_n']),
+	]
+	str_append = ''
+	list_all_ports_name = get_list_all_ports_name(ip_num, list_port_width_list_port_name, str_append)
+
 	list_slot_list_portnum_pin_net = get_list_slot_list_portnum_pin_net()
+	list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_i2s_16_inst)
 
-	for slot, list_portnum_port in list_slot_list_portnum_port:
-		list_portnum_pin_net = None
-		for slot_, list_portnum_pin_net_ in list_slot_list_portnum_pin_net:
-			if slot_ == slot:
-				list_portnum_pin_net = list_portnum_pin_net_
-				break
+	if len(list_all_ports_name) != len(list_pin_net):
+		str_status = 'list_all_ports_name:%d list_pin_net:%d' %(len(list_all_ports_name), len(list_pin_net))
+		raise Exception(str_status)
 
-		if not list_portnum_pin_net:
-			continue
-
-		for portnum, port in list_portnum_port:
-			pin = None
-			for portnum_, pin_, net_ in list_portnum_pin_net:
-				if portnum_ == portnum:
-					pin = pin_
-					break
-			if not pin:
-				continue
-
-			item = (pin, port)
-			list_pin_port.append(item)
-	
+	for i in range(len(list_all_ports_name)):
+		item = (list_pin_net[i][0], list_all_ports_name[i])
+		list_pin_port.append(item)
+			
 	return list_pin_port
 
-def get_list_ip_net_pin_port_des(map_kc705_pin_net):
-	list_ip_net_pin_port_des = []
+def ip_get_list_net_pin_port_des(list_pin_net):
+	list_net_pin_port_des = []
 
 	map_port_list_property = {}
 	list_net_port = []
 	map_net_property = {}
 	list_pin_port = []
 
-	map_port_list_property = map_port_list_property_new_i2s_board_multi()
-	list_pin_port = list_pin_port_new_i2s_board_multi()
-
-	#map_port_list_property = map_port_list_property_new_tsp_board_j94()
-	#list_net_port = list_net_port_new_tsp_board_j94()
+	#map_port_list_property = map_port_list_property_new_i2s_board_multi()
+	#list_pin_port = list_pin_port_new_i2s_board_multi()
 
 	#map_port_list_property = map_port_list_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 	#list_net_port = list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 
-	#map_port_list_property = map_port_list_property_multi_tsp()
-	#list_pin_port = get_list_pin_port_from_list_slot_list_portnum_port(get_list_slot_list_portnum_port_multi_tsp())
-	#list_net_port = list_net_port_multi_tsp()
+	map_port_list_property = map_port_list_property_multi_tsp()
+	list_pin_port = list_pin_port_new_board_multi_tsp()
 
+	list_err_msg = []
 	for pin, port in list_pin_port:
 		list_extra_des = []
 		list_property = map_port_list_property.get(port, None)
@@ -1328,13 +840,18 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 			for i in list_property:
 				list_extra_des.append('set_property %s [get_nets {%s}]' %(i, port))
 
-		net = map_kc705_pin_net.pop(pin, None)
+		net = None
+		for pin_net in list_pin_net:
+			if pin_net[0] == pin:
+				net = pin_net[1]
+				list_pin_net.remove(pin_net)
+				break
 		if net:
 			item = (net, pin, port, list_extra_des)
-			list_ip_net_pin_port_des.append(item)
+			list_net_pin_port_des.append(item)
 		else:
-			err_msg = '(%s, %s) is not in map_kc705_pin_net!' %(pin, port)
-			raise Exception(err_msg)
+			err_msg = '\n%s is not in list_pin_net for %s!' %(pin, port)
+			list_err_msg.append(err_msg)
 	
 	for net, port in list_net_port:
 		list_extra_des = []
@@ -1344,46 +861,41 @@ def get_list_ip_net_pin_port_des(map_kc705_pin_net):
 			for i in list_property:
 				list_extra_des.append('set_property %s [get_nets {%s}]' %(i, port))
 
-		for i, j in map_kc705_pin_net.items():
-			if j == net:
-				pin = i
-				map_kc705_pin_net.pop(pin, None)
+		pin = None
+		for pin_net in list_pin_net:
+			if pin_net[1] == net:
+				pin = pin_net[0]
+				list_pin_net.remove(pin_net)
+				break
 
-				item = (net, pin, port, list_extra_des)
-				list_ip_net_pin_port_des.append(item)
+		if pin:
+			item = (net, pin, port, list_extra_des)
+			list_net_pin_port_des.append(item)
+		else:
+			err_msg = '\n%s is not in list_pin_net for %s!' %(net, port)
+			list_err_msg.append(err_msg)
+	if len(list_err_msg):
+		err_txt = ''
+		for err_msg in list_err_msg:
+			err_txt += err_msg
+		raise Exception(err_txt)
 
 	print '-' * 100
-	print 'list_ip_net_pin_port_des info'
+	print 'list_net_pin_port_des info'
 	print '-' * 100
-	for i in list_ip_net_pin_port_des:
+	for i in list_net_pin_port_des:
 		print i
-	print 'total:', len(list_ip_net_pin_port_des)
+	print 'total:', len(list_net_pin_port_des)
 
-	return list_ip_net_pin_port_des
-
-def list_pin_des_new_i2s_board():
-	list_pin_des = [
-		('AD26', 'SOMI'),
-		('AC26', 'MOSI'),
-		('AE25', 'SCLK'),
-		('AF25', '74138GA(CS)'),
-		('AD21', '74138GB'),
-		('AD24', '74138GC'),
-		('AJ24', 'SPI_S0'),
-		('AK25', 'SPI_S1'),
-		('AJ22', 'SPI_S2'),
-		('AJ23', 'SPI_S3'),
-	]
-
-	return list_pin_des
+	return list_net_pin_port_des
 
 def list_pin_des_new_i2s_board_multi():
 	list_pin_des = []
 
-	list_tuple_slots = [
-		('J101', 'J102'),
-		('J86', 'J96'),
-		('J95', 'J97')
+	list_list_slots = [
+		['J101', 'J102'],
+		['J86', 'J96'],
+		#['J95', 'J97']
 	]
 
 	J101 = 0
@@ -1400,7 +912,7 @@ def list_pin_des_new_i2s_board_multi():
 		(J101, 14),
 	]
 
-	ip_num = len(list_tuple_slots)
+	ip_num = len(list_list_slots)
 	list_port_width_list_des = [
 		(1, ['SOMI', 'MOSI', 'SCLK', '74138GA(CS)', '74138GB', '74138GC', 'SPI_S0', 'SPI_S1', 'SPI_S2', 'SPI_S3']),
 	]
@@ -1408,114 +920,17 @@ def list_pin_des_new_i2s_board_multi():
 	list_all_des = get_list_all_ports_name(ip_num, list_port_width_list_des, str_append)
 
 	list_slot_list_portnum_pin_net = get_list_slot_list_portnum_pin_net()
-	list_pin = get_list_pin_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_tuple_slots, list_index_portnum_for_i2s_16_inst)
+	list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_i2s_16_inst)
 
-	if len(list_all_des) != len(list_pin):
-		str_status = 'list_all_des:%d list_pin:%d' %(len(list_all_des), len(list_pin))
+	if len(list_all_des) != len(list_pin_net):
+		str_status = 'list_all_des:%d list_pin_net:%d' %(len(list_all_des), len(list_pin_net))
 		raise Exception(str_status)
 
 	for i in range(len(list_all_des)):
-		item = (list_pin[i], list_all_des[i])
+		item = (list_pin_net[i][0], list_all_des[i])
 		list_pin_des.append(item)
 
 	return list_pin_des
-
-def list_pin_des_new_tsp_board_j94():
-	list_pin_des = [
-		('C12', 'i2c_sck'),
-		('C11', 'i2c_sda'),
-
-		#('A23', 'spi_clk'),
-		#('D23', 'spi_mosi'),
-		#('E25', 'spi_miso'),
-
-		#('F26', '74138G2A'),
-		#('E23', 'spi_s0'),
-		#('F25', 'spi_s1'),
-		#('E24', 'spi_s2'),
-
-		('C14', 'lnb1_on_off'),
-		('E14', 'TUNB_3.3V_ON'),
-		#('AF27', 'AD9125_INTB'),
-		#('AH29', 'AD5375_DSOP'),
-
-		('E15', 'undefined'),
-		('C15', 'undefined'),
-		('B15', 'undefined'),
-		('J16', 'undefined'),
-		('B14', 'undefined'),
-		('A15', 'undefined'),
-		('F12', 'undefined'),
-		('E13', 'undefined'),
-		('B13', 'undefined'),
-		('A13', 'undefined'),
-		('L16', 'undefined'),
-		('K16', 'undefined'),
-		('H16', 'undefined'),
-	]
-
-	return list_pin_des
-
-def list_net_des_new_tsp_board_j94():
-	list_net_des = [
-		('FMC_HPC_HA03_P', 'i2c_sck'),
-		('FMC_HPC_HA02_N', 'i2c_sda'),
-
-		#('FMC_LPC_LA21_N', 'spi_clk'),
-		#('FMC_LPC_LA19_P', 'spi_mosi'),
-		#('FMC_LPC_LA19_N', 'spi_miso'),
-
-		#('FMC_LPC_LA22_P', '74138G2A'),
-		#('FMC_LPC_LA15_N', 'spi_s0'),
-		#('FMC_LPC_CLK0_M2C_N', 'spi_s1'),
-		#('FMC_LPC_PRSNT_M2C_B_LS', 'spi_s2'),
-
-		#('FMC_HPC_HA06_N', 'lnb1_on_off'),
-		#('FMC_HPC_HA08_P', 'TUNB_3.3V_ON'),
-		#('FMC_LPC_LA20_N', 'AD9125_INTB'),
-		#('FMC_LPC_CLK1_M2C_N', 'AD5375_DSOP'),
-
-		#('FMC_HPC_HA08_N', 'undefined'),
-		#('FMC_HPC_HA12_P', 'undefined'),
-		#('FMC_HPC_HA12_N', 'undefined'),
-		#('FMC_HPC_HA14_P', 'undefined'),
-		#('FMC_HPC_HA07_P', 'undefined'),
-		#('FMC_HPC_HA07_N', 'undefined'),
-		#('FMC_HPC_HA09_P', 'undefined'),
-		#('FMC_HPC_HA09_N', 'undefined'),
-		#('FMC_HPC_HA11_P', 'undefined'),
-		#('FMC_HPC_HA11_N', 'undefined'),
-		#('FMC_HPC_HA13_P', 'undefined'),
-		#('FMC_HPC_HA13_N', 'undefined'),
-		#('FMC_HPC_HA14_N', 'undefined'),
-	]
-	
-	return list_net_des
-
-def list_net_des_new_tsp_board_j97():
-	list_net_des = [
-		('FMC_HPC_LA16_P', 'i2c_sck'),
-		('FMC_HPC_LA15_N', 'i2c_sda'),
-
-		#('FMC_HPC_LA19_N', 'lnb1_on_off'),
-		#('FMC_HPC_LA21_P', 'TUNB_3.3V_ON'),
-
-		#('FMC_HPC_LA21_N', 'undefined'),
-		#('FMC_HPC_LA25_P', 'undefined'),
-		#('FMC_HPC_LA25_N', 'undefined'),
-		#('FMC_HPC_LA27_P', 'undefined'),
-		#('FMC_HPC_LA20_P', 'undefined'),
-		#('FMC_HPC_LA20_N', 'undefined'),
-		#('FMC_HPC_LA22_P', 'undefined'),
-		#('FMC_HPC_LA22_N', 'undefined'),
-		#('FMC_HPC_LA24_P', 'undefined'),
-		#('FMC_HPC_LA24_N', 'undefined'),
-		#('FMC_HPC_LA26_P', 'undefined'),
-		#('FMC_HPC_LA26_N', 'undefined'),
-		#('FMC_HPC_LA27_N', 'undefined'),
-	]
-
-	return list_net_des
 
 def list_net_des_iic_slave():
 	list_net_des = [
@@ -1537,102 +952,62 @@ def list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 
 	return list_net_des
 
-def list_net_des_multi_tsp():
-	list_net_des = [
-		#j94
-		('FMC_HPC_HA03_P', 'i2c_sck'),#10
-		('FMC_HPC_HA02_N', 'i2c_sda'),#11
-		#j95
-		('FMC_HPC_HA18_P', 'i2c_sck_1'),#10
-		('FMC_HPC_HA17_CC_N', 'i2c_sda_1'),#11
-		#j96
-		('FMC_HPC_LA01_CC_P', 'i2c_sck_2'),#10
-		('FMC_HPC_LA00_CC_N', 'i2c_sda_2'),#11
-		#j97
-		('FMC_HPC_LA16_P', 'i2c_sck_3'),#10
-		('FMC_HPC_LA15_N', 'i2c_sda_3'),#11
-	]
-
-	return list_net_des
-
-def get_list_slot_list_portnum_des_multi_tsp():
-	list_slot_list_portnum_des = [
-		(
-			'J94',
-			[
-				(10, 'i2c_sck'),
-				(11, 'i2c_sda'),
-			]
-		),
-		(
-			'J95',
-			[
-				(10, 'i2c_sck_1'),
-				(11, 'i2c_sda_1'),
-			]
-		),
-		(
-			'J96',
-			[
-				(10, 'i2c_sck_2'),
-				(11, 'i2c_sda_2'),
-			]
-		),
-		(
-			'J97',
-			[
-				(10, 'i2c_sck_3'),
-				(11, 'i2c_sda_3'),
-			]
-		)
-	]
-
-	return list_slot_list_portnum_des
-
-def get_list_pin_des_from_list_slot_list_portnum_des(list_slot_list_portnum_des):
+def list_pin_des_multi_tsp():
 	list_pin_des = []
 
+	list_list_slots = [
+		['J94'],
+		['J95'],
+		['J96'],
+		['J97']
+	]
+
+	J94 = 0
+	list_index_portnum_for_i2s_16_inst = [
+		(J94, 10),
+		(J94, 11),
+	]
+
+	ip_num = len(list_list_slots)
+	list_port_width_list_des = [
+		(1, ['i2c_sck', 'i2c_sda']),
+	]
+	str_append = ''
+	list_all_des = get_list_all_ports_name(ip_num, list_port_width_list_des, str_append)
+
 	list_slot_list_portnum_pin_net = get_list_slot_list_portnum_pin_net()
+	list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_i2s_16_inst)
 
-	for slot, list_portnum_des in list_slot_list_portnum_des:
-		list_portnum_pin_net = None
-		for slot_, list_portnum_pin_net_ in list_slot_list_portnum_pin_net:
-			if slot_ == slot:
-				list_portnum_pin_net = list_portnum_pin_net_
-				break
-		if not list_portnum_pin_net:
-			continue
+	if len(list_all_des) != len(list_pin_net):
+		str_status = 'list_all_des:%d list_pin_net:%d' %(len(list_all_des), len(list_pin_net))
+		raise Exception(str_status)
 
-		for portnum, des in list_portnum_des:
-			for portnum_, pin_, net_ in list_portnum_pin_net:
-				if portnum_ == portnum:
-					pin = pin_
-					break
-			if not pin:
-				continue
-			item = (pin, des)
-			list_pin_des.append(item)
+	for i in range(len(list_all_des)):
+		item = (list_pin_net[i][0], list_all_des[i])
+		list_pin_des.append(item)
 
 	return list_pin_des
 
-def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_group_part_pin, list_fmc_pin_resistor):
-	map_gpio_if_list_net_pin_des_resistor = {}
-	map_gpio_if_list_net_pin_des_resistor.update({'HPC': []})
-	map_gpio_if_list_net_pin_des_resistor.update({'LPC': []})
-	map_gpio_if_list_net_pin_des_resistor.update({'OTHER': []})
+def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_part_pin, list_fmc_pin_resistor):
+	map_gpioif_list_net_pin_des_resistor = {}
+	map_gpioif_list_net_pin_des_resistor.update({'HPC': []})
+	map_gpioif_list_net_pin_des_resistor.update({'LPC': []})
+	map_gpioif_list_net_pin_des_resistor.update({'OTHER': []})
 
 	list_pin_des = []
 	list_net_des = []
 
-	list_pin_des = list_pin_des_new_i2s_board_multi()
-	
-	#list_pin_des = get_list_pin_des_from_list_slot_list_portnum_des(get_list_slot_list_portnum_des_multi_tsp())
-	#list_net_des = list_net_des_new_tsp_board_j94()
+	#list_pin_des = list_pin_des_new_i2s_board_multi()
 	#list_net_des = list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
-	#list_net_des = list_net_des_multi_tsp()
+	list_pin_des = list_pin_des_multi_tsp()
 
 	for pin, des in list_pin_des:
-		net = map_kc705_pin_net.pop(pin, None)
+		net = None
+		for pin_net in list_pin_net:
+			if pin_net[0] == pin:
+				net = pin_net[1]
+				list_pin_net.remove(pin_net)
+				break
 		if net:
 			resistor = 'undefined'
 			for i, group, part, j in list_kc705_net_group_part_pin:
@@ -1643,63 +1018,66 @@ def get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_
 								resistor = l
 			v = (net, pin, des, resistor)
 			if net.startswith('FMC_HPC'):
-				map_gpio_if_list_net_pin_des_resistor.get('HPC').append(v)
+				map_gpioif_list_net_pin_des_resistor.get('HPC').append(v)
 			elif net.startswith('FMC_LPC'):
-				map_gpio_if_list_net_pin_des_resistor.get('LPC').append(v)
+				map_gpioif_list_net_pin_des_resistor.get('LPC').append(v)
 			else:
-				map_gpio_if_list_net_pin_des_resistor.get('OTHER').append(v)
+				map_gpioif_list_net_pin_des_resistor.get('OTHER').append(v)
 
 
 	for net, des in list_net_des:
-		for i, j in map_kc705_pin_net.items():
-			if j == net:
-				map_kc705_pin_net.pop(i, None)
-				resistor = 'undefined'
-				pin = i
-				for k, group, part, l in list_kc705_net_group_part_pin:
-					if net == k:
-						if group in ['J2', 'J22']:
-							for m, n in list_fmc_pin_resistor:
-								if l == m:
-									resistor = n
-				v = (net, pin, des, resistor)
-				if net.startswith('FMC_HPC'):
-					map_gpio_if_list_net_pin_des_resistor.get('HPC').append(v)
-				elif net.startswith('FMC_LPC'):
-					map_gpio_if_list_net_pin_des_resistor.get('LPC').append(v)
-				else:
-					map_gpio_if_list_net_pin_des_resistor.get('OTHER').append(v)
+		pin = None
+		for pin_net in list_pin_net:
+			if pin_net[1] == net:
+				pin = pin_net[0]
+				list_pin_net.remove(pin_net)
+				break;
+		if pin:
+			resistor = 'undefined'
+			for k, group, part, l in list_kc705_net_group_part_pin:
+				if net == k:
+					if group in ['J2', 'J22']:
+						for m, n in list_fmc_pin_resistor:
+							if l == m:
+								resistor = n
+			v = (net, pin, des, resistor)
+			if net.startswith('FMC_HPC'):
+				map_gpioif_list_net_pin_des_resistor.get('HPC').append(v)
+			elif net.startswith('FMC_LPC'):
+				map_gpioif_list_net_pin_des_resistor.get('LPC').append(v)
+			else:
+				map_gpioif_list_net_pin_des_resistor.get('OTHER').append(v)
 
-	#for pin, net in map_kc705_pin_net.items():
+	#for pin_net in list_pin_net:
 	#	des = 'undefined'
-	#	net = map_kc705_pin_net.pop(pin, None)
-	#	if net:
-	#		resistor = 'undefined'
-	#		for i, group, part, j in list_kc705_net_group_part_pin:
-	#			if net == i:
-	#				if group in ['J2', 'J22']:
-	#					for k, l in list_fmc_pin_resistor:
-	#						if j == k:
-	#							resistor = l
-	#		v = (net, pin, des, resistor)
-	#		if net.startswith('FMC_HPC'):
-	#			map_gpio_if_list_net_pin_des_resistor.get('HPC').append(v)
-	#		elif net.startswith('FMC_LPC'):
-	#			map_gpio_if_list_net_pin_des_resistor.get('LPC').append(v)
-	#		else:
-	#			map_gpio_if_list_net_pin_des_resistor.get('OTHER').append(v)
+	#	pin = pin_net[0]
+	#	net = pin_net[1]
+	#	resistor = 'undefined'
+	#	for i, group, part, j in list_kc705_net_group_part_pin:
+	#		if net == i:
+	#			if group in ['J2', 'J22']:
+	#				for k, l in list_fmc_pin_resistor:
+	#					if j == k:
+	#						resistor = l
+	#	v = (net, pin, des, resistor)
+	#	if net.startswith('FMC_HPC'):
+	#		map_gpioif_list_net_pin_des_resistor.get('HPC').append(v)
+	#	elif net.startswith('FMC_LPC'):
+	#		map_gpioif_list_net_pin_des_resistor.get('LPC').append(v)
+	#	else:
+	#		map_gpioif_list_net_pin_des_resistor.get('OTHER').append(v)
 
-	for i in map_gpio_if_list_net_pin_des_resistor.items():
+	for i in map_gpioif_list_net_pin_des_resistor.items():
 		print '-' * 100
-		print 'map_gpio_if_list_net_pin_des_resistor %s info' %(i[0])
+		print 'map_gpioif_list_net_pin_des_resistor %s info' %(i[0])
 		print '-' * 100
 		for j in i[1]:
 			print j
 		print 'total:', len(i[1])
 
-	#map_gpio_if_list_net_pin_des_resistor.pop('OTHER', None)
+	#map_gpioif_list_net_pin_des_resistor.pop('OTHER', None)
 
-	return map_gpio_if_list_net_pin_des_resistor
+	return map_gpioif_list_net_pin_des_resistor
 
 def gen_default_contrain():
 	txt = """
@@ -1767,19 +1145,19 @@ set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[7]}]
 	print '#', '-' * 100
 	print txt
 
-def gen_ip_constrain(list_ip_net_pin_port_des):
+def gen_ip_constrain(list_net_pin_port_des):
 	print '#', '-' * 100
 	print '#', 'ip constrain'
 	print '#', '-' * 100
 
-	for net, pin, port, des in list_ip_net_pin_port_des:
+	for net, pin, port, des in list_net_pin_port_des:
 		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(net, pin, port)
 		print 'set_property IOSTANDARD LVCMOS25 [get_ports {%s}]' %(port)
 		if des:
 			for i in des:
 				print i
 
-def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
+def gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor):
 	list_net_pin_des_resistor_gpio_gpio_no = []
 	start = 0
 	top_pin_no = 256
@@ -1809,12 +1187,12 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 	print '#', '-' * 100
 
 	common_list_net_pin_des_resistor = []
-	for i, j in map_gpio_if_list_net_pin_des_resistor.items():
+	for i, j in map_gpioif_list_net_pin_des_resistor.items():
 		common_list_net_pin_des_resistor.extend(j)
 	map_common_list_net_pin_des_resistor = {}
 	map_common_list_net_pin_des_resistor.update({'common gpio' : common_list_net_pin_des_resistor})
 
-	#for i, j in map_gpio_if_list_net_pin_des_resistor.items():
+	#for i, j in map_gpioif_list_net_pin_des_resistor.items():
 	for i, j in map_common_list_net_pin_des_resistor.items():
 		list_len = len(j)
 
@@ -1824,8 +1202,8 @@ def gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor):
 		list_if_gpio_ports = list_gpio_ports[start : ]
 
 		if len(list_if_gpio_ports) < list_len:
-			#print , "gpio bank is not enough!"
-			continue
+			err_msg = 'len(list_if_gpio_ports):%d list_len:%d' %(len(list_if_gpio_ports), list_len)
+			raise Exception(err_msg)
 
 		#print '#', '-' * 100
 		#print '#', 'gpio constrain for %s' %(i)
@@ -1927,20 +1305,21 @@ def gen_kc705_constrain():
 
 	list_fmc_pin_resistor = gen_list_fmc_pin_resistor()
 
-	map_kc705_pin_net = gen_map_kc705_pin_net()
+	list_pin_iotype = gen_kc705_list_pin_iotype()
 
-	map_kc705_pin_iotype = gen_map_kc705_pin_iotype()
+	list_pin_net = kc705_gen_list_pin_net(list_pin_iotype)
 
-	remove_unused_pin(map_kc705_pin_net)
+	remove_unused_pin(list_pin_net)
 
-	list_ip_net_pin_port_des = get_list_ip_net_pin_port_des(map_kc705_pin_net)
+	list_net_pin_port_des = ip_get_list_net_pin_port_des(list_pin_net)
 
-	map_gpio_if_list_net_pin_des_resistor = get_map_gpio_if_list_net_pin_des_resistor(map_kc705_pin_net, list_kc705_net_group_part_pin, list_fmc_pin_resistor)
+	map_gpioif_list_net_pin_des_resistor = get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_part_pin, list_fmc_pin_resistor)
+
 	gen_default_contrain()
 
-	gen_ip_constrain(list_ip_net_pin_port_des)
+	gen_ip_constrain(list_net_pin_port_des)
 
-	list_net_pin_des_resistor_gpio_gpio_no = gen_gpio_constrain(map_gpio_if_list_net_pin_des_resistor)
+	list_net_pin_des_resistor_gpio_gpio_no = gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor)
 
 	gen_bitstream_constrain()
 
