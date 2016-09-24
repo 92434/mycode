@@ -1,4 +1,6 @@
 `timescale 1 ns / 1 ps
+
+//(match) ? extend + save_enable : (end ? extend : (last_valid ? extend : reenter))
 module csa_calc_logic #(
 		parameter integer AXI_DATA_WIDTH = 32,
 		parameter integer ID = 0,
