@@ -59,12 +59,12 @@ function process_opt() {
 function start_logcat() {
 	process_opt $@
 
-	shift $(($OPTIND - 1))
 
 	if [ -z $pattern ];then
 		echo "adb logcat $@ -v brief "*:V""
-		adb logcat $@ -v brief "*:V"
+		adb logcat -v brief "*:V"
 	else
+		shift $(($OPTIND - 1))
 		echo "adb logcat $@ -v brief "*:V" | grep -e "$pattern""
 		adb logcat $@ -v brief "*:V" | grep -e "$pattern"
 	fi
