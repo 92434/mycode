@@ -35,21 +35,24 @@ function process_opt() {
 				echo "logcat option: $@"
 				break
 				;;
+			e)
+				export pattern="$OPTARG"
+				echo "pattern: $pattern"
+				;;
 			p)
 				export package="$OPTARG"
 				echo "package: $package"
 				get_pattern_from_package_name "$package"
 				echo "pattern: $pattern"
 				;;
-			e)
-				export pattern="$OPTARG"
-				echo "pattern: $pattern"
-				;;
 			?)
 				echo -e "Usage:$0 [option]"
 				echo -e "\toption:"
-				echo -e "\t-p package: logcat for package"
+				echo -e "\t-a logcat options: add logcat options"
 				echo -e "\t-e pattern: logcat for regex pattern"
+				echo -e "\t-p package: logcat for package"
+				export error_msg="1"
+				break
 				;;
 		esac
 	done
@@ -59,8 +62,11 @@ function process_opt() {
 function start_logcat() {
 	process_opt $@
 
+	if [ -n "$error_msg" ]; then
+		return
+	fi
 
-	if [ -z $pattern ];then
+	if [ -z "$pattern" ];then
 		echo "adb logcat $@ -v brief "*:V""
 		adb logcat -v brief "*:V"
 	else

@@ -1,9 +1,9 @@
 /**
  *  This is a simple demon of uio driver.
- *  Last modified by 
+ *  Last modified by
  09-05-2011   Joseph Yang(Yang Honggang)<ganggexiongqi@gmail.com>
  *
- * Compile:  
+ * Compile:
  *   Save this file name it simple.c
  *   # echo "obj-m := simple.o" > Makefile
  *   # make -Wall -C /lib/modules/`uname -r`/build M=`pwd` modules
@@ -20,6 +20,7 @@
 #include "interface_conf.h"
 
 #define SPI_BUS_NUM 1
+#define SPI_BUS_NUM_1 2
 
 static struct spi_gpio_platform_data spi_gpio_cfg = {
 	.sck		= SPI_SCK,
@@ -27,8 +28,20 @@ static struct spi_gpio_platform_data spi_gpio_cfg = {
 	.miso		= SPI_MISO,
 	.num_chipselect = 1,
 };
+#if defined(KC705_I2S_RECEIVER_TEST)
+#if (DEFINED_I2S == 1)
+#warning("KC705_I2S_RECEIVER_TEST == 1")
+static struct spi_gpio_platform_data spi_gpio_cfg_1 = {
+	.sck		= SPI_SCK_1,
+	.mosi		= SPI_MOSI_1,
+	.miso		= SPI_MISO_1,
+	.num_chipselect = 1,
+};
+#endif//if (DEFINED_I2S == 2)
+#endif//#if defined(KC705_I2S_RECEIVER_TEST)
 
-static void kc705_spi_master_release(struct device *dev) {
+static void kc705_spi_master_release(struct device *dev)
+{
 	struct spi_gpio_platform_data *pdata = dev->platform_data;
 	pdata = pdata;
 }
@@ -39,19 +52,71 @@ static struct platform_device kc705_spi_master_device = {
 	.dev.platform_data = &spi_gpio_cfg,
 	.dev.release = kc705_spi_master_release,
 };
+#if defined(KC705_I2S_RECEIVER_TEST)
+#if (DEFINED_I2S == 1)
+#warning("KC705_I2S_RECEIVER_TEST == 1")
+static struct platform_device kc705_spi_master_device_1 = {
+	.name		= "spi_gpio_1",
+	.id		= SPI_BUS_NUM_1,
+	.dev.platform_data = &spi_gpio_cfg_1,
+	.dev.release = kc705_spi_master_release,
+};
+#endif//if (DEFINED_I2S == 2)
+#endif//#if defined(KC705_I2S_RECEIVER_TEST)
+
+static struct platform_device *pdev = &kc705_spi_master_device;
+#if defined(KC705_I2S_RECEIVER_TEST)
+#if (DEFINED_I2S == 1)
+#warning("KC705_I2S_RECEIVER_TEST == 1")
+static struct platform_device *pdev_1 = &kc705_spi_master_device_1;
+#endif//if (DEFINED_I2S == 2)
+#endif//#if defined(KC705_I2S_RECEIVER_TEST)
 
 static int __init kc705_spi_master_init(void)
 {
 	int ret = 0;
-	printk("%s\n", __PRETTY_FUNCTION__);
-	ret = platform_device_register(&kc705_spi_master_device);
 
+	printk("%s\n", __PRETTY_FUNCTION__);
+
+	ret = platform_device_register(pdev);
+
+	if(ret != 0) {
+		pdev = NULL;
+		goto kc705_spi_master_init;
+	}
+
+#if defined(KC705_I2S_RECEIVER_TEST)
+#if (DEFINED_I2S == 1)
+#warning("KC705_I2S_RECEIVER_TEST == 1")
+	ret = platform_device_register(pdev_1);
+
+	if(ret != 0) {
+		pdev_1 = NULL;
+		goto kc705_spi_master_init;
+	}
+#endif//if (DEFINED_I2S == 2)
+#endif//#if defined(KC705_I2S_RECEIVER_TEST)
+
+kc705_spi_master_init:
 	return ret;
 }
 
-static void __exit kc705_spi_master_exit(void) {
+static void __exit kc705_spi_master_exit(void)
+{
 	printk("%s\n", __PRETTY_FUNCTION__);
-	platform_device_unregister(&kc705_spi_master_device);
+
+	if(pdev != NULL) {
+		platform_device_unregister(pdev);
+	}
+
+#if defined(KC705_I2S_RECEIVER_TEST)
+#if (DEFINED_I2S == 1)
+#warning("KC705_I2S_RECEIVER_TEST == 1")
+	if(pdev_1 != NULL) {
+		platform_device_unregister(pdev_1);
+	}
+#endif//if (DEFINED_I2S == 2)
+#endif//#if defined(KC705_I2S_RECEIVER_TEST)
 }
 
 module_init(kc705_spi_master_init);

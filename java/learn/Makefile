@@ -15,7 +15,6 @@ entry_point := com.xiaofei.test.ProcessStream
 include $(BUILD_CLASS)
 
 ProcessStream:
-	#java -Xbootclasspath/a:out/bin/jieba.jar -jar out/bin/JiebaSegmenterTest.jar
 	java -jar out/bin/ProcessStream.jar ls
 
 
@@ -36,7 +35,23 @@ include $(BUILD_CLASS)
 
 
 ExecuteScript:
-	#java -Xbootclasspath/a:out/bin/jieba.jar -jar out/bin/JiebaSegmenterTest.jar
 	java -jar out/bin/ExecuteScript.jar
+
+#LOCAL_PRECONDITION := resource
+
+java_files := com/xiaofei/test/StaticClassMember.java
+
+jar_name := StaticClassMember
+
+#package_inc := -C resources .
+
+#include_class_path := out/bin/StaticClassMember.jar
+
+entry_point := com.xiaofei.test.StaticClassMember
+
+include $(BUILD_CLASS)
+
+StaticClassMember:
+	java -jar out/bin/StaticClassMember.jar
 
 include $(ADD_TARGET)

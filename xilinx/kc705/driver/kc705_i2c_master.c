@@ -126,7 +126,7 @@ static int __init kc705_i2c_master_init(void)
 	ret = platform_device_register(pdev);
 
 	if(ret != 0) {
-		pdev_1 = NULL;
+		pdev = NULL;
 		goto kc705_i2c_master_init_failed;
 	}
 

@@ -423,6 +423,11 @@ function main() {
 		adb shell pm uninstall com.xiaomi.jr
 	fi
 
+	if [ -n "$(package_exist com.xiaomi.smarthome)" ]; then
+		echo adb shell pm uninstall com.xiaomi.smarthome
+		adb shell pm uninstall com.xiaomi.smarthome
+	fi
+
 	echo adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 	adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 }
