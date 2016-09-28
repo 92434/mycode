@@ -29,7 +29,7 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-#if 0
+#if 1
 		.dma_thread = csa_dma_threads,
 		.dma_thread_count = CSA_DMA_THREAD, 
 		.is_auto_receive = true,
