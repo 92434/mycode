@@ -829,8 +829,8 @@ def ip_get_list_net_pin_port_des(list_pin_net):
 	#map_port_list_property = map_port_list_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 	#list_net_port = list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 
-	map_port_list_property = map_port_list_property_multi_tsp()
-	list_pin_port = list_pin_port_new_board_multi_tsp()
+	#map_port_list_property = map_port_list_property_multi_tsp()
+	#list_pin_port = list_pin_port_new_board_multi_tsp()
 
 	list_err_msg = []
 	for pin, port in list_pin_port:
@@ -999,7 +999,7 @@ def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_
 
 	#list_pin_des = list_pin_des_new_i2s_board_multi()
 	#list_net_des = list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
-	list_pin_des = list_pin_des_multi_tsp()
+	#list_pin_des = list_pin_des_multi_tsp()
 
 	for pin, des in list_pin_des:
 		net = None
@@ -1048,24 +1048,24 @@ def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_
 			else:
 				map_gpioif_list_net_pin_des_resistor.get('OTHER').append(v)
 
-	#for pin_net in list_pin_net:
-	#	des = 'undefined'
-	#	pin = pin_net[0]
-	#	net = pin_net[1]
-	#	resistor = 'undefined'
-	#	for i, group, part, j in list_kc705_net_group_part_pin:
-	#		if net == i:
-	#			if group in ['J2', 'J22']:
-	#				for k, l in list_fmc_pin_resistor:
-	#					if j == k:
-	#						resistor = l
-	#	v = (net, pin, des, resistor)
-	#	if net.startswith('FMC_HPC'):
-	#		map_gpioif_list_net_pin_des_resistor.get('HPC').append(v)
-	#	elif net.startswith('FMC_LPC'):
-	#		map_gpioif_list_net_pin_des_resistor.get('LPC').append(v)
-	#	else:
-	#		map_gpioif_list_net_pin_des_resistor.get('OTHER').append(v)
+	for pin_net in list_pin_net:
+		des = 'undefined'
+		pin = pin_net[0]
+		net = pin_net[1]
+		resistor = 'undefined'
+		for i, group, part, j in list_kc705_net_group_part_pin:
+			if net == i:
+				if group in ['J2', 'J22']:
+					for k, l in list_fmc_pin_resistor:
+						if j == k:
+							resistor = l
+		v = (net, pin, des, resistor)
+		if net.startswith('FMC_HPC'):
+			map_gpioif_list_net_pin_des_resistor.get('HPC').append(v)
+		elif net.startswith('FMC_LPC'):
+			map_gpioif_list_net_pin_des_resistor.get('LPC').append(v)
+		else:
+			map_gpioif_list_net_pin_des_resistor.get('OTHER').append(v)
 
 	for i in map_gpioif_list_net_pin_des_resistor.items():
 		print '-' * 100
@@ -1075,7 +1075,7 @@ def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_
 			print j
 		print 'total:', len(i[1])
 
-	#map_gpioif_list_net_pin_des_resistor.pop('OTHER', None)
+	map_gpioif_list_net_pin_des_resistor.pop('OTHER', None)
 
 	return map_gpioif_list_net_pin_des_resistor
 
@@ -1160,8 +1160,8 @@ def gen_ip_constrain(list_net_pin_port_des):
 def gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor):
 	list_net_pin_des_resistor_gpio_gpio_no = []
 	start = 0
-	top_pin_no = 256
-	#top_pin_no = 180
+	#top_pin_no = 256
+	top_pin_no = 180
 	gpio_no = 0
 
 	list_gpio_groups = [
@@ -1192,8 +1192,8 @@ def gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor):
 	map_common_list_net_pin_des_resistor = {}
 	map_common_list_net_pin_des_resistor.update({'common gpio' : common_list_net_pin_des_resistor})
 
-	#for i, j in map_gpioif_list_net_pin_des_resistor.items():
-	for i, j in map_common_list_net_pin_des_resistor.items():
+	for i, j in map_gpioif_list_net_pin_des_resistor.items():
+	#for i, j in map_common_list_net_pin_des_resistor.items():
 		list_len = len(j)
 
 		if list_len == 0:
@@ -1205,9 +1205,9 @@ def gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor):
 			err_msg = 'len(list_if_gpio_ports):%d list_len:%d' %(len(list_if_gpio_ports), list_len)
 			raise Exception(err_msg)
 
-		#print '#', '-' * 100
-		#print '#', 'gpio constrain for %s' %(i)
-		#print '#', '-' * 100
+		print '#', '-' * 100
+		print '#', 'gpio constrain for %s' %(i)
+		print '#', '-' * 100
 
 		base_pin_no = 0
 
@@ -1223,11 +1223,12 @@ def gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor):
 			print '\n#%s, %s, %s, %d\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(net, des, resistor, gpio_no, pin, gpio)
 			print 'set_property IOSTANDARD LVCMOS25 [get_ports {%s}]' %(gpio)
 
-		top_pin_no = base_pin_no
+		#top_pin_no = base_pin_no
+		top_pin_no = 180
 
 		start += list_len
-		#if (start % 32) != 0:
-		#	start = 32 * ((start / 32) + 1)
+		if (start % 32) != 0:
+			start = 32 * ((start / 32) + 1)
 
 	return list_net_pin_des_resistor_gpio_gpio_no
 

@@ -5,6 +5,8 @@
 #include "dvbs2_conf/dvbs2_pcie_config.h"
 #elif defined(KC705_CSA)
 #include "csa_conf/csa_pcie_config.h"
+#elif defined(KC705_CSA_DEBUG)
+#include "csa_debug_conf/csa_debug_pcie_config.h"
 #elif defined(KC705_FMC_GPIO)
 #include "fmc_gpio_conf/fmc_gpio_pcie_config.h"
 #elif defined(KC705_I2S_RECEIVER_TEST)

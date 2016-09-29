@@ -25,6 +25,15 @@
 #define IIC_SDA0 (-1)
 #define IIC_SCL0 (-1)
 
+#elif defined(KC705_CSA_DEBUG)
+
+#define SPI_MISO (-1)//FMC_LPC_LA20_N
+#define SPI_MOSI (-1)//FMC_LPC_LA23_N
+#define SPI_SCK (-1)//FMC_LPC_LA23_P
+#define SPI_CS (-1)
+#define IIC_SDA0 (-1)
+#define IIC_SCL0 (-1)
+
 #elif defined(KC705_FMC_GPIO)
 
 #define SPI_MISO (-1)

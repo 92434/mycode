@@ -1,4 +1,5 @@
 `timescale 1 ns / 1 ps
+
 module csa_calc_logic #(
 		parameter integer AXI_DATA_WIDTH = 32,
 		parameter integer ID = 0,
@@ -14,6 +15,11 @@ module csa_calc_logic #(
 		input wire fifo_ready,
 		output reg fifo_ren = 0,
 
+		input wire [CYPHER_DATA_WIDTH - 1 : 0] mask,
+		input wire [CYPHER_DATA_WIDTH - 1 : 0] value,
+		
+		input wire csa_out_error_full,
+
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block,
 		input wire [CSA_CALC_IN_WIDTH - 1 : 0] csa_calc_logic_in,//used for ck_processer
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times,
@@ -28,15 +34,10 @@ module csa_calc_logic #(
 	);
 
 
-	reg [AXI_DATA_WIDTH - 1 : 0] count = 0;
-	always @(posedge clk) begin
-		if(rst_n == 0) begin
-			count <= 0;
-		end
-		else begin
-			count <= count + 1;
-		end
-	end
+	wire [CYPHER_DATA_WIDTH - 1 : 0] cb_out;
+
+	wire matched;
+	assign matched = ((mask & value) == (mask & cb_out)) ? 1 : 0;
 
 	reg fifo_ready_reg_19 = 0;
 	reg fifo_ready_reg_20 = 0;
@@ -45,8 +46,6 @@ module csa_calc_logic #(
 	reg fifo_ren_reg_19 = 0;
 	reg fifo_ren_reg_20 = 0;
 	reg fifo_ren_reg_21 = 0;
-
-	wire [CYPHER_DATA_WIDTH - 1 : 0] cb_out;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_reg = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_reg_1 = 0;
@@ -116,6 +115,29 @@ module csa_calc_logic #(
 	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg_19 = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg_20 = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] cb_out_reg_21 = 0;
+
+	reg disable_reg = 0;
+	reg disable_reg_1 = 0;
+	reg disable_reg_2 = 0;
+	reg disable_reg_3 = 0;
+	reg disable_reg_4 = 0;
+	reg disable_reg_5 = 0;
+	reg disable_reg_6 = 0;
+	reg disable_reg_7 = 0;
+	reg disable_reg_8 = 0;
+	reg disable_reg_9 = 0;
+	reg disable_reg_10 = 0;
+	reg disable_reg_11 = 0;
+	reg disable_reg_12 = 0;
+	reg disable_reg_13 = 0;
+	reg disable_reg_14 = 0;
+	reg disable_reg_15 = 0;
+	reg disable_reg_16 = 0;
+	reg disable_reg_17 = 0;
+	reg disable_reg_18 = 0;
+	reg disable_reg_19 = 0;
+	reg disable_reg_20 = 0;
+	reg disable_reg_21 = 0;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_reg = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_times_reg_1 = 0;
@@ -280,6 +302,29 @@ module csa_calc_logic #(
 			cb_out_reg_20 <= 0;
 			cb_out_reg_21 <= 0;
 
+			disable_reg <= 0;
+			disable_reg_1 <= 0;
+			disable_reg_2 <= 0;
+			disable_reg_3 <= 0;
+			disable_reg_4 <= 0;
+			disable_reg_5 <= 0;
+			disable_reg_6 <= 0;
+			disable_reg_7 <= 0;
+			disable_reg_8 <= 0;
+			disable_reg_9 <= 0;
+			disable_reg_10 <= 0;
+			disable_reg_11 <= 0;
+			disable_reg_12 <= 0;
+			disable_reg_13 <= 0;
+			disable_reg_14 <= 0;
+			disable_reg_15 <= 0;
+			disable_reg_16 <= 0;
+			disable_reg_17 <= 0;
+			disable_reg_18 <= 0;
+			disable_reg_19 <= 0;
+			disable_reg_20 <= 0;
+			disable_reg_21 <= 0;
+
 			csa_calc_logic_times_reg <= 0;
 			csa_calc_logic_times_reg_1 <= 0;
 			csa_calc_logic_times_reg_2 <= 0;
@@ -432,6 +477,29 @@ module csa_calc_logic #(
 			cb_out_reg_21 <= cb_out_reg_20;
 			//cb_out_reg_21 -->result
 
+			disable_reg <= 0;
+			disable_reg_1 <= disable_reg;
+			disable_reg_2 <= disable_reg_1;
+			disable_reg_3 <= disable_reg_2;
+			disable_reg_4 <= disable_reg_3;
+			disable_reg_5 <= disable_reg_4;
+			disable_reg_6 <= disable_reg_5;
+			disable_reg_7 <= disable_reg_6;
+			disable_reg_8 <= disable_reg_7;
+			disable_reg_9 <= disable_reg_8;
+			disable_reg_10 <= disable_reg_9
+			disable_reg_11 <= disable_reg_10;
+			disable_reg_12 <= disable_reg_11;
+			disable_reg_13 <= disable_reg_12;
+			disable_reg_14 <= disable_reg_13;
+			disable_reg_15 <= disable_reg_14;
+			disable_reg_16 <= disable_reg_15;
+			disable_reg_17 <= disable_reg_16;
+			disable_reg_18 <= disable_reg_17;
+			disable_reg_19 <= disable_reg_18;
+			disable_reg_20 <= disable_reg_19;
+			disable_reg_21 <= disable_reg_20;
+
 			csa_calc_logic_times_reg <= csa_calc_logic_times;//entry
 			csa_calc_logic_times_reg_1 <= csa_calc_logic_times_reg;
 			csa_calc_logic_times_reg_2 <= csa_calc_logic_times_reg_1;
@@ -507,7 +575,7 @@ module csa_calc_logic #(
 			else begin
 			end
 
-			if(csa_calc_logic_times_left_reg_18 <= 0) begin
+			if((csa_calc_logic_times_reg_18 == 0) && (csa_calc_logic_times_left_reg_18 == 0)) begin
 				if((fifo_ready == 1) && (fifo_ren == 0)) begin//data is ready
 					fifo_ren <= 1;
 				end
@@ -519,21 +587,72 @@ module csa_calc_logic #(
 
 			if(csa_calc_logic_times_reg_21 > 0) begin
 				if(csa_calc_logic_times_left_reg_21 > 0) begin
-					csa_calc_logic_block_reg <= csa_calc_logic_block_reg_21;
-					csa_calc_logic_in_reg <= csa_calc_logic_in_reg_21;
-					csa_calc_logic_times_reg <= csa_calc_logic_times_reg_21;
-					csa_calc_logic_times_start_reg <= csa_calc_logic_times_start_reg_21;
-					csa_calc_logic_times_left_reg <= csa_calc_logic_times_left_reg_21;
-					cb_out_reg <= cb_out;//for debug
-					//cb_out_reg <= cb_out_reg_21;//for debug
+					if(matched == 1) begin
+						if(csa_out_error_full == 0) begin
+							csa_calc_logic_ready <= 1;
+
+							csa_calc_logic_block_o <= csa_calc_logic_block_reg_21;
+							csa_calc_logic_in_o <= csa_calc_logic_in_reg_21;
+							csa_calc_logic_times_o <= csa_calc_logic_times_reg_21;
+							csa_calc_logic_times_start_o <= csa_calc_logic_times_start_reg_21;
+							csa_calc_logic_out <= cb_out;
+
+							csa_calc_logic_block_reg <= csa_calc_logic_block_reg_21;
+							csa_calc_logic_in_reg <= csa_calc_logic_in_reg_21;
+							csa_calc_logic_times_reg <= csa_calc_logic_times_reg_21;
+							csa_calc_logic_times_start_reg <= csa_calc_logic_times_start_reg_21;
+							csa_calc_logic_times_left_reg <= csa_calc_logic_times_left_reg_21;
+							cb_out_reg <= cb_out;//for debug
+							//cb_out_reg <= cb_out_reg_21;//for debug
+						end
+						else begin
+							disable_reg <= 1;//mark
+
+							csa_calc_logic_block_reg <= csa_calc_logic_block_reg_21;
+							csa_calc_logic_in_reg <= csa_calc_logic_in_reg_21;
+							csa_calc_logic_times_reg <= csa_calc_logic_times_reg_21;
+							csa_calc_logic_times_start_reg <= csa_calc_logic_times_start_reg_21;
+							csa_calc_logic_times_left_reg <= csa_calc_logic_times_left_reg_21 + 1;
+							cb_out_reg <= cb_out_reg_21;
+						end
+					end
+					else begin
+						csa_calc_logic_block_reg <= csa_calc_logic_block_reg_21;
+						csa_calc_logic_in_reg <= csa_calc_logic_in_reg_21;
+						csa_calc_logic_times_reg <= csa_calc_logic_times_reg_21;
+						csa_calc_logic_times_start_reg <= csa_calc_logic_times_start_reg_21;
+						csa_calc_logic_times_left_reg <= csa_calc_logic_times_left_reg_21;
+						cb_out_reg <= cb_out;//for debug
+						//cb_out_reg <= cb_out_reg_21;//for debug
+					end
 				end
 				else begin//loop over? out!!!
-					csa_calc_logic_ready <= 1;
-					csa_calc_logic_block_o <= csa_calc_logic_block_reg_21;
-					csa_calc_logic_in_o <= csa_calc_logic_in_reg_21;
-					csa_calc_logic_times_o <= csa_calc_logic_times_reg_21;
-					csa_calc_logic_times_start_o <= csa_calc_logic_times_start_reg_21;
-					csa_calc_logic_out <= cb_out;
+					if(csa_out_error_full == 0) begin
+						csa_calc_logic_ready <= 1;
+
+						csa_calc_logic_block_o <= csa_calc_logic_block_reg_21;
+						csa_calc_logic_in_o <= csa_calc_logic_in_reg_21;
+						csa_calc_logic_times_o <= csa_calc_logic_times_reg_21;
+						csa_calc_logic_times_start_o <= csa_calc_logic_times_start_reg_21;
+						csa_calc_logic_out <= cb_out;
+
+						csa_calc_logic_block_reg <= 0;
+						csa_calc_logic_in_reg <= 0;
+						csa_calc_logic_times_reg <= 0;
+						csa_calc_logic_times_start_reg <= 0;
+						csa_calc_logic_times_left_reg <= 0;
+						cb_out_reg <= 0;
+					end
+					else begin
+						disable_reg <= 1;//mark
+
+						csa_calc_logic_block_reg <= csa_calc_logic_block_reg_21;
+						csa_calc_logic_in_reg <= csa_calc_logic_in_reg_21;
+						csa_calc_logic_times_reg <= csa_calc_logic_times_reg_21;
+						csa_calc_logic_times_start_reg <= csa_calc_logic_times_start_reg_21;
+						csa_calc_logic_times_left_reg <= csa_calc_logic_times_left_reg_21 + 1;
+						cb_out_reg <= cb_out_reg_21;
+					end
 				end
 			end
 			else begin
@@ -543,7 +662,7 @@ module csa_calc_logic #(
 			//fifo_ready_reg_21 == 1 && fifo_ren_reg_21 == 0----read
 			//fifo_ready_reg_21 == 0 && fifo_ren_reg_21 == 1----error
 			//fifo_ready_reg_21 == 0 && fifo_ren_reg_21 == 0----no data
-			if(csa_calc_logic_times_left_reg_21 <= 0) begin
+			if((csa_calc_logic_times_reg_21 == 0) && (csa_calc_logic_times_left_reg_21 == 0)) begin
 				if((fifo_ready_reg_21 == 1) && (fifo_ren_reg_21 == 0)) begin
 					//read a new data
 				end

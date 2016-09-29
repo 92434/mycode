@@ -6,7 +6,7 @@ typedef struct {
 	int ngpio[2];
 } gpio_chip_info_t;
 
-#define FMC_HPC 0
+#define FMC_HPC 1
 
 static gpio_chip_info_t gpio_chip_info[] = {
 #if FMC_HPC

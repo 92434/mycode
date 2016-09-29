@@ -1,6 +1,6 @@
-#ifndef _CSA_DMA_CONFIG_H
-#define _CSA_DMA_CONFIG_H
-#include "csa_dma_thread_config.h"
+#ifndef _CSA_DEBUG_DMA_CONFIG_H
+#define _CSA_DEBUG_DMA_CONFIG_H
+#include "csa_debug_dma_thread_config.h"
 typedef struct dma_static_config {
 	int dma_lite_offset;
 	int pcie_bar_map_ctl_offset_0;
@@ -29,9 +29,9 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_bar_map_num = MAX_BAR_MAP_MEMORY,
 
 		.dma_type = AXI_DMA,
-#if 0
-		.dma_thread = csa_dma_threads,
-		.dma_thread_count = CSA_DMA_THREAD, 
+#if 1
+		.dma_thread = csa_debug_dma_threads,
+		.dma_thread_count = CSA_DEBUG__DMA_THREAD, 
 		.is_auto_receive = true,
 #else//#if 1
 		.dma_thread = NULL,
@@ -41,10 +41,10 @@ static dma_static_config_info_t dma_info[] = {
 
 		.receive_bulk_size = 7 * 10 * 4,
 		.send_bulk_size = 5 * 10 * 4,
-		.devname = "csa_dma",
+		.devname = "csa_debug_dma",
 	},
 	{
-		.dma_lite_offset = OFFSET_AXI_CSA_LITE_0,
+		.dma_lite_offset = OFFSET_AXI_CSA_DEBUG_LITE_0,
 		.pcie_bar_map_ctl_offset_0 = 0,
 		.pcie_bar_map_ctl_offset_1 = 0,
 		.pcie_map_bar_axi_addr_0 = 0,
@@ -58,10 +58,10 @@ static dma_static_config_info_t dma_info[] = {
 
 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
-		.devname = "csa_reg",
+		.devname = "csa_debug_reg",
 	},
 };
 
 #define DMA_MAX (sizeof(dma_info) / sizeof(dma_static_config_info_t))
 
-#endif//#ifndef _CSA_DMA_CONFIG_H
+#endif//#ifndef _CSA_DEBUG_DMA_CONFIG_H

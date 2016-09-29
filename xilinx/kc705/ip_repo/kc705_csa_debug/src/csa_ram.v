@@ -58,17 +58,43 @@ module csa_ram #(
 	localparam integer ADDR_OUT_DATA_4 = ADDR_OUT_DATA_3 + 1;
 	localparam integer ADDR_OUT_DATA_5 = ADDR_OUT_DATA_4 + 1;
 	localparam integer ADDR_OUT_DATA_6 = ADDR_OUT_DATA_5 + 1;
-	localparam integer ADDR_RESET = ADDR_OUT_DATA_6 + 1;
+	localparam integer ADDR_DATA_CATCH_COUNT_INDEX = ADDR_OUT_DATA_6 + 1;
+	localparam integer ADDR_DATA_CATCH_COUNT_LOW = ADDR_DATA_CATCH_COUNT_INDEX + 1;
+	localparam integer ADDR_DATA_CATCH_COUNT_HIGH = ADDR_DATA_CATCH_COUNT_LOW + 1;
+	localparam integer ADDR_OUT_MASK_LOW = ADDR_DATA_CATCH_COUNT_HIGH + 1;
+	localparam integer ADDR_OUT_MASK_HIGH = ADDR_OUT_MASK_LOW + 1;
+	localparam integer ADDR_OUT_VALUE_LOW = ADDR_OUT_MASK_HIGH + 1;
+	localparam integer ADDR_OUT_VALUE_HIGH = ADDR_OUT_VALUE_LOW + 1;
+	localparam integer ADDR_BUSY = ADDR_OUT_VALUE_HIGH + 1;
+	localparam integer ADDR_RESET = ADDR_BUSY + 1;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
 	reg user_rst_n_reg = 1;
 	reg user_rst_n_reg_1 = 1;
+	reg [CSA_CALC_OUT_WIDTH - 1 : 0] ram_data_catch_count[0 : 8'hff];
+
+	reg [8 - 1 : 0] data_catch_count_index_reg = 0;
+	reg [CYPHER_DATA_WIDTH - 1 : 0] out_mask = 0;
+	reg [CYPHER_DATA_WIDTH - 1 : 0] out_value = 0;
+
+	wire device_empty;
+	reg device_idle = 0;
+
+	wire [AXI_DATA_WIDTH - 1 : 0] data_catch_count_low_wire;
+	assign data_catch_count_low_wire = ram_data_catch_count[data_catch_count_index_reg][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+
+	wire [AXI_DATA_WIDTH - 1 : 0] data_catch_count_high_wire;
+	assign data_catch_count_high_wire = ram_data_catch_count[data_catch_count_index_reg][AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
 
 	always @(posedge axi_mm_clk) begin
 		if(s00_axi_aresetn == 0) begin
 			csa_current_channel <= 0;
 			csa_current_channel_changed <= 0;
+
+			data_catch_count_index_reg <= 0;
+			out_mask <= 0;
+			out_value <= 0;
 		end
 		else begin
 			csa_current_channel_changed <= 0;
@@ -84,6 +110,21 @@ module csa_ram #(
 						end
 						else begin
 						end
+					end
+					ADDR_DATA_CATCH_COUNT_INDEX: begin
+						data_catch_count_index_reg <= wdata[8 - 1 : 0];
+					end
+					ADDR_OUT_MASK_LOW: begin
+						out_mask[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0] <= wdata;
+					end
+					ADDR_OUT_MASK_HIGH: begin
+						out_mask[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1] <= wdata;
+					end
+					ADDR_OUT_VALUE_LOW: begin
+						out_value[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0] <= wdata;
+					end
+					ADDR_OUT_VALUE_HIGH: begin
+						out_value[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1] <= wdata;
 					end
 					ADDR_RESET: begin
 						user_rst_n_reg <= 0;
@@ -168,6 +209,30 @@ module csa_ram #(
 					ADDR_OUT_DATA_6: begin
 						rdata <= csa_out_6;
 					end
+					ADDR_DATA_CATCH_COUNT_INDEX: begin
+						rdata <= {{(AXI_DATA_WIDTH - 8){1'b0}}, data_catch_count_index_reg};
+					end
+					ADDR_DATA_CATCH_COUNT_LOW: begin
+						rdata <= data_catch_count_low_wire;
+					end
+					ADDR_DATA_CATCH_COUNT_HIGH: begin
+						rdata <= data_catch_count_high_wire;
+					end
+					ADDR_OUT_MASK_LOW: begin
+						rdata <= out_mask[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					end
+					ADDR_OUT_MASK_HIGH: begin
+						rdata <= out_mask[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
+					end
+					ADDR_OUT_VALUE_LOW: begin
+						rdata <= out_value[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					end
+					ADDR_OUT_VALUE_HIGH: begin
+						rdata <= out_value[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
+					end
+					ADDR_BUSY: begin
+						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, device_idle};
+					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};
 					end
@@ -195,6 +260,7 @@ module csa_ram #(
 	wire [CSA_OUT_PARAMETER_LENGTH - 1 : 0] csa_out[0 : CSA_CALC_INST_NUM - 1];
 
 	wire [CSA_CALC_INST_NUM - 1 : 0] csa_in_full;
+	wire [CSA_CALC_INST_NUM - 1 : 0] csa_in_empty;
 	reg [CSA_CALC_INST_NUM - 1 : 0] csa_in_wen = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] w_index = 0;
 
@@ -321,6 +387,7 @@ module csa_ram #(
 	reg [AXI_DATA_WIDTH - 1 : 0] r_index = 0;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] r_state = 0;
+	reg data_catch_enable = 0;
 	always @(posedge csa_out_wclk) begin
 		if(rst_n == 0) begin
 			csa_out_valid <= 0;
@@ -337,10 +404,14 @@ module csa_ram #(
 
 			r_state <= 0;
 			r_index <= 0;
+
+			data_catch_enable <= 0;
 		end
 		else begin
 			csa_out_ren <= 0;
 			csa_out_wen <= 0;
+
+			data_catch_enable <= 0;
 
 			if(csa_current_channel_changed == 1) begin
 				csa_out_valid <= 0;
@@ -429,6 +500,7 @@ module csa_ram #(
 				9: begin
 					csa_out_wen <= 1;
 					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					data_catch_enable <= 1;
 
 					r_state <= 10;
 				end
@@ -477,6 +549,7 @@ module csa_ram #(
 					.clk(csa_calc_clk),
 					.rst_n(rst_n),
 
+					.csa_in_empty(csa_in_empty[i]),
 					.csa_in_full(csa_in_full[i]),
 					.csa_in_wen(csa_in_wen[i]),
 					.csa_in(csa_in),
@@ -487,4 +560,61 @@ module csa_ram #(
 				);
 		end
 	endgenerate
+
+	assign device_empty = (csa_in_empty == {(CSA_CALC_INST_NUM){1'b1}}) ? 1 : 0;
+
+	reg [AXI_DATA_WIDTH - 1 : 0] idle_debounce_count = 0;
+	always @(posedge csa_out_wclk) begin
+		if(rst_n == 0) begin
+			device_idle <= 0;
+			idle_debounce_count <= 0;
+		end
+		else begin
+			if(idle_debounce_count >= 100) begin
+				device_idle <= 1;
+			end
+			else begin
+				device_idle <= 0;
+			end
+
+			if(device_empty == 1) begin
+				if(idle_debounce_count < 100) begin
+					idle_debounce_count <= idle_debounce_count + 1;
+				end
+				else begin
+					idle_debounce_count <= idle_debounce_count;
+				end
+			end
+			else begin
+				idle_debounce_count <= 0;
+			end
+		end
+	end
+
+
+	wire [8 - 1 : 0] ram_data_catch_index;
+	assign ram_data_catch_index = csa_out_wdata[8 - 1 : 0];
+
+	reg [AXI_DATA_WIDTH - 1 : 0] ram_data_catch_count_index = 0;
+	always @(posedge csa_out_wclk) begin
+		if(rst_n == 0) begin
+			for(ram_data_catch_count_index = 0; ram_data_catch_count_index < 256; ram_data_catch_count_index = ram_data_catch_count_index + 1) begin
+				ram_data_catch_count[ram_data_catch_count_index] <= 0;
+			end
+		end
+		else begin
+			if(user_rst_n == 0) begin
+				for(ram_data_catch_count_index = 0; ram_data_catch_count_index < 256; ram_data_catch_count_index = ram_data_catch_count_index + 1) begin
+					ram_data_catch_count[ram_data_catch_count_index] <= 0;
+				end
+			end
+			else begin
+				if(data_catch_enable == 1) begin
+					ram_data_catch_count[ram_data_catch_index] <= ram_data_catch_count[ram_data_catch_index] + 1;
+				end
+				else begin
+				end
+			end
+		end
+	end
 endmodule
