@@ -92,6 +92,9 @@ module csa_ram #(
 			csa_current_channel <= 0;
 			csa_current_channel_changed <= 0;
 
+			user_rst_n_reg <= 1;
+			user_rst_n_reg_1 <= 1;
+
 			data_catch_count_index_reg <= 0;
 			out_mask <= 0;
 			out_value <= 0;

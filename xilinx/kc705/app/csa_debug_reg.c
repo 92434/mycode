@@ -34,7 +34,7 @@ typedef enum {
 	ADDR_MASK_HIGH,
 	ADDR_VALUE_LOW,
 	ADDR_VALUE_HIGH,
-	ADDR_BUSY,
+	ADDR_DEVICE_IDLE,
 	ADDR_RESET,
 	TOTAL_REGS,
 } addr_t;
@@ -62,7 +62,7 @@ char *reg_name[] = {
 	"ADDR_MASK_HIGH",
 	"ADDR_VALUE_LOW",
 	"ADDR_VALUE_HIGH",
-	"ADDR_BUSY",
+	"ADDR_DEVICE_IDLE",
 	"ADDR_RESET",
 };
 
@@ -138,8 +138,8 @@ void *write_fn(void *arg) {
 	while(stop == 0) {
 		//lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
 		//nwrite = write(targ->fd, &channel, sizeof(int));
-		//lseek(targ->fd, ADDR_OFFSET(ADDR_RESET), SEEK_SET);
-		//nwrite = write(targ->fd, &reset, sizeof(int));
+		lseek(targ->fd, ADDR_OFFSET(ADDR_RESET), SEEK_SET);
+		nwrite = write(targ->fd, &reset, sizeof(int));
 
 		return NULL;
 	}

@@ -31,7 +31,7 @@ static dma_static_config_info_t dma_info[] = {
 		.dma_type = AXI_DMA,
 #if 1
 		.dma_thread = csa_debug_dma_threads,
-		.dma_thread_count = CSA_DEBUG__DMA_THREAD, 
+		.dma_thread_count = CSA_DEBUG_DMA_THREAD, 
 		.is_auto_receive = true,
 #else//#if 1
 		.dma_thread = NULL,

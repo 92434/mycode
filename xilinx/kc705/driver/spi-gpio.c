@@ -521,7 +521,7 @@ static int spi_gpio_remove(struct platform_device *pdev)
 
 MODULE_ALIAS("platform:" DRIVER_NAME);
 
-static const struct platform_device_id i2c_gpio_driver_ids[] = {
+static const struct platform_device_id spi_gpio_driver_ids[] = {
 	{
 		.name           = "spi-gpio_0",
 	}, 
@@ -531,7 +531,7 @@ static const struct platform_device_id i2c_gpio_driver_ids[] = {
 	{
 	}
 };
-MODULE_DEVICE_TABLE(platform, i2c_gpio_driver_ids);
+MODULE_DEVICE_TABLE(platform, spi_gpio_driver_ids);
 
 static struct platform_driver spi_gpio_driver = {
 	.id_table	= spi_gpio_driver_ids,

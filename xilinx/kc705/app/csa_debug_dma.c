@@ -36,7 +36,7 @@ typedef enum {
 	ADDR_MASK_HIGH,
 	ADDR_VALUE_LOW,
 	ADDR_VALUE_HIGH,
-	ADDR_BUSY,
+	ADDR_DEVICE_IDLE,
 	ADDR_RESET,
 	TOTAL_REGS,
 } addr_t;
@@ -64,7 +64,7 @@ char *reg_name[] = {
 	"ADDR_MASK_HIGH",
 	"ADDR_VALUE_LOW",
 	"ADDR_VALUE_HIGH",
-	"ADDR_BUSY",
+	"ADDR_DEVICE_IDLE",
 	"ADDR_RESET",
 };
 
@@ -92,7 +92,6 @@ uint32_t *raw_data = NULL;
 #define BUFSIZE (7 * 4 * 1500)
 
 static int stop = 0;
-static int force_stop = 0;
 
 static void default_sig_action(int signo, siginfo_t *info, void *context)
 {
@@ -101,7 +100,6 @@ static void default_sig_action(int signo, siginfo_t *info, void *context)
 	if(stop == 0) {
 		stop = 1;
 	} else {
-		force_stop = 1;
 		printf("xiaofei:force stop!\n");
 	}
 
@@ -123,98 +121,20 @@ typedef struct {
 	unsigned char *buffer;
 } thread_arg_t;
 
-void *read_fn(void *arg)
-{
-	thread_arg_t *targ = (thread_arg_t *)arg;
-	//struct timeval tv;
-	//fd_set rfds;
-	//fd_set efds;
-	//int nread;
-
-	//printids("read_fn: ");
-
-	//tv.tv_sec=1;
-	//tv.tv_usec=0;
-
-	while(stop == 0) {
-		//FD_ZERO(&rfds);
-		//FD_ZERO(&efds);
-		//FD_SET(targ->dma_fd, &rfds);
-		//FD_SET(targ->dma_fd, &efds);
-
-		//if(select(targ->dma_fd + 1, &rfds, NULL, &efds, &tv) > 0) {
-		//	if(FD_ISSET(targ->dma_fd, &rfds)) {
-		//		//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-		//		nread = read(targ->dma_fd, targ->buffer, BUFSIZE);
-		//		if(nread < 0) {
-		//			printf("%s\n", strerror(errno));
-		//		} else {
-		//			int i;
-		//			uint32_t *data = (uint32_t *)targ->buffer;
-
-		//			printf("read %d!\n", nread);
-		//			for(i = 0; i < nread / sizeof(uint32_t); i++) {
-		//				if((i != 0) && (i % 12 == 0)) {
-		//					printf("\n");
-		//				}
-		//				printf("%04x ", data[i] & 0xffff);
-		//			}
-		//			printf("\n");
-
-		//			//return NULL;
-		//		}
-		//	}
-		//	if(FD_ISSET(targ->dma_fd, &efds)) {
-		//		//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-		//	}
-		//}
-
-		return NULL;
-	}
-
-	return NULL;
-}
-
-void *write_fn(void *arg)
-{
-	thread_arg_t *targ = (thread_arg_t *)arg;
-	//int nwrite;
-
-	//printids("write_fn: ");
-
-	while(stop == 0) {
-		//nwrite = write(targ->dma_fd, raw_data, RAW_DATA_SIZE);
-		//if(nwrite < 0) {
-		//	printf("%s\n", strerror(errno));
-		//} else {
-		//	//printf("write %d!\n", nwrite);
-		//}
-		return NULL;
-	}
-
-	return NULL;
-}
-
-int get_busy_status(thread_arg_t *targ)
+int get_idle_status(thread_arg_t *targ)
 {
 	int nread;
 	uint32_t *data = (uint32_t *)targ->buffer;
-	int busy = 1;
+	int idle = 1;
 
-	lseek(targ->reg_fd, ADDR_OFFSET(ADDR_BUSY), SEEK_SET);
+	lseek(targ->reg_fd, ADDR_OFFSET(ADDR_DEVICE_IDLE), SEEK_SET);
 	nread = read(targ->reg_fd, targ->buffer, sizeof(uint32_t));
 
 	if(nread == sizeof(uint32_t)) {
-		busy = data[0];
+		idle = data[0];
 	}
 
-	if(busy == 1) {
-		busy = 0;
-	} else {
-		busy = 1;
-	}
-
-	return busy;
+	return idle;
 }
 
 int init_raw_data(int start)
@@ -236,19 +156,98 @@ int init_raw_data(int start)
 	return use_start;
 }
 
-void main_proc(thread_arg_t *arg)
+void *read_fn(void *arg)
+{
+	thread_arg_t *targ = (thread_arg_t *)arg;
+	struct timeval tv;
+	fd_set rfds;
+	fd_set efds;
+	int nread;
+
+	//printids("read_fn: ");
+
+	tv.tv_sec=1;
+	tv.tv_usec=0;
+
+	int idle_count = 0;
+
+	while(stop == 0) {
+		FD_ZERO(&rfds);
+		FD_ZERO(&efds);
+		FD_SET(targ->dma_fd, &rfds);
+		FD_SET(targ->dma_fd, &efds);
+
+		if(select(targ->dma_fd + 1, &rfds, NULL, &efds, &tv) > 0) {
+			if(FD_ISSET(targ->dma_fd, &rfds)) {
+				//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
+				while(nread > 0) {
+					nread = read(targ->dma_fd, targ->buffer, BUFSIZE);
+
+					if(nread < 0) {
+						printf("%s\n", strerror(errno));
+						stop = 1;
+						break;
+					} else {
+						int i;
+						uint32_t *data = (uint32_t *)targ->buffer;
+
+						//printf("read %d!\n", nread);
+						if(nread == 0) {
+							continue;
+						}
+
+						for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
+							printf("block:<%01x>%10d in:0x%08x%08x times:%10d times_start:%10d out:0x%08x%08x\n",
+								   (data[i + 0] & 0xc0000000) >> 30,//block
+								   data[i + 0] & 0x3fffffff,//block
+								   data[i + 2],//in(high)
+								   data[i + 1],//in(low)
+								   data[i + 3],//times
+								   data[i + 4],//times delay
+								   data[i + 6],//out(high)
+								   data[i + 5]//out(low)
+								  );
+						}
+
+						//printf("\n");
+					}
+				}
+
+			}
+
+			if(FD_ISSET(targ->dma_fd, &efds)) {
+				//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
+			}
+
+			//if(get_idle_status(targ) == 1) {
+			//	idle_count++;
+
+			//	if(idle_count = 5000) {
+			//		stop = 1;
+			//	}
+			//} else {
+			//	idle_count = 0;
+			//}
+		}
+
+		//return NULL;
+	}
+
+	return NULL;
+}
+
+void *write_fn(void *arg)
 {
 	thread_arg_t *targ = (thread_arg_t *)arg;
 	int nwrite = RAW_DATA_SIZE;
 	int nread = BUFSIZE;
-	int total_read = 0;
 	int count;
 	int start = 1;
 
 	int mask_low = 0x000000ff;
 	int value_low = 0x00000000;
 
-	//printids("main_proc: ");
+	//printids("write_fn: ");
 
 	struct timeval tv0, tv1;
 	struct timezone tz0, tz1;
@@ -261,92 +260,35 @@ void main_proc(thread_arg_t *arg)
 	nwrite = write(targ->reg_fd, &value_low, sizeof(int));
 
 	while(stop == 0) {
-		for(count = 0; count < 1;) {
-			if(nwrite == RAW_DATA_SIZE) {
-				start = init_raw_data(start);
+		nwrite = RAW_DATA_SIZE;
 
-				if(start >= 50000) {
-					//stop = 1;
-				}
+		if(nwrite == RAW_DATA_SIZE) {
+			start = init_raw_data(start);
 
-				//printf("start %d! count:%d!\n", start, count);
-			} else {
-				//printf("nwrite %d! count:%d!\n", nwrite, count);
+			if(start >= RAW_DATA_SIZE) {
+				stop = 1;
 			}
 
-			if(get_busy_status(targ) == 0) {
-				nwrite = write(targ->dma_fd, raw_data, RAW_DATA_SIZE);
-
-				if(nwrite < 0) {
-					printf("%s\n", strerror(errno));
-				} else {
-					//printf("write %d!\n", nwrite);
-					if(nwrite == RAW_DATA_SIZE) {
-						count++;
-					} else if(nwrite != 0) {
-						break;
-					} else {
-						if(force_stop == 1) {
-							break;
-						}
-					}
-				}
-
-				total_read = 0;
-			} else {
-				printf("xiaofei: %s:%d: %s-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-				usleep(1000);
-			}
+			//printf("start %d! count:%d!\n", start, count);
+		} else {
+			//printf("nwrite %d! count:%d!\n", nwrite, count);
 		}
 
-		for(count = 0; count < 1;) {
-			nread = read(targ->dma_fd, targ->buffer, BUFSIZE);
+		if(get_idle_status(targ) == 1) {
+			nwrite = write(targ->dma_fd, raw_data, RAW_DATA_SIZE);
 
-			if(nread < 0) {
+			if(nwrite < 0) {
 				printf("%s\n", strerror(errno));
+				stop = 1;
 			} else {
-				int i;
-				uint32_t *data = (uint32_t *)targ->buffer;
-
-				total_read += nread;
-				//printf("read %d!\n", nread);
-				if(nread == BUFSIZE) {
-					//count++;
-				} else if(nread != 0) {
-					printf("xiaofei: %s:%d: %s-nread error!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-					break;
-				} else {
-					if(get_busy_status(targ) == 0) {
-						if(total_read > 0) {
-							count++;
-						} else {
-							printf("xiaofei: %s:%d: %s-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-							usleep(1000);
-						}
-					}
-					if(force_stop == 1) {
-						break;
-					}
-				}
-
-				for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
-					printf("block:<%01x>%10d in:0x%08x%08x times:%10d times_start:%10d out:0x%08x%08x\n",
-						   (data[i + 0] & 0xc0000000) >> 30,//block
-						   data[i + 0] & 0x3fffffff,//block
-						   data[i + 2],//in(high)
-						   data[i + 1],//in(low)
-						   data[i + 3],//times
-						   data[i + 4],//times delay
-						   data[i + 6],//out(high)
-						   data[i + 5]//out(low)
-						  );
-				}
-
-				//printf("\n");
+				//printf("write %d!\n", nwrite);
 			}
+		} else {
+			printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+			usleep(1000);
 		}
 
-		//return;
+		return NULL;
 	}
 
 	gettimeofday(&tv1, &tz1);
@@ -360,6 +302,19 @@ void main_proc(thread_arg_t *arg)
 	printf("tv1.tv_usec:%d\n", (int)tv1.tv_usec);
 	printf("tz1.tz_minuteswest:%d\n", (int)tz1.tz_minuteswest);
 	printf("tz1.tz_dsttime:%d\n", (int)tz1.tz_dsttime);
+
+	return NULL;
+}
+
+void main_proc(thread_arg_t *arg)
+{
+	thread_arg_t *targ = (thread_arg_t *)arg;
+
+	//printids("main_proc: ");
+
+	while(stop == 0) {
+		usleep(10000);
+	}
 }
 
 int read_write(thread_arg_t *targ)

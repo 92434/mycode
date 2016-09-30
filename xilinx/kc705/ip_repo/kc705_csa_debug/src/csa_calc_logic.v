@@ -34,8 +34,6 @@ module csa_calc_logic #(
 	);
 
 
-	wire [CYPHER_DATA_WIDTH - 1 : 0] cb_out;
-
 	wire matched;
 	assign matched = ((mask != 0) && ((mask & value) == (mask & cb_out))) ? 1 : 0;
 
@@ -48,6 +46,8 @@ module csa_calc_logic #(
 	reg fifo_ren_reg_19 = 0;
 	reg fifo_ren_reg_20 = 0;
 	reg fifo_ren_reg_21 = 0;
+
+	wire [CYPHER_DATA_WIDTH - 1 : 0] cb_out;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_reg = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_calc_logic_block_reg_1 = 0;
