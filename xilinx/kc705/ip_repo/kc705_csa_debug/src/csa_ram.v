@@ -65,8 +65,8 @@ module csa_ram #(
 	localparam integer ADDR_OUT_MASK_HIGH = ADDR_OUT_MASK_LOW + 1;
 	localparam integer ADDR_OUT_VALUE_LOW = ADDR_OUT_MASK_HIGH + 1;
 	localparam integer ADDR_OUT_VALUE_HIGH = ADDR_OUT_VALUE_LOW + 1;
-	localparam integer ADDR_BUSY = ADDR_OUT_VALUE_HIGH + 1;
-	localparam integer ADDR_RESET = ADDR_BUSY + 1;
+	localparam integer ADDR_DEVICE_IDLE = ADDR_OUT_VALUE_HIGH + 1;
+	localparam integer ADDR_RESET = ADDR_DEVICE_IDLE + 1;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
@@ -78,7 +78,7 @@ module csa_ram #(
 	reg [CYPHER_DATA_WIDTH - 1 : 0] out_mask = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] out_value = 0;
 
-	wire device_empty;
+	wire device_in_fifo_all_empty;
 	reg device_idle = 0;
 
 	wire [AXI_DATA_WIDTH - 1 : 0] data_catch_count_low_wire;
@@ -230,7 +230,7 @@ module csa_ram #(
 					ADDR_OUT_VALUE_HIGH: begin
 						rdata <= out_value[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
 					end
-					ADDR_BUSY: begin
+					ADDR_DEVICE_IDLE: begin
 						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, device_idle};
 					end
 					default: begin
@@ -343,12 +343,24 @@ module csa_ram #(
 				7: begin
 					if(csa_in_full[w_index] == 0) begin
 
-						w_state <= 8;
+						w_state <= 9;
 					end
 					else begin
+
+						w_state <= 8;
 					end
 				end
 				8: begin
+					if(w_index == CSA_CALC_INST_NUM - 1) begin
+						w_index <= 0;
+					end
+					else begin
+						w_index <= w_index + 1;
+					end
+
+					w_state <= 7;
+				end
+				9: begin
 					csa_in_wen[w_index] <= 1;
 					if(w_index == csa_current_channel) begin
 						csa_in_valid <= 1;
@@ -359,16 +371,6 @@ module csa_ram #(
 						csa_in_4 <= csa_calc_logic_times_start;
 					end
 					else begin
-					end
-
-					w_state <= 9;
-				end
-				9: begin
-					if(w_index == CSA_CALC_INST_NUM - 1) begin
-						w_index <= 0;
-					end
-					else begin
-						w_index <= w_index + 1;
 					end
 
 					w_state <= 0;
@@ -423,25 +425,37 @@ module csa_ram #(
 				0: begin
 					if(csa_out_ready[r_index] == 1) begin
 
-						r_state <= 1;
+						r_state <= 2;
 					end
 					else begin
+
+						r_state <= 1;
 					end
 				end
-				1 : begin
+				1: begin
+					if(r_index == CSA_CALC_INST_NUM - 1) begin
+						r_index <= 0;
+					end
+					else begin
+						r_index <= r_index + 1;
+					end
+
+					r_state <= 0;
+				end
+				2 : begin
 					csa_out_ren[r_index] <= 1;
 
-					r_state <= 2;
+					r_state <= 3;
 				end
-				2: begin
+				3: begin
 					if(csa_out_ren[r_index] == 1) begin
-						r_state <= 3;
+						r_state <= 4;
 					end
 					else begin
 						r_state <= 0;
 					end
 				end
-				3: begin
+				4: begin
 					csa_calc_logic_block_o <= csa_out[r_index][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 					csa_calc_logic_in_o <= csa_out[r_index][AXI_DATA_WIDTH * 3 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1];
 					csa_calc_logic_times_o <= csa_out[r_index][AXI_DATA_WIDTH * 4 - 1 : AXI_DATA_WIDTH * 3];
@@ -461,64 +475,55 @@ module csa_ram #(
 					else begin
 					end
 
-					r_state <= 4;
-				end
-				4: begin
-					if(csa_out_error_full == 0) begin
-						csa_out_wen <= 1;
-						csa_out_wdata <= csa_calc_logic_block_o;
-
-						r_state <= 5;
-					end
-					else begin
-					end
+					r_state <= 5;
 				end
 				5: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					csa_out_wdata <= csa_calc_logic_block_o;
 
 					r_state <= 6;
 				end
 				6: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};
+					csa_out_wdata <= csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 
 					r_state <= 7;
 				end
 				7: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_times_o;
+					csa_out_wdata <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};
 
 					r_state <= 8;
 				end
 				8: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_times_start_o;
+					csa_out_wdata <= csa_calc_logic_times_o;
 
 					r_state <= 9;
 				end
 				9: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
-					data_catch_enable <= 1;
+					csa_out_wdata <= csa_calc_logic_times_start_o;
 
 					r_state <= 10;
 				end
 				10: begin
 					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
+					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					data_catch_enable <= 1;
 
 					r_state <= 11;
 				end
 				11: begin
-					if(r_index == CSA_CALC_INST_NUM - 1) begin
-						r_index <= 0;
+					if(csa_out_error_full == 0) begin
+						csa_out_wen <= 1;
+						csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
+
+						r_state <= 0;
 					end
 					else begin
-						r_index <= r_index + 1;
+						r_state <= 11;
 					end
-
-					r_state <= 0;
 				end
 				default: begin
 				end
@@ -549,8 +554,11 @@ module csa_ram #(
 					.clk(csa_calc_clk),
 					.rst_n(rst_n),
 
-					.csa_in_empty(csa_in_empty[i]),
+					.mask(out_mask),
+					.value(out_value),
+
 					.csa_in_full(csa_in_full[i]),
+					.csa_in_empty(csa_in_empty[i]),
 					.csa_in_wen(csa_in_wen[i]),
 					.csa_in(csa_in),
 
@@ -561,7 +569,7 @@ module csa_ram #(
 		end
 	endgenerate
 
-	assign device_empty = (csa_in_empty == {(CSA_CALC_INST_NUM){1'b1}}) ? 1 : 0;
+	assign device_in_fifo_all_empty = (csa_in_empty == {(CSA_CALC_INST_NUM){1'b1}}) ? 1 : 0;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] idle_debounce_count = 0;
 	always @(posedge csa_out_wclk) begin
@@ -577,7 +585,7 @@ module csa_ram #(
 				device_idle <= 0;
 			end
 
-			if(device_empty == 1) begin
+			if(device_in_fifo_all_empty == 1) begin
 				if(idle_debounce_count < 100) begin
 					idle_debounce_count <= idle_debounce_count + 1;
 				end
