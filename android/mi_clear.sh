@@ -105,6 +105,14 @@
 #pm remove-user: remove the user with the given USER_IDENTIFIER,
 #  deleting all data associated with that user
 
+#RM_ALL="rm -rf"
+RM_ALL="echo rm -rf"
+
+function exec_cmd() {
+	echo "$@"
+	$@
+}
+
 function package_exist() {
 	if [ -z "$1" ]; then
 		return
@@ -113,177 +121,100 @@ function package_exist() {
 	adb shell pm list packages -f -u | grep -i "$1"
 }
 
+function clear_app() {
+	exec_cmd adb shell pm clear $1
+}
+
+function rm_system_app() {
+	exec_cmd adb shell "PATH=/data/bin;if [ -f $1 ]; then mv $1 $1.bak;fi"
+	exec_cmd adb shell "PATH=/data/bin;if [ -d /data/data/$2 ]; then $RM_ALL /data/data/$2; fi"
+}
+
+function rm_dir() {
+	exec_cmd adb shell "PATH=/data/bin;if [ -d $1 ]; then $RM_ALL $1; fi"
+}
+
+function uninstall_app() {
+	package_exist $1
+	if [ -n "$(package_exist $1)" ]; then
+		exec_cmd adb shell pm uninstall $1
+	else
+		echo "not exist $1"
+	fi
+}
+
 function main() {
-	#local ip=
+	local list_clear=(
+"com.android.browser"
+"com.kugou.android"
+"com.sinovatech.unicom.ui"
+"com.kingpoint.gmcchh"
+"com.example.android.apis"
+"com.cleanmaster.sdk"
+"com.android.email"
+"com.handsgo.jiakao.android"
+"com.miui.yellowpage"
+"com.miui.mipub"
+"com.miui.player"
+"com.xiaomi.market"
+"com.icbc"
+"com.miui.video"
+"com.MobileTicket"
+"com.jeejen.container.miui"
+"com.jeejen.store"
+"com.jeejen.knowledge"
+"com.jeejen.family.miui"
+"com.miui.touchassistant"
+)
 
-	#ip="$1"
-	#if [ -z "$ip" ]; then
-	#	echo "ip:$ip";
-	#	return;
-	#fi
+	local list_mv_rm_system_app=(
+"/system/app/SogouInput.apk:com.sohu.inputmethod.sogou.xiaomi"
+"/system/priv-app/MiuiVoip.apk:com.miui.voip"
+"/system/app/GameCenter.apk:com.xiaomi.gamecenter"
+"/system/priv-app/MiGameCenterSDKService.apk:com.xiaomi.gamecenter.sdk.service"
+"/system/app/XMPass.apk:com.xiaomi.pass"
+"/system/app/PaymentService.apk:com.xiaomi.payment"
+)
 
-	#adb connect $*
-	#adb root
+	local list_rm_dir=(
+"/data/miui/app"
+)
+	local list_uninstall_app=(
+"com.mi.vtalk"
+"com.funshion.video.player"
+"com.pplive.androidsdk.mi"
+"com.miui.video.plugin"
+"com.xiaomi.payment"
+"com.xiaomi.jr"
+"com.xiaomi.smarthome"
+"com.miui.miuibbs"
+"com.xiaomi.o2o"
+"com.wali.live"
+)
 
-	echo adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
-	adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	#echo adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	#adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 
-	echo adb shell pm clear com.android.browser
-	adb shell pm clear com.android.browser
+	local i;
 
-	echo adb shell pm clear com.kugou.android
-	adb shell pm clear com.kugou.android
+	for i in ${list_clear[@]};do
+		clear_app $i
+	done
 
-	echo adb shell pm clear com.sinovatech.unicom.ui
-	adb shell pm clear com.sinovatech.unicom.ui
+	for i in ${list_mv_rm_system_app[@]};do
+		rm_system_app ${i//:/ }
+	done
 
-	echo adb shell pm clear com.kingpoint.gmcchh
-	adb shell pm clear com.kingpoint.gmcchh
+	for i in ${list_rm_dir[@]};do
+		rm_dir $i
+	done
 
-	echo adb shell pm clear com.example.android.apis
-	adb shell pm clear com.example.android.apis
+	for i in ${list_uninstall_app[@]};do
+		uninstall_app $i
+	done
 
-	echo adb shell pm clear com.cleanmaster.sdk
-	adb shell pm clear com.cleanmaster.sdk
-
-	echo adb shell pm clear com.android.email
-	adb shell pm clear com.android.email
-
-	echo adb shell pm clear com.handsgo.jiakao.android
-	adb shell pm clear com.handsgo.jiakao.android
-
-	echo adb shell pm clear com.miui.yellowpage
-	adb shell pm clear com.miui.yellowpage
-
-	echo adb shell pm clear com.miui.mipub
-	adb shell pm clear com.miui.mipub
-
-	echo adb shell pm clear com.miui.player
-	adb shell pm clear com.miui.player
-
-	echo adb shell pm clear com.xiaomi.market
-	adb shell pm clear com.xiaomi.market
-
-	echo adb shell pm clear com.icbc
-	adb shell pm clear com.icbc
-
-	echo adb shell pm clear com.miui.video
-	adb shell pm clear com.miui.video
-
-	echo adb shell pm clear com.MobileTicket
-	adb shell pm clear com.MobileTicket
-
-	echo adb shell pm clear com.jeejen.container.miui
-	adb shell pm clear com.jeejen.container.miui
-
-	echo adb shell pm clear com.jeejen.store
-	adb shell pm clear com.jeejen.store
-
-	echo adb shell pm clear com.jeejen.knowledge
-	adb shell pm clear com.jeejen.knowledge
-
-	echo adb shell pm clear com.jeejen.family.miui
-	adb shell pm clear com.jeejen.family.miui
-
-	echo adb shell pm clear com.miui.touchassistant
-	adb shell pm clear com.miui.touchassistant
-
-	echo adb shell "PATH=/data/bin;if [ -f /system/app/SogouInput.apk ]; then mv /system/app/SogouInput.apk /system/app/SogouInput.apk.bak;fi"
-	adb shell "PATH=/data/bin;if [ -f /system/app/SogouInput.apk ]; then mv /system/app/SogouInput.apk /system/app/SogouInput.apk.bak;fi"
-
-	echo adb shell "PATH=/data/bin;if [ -d /data/data/com.sohu.inputmethod.sogou.xiaomi ]; then rm -rf /data/data/com.sohu.inputmethod.sogou.xiaomi; fi"
-	adb shell "PATH=/data/bin;if [ -d /data/data/com.sohu.inputmethod.sogou.xiaomi ]; then rm -rf /data/data/com.sohu.inputmethod.sogou.xiaomi; fi"
-	
-	echo adb shell "PATH=/data/bin;if [ -f /system/priv-app/MiuiVoip.apk ]; then mv /system/priv-app/MiuiVoip.apk /system/priv-app/MiuiVoip.apk.bak;fi"
-	adb shell "PATH=/data/bin;if [ -f /system/priv-app/MiuiVoip.apk ]; then mv /system/priv-app/MiuiVoip.apk /system/priv-app/MiuiVoip.apk.bak;fi"
-
-	echo adb shell "PATH=/data/bin;if [ -d /data/data/com.miui.voip ]; then rm -rf /data/data/com.miui.voip; fi"
-	adb shell "PATH=/data/bin;if [ -d /data/data/com.miui.voip ]; then rm -rf /data/data/com.miui.voip; fi"
-
-	echo adb shell "PATH=/data/bin;if [ -f /system/app/GameCenter.apk ]; then mv /system/app/GameCenter.apk /system/app/GameCenter.apk.bak;fi"
-	adb shell "PATH=/data/bin;if [ -f /system/app/GameCenter.apk ]; then mv /system/app/GameCenter.apk /system/app/GameCenter.apk.bak;fi"
-
-	echo adb shell "PATH=/data/bin;if [ -d /data/data/com.xiaomi.gamecenter ]; then rm -rf /data/data/com.xiaomi.gamecenter; fi"
-	adb shell "PATH=/data/bin;if [ -d /data/data/com.xiaomi.gamecenter ]; then rm -rf /data/data/com.xiaomi.gamecenter; fi"
-
-	echo adb shell "PATH=/data/bin;if [ -f /system/priv-app/MiGameCenterSDKService.apk ]; then mv /system/priv-app/MiGameCenterSDKService.apk /system/priv-app/MiGameCenterSDKService.apk.bak;fi"
-	adb shell "PATH=/data/bin;if [ -f /system/priv-app/MiGameCenterSDKService.apk ]; then mv /system/priv-app/MiGameCenterSDKService.apk /system/priv-app/MiGameCenterSDKService.apk.bak;fi"
-
-	echo adb shell "PATH=/data/bin;if [ -d /data/data/com.xiaomi.gamecenter.sdk.service ]; then rm -rf /data/data/com.xiaomi.gamecenter.sdk.service; fi"
-	adb shell "PATH=/data/bin;if [ -d /data/data/com.xiaomi.gamecenter.sdk.service ]; then rm -rf /data/data/com.xiaomi.gamecenter.sdk.service; fi"
-
-	echo adb shell "PATH=/data/bin;if [ -f /system/app/XMPass.apk ]; then mv /system/app/XMPass.apk /system/app/XMPass.apk.bak;fi"
-	adb shell "PATH=/data/bin;if [ -f /system/app/XMPass.apk ]; then mv /system/app/XMPass.apk /system/app/XMPass.apk.bak;fi"
-
-	echo adb shell "PATH=/data/bin;if [ -d /data/data/com.xiaomi.pass ]; then rm -rf /data/data/com.xiaomi.pass; fi"
-	adb shell "PATH=/data/bin;if [ -d /data/data/com.xiaomi.pass ]; then rm -rf /data/data/com.xiaomi.pass; fi"
-
-	echo adb shell "PATH=/data/bin;if [ -f /system/app/PaymentService.apk ]; then mv /system/app/PaymentService.apk /system/app/PaymentService.apk.bak;fi"
-	adb shell "PATH=/data/bin;if [ -f /system/app/PaymentService.apk ]; then mv /system/app/PaymentService.apk /system/app/PaymentService.apk.bak;fi"
-
-	echo adb shell "PATH=/data/bin;if [ -d /data/data/com.xiaomi.payment ]; then rm -rf /data/data/com.xiaomi.payment; fi"
-	adb shell "PATH=/data/bin;if [ -d /data/data/com.xiaomi.payment ]; then rm -rf /data/data/com.xiaomi.payment; fi"
-
-	echo adb shell "PATH=/data/bin;if [ -d /data/miui/app ]; then rm -rf /data/miui/app; fi"
-	adb shell "PATH=/data/bin;if [ -d /data/miui/app ]; then rm -rf /data/miui/app; fi"
-
-	if [ -n "$(package_exist com.mi.vtalk)" ]; then
-		echo adb shell pm uninstall com.mi.vtalk
-		adb shell pm uninstall com.mi.vtalk
-	fi
-
-	if [ -n "$(package_exist com.funshion.video.player)" ]; then
-		echo adb shell pm uninstall com.funshion.video.player
-		adb shell pm uninstall com.funshion.video.player
-	fi
-
-	if [ -n "$(package_exist com.pplive.androidsdk.mi)" ]; then
-		echo adb shell pm uninstall com.pplive.androidsdk.mi
-		adb shell pm uninstall com.pplive.androidsdk.mi
-	fi
-
-	if [ -n "$(package_exist com.miui.video.plugin)" ]; then
-		echo adb shell pm uninstall com.miui.video.plugin
-		adb shell pm uninstall com.miui.video.plugin
-	fi
-
-	if [ -n "$(package_exist com.xiaomi.pass)" ]; then
-		echo adb shell pm uninstall com.xiaomi.pass
-		adb shell pm uninstall com.xiaomi.pass
-	fi
-
-	if [ -n "$(package_exist com.xiaomi.payment)" ]; then
-		echo adb shell pm uninstall com.xiaomi.payment
-		adb shell pm uninstall com.xiaomi.payment
-	fi
-
-	if [ -n "$(package_exist com.xiaomi.jr)" ]; then
-		echo adb shell pm uninstall com.xiaomi.jr
-		adb shell pm uninstall com.xiaomi.jr
-	fi
-
-	if [ -n "$(package_exist com.xiaomi.smarthome)" ]; then
-		echo adb shell pm uninstall com.xiaomi.smarthome
-		adb shell pm uninstall com.xiaomi.smarthome
-	fi
-
-	if [ -n "$(package_exist com.miui.miuibbs)" ]; then
-		echo adb shell pm uninstall com.miui.miuibbs
-		adb shell pm uninstall com.miui.miuibbs
-	fi
-
-	if [ -n "$(package_exist com.xiaomi.o2o)" ]; then
-		echo adb shell pm uninstall com.xiaomi.o2o
-		adb shell pm uninstall com.xiaomi.o2o
-	fi
-
-	if [ -n "$(package_exist com.wali.live)" ]; then
-		echo adb shell pm uninstall com.wali.live
-		adb shell pm uninstall com.wali.live
-	fi
-
-	echo adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
-	adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	#echo adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	#adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 }
 
 main $@
