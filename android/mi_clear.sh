@@ -108,8 +108,15 @@
 #RM_ALL="rm -rf"
 RM_ALL="echo rm -rf"
 
+#MV_ALL="mv"
+MV_ALL="echo mv"
+
+function red() {
+	echo -ne "\033[31m$@\033[0m:\n"
+}
+
 function exec_cmd() {
-	echo "$@"
+	red "$@"
 	$@
 }
 
@@ -126,20 +133,19 @@ function clear_app() {
 }
 
 function rm_system_app() {
-	exec_cmd adb shell "PATH=/data/bin;if [ -f $1 ]; then mv $1 $1.bak;fi"
-	exec_cmd adb shell "PATH=/data/bin;if [ -d /data/data/$2 ]; then $RM_ALL /data/data/$2; fi"
+	exec_cmd adb shell "PATH=/data/bin;if [ -f $1 ]; then $MV_ALL $1 $1.bak; else echo not exist $1; fi"
+	exec_cmd adb shell "PATH=/data/bin;if [ -d /data/data/$2 ]; then $RM_ALL /data/data/$2; else echo not exist $2; fi"
 }
 
 function rm_dir() {
-	exec_cmd adb shell "PATH=/data/bin;if [ -d $1 ]; then $RM_ALL $1; fi"
+	exec_cmd adb shell "PATH=/data/bin;if [ -d $1 ]; then $RM_ALL $1; else echo not exist $1; fi"
 }
 
 function uninstall_app() {
-	package_exist $1
 	if [ -n "$(package_exist $1)" ]; then
 		exec_cmd adb shell pm uninstall $1
 	else
-		echo "not exist $1"
+		red "not exist $1"
 	fi
 }
 

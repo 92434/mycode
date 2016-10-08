@@ -31,10 +31,12 @@ module csa_ram #(
 		input wire rst_n,
 
 		input wire csa_in_r_ready,
+		input wire csa_in_error_empty,
 		output wire csa_in_rclk,
 		output reg csa_in_ren = 0,
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_in_rdata,
 
+		input wire csa_out_w_ready,
 		input wire csa_out_error_full,
 		output wire csa_out_wclk,
 		output reg csa_out_wen = 0,
@@ -66,7 +68,8 @@ module csa_ram #(
 	localparam integer ADDR_OUT_VALUE_LOW = ADDR_OUT_MASK_HIGH + 1;
 	localparam integer ADDR_OUT_VALUE_HIGH = ADDR_OUT_VALUE_LOW + 1;
 	localparam integer ADDR_DEVICE_IDLE = ADDR_OUT_VALUE_HIGH + 1;
-	localparam integer ADDR_RESET = ADDR_DEVICE_IDLE + 1;
+	localparam integer ADDR_DEVICE_READY = ADDR_DEVICE_IDLE + 1;
+	localparam integer ADDR_RESET = ADDR_DEVICE_READY + 1;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
@@ -78,8 +81,11 @@ module csa_ram #(
 	reg [CYPHER_DATA_WIDTH - 1 : 0] out_mask = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] out_value = 0;
 
-	wire device_in_fifo_all_empty;
-	reg device_idle = 0;
+	wire device_idle;
+	assign device_idle = csa_in_error_empty;
+
+	wire device_ready;
+	assign device_ready = csa_out_w_ready;
 
 	wire [AXI_DATA_WIDTH - 1 : 0] data_catch_count_low_wire;
 	assign data_catch_count_low_wire = ram_data_catch_count[data_catch_count_index_reg][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
@@ -236,6 +242,9 @@ module csa_ram #(
 					ADDR_DEVICE_IDLE: begin
 						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, device_idle};
 					end
+					ADDR_DEVICE_READY: begin
+						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, device_ready};
+					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};
 					end
@@ -263,7 +272,6 @@ module csa_ram #(
 	wire [CSA_OUT_PARAMETER_LENGTH - 1 : 0] csa_out[0 : CSA_CALC_INST_NUM - 1];
 
 	wire [CSA_CALC_INST_NUM - 1 : 0] csa_in_full;
-	wire [CSA_CALC_INST_NUM - 1 : 0] csa_in_empty;
 	reg [CSA_CALC_INST_NUM - 1 : 0] csa_in_wen = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] w_index = 0;
 
@@ -561,7 +569,6 @@ module csa_ram #(
 					.value(out_value),
 
 					.csa_in_full(csa_in_full[i]),
-					.csa_in_empty(csa_in_empty[i]),
 					.csa_in_wen(csa_in_wen[i]),
 					.csa_in(csa_in),
 
@@ -571,37 +578,6 @@ module csa_ram #(
 				);
 		end
 	endgenerate
-
-	assign device_in_fifo_all_empty = (csa_in_empty == {(CSA_CALC_INST_NUM){1'b1}}) ? 1 : 0;
-
-	reg [AXI_DATA_WIDTH - 1 : 0] idle_debounce_count = 0;
-	always @(posedge csa_out_wclk) begin
-		if(rst_n == 0) begin
-			device_idle <= 0;
-			idle_debounce_count <= 0;
-		end
-		else begin
-			if(idle_debounce_count >= 100) begin
-				device_idle <= 1;
-			end
-			else begin
-				device_idle <= 0;
-			end
-
-			if(device_in_fifo_all_empty == 1) begin
-				if(idle_debounce_count < 100) begin
-					idle_debounce_count <= idle_debounce_count + 1;
-				end
-				else begin
-					idle_debounce_count <= idle_debounce_count;
-				end
-			end
-			else begin
-				idle_debounce_count <= 0;
-			end
-		end
-	end
-
 
 	wire [8 - 1 : 0] ram_data_catch_index;
 	assign ram_data_catch_index = csa_out_wdata[8 - 1 : 0];

@@ -19,7 +19,6 @@ module csa_calc_logic_wrap #(
 		input wire [CYPHER_DATA_WIDTH - 1 : 0] value,
 
 		output wire csa_in_full,
-		output wire csa_in_empty,
 		input wire csa_in_wen,
 		input wire [CSA_IN_PARAMETER_LENGTH - 1 : 0] csa_in,
 
@@ -31,6 +30,7 @@ module csa_calc_logic_wrap #(
 
 	wire fifo_ren;
 	wire my_fifo_inst_1_r_ready;
+	wire my_fifo_inst_1_error_empty;
 	wire [CSA_IN_PARAMETER_LENGTH - 1 : 0] my_fifo_inst_1_rdata;
 	my_fifo #(
 			.DATA_WIDTH(CSA_IN_PARAMETER_LENGTH),
@@ -46,7 +46,7 @@ module csa_calc_logic_wrap #(
 			.r_enable(fifo_ren),
 			.r_ready(my_fifo_inst_1_r_ready),
 			.error_full(csa_in_full),
-			.error_empty(csa_in_empty)
+			.error_empty(my_fifo_inst_1_error_empty)
 		);
 
 	wire [CSA_OUT_PARAMETER_LENGTH - 1 : 0] my_fifo_inst_2_wdata;

@@ -35,6 +35,7 @@ typedef enum {
 	ADDR_VALUE_LOW,
 	ADDR_VALUE_HIGH,
 	ADDR_DEVICE_IDLE,
+	ADDR_DEVICE_READY,
 	ADDR_RESET,
 	TOTAL_REGS,
 } addr_t;
@@ -63,6 +64,7 @@ char *reg_name[] = {
 	"ADDR_VALUE_LOW",
 	"ADDR_VALUE_HIGH",
 	"ADDR_DEVICE_IDLE",
+	"ADDR_DEVICE_READY",
 	"ADDR_RESET",
 };
 

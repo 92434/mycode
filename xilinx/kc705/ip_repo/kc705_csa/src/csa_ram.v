@@ -31,10 +31,12 @@ module csa_ram #(
 		input wire rst_n,
 
 		input wire csa_in_r_ready,
+		input wire csa_in_error_empty,
 		output wire csa_in_rclk,
 		output reg csa_in_ren = 0,
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_in_rdata,
 
+		input wire csa_out_w_ready,
 		input wire csa_out_error_full,
 		output wire csa_out_wclk,
 		output reg csa_out_wen = 0,
@@ -58,12 +60,20 @@ module csa_ram #(
 	localparam integer ADDR_OUT_DATA_4 = ADDR_OUT_DATA_3 + 1;
 	localparam integer ADDR_OUT_DATA_5 = ADDR_OUT_DATA_4 + 1;
 	localparam integer ADDR_OUT_DATA_6 = ADDR_OUT_DATA_5 + 1;
-	localparam integer ADDR_RESET = ADDR_OUT_DATA_6 + 1;
+	localparam integer ADDR_DEVICE_IDLE = ADDR_OUT_DATA_6 + 1;
+	localparam integer ADDR_DEVICE_READY = ADDR_DEVICE_IDLE + 1;
+	localparam integer ADDR_RESET = ADDR_DEVICE_READY + 1;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
 	reg user_rst_n_reg = 1;
 	reg user_rst_n_reg_1 = 1;
+
+	wire device_idle;
+	assign device_idle = csa_in_error_empty;
+
+	wire device_ready;
+	assign device_ready = csa_out_w_ready;
 
 	always @(posedge axi_mm_clk) begin
 		if(s00_axi_aresetn == 0) begin
@@ -170,6 +180,12 @@ module csa_ram #(
 					end
 					ADDR_OUT_DATA_6: begin
 						rdata <= csa_out_6;
+					end
+					ADDR_DEVICE_IDLE: begin
+						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, device_idle};
+					end
+					ADDR_DEVICE_READY: begin
+						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, device_ready};
 					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};

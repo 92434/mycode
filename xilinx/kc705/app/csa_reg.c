@@ -27,6 +27,8 @@ typedef enum {
 	ADDR_OUT_DATA_4,
 	ADDR_OUT_DATA_5,
 	ADDR_OUT_DATA_6,
+	ADDR_DEVICE_IDLE,
+	ADDR_DEVICE_READY,
 	ADDR_RESET,
 	TOTAL_REGS,
 } addr_t;
@@ -47,6 +49,8 @@ char *reg_name[] = {
 	"ADDR_OUT_DATA_4",
 	"ADDR_OUT_DATA_5",
 	"ADDR_OUT_DATA_6",
+	"ADDR_DEVICE_IDLE",
+	"ADDR_DEVICE_READY",
 	"ADDR_RESET",
 };
 

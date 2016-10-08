@@ -37,6 +37,7 @@ typedef enum {
 	ADDR_VALUE_LOW,
 	ADDR_VALUE_HIGH,
 	ADDR_DEVICE_IDLE,
+	ADDR_DEVICE_READY,
 	ADDR_RESET,
 	TOTAL_REGS,
 } addr_t;
@@ -65,6 +66,7 @@ char *reg_name[] = {
 	"ADDR_VALUE_LOW",
 	"ADDR_VALUE_HIGH",
 	"ADDR_DEVICE_IDLE",
+	"ADDR_DEVICE_READY",
 	"ADDR_RESET",
 };
 
@@ -87,9 +89,12 @@ char *reg_name[] = {
 //};
 //#define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
 uint32_t *raw_data = NULL;
-#define RAW_DATA_SIZE (5 * 4 * 1500)
 
-#define BUFSIZE (7 * 4 * 1500)
+#define CALC_IN_SIZE (5 * 4)
+#define CALC_OUT_SIZE (7 * 4)
+#define CALC_COUNT 1500
+#define RAW_DATA_SIZE (CALC_IN_SIZE * CALC_COUNT)
+#define BUFSIZE (CALC_OUT_SIZE * CALC_COUNT)
 
 static int stop = 0;
 
@@ -121,20 +126,22 @@ typedef struct {
 	unsigned char *buffer;
 } thread_arg_t;
 
-int get_idle_status(thread_arg_t *targ)
+void get_status(thread_arg_t *targ, int *idle, int *ready)
 {
 	int nread;
 	uint32_t *data = (uint32_t *)targ->buffer;
-	int idle = 1;
+	uint32_t status_size = sizeof(uint32_t) * 2;
 
 	lseek(targ->reg_fd, ADDR_OFFSET(ADDR_DEVICE_IDLE), SEEK_SET);
-	nread = read(targ->reg_fd, targ->buffer, sizeof(uint32_t));
+	nread = read(targ->reg_fd, targ->buffer, status_size);
 
-	if(nread == sizeof(uint32_t)) {
-		idle = data[0];
+	if(nread == status_size) {
+		*idle = data[0];
+		*ready = data[1];
+	} else {
+		*idle = 0;
+		*ready = 0;
 	}
-
-	return idle;
 }
 
 int init_raw_data(int start)
@@ -156,6 +163,7 @@ int init_raw_data(int start)
 	return use_start;
 }
 
+#if 0
 void *read_fn(void *arg)
 {
 	thread_arg_t *targ = (thread_arg_t *)arg;
@@ -166,8 +174,8 @@ void *read_fn(void *arg)
 
 	//printids("read_fn: ");
 
-	tv.tv_sec=1;
-	tv.tv_usec=0;
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
 
 	int idle_count = 0;
 
@@ -218,16 +226,6 @@ void *read_fn(void *arg)
 			if(FD_ISSET(targ->dma_fd, &efds)) {
 				//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
 			}
-
-			//if(get_idle_status(targ) == 1) {
-			//	idle_count++;
-
-			//	if(idle_count = 5000) {
-			//		stop = 1;
-			//	}
-			//} else {
-			//	idle_count = 0;
-			//}
 		}
 
 		//return NULL;
@@ -235,16 +233,70 @@ void *read_fn(void *arg)
 
 	return NULL;
 }
+#else
+void *read_fn(void *arg)
+{
+	thread_arg_t *targ = (thread_arg_t *)arg;
+	int nread;
+
+	//printids("read_fn: ");
+
+	while(stop == 0) {
+		int idle, ready;
+		get_status(targ, &idle, &ready);
+
+		if(ready == 1) {
+			nread = read(targ->dma_fd, targ->buffer, BUFSIZE);
+
+			if(nread < 0) {
+				printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+				stop = 1;
+				break;
+			} else {
+				int i;
+				uint32_t *data = (uint32_t *)targ->buffer;
+
+				//printf("read %d!\n", nread);
+				if(nread == 0) {
+					printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+					stop = 1;
+				}
+
+				for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
+					printf("block:<%01x>%10d in:0x%08x%08x times:%10d times_start:%10d out:0x%08x%08x\n",
+						   (data[i + 0] & 0xc0000000) >> 30,//block
+						   data[i + 0] & 0x3fffffff,//block
+						   data[i + 2],//in(high)
+						   data[i + 1],//in(low)
+						   data[i + 3],//times
+						   data[i + 4],//times delay
+						   data[i + 6],//out(high)
+						   data[i + 5]//out(low)
+						  );
+				}
+
+				//printf("\n");
+			}
+		} else {
+			//printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+			usleep(1);
+		}
+
+		//stop = 1;
+	}
+
+	return NULL;
+}
+#endif //if 0
 
 void *write_fn(void *arg)
 {
 	thread_arg_t *targ = (thread_arg_t *)arg;
 	int nwrite = RAW_DATA_SIZE;
-	int nread = BUFSIZE;
 	int count;
 	int start = 1;
 
-	int mask_low = 0x000000ff;
+	int mask_low = 0x00000000;
 	int value_low = 0x00000000;
 
 	//printids("write_fn: ");
@@ -260,21 +312,19 @@ void *write_fn(void *arg)
 	nwrite = write(targ->reg_fd, &value_low, sizeof(int));
 
 	while(stop == 0) {
-		nwrite = RAW_DATA_SIZE;
+		int idle, ready;
+		get_status(targ, &idle, &ready);
 
-		if(nwrite == RAW_DATA_SIZE) {
+		if(start < CALC_COUNT) {
 			start = init_raw_data(start);
-
-			if(start >= RAW_DATA_SIZE) {
-				stop = 1;
-			}
 
 			//printf("start %d! count:%d!\n", start, count);
 		} else {
 			//printf("nwrite %d! count:%d!\n", nwrite, count);
 		}
 
-		if(get_idle_status(targ) == 1) {
+		if(idle == 1) {
+			printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 			nwrite = write(targ->dma_fd, raw_data, RAW_DATA_SIZE);
 
 			if(nwrite < 0) {
@@ -285,9 +335,10 @@ void *write_fn(void *arg)
 			}
 		} else {
 			printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-			usleep(1000);
+			usleep(1);
 		}
 
+		//stop = 1;
 		return NULL;
 	}
 
@@ -311,10 +362,110 @@ void main_proc(thread_arg_t *arg)
 	thread_arg_t *targ = (thread_arg_t *)arg;
 
 	//printids("main_proc: ");
+	int nwrite = RAW_DATA_SIZE;
+	int nread = CALC_OUT_SIZE;
+	int count;
+	int start = 1;
+
+	uint32_t total_count = 0;
+	int speed = 0;
+
+	int mask_low = 0x00000000;
+	int value_low = 0x00000000;
+
+	//printids("write_fn: ");
+
+	struct timeval tv0, tv1;
+	struct timezone tz0, tz1;
+
+	gettimeofday(&tv0, &tz0);
+
+	lseek(targ->reg_fd, ADDR_OFFSET(ADDR_MASK_LOW), SEEK_SET);
+	nwrite = write(targ->reg_fd, &mask_low, sizeof(int));
+	lseek(targ->reg_fd, ADDR_OFFSET(ADDR_VALUE_LOW), SEEK_SET);
+	nwrite = write(targ->reg_fd, &value_low, sizeof(int));
 
 	while(stop == 0) {
-		usleep(10000);
+		int idle, ready;
+		get_status(targ, &idle, &ready);
+
+		if(idle == 1) {
+			if((0 == 0) || (start < CALC_COUNT)) {
+				start = init_raw_data(start);
+
+				//printf("start %d! count:%d!\n", start, count);
+
+				nwrite = write(targ->dma_fd, raw_data, RAW_DATA_SIZE);
+
+				if(nwrite < 0) {
+					printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+					stop = 1;
+				} else {
+					//printf("write %d!\n", nwrite);
+				}
+			}
+		} else {
+			//printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		}
+
+		if(ready == 1) {
+			nread = read(targ->dma_fd, targ->buffer, CALC_OUT_SIZE);
+
+			if(nread < 0) {
+				printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+				stop = 1;
+				break;
+			} else {
+				int i;
+				uint32_t *data = (uint32_t *)targ->buffer;
+
+				//printf("read %d!\n", nread);
+				if(nread == 0) {
+					printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+					stop = 1;
+				}
+
+				for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
+					if(0 == 1) {
+						printf("block:<%01x>%10d in:0x%08x%08x times:%10d times_start:%10d out:0x%08x%08x\n",
+							   (data[i + 0] & 0xc0000000) >> 30,//block
+							   data[i + 0] & 0x3fffffff,//block
+							   data[i + 2],//in(high)
+							   data[i + 1],//in(low)
+							   data[i + 3],//times
+							   data[i + 4],//times delay
+							   data[i + 6],//out(high)
+							   data[i + 5]//out(low)
+							  );
+					}
+
+					//total_count = (data[i + 0] & 0x3fffffff);
+					total_count++;
+				}
+
+				//printf("\n");
+			}
+		} else {
+			//printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+			usleep(10);
+		}
+
+		//stop = 1;
 	}
+
+	gettimeofday(&tv1, &tz1);
+
+	printf("tv0.tv_sec:%d\n", (int)tv0.tv_sec);
+	printf("tv0.tv_usec:%d\n", (int)tv0.tv_usec);
+	printf("tz0.tz_minuteswest:%d\n", (int)tz0.tz_minuteswest);
+	printf("tz0.tz_dsttime:%d\n", (int)tz0.tz_dsttime);
+
+	printf("tv1.tv_sec:%d\n", (int)tv1.tv_sec);
+	printf("tv1.tv_usec:%d\n", (int)tv1.tv_usec);
+	printf("tz1.tz_minuteswest:%d\n", (int)tz1.tz_minuteswest);
+	printf("tz1.tz_dsttime:%d\n", (int)tz1.tz_dsttime);
+
+	printf("speed:%d/s\n", (int)(total_count / ((tv1.tv_sec * 1000000 + tv1.tv_usec - tv0.tv_sec * 1000000 + tv0.tv_usec) / 1000000)));
 }
 
 int read_write(thread_arg_t *targ)
@@ -323,22 +474,22 @@ int read_write(thread_arg_t *targ)
 	pthread_t rtid;
 	pthread_t wtid;
 
-	err = pthread_create(&rtid, NULL, read_fn, targ);
+	//err = pthread_create(&rtid, NULL, read_fn, targ);
 
-	if (err != 0) {
-		printf("can't create thread: %s\n", strerror(err));
-	}
+	//if (err != 0) {
+	//	printf("can't create thread: %s\n", strerror(err));
+	//}
 
-	err = pthread_create(&wtid, NULL, write_fn, targ);
+	//err = pthread_create(&wtid, NULL, write_fn, targ);
 
-	if (err != 0) {
-		printf("can't create thread: %s\n", strerror(err));
-	}
+	//if (err != 0) {
+	//	printf("can't create thread: %s\n", strerror(err));
+	//}
 
 	main_proc(targ);
 
-	pthread_join(rtid, NULL);
-	pthread_join(wtid, NULL);
+	//pthread_join(rtid, NULL);
+	//pthread_join(wtid, NULL);
 
 	return EXIT_SUCCESS;
 }

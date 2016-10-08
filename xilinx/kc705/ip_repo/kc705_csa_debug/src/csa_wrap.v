@@ -295,10 +295,12 @@ module csa_wrap #
 			.rst_n(rst_n),
 
 			.csa_in_r_ready(axis_s_r_ready),
+			.csa_in_error_empty(axis_s_error_empty),
 			.csa_in_rclk(axis_s_rclk),
 			.csa_in_ren(axis_s_ren),
 			.csa_in_rdata(axis_s_rdata),
 
+			.csa_out_w_ready(axis_m_r_ready),
 			.csa_out_error_full(axis_m_error_full),
 			.csa_out_wclk(axis_m_wclk),
 			.csa_out_wen(axis_m_wen),
