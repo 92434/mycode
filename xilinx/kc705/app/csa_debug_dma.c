@@ -92,7 +92,7 @@ uint32_t *raw_data = NULL;
 
 #define CALC_IN_SIZE (5 * 4)
 #define CALC_OUT_SIZE (7 * 4)
-#define CALC_COUNT 1500
+#define CALC_COUNT 10
 #define RAW_DATA_SIZE (CALC_IN_SIZE * CALC_COUNT)
 #define BUFSIZE (CALC_OUT_SIZE * CALC_COUNT)
 

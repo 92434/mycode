@@ -174,12 +174,12 @@ function main() {
 )
 
 	local list_mv_rm_system_app=(
-"/system/app/SogouInput.apk:com.sohu.inputmethod.sogou.xiaomi"
-"/system/priv-app/MiuiVoip.apk:com.miui.voip"
-"/system/app/GameCenter.apk:com.xiaomi.gamecenter"
-"/system/priv-app/MiGameCenterSDKService.apk:com.xiaomi.gamecenter.sdk.service"
-"/system/app/XMPass.apk:com.xiaomi.pass"
-"/system/app/PaymentService.apk:com.xiaomi.payment"
+"/system/app/SogouInput.apk=com.sohu.inputmethod.sogou.xiaomi"
+"/system/priv-app/MiuiVoip.apk=com.miui.voip"
+"/system/app/GameCenter.apk=com.xiaomi.gamecenter"
+"/system/priv-app/MiGameCenterSDKService.apk=com.xiaomi.gamecenter.sdk.service"
+"/system/app/XMPass.apk=com.xiaomi.pass"
+"/system/app/PaymentService.apk=com.xiaomi.payment"
 )
 
 	local list_rm_dir=(
@@ -208,7 +208,7 @@ function main() {
 	done
 
 	for i in ${list_mv_rm_system_app[@]};do
-		rm_system_app ${i//:/ }
+		rm_system_app ${i//=/ }
 	done
 
 	for i in ${list_rm_dir[@]};do
