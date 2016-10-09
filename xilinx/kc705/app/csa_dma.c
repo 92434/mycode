@@ -423,7 +423,7 @@ void main_proc(thread_arg_t *arg)
 			}
 		} else {
 			//printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-			usleep(1);
+			//usleep(1);
 			delay_count++;
 
 			if(delay_count == 1000) {
@@ -455,7 +455,7 @@ void *delay_thread(void *arg)
 
 	//printids("write_fn: ");
 
-	sleep(20);
+	sleep(60);
 
 	stop = 1;
 }
@@ -465,6 +465,7 @@ int read_write(thread_arg_t *targ)
 	int err;
 	pthread_t rtid;
 	pthread_t wtid;
+	pthread_t dtid;
 
 	//err = pthread_create(&rtid, NULL, read_fn, targ);
 
@@ -478,7 +479,7 @@ int read_write(thread_arg_t *targ)
 	//	printf("can't create thread: %s\n", strerror(err));
 	//}
 
-	err = pthread_create(&wtid, NULL, delay_thread, targ);
+	err = pthread_create(&dtid, NULL, delay_thread, targ);
 
 	if (err != 0) {
 		printf("can't create thread: %s\n", strerror(err));
@@ -488,6 +489,7 @@ int read_write(thread_arg_t *targ)
 
 	//pthread_join(rtid, NULL);
 	//pthread_join(wtid, NULL);
+	pthread_join(dtid, NULL);
 
 	return EXIT_SUCCESS;
 }
