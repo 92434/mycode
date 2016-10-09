@@ -115,12 +115,37 @@ void *read_fn(void *arg) {
 	while(stop == 0) {
 		uint32_t *data = (uint32_t *)targ->buffer;
 		int i;
+		unsigned long long total_count = 0;
 
 		usleep(10);
 
 		for(i = 0; i < TOTAL_REGS; i++) {
-			read_regs(i);
-			printf("%s: %08x(%d)\n", reg_name[i], data[0], data[0]);
+			if(i == ADDR_DATA_CATCH_COUNT_INDEX) {
+				int index = 0;
+				for(index = 0; index < 256; index++) {
+					int nwrite;
+					uint64_t low;
+					uint64_t high;
+					unsigned long long count;
+
+					lseek(targ->fd, ADDR_OFFSET(ADDR_DATA_CATCH_COUNT_INDEX), SEEK_SET);
+					nwrite = write(targ->fd, &index, sizeof(int));
+
+					read_regs(ADDR_DATA_CATCH_COUNT_LOW);
+					low = data[0];
+					read_regs(ADDR_DATA_CATCH_COUNT_HIGH);
+					high = data[0];
+
+					count = (high << 32) + low;
+					total_count += count;
+					printf("%s(%03d): %08x%08x(%llu)\n", reg_name[i], index, (int)high, (int)low, count);
+				}
+
+				printf("%s: total_count:(%llu)\n", reg_name[i], total_count);
+			} else {
+				read_regs(i);
+				printf("%s: %08x(%d)\n", reg_name[i], data[0], data[0]);
+			}
 		}
 
 		return NULL;
@@ -140,8 +165,8 @@ void *write_fn(void *arg) {
 	while(stop == 0) {
 		//lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
 		//nwrite = write(targ->fd, &channel, sizeof(int));
-		lseek(targ->fd, ADDR_OFFSET(ADDR_RESET), SEEK_SET);
-		nwrite = write(targ->fd, &reset, sizeof(int));
+		//lseek(targ->fd, ADDR_OFFSET(ADDR_RESET), SEEK_SET);
+		//nwrite = write(targ->fd, &reset, sizeof(int));
 
 		return NULL;
 	}

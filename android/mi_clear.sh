@@ -198,8 +198,8 @@ function main() {
 "com.wali.live"
 )
 
-	#echo adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
-	#adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	echo adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 
 	local i;
 
@@ -219,8 +219,8 @@ function main() {
 		uninstall_app $i
 	done
 
-	#echo adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
-	#adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	echo adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
+	adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 }
 
 main $@

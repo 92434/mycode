@@ -36,7 +36,7 @@ uint32_t *raw_data = NULL;
 #define BULKNUM 10
 #define BULKSIZE (CALC_OUT_SIZE * BULKNUM)
 
-#define CALC_COUNT (150 * BULKNUM)
+#define CALC_COUNT (1 * BULKNUM)
 #define RAW_DATA_SIZE (CALC_IN_SIZE * CALC_COUNT)
 #define BUFSIZE (CALC_OUT_SIZE * CALC_COUNT)
 
@@ -325,15 +325,15 @@ void *write_fn(void *arg)
 
 	gettimeofday(&tv1, &tz1);
 
-	printf("tv0.tv_sec:%d\n", (int)tv0.tv_sec);
-	printf("tv0.tv_usec:%d\n", (int)tv0.tv_usec);
-	printf("tz0.tz_minuteswest:%d\n", (int)tz0.tz_minuteswest);
-	printf("tz0.tz_dsttime:%d\n", (int)tz0.tz_dsttime);
+	//printf("tv0.tv_sec:%d\n", (int)tv0.tv_sec);
+	//printf("tv0.tv_usec:%d\n", (int)tv0.tv_usec);
+	//printf("tz0.tz_minuteswest:%d\n", (int)tz0.tz_minuteswest);
+	//printf("tz0.tz_dsttime:%d\n", (int)tz0.tz_dsttime);
 
-	printf("tv1.tv_sec:%d\n", (int)tv1.tv_sec);
-	printf("tv1.tv_usec:%d\n", (int)tv1.tv_usec);
-	printf("tz1.tz_minuteswest:%d\n", (int)tz1.tz_minuteswest);
-	printf("tz1.tz_dsttime:%d\n", (int)tz1.tz_dsttime);
+	//printf("tv1.tv_sec:%d\n", (int)tv1.tv_sec);
+	//printf("tv1.tv_usec:%d\n", (int)tv1.tv_usec);
+	//printf("tz1.tz_minuteswest:%d\n", (int)tz1.tz_minuteswest);
+	//printf("tz1.tz_dsttime:%d\n", (int)tz1.tz_dsttime);
 
 	return NULL;
 }
@@ -348,9 +348,11 @@ void main_proc(thread_arg_t *arg)
 	int count;
 	int start = 1;
 
-	uint32_t total_count = 0;
+	uint64_t total_count = 0;
+	int usec0 = 0;
+	int usec1 = 0;
+	uint64_t usec_duration = 0;
 	int speed = 0;
-
 	int delay_count = 0;
 
 	//printids("write_fn: ");
@@ -383,7 +385,7 @@ void main_proc(thread_arg_t *arg)
 			//printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		}
 
-		if(ready == 1) {
+		if(ready == 1 || 1 == 1) {
 			delay_count = 0;
 			nread = read(targ->dma_fd, targ->buffer, BULKSIZE);
 
@@ -402,7 +404,7 @@ void main_proc(thread_arg_t *arg)
 				}
 
 				for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
-					if(0 == 1) {
+					if(1 == 1) {
 						printf("block:<%01x>%10d in:0x%08x%08x times:%10d times_start:%10d out:0x%08x%08x\n",
 							   (data[i + 0] & 0xc0000000) >> 30,//block
 							   data[i + 0] & 0x3fffffff,//block
@@ -436,17 +438,20 @@ void main_proc(thread_arg_t *arg)
 
 	gettimeofday(&tv1, &tz1);
 
-	printf("tv0.tv_sec:%d\n", (int)tv0.tv_sec);
-	printf("tv0.tv_usec:%d\n", (int)tv0.tv_usec);
-	printf("tz0.tz_minuteswest:%d\n", (int)tz0.tz_minuteswest);
-	printf("tz0.tz_dsttime:%d\n", (int)tz0.tz_dsttime);
+	//printf("tv0.tv_sec:%d\n", (int)tv0.tv_sec);
+	//printf("tv0.tv_usec:%d\n", (int)tv0.tv_usec);
+	//printf("tz0.tz_minuteswest:%d\n", (int)tz0.tz_minuteswest);
+	//printf("tz0.tz_dsttime:%d\n", (int)tz0.tz_dsttime);
 
-	printf("tv1.tv_sec:%d\n", (int)tv1.tv_sec);
-	printf("tv1.tv_usec:%d\n", (int)tv1.tv_usec);
-	printf("tz1.tz_minuteswest:%d\n", (int)tz1.tz_minuteswest);
-	printf("tz1.tz_dsttime:%d\n", (int)tz1.tz_dsttime);
+	//printf("tv1.tv_sec:%d\n", (int)tv1.tv_sec);
+	//printf("tv1.tv_usec:%d\n", (int)tv1.tv_usec);
+	//printf("tz1.tz_minuteswest:%d\n", (int)tz1.tz_minuteswest);
+	//printf("tz1.tz_dsttime:%d\n", (int)tz1.tz_dsttime);
 
-	printf("speed:%d/s\n", (int)(total_count / ((tv1.tv_sec * 1000000 + tv1.tv_usec - tv0.tv_sec * 1000000 + tv0.tv_usec) / 1000000)));
+	usec0 = tv0.tv_sec * 1000000 + tv0.tv_usec;
+	usec1 = tv1.tv_sec * 1000000 + tv1.tv_usec;
+	usec_duration = usec1 - usec0;
+	printf("speed:%d/s\n", (int)(total_count * 1000000 / usec_duration));
 }
 
 void *delay_thread(void *arg)
@@ -455,9 +460,17 @@ void *delay_thread(void *arg)
 
 	//printids("write_fn: ");
 
-	sleep(60);
+	int delay_count = 0;
 
-	stop = 1;
+	while(stop == 0) {
+		sleep(1);
+
+		delay_count++;
+
+		if(delay_count >= 60) {
+			stop = 1;
+		}
+	}
 }
 
 int read_write(thread_arg_t *targ)
