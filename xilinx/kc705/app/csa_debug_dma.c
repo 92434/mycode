@@ -13,6 +13,33 @@
 #include <time.h>
 #include "kc705.h"
 
+//40bits in, 48bits out
+//5byte in, 3 words out(use lower 16 bits)
+
+//uint32_t raw_data[] = {
+//	1, 0x00000001, 0x00000000, 50000, 0,
+//	2, 0x00000002, 0x00000000, 50000, 0,
+//	3, 0x00000003, 0x00000000, 50000, 0,
+//	4, 0x00000004, 0x00000000, 50000, 0,
+//	5, 0x00000005, 0x00000000, 50000, 0,
+//	6, 0x00000006, 0x00000000, 50000, 0,
+//	7, 0x00000007, 0x00000000, 50000, 0,
+//	8, 0x00000008, 0x00000000, 50000, 0,
+//	9, 0x00000009, 0x00000000, 50000, 0,
+//	10, 0x0000000a, 0x00000000, 50000, 0,
+//};
+//#define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
+uint32_t *raw_data = NULL;
+
+#define CALC_IN_SIZE (5 * 4)
+#define CALC_OUT_SIZE (7 * 4)
+#define BULKNUM 10
+#define BULKSIZE (CALC_OUT_SIZE * BULKNUM)
+
+#define CALC_COUNT (150 * BULKNUM)
+#define RAW_DATA_SIZE (CALC_IN_SIZE * CALC_COUNT)
+#define BUFSIZE (CALC_OUT_SIZE * CALC_COUNT)
+
 typedef enum {
 	ADDR_CHANNEL_INDEX = 0,
 	ADDR_IN_DATA_VALID,
@@ -71,30 +98,6 @@ char *reg_name[] = {
 };
 
 #define ADDR_OFFSET(addr) (addr * 4)
-
-//40bits in, 48bits out
-//5byte in, 3 words out(use lower 16 bits)
-
-//uint32_t raw_data[] = {
-//	1, 0x00000001, 0x00000000, 50000, 0,
-//	2, 0x00000002, 0x00000000, 50000, 0,
-//	3, 0x00000003, 0x00000000, 50000, 0,
-//	4, 0x00000004, 0x00000000, 50000, 0,
-//	5, 0x00000005, 0x00000000, 50000, 0,
-//	6, 0x00000006, 0x00000000, 50000, 0,
-//	7, 0x00000007, 0x00000000, 50000, 0,
-//	8, 0x00000008, 0x00000000, 50000, 0,
-//	9, 0x00000009, 0x00000000, 50000, 0,
-//	10, 0x0000000a, 0x00000000, 50000, 0,
-//};
-//#define RAW_DATA_SIZE (sizeof(raw_data) / sizeof(char))
-uint32_t *raw_data = NULL;
-
-#define CALC_IN_SIZE (5 * 4)
-#define CALC_OUT_SIZE (7 * 4)
-#define CALC_COUNT 10
-#define RAW_DATA_SIZE (CALC_IN_SIZE * CALC_COUNT)
-#define BUFSIZE (CALC_OUT_SIZE * CALC_COUNT)
 
 static int stop = 0;
 
@@ -189,7 +192,7 @@ void *read_fn(void *arg)
 			if(FD_ISSET(targ->dma_fd, &rfds)) {
 				//printf("%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
 				while(nread > 0) {
-					nread = read(targ->dma_fd, targ->buffer, BUFSIZE);
+					nread = read(targ->dma_fd, targ->buffer, BULKSIZE);
 
 					if(nread < 0) {
 						printf("%s\n", strerror(errno));
@@ -246,7 +249,7 @@ void *read_fn(void *arg)
 		get_status(targ, &idle, &ready);
 
 		if(ready == 1) {
-			nread = read(targ->dma_fd, targ->buffer, BUFSIZE);
+			nread = read(targ->dma_fd, targ->buffer, BULKSIZE);
 
 			if(nread < 0) {
 				printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -370,6 +373,8 @@ void main_proc(thread_arg_t *arg)
 	uint32_t total_count = 0;
 	int speed = 0;
 
+	int delay_count = 0;
+
 	int mask_low = 0x00000000;
 	int value_low = 0x00000000;
 
@@ -390,7 +395,7 @@ void main_proc(thread_arg_t *arg)
 		get_status(targ, &idle, &ready);
 
 		if(idle == 1) {
-			if((0 == 0) || (start < CALC_COUNT)) {
+			if((1 == 1) || (start < CALC_COUNT)) {
 				start = init_raw_data(start);
 
 				//printf("start %d! count:%d!\n", start, count);
@@ -409,7 +414,8 @@ void main_proc(thread_arg_t *arg)
 		}
 
 		if(ready == 1) {
-			nread = read(targ->dma_fd, targ->buffer, CALC_OUT_SIZE);
+			delay_count = 0;
+			nread = read(targ->dma_fd, targ->buffer, BULKSIZE);
 
 			if(nread < 0) {
 				printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
@@ -447,7 +453,12 @@ void main_proc(thread_arg_t *arg)
 			}
 		} else {
 			//printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-			usleep(10);
+			//usleep(1);
+			delay_count++;
+
+			if(delay_count == 1000) {
+				stop = 1;
+			}
 		}
 
 		//stop = 1;
@@ -468,6 +479,17 @@ void main_proc(thread_arg_t *arg)
 	printf("speed:%d/s\n", (int)(total_count / ((tv1.tv_sec * 1000000 + tv1.tv_usec - tv0.tv_sec * 1000000 + tv0.tv_usec) / 1000000)));
 }
 
+void *delay_thread(void *arg)
+{
+	thread_arg_t *targ = (thread_arg_t *)arg;
+
+	//printids("write_fn: ");
+
+	sleep(60);
+
+	stop = 1;
+}
+
 int read_write(thread_arg_t *targ)
 {
 	int err;
@@ -485,6 +507,12 @@ int read_write(thread_arg_t *targ)
 	//if (err != 0) {
 	//	printf("can't create thread: %s\n", strerror(err));
 	//}
+
+	err = pthread_create(&wtid, NULL, delay_thread, targ);
+
+	if (err != 0) {
+		printf("can't create thread: %s\n", strerror(err));
+	}
 
 	main_proc(targ);
 
