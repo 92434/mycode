@@ -300,7 +300,7 @@ module csa_wrap #
 			.csa_in_ren(axis_s_ren),
 			.csa_in_rdata(axis_s_rdata),
 
-			.csa_out_w_ready(axis_m_r_ready),
+			.m00_axis_tvalid(m00_axis_tvalid),
 			.csa_out_error_full(axis_m_error_full),
 			.csa_out_wclk(axis_m_wclk),
 			.csa_out_wen(axis_m_wen),

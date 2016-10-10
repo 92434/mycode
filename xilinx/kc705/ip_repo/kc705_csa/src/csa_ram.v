@@ -36,7 +36,7 @@ module csa_ram #(
 		output reg csa_in_ren = 0,
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_in_rdata,
 
-		input wire csa_out_w_ready,
+		input wire m00_axis_tvalid,
 		input wire csa_out_error_full,
 		output wire csa_out_wclk,
 		output reg csa_out_wen = 0,
@@ -67,13 +67,12 @@ module csa_ram #(
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
 	reg user_rst_n_reg = 1;
-	reg user_rst_n_reg_1 = 1;
 
 	wire device_idle;
 	assign device_idle = csa_in_error_empty;
 
 	wire device_ready;
-	assign device_ready = csa_out_w_ready;
+	assign device_ready = m00_axis_tvalid;
 
 	always @(posedge axi_mm_clk) begin
 		if(s00_axi_aresetn == 0) begin
@@ -81,12 +80,11 @@ module csa_ram #(
 			csa_current_channel_changed <= 0;
 
 			user_rst_n_reg <= 1;
-			user_rst_n_reg_1 <= 1;
+
 		end
 		else begin
 			csa_current_channel_changed <= 0;
 			user_rst_n_reg <= 1;
-			user_rst_n_reg_1 <= user_rst_n_reg;
 
 			if(wen == 1) begin
 				case(waddr)
@@ -99,7 +97,7 @@ module csa_ram #(
 						end
 					end
 					ADDR_RESET: begin
-						user_rst_n_reg <= 0;
+						user_rst_n_reg <= wdata[0];
 					end
 					default: begin
 					end
@@ -110,7 +108,7 @@ module csa_ram #(
 		end
 	end
 
-	assign user_rst_n = (user_rst_n_reg == 1 && user_rst_n_reg_1 == 1) ? 1 : 0;
+	assign user_rst_n = user_rst_n_reg;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_0 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_1 = 0;
@@ -186,6 +184,9 @@ module csa_ram #(
 					end
 					ADDR_DEVICE_READY: begin
 						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, device_ready};
+					end
+					ADDR_RESET: begin
+						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, user_rst_n_reg};
 					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};

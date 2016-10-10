@@ -36,7 +36,7 @@ module csa_ram #(
 		output reg csa_in_ren = 0,
 		input wire [AXI_DATA_WIDTH - 1 : 0] csa_in_rdata,
 
-		input wire csa_out_w_ready,
+		input wire m00_axis_tvalid,
 		input wire csa_out_error_full,
 		output wire csa_out_wclk,
 		output reg csa_out_wen = 0,
@@ -74,9 +74,8 @@ module csa_ram #(
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_current_channel = 0;
 	reg csa_current_channel_changed = 0;
 	reg user_rst_n_reg = 1;
-	reg user_rst_n_reg_1 = 1;
+	
 	reg [CSA_CALC_OUT_WIDTH - 1 : 0] ram_data_catch_count[0 : 8'hff];
-
 	reg [8 - 1 : 0] data_catch_count_index_reg = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] out_mask = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] out_value = 0;
@@ -85,7 +84,7 @@ module csa_ram #(
 	assign device_idle = csa_in_error_empty;
 
 	wire device_ready;
-	assign device_ready = csa_out_w_ready;
+	assign device_ready = m00_axis_tvalid;
 
 	wire [AXI_DATA_WIDTH - 1 : 0] data_catch_count_low_wire;
 	assign data_catch_count_low_wire = ram_data_catch_count[data_catch_count_index_reg][AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
@@ -99,7 +98,6 @@ module csa_ram #(
 			csa_current_channel_changed <= 0;
 
 			user_rst_n_reg <= 1;
-			user_rst_n_reg_1 <= 1;
 
 			data_catch_count_index_reg <= 0;
 			out_mask <= 0;
@@ -108,7 +106,6 @@ module csa_ram #(
 		else begin
 			csa_current_channel_changed <= 0;
 			user_rst_n_reg <= 1;
-			user_rst_n_reg_1 <= user_rst_n_reg;
 
 			if(wen == 1) begin
 				case(waddr)
@@ -136,7 +133,7 @@ module csa_ram #(
 						out_value[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1] <= wdata;
 					end
 					ADDR_RESET: begin
-						user_rst_n_reg <= 0;
+						user_rst_n_reg <= wdata[0];
 					end
 					default: begin
 					end
@@ -147,7 +144,7 @@ module csa_ram #(
 		end
 	end
 
-	assign user_rst_n = (user_rst_n_reg == 1 && user_rst_n_reg_1 == 1) ? 1 : 0;
+	assign user_rst_n = user_rst_n_reg;
 
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_0 = 0;
 	reg [AXI_DATA_WIDTH - 1 : 0] csa_in_1 = 0;
@@ -244,6 +241,9 @@ module csa_ram #(
 					end
 					ADDR_DEVICE_READY: begin
 						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, device_ready};
+					end
+					ADDR_RESET: begin
+						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, user_rst_n_reg};
 					end
 					default: begin
 						rdata <= {16'hE000, {(16 - OPT_MEM_ADDR_BITS){1'b0}}, raddr};
@@ -590,17 +590,10 @@ module csa_ram #(
 			end
 		end
 		else begin
-			if(user_rst_n == 0) begin
-				for(ram_data_catch_count_index = 0; ram_data_catch_count_index < 256; ram_data_catch_count_index = ram_data_catch_count_index + 1) begin
-					ram_data_catch_count[ram_data_catch_count_index] <= 0;
-				end
+			if(data_catch_enable == 1) begin
+				ram_data_catch_count[ram_data_catch_index] <= ram_data_catch_count[ram_data_catch_index] + 1;
 			end
 			else begin
-				if(data_catch_enable == 1) begin
-					ram_data_catch_count[ram_data_catch_index] <= ram_data_catch_count[ram_data_catch_index] + 1;
-				end
-				else begin
-				end
 			end
 		end
 	end

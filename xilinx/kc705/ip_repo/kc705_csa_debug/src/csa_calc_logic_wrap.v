@@ -128,7 +128,7 @@ module csa_calc_logic_wrap #(
 			.clk(clk),
 			.rst_n(rst_n),
 
-			.fifo_ready(my_fifo_inst_1_r_ready),
+			.fifo_ready(fifo_ready),
 			.fifo_ren(fifo_ren),
 
 			.mask(mask),
