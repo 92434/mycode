@@ -33,12 +33,11 @@ uint32_t *raw_data = NULL;
 
 #define CALC_IN_SIZE (5 * 4)
 #define CALC_OUT_SIZE (7 * 4)
-#define BULKNUM 10
+#define BULKNUM 36
 #define BULKSIZE (CALC_OUT_SIZE * BULKNUM)
 
-#define CALC_COUNT (1 * BULKNUM)
-#define RAW_DATA_SIZE (CALC_IN_SIZE * CALC_COUNT)
-#define BUFSIZE (CALC_OUT_SIZE * CALC_COUNT)
+#define RAW_DATA_SIZE (CALC_IN_SIZE * BULKNUM)
+#define BUFSIZE (CALC_OUT_SIZE * BULKNUM)
 
 typedef enum {
 	ADDR_CHANNEL_INDEX = 0,
@@ -296,7 +295,7 @@ void *write_fn(void *arg)
 		int idle, ready;
 		get_status(targ, &idle, &ready);
 
-		if(start < CALC_COUNT) {
+		if(start < BULKNUM) {
 			start = init_raw_data(start);
 
 			//printf("start %d! count:%d!\n", start, count);
@@ -348,10 +347,10 @@ void main_proc(thread_arg_t *arg)
 	int count;
 	int start = 1;
 
-	uint64_t total_count = 0;
+	unsigned long long total_count = 0;
 	int usec0 = 0;
 	int usec1 = 0;
-	uint64_t usec_duration = 0;
+	unsigned long long usec_duration = 0;
 	int speed = 0;
 	int delay_count = 0;
 
@@ -367,7 +366,7 @@ void main_proc(thread_arg_t *arg)
 		get_status(targ, &idle, &ready);
 
 		if(idle == 1) {
-			if((1 == 1) || (start < CALC_COUNT)) {
+			if((1 == 1) || (start < BULKNUM)) {
 				start = init_raw_data(start);
 
 				//printf("start %d! count:%d!\n", start, count);
@@ -451,6 +450,8 @@ void main_proc(thread_arg_t *arg)
 	usec0 = tv0.tv_sec * 1000000 + tv0.tv_usec;
 	usec1 = tv1.tv_sec * 1000000 + tv1.tv_usec;
 	usec_duration = usec1 - usec0;
+	printf("total_count:%llu\n", total_count);
+	printf("usec_duration:%llu usec\n", usec_duration);
 	printf("speed:%d/s\n", (int)(total_count * 1000000 / usec_duration));
 }
 
