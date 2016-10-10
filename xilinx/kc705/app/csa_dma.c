@@ -385,7 +385,7 @@ void main_proc(thread_arg_t *arg)
 			//printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		}
 
-		if(ready == 1 || 1 == 1) {
+		if(ready == 1) {
 			delay_count = 0;
 			nread = read(targ->dma_fd, targ->buffer, BULKSIZE);
 
@@ -404,7 +404,7 @@ void main_proc(thread_arg_t *arg)
 				}
 
 				for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
-					if(1 == 1) {
+					if(0 == 1) {
 						printf("block:<%01x>%10d in:0x%08x%08x times:%10d times_start:%10d out:0x%08x%08x\n",
 							   (data[i + 0] & 0xc0000000) >> 30,//block
 							   data[i + 0] & 0x3fffffff,//block

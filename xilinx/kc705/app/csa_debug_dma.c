@@ -377,7 +377,7 @@ void main_proc(thread_arg_t *arg)
 	int speed = 0;
 	int delay_count = 0;
 
-	int mask_low = 0x000000ff;
+	int mask_low = 0x00000000;
 	int value_low = 0x00000000;
 
 	//printids("write_fn: ");

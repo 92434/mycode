@@ -160,11 +160,17 @@ void *write_fn(void *arg) {
 
 	//printids("write_fn: ");
 	int channel = 3;
-	int reset = 1;
+	int reset = 0;
 
 	while(stop == 0) {
 		//lseek(targ->fd, ADDR_OFFSET(ADDR_CHANNEL_INDEX), SEEK_SET);
 		//nwrite = write(targ->fd, &channel, sizeof(int));
+		//lseek(targ->fd, ADDR_OFFSET(ADDR_RESET), SEEK_SET);
+		//nwrite = write(targ->fd, &reset, sizeof(int));
+		//
+		//sleep(1);
+
+		//reset = 1;
 		//lseek(targ->fd, ADDR_OFFSET(ADDR_RESET), SEEK_SET);
 		//nwrite = write(targ->fd, &reset, sizeof(int));
 
