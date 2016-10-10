@@ -8,7 +8,7 @@ function get_pattern_from_package_name() {
 		return
 	fi
 
-	local pids=$(adb shell busybox ps | grep "$package" | awk '{print $1}')
+	local pids=$(adb shell busybox ps | grep -ie "$package" | awk '{print $1}')
 
 	if [ -z "$pids" ]; then
 		echo "pids:$pids";
@@ -71,7 +71,7 @@ function start_logcat() {
 		adb logcat -v brief "*:V"
 	else
 		shift $(($OPTIND - 1))
-		echo "adb logcat $@ -v brief "*:V" | grep -e "$pattern""
+		echo "adb logcat $@ -v brief "*:V" | grep -ie "$pattern""
 		adb logcat $@ -v brief "*:V" | grep -e "$pattern"
 	fi
 }
