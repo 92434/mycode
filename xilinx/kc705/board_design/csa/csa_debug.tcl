@@ -170,7 +170,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: kc705_csa_debug_0, and set properties
   set kc705_csa_debug_0 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_csa_debug:1.0 kc705_csa_debug_0 ]
-  set_property -dict [ list CONFIG.CSA_CALC_INST_NUM {32}  ] $kc705_csa_debug_0
+  set_property -dict [ list CONFIG.CSA_CALC_INST_NUM {28}  ] $kc705_csa_debug_0
 
   # Create instance: kc705_pcie_ext_0, and set properties
   set kc705_pcie_ext_0 [ create_bd_cell -type ip -vlnv xiaofei:user:kc705_pcie_ext:1.0 kc705_pcie_ext_0 ]

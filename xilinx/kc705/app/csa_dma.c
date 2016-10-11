@@ -85,6 +85,7 @@ char *reg_name[] = {
 #define ADDR_OFFSET(addr) (addr * 4)
 
 static int stop = 0;
+static int feed = 1;
 
 static void default_sig_action(int signo, siginfo_t *info, void *context)
 {
@@ -378,7 +379,7 @@ void main_proc(thread_arg_t *arg)
 		get_status(targ, &idle, &ready);
 
 		if(idle == 1) {
-			if((1 == 1) || (start < BULKNUM * 5000)) {
+			if(((1 == 1) && (feed == 1)) || (start < BULKNUM * 5000)) {
 				start = init_raw_data(start);
 
 				//printf("start %d! count:%d!\n", start, count);
@@ -467,7 +468,7 @@ void main_proc(thread_arg_t *arg)
 	printf("speed:%d/s\n", (int)(total_count * 1000000 / usec_duration));
 }
 
-void *delay_thread(void *arg)
+void *feed_thread(void *arg)
 {
 	thread_arg_t *targ = (thread_arg_t *)arg;
 
@@ -481,7 +482,7 @@ void *delay_thread(void *arg)
 		delay_count++;
 
 		if(delay_count >= 60) {
-			stop = 1;
+			feed = 0;
 		}
 	}
 }
@@ -505,7 +506,7 @@ int read_write(thread_arg_t *targ)
 	//	printf("can't create thread: %s\n", strerror(err));
 	//}
 
-	err = pthread_create(&dtid, NULL, delay_thread, targ);
+	err = pthread_create(&dtid, NULL, feed_thread, targ);
 
 	if (err != 0) {
 		printf("can't create thread: %s\n", strerror(err));

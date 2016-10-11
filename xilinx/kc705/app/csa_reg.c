@@ -1,10 +1,10 @@
-#include <stdio.h>     
-#include <unistd.h>    
+#include <stdio.h>
+#include <unistd.h>
 #include <signal.h>
-#include <stdlib.h>   
-#include <errno.h>    
+#include <stdlib.h>
+#include <errno.h>
 #include <string.h>
-#include <fcntl.h>    
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
@@ -60,14 +60,16 @@ char *reg_name[] = {
 
 static int stop = 0;
 
-static void default_sig_action(int signo, siginfo_t *info, void *context) {
+static void default_sig_action(int signo, siginfo_t *info, void *context)
+{
 	printf("xiaofei:%s called! info->si_signo:%d\n", __func__, info->si_signo);
 	stop = 1;
 
 	return;
 }
 
-void printids(const char *s) {
+void printids(const char *s)
+{
 	pid_t pid;
 	pthread_t tid;
 	pid = getpid();
@@ -86,7 +88,8 @@ do { \
 	nread = read(targ->fd, targ->buffer, sizeof(uint32_t)); \
 } while(0)
 
-void *read_fn(void *arg) {
+void *read_fn(void *arg)
+{
 	thread_arg_t *targ = (thread_arg_t *)arg;
 	struct timeval tv;
 	fd_set rfds;
@@ -95,8 +98,8 @@ void *read_fn(void *arg) {
 
 	//printids("read_fn: ");
 
-	tv.tv_sec=1;
-	tv.tv_usec=0;
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
 
 	while(stop == 0) {
 		uint32_t *data = (uint32_t *)targ->buffer;
@@ -111,10 +114,12 @@ void *read_fn(void *arg) {
 
 		return NULL;
 	}
+
 	return NULL;
 }
 
-void *write_fn(void *arg) {
+void *write_fn(void *arg)
+{
 	thread_arg_t *targ = (thread_arg_t *)arg;
 	targ = targ;
 	int nwrite;
@@ -137,32 +142,37 @@ void *write_fn(void *arg) {
 
 		return NULL;
 	}
+
 	return NULL;
 }
 
-int read_write(thread_arg_t *targ) {
+int read_write(thread_arg_t *targ)
+{
 	int err;
 	pthread_t rtid;
 	pthread_t wtid;
 
 	err = pthread_create(&rtid, NULL, read_fn, targ);
+
 	if (err != 0) {
 		printf("can't create thread: %s\n", strerror(err));
 	}
 
 	err = pthread_create(&wtid, NULL, write_fn, targ);
+
 	if (err != 0) {
 		printf("can't create thread: %s\n", strerror(err));
 	}
 
 	//printids("main thread:");
-	pthread_join(rtid,NULL);
-	pthread_join(wtid,NULL);
+	pthread_join(rtid, NULL);
+	pthread_join(wtid, NULL);
 
 	return EXIT_SUCCESS;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 	int ret = 0;
 
 	char *dev = argv[1];
@@ -179,7 +189,7 @@ int main(int argc, char **argv) {
 		return ret;
 	}
 
-	if ((targ.fd = open(dev, O_RDWR))<0) {
+	if ((targ.fd = open(dev, O_RDWR)) < 0) {
 		printf("err: can't open device(%s)!(%s)\n", dev, strerror(errno));
 		ret = -1;
 		return ret;
@@ -190,10 +200,12 @@ int main(int argc, char **argv) {
 	//fcntl(targ.fd, F_SETFL, flags | O_NONBLOCK);
 
 	ret = ioctl(targ.fd, PCIE_DEVICE_IOCTL_GET_LIST_BUFFER_SIZE, &mmap_size);
+
 	if (ret != 0) {
 		printf("[%s:%s:%d]:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		return ret;
 	}
+
 	printf("mmap_size:%d(%x)\n", mmap_size, mmap_size);
 
 	//mmap_memory = (char *)mmap(NULL, mmap_size, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, targ.fd, (off_t)0);
@@ -210,6 +222,7 @@ int main(int argc, char **argv) {
 	}
 
 	targ.buffer = (unsigned char *)malloc(BUFSIZE);
+
 	if(targ.buffer == 0) {
 		printf("err: no memory for targ.buffer!\n");
 		ret = -1;

@@ -547,7 +547,6 @@ module csa_ram #(
 					if(csa_out_error_full == 0) begin
 						csa_out_wen <= 1;
 						csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
-						data_catch_enable <= 1;
 
 						r_state <= 11;
 					end
@@ -559,7 +558,8 @@ module csa_ram #(
 					if(csa_out_error_full == 0) begin
 						csa_out_wen <= 1;
 						csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 2 - 1 : AXI_DATA_WIDTH * 1];
-
+						data_catch_enable <= 1;
+						
 						r_state <= 0;
 					end
 					else begin
