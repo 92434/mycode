@@ -43,7 +43,7 @@ static int init_dma(void *ppara)
 	ret = wait_for_iostatus_timeout(0, dma_base_vaddr + MM2S_DMACR, mask, 0);
 
 	if(ret != 0) {
-		mydebug("time out!\n");
+		mydebug("timeout!\n");
 	}
 
 	mask = BITMASK(0)/*RS bit*/;
@@ -53,7 +53,7 @@ static int init_dma(void *ppara)
 	ret = wait_for_iostatus_timeout(0, dma_base_vaddr + MM2S_DMASR, mask, 0);
 
 	if(ret != 0) {
-		mydebug("time out!\n");
+		mydebug("timeout!\n");
 	}
 
 	mask = BITMASK(12)/*IOC_IrqEn*/ | BITMASK(14)/*Err_IrqEn*/;

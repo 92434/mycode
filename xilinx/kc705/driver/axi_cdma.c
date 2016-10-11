@@ -36,23 +36,25 @@
  *
  * */
 
-static int init_dma(void *ppara) {
+static int init_dma(void *ppara)
+{
 	int ret;
 	pcie_dma_t *dma = (pcie_dma_t *)ppara;
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + dma->dma_lite_offset); 
+	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + dma->dma_lite_offset);
 
 	//reset cdma
 	uint32_t default_value = 0x00010002;//0000_0000_0000_0001(irq threshold)_0000_0000_0000_001(tail ptr enable)0
 	uint32_t value;
-	
+
 	//reset
 	value = default_value | BITMASK(2);//reset bit
 	writel(value, cdma_base_vaddr + CDMA_CR);
 	ret = wait_for_iostatus_timeout(0, cdma_base_vaddr + CDMA_CR, BITMASK(2), 0);
+
 	if(ret != 0) {
-		mydebug("time out!\n");
+		mydebug("timeout!\n");
 	}
 
 	//enable sg mode
@@ -73,15 +75,17 @@ static int init_dma(void *ppara) {
 	return ret;
 }
 
-static irqreturn_t process_isr(void *ppara) {
+static irqreturn_t process_isr(void *ppara)
+{
 	irqreturn_t status = IRQ_NONE;
 	pcie_dma_t *dma = (pcie_dma_t *)ppara;
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + dma->dma_lite_offset); 
+	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + dma->dma_lite_offset);
 	uint32_t value;
 
 	value = readl(cdma_base_vaddr + CDMA_SR);
+
 	if((value & BITMASK(12)/*IOC_Irq*/) != 0) {
 		complete(&dma->tx_cmp);
 		complete(&dma->rx_cmp);
@@ -97,6 +101,7 @@ static irqreturn_t process_isr(void *ppara) {
 		writel(value, cdma_base_vaddr + CDMA_SR);
 		status = IRQ_HANDLED;
 	}
+
 	/* Handle DMA and any user interrupts */
 	return status;
 }
@@ -120,7 +125,8 @@ typedef struct {
 	kc705_transfer_descriptor_t des;
 } kc705_sg_item_info_t;
 
-static int alloc_sg_des_item(uint32_t SA, uint32_t DA, uint32_t CONTROL, struct list_head *sg_list) {
+static int alloc_sg_des_item(uint32_t SA, uint32_t DA, uint32_t CONTROL, struct list_head *sg_list)
+{
 	int ret = 0;
 	kc705_sg_item_info_t *sg_item = (kc705_sg_item_info_t *)vzalloc(sizeof(kc705_sg_item_info_t));
 
@@ -137,7 +143,8 @@ static int alloc_sg_des_item(uint32_t SA, uint32_t DA, uint32_t CONTROL, struct 
 	return 0;
 }
 
-static void free_sg_des_items(struct list_head *sg_list) {
+static void free_sg_des_items(struct list_head *sg_list)
+{
 	kc705_sg_item_info_t *sg_item, *sg_item_next;
 	list_for_each_entry_safe(sg_item, sg_item_next, sg_list, sg_item) {
 		list_del(&sg_item->sg_item);
@@ -146,7 +153,8 @@ static void free_sg_des_items(struct list_head *sg_list) {
 	}
 }
 
-static uint32_t flush_sg_des_items(pcie_dma_t *dma, struct list_head *sg_list) {
+static uint32_t flush_sg_des_items(pcie_dma_t *dma, struct list_head *sg_list)
+{
 	kc705_transfer_descriptor_t *pdes = dma->bar_map_memory[0]; //buffer for sg, axi address 0x80800000
 	kc705_sg_item_info_t *info;
 	uint32_t cdma_tail_des_axi_addr = 0;
@@ -156,7 +164,7 @@ static uint32_t flush_sg_des_items(pcie_dma_t *dma, struct list_head *sg_list) {
 		//kc705_sg_item_info_t *next_info = list_next_entry(info, sg_item);
 
 		if(info->sg_item.next != sg_list) {
-		//if(&(next_info->sg_item) != sg_list) {
+			//if(&(next_info->sg_item) != sg_list) {
 			info->des.des.NXTDESC_PNTR = bar_sg_next_addr_offset;
 			cdma_tail_des_axi_addr = bar_sg_next_addr_offset;
 			bar_sg_next_addr_offset += SG_DESCRIPTOR_SIZE;
@@ -175,10 +183,11 @@ static uint32_t flush_sg_des_items(pcie_dma_t *dma, struct list_head *sg_list) {
 	return cdma_tail_des_axi_addr;
 }
 
-static int start_cdma(pcie_dma_t *dma, uint32_t cdma_tail_des_axi_addr) {
+static int start_cdma(pcie_dma_t *dma, uint32_t cdma_tail_des_axi_addr)
+{
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
-	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + dma->dma_lite_offset); 
+	uint8_t *cdma_base_vaddr = (uint8_t *)(base_vaddr + dma->dma_lite_offset);
 
 	init_completion(&dma->tx_cmp);
 	init_completion(&dma->rx_cmp);
@@ -190,7 +199,8 @@ static int start_cdma(pcie_dma_t *dma, uint32_t cdma_tail_des_axi_addr) {
 	return 0;
 }
 
-static int dma_trans_sync(pcie_tr_t *tr) {
+static int dma_trans_sync(pcie_tr_t *tr)
+{
 	pcie_dma_t *dma = tr->dma;
 	int tx_size = tr->tx_size;
 	int rx_size = tr->rx_size;
@@ -200,7 +210,8 @@ static int dma_trans_sync(pcie_tr_t *tr) {
 	if(tx_size != 0) {
 		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->tx_cmp, tmo);
-		myprintf_once((0 == tmo), "%s:tx transfer timed out!\n", dma->devname);
+		myprintf_once((0 == tmo), "%s:tx transfer timeout!\n", dma->devname);
+
 		if (0 == tmo) {
 			tr->tx_size = 0;
 			ret = -1;
@@ -210,7 +221,8 @@ static int dma_trans_sync(pcie_tr_t *tr) {
 	if(rx_size != 0) {
 		tmo = msecs_to_jiffies(10);
 		tmo = wait_for_completion_timeout(&dma->rx_cmp, tmo);
-		myprintf_once((0 == tmo), "%s:rx transfer timed out!\n", dma->devname);
+		myprintf_once((0 == tmo), "%s:rx transfer timeout!\n", dma->devname);
+
 		if (0 == tmo) {
 			tr->rx_size = 0;
 			ret = -1;
@@ -220,13 +232,14 @@ static int dma_trans_sync(pcie_tr_t *tr) {
 	return ret;
 }
 
-static int prepare_bars_map(pcie_dma_t *dma, uint64_t tx_src_bar_map_addr, uint64_t rx_dest_bar_map_addr) {
+static int prepare_bars_map(pcie_dma_t *dma, uint64_t tx_src_bar_map_addr, uint64_t rx_dest_bar_map_addr)
+{
 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)dma->kc705_pci_dev;
 	uint8_t *base_vaddr = kc705_pci_dev->bar_info[0].base_vaddr;
 	uint32_t *bram_vddr_reg = (uint32_t *)(base_vaddr + OFFSET_Translation_BRAM);
 	uint32_t *bar_vddr_map_ctrl_reg = (uint32_t *)(base_vaddr + OFFSET_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_0);
 
-	//bind sg 
+	//bind sg
 	write_addr_to_reg(bar_vddr_map_ctrl_reg, (uint64_t)dma->bar_map_addr[0]);
 
 	//prepare tx && rx buffer address for dm map ctl register at TR BRAM
@@ -237,7 +250,8 @@ static int prepare_bars_map(pcie_dma_t *dma, uint64_t tx_src_bar_map_addr, uint6
 	return 0;
 }
 
-static int dma_tr(void *ppara) {
+static int dma_tr(void *ppara)
+{
 	int ret = 0;
 
 	pcie_tr_t *tr = (pcie_tr_t *)ppara;
@@ -264,6 +278,7 @@ static int dma_tr(void *ppara) {
 
 	reset_list_buffer(dma->list);
 	ret = get_buffer_node_info(&write, NULL, dma->list);
+
 	if(ret != 0) {
 		return ret;
 	}
@@ -280,14 +295,16 @@ static int dma_tr(void *ppara) {
 
 	if(tx_size != 0) {
 		ret = alloc_sg_des_item(BASE_Translation_BRAM + offset,//map dma bar1 to pcie axi bar1
-				BASE_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_1,
-				sizeof(uint64_t),
-				&sg_descripter_list);
+								BASE_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_1,
+								sizeof(uint64_t),
+								&sg_descripter_list);
+
 		if(ret != 0) {
 			goto exit;
 		}
 
 		ret = alloc_sg_des_item(tx_src_axi_addr, tx_dest_axi_addr, tx_size, &sg_descripter_list);//pcie axi bar1 -> sdram axi addr
+
 		if(ret != 0) {
 			goto exit;
 		}
@@ -297,20 +314,23 @@ static int dma_tr(void *ppara) {
 
 	if(rx_size != 0) {
 		ret = alloc_sg_des_item(BASE_Translation_BRAM + offset,//map dma bar2 to pcie axi bar1
-				BASE_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_1,
-				sizeof(uint64_t),
-				&sg_descripter_list);
+								BASE_AXI_PCIe_CTL + dma->pcie_bar_map_ctl_offset_1,
+								sizeof(uint64_t),
+								&sg_descripter_list);
+
 		if(ret != 0) {
 			goto exit;
 		}
 
 		ret = alloc_sg_des_item(rx_src_axi_addr, rx_dest_axi_addr, rx_size, &sg_descripter_list);//sdram axi addr -> pcie axi bar1
+
 		if(ret != 0) {
 			goto exit;
 		}
 	}
 
 	ret = flush_sg_des_items(dma, &sg_descripter_list);
+
 	if(ret == 0) {
 		goto exit;
 	}
@@ -318,9 +338,11 @@ static int dma_tr(void *ppara) {
 	start_cdma(dma, ret);
 
 	ret = dma_trans_sync(tr);
+
 	if(ret != 0) {
 		dma->dma_op.init_dma(dma);
 	}
+
 exit:
 	free_sg_des_items(&sg_descripter_list);
 
