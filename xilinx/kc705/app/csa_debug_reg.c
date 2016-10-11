@@ -122,6 +122,7 @@ void *read_fn(void *arg) {
 		for(i = 0; i < TOTAL_REGS; i++) {
 			if(i == ADDR_DATA_CATCH_COUNT_INDEX) {
 				int index = 0;
+
 				for(index = 0; index < 256; index++) {
 					int nwrite;
 					uint64_t low;
@@ -138,10 +139,28 @@ void *read_fn(void *arg) {
 
 					count = (high << 32) + low;
 					total_count += count;
-					printf("%s(%03d): %08x%08x(%llu)\n", reg_name[i], index, (int)high, (int)low, count);
+				}
+
+				for(index = 0; index < 256; index++) {
+					int nwrite;
+					uint64_t low;
+					uint64_t high;
+					unsigned long long count;
+
+					lseek(targ->fd, ADDR_OFFSET(ADDR_DATA_CATCH_COUNT_INDEX), SEEK_SET);
+					nwrite = write(targ->fd, &index, sizeof(int));
+
+					read_regs(ADDR_DATA_CATCH_COUNT_LOW);
+					low = data[0];
+					read_regs(ADDR_DATA_CATCH_COUNT_HIGH);
+					high = data[0];
+
+					count = (high << 32) + low;
+					printf("%s(%03d): %08x%08x(%llu)--%.6f\n", reg_name[i], index, (int)high, (int)low, count, count * 1.0 / total_count);
 				}
 
 				printf("%s: total_count:(%llu)\n", reg_name[i], total_count);
+				i += 2;
 			} else {
 				read_regs(i);
 				printf("%s: %08x(%d)\n", reg_name[i], data[0], data[0]);

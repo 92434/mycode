@@ -354,19 +354,31 @@ void main_proc(thread_arg_t *arg)
 	int speed = 0;
 	int delay_count = 0;
 
+	int reset = 0;
+
 	//printids("write_fn: ");
 
 	struct timeval tv0, tv1;
 	struct timezone tz0, tz1;
 
+	lseek(targ->reg_fd, ADDR_OFFSET(ADDR_RESET), SEEK_SET);
+	nwrite = write(targ->reg_fd, &reset, sizeof(int));
+
+	reset = 1;
+
 	gettimeofday(&tv0, &tz0);
+
+	lseek(targ->reg_fd, ADDR_OFFSET(ADDR_RESET), SEEK_SET);
+	nwrite = write(targ->reg_fd, &reset, sizeof(int));
+
+	usleep(1000);
 
 	while(stop == 0) {
 		int idle, ready;
 		get_status(targ, &idle, &ready);
 
 		if(idle == 1) {
-			if((1 == 1) || (start < BULKNUM)) {
+			if((1 == 1) || (start < BULKNUM * 5000)) {
 				start = init_raw_data(start);
 
 				//printf("start %d! count:%d!\n", start, count);
