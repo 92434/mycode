@@ -71,8 +71,8 @@ typedef int (*dma_tr_t)(void *ppara);
 
 typedef struct _dma_op {
 	init_dma_t init_dma;
-	process_isr_t process_isr; 
-	dma_tr_t dma_tr; 
+	process_isr_t process_isr;
+	dma_tr_t dma_tr;
 } dma_op_t;
 
 typedef int (*pcie_dma_thread_t)(void *ppara);
@@ -127,6 +127,8 @@ typedef struct {
 	int rx_size;
 	uint8_t *tx_data;
 	uint8_t *rx_data;
+	int *dma_tx_size;
+	int *dma_rx_size;
 	struct completion *tr_cmp;
 } pcie_tr_t;
 
@@ -136,7 +138,7 @@ typedef struct {
 	struct {
 		unsigned long base_phyaddr; /**< Base address of device memory */
 		unsigned long base_len; /**< Length of device memory */
-		void __iomem * base_vaddr; /**< VA - mapped address */
+		void __iomem *base_vaddr;  /**< VA - mapped address */
 	} bar_info[MAX_BARS];
 	int msi_enable;
 

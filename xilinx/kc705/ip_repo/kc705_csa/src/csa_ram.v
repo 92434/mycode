@@ -427,40 +427,71 @@ module csa_ram #(
 					r_state <= 5;
 				end
 				5: begin
-					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_block_o;
+					if(csa_out_error_full == 0) begin
+						csa_out_wen <= 1;
+						csa_out_wdata <= csa_calc_logic_block_o;
 
-					r_state <= 6;
+						r_state <= 6;
+					end
+					else begin
+						r_state <= 5;
+					end
 				end
 				6: begin
-					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					if(csa_out_error_full == 0) begin
+						csa_out_wen <= 1;
+						csa_out_wdata <= csa_calc_logic_in_o[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
 
-					r_state <= 7;
+						r_state <= 7;
+					end
+					else begin
+						r_state <= 6;
+					end
 				end
 				7: begin
-					csa_out_wen <= 1;
-					csa_out_wdata <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};
+					if(csa_out_error_full == 0) begin
+						csa_out_wen <= 1;
+						csa_out_wdata <= {{(CSA_CALC_IN_WIDTH_PAD){1'b0}}, csa_calc_logic_in_o[AXI_DATA_WIDTH * 2 - 1 - CSA_CALC_IN_WIDTH_PAD : AXI_DATA_WIDTH * 1]};
 
-					r_state <= 8;
+						r_state <= 8;
+					end
+					else begin
+						r_state <= 7;
+					end
 				end
 				8: begin
-					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_times_o;
+					if(csa_out_error_full == 0) begin
+						csa_out_wen <= 1;
+						csa_out_wdata <= csa_calc_logic_times_o;
 
-					r_state <= 9;
+						r_state <= 9;
+					end
+					else begin
+						r_state <= 8;
+					end
 				end
 				9: begin
-					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_times_start_o;
+					if(csa_out_error_full == 0) begin
+						csa_out_wen <= 1;
+						csa_out_wdata <= csa_calc_logic_times_start_o;
 
-					r_state <= 10;
+						r_state <= 10;
+					end
+					else begin
+						r_state <= 9;
+					end
 				end
 				10: begin
-					csa_out_wen <= 1;
-					csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+					if(csa_out_error_full == 0) begin
+						csa_out_wen <= 1;
+						csa_out_wdata <= csa_calc_logic_out[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
+						data_catch_enable <= 1;
 
-					r_state <= 11;
+						r_state <= 11;
+					end
+					else begin
+						r_state <= 10;
+					end
 				end
 				11: begin
 					if(csa_out_error_full == 0) begin
