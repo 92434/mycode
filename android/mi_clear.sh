@@ -105,11 +105,11 @@
 #pm remove-user: remove the user with the given USER_IDENTIFIER,
 #  deleting all data associated with that user
 
-#RM_ALL="rm -rf"
-RM_ALL="echo rm -rf"
+RM_ALL="rm -rf"
+#RM_ALL="echo rm -rf"
 
-#MV_ALL="mv"
-MV_ALL="echo mv"
+MV_ALL="mv"
+#MV_ALL="echo mv"
 
 function red() {
 	echo -ne "\033[31m$@\033[0m:\n"
@@ -190,7 +190,6 @@ function main() {
 "com.funshion.video.player"
 "com.pplive.androidsdk.mi"
 "com.miui.video.plugin"
-"com.xiaomi.payment"
 "com.xiaomi.jr"
 "com.xiaomi.smarthome"
 "com.miui.miuibbs"
