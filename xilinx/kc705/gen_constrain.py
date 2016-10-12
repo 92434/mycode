@@ -993,6 +993,7 @@ def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_
 	map_gpioif_list_net_pin_des_resistor.update({'HPC': []})
 	map_gpioif_list_net_pin_des_resistor.update({'LPC': []})
 	map_gpioif_list_net_pin_des_resistor.update({'OTHER': []})
+	map_gpioif_list_net_pin_des_resistor.update({'ALL': []})
 
 	list_pin_des = []
 	list_net_des = []
@@ -1024,6 +1025,7 @@ def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_
 			else:
 				map_gpioif_list_net_pin_des_resistor.get('OTHER').append(v)
 
+			map_gpioif_list_net_pin_des_resistor.get('ALL').append(v)
 
 	for net, des in list_net_des:
 		pin = None
@@ -1188,7 +1190,8 @@ def gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor):
 
 	common_list_net_pin_des_resistor = []
 	for i, j in map_gpioif_list_net_pin_des_resistor.items():
-		common_list_net_pin_des_resistor.extend(j)
+		if i == 'ALL':
+			common_list_net_pin_des_resistor.extend(j)
 	map_common_list_net_pin_des_resistor = {}
 	map_common_list_net_pin_des_resistor.update({'common gpio' : common_list_net_pin_des_resistor})
 
