@@ -15,6 +15,7 @@ module csa_calc_logic_wrap #(
 		input wire clk,
 		input wire rst_n,
 
+		input wire mask_enable,
 		input wire [CYPHER_DATA_WIDTH - 1 : 0] mask,
 		input wire [CYPHER_DATA_WIDTH - 1 : 0] value,
 
@@ -131,6 +132,7 @@ module csa_calc_logic_wrap #(
 			.fifo_ready(fifo_ready),
 			.fifo_ren(fifo_ren),
 
+			.mask_enable(mask_enable),
 			.mask(mask),
 			.value(value),
 

@@ -226,58 +226,12 @@ void *read_fn(void *arg)
 void *read_fn(void *arg)
 {
 	thread_arg_t *targ = (thread_arg_t *)arg;
-	int nread;
-
-	//printids("read_fn: ");
-
-	while(stop == 0) {
-		int idle, ready;
-		get_status(targ, &idle, &ready);
-
-		if(ready == 1) {
-			nread = read(targ->dma_fd, targ->buffer, BULKSIZE);
-
-			if(nread < 0) {
-				printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-				stop = 1;
-				break;
-			} else {
-				int i;
-				uint32_t *data = (uint32_t *)targ->buffer;
-
-				//printf("read %d!\n", nread);
-				if(nread == 0) {
-					printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-					stop = 1;
-				}
-
-				for(i = 0; i < nread / sizeof(uint32_t); i += 7) {
-					printf("block:<%01x>%10d in:0x%08x%08x times:%10d times_start:%10d out:0x%08x%08x\n",
-						   (data[i + 0] & 0xc0000000) >> 30,//block
-						   data[i + 0] & 0x3fffffff,//block
-						   data[i + 2],//in(high)
-						   data[i + 1],//in(low)
-						   data[i + 3],//times
-						   data[i + 4],//times delay
-						   data[i + 6],//out(high)
-						   data[i + 5]//out(low)
-						  );
-				}
-
-				//printf("\n");
-			}
-		} else {
-			//printf("xiaofei: %s:%d: [%s]-wait!\n", __PRETTY_FUNCTION__, __LINE__, strerror(errno));
-			usleep(1);
-		}
-
-		//stop = 1;
-	}
 
 	return NULL;
 }
 #endif //if 0
 
+#if 0
 void *write_fn(void *arg)
 {
 	thread_arg_t *targ = (thread_arg_t *)arg;
@@ -337,6 +291,12 @@ void *write_fn(void *arg)
 
 	return NULL;
 }
+#else
+void *write_fn(void *arg)
+{
+	thread_arg_t *targ = (thread_arg_t *)arg;
+}
+#endif //if 0
 
 void main_proc(thread_arg_t *arg)
 {

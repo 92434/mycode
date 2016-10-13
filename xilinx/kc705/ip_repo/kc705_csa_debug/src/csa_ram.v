@@ -63,7 +63,8 @@ module csa_ram #(
 	localparam integer ADDR_DATA_CATCH_COUNT_INDEX = ADDR_OUT_DATA_6 + 1;
 	localparam integer ADDR_DATA_CATCH_COUNT_LOW = ADDR_DATA_CATCH_COUNT_INDEX + 1;
 	localparam integer ADDR_DATA_CATCH_COUNT_HIGH = ADDR_DATA_CATCH_COUNT_LOW + 1;
-	localparam integer ADDR_OUT_MASK_LOW = ADDR_DATA_CATCH_COUNT_HIGH + 1;
+	localparam integer ADDR_OUT_MASK_ENABLE = ADDR_DATA_CATCH_COUNT_HIGH + 1;
+	localparam integer ADDR_OUT_MASK_LOW = ADDR_OUT_MASK_ENABLE + 1;
 	localparam integer ADDR_OUT_MASK_HIGH = ADDR_OUT_MASK_LOW + 1;
 	localparam integer ADDR_OUT_VALUE_LOW = ADDR_OUT_MASK_HIGH + 1;
 	localparam integer ADDR_OUT_VALUE_HIGH = ADDR_OUT_VALUE_LOW + 1;
@@ -77,6 +78,7 @@ module csa_ram #(
 	
 	reg [CSA_CALC_OUT_WIDTH - 1 : 0] ram_data_catch_count[0 : 8'hff];
 	reg [8 - 1 : 0] data_catch_count_index_reg = 0;
+	reg out_mask_enable = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] out_mask = 0;
 	reg [CYPHER_DATA_WIDTH - 1 : 0] out_value = 0;
 
@@ -100,6 +102,7 @@ module csa_ram #(
 			user_rst_n_reg <= 1;
 
 			data_catch_count_index_reg <= 0;
+			out_mask_enable <= 0;
 			out_mask <= 0;
 			out_value <= 0;
 		end
@@ -119,6 +122,9 @@ module csa_ram #(
 					end
 					ADDR_DATA_CATCH_COUNT_INDEX: begin
 						data_catch_count_index_reg <= wdata[8 - 1 : 0];
+					end
+					ADDR_OUT_MASK_ENABLE: begin
+						out_mask_enable <= wdata[0];
 					end
 					ADDR_OUT_MASK_LOW: begin
 						out_mask[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0] <= wdata;
@@ -223,6 +229,9 @@ module csa_ram #(
 					end
 					ADDR_DATA_CATCH_COUNT_HIGH: begin
 						rdata <= data_catch_count_high_wire;
+					end
+					ADDR_OUT_MASK_ENABLE: begin
+						rdata <= {{(AXI_DATA_WIDTH - 1){1'b0}}, out_mask_enable};
 					end
 					ADDR_OUT_MASK_LOW: begin
 						rdata <= out_mask[AXI_DATA_WIDTH * 1 - 1 : AXI_DATA_WIDTH * 0];
@@ -595,6 +604,7 @@ module csa_ram #(
 					.clk(csa_calc_clk),
 					.rst_n(rst_n),
 
+					.mask_enable(out_mask_enable),
 					.mask(out_mask),
 					.value(out_value),
 

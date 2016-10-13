@@ -15,6 +15,7 @@ module csa_calc_logic #(
 		input wire fifo_ready,
 		output reg fifo_ren = 0,
 
+		input wire mask_enable,
 		input wire [CYPHER_DATA_WIDTH - 1 : 0] mask,
 		input wire [CYPHER_DATA_WIDTH - 1 : 0] value,
 		
@@ -35,7 +36,7 @@ module csa_calc_logic #(
 
 
 	wire matched;
-	assign matched = ((mask != 0) && ((mask & value) == (mask & cb_out))) ? 1 : 0;
+	assign matched = ((mask_enable == 1) && ((mask & value) == (mask & cb_out))) ? 1 : 0;
 
 	reg disable_reg = 0;
 
