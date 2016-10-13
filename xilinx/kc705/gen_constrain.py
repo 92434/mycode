@@ -60,6 +60,35 @@ def gen_list_fmc_pin_resistor():
 	print 'total:', len(list_fmc_pin_resistor)
 	return list_fmc_pin_resistor
 
+def new_board_list_fmc_part_no_key(x):
+	#print x
+	part = x[1]
+	no = x[2]
+	return part, int(no)
+
+def gen_new_board_list_fmc_part_no():
+	content = ''
+
+	with open('kc705_new_board_fmc.txt') as f:
+		content = f.read()
+	pattern = re.compile(r'\*SIGNAL\* ([^ ]+) \d+ \d+\r\n(J[^\.]+)\.(\d+)\s+')
+	result = pattern.findall(content)
+	result = sorted(result, key = lambda x:(new_board_list_fmc_part_no_key(x)))
+	list_fmc_part_no = []
+	for i in result:
+		list_fmc_part_no.append(i)
+	print '-' * 100
+	print 'list_fmc_part_no info'
+	print '-' * 100
+	for i in list_fmc_part_no:
+		print i
+	print 'total:', len(list_fmc_part_no)
+	return list_fmc_part_no
+
+def gen_new_board_list_slot_list_portnum_pin_net():
+	list_slot_list_portnum_pin_net = []
+	return list_slot_list_portnum_pin_net
+
 def gen_kc705_list_pin_iotype():
 	list_pin_iotype = []
 	lines = []
@@ -1308,6 +1337,10 @@ def gen_kc705_constrain():
 	list_kc705_net_group_part_pin = gen_list_kc705_net_group_part_pin()
 
 	list_fmc_pin_resistor = gen_list_fmc_pin_resistor()
+
+	list_fmc_part_no = gen_new_board_list_fmc_part_no()
+
+	list_slot_list_portnum_pin_net = gen_new_board_list_slot_list_portnum_pin_net()
 
 	list_pin_iotype = gen_kc705_list_pin_iotype()
 
