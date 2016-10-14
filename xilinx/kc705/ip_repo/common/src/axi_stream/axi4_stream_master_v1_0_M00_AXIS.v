@@ -105,8 +105,10 @@ module axi4_stream_master_v1_0_M00_AXIS #
 	always @(posedge M_AXIS_ACLK) begin
 		// Synchronous reset (active low)
 		if (!M_AXIS_ARESETN) begin
-			mst_exec_state <= IDLE;
+			count <= C_M_START_COUNT;
 			ren_0 <= 0;
+
+			mst_exec_state <= IDLE;
 		end
 		else begin
 			ren_0 <= 0;

@@ -76,9 +76,9 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 			}
 		}
 
-		if(!dma->is_auto_receive) {
-			if(c > 0) {
-				if(!data_available) {
+		if(c > 0) {
+			if(!data_available) {
+				if(!dma->is_auto_receive) {
 					if(put_pcie_tr(
 						   dma,
 						   0,
@@ -91,13 +91,12 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 					} else {
 						data_available = true;
 					}
+				} else {
+					c = 0;
 				}
 			} else {
-				c = 0;
 			}
-		}
 
-		if(c > 0) {
 			if(read_available(dma->list)) {
 				c = read_buffer(buf + ret, c, dma->list);
 				ret += c;
@@ -105,8 +104,9 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 				idle_count = 0;
 			} else {
 				data_available = false;
+				idle_count++;
 
-				if(idle_count++ == 300) {
+				if(idle_count == 300) {
 					return ret;
 				}
 			}
