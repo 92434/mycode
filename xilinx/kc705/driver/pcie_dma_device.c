@@ -76,27 +76,39 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 			}
 		}
 
-		if(c > 0) {
-			if(!data_available) {
-				if(!dma->is_auto_receive) {
-					if(put_pcie_tr(
-						   dma,
-						   0,
-						   offset,
-						   0,
-						   request_c,
-						   NULL,
-						   NULL) <= 0) {
-						c = 0;
-					} else {
-						data_available = true;
-					}
-				} else {
+		if(!data_available) {
+			if(!dma->is_auto_receive) {
+				if(put_pcie_tr(
+					   dma,
+					   0,
+					   offset,
+					   0,
+					   request_c,
+					   NULL,
+					   NULL) <= 0) {
 					c = 0;
+				} else {
+					data_available = true;
 				}
 			} else {
 			}
+		} else {
+		}
 
+		if(!data_available) {
+			if (filp->f_flags & O_NONBLOCK) {
+				return ret;
+			}
+
+			idle_count++;
+
+			if(idle_count == 300) {
+				return ret;
+			}
+		} else {
+		}
+
+		if(c > 0) {
 			if(read_available(dma->list)) {
 				c = read_buffer(buf + ret, c, dma->list);
 				ret += c;
@@ -104,16 +116,8 @@ static ssize_t pcie_dma_read(struct file *filp, char __user *buf, size_t len, lo
 				idle_count = 0;
 			} else {
 				data_available = false;
-				idle_count++;
-
-				if(idle_count == 300) {
-					return ret;
-				}
 			}
 		} else {
-			if (filp->f_flags & O_NONBLOCK) {
-				return ret;
-			}
 		}
 	}
 
@@ -152,25 +156,22 @@ static ssize_t pcie_dma_write(struct file *filp, const char __user *buf, size_t 
 			}
 		}
 
-		if(c > 0) {
-			if(copy_from_user(dma->bar_map_memory[1], buf + ret, c)) {
-				mydebug("%p\n", current);
-				return ret;
-			}
+		if(copy_from_user(dma->bar_map_memory[1], buf + ret, c)) {
+			mydebug("%p\n", current);
+			return ret;
+		}
 
-			if(put_pcie_tr(
-				   dma,
-				   offset,
-				   0,
-				   request_c,
-				   0,
-				   NULL,
-				   NULL
-			   ) <= 0) {
-				c = 0;
-			}
-		} else {
+		if(put_pcie_tr(
+			   dma,
+			   offset,
+			   0,
+			   request_c,
+			   0,
+			   NULL,
+			   NULL
+		   ) <= 0) {
 			c = 0;
+		} else {
 		}
 
 		if(c > 0) {
