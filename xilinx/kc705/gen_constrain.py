@@ -73,6 +73,8 @@ def gen_new_board_list_fmc_part_no():
 		content = f.read()
 	pattern = re.compile(r'\*SIGNAL\* ([^ ]+) \d+ \d+\r\n(J[^\.]+)\.(\d+)\s+')
 	result = pattern.findall(content)
+	pattern = re.compile(r'\*SIGNAL\* ([^ ]+) \d+ \d+\r\n[^\n]+\n[^\n]+\n[^\n]+\n(J[^\.]+)\.(\d+)\s+')
+	result.extend(pattern.findall(content))
 	result = sorted(result, key = lambda x:(new_board_list_fmc_part_no_key(x)))
 	list_fmc_part_no = []
 	for i in result:
@@ -85,8 +87,31 @@ def gen_new_board_list_fmc_part_no():
 	print 'total:', len(list_fmc_part_no)
 	return list_fmc_part_no
 
-def gen_new_board_list_slot_list_portnum_pin_net():
+def gen_new_board_list_slot_list_portnum_pin_net(list_fmc_part_no, list_pin_net):
 	list_slot_list_portnum_pin_net = []
+	set_slot = set()
+	for net, slot, portnum in list_fmc_part_no:
+		set_slot.add(slot)
+	for slot in set_slot:
+		list_portnum_pin_net = []
+		slot_list_portnum_pin_net = (slot, list_portnum_pin_net)
+		for net, slot_, portnum in list_fmc_part_no:
+			if slot == slot_:
+				for pin, net_ in list_pin_net:
+					if net == net_:
+						item = (int(portnum), pin, net)				
+						list_portnum_pin_net.append(item)
+		item = (slot, list_portnum_pin_net)
+		list_slot_list_portnum_pin_net.append(item)
+
+	print '-' * 100
+	print 'list_slot_list_portnum_pin_net info'
+	print '-' * 100
+	for slot, list_portnum_pin_net in list_slot_list_portnum_pin_net:
+		print "%s:" %(slot)
+		for i in list_portnum_pin_net:
+			print "\t%s" %(str(i))
+	print 'total:', len(list_slot_list_portnum_pin_net)
 	return list_slot_list_portnum_pin_net
 
 def gen_kc705_list_pin_iotype():
@@ -1340,11 +1365,11 @@ def gen_kc705_constrain():
 
 	list_fmc_part_no = gen_new_board_list_fmc_part_no()
 
-	list_slot_list_portnum_pin_net = gen_new_board_list_slot_list_portnum_pin_net()
-
 	list_pin_iotype = gen_kc705_list_pin_iotype()
 
 	list_pin_net = kc705_gen_list_pin_net(list_pin_iotype)
+
+	list_slot_list_portnum_pin_net = gen_new_board_list_slot_list_portnum_pin_net(list_fmc_part_no, list_pin_net)
 
 	remove_unused_pin(list_pin_net)
 
