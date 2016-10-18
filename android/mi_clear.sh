@@ -171,6 +171,8 @@ function main() {
 "com.jeejen.knowledge"
 "com.jeejen.family.miui"
 "com.miui.touchassistant"
+"com.speedsoftware.rootexplorer"
+"com.mipay.wallet"
 )
 
 	local list_mv_rm_system_app=(

@@ -87,20 +87,30 @@ def gen_new_board_list_fmc_part_no():
 	print 'total:', len(list_fmc_part_no)
 	return list_fmc_part_no
 
-def gen_new_board_list_slot_list_portnum_pin_net(list_fmc_part_no, list_pin_net):
+def gen_new_board_list_slot_list_portnum_pin_net(list_fmc_part_no, list_pin_net, list_kc705_net_group_part_pin):
 	list_slot_list_portnum_pin_net = []
 	set_slot = set()
 	for net, slot, portnum in list_fmc_part_no:
 		set_slot.add(slot)
 	for slot in set_slot:
 		list_portnum_pin_net = []
-		slot_list_portnum_pin_net = (slot, list_portnum_pin_net)
 		for net, slot_, portnum in list_fmc_part_no:
 			if slot == slot_:
-				for pin, net_ in list_pin_net:
+				pin = None
+				for pin_, net_ in list_pin_net:
 					if net == net_:
+						pin = pin_
 						item = (int(portnum), pin, net)				
 						list_portnum_pin_net.append(item)
+						break
+				for net_, group_, part_, pin_ in list_kc705_net_group_part_pin:
+					if net == net_:
+						pin = pin_
+						item = (int(portnum), pin, net)				
+						list_portnum_pin_net.append(item)
+						break
+				if not pin:
+					print "(%s, %s, %s) is not in list_pin_net" %(net, slot, portnum)
 		item = (slot, list_portnum_pin_net)
 		list_slot_list_portnum_pin_net.append(item)
 
@@ -1369,7 +1379,7 @@ def gen_kc705_constrain():
 
 	list_pin_net = kc705_gen_list_pin_net(list_pin_iotype)
 
-	list_slot_list_portnum_pin_net = gen_new_board_list_slot_list_portnum_pin_net(list_fmc_part_no, list_pin_net)
+	list_slot_list_portnum_pin_net = gen_new_board_list_slot_list_portnum_pin_net(list_fmc_part_no, list_pin_net, list_kc705_net_group_part_pin)
 
 	remove_unused_pin(list_pin_net)
 
