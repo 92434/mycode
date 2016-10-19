@@ -1,0 +1,8 @@
+将\r\n换成\n:
+sed 's:\r$::g'
+
+*把.开关的文件匹配出来
+shopt -s dotglob
+
+查看键值绑定:
+bind -p

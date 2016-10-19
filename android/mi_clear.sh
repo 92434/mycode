@@ -173,6 +173,8 @@ function main() {
 "com.miui.touchassistant"
 "com.speedsoftware.rootexplorer"
 "com.mipay.wallet"
+"com.miui.gallery"
+"com.miui.klo.bugreport"
 )
 
 	local list_mv_rm_system_app=(
