@@ -15,6 +15,8 @@ int main(int argc, char **argv)
 	optparse opt;
 	int rtn = 0;
 
+	mydebug("argc:%d\n", argc);
+
 	opt.add_option('f', true, "file name");
 	opt.get_option(argc, argv);
 
@@ -34,7 +36,7 @@ int main(int argc, char **argv)
 
 	if(fd == -1) {
 		mydebug("create file %s\n", file_name);
-		int fd = open(file_name, O_CREAT, S_IRUSR);
+		fd = open(file_name, O_CREAT, S_IRUSR);
 	}
 
 	if(fd == -1) {
