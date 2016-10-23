@@ -1077,19 +1077,22 @@ def list_pin_des_multi_tsp(list_slot_list_portnum_pin_net):
 	]
 
 	J94 = 0
-	list_index_portnum_for_i2s_16_inst = [
+	list_index_portnum_for_multi_tsp_inst = [
 		(J94, 10),
 		(J94, 11),
+		(J94, 21),
+		(J94, 22),
+		(J94, 23),
 	]
 
 	ip_num = len(list_list_slots)
 	list_port_width_list_des = [
-		(1, ['i2c_sck', 'i2c_sda']),
+		(1, ['i2c_sck', 'i2c_sda', 'lnb1_on_off', 'nim_reset', 'tunb_33_on_off']),
 	]
 	str_append = ''
 	list_all_des = get_list_all_ports_name(ip_num, list_port_width_list_des, str_append)
 
-	list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_i2s_16_inst)
+	list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_multi_tsp_inst)
 
 	if len(list_all_des) != len(list_pin_net):
 		str_status = 'list_all_des:%d list_pin_net:%d' %(len(list_all_des), len(list_pin_net))
@@ -1321,9 +1324,9 @@ def gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor):
 			err_msg = 'len(list_if_gpio_ports):%d list_len:%d' %(len(list_if_gpio_ports), list_len)
 			raise Exception(err_msg)
 
-		print '#', '-' * 100
-		print '#', 'gpio constrain for %s' %(i)
-		print '#', '-' * 100
+		#print '#', '-' * 100
+		#print '#', 'gpio constrain for %s' %(i)
+		#print '#', '-' * 100
 
 		base_pin_no = 0
 

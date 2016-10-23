@@ -279,37 +279,85 @@ set_property IOSTANDARD LVCMOS25 [get_ports {asi_out_n_3}]
 # gpio constrain
 # ----------------------------------------------------------------------------------------------------
 
-#FMC_HPC_HA03_P, i2c_sck, R126.1, 248
+#FMC_HPC_HA03_P, i2c_sck, R126.1, 236
 set_property PACKAGE_PIN C12 [get_ports {gpio_tri_io[0]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[0]}]
 
-#FMC_HPC_HA02_N, i2c_sda, R139.1, 249
+#FMC_HPC_HA02_N, i2c_sda, R139.1, 237
 set_property PACKAGE_PIN C11 [get_ports {gpio_tri_io[1]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[1]}]
 
-#FMC_HPC_HA18_P, i2c_sck_1, R134.1, 250
-set_property PACKAGE_PIN K14 [get_ports {gpio_tri_io[2]}]
+#FMC_HPC_HA06_N, lnb1_on_off, R141.1, 238
+set_property PACKAGE_PIN C14 [get_ports {gpio_tri_io[2]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[2]}]
 
-#FMC_HPC_HA17_CC_N, i2c_sda_1, R145.1, 251
-set_property PACKAGE_PIN F13 [get_ports {gpio_tri_io[3]}]
+#FMC_HPC_HA07_N, nim_reset, R129.1, 239
+set_property PACKAGE_PIN A15 [get_ports {gpio_tri_io[3]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[3]}]
 
-#FMC_HPC_LA01_CC_P, i2c_sck_2, R20.1, 252
-set_property PACKAGE_PIN D26 [get_ports {gpio_tri_io[4]}]
+#FMC_HPC_HA08_P, tunb_33_on_off, R118.1, 240
+set_property PACKAGE_PIN E14 [get_ports {gpio_tri_io[4]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[4]}]
 
-#FMC_HPC_LA00_CC_N, i2c_sda_2, R41.1, 253
-set_property PACKAGE_PIN B25 [get_ports {gpio_tri_io[5]}]
+#FMC_HPC_HA18_P, i2c_sck_1, R134.1, 241
+set_property PACKAGE_PIN K14 [get_ports {gpio_tri_io[5]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[5]}]
 
-#FMC_HPC_LA16_P, i2c_sck_3, R48.1, 254
-set_property PACKAGE_PIN B27 [get_ports {gpio_tri_io[6]}]
+#FMC_HPC_HA17_CC_N, i2c_sda_1, R145.1, 242
+set_property PACKAGE_PIN F13 [get_ports {gpio_tri_io[6]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[6]}]
 
-#FMC_HPC_LA15_N, i2c_sda_3, R74.1, 255
-set_property PACKAGE_PIN B24 [get_ports {gpio_tri_io[7]}]
+#FMC_HPC_HA21_N, lnb1_on_off_1, R147.1, 243
+set_property PACKAGE_PIN J12 [get_ports {gpio_tri_io[7]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[7]}]
+
+#FMC_HPC_HA22_N, nim_reset_1, R137.1, 244
+set_property PACKAGE_PIN K11 [get_ports {gpio_tri_io[8]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[8]}]
+
+#FMC_HPC_HA23_P, tunb_33_on_off_1, R148.1, 245
+set_property PACKAGE_PIN L12 [get_ports {gpio_tri_io[9]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[9]}]
+
+#FMC_HPC_LA01_CC_P, i2c_sck_2, R20.1, 246
+set_property PACKAGE_PIN D26 [get_ports {gpio_tri_io[10]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[10]}]
+
+#FMC_HPC_LA00_CC_N, i2c_sda_2, R41.1, 247
+set_property PACKAGE_PIN B25 [get_ports {gpio_tri_io[11]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[11]}]
+
+#FMC_HPC_LA04_N, lnb1_on_off_2, R68.1, 248
+set_property PACKAGE_PIN F28 [get_ports {gpio_tri_io[12]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[12]}]
+
+#FMC_HPC_LA05_N, nim_reset_2, R23.1, 249
+set_property PACKAGE_PIN F30 [get_ports {gpio_tri_io[13]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[13]}]
+
+#FMC_HPC_LA06_P, tunb_33_on_off_2, R5.1, 250
+set_property PACKAGE_PIN H30 [get_ports {gpio_tri_io[14]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[14]}]
+
+#FMC_HPC_LA16_P, i2c_sck_3, R48.1, 251
+set_property PACKAGE_PIN B27 [get_ports {gpio_tri_io[15]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[15]}]
+
+#FMC_HPC_LA15_N, i2c_sda_3, R74.1, 252
+set_property PACKAGE_PIN B24 [get_ports {gpio_tri_io[16]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[16]}]
+
+#FMC_HPC_LA19_N, lnb1_on_off_3, R76.1, 253
+set_property PACKAGE_PIN F18 [get_ports {gpio_tri_io[17]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[17]}]
+
+#FMC_HPC_LA20_N, nim_reset_3, R51.1, 254
+set_property PACKAGE_PIN D19 [get_ports {gpio_tri_io[18]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[18]}]
+
+#FMC_HPC_LA21_P, tunb_33_on_off_3, R77.1, 255
+set_property PACKAGE_PIN A20 [get_ports {gpio_tri_io[19]}]
+set_property IOSTANDARD LVCMOS25 [get_ports {gpio_tri_io[19]}]
 # ----------------------------------------------------------------------------------------------------
 # bitstream constrain
 # ----------------------------------------------------------------------------------------------------

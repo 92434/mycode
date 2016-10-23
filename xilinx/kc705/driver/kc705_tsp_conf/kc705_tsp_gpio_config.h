@@ -18,7 +18,7 @@ static gpio_chip_info_t gpio_chip_info[] = {
 		.ngpio = {2},
 #elif (DEFINED_TSP == 2)
 #warning("DEFINED_TSP == 2")
-		.ngpio = {8},
+		.ngpio = {20},
 #endif//if (DEFINED_TSP == 0)
 
 	},
