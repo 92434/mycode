@@ -9,18 +9,40 @@ def kc705_pins_key(x):
 	r = g.groups()
 	return r[0], int(r[1])
 
-def gen_list_kc705_net_group_part_pin():
-	content = ''
+def gen_demo_board_list_kc705_net_group_part_pin():
+	list_kc705_net_group_part_pin = []
 
+	content = ''
 	with open('kc705_signals.txt') as f:
 		content = f.read()
-	pattern = re.compile(r'\*SIGNAL\* (.*) \d+ \d+\r\n\s*([^\-\s]+)-([^\.]+)\.([^\s]+)')
-	result = pattern.findall(content)
-	list_kc705_net_group_part_pin = sorted(result, key = lambda x:(kc705_pins_key(x)))
+	lines = content.splitlines()
+
+	state = 0
+	signal = None
+	signal_pattern = re.compile(r'^\*SIGNAL\* (.*) \d+ \d+')
+	group_part_pin_pattern = re.compile(r'^([^-\s]+)-([^\.]+)\.([^\s]+)')
+	for line in lines:
+		if len(line) == 0:
+			state = 0
+			signal = None
+			continue
+
+		if state == 0:
+			list_signal = signal_pattern.findall(line)
+			if len(list_signal):
+				signal = list_signal[0]
+				state = 1
+		if state == 1:
+			list_group_part_pin = group_part_pin_pattern.findall(line)
+			for group, part, pin in list_group_part_pin:
+				item = (signal, group, part, pin)
+				list_kc705_net_group_part_pin.append(item)
 	list_kc705_net_group_part_pin.append(('FMC_LPC_PRSNT_M2C_B_LS', 'J2', 'E', 'H2'))
 	list_kc705_net_group_part_pin.append(('FMC_HPC_PRSNT_M2C_B_LS', 'J22', 'I', 'H2'))
 	list_kc705_net_group_part_pin.append(('FMC_HPC_PG_M2C_LS', 'J22', 'F', 'F1'))
-	list_kc705_net_group_part_pin.append(('FMC_C2M_PG_LS', 'J22', 'D', 'D1'))#not valid
+	list_kc705_net_group_part_pin.append(('FMC_C2M_PG_LS', 'J22', 'D', 'D1'))
+
+	list_kc705_net_group_part_pin = sorted(list_kc705_net_group_part_pin, key = lambda x:(kc705_pins_key(x)))
 	print '-' * 100
 	print 'list_kc705_net_group_part_pin info'
 	print '-' * 100
@@ -67,18 +89,35 @@ def new_board_list_fmc_part_no_key(x):
 	return part, int(no)
 
 def gen_new_board_list_fmc_part_no():
-	content = ''
+	list_fmc_part_no = []
 
+	content = ''
 	with open('kc705_new_board_fmc.txt') as f:
 		content = f.read()
-	pattern = re.compile(r'\*SIGNAL\* ([^ ]+) \d+ \d+\r\n(J[^\.]+)\.(\d+)\s+')
-	result = pattern.findall(content)
-	pattern = re.compile(r'\*SIGNAL\* ([^ ]+) \d+ \d+\r\n[^\n]+\n[^\n]+\n[^\n]+\n(J[^\.]+)\.(\d+)\s+')
-	result.extend(pattern.findall(content))
-	result = sorted(result, key = lambda x:(new_board_list_fmc_part_no_key(x)))
-	list_fmc_part_no = []
-	for i in result:
-		list_fmc_part_no.append(i)
+	lines = content.splitlines()
+
+	state = 0
+	signal = None
+	signal_pattern = re.compile(r'^\*SIGNAL\* (.*) \d+ \d+')
+	part_no_pattern = re.compile(r'^(J[^\.]+)\.(\d+)')
+	for line in lines:
+		if len(line) == 0:
+			state = 0
+			signal = None
+			continue
+
+		if state == 0:
+			list_signal = signal_pattern.findall(line)
+			if len(list_signal):
+				signal = list_signal[0]
+				state = 1
+		if state == 1:
+			list_part_no = part_no_pattern.findall(line)
+			for part, no in list_part_no:
+				item = (signal, part, no)
+				list_fmc_part_no.append(item)
+
+	list_fmc_part_no = sorted(list_fmc_part_no, key = lambda x:(new_board_list_fmc_part_no_key(x)))
 	print '-' * 100
 	print 'list_fmc_part_no info'
 	print '-' * 100
@@ -92,6 +131,7 @@ def gen_new_board_list_slot_list_portnum_pin_net(list_fmc_part_no, list_pin_net,
 	set_slot = set()
 	for net, slot, portnum in list_fmc_part_no:
 		set_slot.add(slot)
+	set_slot = sorted(set_slot)
 	for slot in set_slot:
 		list_portnum_pin_net = []
 		for net, slot_, portnum in list_fmc_part_no:
@@ -101,14 +141,17 @@ def gen_new_board_list_slot_list_portnum_pin_net(list_fmc_part_no, list_pin_net,
 					if net == net_:
 						pin = pin_
 						item = (int(portnum), pin, net)				
-						list_portnum_pin_net.append(item)
+						if item not in list_portnum_pin_net:
+							list_portnum_pin_net.append(item)
 						break
-				for net_, group_, part_, pin_ in list_kc705_net_group_part_pin:
-					if net == net_:
-						pin = pin_
-						item = (int(portnum), pin, net)				
-						list_portnum_pin_net.append(item)
-						break
+				if not pin:
+					for net_, group_, part_, pin_ in list_kc705_net_group_part_pin:
+						if net == net_ and group_ == "U1":
+							pin = pin_
+							item = (int(portnum), pin, net)				
+							if item not in list_portnum_pin_net:
+								list_portnum_pin_net.append(item)
+							break
 				if not pin:
 					print "(%s, %s, %s) is not in list_pin_net" %(net, slot, portnum)
 		item = (slot, list_portnum_pin_net)
@@ -123,69 +166,6 @@ def gen_new_board_list_slot_list_portnum_pin_net(list_fmc_part_no, list_pin_net,
 			print "\t%s" %(str(i))
 	print 'total:', len(list_slot_list_portnum_pin_net)
 	return list_slot_list_portnum_pin_net
-
-def gen_kc705_list_pin_iotype():
-	list_pin_iotype = []
-	lines = []
-	with open('kc705_io_package_pins.txt') as f:
-		lines = f.read().splitlines()
-
-	for i in lines:
-		l = i.split()
-		if len(l) == 8:
-			pin_iotype = (l[0], l[1])
-			list_pin_iotype.append(pin_iotype)
-
-	print '-' * 100
-	print 'list_pin_iotype info'
-	print '-' * 100
-	for i in list_pin_iotype:
-		print i
-	print 'total:', len(list_pin_iotype)
-
-	return list_pin_iotype
-
-def kc705_gen_list_pin_net(list_pin_iotype):
-	list_pin_net = []
-	lines = []
-	with open('kc705_package_pin_nets.txt') as f:
-		lines = f.read().splitlines()
-
-	for i in lines:
-		l = i.split()
-		if len(l) == 2:
-			for pin, iotype in list_pin_iotype:
-				if pin == l[0]:
-					pin_net = (l[0], l[1])
-					list_pin_net.append(pin_net)
-					break
-
-	print '-' * 100
-	print 'list_pin_net info'
-	print '-' * 100
-	for i in list_pin_net:
-		print i
-	print 'total:', len(list_pin_net)
-
-	return list_pin_net
-
-def remove_unused_pin(list_pin_net):
-	list_unsupport_pin_net = []
-	unsupport_pin = [
-	]
-	
-	for i in unsupport_pin:
-		for pin_net in list_pin_net:
-			if pin_net[0] == i:
-				list_pin_net.remove(pin_net)
-				list_unsupport_pin_net.append(pin_net)
-				break
-	print '-' * 100
-	print 'list_unsupport_pin_net info'
-	print '-' * 100
-	for i in list_unsupport_pin_net:
-		print i
-	print 'total:', len(list_unsupport_pin_net)
 
 def get_list_slot_list_portnum_pin_net():
 	list_slot_list_portnum_pin_net = [
@@ -512,7 +492,80 @@ def get_list_slot_list_portnum_pin_net():
 		),
 	]
 
+	list_slot_list_portnum_pin_net = sorted(list_slot_list_portnum_pin_net, key = lambda x:x[0])
+
+	print '-' * 100
+	print 'list_slot_list_portnum_pin_net info'
+	print '-' * 100
+	for slot, list_portnum_pin_net in list_slot_list_portnum_pin_net:
+		print "%s:" %(slot)
+		for i in list_portnum_pin_net:
+			print "\t%s" %(str(i))
+	print 'total:', len(list_slot_list_portnum_pin_net)
 	return list_slot_list_portnum_pin_net
+
+def gen_kc705_list_pin_iotype():
+	list_pin_iotype = []
+	lines = []
+	with open('kc705_io_package_pins.txt') as f:
+		lines = f.read().splitlines()
+
+	for i in lines:
+		l = i.split()
+		if len(l) == 8:
+			pin_iotype = (l[0], l[1])
+			list_pin_iotype.append(pin_iotype)
+
+	print '-' * 100
+	print 'list_pin_iotype info'
+	print '-' * 100
+	for i in list_pin_iotype:
+		print i
+	print 'total:', len(list_pin_iotype)
+
+	return list_pin_iotype
+
+def kc705_gen_list_pin_net(list_pin_iotype):
+	list_pin_net = []
+	lines = []
+	with open('kc705_package_pin_nets.txt') as f:
+		lines = f.read().splitlines()
+
+	for i in lines:
+		l = i.split()
+		if len(l) == 2:
+			for pin, iotype in list_pin_iotype:
+				if pin == l[0]:
+					pin_net = (l[0], l[1])
+					list_pin_net.append(pin_net)
+					break
+
+	print '-' * 100
+	print 'list_pin_net info'
+	print '-' * 100
+	for i in list_pin_net:
+		print i
+	print 'total:', len(list_pin_net)
+
+	return list_pin_net
+
+def remove_unused_pin(list_pin_net):
+	list_unsupport_pin_net = []
+	unsupport_pin = [
+	]
+	
+	for i in unsupport_pin:
+		for pin_net in list_pin_net:
+			if pin_net[0] == i:
+				list_pin_net.remove(pin_net)
+				list_unsupport_pin_net.append(pin_net)
+				break
+	print '-' * 100
+	print 'list_unsupport_pin_net info'
+	print '-' * 100
+	for i in list_unsupport_pin_net:
+		print i
+	print 'total:', len(list_unsupport_pin_net)
 
 def map_port_list_property_iic_slave():
 	map_port_list_property = {
@@ -603,7 +656,7 @@ def get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_
 		raise Exception(err_txt)
 	return list_pin_net
 
-def list_pin_port_new_i2s_board_multi():
+def list_pin_port_new_i2s_board_multi(list_slot_list_portnum_pin_net):
 	list_pin_port = []
 
 	list_list_slots = [
@@ -673,7 +726,6 @@ def list_pin_port_new_i2s_board_multi():
 	str_append = ''
 	list_all_ports_name = get_list_all_ports_name(ip_num, list_port_width_list_port_name, str_append)
 
-	list_slot_list_portnum_pin_net = get_list_slot_list_portnum_pin_net()
 	list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_i2s_16_inst)
 
 	if len(list_all_ports_name) != len(list_pin_net):
@@ -828,7 +880,7 @@ def map_port_list_property_multi_tsp():
 
 	return map_port_list_property
 
-def list_pin_port_new_board_multi_tsp():
+def list_pin_port_new_board_multi_tsp(list_slot_list_portnum_pin_net):
 	list_pin_port = []
 
 	list_list_slots = [
@@ -866,7 +918,6 @@ def list_pin_port_new_board_multi_tsp():
 	str_append = ''
 	list_all_ports_name = get_list_all_ports_name(ip_num, list_port_width_list_port_name, str_append)
 
-	list_slot_list_portnum_pin_net = get_list_slot_list_portnum_pin_net()
 	list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_i2s_16_inst)
 
 	if len(list_all_ports_name) != len(list_pin_net):
@@ -879,7 +930,7 @@ def list_pin_port_new_board_multi_tsp():
 			
 	return list_pin_port
 
-def ip_get_list_net_pin_port_des(list_pin_net):
+def ip_get_list_net_pin_port_des(list_pin_net, list_slot_list_portnum_pin_net):
 	list_net_pin_port_des = []
 
 	map_port_list_property = {}
@@ -887,14 +938,14 @@ def ip_get_list_net_pin_port_des(list_pin_net):
 	map_net_property = {}
 	list_pin_port = []
 
-	map_port_list_property = map_port_list_property_new_i2s_board_multi()
-	list_pin_port = list_pin_port_new_i2s_board_multi()
+	#map_port_list_property = map_port_list_property_new_i2s_board_multi()
+	#list_pin_port = list_pin_port_new_i2s_board_multi(list_slot_list_portnum_pin_net)
 
 	#map_port_list_property = map_port_list_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 	#list_net_port = list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 
-	#map_port_list_property = map_port_list_property_multi_tsp()
-	#list_pin_port = list_pin_port_new_board_multi_tsp()
+	map_port_list_property = map_port_list_property_multi_tsp()
+	list_pin_port = list_pin_port_new_board_multi_tsp(list_slot_list_portnum_pin_net)
 
 	list_err_msg = []
 	for pin, port in list_pin_port:
@@ -953,7 +1004,7 @@ def ip_get_list_net_pin_port_des(list_pin_net):
 
 	return list_net_pin_port_des
 
-def list_pin_des_new_i2s_board_multi():
+def list_pin_des_new_i2s_board_multi(list_slot_list_portnum_pin_net):
 	list_pin_des = []
 
 	list_list_slots = [
@@ -983,7 +1034,6 @@ def list_pin_des_new_i2s_board_multi():
 	str_append = ''
 	list_all_des = get_list_all_ports_name(ip_num, list_port_width_list_des, str_append)
 
-	list_slot_list_portnum_pin_net = get_list_slot_list_portnum_pin_net()
 	list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_i2s_16_inst)
 
 	if len(list_all_des) != len(list_pin_net):
@@ -1016,7 +1066,7 @@ def list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328():
 
 	return list_net_des
 
-def list_pin_des_multi_tsp():
+def list_pin_des_multi_tsp(list_slot_list_portnum_pin_net):
 	list_pin_des = []
 
 	list_list_slots = [
@@ -1039,7 +1089,6 @@ def list_pin_des_multi_tsp():
 	str_append = ''
 	list_all_des = get_list_all_ports_name(ip_num, list_port_width_list_des, str_append)
 
-	list_slot_list_portnum_pin_net = get_list_slot_list_portnum_pin_net()
 	list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_i2s_16_inst)
 
 	if len(list_all_des) != len(list_pin_net):
@@ -1052,7 +1101,7 @@ def list_pin_des_multi_tsp():
 
 	return list_pin_des
 
-def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_part_pin, list_fmc_pin_resistor):
+def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_part_pin, list_fmc_pin_resistor, list_slot_list_portnum_pin_net):
 	map_gpioif_list_net_pin_des_resistor = {}
 	map_gpioif_list_net_pin_des_resistor.update({'HPC': []})
 	map_gpioif_list_net_pin_des_resistor.update({'LPC': []})
@@ -1062,9 +1111,9 @@ def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_
 	list_pin_des = []
 	list_net_des = []
 
-	list_pin_des = list_pin_des_new_i2s_board_multi()
+	#list_pin_des = list_pin_des_new_i2s_board_multi(list_slot_list_portnum_pin_net)
 	#list_net_des = list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
-	#list_pin_des = list_pin_des_multi_tsp()
+	list_pin_des = list_pin_des_multi_tsp(list_slot_list_portnum_pin_net)
 
 	for pin, des in list_pin_des:
 		net = None
@@ -1369,7 +1418,7 @@ def gen_gpio_test_list(list_net_pin_des_resistor_gpio_gpio_no):
 		print "%s\t%s\t%s" %(gpio_no, resistor, net)
 
 def gen_kc705_constrain():
-	list_kc705_net_group_part_pin = gen_list_kc705_net_group_part_pin()
+	list_kc705_net_group_part_pin = gen_demo_board_list_kc705_net_group_part_pin()
 
 	list_fmc_pin_resistor = gen_list_fmc_pin_resistor()
 
@@ -1380,12 +1429,13 @@ def gen_kc705_constrain():
 	list_pin_net = kc705_gen_list_pin_net(list_pin_iotype)
 
 	list_slot_list_portnum_pin_net = gen_new_board_list_slot_list_portnum_pin_net(list_fmc_part_no, list_pin_net, list_kc705_net_group_part_pin)
+	#list_slot_list_portnum_pin_net = get_list_slot_list_portnum_pin_net()
 
 	remove_unused_pin(list_pin_net)
 
-	list_net_pin_port_des = ip_get_list_net_pin_port_des(list_pin_net)
+	list_net_pin_port_des = ip_get_list_net_pin_port_des(list_pin_net, list_slot_list_portnum_pin_net)
 
-	map_gpioif_list_net_pin_des_resistor = get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_part_pin, list_fmc_pin_resistor)
+	map_gpioif_list_net_pin_des_resistor = get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_part_pin, list_fmc_pin_resistor, list_slot_list_portnum_pin_net)
 
 	gen_default_contrain()
 
