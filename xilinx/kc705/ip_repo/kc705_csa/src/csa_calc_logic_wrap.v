@@ -53,7 +53,7 @@ module csa_calc_logic_wrap #(
 	my_fifo #(
 			.DATA_WIDTH(CSA_OUT_PARAMETER_LENGTH),
 			.BULK_OF_DATA(1),
-			.BULK_DEPTH(23)
+			.BULK_DEPTH(22)
 		) my_fifo_inst_2 (
 			.rst_n(rst_n),
 			.wclk(clk),
