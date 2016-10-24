@@ -43,14 +43,26 @@
 #define IIC_SDA0 (-1)
 #define IIC_SCL0 (-1)
 
-#elif defined(KC705_I2S_RECEIVER_TEST)
+#elif defined(KC705_I2S_RECEIVER)
+#define DEFINED_I2S 1
 
-#define SPI_MISO (246)
-#define SPI_MOSI (247)
-#define SPI_SCK (248)
-#define SPI_CS (249)
+#define SPI_MISO (226)
+#define SPI_MOSI (227)
+#define SPI_SCK (228)
+#define SPI_CS (229)
 #define IIC_SDA0 (-1)
 #define IIC_SCL0 (-1)
+#if (DEFINED_I2S == 1)
+#warning("DEFINED_I2S == 1")
+#define SPI_MISO_1 (236)
+#define SPI_MOSI_1 (237)
+#define SPI_SCK_1 (238)
+#define SPI_CS_1 (239)
+#define SPI_MISO_2 (246)
+#define SPI_MOSI_2 (247)
+#define SPI_SCK_2 (248)
+#define SPI_CS_2 (249)
+#endif//#if (DEFINED_I2S == 1)
 
 #elif defined(KC705_IIC_SLAVE)
 

@@ -730,7 +730,7 @@ def list_pin_port_new_i2s_board_multi(list_slot_list_portnum_pin_net):
 
 	if len(list_all_ports_name) != len(list_pin_net):
 		str_status = 'list_all_ports_name:%d list_pin_net:%d' %(len(list_all_ports_name), len(list_pin_net))
-		raise Exception('')
+		raise Exception(str_status)
 
 	for i in range(len(list_all_ports_name)):
 		item = (list_pin_net[i][0], list_all_ports_name[i])
@@ -938,14 +938,14 @@ def ip_get_list_net_pin_port_des(list_pin_net, list_slot_list_portnum_pin_net):
 	map_net_property = {}
 	list_pin_port = []
 
-	#map_port_list_property = map_port_list_property_new_i2s_board_multi()
-	#list_pin_port = list_pin_port_new_i2s_board_multi(list_slot_list_portnum_pin_net)
+	map_port_list_property = map_port_list_property_new_i2s_board_multi()
+	list_pin_port = list_pin_port_new_i2s_board_multi(list_slot_list_portnum_pin_net)
 
 	#map_port_list_property = map_port_list_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 	#list_net_port = list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 
-	map_port_list_property = map_port_list_property_multi_tsp()
-	list_pin_port = list_pin_port_new_board_multi_tsp(list_slot_list_portnum_pin_net)
+	#map_port_list_property = map_port_list_property_multi_tsp()
+	#list_pin_port = list_pin_port_new_board_multi_tsp(list_slot_list_portnum_pin_net)
 
 	list_err_msg = []
 	for pin, port in list_pin_port:
@@ -1114,9 +1114,9 @@ def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_
 	list_pin_des = []
 	list_net_des = []
 
-	#list_pin_des = list_pin_des_new_i2s_board_multi(list_slot_list_portnum_pin_net)
+	list_pin_des = list_pin_des_new_i2s_board_multi(list_slot_list_portnum_pin_net)
 	#list_net_des = list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
-	list_pin_des = list_pin_des_multi_tsp(list_slot_list_portnum_pin_net)
+	#list_pin_des = list_pin_des_multi_tsp(list_slot_list_portnum_pin_net)
 
 	for pin, des in list_pin_des:
 		net = None
@@ -1233,29 +1233,29 @@ set_property PACKAGE_PIN U7 [get_ports EXT_PCIE_REFCLK_N]
 #set_property PACKAGE_PIN P1 [get_ports {EXT_PCIE_txn[3]}]
 
 # LED Pins
-set_property PACKAGE_PIN AB8 [get_ports {EXT_LEDS[0]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[0]}]
-
-set_property PACKAGE_PIN AA8 [get_ports {EXT_LEDS[1]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[1]}]
-
-set_property PACKAGE_PIN AC9 [get_ports {EXT_LEDS[2]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[2]}]
-
-set_property PACKAGE_PIN AB9 [get_ports {EXT_LEDS[3]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[3]}]
-
-set_property PACKAGE_PIN AE26 [get_ports {EXT_LEDS[4]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[4]}]
-
-set_property PACKAGE_PIN G19 [get_ports {EXT_LEDS[5]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[5]}]
-
-set_property PACKAGE_PIN E18 [get_ports {EXT_LEDS[6]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[6]}]
-
-set_property PACKAGE_PIN F16 [get_ports {EXT_LEDS[7]}]
-set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[7]}]
+#set_property PACKAGE_PIN AB8 [get_ports {EXT_LEDS[0]}]
+#set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[0]}]
+#
+#set_property PACKAGE_PIN AA8 [get_ports {EXT_LEDS[1]}]
+#set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[1]}]
+#
+#set_property PACKAGE_PIN AC9 [get_ports {EXT_LEDS[2]}]
+#set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[2]}]
+#
+#set_property PACKAGE_PIN AB9 [get_ports {EXT_LEDS[3]}]
+#set_property IOSTANDARD LVCMOS15 [get_ports {EXT_LEDS[3]}]
+#
+#set_property PACKAGE_PIN AE26 [get_ports {EXT_LEDS[4]}]
+#set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[4]}]
+#
+#set_property PACKAGE_PIN G19 [get_ports {EXT_LEDS[5]}]
+#set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[5]}]
+#
+#set_property PACKAGE_PIN E18 [get_ports {EXT_LEDS[6]}]
+#set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[6]}]
+#
+#set_property PACKAGE_PIN F16 [get_ports {EXT_LEDS[7]}]
+#set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[7]}]
 	"""
 
 	print '#', '-' * 100
@@ -1263,19 +1263,37 @@ set_property IOSTANDARD LVCMOS25 [get_ports {EXT_LEDS[7]}]
 	print '#', '-' * 100
 	print txt
 
-def gen_ip_constrain(list_net_pin_port_des):
+def get_slot_portnum_from_net_pin(net, pin, list_slot_list_portnum_pin_net):
+	slot = 'undefined'
+	portnum = 'undefined'
+
+	find = 0
+	for slot_, list_portnum_pin_net in list_slot_list_portnum_pin_net:
+		if find == 1:
+			break
+
+		for portnum_, pin_, net_ in list_portnum_pin_net:
+			if net_ == net and pin_ == pin:
+				slot = slot_
+				portnum = portnum_
+				find = 1
+				break
+	return slot, str(portnum)
+
+def gen_ip_constrain(list_net_pin_port_des, list_slot_list_portnum_pin_net):
 	print '#', '-' * 100
 	print '#', 'ip constrain'
 	print '#', '-' * 100
 
 	for net, pin, port, des in list_net_pin_port_des:
-		print '\n#%s\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(net, pin, port)
+		slot, portnum = get_slot_portnum_from_net_pin(net, pin, list_slot_list_portnum_pin_net)
+		print '\n#%s, %s(%s)\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(net, slot, portnum, pin, port)
 		print 'set_property IOSTANDARD LVCMOS25 [get_ports {%s}]' %(port)
 		if des:
 			for i in des:
 				print i
 
-def gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor):
+def gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor, list_slot_list_portnum_pin_net):
 	list_net_pin_des_resistor_gpio_gpio_no = []
 	start = 0
 	top_pin_no = 256
@@ -1339,7 +1357,8 @@ def gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor):
 			gpio = list_if_gpio_ports[k]
 			item = (net, pin, des, resistor, gpio, gpio_no)
 			list_net_pin_des_resistor_gpio_gpio_no.append(item)
-			print '\n#%s, %s, %s, %d\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(net, des, resistor, gpio_no, pin, gpio)
+			slot, portnum = get_slot_portnum_from_net_pin(net, pin, list_slot_list_portnum_pin_net)
+			print '\n#%s, %s, %s, %s(%s), %d\nset_property PACKAGE_PIN %s [get_ports {%s}]' %(net, des, resistor, slot, portnum, gpio_no, pin, gpio)
 			print 'set_property IOSTANDARD LVCMOS25 [get_ports {%s}]' %(gpio)
 
 		top_pin_no = base_pin_no
@@ -1442,9 +1461,9 @@ def gen_kc705_constrain():
 
 	gen_default_contrain()
 
-	gen_ip_constrain(list_net_pin_port_des)
+	gen_ip_constrain(list_net_pin_port_des, list_slot_list_portnum_pin_net)
 
-	list_net_pin_des_resistor_gpio_gpio_no = gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor)
+	list_net_pin_des_resistor_gpio_gpio_no = gen_gpio_constrain(map_gpioif_list_net_pin_des_resistor, list_slot_list_portnum_pin_net)
 
 	gen_bitstream_constrain()
 

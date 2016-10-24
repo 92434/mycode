@@ -5,12 +5,30 @@
 //regs
 #define BASE_AXI_PCIe_CTL 0x81000000
 #define BASE_AXI_DMA_LITE_0 0x81001000
+#if defined(KC705_I2S_RECEIVER)
+#define DEFINED_I2S 1
+
+#if (DEFINED_I2S == 0)
 #define BASE_AXI_GPIO_LITE_0 0x81002000
+#elif (DEFINED_I2S == 1) 
+#warning("DEFINED_I2S == 1")
+#define BASE_AXI_DMA_LITE_1 0x81002000
+#define BASE_AXI_DMA_LITE_2 0x81003000
+#define BASE_AXI_GPIO_LITE_0 0x81004000
+#endif//if (DEFINED_I2S == 0)
+#endif//#if defined(KC705_I2S_RECEIVER)
 #define BASE_Translation_BRAM 0x81009000
 
 //PCIe:BAR0 Address Offset for the accessible Interfaces
 #define OFFSET_AXI_PCIe_CTL (BASE_AXI_PCIe_CTL - BASE_AXI_PCIe)
 #define OFFSET_AXI_DMA_LITE_0 (BASE_AXI_DMA_LITE_0 - BASE_AXI_PCIe)
+#if defined(KC705_I2S_RECEIVER)
+#if (DEFINED_I2S == 1)
+#warning("DEFINED_I2S == 1")
+#define OFFSET_AXI_DMA_LITE_1 (BASE_AXI_DMA_LITE_1 - BASE_AXI_PCIe)
+#define OFFSET_AXI_DMA_LITE_2 (BASE_AXI_DMA_LITE_2 - BASE_AXI_PCIe)
+#endif//if (DEFINED_I2S == 0)
+#endif//#if defined(KC705_I2S_RECEIVER)
 #define OFFSET_AXI_GPIO_LITE_0 (BASE_AXI_GPIO_LITE_0 - BASE_AXI_PCIe)
 #define OFFSET_Translation_BRAM (BASE_Translation_BRAM - BASE_AXI_PCIe)
 

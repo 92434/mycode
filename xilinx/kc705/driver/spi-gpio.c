@@ -529,6 +529,9 @@ static const struct platform_device_id spi_gpio_driver_ids[] = {
 		.name           = "spi-gpio_1",
 	}, 
 	{
+		.name           = "spi-gpio_2",
+	}, 
+	{
 	}
 };
 MODULE_DEVICE_TABLE(platform, spi_gpio_driver_ids);
