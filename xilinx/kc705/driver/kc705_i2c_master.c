@@ -25,8 +25,8 @@
 #define I2C_BUS_NUM (-1)
 
 static struct i2c_gpio_platform_data i2c_gpio_data = {
-	.sda_pin		= IIC_SDA0 - 76,
-	.scl_pin		= IIC_SCL0 - 76,
+	.sda_pin		= IIC_SDA0,
+	.scl_pin		= IIC_SCL0,
 	.sda_is_open_drain	= 0,
 	.scl_is_open_drain	= 0,
 	.udelay			= 10,
