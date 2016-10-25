@@ -20,7 +20,7 @@ typedef struct dma_static_config {
 } dma_static_config_info_t;
 
 #define DEFINED_TSP 2
-#define ENABLE_DMA 1
+#define ENABLE_DMA 0
 
 static dma_static_config_info_t dma_info[] = {
 	{

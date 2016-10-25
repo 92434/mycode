@@ -1,10 +1,4 @@
-include $(default_rules)
-
-#all_dirs := $(strip $(call all-dirs-under))
-
-SUB_DIRS := driver app
-
-include $(ADD_TARGET)
+export BUILD_KO=$(shell pwd)/driver/build_kernel_modules.mk
 
 #export SUBJECT := DVBS2
 #export SUBJECT := KC705_CSA
@@ -13,7 +7,7 @@ include $(ADD_TARGET)
 #export SUBJECT := KC705_I2S_RECEIVER
 #export SUBJECT := KC705_IIC_SLAVE
 #export SUBJECT := KC705_DVBS2
-export SUBJECT := KC705_TSP
+#export SUBJECT := KC705_TSP
 
 
 ifeq ($(SUBJECT), DVBS2)
@@ -29,6 +23,33 @@ else ifeq ($(SUBJECT), KC705_DVBS2)
 else ifeq ($(SUBJECT), KC705_TSP)
 	NEED_I2C := YES
 endif
+
+app_target := app/kc705_device \
+		app/tsp_dma \
+		app/asi_dma \
+		app/i2s_dma \
+		app/i2s_spi_dev \
+		app/tsp_regs \
+		app/dvbs2_regs \
+		app/iic_slave \
+		app/csa_dma \
+		app/csa_reg \
+		app/csa_debug_dma \
+		app/csa_debug_reg
+
+all : $(app_target)
+	make -C driver
+
+% : %.c app/utils.c
+	gcc -Idriver -o $@ $^ -pthread
+
+clean : clean-app clean-driver
+
+clean-app :
+	-rm $(app_target)
+
+clean-driver :
+	make -C driver clean
 
 install:
 	sudo insmod driver/kc705-module.ko

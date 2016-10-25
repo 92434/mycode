@@ -523,13 +523,13 @@ MODULE_ALIAS("platform:" DRIVER_NAME);
 
 static const struct platform_device_id spi_gpio_driver_ids[] = {
 	{
-		.name           = "spi-gpio_0",
+		.name           = "spi_gpio",
 	}, 
 	{
-		.name           = "spi-gpio_1",
+		.name           = "spi_gpio_1",
 	}, 
 	{
-		.name           = "spi-gpio_2",
+		.name           = "spi_gpio_2",
 	}, 
 	{
 	}

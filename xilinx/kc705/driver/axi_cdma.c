@@ -54,7 +54,7 @@ static int init_dma(void *ppara)
 	ret = wait_for_iostatus_timeout(0, cdma_base_vaddr + CDMA_CR, BITMASK(2), 0);
 
 	if(ret != 0) {
-		mydebug("timeout!\n");
+		mydebug("%s:time out!\n", dma->devname);
 	}
 
 	//enable sg mode
