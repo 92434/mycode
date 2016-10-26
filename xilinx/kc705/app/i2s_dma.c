@@ -99,14 +99,15 @@ void *read_fn(void *arg) {
 			//printf("read %d!\n", nread);
 			if(nread > 0) {
 				if(
+					//(1)
 					((data[0] & 0xffff) == 0x0b77)
-					&& ((data[1] & 0xffff) == 0xa1dd)
-					&& ((data[2] & 0xffff) == 0x4240)
-					&& ((data[3] & 0xffff) == 0x2f84)
-					&& ((data[4] & 0xffff) == 0x2b03)
-					&& ((data[5] & 0xffff) == 0x8143)
-					&& ((data[6] & 0xffff) == 0x4339)
-					&& ((data[7] & 0xffff) == 0xfa53)
+					//&& ((data[1] & 0xffff) == 0xa1dd)
+					//&& ((data[2] & 0xffff) == 0x4240)
+					//&& ((data[3] & 0xffff) == 0x2f84)
+					//&& ((data[4] & 0xffff) == 0x2b03)
+					//&& ((data[5] & 0xffff) == 0x8143)
+					//&& ((data[6] & 0xffff) == 0x4339)
+					//&& ((data[7] & 0xffff) == 0xfa53)
 					//&& (last_data != (data[86] & 0xffff))
 					//&& (last_byte != (data[79] & 0xff))
 					//&& (0x01 == ((data[78] >> 8) & 0xff))
@@ -147,6 +148,8 @@ void *read_fn(void *arg) {
 							msg_end = "";
 						}
 						printf("%s%02x %02x %s", msg_start, ((data[i] >> 8) & 0xff), ((data[i] >> 0) & 0xff), msg_end);
+						//printf("(%d)[%02x %02x]%02x %02x ",i, ((data[i] >> 24) & 0xff), ((data[i] >> 16) & 0xff),
+						//	((data[i] >> 8) & 0xff), ((data[i] >> 0) & 0xff));
 					}
 					{
         					struct timeval tv0;
