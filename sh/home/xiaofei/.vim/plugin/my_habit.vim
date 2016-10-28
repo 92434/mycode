@@ -5,21 +5,10 @@
 "ignorecase
 "set ic
 
-
-"shiftwidth
-"set sw=2
-
-"set width of table
-set ts=8
-
-"table to space||||retab!
-"set et
-
-"smarttab
-"set sta
-
-"set filetype indent
-:filetype indent on
+au FileType c setlocal sw=8 ts=8 sts=8
+au FileType cpp setlocal sw=8 ts=8 sts=8
+au FileType java setlocal sw=4 ts=4 sts=4
+au FileType python setlocal sw=4 ts=4 sts=4 et
 
 "autoindent
 set ai	

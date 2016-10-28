@@ -10,7 +10,7 @@ poll_test.cpp.LOCAL_CFLAGS :=
 poll_test.cpp.LOCAL_LDFLAGS :=
 poll_test.cpp.LOCAL_DEPS :=
 
-c_files := RC4.cpp
+c_files += RC4.cpp
 local_lib_src :=
 poll_test.cpp.LOCAL_CFLAGS :=
 poll_test.cpp.LOCAL_LDFLAGS :=

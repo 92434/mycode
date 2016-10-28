@@ -1,5 +1,5 @@
-#ifndef _INTERFACE_IO_H
-#define _INTERFACE_IO_H
+#ifndef _INTERFACE_CONF_H
+#define _INTERFACE_CONF_H
 
 
 #if defined(DVBS2)
@@ -113,4 +113,4 @@
 #endif//if (DEFINED_TSP == 0)
 #endif
 
-#endif //ifndef _INTERFACE_IO_H
+#endif //ifndef _INTERFACE_CONF_H
