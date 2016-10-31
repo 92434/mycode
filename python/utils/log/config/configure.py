@@ -58,7 +58,8 @@ def gen_debug_file():
 	if not os.path.exists(dirname):
 		os.makedirs(dirname)
 	return debug_file
-debug_file = gen_debug_file()
+#debug_file = gen_debug_file()
+debug_file = None
 
 dict_config = {
 	'version': 1,
@@ -85,14 +86,14 @@ dict_config = {
 			'level': 'DEBUG',
 			'class': 'logging.NullHandler',
 		},
-		'file': {
-			'level': 'DEBUG',
-			'class': 'logging.FileHandler',
-			#'filename': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'debug.log'),
-			'filename': debug_file,
-			'formatter': 'myformatter',
-			'filters': ['special']
-		},
+		#'file': {
+		#	'level': 'DEBUG',
+		#	'class': 'logging.FileHandler',
+		#	#'filename': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'debug.log'),
+		#	'filename': debug_file,
+		#	'formatter': 'myformatter',
+		#	'filters': ['special']
+		#},
 		'tcp': {
 			'level': 'DEBUG',
 			'class': 'logging.handlers.SocketHandler',
@@ -119,7 +120,8 @@ dict_config = {
 
 	'loggers': {
 		'my_logger': {
-			'handlers': ['file', 'console', 'tcp', 'udp'],
+			#'handlers': ['file', 'console', 'tcp', 'udp'],
+			'handlers': ['console', 'tcp', 'udp'],
 			'level': 'DEBUG',
 			'propagate': True,
 		},
