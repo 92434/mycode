@@ -59,7 +59,7 @@ def gen_debug_file():
 		os.makedirs(dirname)
 	return debug_file
 #debug_file = gen_debug_file()
-debug_file = None
+debug_file = ''
 
 dict_config = {
 	'version': 1,
