@@ -885,9 +885,10 @@ def list_pin_port_new_board_multi_tsp(list_slot_list_portnum_pin_net):
 
 	list_list_slots = [
 		['J94'],
-		['J95'],
+		#['J95'],
+		['J101'],
 		['J96'],
-		['J97']
+		#['J97'],
 	]
 
 	J94 = 0
@@ -938,14 +939,14 @@ def ip_get_list_net_pin_port_des(list_pin_net, list_slot_list_portnum_pin_net):
 	map_net_property = {}
 	list_pin_port = []
 
-	map_port_list_property = map_port_list_property_new_i2s_board_multi()
-	list_pin_port = list_pin_port_new_i2s_board_multi(list_slot_list_portnum_pin_net)
+	#map_port_list_property = map_port_list_property_new_i2s_board_multi()
+	#list_pin_port = list_pin_port_new_i2s_board_multi(list_slot_list_portnum_pin_net)
 
 	#map_port_list_property = map_port_list_property_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 	#list_net_port = list_net_port_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
 
-	#map_port_list_property = map_port_list_property_multi_tsp()
-	#list_pin_port = list_pin_port_new_board_multi_tsp(list_slot_list_portnum_pin_net)
+	map_port_list_property = map_port_list_property_multi_tsp()
+	list_pin_port = list_pin_port_new_board_multi_tsp(list_slot_list_portnum_pin_net)
 
 	list_err_msg = []
 	for pin, port in list_pin_port:
@@ -1071,9 +1072,10 @@ def list_pin_des_multi_tsp(list_slot_list_portnum_pin_net):
 
 	list_list_slots = [
 		['J94'],
-		['J95'],
+		#['J95'],
+		['J101'],
 		['J96'],
-		['J97']
+		#['J97'],
 	]
 
 	J94 = 0
@@ -1114,9 +1116,9 @@ def get_map_gpioif_list_net_pin_des_resistor(list_pin_net, list_kc705_net_group_
 	list_pin_des = []
 	list_net_des = []
 
-	list_pin_des = list_pin_des_new_i2s_board_multi(list_slot_list_portnum_pin_net)
+	#list_pin_des = list_pin_des_new_i2s_board_multi(list_slot_list_portnum_pin_net)
 	#list_net_des = list_net_des_old_tsp_board_2ab42e394123204b24255388e7e131aab67b6328()
-	#list_pin_des = list_pin_des_multi_tsp(list_slot_list_portnum_pin_net)
+	list_pin_des = list_pin_des_multi_tsp(list_slot_list_portnum_pin_net)
 
 	for pin, des in list_pin_des:
 		net = None

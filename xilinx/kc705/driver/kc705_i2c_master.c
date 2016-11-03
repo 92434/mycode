@@ -52,14 +52,14 @@ static struct i2c_gpio_platform_data i2c_gpio_data_2 = {
 	.udelay			= 10,
 	.scl_is_output_only	= 1,
 };
-static struct i2c_gpio_platform_data i2c_gpio_data_3 = {
-	.sda_pin		= IIC_SDA3,
-	.scl_pin		= IIC_SCL3,
-	.sda_is_open_drain	= 0,
-	.scl_is_open_drain	= 0,
-	.udelay			= 10,
-	.scl_is_output_only	= 1,
-};
+//static struct i2c_gpio_platform_data i2c_gpio_data_3 = {
+//	.sda_pin		= IIC_SDA3,
+//	.scl_pin		= IIC_SCL3,
+//	.sda_is_open_drain	= 0,
+//	.scl_is_open_drain	= 0,
+//	.udelay			= 10,
+//	.scl_is_output_only	= 1,
+//};
 #endif//if (DEFINED_TSP == 2)
 #endif//#if defined(KC705_TSP)
 
@@ -98,14 +98,14 @@ static struct platform_device i2c_gpio_device_2 = {
 		.release = release_gpio,
 	},
 };
-static struct platform_device i2c_gpio_device_3 = {
-	.name		= "i2c-gpio_3",
-	.id		= I2C_BUS_NUM,
-	.dev		= {
-		.platform_data	= &i2c_gpio_data_3,
-		.release = release_gpio,
-	},
-};
+//static struct platform_device i2c_gpio_device_3 = {
+//	.name		= "i2c-gpio_3",
+//	.id		= I2C_BUS_NUM,
+//	.dev		= {
+//		.platform_data	= &i2c_gpio_data_3,
+//		.release = release_gpio,
+//	},
+//};
 #endif//if (DEFINED_TSP == 2)
 #endif//#if defined(KC705_TSP)
 
@@ -115,7 +115,7 @@ static struct platform_device *pdev = &i2c_gpio_device;
 #warning("DEFINED_TSP == 2")
 static struct platform_device *pdev_1 = &i2c_gpio_device_1;
 static struct platform_device *pdev_2 = &i2c_gpio_device_2;
-static struct platform_device *pdev_3 = &i2c_gpio_device_3;
+//static struct platform_device *pdev_3 = &i2c_gpio_device_3;
 #endif//if (DEFINED_TSP == 2)
 #endif//#if defined(KC705_TSP)
 
@@ -147,12 +147,12 @@ static int __init kc705_i2c_master_init(void)
 		goto kc705_i2c_master_init_failed;
 	}
 
-	ret = platform_device_register(pdev_3);
+	//ret = platform_device_register(pdev_3);
 
-	if(ret != 0) {
-		pdev_3 = NULL;
-		goto kc705_i2c_master_init_failed;
-	}
+	//if(ret != 0) {
+	//	pdev_3 = NULL;
+	//	goto kc705_i2c_master_init_failed;
+	//}
 
 #endif//if (DEFINED_TSP == 2)
 #endif//#if defined(KC705_TSP)
@@ -181,9 +181,9 @@ static void __exit kc705_i2c_master_exit(void)
 		platform_device_unregister(pdev_2);
 	}
 
-	if(pdev_3 != NULL) {
-		platform_device_unregister(pdev_3);
-	}
+	//if(pdev_3 != NULL) {
+	//	platform_device_unregister(pdev_3);
+	//}
 
 #endif//if (DEFINED_TSP == 2)
 #endif//#if defined(KC705_TSP)

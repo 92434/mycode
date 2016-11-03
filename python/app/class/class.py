@@ -56,6 +56,10 @@ class base(object):
         txt = "self:%s args:%s kwargs:%s" %(self, args, kwargs)
         logger.debug(txt)
 
+    def __call__(self, *args, **kwargs):
+        txt = 'self:%s args:%s kwargs:%s' %(self, args, kwargs)
+        logger.debug(txt)
+
     objects = 'base'
 
 def test_attr():
@@ -77,6 +81,7 @@ def test_attr():
 
     base.func(b)
     b.func()
+    b(1, 2, {3 : 4}, v = 5)
 
 
 class derived(base):
@@ -120,9 +125,9 @@ class attr_wrapper(object):
 
     a = base(1, 2, {3 : 4})
 
-    #objects = 'attr_wrapper'
+    objects = 'attr_wrapper'
 
-def test_attr():
+def test_attr_wapper():
     a = attr_wrapper(1, 2, {3 : 4})
     a.a
     a.a = 'xiaofei'
@@ -269,10 +274,9 @@ def test_ma():
 
     txt = 'dir(ao):%s' %(dir(ao))
     logger.debug(txt)
-    
 
 if __name__ == "__main__":
-    #test_attr()
+    #test_attr_wapper()
     #test_derived()
     #test_attr()
     test_ma()
