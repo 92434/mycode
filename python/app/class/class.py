@@ -276,7 +276,7 @@ def test_ma():
     logger.debug(txt)
 
 if __name__ == "__main__":
-    #test_attr_wapper()
+    test_attr_wapper()
     #test_derived()
     #test_attr()
-    test_ma()
+    #test_ma()

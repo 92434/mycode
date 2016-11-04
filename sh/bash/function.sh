@@ -350,3 +350,35 @@ function chcst() {
 function check_net_ports() {
 	netstat -anp
 }
+
+
+function test_patch() {
+	mkdir -p 1 2
+	echo 1234 > 1/file
+	echo 1235 > 2/file
+
+
+	echo -n "1/file:"
+	cat 1/file
+
+	echo -n "2/file:"
+	cat 2/file
+
+	diff -urN 1/file 2/file > diff.patch
+
+	echo "diff.patch:"
+	cat diff.patch
+
+	echo -n "1/file:"
+	cat 1/file
+
+	patch -p0 < diff.patch
+	echo -n "1/file:"
+	cat 1/file
+
+	patch -Rp0 < diff.patch
+	echo -n "1/file:"
+	cat 1/file
+
+	rm 1/file 2/file diff.patch
+}
