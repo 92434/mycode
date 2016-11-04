@@ -1,0 +1,827 @@
+diff -urN driver/gpio.c driver/gpio.c
+--- driver/gpio.c	2016-08-13 13:39:28.919346406 +0800
++++ driver/gpio.c	2016-11-04 18:19:35.819374322 +0800
+@@ -193,24 +193,24 @@
+ ////	return 0;
+ ////}
+ 
+-static int kc705_gpio_get(struct gpio_chip *chip, unsigned offset) {
++static int duodev_gpio_get(struct gpio_chip *chip, unsigned offset) {
+ 	kc705_gpio_chip_channel_t *gpio = container_of(chip, kc705_gpio_chip_channel_t, chip);
+ 
+ 	return gpio_channel_get(gpio->base_addr, gpio->channel_index, offset);
+ }
+ 
+-static void kc705_gpio_set(struct gpio_chip *chip, unsigned offset, int value) {
++static void duodev_gpio_set(struct gpio_chip *chip, unsigned offset, int value) {
+ 	kc705_gpio_chip_channel_t *gpio = container_of(chip, kc705_gpio_chip_channel_t, chip);
+ 	gpio_channel_set(gpio->base_addr, gpio->channel_index, offset, !!value);
+ }
+ 
+-static int kc705_gpio_direction_input(struct gpio_chip *chip, unsigned offset) {
++static int duodev_gpio_direction_input(struct gpio_chip *chip, unsigned offset) {
+ 	kc705_gpio_chip_channel_t *gpio = container_of(chip, kc705_gpio_chip_channel_t, chip);
+ 
+ 	return gpio_channel_set_input(gpio->base_addr, gpio->channel_index, offset);
+ }
+ 
+-static int kc705_gpio_direction_output(struct gpio_chip *chip, unsigned offset, int value) {
++static int duodev_gpio_direction_output(struct gpio_chip *chip, unsigned offset, int value) {
+ 	kc705_gpio_chip_channel_t *gpio = container_of(chip, kc705_gpio_chip_channel_t, chip);
+ 
+ 	gpio_channel_set_output(gpio->base_addr, gpio->channel_index, offset);
+@@ -219,7 +219,7 @@
+ 	return 0;
+ }
+ 
+-static int kc705_gpio_get_direction(struct gpio_chip *chip, unsigned offset) {
++static int duodev_gpio_get_direction(struct gpio_chip *chip, unsigned offset) {
+ 	kc705_gpio_chip_channel_t *gpio = container_of(chip, kc705_gpio_chip_channel_t, chip);
+ 
+ 	return gpio_channel_get_direction(gpio->base_addr, gpio->channel_index, offset);
+@@ -230,17 +230,17 @@
+ 	//.request = request,
+ 	//.free = free,
+ 	.base = -1,
+-	.get_direction = kc705_gpio_get_direction,
+-	.direction_input = kc705_gpio_direction_input,
+-	.direction_output = kc705_gpio_direction_output,
+-	.get = kc705_gpio_get,
+-	.set = kc705_gpio_set,
++	.get_direction = duodev_gpio_get_direction,
++	.direction_input = duodev_gpio_direction_input,
++	.direction_output = duodev_gpio_direction_output,
++	.get = duodev_gpio_get,
++	.set = duodev_gpio_set,
+ 	//.dbg_show = dbg_show,
+ 	//.to_irq = to_irq,
+ 	.ngpio = DEFAULT_CHANNEL_PIN_NUMBER,
+ };
+ 
+-void *kc705_add_gpio_chip(uint8_t *base_addr, int ngpios, int *pngpio, char *namefmt, ...) {
++void *duodev_add_gpio_chip(uint8_t *base_addr, int ngpios, int *pngpio, char *namefmt, ...) {
+ 	void *ret;
+ 	int i;
+ 	char base_name[NAME_SIZE] = {0};
+@@ -277,7 +277,7 @@
+ 	return ret;
+ }
+ 
+-void kc705_remove_gpio_chip(void *ppara) {
++void duodev_remove_gpio_chip(void *ppara) {
+ 	kc705_gpio_chip_t *kc705_gpio_chip = (kc705_gpio_chip_t *)ppara;
+ 	int i;
+ 	
+diff -urN driver/gpio.h driver/gpio.h
+--- driver/gpio.h	2016-08-12 15:16:51.643792428 +0800
++++ driver/gpio.h	2016-11-04 18:19:35.823374321 +0800
+@@ -1,5 +1,5 @@
+ #ifndef _GPIO_H
+ #define _GPIO_H
+-void *kc705_add_gpio_chip(uint8_t *base_addr, int ngpios, int *pngpio, char *namefmt, ...);
+-void kc705_remove_gpio_chip(void *ppara);
++void *duodev_add_gpio_chip(uint8_t *base_addr, int ngpios, int *pngpio, char *namefmt, ...);
++void duodev_remove_gpio_chip(void *ppara);
+ #endif//#ifndef _GPIO_H
+diff -urN driver/i2c-dev.c driver/i2c-dev.c
+--- driver/i2c-dev.c	2016-11-04 18:09:30.467394660 +0800
++++ driver/i2c-dev.c	2016-11-04 18:19:35.823374321 +0800
+@@ -78,7 +78,7 @@
+ 	struct i2c_dev *i2c_dev;
+ 
+ 	if (adap->nr >= I2C_MINORS) {
+-		printk(KERN_ERR "i2c-dev: Out of device minors (%d)\n",
++		printk(KERN_ERR "capa_dev_a: Out of device minors (%d)\n",
+ 		       adap->nr);
+ 		return ERR_PTR(-ENODEV);
+ 	}
+@@ -153,7 +153,7 @@
+ 	if (tmp == NULL)
+ 		return -ENOMEM;
+ 
+-	pr_debug("i2c-dev: i2c-%d reading %zu bytes.\n",
++	pr_debug("i2c-dev: capa_dev%d_a reading %zu bytes.\n",
+ 		iminor(file_inode(file)), count);
+ 
+ 	ret = i2c_master_recv(client, tmp, count);
+@@ -177,7 +177,7 @@
+ 	if (IS_ERR(tmp))
+ 		return PTR_ERR(tmp);
+ 
+-	pr_debug("i2c-dev: i2c-%d writing %zu bytes.\n",
++	pr_debug("capa_dev_a: capa_dev%d_a writing %zu bytes.\n",
+ 		iminor(file_inode(file)), count);
+ 
+ 	ret = i2c_master_send(client, tmp, count);
+@@ -513,7 +513,7 @@
+ 		i2c_put_adapter(adap);
+ 		return -ENOMEM;
+ 	}
+-	snprintf(client->name, I2C_NAME_SIZE, "i2c-dev %d", adap->nr);
++	snprintf(client->name, I2C_NAME_SIZE, "capa_dev%d_a", adap->nr);
+ 
+ 	client->adapter = adap;
+ 	file->private_data = client;
+@@ -563,13 +563,13 @@
+ 	/* register this i2c device with the driver core */
+ 	i2c_dev->dev = device_create(i2c_dev_class, &adap->dev,
+ 				     MKDEV(I2C_MAJOR, adap->nr), NULL,
+-				     "i2c-%d", adap->nr);
++				     "capa_dev%d_a", adap->nr);
+ 	if (IS_ERR(i2c_dev->dev)) {
+ 		res = PTR_ERR(i2c_dev->dev);
+ 		goto error;
+ 	}
+ 
+-	pr_debug("i2c-dev: adapter [%s] registered as minor %d\n",
++	pr_debug("capa_dev_a: adapter [%s] registered as minor %d\n",
+ 		 adap->name, adap->nr);
+ 	return 0;
+ error:
+@@ -593,7 +593,7 @@
+ 	return_i2c_dev(i2c_dev);
+ 	device_destroy(i2c_dev_class, MKDEV(I2C_MAJOR, adap->nr));
+ 
+-	pr_debug("i2c-dev: adapter [%s] unregistered\n", adap->name);
++	pr_debug("capa_dev_a: adapter [%s] unregistered\n", adap->name);
+ 	return 0;
+ }
+ 
+diff -urN driver/i2s_receiver_conf/i2s_receiver_dma_config.h driver/i2s_receiver_conf/i2s_receiver_dma_config.h
+--- driver/i2s_receiver_conf/i2s_receiver_dma_config.h	2016-11-04 18:09:30.471394660 +0800
++++ driver/i2s_receiver_conf/i2s_receiver_dma_config.h	2016-11-04 18:19:35.823374321 +0800
+@@ -41,7 +41,7 @@
+ 
+ 		.receive_bulk_size = 87 * 4,
+ 		.send_bulk_size = 87 * 4,
+-		.devname = "i2s_receiver_dma",
++		.devname = "capb_dev0_b",
+ 	},
+ #if defined(KC705_I2S_RECEIVER)
+ #define DEFINED_I2S 1
+@@ -69,7 +69,7 @@
+ 
+ 		.receive_bulk_size = 87 * 4,
+ 		.send_bulk_size = 87 * 4,
+-		.devname = "i2s_receiver_dma_1",
++		.devname = "capb_dev1_b",
+ 	},
+ 	{
+ 		.dma_lite_offset = OFFSET_AXI_DMA_LITE_2,
+@@ -92,7 +92,7 @@
+ 
+ 		.receive_bulk_size = 87 * 4,
+ 		.send_bulk_size = 87 * 4,
+-		.devname = "i2s_receiver_dma_2",
++		.devname = "capb_dev2_b",
+ 	},
+ #endif//if (DEFINED_I2S == 1)
+ #endif//#if defined(KC705_I2S_RECEIVER)
+diff -urN driver/kc705.c driver/kc705.c
+--- driver/kc705.c	2016-08-12 15:16:51.315792425 +0800
++++ driver/kc705.c	2016-11-04 18:19:35.823374321 +0800
+@@ -22,23 +22,23 @@
+ 
+ 	if(my_pci_device_id != 0) {
+ 		mydebug("my_pci_device_id:0x%x!\n", my_pci_device_id);
+-		((struct pci_device_id *)kc705_pcie_driver.id_table)[0].device = my_pci_device_id;
++		((struct pci_device_id *)duodev_pcie_driver.id_table)[0].device = my_pci_device_id;
+ 	}
+ 
+ 	/* Just register the driver. No kernel boot options used. */
+-	ret = pci_register_driver(&kc705_pcie_driver);
++	ret = pci_register_driver(&duodev_pcie_driver);
+ 
+ 	mydebug("kc705 initilized!\n");
+ 
+ 	return ret;
+ }
+ 
+-static void __exit kc705_exit(void) {
++static void __exit duodev_exit(void) {
+ 	/* Then, unregister driver with PCI in order to free up resources */
+-	pci_unregister_driver(&kc705_pcie_driver);
++	pci_unregister_driver(&duodev_pcie_driver);
+ 
+ 	mydebug("kc705 exit!\n");
+ }
+ 
+ module_init(kc705_init);
+-module_exit(kc705_exit);
++module_exit(duodev_exit);
+diff -urN driver/kc705_i2c_master.c driver/kc705_i2c_master.c
+--- driver/kc705_i2c_master.c	2016-11-02 13:51:53.640772254 +0800
++++ driver/kc705_i2c_master.c	2016-11-04 18:19:35.823374321 +0800
+@@ -161,7 +161,7 @@
+ 	return ret;
+ }
+ 
+-static void __exit kc705_i2c_master_exit(void)
++static void __exit duodev_i2c_master_exit(void)
+ {
+ 	printk("%s\n", __PRETTY_FUNCTION__);
+ 
+@@ -190,7 +190,7 @@
+ }
+ 
+ module_init(kc705_i2c_master_init);
+-module_exit(kc705_i2c_master_exit);
++module_exit(duodev_i2c_master_exit);
+ 
+ MODULE_LICENSE("GPL");
+ MODULE_AUTHOR("xiaofei");
+diff -urN driver/kc705_tsp_conf/kc705_tsp_dma_config.h driver/kc705_tsp_conf/kc705_tsp_dma_config.h
+--- driver/kc705_tsp_conf/kc705_tsp_dma_config.h	2016-11-04 18:09:30.471394660 +0800
++++ driver/kc705_tsp_conf/kc705_tsp_dma_config.h	2016-11-04 18:19:35.823374321 +0800
+@@ -38,7 +38,7 @@
+ 
+ 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
+ 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+-		.devname = "tsp_regs_0",
++		.devname = "capa_dev0_b",
+ 	},
+ #if (DEFINED_TSP == 2)
+ 	{
+@@ -56,7 +56,7 @@
+ 
+ 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
+ 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+-		.devname = "tsp_regs_1",
++		.devname = "capa_dev1_b",
+ 	},
+ 	{
+ 		.dma_lite_offset = OFFSET_AXI_TSP_LITE_2,
+@@ -73,7 +73,7 @@
+ 
+ 		.receive_bulk_size = PCIe_MAP_BAR_SIZE,
+ 		.send_bulk_size = PCIe_MAP_BAR_SIZE,
+-		.devname = "tsp_regs_2",
++		.devname = "capa_dev2_b",
+ 	},
+ 	//{
+ 	//	.dma_lite_offset = OFFSET_AXI_TSP_LITE_3,
+diff -urN driver/Makefile driver/Makefile
+--- driver/Makefile	2016-11-04 18:09:30.471394660 +0800
++++ driver/Makefile	2016-11-04 18:19:35.823374321 +0800
+@@ -8,7 +8,7 @@
+ 
+ KBUILD_CFLAGS += -D$(SUBJECT)
+ 
+-kc705-module-objs := kc705.o \
++DuoDev0-objs := kc705.o \
+ 	pcie.o \
+ 	gpio.o \
+ 	gpio_proc.o \
+@@ -31,10 +31,18 @@
+ 	utils/xiaofei_kthread.o \
+ 	utils/xiaofei_timer.o \
+ 	utils/xiaofei_list_buffer.o
+-KERNEL-OBJS += kc705-module.o
+ 
+-spi-gpio-all-objs := spi-gpio.o spi-bitbang.o
+-KERNEL-OBJS += i2c-gpio.o i2c-dev.o spi-gpio-all.o spidev.o kc705_i2c_master.o kc705_spi_master.o kc705_spi_device.o
++KERNEL-OBJS += DuoDev0.o
++
++DuoDev7-objs := i2c-gpio.o
++DuoDev6-objs := i2c-dev.o
++DuoDev4-objs := spi-gpio.o spi-bitbang.o
++DuoDev3-objs := spidev.o
++DuoDev5-objs := kc705_i2c_master.o
++DuoDev1-objs := kc705_spi_master.o
++DuoDev2-objs := kc705_spi_device.o
++
++KERNEL-OBJS += DuoDev7.o DuoDev6.o DuoDev4.o DuoDev3.o DuoDev5.o DuoDev1.o DuoDev2.o
+ 
+ include $(BUILD_KO)
+ 
+diff -urN driver/pcie.c driver/pcie.c
+--- driver/pcie.c	2016-08-12 15:16:50.611792420 +0800
++++ driver/pcie.c	2016-11-04 18:19:35.823374321 +0800
+@@ -27,11 +27,11 @@
+ #include "pcie_dma.h"
+ #include "eg9013f_nz_fb.h"
+ static void add_local_device(kc705_pci_dev_t *kc705_pci_dev) {
+-	add_kc705_gpio(kc705_pci_dev);
++	add_duodev_gpio(kc705_pci_dev);
+ 
+-	init_kc705_dev_class(kc705_pci_dev);
++	init_duodev_dev_class(kc705_pci_dev);
+ 
+-	setup_kc705_dev(kc705_pci_dev);
++	setup_duodev_dev(kc705_pci_dev);
+ 
+ 	add_dma_device(kc705_pci_dev);
+ }
+@@ -40,11 +40,11 @@
+ 
+ 	remove_dma_device(kc705_pci_dev);
+ 
+-	uninstall_kc705_dev(kc705_pci_dev);
++	uninstall_duodev_dev(kc705_pci_dev);
+ 
+-	uninit_kc705_dev_class(kc705_pci_dev);
++	uninit_duodev_dev_class(kc705_pci_dev);
+ 
+-	remove_kc705_gpio(kc705_pci_dev);
++	remove_duodev_gpio(kc705_pci_dev);
+ }
+ 
+ #include "pcie_performance.h"
+@@ -157,7 +157,7 @@
+ }
+ 
+ #include "pcie_utils.h"
+-static int kc705_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *ent) {
++static int duodev_probe_pcie(struct pci_dev *pdev, const struct pci_device_id *ent) {
+ 	int ret = 0;
+ 	kc705_pci_dev_t *kc705_pci_dev = NULL;
+ 
+@@ -175,7 +175,7 @@
+ 	/* Save private data pointer in device structure */
+ 	pci_set_drvdata(kc705_pci_dev->pdev, kc705_pci_dev);
+ 
+-	ret = alloc_kc705_dma(kc705_pci_dev);
++	ret = alloc_duodev_dma(kc705_pci_dev);
+ 	if(ret != 0) {
+ 		ret = -1;
+ 		goto alloc_kc705_pci_dma_failed;
+@@ -187,7 +187,7 @@
+ 		goto alloc_kc705_pci_dma_thread_failed;
+ 	}
+ 
+-	ret = alloc_kc705_gpio(kc705_pci_dev);
++	ret = alloc_duodev_gpio(kc705_pci_dev);
+ 	if(ret != 0) {
+ 		ret = -1;
+ 		goto alloc_kc705_pci_gpiochip_failed;
+@@ -283,11 +283,11 @@
+ add_fb_failed:
+ 	free_pcie_tr(kc705_pci_dev);
+ init_pcie_tr_failed:
+-	free_kc705_gpio(kc705_pci_dev);
++	free_duodev_gpio(kc705_pci_dev);
+ alloc_kc705_pci_gpiochip_failed:
+ 	free_dma_thread(kc705_pci_dev);
+ alloc_kc705_pci_dma_thread_failed:
+-	free_kc705_dma(kc705_pci_dev);
++	free_duodev_dma(kc705_pci_dev);
+ alloc_kc705_pci_dma_failed:
+ 	pci_set_drvdata(kc705_pci_dev->pdev, NULL);
+ 	vfree(kc705_pci_dev);
+@@ -295,7 +295,7 @@
+ 	return ret;
+ }
+ 
+-static void kc705_remove_pcie(struct pci_dev *pdev) {
++static void duodev_remove_pcie(struct pci_dev *pdev) {
+ 	kc705_pci_dev_t *kc705_pci_dev = pci_get_drvdata(pdev);
+ 
+ 	if(kc705_pci_dev == NULL) {
+@@ -326,20 +326,20 @@
+ 
+ 	free_pcie_tr(kc705_pci_dev);
+ 
+-	free_kc705_gpio(kc705_pci_dev);
++	free_duodev_gpio(kc705_pci_dev);
+ 
+ 	free_dma_thread(kc705_pci_dev);
+ 
+-	free_kc705_dma(kc705_pci_dev);
++	free_duodev_dma(kc705_pci_dev);
+ 
+ 	pci_set_drvdata(pdev, NULL);
+ 
+ 	vfree(kc705_pci_dev);
+ }
+ 
+-struct pci_driver kc705_pcie_driver = {
++struct pci_driver duodev_pcie_driver = {
+ 	.name = MODULE_NAME,
+ 	.id_table = ids,
+-	.probe = kc705_probe_pcie,
+-	.remove = __devexit_p(kc705_remove_pcie)
++	.probe = duodev_probe_pcie,
++	.remove = __devexit_p(duodev_remove_pcie)
+ };
+diff -urN driver/pcie_device.c driver/pcie_device.c
+--- driver/pcie_device.c	2016-08-12 15:16:50.343792418 +0800
++++ driver/pcie_device.c	2016-11-04 18:19:35.827374321 +0800
+@@ -10,19 +10,19 @@
+ void start_dma(kc705_pci_dev_t *kc705_pci_dev);
+ void stop_dma(kc705_pci_dev_t *kc705_pci_dev);
+ 
+-static int kc705_open(struct inode *i, struct file *filp) {
++static int duodev_open(struct inode *i, struct file *filp) {
+ 	kc705_pci_dev_t *kc705_pci_dev = container_of(i->i_cdev, kc705_pci_dev_t, cdev);
+ 	filp->private_data = kc705_pci_dev;
+ 	mydebug("\n");
+ 	return 0;
+ }
+ 
+-static int kc705_close(struct inode *i, struct file *filp) {
++static int duodev_close(struct inode *i, struct file *filp) {
+ 	mydebug("\n");
+ 	return 0;
+ }
+ 
+-static ssize_t kc705_read(struct file *filp, char __user * buf, size_t len, loff_t * off) {
++static ssize_t duodev_read(struct file *filp, char __user * buf, size_t len, loff_t * off) {
+ 	int ret = 0;
+ 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)filp->private_data;
+ 	kc705_pci_dev = kc705_pci_dev;
+@@ -36,12 +36,12 @@
+ 	return ret;
+ }
+ 
+-static ssize_t kc705_write(struct file *filp, const char __user * buf, size_t len, loff_t * off) {
++static ssize_t duodev_write(struct file *filp, const char __user * buf, size_t len, loff_t * off) {
+ 	mydebug("\n");
+ 	return len;
+ }
+ 
+-static unsigned int kc705_poll(struct file *filp, poll_table *wait) {
++static unsigned int duodev_poll(struct file *filp, poll_table *wait) {
+ 	unsigned int mask =0;
+ 
+ 
+@@ -49,7 +49,7 @@
+ 	return mask;
+ }
+ 
+-static int kc705_mmap(struct file *filp, struct vm_area_struct *vma) {
++static int duodev_mmap(struct file *filp, struct vm_area_struct *vma) {
+ 	int ret;
+ 	unsigned long requested_size;
+ 
+@@ -61,7 +61,7 @@
+ 	return ret;
+ }
+ 
+-static long kc705_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
++static long duodev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
+ 	int ret = 0;
+ 	kc705_pci_dev_t *kc705_pci_dev = (kc705_pci_dev_t *)filp->private_data;
+ 
+@@ -85,18 +85,18 @@
+ 	return ret;
+ }
+ 
+-static const struct file_operations kc705_fops = {
++static const struct file_operations duodev_fops = {
+ 	.owner = THIS_MODULE,
+-	.open = kc705_open,
+-	.release = kc705_close,
+-	.read = kc705_read,
+-	.write = kc705_write,
+-	.mmap = kc705_mmap,
+-	.unlocked_ioctl = kc705_ioctl,
+-	.poll = kc705_poll,
++	.open = duodev_open,
++	.release = duodev_close,
++	.read = duodev_read,
++	.write = duodev_write,
++	.mmap = duodev_mmap,
++	.unlocked_ioctl = duodev_ioctl,
++	.poll = duodev_poll,
+ };
+ 
+-int alloc_kc705_chrdev(kc705_pci_dev_t *kc705_pci_dev) {
++int alloc_duodev_chrdev(kc705_pci_dev_t *kc705_pci_dev) {
+ 	int ret = 0;
+ 	dev_t dev = 0;
+ 	unsigned int major = 0;
+@@ -132,7 +132,7 @@
+ 	return ret;
+ }
+ 
+-void free_kc705_chrdev(kc705_pci_dev_t *kc705_pci_dev) {
++void free_duodev_chrdev(kc705_pci_dev_t *kc705_pci_dev) {
+ 	int i;
+ 
+ 	for(i = 0; i < kc705_pci_dev->dma_count; i++) {
+@@ -144,7 +144,7 @@
+ 	kc705_pci_dev->dev = 0;
+ }
+ 
+-int create_kc705_device_class(kc705_pci_dev_t *kc705_pci_dev) {
++int create_duodev_device_class(kc705_pci_dev_t *kc705_pci_dev) {
+ 	int ret = 0;
+ 
+ 	if(kc705_pci_dev->kc705_class != NULL) {
+@@ -163,7 +163,7 @@
+ 	return ret;
+ }
+ 
+-void destroy_kc705_device_class(kc705_pci_dev_t *kc705_pci_dev) {
++void destroy_duodev_device_class(kc705_pci_dev_t *kc705_pci_dev) {
+ 
+ 	if(!IS_ERR(kc705_pci_dev->kc705_class)) {
+ 		class_destroy(kc705_pci_dev->kc705_class);
+@@ -172,37 +172,37 @@
+ 	kc705_pci_dev->kc705_class = NULL;
+ }
+ 
+-int init_kc705_dev_class(kc705_pci_dev_t *kc705_pci_dev) {
++int init_duodev_dev_class(kc705_pci_dev_t *kc705_pci_dev) {
+ 	int ret = 0;
+ 
+-	ret = alloc_kc705_chrdev(kc705_pci_dev);
++	ret = alloc_duodev_chrdev(kc705_pci_dev);
+ 	if(ret != 0) {
+ 		mydebug("\n");
+-		goto alloc_kc705_chrdev_failed;
++		goto alloc_duodev_chrdev_failed;
+ 	}
+ 
+-	ret = create_kc705_device_class(kc705_pci_dev);
++	ret = create_duodev_device_class(kc705_pci_dev);
+ 	if(ret != 0) {
+ 		mydebug("\n");
+-		goto create_kc705_device_class_failed;
++		goto create_duodev_device_class_failed;
+ 	}
+ 
+ 	return ret;
+ 
+-	destroy_kc705_device_class(kc705_pci_dev);
+-create_kc705_device_class_failed:
+-	free_kc705_chrdev(kc705_pci_dev);
+-alloc_kc705_chrdev_failed:
++	destroy_duodev_device_class(kc705_pci_dev);
++create_duodev_device_class_failed:
++	free_duodev_chrdev(kc705_pci_dev);
++alloc_duodev_chrdev_failed:
+ 	return ret;
+ }
+ 
+-void uninit_kc705_dev_class(kc705_pci_dev_t *kc705_pci_dev) {
+-	destroy_kc705_device_class(kc705_pci_dev);
+-	free_kc705_chrdev(kc705_pci_dev);
++void uninit_duodev_dev_class(kc705_pci_dev_t *kc705_pci_dev) {
++	destroy_duodev_device_class(kc705_pci_dev);
++	free_duodev_chrdev(kc705_pci_dev);
+ }
+ 
+ 
+-int setup_kc705_dev(kc705_pci_dev_t *kc705_pci_dev) {
++int setup_duodev_dev(kc705_pci_dev_t *kc705_pci_dev) {
+ 	int status = 0;
+ 
+ 	if(kc705_pci_dev->devname == NULL) {
+@@ -210,7 +210,7 @@
+ 		goto no_device_name_failed;
+ 	}
+ 
+-	cdev_init(&kc705_pci_dev->cdev, &kc705_fops);
++	cdev_init(&kc705_pci_dev->cdev, &duodev_fops);
+ 
+ 	status = cdev_add(&kc705_pci_dev->cdev, kc705_pci_dev->dev, 1);
+ 	if (status < 0) {
+@@ -235,7 +235,7 @@
+ 	return status;
+ }
+ 
+-void uninstall_kc705_dev(kc705_pci_dev_t *kc705_pci_dev) {
++void uninstall_duodev_dev(kc705_pci_dev_t *kc705_pci_dev) {
+ 	if(kc705_pci_dev->device != NULL) {
+ 		device_destroy(kc705_pci_dev->kc705_class, kc705_pci_dev->dev);
+ 		kc705_pci_dev->device = NULL;
+diff -urN driver/pcie_device.h driver/pcie_device.h
+--- driver/pcie_device.h	2016-08-12 15:16:50.463792419 +0800
++++ driver/pcie_device.h	2016-11-04 18:19:35.827374321 +0800
+@@ -1,9 +1,9 @@
+ #ifndef _PCIE_DEVICE_H
+ #define _PCIE_DEVICE_H
+ 
+-int init_kc705_dev_class(kc705_pci_dev_t *kc705_pci_dev);
+-void uninit_kc705_dev_class(kc705_pci_dev_t *kc705_pci_dev);
+-int setup_kc705_dev(kc705_pci_dev_t *kc705_pci_dev);
+-void uninstall_kc705_dev(kc705_pci_dev_t *kc705_pci_dev);
++int init_duodev_dev_class(kc705_pci_dev_t *kc705_pci_dev);
++void uninit_duodev_dev_class(kc705_pci_dev_t *kc705_pci_dev);
++int setup_duodev_dev(kc705_pci_dev_t *kc705_pci_dev);
++void uninstall_duodev_dev(kc705_pci_dev_t *kc705_pci_dev);
+ 
+ #endif//#ifndef _PCIE_DEVICE_H
+diff -urN driver/pcie_dma.c driver/pcie_dma.c
+--- driver/pcie_dma.c	2016-08-12 15:16:50.863792422 +0800
++++ driver/pcie_dma.c	2016-11-04 18:19:35.827374321 +0800
+@@ -101,7 +101,7 @@
+ 
+ }
+ 
+-int alloc_kc705_dma(kc705_pci_dev_t *kc705_pci_dev) {
++int alloc_duodev_dma(kc705_pci_dev_t *kc705_pci_dev) {
+ 	int ret = 0;
+ 
+ 	if(DMA_MAX == 0) {
+@@ -134,7 +134,7 @@
+ 	return ret;
+ }
+ 
+-void free_kc705_dma(kc705_pci_dev_t *kc705_pci_dev) {
++void free_duodev_dma(kc705_pci_dev_t *kc705_pci_dev) {
+ 	free_dma_memory(kc705_pci_dev);
+ 	if(kc705_pci_dev->dma == NULL) {
+ 		kc705_pci_dev->dma_count = 0;
+diff -urN driver/pcie_dma.h driver/pcie_dma.h
+--- driver/pcie_dma.h	2016-08-12 15:16:50.951792423 +0800
++++ driver/pcie_dma.h	2016-11-04 18:19:35.827374321 +0800
+@@ -1,7 +1,7 @@
+ #ifndef _PCIE_DMA_H
+ #define _PCIE_DMA_H
+-int alloc_kc705_dma(kc705_pci_dev_t *kc705_pci_dev);
+-void free_kc705_dma(kc705_pci_dev_t *kc705_pci_dev);
++int alloc_duodev_dma(kc705_pci_dev_t *kc705_pci_dev);
++void free_duodev_dma(kc705_pci_dev_t *kc705_pci_dev);
+ void add_dma_device(kc705_pci_dev_t *kc705_pci_dev);
+ void remove_dma_device(kc705_pci_dev_t *kc705_pci_dev);
+ irqreturn_t dma_process_isr(kc705_pci_dev_t *kc705_pci_dev);
+diff -urN driver/pcie_gpio.c driver/pcie_gpio.c
+--- driver/pcie_gpio.c	2016-08-12 15:16:50.627792420 +0800
++++ driver/pcie_gpio.c	2016-11-04 18:19:35.827374321 +0800
+@@ -2,7 +2,7 @@
+ #include "gpio_conf.h"
+ #include "utils/xiaofei_debug.h"
+ 
+-int alloc_kc705_gpio(kc705_pci_dev_t *kc705_pci_dev) {
++int alloc_duodev_gpio(kc705_pci_dev_t *kc705_pci_dev) {
+ 	int ret = 0;
+ 
+ 	if(GPIOCHIP_MAX == 0) {
+@@ -18,7 +18,7 @@
+ 	return ret;
+ }
+ 
+-void free_kc705_gpio(kc705_pci_dev_t *kc705_pci_dev) {
++void free_duodev_gpio(kc705_pci_dev_t *kc705_pci_dev) {
+ 	if(kc705_pci_dev->gpiochip != NULL) {
+ 		vfree(kc705_pci_dev->gpiochip);
+ 		kc705_pci_dev->gpiochip = NULL;
+@@ -27,27 +27,27 @@
+ 
+ #include "gpio.h"
+ #include "gpio_proc.h"
+-void add_kc705_gpio(kc705_pci_dev_t *kc705_pci_dev) {
++void add_duodev_gpio(kc705_pci_dev_t *kc705_pci_dev) {
+ 	int i;
+ 
+ 	for(i = 0; i < GPIOCHIP_MAX; i++) {
+ 		uint8_t *gpio_chip_base_addr = kc705_pci_dev->bar_info[0].base_vaddr + gpio_chip_info[i].chip_addr_offset;
+ 		int ngpios = gpio_chip_info[i].ngpios;
+ 		int *pngpio = gpio_chip_info[i].ngpio;
+-		kc705_pci_dev->gpiochip[i] = kc705_add_gpio_chip(gpio_chip_base_addr, ngpios, pngpio, "gpiochip%d", i);
++		kc705_pci_dev->gpiochip[i] = duodev_add_gpio_chip(gpio_chip_base_addr, ngpios, pngpio, "gpiochip%d", i);
+ 	}
+ 
+ 	create_gpio_proc_dir();
+ }
+ 
+-void remove_kc705_gpio(kc705_pci_dev_t *kc705_pci_dev) {
++void remove_duodev_gpio(kc705_pci_dev_t *kc705_pci_dev) {
+ 	int i;
+ 
+ 	remove_gpio_proc_dir();
+ 
+ 	for(i = 0; i < GPIOCHIP_MAX; i++) {
+ 		if(kc705_pci_dev->gpiochip[i] != NULL) {
+-			kc705_remove_gpio_chip(kc705_pci_dev->gpiochip[i]);
++			duodev_remove_gpio_chip(kc705_pci_dev->gpiochip[i]);
+ 			kc705_pci_dev->gpiochip[i] = NULL;
+ 		}
+ 	}
+diff -urN driver/pcie_gpio.h driver/pcie_gpio.h
+--- driver/pcie_gpio.h	2016-08-12 15:16:50.907792422 +0800
++++ driver/pcie_gpio.h	2016-11-04 18:19:35.827374321 +0800
+@@ -1,9 +1,9 @@
+ #ifndef _PCIE_GPIO_H
+ #define _PCIE_GPIO_H
+-int alloc_kc705_gpio(kc705_pci_dev_t *kc705_pci_dev);
+-void free_kc705_gpio(kc705_pci_dev_t *kc705_pci_dev);
++int alloc_duodev_gpio(kc705_pci_dev_t *kc705_pci_dev);
++void free_duodev_gpio(kc705_pci_dev_t *kc705_pci_dev);
+ 
+-void add_kc705_gpio(kc705_pci_dev_t *kc705_pci_dev);
+-void remove_kc705_gpio(kc705_pci_dev_t *kc705_pci_dev);
++void add_duodev_gpio(kc705_pci_dev_t *kc705_pci_dev);
++void remove_duodev_gpio(kc705_pci_dev_t *kc705_pci_dev);
+ 
+ #endif//#ifndef _PCIE_GPIO_H
+diff -urN driver/pcie.h driver/pcie.h
+--- driver/pcie.h	2016-11-04 18:09:30.467394660 +0800
++++ driver/pcie.h	2016-11-04 18:19:35.827374321 +0800
+@@ -18,8 +18,8 @@
+ /** @name Macros for PCI probing
+  * @{
+  */
+-#define PCI_VENDOR_ID_DMA   0x10EE      /**< Vendor ID - Xilinx */
+-#define PCI_DEVICE_ID_DMA   0x7012      /**< Xilinx's Device ID */
++#define PCI_VENDOR_ID_DMA   0x1234      /**< Vendor ID - Xilinx */
++#define PCI_DEVICE_ID_DMA   0x5678      /**< Xilinx's Device ID */
+ 
+ //Base Address
+ //regs
+@@ -169,6 +169,6 @@
+ 	struct fb_info *fb_info;
+ } kc705_pci_dev_t;
+ 
+-extern struct pci_driver kc705_pcie_driver;
++extern struct pci_driver duodev_pcie_driver;
+ 
+ #endif //#define _PCIE_H
+diff -urN driver/spidev.c driver/spidev.c
+--- driver/spidev.c	2016-11-04 18:09:30.471394660 +0800
++++ driver/spidev.c	2016-11-04 18:19:35.827374321 +0800
+@@ -601,7 +601,7 @@
+ 
+ 		spidev->devt = MKDEV(SPIDEV_MAJOR, minor);
+ 		dev = device_create(spidev_class, &spi->dev, spidev->devt,
+-				    spidev, "spidev%d.%d",
++				    spidev, "capb_dev%d_%d_a",
+ 				    spi->master->bus_num, spi->chip_select);
+ 		status = PTR_ERR_OR_ZERO(dev);
+ 	} else {
+diff -urN driver/utils/xiaofei_debug.h driver/utils/xiaofei_debug.h
+--- driver/utils/xiaofei_debug.h	2016-08-12 15:16:54.995792453 +0800
++++ driver/utils/xiaofei_debug.h	2016-11-04 18:27:02.977270283 +0800
+@@ -2,6 +2,7 @@
+ #define _XIAOFEI_DEBUG_H
+ #include <linux/version.h>
+ 
++#if 0
+ #define mydebug(format, ...) printk(KERN_DEBUG "[%s:%s:%d]:" format, __FILE__, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__)
+ #define myprintf(format, ...) printk(KERN_DEBUG format, ## __VA_ARGS__)
+ #define myprintf_once(condition, format, ...) ({ \
+@@ -18,6 +19,12 @@
+ 	} \
+ 	myprintf_once_ret; \
+ })
++#else
++#define printk(format, ...)
++#define mydebug(format, ...)
++#define myprintf(format, ...)
++#define myprintf_once(format, ...)
++#endif//#if 0
+ 
+ #define BITMASK(loc) (1 << loc)
+ 
+diff -urN Makefile Makefile
+--- Makefile	2016-11-04 18:09:30.471394660 +0800
++++ Makefile	2016-11-04 18:19:35.827374321 +0800
+@@ -51,19 +51,19 @@
+ 	make -C driver clean
+ 
+ install:
+-	sudo insmod driver/kc705-module.ko
++	sudo insmod driver/DuoDev0.ko
+ 
+ ifeq ($(NEED_I2C), YES)
+-	sudo insmod driver/i2c-gpio.ko
+-	sudo insmod driver/kc705_i2c_master.ko
+-	sudo insmod driver/i2c-dev.ko
++	sudo insmod driver/DuoDev7.ko
++	sudo insmod driver/DuoDev5.ko
++	sudo insmod driver/DuoDev6.ko
+ endif
+ 
+ ifeq ($(NEED_SPI), YES)
+-	sudo insmod driver/spi-gpio-all.ko
+-	sudo insmod driver/kc705_spi_master.ko
+-	sudo insmod driver/spidev.ko
+-	sudo insmod driver/kc705_spi_device.ko
++	sudo insmod driver/DuoDev4.ko
++	sudo insmod driver/DuoDev1.ko
++	sudo insmod driver/DuoDev3.ko
++	sudo insmod driver/DuoDev2.ko
+ endif
+ 
+ 	dmesg
+@@ -72,20 +72,20 @@
+ #	make start_dma
+ 
+ ifeq ($(NEED_SPI), YES)
+-	-sudo rmmod kc705_spi_device
+-	-sudo rmmod spidev
++	-sudo rmmod DuoDev2
++	-sudo rmmod DuoDev3
+ 	-sudo rmmod spi_bitbang
+-	-sudo rmmod kc705_spi_master
+-	-sudo rmmod spi_gpio_all
++	-sudo rmmod DuoDev1
++	-sudo rmmod DuoDev4
+ endif
+ 
+ ifeq ($(NEED_I2C), YES)
+-	-sudo rmmod i2c-dev
+-	-sudo rmmod kc705_i2c_master
+-	-sudo rmmod i2c_gpio
++	-sudo rmmod DuoDev6
++	-sudo rmmod DuoDev5
++	-sudo rmmod DuoDev7
+ endif
+ 
+-	-sudo rmmod kc705-module
++	-sudo rmmod DuoDev0
+ 
+ 	sudo dmesg -c
+ 
