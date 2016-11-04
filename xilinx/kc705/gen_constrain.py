@@ -884,9 +884,8 @@ def list_pin_port_new_board_multi_tsp(list_slot_list_portnum_pin_net):
 	list_pin_port = []
 
 	list_list_slots = [
+		['J95'],
 		['J94'],
-		#['J95'],
-		['J101'],
 		['J96'],
 		#['J97'],
 	]
@@ -1071,9 +1070,8 @@ def list_pin_des_multi_tsp(list_slot_list_portnum_pin_net):
 	list_pin_des = []
 
 	list_list_slots = [
+		['J95'],
 		['J94'],
-		#['J95'],
-		['J101'],
 		['J96'],
 		#['J97'],
 	]
