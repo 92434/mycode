@@ -1,0 +1,166 @@
+
+一 视频下载
+
+很多实验数据会从YouTube上下载，我用的工具是youtube-dl
+
+1 安装： sudo apt-get install youtube-dl 即可
+
+2 配置使用：如果你已经翻墙，直接： youtube-dl http://www.youtube.com/watch?v=ksjfsjfslkjfskfjs 就可以；如果没有翻墙，可以在~/.bashrc中添加 
+
+http_proxy=http://xxx.xxx.xxx.xxx:yyyy
+export http_proxy
+
+xxx yyy分别是代理的IP和端口
+
+
+二 视频处理
+
+用的是非常强大的工具ffmpeg
+
+1 安装
+
+需要提前安装yasm，从网上下载安装包，然后
+
+./configure 
+
+sudo make 
+
+sudo make install
+
+同样的方法下载ffmpeg的安装包，安装
+
+
+2 使用
+
+常用基本命令：
+
+2.1.分离视频音频流
+ffmpeg -i input_file -vcodec copy -an output_file_video　　//分离视频流
+ffmpeg -i input_file -acodec copy -vn output_file_audio　　//分离音频流
+
+
+2.2.视频解复用
+ffmpeg –i test.mp4 –vcodec copy –an –f m4v test.264
+ffmpeg –i test.avi –vcodec copy –an –f m4v test.264
+
+
+2.3.视频转码
+ffmpeg –i test.mp4 –vcodec h264 –s 352*278 –an –f m4v test.264              //转码为码流原始文件
+ffmpeg –i test.mp4 –vcodec h264 –bf 0 –g 25 –s 352*278 –an –f m4v test.264  //转码为码流原始文件
+ffmpeg –i test.avi -vcodec mpeg4 –vtag xvid –qsame test_xvid.avi            //转码为封装文件
+//-bf B帧数目控制，-g 关键帧间隔控制，-s 分辨率控制
+
+
+2.4.视频封装
+ffmpeg –i video_file –i audio_file –vcodec copy –acodec copy output_file
+
+
+2.5.视频剪切
+ffmpeg –i test.avi –r 1 –f image2 image-%3d.jpeg        //提取图片
+ffmpeg -ss 0:1:30 -t 0:0:20 -i input.avi -vcodec copy -acodec copy output.avi    //剪切视频
+//-r 提取图像的频率，-ss 开始时间，-t 持续时间
+
+
+2.6 视频合并
+
+ffmpeg -i "concat:input1.avi|input2.avi|input3.avi" -c copy output.avi
+
+
+2.7.视频录制
+ffmpeg –i rtsp://192.168.3.205:5555/test –vcodec copy out.avi
+
+
+2.8.YUV序列播放
+ffplay -f rawvideo -video_size 1920x1080 input.yuv
+
+
+2.9.YUV序列转AVI
+ffmpeg –s w*h –pix_fmt yuv420p –i input.yuv –vcodec mpeg4 output.avi
+
+
+
+常用参数说明：
+
+主要参数：
+-i 设定输入流
+-f 设定输出格式
+-ss 开始时间
+视频参数：
+-b 设定视频流量，默认为200Kbit/s
+-r 设定帧速率，默认为25
+-s 设定画面的宽与高
+-aspect 设定画面的比例
+-vn 不处理视频
+-vcodec 设定视频编解码器，未设定时则使用与输入流相同的编解码器
+音频参数：
+-ar 设定采样率
+-ac 设定声音的Channel数
+-acodec 设定声音编解码器，未设定时则使用与输入流相同的编解码器
+-an 不处理音频
+
+
+
+-----------------------------------------------------------------------
+
+以下部分转自 ： http://www.cvchina.info/2011/07/29/ffmpeg-cheat-sheet/ 
+
+
+
+平常少不了用到视频处理，借助GUI工具当然不失为一种选择，但是往往找不到趁手的家伙，virtualDub不错，但是也不够使。
+
+ffmpeg功能极其强大，堪比图像处理的ImageMagik。下面是一些常用的命令，记下备用。
+
+1：得到视频信息
+
+    ffmpeg -i input.xxx
+
+2: 将图像序列转换为视频
+
+    ffmpeg  -f image2 -i prefix%d.jpg output.xxx
+
+3:将视频转换为图像序列
+
+    ffmpeg -i input.xxx prefix%d.jpg
+
+4:将视频转换为yuv格式
+
+    ffmpeg -i input.avi ouput.yuv
+
+强制指定像素格式为yuv420p
+
+    ffmpeg -i input.avi -pix_fmt yuv420p output.yuv
+
+5:通过摄像头录制视频（windows）
+
+    ffmpeg -f vfwcap -r 15 -i 0 output.avi
+
+6:播放视频
+
+    ffplay input.avi
+
+    ffplay -s 640×480 input.yuv
+
+7:旋转视频90度
+
+    ffmpeg -vf  ”transpose=1″ -i input.mp4 output.mp4
+
+8:截取音频的中指定时间的一段
+
+    ffmpeg -ss starttime -t totalseconds -i inout.mp3 -acodec copy output.mp3
+
+    -ss -t都支持hh:mm:ss格式
+
+我常用的就是这些啦。
+
+附上另外别人的cheat sheet。
+
+http://www.webupd8.org/2009/08/ffmpeg-cheat-sheet-19-best-practices.html
+
+http://rodrigopolo.com/ffmpeg/cheats.html
+
+还有ffmpeg的doc，也是最全面的手册。
+
+http://www.ffmpeg.org/ffmpeg.html
+
+愿对诸位有所帮助。
+
