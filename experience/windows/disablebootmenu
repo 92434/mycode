@@ -1,0 +1,10 @@
+1 右键菜单栏，在附件找到cmd（命令提示符），用管理员身份运行
+关闭windows启动管理器
+2 在命令提示符窗口输入bcdedit，看到最后displaybootmenu显示为yes，即表明显示windows启动管理器
+关闭windows启动管理器
+3 为了让它不显示，直接输入BCDEDIT -SET {BOOTMGR} displaybootmenu NO
+关闭windows启动管理器
+4 成功后会显示操作完成，再用输入bcdedit，看看是否更改成功，显示NO即为关闭状态。
+关闭windows启动管理器
+5 有时候想打开这个界面，还原为初始状态可以输入BCDEDIT -SET {BOOTMGR} displaybootmenu YES
+6 过程就是这样了，是不是很简单，有用的朋友请帮忙顶一下，以帮助更多的人
