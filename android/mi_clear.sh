@@ -175,6 +175,8 @@ function main() {
 "com.mipay.wallet"
 "com.miui.gallery"
 "com.miui.klo.bugreport"
+"com.miui.personalassistant"
+"com.miui.home.launcher.assistant"
 )
 
 	local list_mv_rm_system_app=(
@@ -184,6 +186,7 @@ function main() {
 "/system/priv-app/MiGameCenterSDKService.apk=com.xiaomi.gamecenter.sdk.service"
 "/system/app/XMPass.apk=com.xiaomi.pass"
 "/system/app/PaymentService.apk=com.xiaomi.payment"
+"/system/priv-app/PersonalAssistant.apk=com.miui.personalassistant"
 )
 
 	local list_rm_dir=(
@@ -199,6 +202,14 @@ function main() {
 "com.miui.miuibbs"
 "com.xiaomi.o2o"
 "com.wali.live"
+)
+	local list_uninstall_app_temp=(
+"com.sinovatech.unicom.ui"
+"com.kingpoint.gmcchh"
+"com.icbc"
+"com.kugou.android"
+"com.MobileTicket"
+"com.handsgo.jiakao.android"
 )
 
 	echo adb shell busybox mount -o remount,rw,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
@@ -221,6 +232,10 @@ function main() {
 	for i in ${list_uninstall_app[@]};do
 		uninstall_app $i
 	done
+
+	#for i in ${list_uninstall_app_temp[@]};do
+	#	uninstall_app $i
+	#done
 
 	echo adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
 	adb shell busybox mount -o remount,ro,seclabel,noatime,noauto_da_alloc,commit=1,data=ordered -t ext4 /emmc@android /system
