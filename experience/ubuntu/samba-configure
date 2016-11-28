@@ -1,0 +1,37 @@
+samba安装服务器与图形管理界面
+2010-02-06 16:46 佚名 CSDN 我要评论(0) 字号：T | T
+一键收藏，随时查看，分享好友！
+
+安装Ubuntu samba图形管理界面到这里，你已经可以去访问别人共享的目录了如smb://192.168.2.187/启动Ubuntu samba:命令: sudo /etc/init.d/samba start
+
+AD：2013大数据全球技术峰会低价抢票中
+
+Ubuntu samba是常用系统，于是我学习研究了Ubuntu samba，在这里对大家详细介绍下Ubuntu samba系统应用，希望对大家有用。
+
+在终端下卸载samba,smbclient,samba-common
+
+    $sudo apt-get remove samba-common   
+    $sudo apt-get remove smbclient   
+    $sudo apt-get remove samba 
+
+1.安装Ubuntu samba服务器:
+
+    命令: sudo apt-get install samba  
+    sudo apt-get install smbfs  
+    启动: sudo /etc/init.d/samba start 
+
+到这里，你已经可以去访问别人共享的目录了如smb://192.168.2.187/
+
+2.安装Ubuntu samba图形管理界面
+
+命令: sudo apt-get install system-config-samba
+
+3.启动Ubuntu samba:
+
+命令: sudo /etc/init.d/samba start
+
+4.启动管理界面:
+
+命令: sudo system-config-samba （你也可以在点击菜单项进去： 系统－系统管理－Samba）可添加共享目录,选中可访问用户. 设置用户smb密码命令为: sudo smbpasswd -a 用户名在配置时，要选上“可见”，否则就是隐藏的了，别人就看不到你的共享了这样重启之后别人就可以访问你共享的目录了
+
+5.设置完毕之后要重启:sudo /etc/init.d/samba restart

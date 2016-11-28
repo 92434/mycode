@@ -1,0 +1,102 @@
+需要涉及到以下几个目录和文件 
+~/.local/share/applications 
+/etc/gnome/defaults.list 
+/usr/share/applications 
+/usr/share/applications/mimeinfo.cache 
+~/.local/share/applications/mimeinfo.cache 
+去这几个目录看一下，就会发现很多以　desktop　为后缀的文件。 
+这些文件是多功能的，第一，它们是组成GNMOE的“开始”菜单的一部分，即“开始” 
+菜单里的一些应用程序项，在这里都能找到。你可以运行　alacarte ，　这里会 
+列出整个菜单的结构，你可以编辑它，但是很多项你没法删除，因为没有权限， 
+你试着用root权限去运行　alacarte　，抱歉，你还是没有权限删除，要删除它们， 
+只有在/usr/share/applications下面找到对应的文件，直接删除这个文件即可。 
+
+
+从总体上讲 
+/etc/gnome/defaults.list 保存了全局的打开方式 
+~/.local/share/applications/defaults.list 保存了个人的打开方式 
+当两着不一致是，优先采用局部的个人设置。 
+
+
+~/.local/share/applications 
+/usr/share/applications 
+这两个分别是局部的desktop项和全局的desktop项 
+
+
+/usr/share/applications/mimeinfo.cache 
+~/.local/share/applications/mimeinfo.cache 
+这两个分别是全局的和局部的打开方式缓存 
+
+
+先看一下/etc/gnome/defaults.list的结构 
+
+
+[Default Applications] 
+application/csv=gnumeric.desktop 
+application/excel=ooo-calc.desktop 
+application/msexcel=ooo-calc.desktop 
+application/msword=ooo-writer.desktop 
+application/ogg=mplayer.desktop 
+application/pdf=evince.desktop 
+application/postscript=evince.desktop 
+................. 
+text/x-chdr=vim.desktop 
+text/x-csrc=vim.desktop 
+text/x-dtd=vim.desktop 
+text/x-java=vim.desktop 
+text/mathml=vim.desktop 
+text/x-python=vim.desktop 
+text/x-sql=vim.desktop 
+text/xml=firefox.desktop 
+video/dv=mplayer.desktop 
+video/mp4=mplayer.desktop 
+video/mpeg=mplayer.desktop 
+video/msvideo=mplayer.desktop 
+video/quicktime=mplayer.desktop 
+video/vnd.rn-realvideo=mplayer.desktop 
+video/x-anim=mplayer.desktop 
+video/x-avi=mplayer.desktop 
+video/x-flc=mplayer.desktop 
+...................... 
+
+
+不难发现 
+是这样的一种形式 
+程序的类型/文件类型=打开这个文件的项[;项2]...[;项n] 
+候选打开方式可以有好几种 
+中间用;隔开，不留其余字符 
+
+
+
+
+要修改一个文件的打开方式，需要先确定这个文件的类型 
+以纯文本文件为例 类型是plain 打开方式默认为vim.desktop 
+候选的是firefox.desktop 
+text/plain=vim.desktop;firefox.desktop 
+
+
+可以直接编辑 
+~/.local/share/applications/defaults.list 
+/etc/gnome/defaults.list 
+编辑完之后，手工修改 
+/usr/share/applications/mimeinfo.cache 
+~/.local/share/applications/mimeinfo.cache 
+这两个cache文件。 
+这样就立即生效了 
+
+
+下面看一下desktop文件的结构 
+
+
+[Desktop Entry] 
+Encoding=UTF-8 //字符编码 
+Name=vim　　//现实的名字 
+MimeType=text/plain; //类型 
+Exec=vim %f //运行的程序 %f表示一个参数 
+Type=Application　//类型 
+Terminal=true //是否使用终端 
+NoDisplay=true //是否显示在gnome菜单里 
+
+
+知道这些 
+就可以很方便的定制“开始”菜单和文件的打开方式了

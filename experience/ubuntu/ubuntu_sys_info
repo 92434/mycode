@@ -1,0 +1,317 @@
+:系统信息
+一、
+
+
+
+[root@linuxzgf ~]#getconf LONG_BIT
+
+[root@linuxzgf ~]#getconf WORD_BIT
+
+（32位的系统中int类型和long类型一般都是4字节，64位的系统中int类型还是4字节的，但是long已变成了8字节inux系统中可用"getconf WORD_BIT"和"getconf LONG_BIT"获得word和long的位数。64位系统中应该分别得到32和64。）
+
+
+
+二、
+
+
+
+[root@linuxzgf ~]#uname -a
+
+如果有x86_64就是64位的，没有就是32位的
+
+后面是X686或X86_64则内核是64位的，i686或i386则内核是32位的
+
+
+
+三、
+
+
+
+直接看看有没有/lib64目目录的方法。64位的系统会有/lib64和/lib两个目录，32位只有/lib一个。
+
+
+
+四、
+
+
+
+[root@linuxzgf ~]#file /sbin/init
+
+/sbin/init: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), for GNU/Linux 2.6.9, dynamically linked (uses shared libs), for GNU/Linux 2.6.9, stripped
+
+32-bit即是32位的 linux, 如是64位的, 显示的是 64-bit
+
+
+
+五、
+
+
+
+[root@linuxzgf ~]#file /bin/cat
+
+/bin/cat: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), for GNU/Linux 2.6.9, dynamically linked (uses shared libs), for GNU/Linux 2.6.9, stripped
+
+32-bit即是32位的 linux, 如是64位的, 显示的是 64-bit
+
+
+
+六、
+
+
+
+[root@linuxzgf ~]#uname -m
+
+x86_64
+
+3.# arch
+
+x86_64
+
+i686
+
+
+
+七、查看cpu是多少位的
+
+
+
+[root@linuxzgf ~]#more /proc/cpuinfo
+
+
+
+八、
+
+
+
+[root@linuxzgf ~]# echo $HOSTTYPE
+
+x86_64
+
+
+
+getconf命令还可以获取系统的基本配置信息，比如操作系统位数，内存大小，磁盘大小等。
+
+$getconf -a 可以看到详细的系统信息
+
+ubuntu查看系统版本信息[转载]  2008-09-30 15:16:19|  分类： Linux |  标签： |字号大中小 订阅 .
+
+转载自：http://blog.chinaitlab.com/html/88/1031688-150364.html
+
+查看ubuntu系统版本信息
+
+方法一：cat /etc/issue
+            返回结果：Ubuntu 8.04.1 \n \l
+
+方法二：cat /proc/version
+             返回结果：Linux version 2.6.24-21-generic (buildd@palmer) (gcc version 4.2.3 (Ubuntu 4.2.3-2ubuntu7)) #1 SMP Mon Aug 25 17:32:09 UTC 2008
+
+方法三：uname -a
+             返回结果：Linux wwt-laptop 2.6.24-21-generic #1 SMP Mon Aug 25 17:32:09 UTC 2008 i686 GNU/Linux
+
+方法四：lsb_release -a
+             返回结果：
+
+                            No LSB modules are available.
+                            Distributor ID:    Ubuntu
+                            Description:    Ubuntu 8.04.1
+                            Release:    8.04
+                            Codename:    hardy
+
+方法五：cat /etc/lsb-release
+             返回结果：
+                            DISTRIB_ID=Ubuntu
+                            DISTRIB_RELEASE=8.04
+                            DISTRIB_CODENAME=hardy
+                            DISTRIB_DESCRIPTION="Ubuntu 8.04.1"
+
+:ubuntu 终端下快捷键
+linux 2009-12-06 10:38:34 阅读3 评论0 字号：大中小 
+一个系统用久了，总会用到许多快捷键，可能大家对win下的快捷键比对linux下的要熟悉一些，所以，我打算整理一些快捷键的说明。
+
+1.关于终端的快捷键：
+
+Tab：tab键是比较常用的一个快捷键，它的作用是补全文件名或者路径。举例来说，输入”cd /ho”在按一下tab键，终端里就会显示”cd /home”了。如果您的文件夹下，有两个名字开头部分相同的文件，比如有”picture001.bmp”和”picture002.bmp”两个文件，输入”rm pic”以后按下tab键，就会补全成”rm picture”，您可以接着输入剩下的名字。使用tab键补全还支持对于扩展名的识别，比如您的文件夹下有”TH2AD_CHS.exe文件和 TH2AD_CHS.ini文件，当您输入”wine TH”再按下tab后，会补全成”wine TH2AD_CHS.exe”而不会补全.ini文件，因为wine和.exe文件是关联的。
+
+Ctrl+C：这个键可不是用来复制的，在中端下，按下Ctrl+C就代表结速当前终端执行的程序，按下的时候一定要慎重。
+
+Ctrl+A：将光标移动到命令行的开始处。
+
+Ctrl+E：将光标移动到命行令的结尾处。
+
+Ctrl+U：删除行首到光标出的字符。
+
+Ctrl+Z：把当前进程送到后台处理。
+
+Ctrl+Alt+F1：切换到第一个文本终端。在Linux下你可以有多达六个不同的终端。
+
+Ctrl+Alt+F7：切换到第一个图形用户界面（一般来说X-window在第七个终端）。
+
+～：～好像不能算一个快捷键吧？～的作用是代替您的主文件夹，比如您的用户名是user，那么 “/home/user/桌面” 和 “~/桌面” 是等价的。
+
+2.Gnome下的快捷键：
+
+Alt + F1：类似Windows下的Win键，在GNOME中打开”应用程序”菜单(Applications)
+（在KDE下同样适用。）
+
+Alt + F2：类似Windows下的Win + R组合键，在GNOME中运行应用程序
+
+Ctrl + Alt + D：类似Windows下的Win + D组合键，显示桌面。
+
+Ctrl + Alt + L：锁定桌面并启动屏幕保护程序，取消锁定时需要输入密码。
+（在KDE下有效。）
+
+Alt + Tab：同Windows下的Alt + Tab组合键，在不同程序窗口间切换。
+
+PrintScreen：全屏抓图，由于这个功能的反应有点慢，请不要反复按这个键，否则可能会死机。
+
+Alt + PrintScreen：当前窗口抓图，弹出抓图对话框。
+（在KDE下会将图片报存到剪贴板中。）
+
+Ctrl + Alt + → / ←：在不同工作台间切换。
+（在KDE下使用 Ctrl+Tab 键完成这个功能。）
+
+Ctrl + Alt + Shift + → / ←：移动当前窗口到不同工作台
+
+Ctrl+Alt+Shift+Fn：终端N或模拟终端N(n和N为数字1－6)
+
+Ctrl+Alt+F7：返回桌面，如果您用 Ctrl+Alt+F1
+
+Alt + F4：关闭窗口
+
+Alt + F5：取消最大化窗口 (恢复窗口原来的大小)
+
+Alt + F7：移动窗口 (注: 在窗口最大化的状态下无效)
+
+Alt + F8：改变窗口大小 (注: 在窗口最大化的状态下无效)
+
+Alt + F9：最小化窗口
+
+Alt + F10：最大化窗口
+
+Alt + Space：打开窗口的控制菜单 (点击窗口左上角图标出现的菜单) 
+
+单击鼠标滚轮：当您选中一段文字后，按下鼠标滚轮键，可以将选中的文字复制到鼠标所指的位置，在中端中也有效。
+（KDE中未测试。）
+
+Atl+单击鼠标拖动：移动窗口的位置。
+（在KDE和Compiz中同样有效。）
+
+3.Firefox的快捷键：
+
+Alt+左方向键 或 Backspace：后退。
+Shift+Backspace 或 Alt+右方向键：前进。
+Alt+Home：首页。（这里指的是用户自定义的首页）
+Ctrl+O：打开文件。
+F5 或 Ctrl+R：重新载入。
+Ctrl+F5 或 Ctrl+Shift+R：重新载入 (忽略缓存)。
+Esc：停止。
+
+End：到页面底部。
+Home：到页面顶部。
+F6 ：移到下一帧。
+Shift+F6：移到上一帧。
+Ctrl+U：页面源代码。
+Ctrl+P：打印。
+Ctrl+S：页面另存为。
+Ctrl+”+”：放大文字。
+Ctrl+”-”：缩小文字。
+Ctrl+0：恢复文本大小。
+
+Ctrl+F：本页查找。
+F3：再次查找。
+‘：输入查找链接。
+/：输入查找文本。
+Shift+F3：查找。
+Ctrl+K 或 Ctrl+E：网页搜索。
+
+Ctrl+W 或 Ctrl+F4：关闭标签。
+Ctrl+Shift+W 或 Alt+F4：关闭窗口。
+Ctrl+左方向键或 Ctrl+上方向键：向左移动标签。
+Ctrl+右方向键或 Ctrl+下方向键：向右移动标签。
+Ctrl+Home：移动标签到开头。
+Ctrl+End：移动标签到结尾。
+Ctrl+T：新建标签页。
+Ctrl+N：新建窗口。
+Ctrl+Tab 或 Ctrl+PageDown：下一个标签页。
+Alt+Enter：在新标签页打开网址。
+Ctrl+Shift+Tab 或 Ctrl+PageUp：前一个标签页。
+Ctrl+Shift+T：撤销关闭标签页。
+[1 到 8]： Ctrl+[1 到 8]：选择标签页。
+Ctrl+9：选择最后标签页。
+
+Ctrl+Shift+D:添加所有为书签。
+Ctrl+D:添加当前为书签。
+Ctrl+B 或 Ctrl+I：打开书签。
+F7：插入浏览。
+Ctrl+J：下载。
+Ctrl+H：历史。
+Ctrl+Shift+Del：清除私有数据。
+
+Ctrl+Enter：补全 .com 地址。
+Shift+Enter：补全 .net 地址。
+Ctrl+Shift+Enter：补全 .org 地址。
+Del：删除选定的自匹配输入。
+F11：全屏。
+Alt+D 或 F6 或 Ctrl+L：选择地址条。
+Alt+上方向键或 Alt+下方向键 或 F4：选择或管理搜索引擎。
+
+Shift+向上滚动滚轮：前进。
+Shift+向下滚动滚轮：后退。
+在标签上按鼠标中键：关闭标签页。
+Ctrl+滚动滚轮：改变页面比例。
+在标签页栏双击鼠标：新建标签页。
+Ctrl+Left-click 或 点击鼠标中键：在后台打开标签页。
+Shift+Ctrl+Left-click 或 Shift+点击鼠标中键：在前台打开标签页。
+Shift+Left-click：在新窗口打开。
+Shift+Reload button：刷新 (覆盖缓存)。
+Alt+Left-click：保存页面为。
+Alt+滚轮：逐行滚动。
+
+Shift+Ctrl+T:新建标签页 
+
+Shift+Ctrl+W:关闭标签页 
+
+Ctrl+PageUp:前一标签页 
+
+Ctrl+PageDown:后一标签页 
+
+Shift+Ctrl+PageUp:标签页左移 
+
+Shift+Ctrl+PageDown:标签页右移 
+
+Alt+1:切换到标签页1 
+
+Alt+2:切换到标签页2 
+
+Alt+3:切换到标签页3 
+
+Shift+Ctrl+N:新建窗口 
+
+Shift+Ctrl+Q:关闭终端 
+
+终端中的复制／粘贴: 
+
+Shift+Ctrl+C:复制 
+
+Shift+Ctrl+V:粘贴 
+
+终端改变大小： 
+
+F11：全屏 
+
+Ctrl+plus:放大 
+
+Ctrl+minus:减小 
+
+Ctrl+0:原始大小
+
+
+
+
+:默认打开方式：
+全局配置  
+/etc/gnome/defaults.list  
+/usr/share/applications/mimeinfo.cache  
+个人配置  
+~/.local/share/applications/mimeapps.list  
+~/.local/share/applications/mimeinfo.cache  
