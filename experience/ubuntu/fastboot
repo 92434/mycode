@@ -1,0 +1,64 @@
+   1) 添加软件源，安装adb/fastboot
+
+sudo add-apt-repository ppa:nilarimogard/webupd8
+
+sudo apt-get update
+
+sudo apt-get install android-tools-adb android-tools-fastboot
+
+@@@点击此处下载adb安装包@@@(百度)
+
+  2) android设备连接电脑，lsusb命令查看Devices信息
+
+我这里的Devices VID:0x2717  PID:0x0368
+
+执行adb devices，结果无法列出激活设备，如下图所示：
+
+  3) 建立规则，添加权限
+
+sudo touch /etc/udev/rules.d/71-android-rules.rules
+
+sudo vi /etc/udev/rules.d/71-android-rules.rules
+
+sudo chmod a+r /etc/udev/rules.d/71-android-rules.rules
+
+添加下列内容，红色部分对应的就是lsusb得到的Devices ID
+
+SUBSYSTEM=="usb",ATTR{idVendor}=="2717",ATTR{idProduct}=="0368",MODE="0666"
+
+重启usb服务，执行adb devices,发现还是查找不到设备，原因是adb内建有一个知名的厂商ID列表，对于列表内的设备，adb可以直接连接，而不在列表中的设备，它会直接返回，这也就是为什么android设备的驱动已经安装好了，而adb连接不上的原因。如果我们用的android设备的厂商ID被修改过，即未在google默认的列表里，按官方的步骤就会失败。好在adb除了内建的一个列表之后，还有一个adb_usb.ini文件维护一下可信任的第三方厂商列表，需要把VID(Vender ID)写到adb_usb.ini中。
+
+  4) 创建adb_usb.ini(可查看adb源码当中需要建立此文件)文件,写入设备ID
+
+touch ~/.android/adb_usb.ini
+
+echo 0x2717 > ~/.android/adb_usb.ini
+
+如果有多设备，直接追加内容即可：
+
+echo 0x18d1 >> ~/.android/adb_usb.ini
+
+  5) 重启USB服务
+
+sudo service udev restart
+
+  6) 重启adb服务，插拔设备，重新adb devices连接设备，adb安装成功
+
+adb kill-server
+
+adb start-server
+
+adb devices
+
+List of devices attached
+13e3ab6c     device
+
+  7) 查看fastboot是否可列出当前设备
+
+adb reboot bootloader
+
+fastboot devices
+
+13e3ab6c     device
+
+如果识别不到设备，可按照adb方式添加usb设备支持即可

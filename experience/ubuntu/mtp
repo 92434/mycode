@@ -1,0 +1,72 @@
+1.检查安装依赖库[url=]表情[/url]
+
+    sudo apt-get install gvfs-backends mtpfs  libmtp-common mtp-tools libmtp-dev libmtp-runtime libmtp9
+
+
+2.编辑 /etc/fuse.conf 文件,修改 #user_allow_other 为 user_allow_other
+
+    sudo vim /etc/fuse.conf
+
+
+    #/etc/fuse.conf - Configuration file for Filesystem in Userspace (FUSE)
+
+    #Set the maximum number of FUSE mounts allowed to non-root users.
+    #The default is 1000.
+    #mount_max = 1000
+
+    # Allow non-root users to specify the allow_other or allow_root mount options.
+    user_allow_other
+
+
+3.连接手机,查看usb设备码,例如我的手机的设备码就是第一行所示:  Bus 002 Device 006:ID 05c6:6765 Qualcomm, Inc.
+
+    royakon@ubuntu-laptop:~$ lsusb
+    Bus 002 Device 006: ID 05c6:6765 Qualcomm, Inc.
+    Bus 002 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+    Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+    Bus 001 Device 005: ID 0bda:58c1 Realtek Semiconductor Corp.
+    Bus 001 Device 004: ID 0a5c:21bc Broadcom Corp. BCM2070 Bluetooth 2.1 + EDR
+    Bus 001 Device 003: ID 17ef:6042 Lenovo
+    Bus 001 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+    Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+
+
+3.编辑配置文件  /lib/udev/rules.d/69-mtp.rules   如文件不存在则新建,注意文件中替换自己的usb设备代码
+
+    sudo vim /lib/udev/rules.d/69-mtp.rules
+
+
+    # OnePlus One
+    ATTR{idVendor}=="05c6", ATTR{idProduct}=="6765", SYMLINK+="libmtp-%k", ENV{ID_MTP_DEVICE}="1", ENV{ID_MEDIA_PLAYER}="1"
+
+
+4.编辑配置文件 /etc/udev/rules.d/51-android.rules 如文件不存在则新建,注意文件中替换自己的usb设备代码
+
+    sudo vim /etc/udev/rules.d/51-android.rules
+
+
+    ATTR{idVendor}=="05c6", ATTR{idProduct}=="6765", MODE=”0666"
+
+
+5.重启udev服务
+
+    sudo service udev restart
+
+
+6.重启计算机
+
+    sudo reboot
+
+
+附记：如果严格按照上面的步骤，并且注意了全角和半角符号，仍然出现了问题，可以检测是否是libmtp这个库运行不正常，可能在最新的Ubuntu下面，较久版本的不能正常运行，此时，可以按照下面的步骤来更新到最新的libmtp库，然后即可成功。经过测试，也没问题（此步骤可以在前面所有步骤之前进行）
+    sudo apt-get install libusb-dev
+    wget http://downloads.sourceforge.net/project/libmtp/libmtp/1.1.1/libmtp-1.1.1.tar.gz
+    tar -xvf libmtp-1.1.1.tar.gz
+    cd libmtp-1.1.1
+    ./configure --prefix=/usr
+    make
+
+
+    sudo make install
+    sudo cp 69-libmtp.rules /etc/udev/rules.d (mayby not needed)
+    sudo service udev restart
