@@ -165,7 +165,6 @@ function main() {
 "com.xiaomi.market"
 "com.icbc"
 "com.miui.video"
-"com.MobileTicket"
 "com.jeejen.container.miui"
 "com.jeejen.store"
 "com.jeejen.knowledge"

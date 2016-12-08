@@ -1,49 +1,33 @@
 include $(default_rules)
-include /home/xiaofei/workspace/code/mycode/make_test/inc.mk
+include $(shell pwd)/inc.mk
 
-c_files := 
-include $(BUILD_BINS)
+# Cancel implicit rules on top Makefile
+$(CURDIR)/Makefile Makefile:;
 
-include $(ADD_TARGET)
-
-local_targets: xiaofei
-	gcc -print-search-dirs
+env:
 	echo $$\(CURDIR\) is $(CURDIR)
 	echo $$\(MAKEFLAGS\) is $(MAKEFLAGS)
 
+1 2 3:
+	echo $@
+
+overriding_commands: 1
+	echo $@ dep $<
+overriding_commands: 2
+	echo $@ dep $<
+overriding_commands: 3
+	echo $@ dep $<
+overriding_commands:
+	echo $@ dep $<
+
 #define get-device-major
-#	$(strip $(shell awk '/$(1)/ {print $$1}' /proc/devices))
+#	$(shell awk '$$2 ~ /$(1)/ && $$1 !~ /xiaofei/ {print $$1}' /proc/devices)
 #endef
-#define get-device-major
-#	$(shell awk '/$(1)/ {print $$1}' /proc/devices)
-#endef
+get-device-major = $(shell awk '$$2 ~ /$(1)/ && $$1 !~ /xiaofei/ {print $$1}' /proc/devices)
+%_major:
+	echo ${@:_major=} is $(call get-device-major,${@:_major=})
 
-get-device-major = $(shell awk '/$(1)/ {print $$1}' /proc/devices)
-
-# Cancel implicit rules on top Makefile
-$(CURDIR)/Makefile Makefile:
-
-1:
-2:
-3:
-.PHONY: 1 2 3
-
-xiaofei : 2
-xiaofei : 1
-	echo xiaofei1
-	echo $^
-xiaofei : 3
-
-%.t2 : %.t1
-	echo "$@----t1"
-	touch $@
-
-%.t2 :
-	echo "$@----t2"
-	touch $@
-
-test : 1.t2 2.t2 3.t2
-	echo $(call get-device-major,rtc)
-	echo $(get-device-major)
-
+.PHONY: gcc-search-path
+gcc-search-path :
+	gcc -print-search-dirs
 

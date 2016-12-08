@@ -7,9 +7,12 @@ fi
 
 interface=$1
 
+info=
+
 function update_info() {
-	#info=($(ifconfig $interface | grep -o "RX bytes\:\([^ ]\+\).*TX bytes\:\([^ ]\+\).*" | sed 's/RX bytes\:\([^ ]\+\).*TX bytes\:\([^ ]\+\).*/\1 \2/g'))
-	info=($(ifconfig $interface | grep -o "接收字节\:\([^ ]\+\).*发送字节\:\([^ ]\+\).*" | sed 's/接收字节\:\([^ ]\+\).*发送字节\:\([^ ]\+\).*/\1 \2/g'))
+	local rx_tx_info
+	rx_tx_info=$(ifconfig $interface | grep -o "接收字节\:\([^ ]\+\).*发送字节\:\([^ ]\+\).*") || rx_tx_info=$(ifconfig $interface | grep -o "RX bytes\:\([^ ]\+\).*TX bytes\:\([^ ]\+\).*")
+	info=($(echo $rx_tx_info | sed 's/[^\:]*\:\([^ ]\+\)[^\:]\+\:\([^ ]\+\).*/\1 \2/g'))
 }
 
 function get_received() {
