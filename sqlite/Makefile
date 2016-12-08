@@ -4,6 +4,7 @@ CC := gcc
 
 LDFLAGS += -lpthread
 LDFLAGS += -ldl
+LDFLAGS += -fPIC
 
 staticd_lib_c_files := sqlite-amalgamation/sqlite3.c
 $(staticd_lib_c_files) : sqlite-amalgamation
@@ -34,6 +35,13 @@ app_c_files := sqlite-amalgamation/sqlite3.c
 app_c_files += sqlite-amalgamation/shell.c
 $(app_c_files) : sqlite-amalgamation
 app_name := sqlite3-raw
+include $(BUILD_APP)
+
+LOCAL_LDFLAGS :=
+app_c_files := sqlite-amalgamation/shell.c
+LOCAL_LIBS := out/lib/libsqlite3.a
+$(app_c_files) : sqlite-amalgamation
+app_name := sqlite3-with-lib
 include $(BUILD_APP)
 
 include $(ADD_TARGET)

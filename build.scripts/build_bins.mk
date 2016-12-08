@@ -6,7 +6,7 @@ endef
 
 define transform-c-file-to-bin-file
 	$(quiet)mkdir -p $(dir $@)
-	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -o $@ $($@.c_file) $($@.local_ldflags) $(LDFLAGS)
+	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -o $@ $($@.c_file) $($@.local_libs) $(LIBS) $($@.local_ldflags) $(LDFLAGS)
 endef
 
 $(out_dir)/bin/% : %.c
@@ -19,8 +19,9 @@ $(out_dir)/bin/% : %.cpp
 $(foreach c_file,$(c_files),$(eval $(call gen-bin-path-from-c-file-name,$(c_file)).c_file := $(c_file)))
 bin_files := $(call gen-bin-path-from-c-file-name,$(c_files))
 
-$(foreach c_file,$(c_files),$(eval $(call gen-bin-path-from-c-file-name,$(c_file)).local_ldflags := $($(c_file).LOCAL_LDFLAGS) $(LOCAL_LDFLAGS)))
 $(foreach c_file,$(c_files),$(eval $(call gen-bin-path-from-c-file-name,$(c_file)).local_cflags := $($(c_file).LOCAL_CFLAGS) $(LOCAL_CFLAGS)))
+$(foreach c_file,$(c_files),$(eval $(call gen-bin-path-from-c-file-name,$(c_file)).local_libs := $($(c_file).LOCAL_LIBS) $(LOCAL_LIBS)))
+$(foreach c_file,$(c_files),$(eval $(call gen-bin-path-from-c-file-name,$(c_file)).local_ldflags := $($(c_file).LOCAL_LDFLAGS) $(LOCAL_LDFLAGS)))
 $(foreach c_file,$(c_files),$(eval $(strip $(call gen-bin-path-from-c-file-name,$(c_file))) : $($(c_file).LOCAL_DEPS) $(LOCAL_DEPS)))
 
 ifneq ($(LOCAL_PRECONDITION),)
@@ -51,10 +52,12 @@ $(foreach c_file,$(c_files),$(eval $(call gen-d-file-name-for-bin-file-from-c-fi
 $(eval d_files += $(bins_d_files))
 
 $(foreach c_file,$(c_files),$(eval $(c_file).LOCAL_CFLAGS :=))
+$(foreach c_file,$(c_files),$(eval $(c_file).LOCAL_LIBS :=))
 $(foreach c_file,$(c_files),$(eval $(c_file).LOCAL_LDFLAGS :=))
 $(foreach c_file,$(c_files),$(eval $(c_file).LOCAL_DEPS :=))
 
 LOCAL_CFLAGS :=
+LOCAL_LIBS :=
 LOCAL_LDFLAGS :=
 LOCAL_DEPS :=
 LOCAL_PRECONDITION :=

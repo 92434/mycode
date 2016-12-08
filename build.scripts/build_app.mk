@@ -10,7 +10,7 @@ endef
 
 define transform-c-files-to-app-file
 	$(quiet)mkdir -p $(dir $@)
-	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -o $@ $($@.c_files) $($@.local_ldflags) $(LDFLAGS)
+	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -o $@ $($@.c_files) $($@.local_libs) $($@.local_ldflags) $(LDFLAGS)
 endef
 
 #app_name := $(strip $(call gen-app-name-from-user-defined,$(app_name)))
@@ -19,6 +19,7 @@ app_bin_file := $(call gen-app-path-from-app-name,$(app_name))
 $(eval $(app_bin_file).c_files := $(app_c_files))
 $(eval $(app_bin_file).local_cflags := $(LOCAL_CFLAGS))
 $(eval $(app_bin_file).local_ldflags := $(LOCAL_LDFLAGS))
+$(eval $(app_bin_file).local_libs := $(LOCAL_LIBS))
 $(app_bin_file) : $(LOCAL_DEPS)
 	$(call transform-c-files-to-app-file)
 
@@ -55,5 +56,6 @@ $(eval d_files += $(app_d_file))
 
 LOCAL_CFLAGS :=
 LOCAL_LDFLAGS :=
+LOCAL_LIBS :=
 LOCAL_DEPS :=
 LOCAL_PRECONDITION :=
