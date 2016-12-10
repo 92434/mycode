@@ -4,9 +4,11 @@ include $(shell pwd)/inc.mk
 # Cancel implicit rules on top Makefile
 $(CURDIR)/Makefile Makefile:;
 
-env:
+env: 1 *.mk
 	echo $$\(CURDIR\) is $(CURDIR)
 	echo $$\(MAKEFLAGS\) is $(MAKEFLAGS)
+	echo $$\? is $?
+	echo $$\(wildcard $$^\) is $(wildcard $^)
 
 1 2 3:
 	echo $@
