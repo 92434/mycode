@@ -18,6 +18,7 @@ jar_file := $(call gen-jar-path-from-jar-name,$(jar_name))
 
 $(jar_file) : $(java_files)
 	$(call transform-java-file-to-jar)
+	$(call echo-why)
 
 $(eval $(jar_file).class_path := $(class_path))
 $(eval $(jar_file).bin_path := $(dir $(jar_file)))

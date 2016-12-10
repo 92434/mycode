@@ -4,11 +4,36 @@ include $(shell pwd)/inc.mk
 # Cancel implicit rules on top Makefile
 $(CURDIR)/Makefile Makefile:;
 
-env: 1 *.mk
+comma   := ,
+quote   := "
+squote  := '
+empty   :=
+space   := $(empty) $(empty)
+
+escsq = $(subst $(squote),'\$(squote)',$1)
+any-prereq = $(filter $(wildcard $^), $?)
+any-phony = $(filter-out $(wildcard $^),$^)
+
+define why
+$(if $(wildcard $@), 
+	$(if $(strip $(any-prereq)),
+		- due to: $(any-prereq),
+		- due to: $(any-phony)
+	),
+	- due to target missing
+)
+endef
+echo-why = $(call escsq, $(strip $(why)))
+
+env: 1 *.mk gcc-search-path
 	echo $$\(CURDIR\) is $(CURDIR)
 	echo $$\(MAKEFLAGS\) is $(MAKEFLAGS)
 	echo $$\? is $?
+	echo $$^ is $^
+	echo $$* is $*
 	echo $$\(wildcard $$^\) is $(wildcard $^)
+	echo $(echo-why)
+	touch env
 
 1 2 3:
 	echo $@

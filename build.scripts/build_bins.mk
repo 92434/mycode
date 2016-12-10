@@ -11,10 +11,13 @@ endef
 
 $(out_dir)/bin/% : %.c
 	$(call transform-c-file-to-bin-file)
+	$(call echo-why)
 $(out_dir)/bin/% : %.cc
 	$(call transform-c-file-to-bin-file)
+	$(call echo-why)
 $(out_dir)/bin/% : %.cpp
 	$(call transform-c-file-to-bin-file)
+	$(call echo-why)
 
 $(foreach c_file,$(c_files),$(eval $(call gen-bin-path-from-c-file-name,$(c_file)).c_file := $(c_file)))
 bin_files := $(call gen-bin-path-from-c-file-name,$(c_files))
@@ -41,10 +44,13 @@ endef
 
 $(out_dir)/obj/%.bin.d : %.c
 	$(call transform-c-file-to-d-file,$(strip $(call gen-d-file-target-name-for-bin-file-from-d-file-name,$@)))
+	$(call echo-why)
 $(out_dir)/obj/%.bin.d : %.cc
 	$(call transform-c-file-to-d-file,$(strip $(call gen-d-file-target-name-for-bin-file-from-d-file-name,$@)))
+	$(call echo-why)
 $(out_dir)/obj/%.bin.d : %.cpp
 	$(call transform-c-file-to-d-file,$(strip $(call gen-d-file-target-name-for-bin-file-from-d-file-name,$@)))
+	$(call echo-why)
 
 
 bins_d_files := $(call gen-d-file-name-for-bin-file-from-c-file-name,$(c_files))
