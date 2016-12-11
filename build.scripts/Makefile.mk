@@ -51,15 +51,8 @@ endef
 
 ifeq ("$(origin S)", "command line")
 $(info "silent flag is $(S)")
-else
-S := 0
 endif
-
-ifeq ("$(origin C)", "command line")
-$(info "ctags flag is $(C)")
-else
-C := 0
-endif
+S ?= 0
 
 is-verbose = $(S:1=)
 quiet := $(if $(call is-verbose),,@)
@@ -83,29 +76,12 @@ define sub-dirs-make
 			else \
 				exit 1; \
 			fi; \
-		fi \
+		fi; \
 	done
 endef
 
-ifeq ($(C), 1)
-define add-dep-tags
-	$(quiet)mkdir -p cscope;
-	$(quiet)cat dep_files | sort | uniq | sed 's/^\(.*\)$$/\"\1\"/g' >> cscope/cscope.files;
-	$(quiet)cat dep_files | sort | uniq >> cscope/ctags.files;
-	$(quiet)tags.sh cscope;
-	$(quiet)tags.sh tags;
-	$(quiet)tags.sh env;
-endef
-define remove-dep-tags
-	$(quiet)rm cscope e_cs dep_files -rf
-endef
-top := $(shell pwd)
-prepare_dep_file_status := $(shell touch dep_files)
-endif
-
 target : sub_dirs_make local_targets
 	$(call echo-why)
-	$(call add-dep-tags)
 
 sub_dirs_make :
 	$(call sub-dirs-make,$(SUB_DIRS))
@@ -134,3 +110,19 @@ clean_dep : sub_dirs_clean_dep
 sub_dirs_clean_dep : 
 	$(call sub-dirs-make,$(SUB_DIRS),clean_dep)
 	$(call echo-why)
+
+tags:
+	$(quiet)tags.sh all;
+	$(quiet)touch dep_files;
+	$(quiet)for f in $$(find . -type f -name "*.d" 2>/dev/null); do \
+		for i in $$(cat $$f | sed 's/^.*: //g'); do \
+			if test $${i:0:1} = /;then echo "$$i" >>dep_files;fi; \
+		done; \
+	done;
+	$(quiet)cat dep_files | sort | uniq | sed 's/^\(.*\)$$/\"\1\"/g' >> cscope/cscope.files;
+	$(quiet)cat dep_files | sort | uniq >> cscope/ctags.files;
+	$(quiet)tags.sh cscope;
+	$(quiet)tags.sh tags;
+	$(quiet)tags.sh env;
+clean_tags:
+	$(quiet)rm cscope e_cs dep_files -rf
