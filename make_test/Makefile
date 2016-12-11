@@ -4,27 +4,6 @@ include $(shell pwd)/inc.mk
 # Cancel implicit rules on top Makefile
 $(CURDIR)/Makefile Makefile:;
 
-comma   := ,
-quote   := "
-squote  := '
-empty   :=
-space   := $(empty) $(empty)
-
-escsq = $(subst $(squote),'\$(squote)',$1)
-any-prereq = $(filter $(wildcard $^), $?)
-any-phony = $(filter-out $(wildcard $^),$^)
-
-define why
-$(if $(wildcard $@), 
-	$(if $(strip $(any-prereq)),
-		- due to: $(any-prereq),
-		- due to: $(any-phony)
-	),
-	- due to target missing
-)
-endef
-echo-why = $(call escsq, $(strip $(why)))
-
 env: 1 *.mk gcc-search-path
 	echo $$\(CURDIR\) is $(CURDIR)
 	echo $$\(MAKEFLAGS\) is $(MAKEFLAGS)
@@ -32,7 +11,6 @@ env: 1 *.mk gcc-search-path
 	echo $$^ is $^
 	echo $$* is $*
 	echo $$\(wildcard $$^\) is $(wildcard $^)
-	echo $(echo-why)
 	touch env
 
 1 2 3:
@@ -58,3 +36,4 @@ get-device-major = $(shell awk '$$2 ~ /$(1)/ && $$1 !~ /xiaofei/ {print $$1}' /p
 gcc-search-path :
 	gcc -print-search-dirs
 
+include $(ADD_TARGET)

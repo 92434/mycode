@@ -16,11 +16,3 @@ include $(ADD_TARGET)
 
 local_targets:
 	$(info "compile ok!")
-
-add_dep_tags:
-	mv dep_files .dep_files
-	cat .dep_files | sort | uniq | sed 's/^\(.*\)$$/\"\1\"/g' >> cscope/cscope.files
-	cat .dep_files | sort | uniq >> cscope/ctags.files
-	tags.sh cscope
-	tags.sh tags
-
