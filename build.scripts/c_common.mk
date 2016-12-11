@@ -20,17 +20,11 @@ endef
 #	$(quiet)#$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -MM $< | sed 's:^.*\::$(1) \::' >$@
 #	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -M $< | sed 's:^.*\::$(1) \::' >$@
 #	$(quiet)#echo -e "\t$$""(""call $(2)"")" >>$@
-#	$(quiet)if test -f $$top/dep_files;then \
-#		for i in $$(cat $@ | sed 's/^.*: //g');do if test $${i:0:1} = /;then echo "$$i" >>$$top/dep_files;fi;done; \
-#	fi
 #endef
 define transform-c-file-to-d-file
 	$(quiet)mkdir -p $(dir $@)
 	$(quiet)#$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -MM $< | sed 's:^.*\::$(1) \::' >$@
 	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -M $< | sed 's:^.*\::$(1) \::' >$@
-	$(quiet)if test -f $$top/dep_files;then \
-		for i in $$(cat $@ | sed 's/^.*: //g'); do if test $${i:0:1} = /; then echo "$$i" >>$$top/dep_files; fi; done; \
-	fi
 endef
 
 #define transform-o-files-to-bin-file
