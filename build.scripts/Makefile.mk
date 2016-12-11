@@ -88,9 +88,8 @@ sub_dirs_make :
 	$(call echo-why)
 
 clean : sub_dirs_clean
-	$(quiet)-rm -rf out
+	$(quiet)-rm -rf out cscope e_cs dep_files
 	$(call echo-why)
-	$(call remove-dep-tags)
 
 sub_dirs_clean : 
 	$(call sub-dirs-make,$(SUB_DIRS),clean)
@@ -111,8 +110,8 @@ sub_dirs_clean_dep :
 	$(call sub-dirs-make,$(SUB_DIRS),clean_dep)
 	$(call echo-why)
 
-tags:
-	$(quiet)tags.sh all;
+cscope: target
+	$(quiet)tags.sh prepare;
 	$(quiet)touch dep_files;
 	$(quiet)for f in $$(find . -type f -name "*.d" 2>/dev/null); do \
 		for i in $$(cat $$f | sed 's/^.*: //g'); do \
@@ -124,5 +123,4 @@ tags:
 	$(quiet)tags.sh cscope;
 	$(quiet)tags.sh tags;
 	$(quiet)tags.sh env;
-clean_tags:
-	$(quiet)rm cscope e_cs dep_files -rf
+	$(call echo-why)

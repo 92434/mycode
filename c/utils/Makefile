@@ -1,7 +1,5 @@
 include $(default_rules)
 
-cscope_top := $(shell pwd)
-
 CFLAGS += -g
 LDFLAGS += -lpthread
 LDFLAGS += -static
@@ -23,7 +21,5 @@ include $(BUILD_LIB)
 shared_lib_c_files := $(c_files)
 shared_lib_name := xiaofei
 include $(BUILD_SO)
-
-SUB_DIRS := sub
 
 include $(ADD_TARGET)
