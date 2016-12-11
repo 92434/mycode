@@ -55,7 +55,7 @@ $(foreach d_file,$(module_tmp_d_files),$(eval $(d_file).local_cflags := $(LOCAL_
 $(eval $(app_d_file).target_file := $(strip $(app_bin_file)))
 $(app_d_file) : $(module_tmp_d_files)
 	$(call transform-d-files-to-target-d-file)
-	echo $(echo-why)
+	$(call echo-why)
 
 $(eval d_files += $(app_d_file))
 
