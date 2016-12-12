@@ -1,6 +1,7 @@
 #!/bin/sh
 
 export top=$(pwd)
+export utils=$top/build.scripts/utils.mk
 export default_rules=$top/build.scripts/Makefile.mk
 export C_COMMON=$top/build.scripts/c_common.mk
 export BUILD_BINS=$top/build.scripts/build_bins.mk

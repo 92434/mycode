@@ -7,10 +7,10 @@ define gen-jar-path-from-jar-name
 endef
 
 define transform-java-file-to-jar
-	$(quiet)mkdir -p $($@.class_path)
-	$(quiet)mkdir -p $($@.bin_path);
-	$(quiet)$(JAVAC) $(subst $(space)$(semicolon),$(semicolon),$($@.cp)) -d $($@.class_path) $^;
-	$(quiet)$(JAR) $($@.option) $@ $($@.entry_point) -C $($@.class_path) . $($@.package_inc);
+	$(silent)mkdir -p $($@.class_path)
+	$(silent)mkdir -p $($@.bin_path);
+	$(silent)$(JAVAC) $(subst $(space)$(semicolon),$(semicolon),$($@.cp)) -d $($@.class_path) $^;
+	$(silent)$(JAR) $($@.option) $@ $($@.entry_point) -C $($@.class_path) . $($@.package_inc);
 endef
 
 class_path := $(call gen-class-path-from-jar-name,$(jar_name))
@@ -18,7 +18,7 @@ jar_file := $(call gen-jar-path-from-jar-name,$(jar_name))
 
 $(jar_file) : $(java_files)
 	$(call transform-java-file-to-jar)
-	$(call echo-why)
+	$(call target-echo-why)
 
 $(eval $(jar_file).class_path := $(class_path))
 $(eval $(jar_file).bin_path := $(dir $(jar_file)))

@@ -16,31 +16,31 @@ endef
 
 
 #define transform-c-file-to-d-file
-#	$(quiet)mkdir -p $(dir $@)
-#	$(quiet)#$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -MM $< | sed 's:^.*\::$(1) \::' >$@
-#	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -M $< | sed 's:^.*\::$(1) \::' >$@
-#	$(quiet)#echo -e "\t$$""(""call $(2)"")" >>$@
+#	$(silent)mkdir -p $(dir $@)
+#	$(silent)#$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -MM $< | sed 's:^.*\::$(1) \::' >$@
+#	$(silent)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -M $< | sed 's:^.*\::$(1) \::' >$@
+#	$(silent)#echo -e "\t$$""(""call $(2)"")" >>$@
 #endef
 define transform-c-file-to-d-file
-	$(quiet)mkdir -p $(dir $@)
-	$(quiet)#$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -MM $< | sed 's:^.*\::$(1) \::' >$@
-	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -M $< | sed 's:^.*\::$(1) \::' >$@
+	$(silent)mkdir -p $(dir $@)
+	$(silent)#$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -MM $< | sed 's:^.*\::$(1) \::' >$@
+	$(silent)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -M $< | sed 's:^.*\::$(1) \::' >$@
 endef
 
 #define transform-o-files-to-bin-file
-#	$(quiet)mkdir -p $(dir $@)
-#	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) -o $@ $(1) $($@.local_ldflags) $(LDFLAGS)
+#	$(silent)mkdir -p $(dir $@)
+#	$(silent)$(TOOLCHAIN_PREFIX)$(CC) -o $@ $(1) $($@.local_ldflags) $(LDFLAGS)
 #endef
 #
 #define transform-c-file-to-s-file
-#	$(quiet)mkdir -p $(dir $@)
-#	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) -S $($@.local_cflags) $(CFLAGS) -o $@ $<
+#	$(silent)mkdir -p $(dir $@)
+#	$(silent)$(TOOLCHAIN_PREFIX)$(CC) -S $($@.local_cflags) $(CFLAGS) -o $@ $<
 #endef
 
 #define transform-d-files-to-target-d-file
-#	$(quiet)mkdir -p $(dir $@);
-#	$(quiet)echo "#auto generate!!!---xiaofei">$@;
-#	$(quiet)for d in $^ ; do \
+#	$(silent)mkdir -p $(dir $@);
+#	$(silent)echo "#auto generate!!!---xiaofei">$@;
+#	$(silent)for d in $^ ; do \
 #		if (cat $$d | sed '$$d' | sed 's:^.*\::$($@.target_file) \::' >>$@) ; then \
 #			true; \
 #		else \
@@ -49,9 +49,9 @@ endef
 #	done;
 #endef
 define transform-d-files-to-target-d-file
-	$(quiet)mkdir -p $(dir $@);
-	$(quiet)echo "#auto generate!!!---xiaofei">$@;
-	$(quiet)for d in $^ ; do \
+	$(silent)mkdir -p $(dir $@);
+	$(silent)echo "#auto generate!!!---xiaofei">$@;
+	$(silent)for d in $^ ; do \
 		if (cat $$d | sed 's:^.*\::$($@.target_file) \::' >>$@) ; then \
 			true; \
 		else \

@@ -9,8 +9,8 @@ define gen-app-path-from-app-name
 endef
 
 define transform-c-files-to-app-file
-	$(quiet)mkdir -p $(dir $@)
-	$(quiet)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -o $@ $($@.c_files) $($@.local_libs) $($@.local_ldflags) $(LDFLAGS)
+	$(silent)mkdir -p $(dir $@)
+	$(silent)$(TOOLCHAIN_PREFIX)$(CC) $($@.local_cflags) $(CFLAGS) -o $@ $($@.c_files) $($@.local_libs) $($@.local_ldflags) $(LDFLAGS)
 endef
 
 #app_name := $(strip $(call gen-app-name-from-user-defined,$(app_name)))
@@ -22,7 +22,7 @@ $(eval $(app_bin_file).local_ldflags := $(LOCAL_LDFLAGS))
 $(eval $(app_bin_file).local_libs := $(LOCAL_LIBS))
 $(app_bin_file) : $(LOCAL_DEPS)
 	$(call transform-c-files-to-app-file)
-	$(call echo-why)
+	$(call target-echo-why)
 
 ifneq ($(LOCAL_PRECONDITION),)
 $(eval target_files += $(LOCAL_PRECONDITION))
@@ -38,13 +38,13 @@ endef
 
 $(out_dir)/obj/$(app_name)/%.tmp.d : %.c
 	$(call transform-c-file-to-d-file,$(strip $(call gen-d-file-target-name-for-app-file-from-d-file-name,$@)))
-	$(call echo-why)
+	$(call target-echo-why)
 $(out_dir)/obj/$(app_name)/%.tmp.d : %.cc
 	$(call transform-c-file-to-d-file,$(strip $(call gen-d-file-target-name-for-app-file-from-d-file-name,$@)))
-	$(call echo-why)
+	$(call target-echo-why)
 $(out_dir)/obj/$(app_name)/%.tmp.d : %.cpp
 	$(call transform-c-file-to-d-file,$(strip $(call gen-d-file-target-name-for-app-file-from-d-file-name,$@)))
-	$(call echo-why)
+	$(call target-echo-why)
 
 
 module_tmp_d_files := $(call gen-d-file-names-for-module-tmp-from-module-name-and-c-file-names,$(app_name),$(app_c_files))
@@ -55,7 +55,7 @@ $(foreach d_file,$(module_tmp_d_files),$(eval $(d_file).local_cflags := $(LOCAL_
 $(eval $(app_d_file).target_file := $(strip $(app_bin_file)))
 $(app_d_file) : $(module_tmp_d_files)
 	$(call transform-d-files-to-target-d-file)
-	$(call echo-why)
+	$(call target-echo-why)
 
 $(eval d_files += $(app_d_file))
 
