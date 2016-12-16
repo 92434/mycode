@@ -4,7 +4,8 @@ libqrencode/.install: libqrencode/Makefile
 
 libqrencode/Makefile: libqrencode/configure
 	cd ./$(^:/configure=); \
-	sh configure --prefix=$$(pwd)/.install;
+	sh configure --prefix=$$(pwd)/.install --with-tests=yes;
+	#sh configure --prefix=$$(pwd)/.install;
 
 libqrencode/configure: libqrencode
 	cd ./$^; \
