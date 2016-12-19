@@ -50,14 +50,15 @@
 **
 ****************************************************************************/
 
-#include <QApplication>
-
-#include "mainwindow.h"
+#include "single_application.h"
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
-	MainWindow w;
-	w.show();
-	return a.exec();
+	single_application a(argc, argv);
+
+	if(a.init()) {
+		return a.exec();
+	} else {
+		return 0;
+	}
 }

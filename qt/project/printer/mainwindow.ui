@@ -1500,7 +1500,6 @@
       </layout>
      </item>
     </layout>
-    <zorder></zorder>
    </widget>
    <widget class="QFrame" name="frame_6">
     <property name="geometry">
@@ -1625,7 +1624,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>648</width>
+      <width>642</width>
       <height>194</height>
      </rect>
     </property>
@@ -1718,13 +1717,13 @@
        <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
-       <widget class="QWidget" name="layoutWidget">
+       <widget class="QWidget" name="">
         <property name="geometry">
          <rect>
-          <x>1</x>
-          <y>2</y>
+          <x>2</x>
+          <y>3</y>
           <width>194</width>
-          <height>194</height>
+          <height>182</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">

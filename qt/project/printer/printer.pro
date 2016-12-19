@@ -1,4 +1,4 @@
-QT += widgets serialport
+QT += widgets serialport network
 
 TARGET = form
 TEMPLATE = app
@@ -9,11 +9,13 @@ FORMS += \
     mainwindow.ui
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    single_application.h
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    single_application.cpp
 
 RESOURCES += \
     resource.qrc

@@ -1,8 +1,8 @@
 #include <QtWidgets/qdesktopwidget.h>
 #include <qdatetime.h>
-#include <QDebug>
-#include<qpalette.h>
+#include <QPalette>
 
+#include "xiaofei_debug.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -36,7 +36,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
 	if (event->timerId() == m_timerId) {
 		QString datetime = QDateTime::currentDateTime().toString(QString("yyyy/MM/dd hh:mm:ss"));
 
-		//qDebug("datetime = %s\n",qPrintable(datetime));
+		//printf("datetime = %s\n",qPrintable(datetime));
 
 		ui->label->setText(datetime);
 	}
