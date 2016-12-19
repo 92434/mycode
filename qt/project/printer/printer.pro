@@ -1,6 +1,6 @@
 QT += widgets serialport network
 
-TARGET = form
+TARGET = kingly_printer
 TEMPLATE = app
 
 message($$escape_expand("QT:$${QT}"))
