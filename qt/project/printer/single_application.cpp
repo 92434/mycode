@@ -1,4 +1,5 @@
 #include <qfile.h>
+#include <qdir.h>
 
 #include "xiaofei_debug.h"
 #include "single_application.h"
@@ -15,11 +16,14 @@ bool single_application::init()
 {
 	bool enable = true;
 	QString serverName = QCoreApplication::applicationName();
+	serverName = QDir::cleanPath(QDir::tempPath()) + QLatin1Char('/') + serverName;
+
+	printf("serverName:%s\n", qPrintable(serverName));
 
 	socket.connectToServer(serverName);
 
 	if (socket.waitForConnected(50)) { //如果能够连接得上的话，将参数发送到服务器，然后退出
-		printf("\n");
+		printf("instance exist!!!\n");
 
 		QTextStream stream(&socket);
 		QStringList args = QCoreApplication::arguments();
@@ -35,20 +39,17 @@ bool single_application::init()
 		enable = false;
 
 	} else {
-		printf("\n");
+		if (server.listen(serverName) == false) {
+			enable = false;
+
+			if (server.serverError() == QAbstractSocket::AddressInUseError && QFile::exists(serverName)) { //确保能够监听成功
+				printf("serverName exist:%s!!!\n", qPrintable(serverName));
+				QFile::remove(serverName);
+			}
+		}
 
 		connect(&server, SIGNAL(newConnection()), this, SLOT(newLocalSocketConnection())); //监听新到来的连接
 
-		printf("serverName:%s\n", qPrintable(serverName));
-
-		if (server.listen(serverName) == false) {
-			if (server.serverError() == QAbstractSocket::AddressInUseError && QFile::exists(server.serverName())) { //确保能够监听成功
-				printf("serverName:%s\n", qPrintable(serverName));
-				QFile::remove(server.serverName());
-				server.listen(serverName);
-			}
-		}
-		
 		w.show();
 	}
 
