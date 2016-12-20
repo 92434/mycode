@@ -149,7 +149,8 @@ void DiagramScene::editorLostFocus(DiagramTextItem *item)
 //! [6]
 void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-	printf("\n");
+	printf("");
+	qDebug() << mouseEvent->scenePos().x() << ',' << mouseEvent->scenePos().y();
 
 	if (mouseEvent->button() != Qt::LeftButton) {
 		return;
