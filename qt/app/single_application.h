@@ -17,7 +17,9 @@ public:
 
 	single_application(int &argc, char **argv);
 	virtual ~single_application();
-	bool init(QMainWindow *w);
+    bool init(QWidget *w);
+
+	bool addFont(const QString &fileName);
 
 private slots:
 	void newLocalSocketConnection();
@@ -25,9 +27,7 @@ private slots:
 private:
 	QLocalSocket socket;
 	QLocalServer server;
-	QMainWindow *w;
-
-	void addFont(const QString &fileName);
+    QWidget *w;
 };
 
 #endif

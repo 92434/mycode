@@ -8,7 +8,7 @@ single_application::~single_application()
 {
 }
 
-bool single_application::init(QMainWindow *w)
+bool single_application::init(QWidget *w)
 {
 	bool enable = true;
 
@@ -71,15 +71,18 @@ void single_application::newLocalSocketConnection()
 	QTextStream stream(socket);
 	delete socket;
 
-    w->raise();
-    w->activateWindow(); //记得激活窗口哦
+	w->raise();
+	w->activateWindow(); //记得激活窗口哦
 }
 
-void single_application::addFont(const QString &fileName)
+bool single_application::addFont(const QString &fileName)
 {
+    bool status = false;
 	int nIndex = QFontDatabase::addApplicationFont(fileName);
 
 	if(nIndex != -1) {
+        status = true;
+
 		QStringList strList(QFontDatabase::applicationFontFamilies(nIndex));
 
 		if(strList.count() > 0) {
@@ -88,4 +91,5 @@ void single_application::addFont(const QString &fileName)
 			setFont(font);
 		}
 	}
+    return status;
 }
