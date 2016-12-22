@@ -3,18 +3,21 @@
 #include <QApplication>
 #include <QtNetwork/QLocalServer>
 #include <QtNetwork/QLocalSocket>
+#include <QMainWindow>
+#include <QFontDatabase>
+#include <qfile.h>
+#include <qdir.h>
 
-#include "mainwindow.h"
+#include "../utils/xiaofei_debug.h"
 
 class single_application : public QApplication
 {
 	Q_OBJECT
 public:
-	MainWindow w;
 
 	single_application(int &argc, char **argv);
 	virtual ~single_application();
-	bool init();
+	bool init(QMainWindow *w);
 
 private slots:
 	void newLocalSocketConnection();
@@ -22,6 +25,9 @@ private slots:
 private:
 	QLocalSocket socket;
 	QLocalServer server;
+	QMainWindow *w;
+
+	void addFont(const QString &fileName);
 };
 
 #endif

@@ -2,7 +2,7 @@
 #include <qdatetime.h>
 #include <QPalette>
 
-#include "xiaofei_debug.h"
+#include "../../utils/xiaofei_debug.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 

@@ -10,20 +10,20 @@ FORMS += \
 
 HEADERS += \
     mainwindow.h \
-    single_application.h \
     scene/arrow.h \
     scene/diagramitem.h \
     scene/diagramscene.h \
-    scene/diagramtextitem.h
+    scene/diagramtextitem.h \
+    ../../app/single_application.h
 
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    single_application.cpp \
     scene/diagramitem.cpp \
     scene/arrow.cpp \
     scene/diagramscene.cpp \
-    scene/diagramtextitem.cpp
+    scene/diagramtextitem.cpp \
+    ../../app/single_application.cpp
 
 RESOURCES += \
     resource.qrc

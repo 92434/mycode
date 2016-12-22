@@ -50,13 +50,17 @@
 **
 ****************************************************************************/
 
-#include "single_application.h"
+#include "../../app/single_application.h"
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
 	single_application a(argc, argv);
 
-	if(a.init()) {
+    MainWindow w;
+
+    if(a.init(&w)) {
+        w.show();
 		return a.exec();
 	} else {
 		return 0;

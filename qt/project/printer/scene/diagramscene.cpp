@@ -50,7 +50,7 @@
 
 #include "diagramscene.h"
 #include "arrow.h"
-#include "../xiaofei_debug.h"
+#include "../../../utils/xiaofei_debug.h"
 
 #include <QTextCursor>
 #include <QGraphicsSceneMouseEvent>

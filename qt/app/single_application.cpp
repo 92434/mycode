@@ -1,7 +1,3 @@
-#include <qfile.h>
-#include <qdir.h>
-
-#include "xiaofei_debug.h"
 #include "single_application.h"
 
 single_application::single_application(int &argc, char **argv) : QApplication(argc, argv)
@@ -12,11 +8,20 @@ single_application::~single_application()
 {
 }
 
-bool single_application::init()
+bool single_application::init(QMainWindow *w)
 {
 	bool enable = true;
+
 	QString serverName = QCoreApplication::applicationName();
 	serverName = QDir::cleanPath(QDir::tempPath()) + QLatin1Char('/') + serverName;
+
+	if(w == NULL) {
+		enable = false;
+
+		return enable;
+	} else {
+		this->w = w;
+	}
 
 	printf("serverName:%s\n", qPrintable(serverName));
 
@@ -49,8 +54,6 @@ bool single_application::init()
 		}
 
 		connect(&server, SIGNAL(newConnection()), this, SLOT(newLocalSocketConnection())); //监听新到来的连接
-
-		w.show();
 	}
 
 	return enable;
@@ -68,7 +71,21 @@ void single_application::newLocalSocketConnection()
 	QTextStream stream(socket);
 	delete socket;
 
-	w.raise();
-	w.activateWindow(); //记得激活窗口哦
+    w->raise();
+    w->activateWindow(); //记得激活窗口哦
 }
 
+void single_application::addFont(const QString &fileName)
+{
+	int nIndex = QFontDatabase::addApplicationFont(fileName);
+
+	if(nIndex != -1) {
+		QStringList strList(QFontDatabase::applicationFontFamilies(nIndex));
+
+		if(strList.count() > 0) {
+			QFont font(strList.at(0));
+			font.setPointSize(9);
+			setFont(font);
+		}
+	}
+}
