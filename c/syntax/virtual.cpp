@@ -78,4 +78,10 @@ int main(){
 	B b;
 	E::exec_all();
 	//结论：这个规律适用于多态
+
+	A *pa = &b;
+	pa->func();
+
+	B *pb = &b;
+	pb->func();
 }

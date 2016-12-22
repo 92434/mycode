@@ -133,7 +133,8 @@ function clear_app() {
 }
 
 function rm_system_app() {
-	exec_cmd adb shell "PATH=/data/bin;if [ -f $1 ]; then $MV_ALL $1 $1.bak; else echo not exist $1; fi"
+	#exec_cmd adb shell "PATH=/data/bin;if [ -f $1 ]; then $MV_ALL $1 $1.bak; else echo not exist $1; fi"
+	exec_cmd adb shell "PATH=/data/bin;if [ -f $1 ]; then $RM_ALL $1; else echo not exist $1; fi"
 	exec_cmd adb shell "PATH=/data/bin;if [ -d /data/data/$2 ]; then $RM_ALL /data/data/$2; else echo not exist $2; fi"
 }
 

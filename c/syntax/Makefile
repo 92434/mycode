@@ -19,6 +19,7 @@ endif
 
 c_files += test_macro.cpp
 test_macro.cpp.LOCAL_CFLAGS := -I$(local_lib_src) -DXIAOFEI=\"$(XIAOFEI)\"
+c_files += virtual.cpp
 include $(BUILD_BINS)
 
 include $(ADD_TARGET)
