@@ -1,5 +1,5 @@
-#ifndef SINGLE_APPLICATION_H
-#define SINGLE_APPLICATION_H
+#ifndef APPLICATION_H
+#define APPLICATION_H
 #include <QApplication>
 #include <QtNetwork/QLocalServer>
 #include <QtNetwork/QLocalSocket>
@@ -10,14 +10,14 @@
 
 #include "../utils/xiaofei_debug.h"
 
-class single_application : public QApplication
+class Application : public QApplication
 {
 	Q_OBJECT
 public:
 
-	single_application(int &argc, char **argv);
-	virtual ~single_application();
-    bool init(QWidget *w);
+	Application(int &argc, char **argv);
+	virtual ~Application();
+	bool setSingleWindow(QWidget *w = 0);
 
 	bool addFont(const QString &fileName);
 
@@ -27,7 +27,7 @@ private slots:
 private:
 	QLocalSocket socket;
 	QLocalServer server;
-    QWidget *w;
+	QWidget *w;
 };
 
 #endif

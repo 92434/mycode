@@ -3,7 +3,7 @@
 
 QT_USE_NAMESPACE
 
-Dialog::Dialog(single_application *a, QWidget *parent)
+Dialog::Dialog(Application *a, QWidget *parent)
 	: QDialog(parent)
 {
 	QVBoxLayout *mainLayout = new QVBoxLayout;

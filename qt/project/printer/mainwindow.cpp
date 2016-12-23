@@ -44,11 +44,11 @@ void MainWindow::initDatetime()
 void MainWindow::initFrameShowCom()
 {
 	layout_show_com = new QHBoxLayout();
-	scene_show_com = new DiagramScene(this);
+	scene_show_com = new GraphicsScene(this);
 	//scene_show_com->setSceneRect(QRectF(0, 0, 448, 192));
 	scene_show_com->setSceneRect(QRectF(0, 0, 5000, 154));
 	scene_show_com->setBackgroundBrush(Qt::lightGray);
-	connect(scene_show_com, SIGNAL(itemInserted(DiagramItem *)), this, SLOT(itemInserted(DiagramItem *)));
+	connect(scene_show_com, SIGNAL(itemInserted(GraphicsPolygonItem *)), this, SLOT(itemInserted(GraphicsPolygonItem *)));
 	connect(scene_show_com, SIGNAL(textInserted(QGraphicsTextItem *)), this, SLOT(textInserted(QGraphicsTextItem *)));
 	connect(scene_show_com, SIGNAL(itemSelected(QGraphicsItem *)), this, SLOT(itemSelected(QGraphicsItem *)));
 	view_show_com = new QGraphicsView(scene_show_com);
@@ -91,15 +91,15 @@ void MainWindow::on_pushButton_minimize_clicked()
 	lower();
 }
 
-void MainWindow::itemInserted(DiagramItem *item)
+void MainWindow::itemInserted(GraphicsPolygonItem *item)
 {
-	scene_show_com->setMode(DiagramScene::InsertItem);
+	scene_show_com->setInsertMode(GraphicsScene::InsertGraphicsPolygonItem);
 	item = item;
 }
 
 void MainWindow::textInserted(QGraphicsTextItem *item)
 {
-	scene_show_com->setMode(DiagramScene::InsertText);
+	scene_show_com->setInsertMode(GraphicsScene::InsertTextGraphicsItem);
 	item = item;
 }
 

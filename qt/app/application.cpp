@@ -1,27 +1,21 @@
-#include "single_application.h"
+#include "application.h"
 
-single_application::single_application(int &argc, char **argv) : QApplication(argc, argv)
+Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 {
 }
 
-single_application::~single_application()
+Application::~Application()
 {
 }
 
-bool single_application::init(QWidget *w)
+bool Application::setSingleWindow(QWidget *w)
 {
 	bool enable = true;
 
 	QString serverName = QCoreApplication::applicationName();
 	serverName = QDir::cleanPath(QDir::tempPath()) + QLatin1Char('/') + serverName;
 
-	if(w == NULL) {
-		enable = false;
-
-		return enable;
-	} else {
-		this->w = w;
-	}
+	this->w = w;
 
 	printf("serverName:%s\n", qPrintable(serverName));
 
@@ -52,14 +46,17 @@ bool single_application::init(QWidget *w)
 				QFile::remove(serverName);
 			}
 		}
+	}
 
+	if(this->w != 0) {
 		connect(&server, SIGNAL(newConnection()), this, SLOT(newLocalSocketConnection())); //监听新到来的连接
 	}
+
 
 	return enable;
 }
 
-void single_application::newLocalSocketConnection()
+void Application::newLocalSocketConnection()
 {
 	QLocalSocket *socket = server.nextPendingConnection();
 
@@ -71,11 +68,11 @@ void single_application::newLocalSocketConnection()
 	QTextStream stream(socket);
 	delete socket;
 
-	w->raise();
-	w->activateWindow(); //记得激活窗口哦
+	this->w->raise();
+	this->w->activateWindow();
 }
 
-bool single_application::addFont(const QString &fileName)
+bool Application::addFont(const QString &fileName)
 {
     bool status = false;
 	int nIndex = QFontDatabase::addApplicationFont(fileName);

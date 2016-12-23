@@ -17,7 +17,7 @@
 #include <QtPrintSupport/QPageSetupDialog>
 #include <QProgressDialog>
 
-#include "../app/single_application.h"
+#include "../app/application.h"
 
 QT_USE_NAMESPACE
 
@@ -30,7 +30,7 @@ class Dialog : public QDialog
 	Q_OBJECT
 
 public:
-	Dialog(single_application *a, QWidget *parent = 0);
+    Dialog(Application *a, QWidget *parent = 0);
 
 private slots:
 	void changedFont(const QFont &);

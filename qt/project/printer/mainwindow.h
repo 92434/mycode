@@ -5,10 +5,10 @@
 #include <QtWidgets/QGraphicsView>
 #include <QBoxLayout>
 
-#include "scene/arrow.h"
-#include "scene/diagramitem.h"
-#include "scene/diagramscene.h"
-#include "scene/diagramtextitem.h"
+#include "scene/graphicsarrowitem.h"
+#include "scene/graphicspolygonitem.h"
+#include "scene/graphicsscene.h"
+#include "scene/graphicstextitem.h"
 
 namespace Ui
 {
@@ -33,7 +33,7 @@ private slots:
 	void datetimeUpdateTimeout(QTimerEvent *event);
 	void on_pushButton_exit_clicked();
 	void on_pushButton_minimize_clicked();
-	void itemInserted(DiagramItem *item);
+	void itemInserted(GraphicsPolygonItem *item);
 	void textInserted(QGraphicsTextItem *);
 	void itemSelected(QGraphicsItem *item);
 
@@ -42,7 +42,7 @@ private:
 	int m_timerId;
 
 	QHBoxLayout *layout_show_com;
-	DiagramScene *scene_show_com;
+	GraphicsScene *scene_show_com;
 	QGraphicsView *view_show_com;
 
 	void initDatetime();

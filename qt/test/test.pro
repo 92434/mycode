@@ -8,9 +8,11 @@ message($$escape_expand("QT:$${QT}"))
 SOURCES += \
     main.cpp \
     dialog.cpp \
-    ../app/single_application.cpp
+    ../app/application.cpp
 
 HEADERS += \
     dialog.h \
-    ../app/single_application.h
+    ../app/application.h
+
+DISTFILES +=
 
