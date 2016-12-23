@@ -5,6 +5,7 @@
 #include "graphicstextitem.h"
 
 #include <QGraphicsScene>
+#include <QPainter>
 
 QT_BEGIN_NAMESPACE
 class QGraphicsSceneMouseEvent;
@@ -67,8 +68,8 @@ protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) Q_DECL_OVERRIDE;
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) Q_DECL_OVERRIDE;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) Q_DECL_OVERRIDE;
-	void drawBackground(QPainter *painter, const QRectF &rect);
-	void drawForeground(QPainter *painter, const QRectF &rect);
+	void drawBackground(QPainter *painter, const QRectF &rect) Q_DECL_OVERRIDE;
+	void drawForeground(QPainter *painter, const QRectF &rect) Q_DECL_OVERRIDE;
 
 private:
 
@@ -81,8 +82,16 @@ private:
 	sceneOpMode mSceneOpMode;
 	QGraphicsLineItem *mGraphicsLineItem;
 	GraphicsTextItem *mTextGraphicsItem;
-	bool bLeftButtonDown;
-	bool isSelectedItemTypeMatch(int type);
+
+	int mZoom;
+	int mHeight;
+	int mRuleHeight;
+	int mGridMargin;
+	QPointF mCurrentPoint;
+
+	void drawBGGrid(QPainter *painter, const QRectF &rect, int size, QColor color);
+	void drawBG(QPainter *painter, const QRectF &rect);
+	void drawFGRule(QPainter *painter, const QRectF &rect);
 };
 //! [0]
 

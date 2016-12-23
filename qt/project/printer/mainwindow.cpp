@@ -46,13 +46,14 @@ void MainWindow::initFrameShowCom()
 	layout_show_com = new QHBoxLayout();
 	scene_show_com = new GraphicsScene(this);
 	//scene_show_com->setSceneRect(QRectF(0, 0, 448, 192));
-	scene_show_com->setSceneRect(QRectF(0, 0, 5000, 154));
+	scene_show_com->setSceneRect(QRectF(0, 0, 426, 154));
 	scene_show_com->setBackgroundBrush(Qt::lightGray);
 	connect(scene_show_com, SIGNAL(itemInserted(GraphicsPolygonItem *)), this, SLOT(itemInserted(GraphicsPolygonItem *)));
 	connect(scene_show_com, SIGNAL(textInserted(QGraphicsTextItem *)), this, SLOT(textInserted(QGraphicsTextItem *)));
 	connect(scene_show_com, SIGNAL(itemSelected(QGraphicsItem *)), this, SLOT(itemSelected(QGraphicsItem *)));
 	view_show_com = new QGraphicsView(scene_show_com);
-	//view_show_com->setParent(ui->frame_show_com);
+	view_show_com->setMouseTracking(true);
+	view_show_com->setParent(ui->frame_show_com);
 	layout_show_com->addWidget(view_show_com);
 	ui->frame_show_com->setLayout(layout_show_com);
 }
