@@ -8,10 +8,13 @@
 GraphicsScene::GraphicsScene(QObject *parent)
 	: QGraphicsScene(parent)
 {
-	mZoom = 4;
-	mHeight = 34;
-	mRuleHeight = 40;
+	mRuleHeight = 30;
 	mGridMargin = 10;
+
+	setZoom(3);
+	setPrintXMax(25);
+	setHeight(34);
+
 	mCurrentPoint = QPointF(0, 0);
 	mSceneOpMode = InsertGraphicsPolygonItem;
 	mGraphicsPolygonItemType = GraphicsPolygonItem::Step;
@@ -160,79 +163,92 @@ void GraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
 	QGraphicsScene::mouseReleaseEvent(mouseEvent);
-
-	update();
 }
 
-void GraphicsScene::drawBGGrid(QPainter *painter, const QRectF &rect, int size, QColor color)
+void GraphicsScene::drawBG(QPainter *painter, const QRectF &rect)
 {
-	int x = rect.x();
-	int y = rect.y() + mRuleHeight;
-	int width = rect.width();
-	int height = mHeight * mZoom - mRuleHeight;
+	QRectF validRect(0, mRuleHeight, mPrintXMax * mZoom, mHeight * mZoom);
+	//validRect &= rect;
 
-	int step = size * mZoom;
-
+	if(validRect.isNull()) {
+		return;
+	}
 
 	//printf("");
+	//qDebug() << validRect;
+
+	QColor colorGridBG(Qt::white);
+	QColor colorMargin(Qt::black);
+
+	painter->fillRect(validRect.x(), validRect.y(), validRect.width(), validRect.height(), colorGridBG);
+	painter->fillRect(validRect.x(), validRect.y() + validRect.height(), validRect.width(), mGridMargin, colorMargin);
+}
+
+void GraphicsScene::drawBGGrid(QPainter *painter, const QRectF &rect)
+{
+	QRectF validRect(0, mRuleHeight, mPrintXMax * mZoom, mHeight * mZoom);
+	//validRect &= rect;
+
+	if(validRect.isNull()) {
+		return;
+	}
+
+	int x = validRect.x();
+	int y = validRect.y();
+	int width = validRect.width();
+	int height = validRect.height() - 1;
+
+	QColor colorStep2(Qt::lightGray);
+	QColor colorStep10(Qt::blue);
 
 	painter->save();
-	painter->setPen(color);
 	painter->setBrush(Qt::NoBrush);
 
 	for(int i = y; i < y + height; i++) {
-		if(i % step == 0) {
+		if((i - y) % (10 * mZoom) == 0) {
+			painter->setPen(colorStep10);
 			painter->drawLine(x, i, x + width, i);
-			//qDebug() << rect.x() << ',' << rect.y() << ' ' << rect.width() << 'x' << rect.height();
-			//qDebug() << "x1:" << x << " y1:" << i << " x2:" << x + width << " y2:" << i;
+		} else if((i - y) % (2 * mZoom) == 0) {
+			painter->setPen(colorStep2);
+			painter->drawLine(x, i, x + width, i);
 		}
 	}
 
 	for(int i = x; i < x + width; i++) {
-		if(i % step == 0) {
+		if((i - x) % (10 * mZoom) == 0) {
+			painter->setPen(colorStep10);
 			painter->drawLine(i, y, i, y + height);
-			//qDebug() << rect.x() << ',' << rect.y() << ' ' << rect.width() << 'x' << rect.height();
-			//qDebug() << "x1:" << i << " y1:" << y << " x2:" << i << " y2:" << y + height;
+		} else if((i - x) % (2 * mZoom) == 0){
+			painter->setPen(colorStep2);
+			painter->drawLine(i, y, i, y + height);
 		}
 	}
 
 	painter->restore();
 }
 
-void GraphicsScene::drawBG(QPainter *painter, const QRectF &rect)
+void GraphicsScene::drawBGRule(QPainter *painter, const QRectF &rect)
 {
-	QColor colorGridBG(Qt::white);
-	QColor colorMargin(Qt::black);
+	QRectF validRect(0, 0, mPrintXMax * mZoom, mRuleHeight);
+	//validRect &= rect;
 
-	painter->fillRect(rect.x(), rect.y() + mRuleHeight, rect.width(), mHeight * mZoom - mRuleHeight, colorGridBG);
-	painter->fillRect(rect.x(), mHeight * mZoom, rect.width(), mGridMargin, colorMargin);
-}
+	if(validRect.isNull()) {
+		return;
+	}
 
-void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect)
-{
-	QGraphicsScene::drawBackground(painter, rect);
-	drawBG(painter, rect);
-	drawBGGrid(painter, rect, 2, QColor(Qt::lightGray));
-	drawBGGrid(painter, rect, 10, QColor(Qt::cyan));
-}
-
-
-void GraphicsScene::drawFGRule(QPainter *painter, const QRectF &rect)
-{
-	int x = rect.x();
-	int y = rect.y();
-	int width = rect.width();
-	int height = mRuleHeight;
+	int x = validRect.x();
+	int y = validRect.y();
+	int width = validRect.width();
+	int height = validRect.height() - 1;
 
 	int y0_1 = y + height - 10;
-	int y0_10 = y + height - 30;
+	int y0_10 = y + height - 20;
 	int y1 = y + height;
 
-	int step = mZoom;
-	QColor colorRule(Qt::gray);
-	QColor colorCurrentPos(Qt::black);
+	QColor colorRule(Qt::white);
+	QColor colorNumber(Qt::black);
 
-	int fontHeight = painter->fontMetrics().height();
+	//int fontHeight = painter->fontMetrics().height();
 
 	painter->save();
 	painter->setBrush(Qt::NoBrush);
@@ -240,22 +256,20 @@ void GraphicsScene::drawFGRule(QPainter *painter, const QRectF &rect)
 	painter->setPen(colorRule);
 
 	for(int i = x; i < x + width; i++) {
-		if(i % (10 * step) == 0) {
+		if(i % (10 * mZoom) == 0) {
 			painter->drawLine(i, y0_10, i, y1);
-		} else if(i % step == 0) {
+		} else if(i % mZoom == 0) {
 			painter->drawLine(i, y0_1, i, y1);
 		}
 	}
 
-	painter->setPen(colorCurrentPos);
-	painter->drawLine(mCurrentPoint.x(), rect.y(), mCurrentPoint.x(), y1);
-
-	for(int i = (x - 10 * step >= 0) ? (x - 10 * step) : x; i < x + width; i++) {
-		if(i % (10 * step) == 0) {
+	painter->setPen(colorNumber);
+	for(int i = x; i < x + width; i++) {
+		if(i % (10 * mZoom) == 0) {
 			//printf("");
 			//qDebug() << "i:" << i;
-			//QRect rectText = QRect(i, y0_1 - fontHeight, 10 * step, fontHeight);
-			QString number = QString::number(i / step);
+			//QRect rectText = QRect(i, y0_1 - fontHeight, 10 * mZoom, fontHeight);
+			QString number = QString::number(i / mZoom);
 			//painter->drawText(rectText, Qt::AlignLeft, number);
 			painter->drawText(i, y0_1, number);
 		}
@@ -264,9 +278,45 @@ void GraphicsScene::drawFGRule(QPainter *painter, const QRectF &rect)
 	painter->restore();
 }
 
-void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect)
+void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
 	//printf("");
+	//qDebug() << validRect;
+
+	QGraphicsScene::drawBackground(painter, rect);
+	drawBG(painter, rect);
+	drawBGGrid(painter, rect);
+	drawBGRule(painter, rect);
+}
+
+void GraphicsScene::drawFGPos(QPainter *painter, const QRectF &rect) {
+	QRectF validRect(0, 0, mPrintXMax * mZoom, mRuleHeight);
+	validRect &= rect;
+
+	if(validRect.isNull()) {
+		return;
+	}
+
+	int x = validRect.x();
+	int y = validRect.y();
+	int width = validRect.width();
+	int height = validRect.height();
+
+	painter->save();
+	painter->setBrush(Qt::NoBrush);
+
+	QColor colorCurrentPos(Qt::black);
+
+	painter->setPen(colorCurrentPos);
+	int currentPointX = (mCurrentPoint.x() <= x + width) ? mCurrentPoint.x() : x + width;
+	currentPointX = currentPointX / mZoom * mZoom;
+	painter->drawLine(currentPointX, y, currentPointX, y + height);
+
+	painter->restore();
+}
+
+void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect)
+{
 	//QGraphicsScene::drawForeground(painter, rect);
-	drawFGRule(painter, rect);
+	drawFGPos(painter, rect);
 }

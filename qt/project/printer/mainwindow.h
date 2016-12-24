@@ -31,22 +31,31 @@ protected:
 
 private slots:
 	void datetimeUpdateTimeout(QTimerEvent *event);
-	void on_pushButton_exit_clicked();
-	void on_pushButton_minimize_clicked();
 	void itemInserted(GraphicsPolygonItem *item);
 	void textInserted(QGraphicsTextItem *);
 	void itemSelected(QGraphicsItem *item);
 
+	void on_pushButton_exit_clicked();
+
+	void on_pushButton_minimize_clicked();
+
+	void on_pushButton_dec_print_length_clicked();
+
+	void on_pushButton_inc_print_length_clicked();
+
+	void on_lineEdit_print_length_editingFinished();
+
 private:
 	Ui::MainWindow *ui;
-	int m_timerId;
+	int m_timerId1;
 
-	QHBoxLayout *layout_show_com;
 	GraphicsScene *scene_show_com;
+	QHBoxLayout *layout_show_com;
 	QGraphicsView *view_show_com;
 
 	void initDatetime();
 	void initFrameShowCom();
+	void updateSceneSizeInfo();
 };
 
 #endif // MAINWINDOW_H

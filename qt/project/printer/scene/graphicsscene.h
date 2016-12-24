@@ -54,6 +54,31 @@ public:
 	void setItemColor(const QColor &color);
 	void setFont(const QFont &font);
 
+	qreal printXMax() {
+		return mPrintXMax;
+	}
+
+	void setPrintXMax(qreal printXMax) {
+		mPrintXMax = printXMax;
+		update();
+	}
+
+	int zoom() {
+		return mZoom;
+	}
+
+	void setZoom(int zoom) {
+		mZoom = zoom;
+	}
+
+	int height() {
+		return mHeight;
+	}
+
+	void setHeight(int height) {
+		mHeight = height;
+	}
+
 public slots:
 	void setInsertMode(sceneOpMode mode);
 	void setGraphicsPolygonItemType(GraphicsPolygonItem::GraphicsPolygonType type);
@@ -87,11 +112,13 @@ private:
 	int mHeight;
 	int mRuleHeight;
 	int mGridMargin;
+	qreal mPrintXMax;
 	QPointF mCurrentPoint;
 
-	void drawBGGrid(QPainter *painter, const QRectF &rect, int size, QColor color);
+	void drawBGGrid(QPainter *painter, const QRectF &rect);
 	void drawBG(QPainter *painter, const QRectF &rect);
-	void drawFGRule(QPainter *painter, const QRectF &rect);
+	void drawBGRule(QPainter *painter, const QRectF &rect);
+	void drawFGPos(QPainter *painter, const QRectF &rect);
 };
 //! [0]
 
