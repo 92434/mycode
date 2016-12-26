@@ -46,3 +46,21 @@ function enable_vbox_symlink() {
 	echo VBoxManage getextradata $VM_NAME enumerate
 }
 #enable_vbox_symlink xiaofei_vm_name share_name
+
+
+function gen_ssh_key() {
+	local mail=$1
+	mail=${mail:=alibaba22001@163.com}
+	ssh-keygen -t rsa -b 4096 -C "$mail"
+}
+
+function load_vdi() {
+	local num="$1"
+	local vdi="$2"
+	sudo qemu-nbd -c /dev/nbd$num "$vdi"
+}
+
+function mount_vdi() {
+	for i in  /dev/nbd*p*;do mkdir -p $(basename $i);done
+	for i in  /dev/nbd*p*;do sudo mount $i $(basename $i);done
+}
