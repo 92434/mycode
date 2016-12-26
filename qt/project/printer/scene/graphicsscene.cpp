@@ -1,6 +1,6 @@
 #include "graphicsscene.h"
 #include "graphicsarrowitem.h"
-#include "../../../utils/xiaofei_debug.h"
+#include "xiaofei_debug.h"
 
 #include <QTextCursor>
 #include <QGraphicsSceneMouseEvent>
@@ -16,10 +16,10 @@ GraphicsScene::GraphicsScene(QObject *parent)
 	setHeight(34);
 
 	mCurrentPoint = QPointF(0, 0);
-	mSceneOpMode = InsertGraphicsPolygonItem;
-	mGraphicsPolygonItemType = GraphicsPolygonItem::Step;
-	mGraphicsLineItem = 0;
-	mTextGraphicsItem = 0;
+	//mSceneOpMode = InsertGraphicsPolygonItem;
+	//mGraphicsPolygonItemType = GraphicsPolygonItem::Step;
+	//mGraphicsLineItem = 0;
+	//mTextGraphicsItem = 0;
 	mItemColor = Qt::white;
 	mTextColor = Qt::black;
 	mLineColor = Qt::black;
@@ -31,11 +31,12 @@ void GraphicsScene::setLineColor(const QColor &color)
 	mLineColor = color;
 
 	foreach (QGraphicsItem * item, selectedItems()) {
-		if (item->type() == GraphicsArrowItem::Type) {
-			GraphicsArrowItem *arrow = qgraphicsitem_cast<GraphicsArrowItem *>(item);
-			arrow->setColor(mLineColor);
-			isColorChanged = true;
-		}
+		item = item;
+		//if (item->type() == GraphicsArrowItem::Type) {
+		//	GraphicsArrowItem *arrow = qgraphicsitem_cast<GraphicsArrowItem *>(item);
+		//	arrow->setColor(mLineColor);
+		//	isColorChanged = true;
+		//}
 	}
 
 	if(isColorChanged) {
@@ -48,9 +49,10 @@ void GraphicsScene::setTextColor(const QColor &color)
 	mTextColor = color;
 
 	foreach (QGraphicsItem * item, selectedItems()) {
-		if (item->type() == GraphicsTextItem::Type) {
-			(qgraphicsitem_cast<GraphicsTextItem *>(item))->setDefaultTextColor(mTextColor);
-		}
+		item = item;
+		//if (item->type() == GraphicsTextItem::Type) {
+		//	(qgraphicsitem_cast<GraphicsTextItem *>(item))->setDefaultTextColor(mTextColor);
+		//}
 	}
 }
 
@@ -59,10 +61,11 @@ void GraphicsScene::setItemColor(const QColor &color)
 	mItemColor = color;
 
 	foreach (QGraphicsItem * item, selectedItems()) {
-		if (item->type() == GraphicsPolygonItem::Type) {
-			GraphicsPolygonItem *graphicsPolygonItem = qgraphicsitem_cast<GraphicsPolygonItem *>(item);
-			graphicsPolygonItem->setBrush(mItemColor);
-		}
+		item = item;
+		//if (item->type() == GraphicsPolygonItem::Type) {
+		//	GraphicsPolygonItem *graphicsPolygonItem = qgraphicsitem_cast<GraphicsPolygonItem *>(item);
+		//	graphicsPolygonItem->setBrush(mItemColor);
+		//}
 	}
 }
 
@@ -71,8 +74,9 @@ void GraphicsScene::setFont(const QFont &font)
 	mFont = font;
 
 	foreach (QGraphicsItem * item, selectedItems()) {
-		QGraphicsTextItem *graphicsTextItem = qgraphicsitem_cast<GraphicsTextItem *>(item);
-		graphicsTextItem->setFont(mFont);
+		item = item;
+		//QGraphicsTextItem *graphicsTextItem = qgraphicsitem_cast<GraphicsTextItem *>(item);
+		//graphicsTextItem->setFont(mFont);
 	}
 }
 
@@ -81,22 +85,22 @@ void GraphicsScene::setInsertMode(sceneOpMode mode)
 	mSceneOpMode = mode;
 }
 
-void GraphicsScene::setGraphicsPolygonItemType(GraphicsPolygonItem::GraphicsPolygonType type)
-{
-	mGraphicsPolygonItemType = type;
-}
+//void GraphicsScene::setGraphicsPolygonItemType(GraphicsPolygonItem::GraphicsPolygonType type)
+//{
+//	mGraphicsPolygonItemType = type;
+//}
 
-void GraphicsScene::textItemLostFocus(GraphicsTextItem *item)
-{
-	QTextCursor cursor = item->textCursor();
-	cursor.clearSelection();
-	item->setTextCursor(cursor);
-
-	if (item->toPlainText().isEmpty()) {
-		removeItem(item);
-		item->deleteLater();
-	}
-}
+//void GraphicsScene::textItemLostFocus(GraphicsTextItem *item)
+//{
+//	QTextCursor cursor = item->textCursor();
+//	cursor.clearSelection();
+//	item->setTextCursor(cursor);
+//
+//	if (item->toPlainText().isEmpty()) {
+//		removeItem(item);
+//		item->deleteLater();
+//	}
+//}
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
@@ -104,27 +108,33 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 		return;
 	}
 
-	GraphicsPolygonItem *item;
+	//GraphicsPolygonItem *item;
 
 	switch (mSceneOpMode) {
-		case InsertGraphicsPolygonItem:
-			item = new GraphicsPolygonItem(mGraphicsPolygonItemType);
-			item->setBrush(mItemColor);
-			addItem(item);
-			item->setPos(mouseEvent->scenePos());
-			emit itemInserted(item);
-			break;
-		case InsertQGraphicsLineItem:
-			mGraphicsLineItem = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(), mouseEvent->scenePos()));
-			mGraphicsLineItem->setPen(QPen(mLineColor, 2));
-			addItem(mGraphicsLineItem);
+			//case InsertGraphicsPolygonItem:
+			//	item = new GraphicsPolygonItem(mGraphicsPolygonItemType);
+			//	item->setBrush(mItemColor);
+			//	addItem(item);
+			//	item->setPos(mouseEvent->scenePos());
+			//	emit itemInserted(item);
+			//	break;
+			//case InsertQGraphicsLineItem:
+			//	mGraphicsLineItem = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(), mouseEvent->scenePos()));
+			//	mGraphicsLineItem->setPen(QPen(mLineColor, 2));
+			//	addItem(mGraphicsLineItem);
+			//	break;
+		case InsertGraphicsQRItem:
+			mGraphicsQRItem = new GraphicsQRItem();
+			mGraphicsQRItem->setPos(mouseEvent->scenePos());
+			addItem(mGraphicsQRItem);
+			emit itemInserted(mGraphicsQRItem);
 			break;
 		case InsertTextGraphicsItem:
 			mTextGraphicsItem = new GraphicsTextItem();
 			mTextGraphicsItem->setFont(mFont);
 			mTextGraphicsItem->setTextInteractionFlags(Qt::TextEditorInteraction);
 			mTextGraphicsItem->setZValue(1000.0);
-			connect(mTextGraphicsItem, SIGNAL(lostFocus(GraphicsTextItem *)), this, SLOT(textItemLostFocus(GraphicsTextItem *)));
+			//connect(mTextGraphicsItem, SIGNAL(lostFocus(GraphicsTextItem *)), this, SLOT(textItemLostFocus(GraphicsTextItem *)));
 			connect(mTextGraphicsItem, SIGNAL(selectedChange(QGraphicsItem *)), this, SIGNAL(itemSelected(QGraphicsItem *)));
 			addItem(mTextGraphicsItem);
 			mTextGraphicsItem->setDefaultTextColor(mTextColor);
@@ -140,15 +150,16 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 void GraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
 	switch (mSceneOpMode) {
-		case InsertQGraphicsLineItem:
+			//case InsertQGraphicsLineItem:
 
-			if(mGraphicsLineItem != 0) {
-				QLineF newLine(mGraphicsLineItem->line().p1(), mouseEvent->scenePos());
-				mGraphicsLineItem->setLine(newLine);
-			}
+			//	if(mGraphicsLineItem != 0) {
+			//		QLineF newLine(mGraphicsLineItem->line().p1(), mouseEvent->scenePos());
+			//		mGraphicsLineItem->setLine(newLine);
+			//	}
 
-			break;
+			//	break;
 		default:
+			//qDebug() << mouseEvent->scenePos();
 			QGraphicsScene::mouseMoveEvent(mouseEvent);
 			break;
 	}
@@ -170,6 +181,10 @@ void GraphicsScene::drawBG(QPainter *painter, const QRectF &rect)
 	QRectF validRect(0, mRuleHeight, mPrintXMax * mZoom, mHeight * mZoom);
 	//validRect &= rect;
 
+	if(rect.isNull()) {
+		return;
+	}
+
 	if(validRect.isNull()) {
 		return;
 	}
@@ -188,6 +203,11 @@ void GraphicsScene::drawBGGrid(QPainter *painter, const QRectF &rect)
 {
 	QRectF validRect(0, mRuleHeight, mPrintXMax * mZoom, mHeight * mZoom);
 	//validRect &= rect;
+
+	if(rect.isNull()) {
+		return;
+	}
+
 
 	if(validRect.isNull()) {
 		return;
@@ -218,7 +238,7 @@ void GraphicsScene::drawBGGrid(QPainter *painter, const QRectF &rect)
 		if((i - x) % (10 * mZoom) == 0) {
 			painter->setPen(colorStep10);
 			painter->drawLine(i, y, i, y + height);
-		} else if((i - x) % (2 * mZoom) == 0){
+		} else if((i - x) % (2 * mZoom) == 0) {
 			painter->setPen(colorStep2);
 			painter->drawLine(i, y, i, y + height);
 		}
@@ -231,6 +251,11 @@ void GraphicsScene::drawBGRule(QPainter *painter, const QRectF &rect)
 {
 	QRectF validRect(0, 0, mPrintXMax * mZoom, mRuleHeight);
 	//validRect &= rect;
+
+	if(rect.isNull()) {
+		return;
+	}
+
 
 	if(validRect.isNull()) {
 		return;
@@ -264,6 +289,7 @@ void GraphicsScene::drawBGRule(QPainter *painter, const QRectF &rect)
 	}
 
 	painter->setPen(colorNumber);
+
 	for(int i = x; i < x + width; i++) {
 		if(i % (10 * mZoom) == 0) {
 			//printf("");
@@ -289,7 +315,8 @@ void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect)
 	drawBGRule(painter, rect);
 }
 
-void GraphicsScene::drawFGPos(QPainter *painter, const QRectF &rect) {
+void GraphicsScene::drawFGPos(QPainter *painter, const QRectF &rect)
+{
 	QRectF validRect(0, 0, mPrintXMax * mZoom, mRuleHeight);
 	validRect &= rect;
 

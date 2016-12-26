@@ -14,7 +14,9 @@ HEADERS += \
     scene/graphicsscene.h \
     scene/graphicsarrowitem.h \
     scene/graphicspolygonitem.h \
-    scene/graphicstextitem.h
+    scene/graphicstextitem.h \
+    scene/graphicsqritem.h \
+    qr/zint-master/backend_qt4/qzint.h
 
 SOURCES += \
     main.cpp \
@@ -23,7 +25,15 @@ SOURCES += \
     scene/graphicsarrowitem.cpp \
     scene/graphicsscene.cpp \
     scene/graphicspolygonitem.cpp \
-    scene/graphicstextitem.cpp
+    scene/graphicstextitem.cpp \
+    scene/graphicsqritem.cpp \
+    qr/zint-master/backend_qt4/qzint.cpp
+
+unix:!macx: LIBS += -L$$PWD/qr/zint-master/build/backend -lzint
+unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/qr/zint-master/backend
+unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/qr/zint-master/backend_qt4
+unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/../../utils
+
 
 RESOURCES += \
     resource.qrc

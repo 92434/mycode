@@ -46,8 +46,8 @@ void MainWindow::initFrameShowCom()
 	scene_show_com = new GraphicsScene(this);
 	scene_show_com->setSceneRect(QRectF(0, 0, 426, 169));
 	scene_show_com->setBackgroundBrush(Qt::lightGray);
-	connect(scene_show_com, SIGNAL(itemInserted(GraphicsPolygonItem *)), this, SLOT(itemInserted(GraphicsPolygonItem *)));
-	connect(scene_show_com, SIGNAL(textInserted(QGraphicsTextItem *)), this, SLOT(textInserted(QGraphicsTextItem *)));
+	connect(scene_show_com, SIGNAL(itemInserted(QGraphicsItem *)), this, SLOT(itemInserted(QGraphicsItem *)));
+	//connect(scene_show_com, SIGNAL(textInserted(QGraphicsTextItem *)), this, SLOT(textInserted(QGraphicsTextItem *)));
 	connect(scene_show_com, SIGNAL(itemSelected(QGraphicsItem *)), this, SLOT(itemSelected(QGraphicsItem *)));
 	//ui->graphicsView_show_com->setScene(scene_show_com);
 	//ui->graphicsView_show_com->setMouseTracking(true);
@@ -98,21 +98,15 @@ void MainWindow::on_pushButton_minimize_clicked()
 	lower();
 }
 
-void MainWindow::itemInserted(GraphicsPolygonItem *item)
+void MainWindow::itemInserted(QGraphicsItem *item)
 {
-	scene_show_com->setInsertMode(GraphicsScene::InsertGraphicsPolygonItem);
+	scene_show_com->setInsertMode(GraphicsScene::Esc);
 	item = item;
 }
-
-void MainWindow::textInserted(QGraphicsTextItem *item)
-{
-	scene_show_com->setInsertMode(GraphicsScene::InsertTextGraphicsItem);
-	item = item;
-}
-
 
 void MainWindow::itemSelected(QGraphicsItem *item)
 {
+	scene_show_com->setInsertMode(GraphicsScene::Move);
 	item = item;
 }
 
@@ -158,4 +152,14 @@ void MainWindow::on_lineEdit_print_length_editingFinished()
 	}
 
 	updateSceneSizeInfo();
+}
+
+void MainWindow::on_pushButton_QR_clicked()
+{
+	scene_show_com->setInsertMode(GraphicsScene::InsertGraphicsQRItem);
+}
+
+void MainWindow::on_pushButton_Text_clicked()
+{
+	scene_show_com->setInsertMode(GraphicsScene::InsertTextGraphicsItem);
 }

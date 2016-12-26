@@ -31,8 +31,8 @@ protected:
 
 private slots:
 	void datetimeUpdateTimeout(QTimerEvent *event);
-	void itemInserted(GraphicsPolygonItem *item);
-	void textInserted(QGraphicsTextItem *);
+	void itemInserted(QGraphicsItem *item);
+	//void textInserted(QGraphicsTextItem *);
 	void itemSelected(QGraphicsItem *item);
 
 	void on_pushButton_exit_clicked();
@@ -44,6 +44,10 @@ private slots:
 	void on_pushButton_inc_print_length_clicked();
 
 	void on_lineEdit_print_length_editingFinished();
+
+	void on_pushButton_QR_clicked();
+
+	void on_pushButton_Text_clicked();
 
 private:
 	Ui::MainWindow *ui;

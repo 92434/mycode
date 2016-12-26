@@ -1,8 +1,9 @@
 #ifndef GRAPHICSSCENE_H
 #define GRAPHICSSCENE_H
 
-#include "graphicspolygonitem.h"
+//#include "graphicspolygonitem.h"
 #include "graphicstextitem.h"
+#include "graphicsqritem.h"
 
 #include <QGraphicsScene>
 #include <QPainter>
@@ -26,9 +27,10 @@ public:
 		Move = 0,
 		Delete,
 		Esc,
-		InsertGraphicsPolygonItem,
-		InsertQGraphicsLineItem,
+		InsertGraphicsQRItem,
 		InsertTextGraphicsItem
+		//InsertGraphicsPolygonItem,
+		//InsertQGraphicsLineItem,
 	};
 
 	explicit GraphicsScene(QObject *parent = 0);
@@ -81,13 +83,14 @@ public:
 
 public slots:
 	void setInsertMode(sceneOpMode mode);
-	void setGraphicsPolygonItemType(GraphicsPolygonItem::GraphicsPolygonType type);
-	void textItemLostFocus(GraphicsTextItem *item);
+	//void setGraphicsPolygonItemType(GraphicsPolygonItem::GraphicsPolygonType type);
+	//void textItemLostFocus(GraphicsTextItem *item);
 
 signals:
-	void itemInserted(GraphicsPolygonItem *item);
-	void textInserted(QGraphicsTextItem *item);
+	//void itemInserted(GraphicsPolygonItem *item);
+	void itemInserted(QGraphicsItem *item);
 	void itemSelected(QGraphicsItem *item);
+	void textInserted(QGraphicsTextItem *item);
 
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) Q_DECL_OVERRIDE;
@@ -103,9 +106,10 @@ private:
 	QColor mItemColor;
 	QColor mLineColor;
 
-	GraphicsPolygonItem::GraphicsPolygonType mGraphicsPolygonItemType;
+	//GraphicsPolygonItem::GraphicsPolygonType mGraphicsPolygonItemType;
 	sceneOpMode mSceneOpMode;
-	QGraphicsLineItem *mGraphicsLineItem;
+	//QGraphicsLineItem *mGraphicsLineItem;
+	GraphicsQRItem *mGraphicsQRItem;
 	GraphicsTextItem *mTextGraphicsItem;
 
 	int mZoom;
