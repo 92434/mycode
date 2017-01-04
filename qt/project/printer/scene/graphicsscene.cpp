@@ -14,6 +14,7 @@ GraphicsScene::GraphicsScene(QObject *parent)
 	setZoom(3);
 	setPrintXMax(25);
 	setHeight(34);
+	mVisualRect = QRectF(0, mRuleHeight, mPrintXMax * mZoom, mHeight * mZoom);
 
 	mCurrentPoint = QPointF(0, 0);
 	//mSceneOpMode = InsertGraphicsPolygonItem;
@@ -104,9 +105,20 @@ void GraphicsScene::setInsertMode(sceneOpMode mode)
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+	QPointF pos = mouseEvent->scenePos();
+
 	if (mouseEvent->button() != Qt::LeftButton) {
 		return;
 	}
+
+	pos.setX((int)pos.x() / mZoom * mZoom);
+	pos.setY((int)pos.y() / mZoom * mZoom);
+
+	if(!mVisualRect.contains(pos)) {
+		return;
+	}
+
+	//qDebug() << pos;
 
 	//GraphicsPolygonItem *item;
 
@@ -115,17 +127,17 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			//	item = new GraphicsPolygonItem(mGraphicsPolygonItemType);
 			//	item->setBrush(mItemColor);
 			//	addItem(item);
-			//	item->setPos(mouseEvent->scenePos());
+			//	item->setPos(pos);
 			//	emit itemInserted(item);
 			//	break;
 			//case InsertQGraphicsLineItem:
-			//	mGraphicsLineItem = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(), mouseEvent->scenePos()));
+			//	mGraphicsLineItem = new QGraphicsLineItem(QLineF(pos, pos));
 			//	mGraphicsLineItem->setPen(QPen(mLineColor, 2));
 			//	addItem(mGraphicsLineItem);
 			//	break;
 		case InsertGraphicsQRItem:
 			mGraphicsQRItem = new GraphicsQRItem();
-			mGraphicsQRItem->setPos(mouseEvent->scenePos());
+			mGraphicsQRItem->setPos(pos);
 			addItem(mGraphicsQRItem);
 			emit itemInserted(mGraphicsQRItem);
 			break;
@@ -138,7 +150,7 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			connect(mTextGraphicsItem, SIGNAL(selectedChange(QGraphicsItem *)), this, SIGNAL(itemSelected(QGraphicsItem *)));
 			addItem(mTextGraphicsItem);
 			mTextGraphicsItem->setDefaultTextColor(mTextColor);
-			mTextGraphicsItem->setPos(mouseEvent->scenePos());
+			mTextGraphicsItem->setPos(pos);
 			emit textInserted(mTextGraphicsItem);
 		default:
 			break;
@@ -149,25 +161,17 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 void GraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-	switch (mSceneOpMode) {
-			//case InsertQGraphicsLineItem:
+	//qDebug() << mouseEvent->scenePos();
 
-			//	if(mGraphicsLineItem != 0) {
-			//		QLineF newLine(mGraphicsLineItem->line().p1(), mouseEvent->scenePos());
-			//		mGraphicsLineItem->setLine(newLine);
-			//	}
-
-			//	break;
-		default:
-			//qDebug() << mouseEvent->scenePos();
-			QGraphicsScene::mouseMoveEvent(mouseEvent);
-			break;
+	if(!mVisualRect.contains(mouseEvent->scenePos())) {
+		return;
 	}
 
 	mCurrentPoint = mouseEvent->scenePos();
-	update();
 
-	//qDebug() << mouseEvent->scenePos();
+	QGraphicsScene::mouseMoveEvent(mouseEvent);
+
+	update();
 }
 
 
@@ -346,4 +350,51 @@ void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect)
 {
 	//QGraphicsScene::drawForeground(painter, rect);
 	drawFGPos(painter, rect);
+}
+
+void GraphicsScene::moveSelectedItems(int type)
+{
+	int dx = 0;
+	int dy = 0;
+
+	switch(type) {
+		case 0:
+			dy = -1 * mZoom;
+			break;
+		case 1:
+			dy = 1 * mZoom;
+			break;
+		case 2:
+			dx = -1 * mZoom;
+			break;
+		case 3:
+			dx = 1 * mZoom;
+			break;
+		default:
+			break;
+	}
+
+	foreach (QGraphicsItem * item, selectedItems()) {
+		QPointF pos = item->pos();
+
+		if(!mVisualRect.contains(pos + QPointF(dx, dy))) {
+			return;
+		}
+	}
+
+	foreach (QGraphicsItem * item, selectedItems()) {
+		item->moveBy(dx, dy);
+	}
+}
+
+void GraphicsScene::deselectItems()
+{
+	clearSelection();
+}
+
+void GraphicsScene::deleteSelectedItems()
+{
+	foreach (QGraphicsItem * item, selectedItems()) {
+		delete item;
+	}
 }

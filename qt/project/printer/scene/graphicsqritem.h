@@ -113,6 +113,7 @@ protected:
 	//QVariant itemChange(GraphicsItemChange change, const QVariant &value) Q_DECL_OVERRIDE;
 	//void focusOutEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
 	//void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
+	//void mouseMoveEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
 	Zint::QZint bc;

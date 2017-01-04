@@ -62,6 +62,7 @@ public:
 
 	void setPrintXMax(qreal printXMax) {
 		mPrintXMax = printXMax;
+		mVisualRect.setWidth(mPrintXMax * mZoom);
 		update();
 	}
 
@@ -71,6 +72,7 @@ public:
 
 	void setZoom(int zoom) {
 		mZoom = zoom;
+		update();
 	}
 
 	int height() {
@@ -79,7 +81,17 @@ public:
 
 	void setHeight(int height) {
 		mHeight = height;
+		mVisualRect.setHeight(mHeight * mZoom);
+		update();
 	}
+
+	QRectF visualRect() {
+		return mVisualRect;
+	}
+
+	void moveSelectedItems(int type);
+	void deselectItems();
+	void deleteSelectedItems();
 
 public slots:
 	void setInsertMode(sceneOpMode mode);
@@ -105,6 +117,7 @@ private:
 	QColor mTextColor;
 	QColor mItemColor;
 	QColor mLineColor;
+	QRectF mVisualRect;
 
 	//GraphicsPolygonItem::GraphicsPolygonType mGraphicsPolygonItemType;
 	sceneOpMode mSceneOpMode;

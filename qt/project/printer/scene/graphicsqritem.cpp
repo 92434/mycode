@@ -3,7 +3,7 @@
 
 GraphicsQRItem::GraphicsQRItem() : QGraphicsItem()
 {
-	setFlag(QGraphicsItem::ItemIsMovable);
+	//setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
 
 	w = 45;
@@ -24,9 +24,11 @@ QRectF GraphicsQRItem::boundingRect() const
 void GraphicsQRItem::paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * /*widget*/)
 {
 	if(isSelected()) {
-		//printf("\n");
+		bc.setFgColor(m_bgcolor);
+		bc.setBgColor(m_fgcolor);
 	} else {
-		//printf("\n");
+		bc.setFgColor(m_fgcolor);
+		bc.setBgColor(m_bgcolor);
 	}
 
 	bc.render(*painter, boundingRect(), ar);
@@ -364,7 +366,6 @@ void GraphicsQRItem::init()
 			//} else {
 			//	bc.setSymbol(BARCODE_QRCODE);
 			//}
-			bc.setSymbol(BARCODE_QRCODE);
 
 			//if(m_optionWidget->findChild<QRadioButton *>("radQRGS1")->isChecked()) {
 			//	bc.setInputMode(GS1_MODE);
@@ -469,3 +470,8 @@ void GraphicsQRItem::init()
 	bc.setFgColor(m_fgcolor);
 	bc.setBgColor(m_bgcolor);
 }
+
+//void GraphicsQRItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+//{
+//	QGraphicsItem::mouseMoveEvent(event);
+//}

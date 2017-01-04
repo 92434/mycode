@@ -39,6 +39,7 @@ void MainWindow::initDatetime()
 	ui->label->setText(QDateTime::currentDateTime().toString(QString("yyyy/MM/dd hh:mm:ss")));
 
 	connect(this, SIGNAL(timeout(QTimerEvent *)), this, SLOT(datetimeUpdateTimeout(QTimerEvent *)));
+	connect(this, SIGNAL(timeout(QTimerEvent *)), this, SLOT(statusThumbnailTimeout(QTimerEvent *)));
 }
 
 void MainWindow::initFrameShowCom()
@@ -58,8 +59,15 @@ void MainWindow::initFrameShowCom()
 	layout_show_com = new QHBoxLayout();
 	layout_show_com->addWidget(view_show_com);
 	ui->frame_show_com->setLayout(layout_show_com);
+	ui->pushButton_graphicsitem_up->setAutoRepeat(true);
+	ui->pushButton_graphicsitem_down->setAutoRepeat(true);
+	ui->pushButton_graphicsitem_left->setAutoRepeat(true);
+	ui->pushButton_graphicsitem_right->setAutoRepeat(true);
 	ui->pushButton_dec_print_length->setAutoRepeat(true);
 	ui->pushButton_inc_print_length->setAutoRepeat(true);
+
+	//ui->label_status_thumbnails->setScaledContents(true);
+	//ui->label_status_thumbnails->setAlignment(Qt::AlignCenter);
 
 	updateSceneSizeInfo();
 }
@@ -77,6 +85,31 @@ void MainWindow::datetimeUpdateTimeout(QTimerEvent *event)
 		//printf("datetime = %s\n",qPrintable(datetime));
 
 		ui->label->setText(datetime);
+	}
+}
+
+void MainWindow::statusThumbnailTimeout(QTimerEvent *event)
+{
+	if (event->timerId() == m_timerId1) {
+		int w = scene_show_com->visualRect().width();
+		int h = scene_show_com->visualRect().height();
+
+		QRectF targetRect = QRectF(0, 0, w, h);
+		QRectF sourceRect = QRectF(scene_show_com->visualRect());
+		QImage image = QImage(w, h, QImage::Format_Mono);
+
+		//if(w / h >= 10) {
+		//	h = w / 10;
+		//} else {
+		//	w = h * 10;
+		//}
+
+		QPainter painter(&image);
+		scene_show_com->render(&painter, targetRect, sourceRect, Qt::IgnoreAspectRatio);
+		painter.end();
+		image = image.scaled(ui->label_status_thumbnails->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+		qDebug() << targetRect;
+		ui->label_status_thumbnails->setPixmap(QPixmap::fromImage(image));
 	}
 }
 
@@ -162,4 +195,34 @@ void MainWindow::on_pushButton_QR_clicked()
 void MainWindow::on_pushButton_Text_clicked()
 {
 	scene_show_com->setInsertMode(GraphicsScene::InsertTextGraphicsItem);
+}
+
+void MainWindow::on_pushButton_graphicsitem_up_clicked()
+{
+	scene_show_com->moveSelectedItems(0);
+}
+
+void MainWindow::on_pushButton_graphicsitem_down_clicked()
+{
+	scene_show_com->moveSelectedItems(1);
+}
+
+void MainWindow::on_pushButton_graphicsitem_left_clicked()
+{
+	scene_show_com->moveSelectedItems(2);
+}
+
+void MainWindow::on_pushButton_graphicsitem_right_clicked()
+{
+	scene_show_com->moveSelectedItems(3);
+}
+
+void MainWindow::on_pushButton_deselect_items_clicked()
+{
+	scene_show_com->deselectItems();
+}
+
+void MainWindow::on_pushButton_delete_items_clicked()
+{
+	scene_show_com->deleteSelectedItems();
 }

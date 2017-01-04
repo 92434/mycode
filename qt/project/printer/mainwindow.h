@@ -31,6 +31,7 @@ protected:
 
 private slots:
 	void datetimeUpdateTimeout(QTimerEvent *event);
+	void statusThumbnailTimeout(QTimerEvent *event);
 	void itemInserted(QGraphicsItem *item);
 	//void textInserted(QGraphicsTextItem *);
 	void itemSelected(QGraphicsItem *item);
@@ -48,6 +49,18 @@ private slots:
 	void on_pushButton_QR_clicked();
 
 	void on_pushButton_Text_clicked();
+
+	void on_pushButton_graphicsitem_up_clicked();
+
+	void on_pushButton_graphicsitem_down_clicked();
+
+	void on_pushButton_graphicsitem_left_clicked();
+
+	void on_pushButton_graphicsitem_right_clicked();
+
+	void on_pushButton_deselect_items_clicked();
+
+	void on_pushButton_delete_items_clicked();
 
 private:
 	Ui::MainWindow *ui;
