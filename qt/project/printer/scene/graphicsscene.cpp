@@ -337,6 +337,10 @@ void GraphicsScene::drawFGPos(QPainter *painter, const QRectF &rect)
 	QRectF validRect(0, 0, mPrintXMax * mZoom, mRuleHeight);
 	//validRect &= rect;
 
+    if(rect.isNull()) {
+        return;
+    }
+
 	if(validRect.isNull()) {
 		return;
 	}

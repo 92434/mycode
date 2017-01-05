@@ -66,18 +66,19 @@ private slots:
 
 private:
 	Ui::MainWindow *ui;
-	int m_timerId1;
-	bool mStartPrint;
-
-	GraphicsScene *scene_show_com;
-	QHBoxLayout *layout_show_com;
-	QGraphicsView *view_show_com;
 
 	void initDatetime();
 	void initFrameShowCom();
 	void initStatusThumbnail();
 	void updateSceneSizeInfo();
 	void updateStatusThumbnail();
+
+	GraphicsScene *scene_show_com;
+	QHBoxLayout *layout_show_com;
+	QGraphicsView *view_show_com;
+	int mTimerIdTime;
+	int mTimerIdStatus;
+	bool mStartPrint;
 };
 
 #endif // MAINWINDOW_H

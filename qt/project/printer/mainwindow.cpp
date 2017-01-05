@@ -20,12 +20,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	move((pDesk->width() - width()) / 2, (pDesk->height() - height()) / 2);
 
-	m_timerId1 = startTimer(1000);
 	mStartPrint = false;
 
-	initDatetime();
 	initFrameShowCom();
+
+	initDatetime();
 	initStatusThumbnail();
+
+	mTimerIdTime = startTimer(1000);
+	mTimerIdStatus = startTimer(100);
 }
 
 void MainWindow::initDatetime()
@@ -59,7 +62,7 @@ void MainWindow::initFrameShowCom()
 	connect(scene_show_com, SIGNAL(itemSelected(QGraphicsItem *)), this, SLOT(itemSelected(QGraphicsItem *)));
 	//ui->graphicsView_show_com->setScene(scene_show_com);
 	//ui->graphicsView_show_com->setMouseTracking(true);
-	view_show_com = new QGraphicsView(scene_show_com, view_show_com);
+	view_show_com = new QGraphicsView(scene_show_com);
 	view_show_com->setMouseTracking(true);
 	view_show_com->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	view_show_com->setParent(ui->frame_show_com);
@@ -86,7 +89,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
 
 void MainWindow::datetimeUpdateTimeout(QTimerEvent *event)
 {
-	if (event->timerId() == m_timerId1) {
+	if (event->timerId() == mTimerIdTime) {
 		QString datetime = QDateTime::currentDateTime().toString(QString("yyyy/MM/dd hh:mm:ss"));
 
 		//printf("datetime = %s\n",qPrintable(datetime));
@@ -121,14 +124,15 @@ void MainWindow::updateStatusThumbnail()
 
 void MainWindow::statusThumbnailTimeout(QTimerEvent *event)
 {
-	if (event->timerId() == m_timerId1) {
+	if (event->timerId() == mTimerIdStatus) {
 		updateStatusThumbnail();
 	}
 }
 
 MainWindow::~MainWindow()
 {
-	killTimer(m_timerId1);
+	killTimer(mTimerIdTime);
+	killTimer(mTimerIdStatus);
 	delete layout_show_com;
 	delete view_show_com;
 	delete scene_show_com;
