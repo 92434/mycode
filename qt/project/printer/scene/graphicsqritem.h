@@ -91,18 +91,26 @@ public:
 
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 	int getWidth() {
-		return this->w;
+		return mW;
 	}
 	void setWidth(int w) {
-		this->w = w;
+		mW = w;
 	}
 
 	int getHeight() {
-		return this->h;
+		return mH;
 	}
 
 	void setHeight(int h) {
-		this->h = h;
+		mH = h;
+	}
+
+	int zoom() {
+		return mZoom;
+	}
+
+	void setZoom(int zoom) {
+		mZoom = zoom;
 	}
 
 signals:
@@ -113,14 +121,13 @@ protected:
 	//QVariant itemChange(GraphicsItemChange change, const QVariant &value) Q_DECL_OVERRIDE;
 	//void focusOutEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
 	//void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
-	//void mouseMoveEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
 	Zint::QZint bc;
 	Zint::QZint::AspectRatioMode ar;
-	int w;
-	int h;
-
+	int mW;
+	int mH;
+	int mZoom;
 	std::vector<style_name_t> vecStyleName;
 	int currentType;
 

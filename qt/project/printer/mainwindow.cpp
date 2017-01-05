@@ -21,9 +21,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	move((pDesk->width() - width()) / 2, (pDesk->height() - height()) / 2);
 
 	m_timerId1 = startTimer(1000);
+	mStartPrint = false;
 
 	initDatetime();
 	initFrameShowCom();
+	initStatusThumbnail();
 }
 
 void MainWindow::initDatetime()
@@ -39,6 +41,11 @@ void MainWindow::initDatetime()
 	ui->label->setText(QDateTime::currentDateTime().toString(QString("yyyy/MM/dd hh:mm:ss")));
 
 	connect(this, SIGNAL(timeout(QTimerEvent *)), this, SLOT(datetimeUpdateTimeout(QTimerEvent *)));
+}
+
+void MainWindow::initStatusThumbnail()
+{
+	updateStatusThumbnail();
 	connect(this, SIGNAL(timeout(QTimerEvent *)), this, SLOT(statusThumbnailTimeout(QTimerEvent *)));
 }
 
@@ -88,33 +95,40 @@ void MainWindow::datetimeUpdateTimeout(QTimerEvent *event)
 	}
 }
 
+void MainWindow::updateStatusThumbnail()
+{
+	int w = scene_show_com->visualRect().width();
+	int h = scene_show_com->visualRect().height();
+
+	QRectF targetRect = QRectF(0, 0, w, h);
+	QRectF sourceRect = QRectF(scene_show_com->visualRect());
+	QImage image = QImage(w, h, QImage::Format_Mono);
+
+	QPainter painter(&image);
+
+	if(mStartPrint) {
+		scene_show_com->render(&painter, targetRect, sourceRect, Qt::KeepAspectRatio);
+	} else {
+		painter.fillRect(targetRect, Qt::white);
+	}
+
+	painter.end();
+
+	image = image.scaled(ui->label_status_thumbnails->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+	ui->label_status_thumbnails->setPixmap(QPixmap::fromImage(image));
+}
+
 void MainWindow::statusThumbnailTimeout(QTimerEvent *event)
 {
 	if (event->timerId() == m_timerId1) {
-		int w = scene_show_com->visualRect().width();
-		int h = scene_show_com->visualRect().height();
-
-		QRectF targetRect = QRectF(0, 0, w, h);
-		QRectF sourceRect = QRectF(scene_show_com->visualRect());
-		QImage image = QImage(w, h, QImage::Format_Mono);
-
-		//if(w / h >= 10) {
-		//	h = w / 10;
-		//} else {
-		//	w = h * 10;
-		//}
-
-		QPainter painter(&image);
-		scene_show_com->render(&painter, targetRect, sourceRect, Qt::IgnoreAspectRatio);
-		painter.end();
-		image = image.scaled(ui->label_status_thumbnails->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-		qDebug() << targetRect;
-		ui->label_status_thumbnails->setPixmap(QPixmap::fromImage(image));
+		updateStatusThumbnail();
 	}
 }
 
 MainWindow::~MainWindow()
 {
+	killTimer(m_timerId1);
 	delete layout_show_com;
 	delete view_show_com;
 	delete scene_show_com;
@@ -225,4 +239,12 @@ void MainWindow::on_pushButton_deselect_items_clicked()
 void MainWindow::on_pushButton_delete_items_clicked()
 {
 	scene_show_com->deleteSelectedItems();
+}
+
+void MainWindow::on_pushButton_start_print_clicked()
+{
+	mStartPrint = !mStartPrint;
+	scene_show_com->setInPrinting(mStartPrint);
+	scene_show_com->deselectItems();
+	updateStatusThumbnail();
 }

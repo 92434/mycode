@@ -62,9 +62,12 @@ private slots:
 
 	void on_pushButton_delete_items_clicked();
 
+	void on_pushButton_start_print_clicked();
+
 private:
 	Ui::MainWindow *ui;
 	int m_timerId1;
+	bool mStartPrint;
 
 	GraphicsScene *scene_show_com;
 	QHBoxLayout *layout_show_com;
@@ -72,7 +75,9 @@ private:
 
 	void initDatetime();
 	void initFrameShowCom();
+	void initStatusThumbnail();
 	void updateSceneSizeInfo();
+	void updateStatusThumbnail();
 };
 
 #endif // MAINWINDOW_H

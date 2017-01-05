@@ -14,6 +14,11 @@ GraphicsScene::GraphicsScene(QObject *parent)
 	setZoom(3);
 	setPrintXMax(25);
 	setHeight(34);
+
+	setItemWidth(17);
+	setItemHeight(17);
+	setInPrinting(false);
+
 	mVisualRect = QRectF(0, mRuleHeight, mPrintXMax * mZoom, mHeight * mZoom);
 
 	mCurrentPoint = QPointF(0, 0);
@@ -137,6 +142,9 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			//	break;
 		case InsertGraphicsQRItem:
 			mGraphicsQRItem = new GraphicsQRItem();
+			mGraphicsQRItem->setWidth(mItemWidth);
+			mGraphicsQRItem->setHeight(mItemHeight);
+			mGraphicsQRItem->setZoom(mZoom);
 			mGraphicsQRItem->setPos(pos);
 			addItem(mGraphicsQRItem);
 			emit itemInserted(mGraphicsQRItem);
@@ -200,7 +208,7 @@ void GraphicsScene::drawBG(QPainter *painter, const QRectF &rect)
 	QColor colorMargin(Qt::black);
 
 	painter->fillRect(validRect.x(), validRect.y(), validRect.width(), validRect.height(), colorGridBG);
-	painter->fillRect(validRect.x(), validRect.y() + validRect.height(), validRect.width(), mGridMargin, colorMargin);
+	//painter->fillRect(validRect.x(), vsetPosalidRect.y() + validRect.height(), validRect.width(), mGridMargin, colorMargin);
 }
 
 void GraphicsScene::drawBGGrid(QPainter *painter, const QRectF &rect)
@@ -315,6 +323,11 @@ void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect)
 
 	QGraphicsScene::drawBackground(painter, rect);
 	drawBG(painter, rect);
+
+	if(mInPrinting) {
+		return;
+	}
+
 	drawBGGrid(painter, rect);
 	drawBGRule(painter, rect);
 }
@@ -322,7 +335,7 @@ void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect)
 void GraphicsScene::drawFGPos(QPainter *painter, const QRectF &rect)
 {
 	QRectF validRect(0, 0, mPrintXMax * mZoom, mRuleHeight);
-	validRect &= rect;
+	//validRect &= rect;
 
 	if(validRect.isNull()) {
 		return;
@@ -348,7 +361,12 @@ void GraphicsScene::drawFGPos(QPainter *painter, const QRectF &rect)
 
 void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect)
 {
-	//QGraphicsScene::drawForeground(painter, rect);
+	QGraphicsScene::drawForeground(painter, rect);
+
+	if(mInPrinting) {
+		return;
+	}
+
 	drawFGPos(painter, rect);
 }
 

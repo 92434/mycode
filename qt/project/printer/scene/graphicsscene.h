@@ -85,6 +85,31 @@ public:
 		update();
 	}
 
+	int itemHeight() {
+		return mItemHeight;
+	}
+
+	void setItemHeight(int height) {
+		mItemHeight = height;
+	}
+
+	int itemWidth() {
+		return mItemWidth;
+	}
+
+	void setItemWidth(int width) {
+		mItemWidth = width;
+	}
+
+	bool isInPrinting() {
+		return mInPrinting;
+	}
+
+	void setInPrinting(bool inPrinting) {
+		mInPrinting = inPrinting;
+		update();
+	}
+
 	QRectF visualRect() {
 		return mVisualRect;
 	}
@@ -131,6 +156,10 @@ private:
 	int mGridMargin;
 	qreal mPrintXMax;
 	QPointF mCurrentPoint;
+	bool mInPrinting;
+
+	int mItemWidth;
+	int mItemHeight;
 
 	void drawBGGrid(QPainter *painter, const QRectF &rect);
 	void drawBG(QPainter *painter, const QRectF &rect);

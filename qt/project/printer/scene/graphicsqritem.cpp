@@ -6,8 +6,9 @@ GraphicsQRItem::GraphicsQRItem() : QGraphicsItem()
 	//setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
 
-	w = 45;
-	h = 45;
+	setWidth(17);
+	setHeight(17);
+	setZoom(3);
 	currentType = 53;
 	m_fgcolor = QColor(Qt::black);
 	m_bgcolor = QColor(Qt::white);
@@ -18,7 +19,7 @@ GraphicsQRItem::GraphicsQRItem() : QGraphicsItem()
 
 QRectF GraphicsQRItem::boundingRect() const
 {
-	return QRectF(0, 0, w, h);
+	return QRectF(0, 0, mW * mZoom, mH * mZoom);
 }
 
 void GraphicsQRItem::paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * /*widget*/)
@@ -470,8 +471,3 @@ void GraphicsQRItem::init()
 	bc.setFgColor(m_fgcolor);
 	bc.setBgColor(m_bgcolor);
 }
-
-//void GraphicsQRItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-//{
-//	QGraphicsItem::mouseMoveEvent(event);
-//}

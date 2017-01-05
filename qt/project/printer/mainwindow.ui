@@ -1327,7 +1327,7 @@
           <number>0</number>
          </property>
          <item row="0" column="0" colspan="2">
-          <widget class="QPushButton" name="pushButton_9">
+          <widget class="QPushButton" name="pushButton_start_print">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
