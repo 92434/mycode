@@ -1,6 +1,13 @@
 #include "graphicsqritem.h"
 #include "xiaofei_debug.h"
 
+int GraphicsQRItem::mW = 17;
+int GraphicsQRItem::mH = 17;
+int GraphicsQRItem::mZoom = 3;
+QColor GraphicsQRItem::mFgcolor = QColor(Qt::black);
+QColor GraphicsQRItem::mBgcolor = QColor(Qt::white);
+int GraphicsQRItem::mCurrentType = 53;
+
 GraphicsQRItem::GraphicsQRItem() : QGraphicsItem()
 {
 	//setFlag(QGraphicsItem::ItemIsMovable);
@@ -9,9 +16,9 @@ GraphicsQRItem::GraphicsQRItem() : QGraphicsItem()
 	setWidth(17);
 	setHeight(17);
 	setZoom(3);
-	currentType = 53;
-	m_fgcolor = QColor(Qt::black);
-	m_bgcolor = QColor(Qt::white);
+	mCurrentType = 53;
+	mFgcolor = QColor(Qt::black);
+	mBgcolor = QColor(Qt::white);
 
 	init();
 }
@@ -19,20 +26,20 @@ GraphicsQRItem::GraphicsQRItem() : QGraphicsItem()
 
 QRectF GraphicsQRItem::boundingRect() const
 {
-	return QRectF(0, 0, mW * mZoom, mH * mZoom);
+	return QRectF(0, 0, this->mW * this->mZoom, this->mH * this->mZoom);
 }
 
 void GraphicsQRItem::paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * /*widget*/)
 {
 	if(isSelected()) {
-		bc.setFgColor(m_bgcolor);
-		bc.setBgColor(m_fgcolor);
+		mZint.setFgColor(mBgcolor);
+		mZint.setBgColor(mFgcolor);
 	} else {
-		bc.setFgColor(m_fgcolor);
-		bc.setBgColor(m_bgcolor);
+		mZint.setFgColor(mFgcolor);
+		mZint.setBgColor(mBgcolor);
 	}
 
-	bc.render(*painter, boundingRect(), ar);
+	mZint.render(*painter, boundingRect(), mZintAspectRationMode);
 }
 
 void GraphicsQRItem::init()
@@ -103,10 +110,10 @@ void GraphicsQRItem::init()
 
 
 	for (unsigned int i = 0; i < sizeof(styleNames) / sizeof(style_name_t); i++) {
-		vecStyleName.push_back(styleNames[i]);
+		mVectorStyleName.push_back(styleNames[i]);
 	}
 
-	ar = (Zint::QZint::AspectRatioMode)1;
+	mZintAspectRationMode = (Zint::QZint::AspectRatioMode)1;
 
 	//if(chkComposite->isChecked() == true) {
 	//	bc.setPrimaryMessage(txtData->text());
@@ -115,18 +122,18 @@ void GraphicsQRItem::init()
 	//	bc.setText(txtData->text());
 	//	/*bc.setPrimaryMessage(txtComposite->text());*/
 	//}
-	bc.setText("https://www.baidu.com");
+	mZint.setText("https://www.baidu.com");
 
-	bc.setSecurityLevel(0);
-	bc.setWidth(0);
-	bc.setInputMode(UNICODE_MODE);
-	bc.setHideText(false);
+	mZint.setSecurityLevel(0);
+	mZint.setWidth(0);
+	mZint.setInputMode(UNICODE_MODE);
+	mZint.setHideText(false);
 
 	//if(chkHRTHide->isChecked() == false) {
 	//	bc.setHideText(true);
 	//}
 
-	switch(vecStyleName.at(currentType).type) {
+	switch(mVectorStyleName.at(mCurrentType).type) {
 		case NAME_TYPE_BARCODE_CODE128:
 
 			//if(m_optionWidget->findChild<QRadioButton *>("radC128Stand")->isChecked()) {
@@ -360,7 +367,7 @@ void GraphicsQRItem::init()
 			break;
 
 		case NAME_TYPE_BARCODE_QRCODE:
-			bc.setSymbol(BARCODE_QRCODE);
+			mZint.setSymbol(BARCODE_QRCODE);
 
 			//if(m_optionWidget->findChild<QRadioButton *>("radQRHIBC")->isChecked()) {
 			//	bc.setSymbol(BARCODE_HIBC_QR);
@@ -452,7 +459,7 @@ void GraphicsQRItem::init()
 			break;
 
 		default:
-			bc.setSymbol(vecStyleName.at(currentType).type);
+			mZint.setSymbol(mVectorStyleName.at(mCurrentType).type);
 			break;
 	}
 
@@ -461,13 +468,13 @@ void GraphicsQRItem::init()
 	//}
 
 	//bc.setBorderType((Zint::QZint::BorderType)(btype->currentIndex() * 2));
-	bc.setBorderType((Zint::QZint::BorderType)(0 * 2));
+	mZint.setBorderType((Zint::QZint::BorderType)(0 * 2));
 	//bc.setBorderWidth(bwidth->value());
-	bc.setBorderWidth(0);
+	mZint.setBorderWidth(0);
 	//bc.setHeight(heightb->value());
-	bc.setHeight(50);
+	mZint.setHeight(50);
 	//bc.setWhitespace(spnWhitespace->value());
-	bc.setWhitespace(0);
-	bc.setFgColor(m_fgcolor);
-	bc.setBgColor(m_bgcolor);
+	mZint.setWhitespace(0);
+	mZint.setFgColor(mFgcolor);
+	mZint.setBgColor(mBgcolor);
 }

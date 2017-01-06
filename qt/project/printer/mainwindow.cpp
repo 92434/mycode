@@ -59,7 +59,7 @@ void MainWindow::initFrameShowCom()
 	scene_show_com->setBackgroundBrush(Qt::lightGray);
 	connect(scene_show_com, SIGNAL(itemInserted(QGraphicsItem *)), this, SLOT(itemInserted(QGraphicsItem *)));
 	//connect(scene_show_com, SIGNAL(textInserted(QGraphicsTextItem *)), this, SLOT(textInserted(QGraphicsTextItem *)));
-	connect(scene_show_com, SIGNAL(itemSelected(QGraphicsItem *)), this, SLOT(itemSelected(QGraphicsItem *)));
+	//connect(scene_show_com, SIGNAL(itemSelected(QGraphicsItem *)), this, SLOT(itemSelected(QGraphicsItem *)));
 	//ui->graphicsView_show_com->setScene(scene_show_com);
 	//ui->graphicsView_show_com->setMouseTracking(true);
 	view_show_com = new QGraphicsView(scene_show_com);
@@ -155,11 +155,11 @@ void MainWindow::itemInserted(QGraphicsItem *item)
 	item = item;
 }
 
-void MainWindow::itemSelected(QGraphicsItem *item)
-{
-	scene_show_com->setInsertMode(GraphicsScene::Move);
-	item = item;
-}
+//void MainWindow::itemSelected(QGraphicsItem *item)
+//{
+//	scene_show_com->setInsertMode(GraphicsScene::Move);
+//	item = item;
+//}
 
 void MainWindow::updateSceneSizeInfo()
 {
@@ -207,12 +207,16 @@ void MainWindow::on_lineEdit_print_length_editingFinished()
 
 void MainWindow::on_pushButton_QR_clicked()
 {
+    QRSetttingDialog *dialog = new QRSetttingDialog;
+    dialog->exec();
 	scene_show_com->setInsertMode(GraphicsScene::InsertGraphicsQRItem);
 }
 
 void MainWindow::on_pushButton_Text_clicked()
 {
-	scene_show_com->setInsertMode(GraphicsScene::InsertTextGraphicsItem);
+    TextSettingDialog *dialog = new TextSettingDialog;
+    dialog->exec();
+    scene_show_com->setInsertMode(GraphicsScene::InsertGraphicsTextItem);
 }
 
 void MainWindow::on_pushButton_graphicsitem_up_clicked()

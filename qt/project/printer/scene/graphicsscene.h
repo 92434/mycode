@@ -17,7 +17,6 @@ class QGraphicsTextItem;
 class QColor;
 QT_END_NAMESPACE
 
-//! [0]
 class GraphicsScene : public QGraphicsScene
 {
 	Q_OBJECT
@@ -28,33 +27,10 @@ public:
 		Delete,
 		Esc,
 		InsertGraphicsQRItem,
-		InsertTextGraphicsItem
-		//InsertGraphicsPolygonItem,
-		//InsertQGraphicsLineItem,
+        InsertGraphicsTextItem
 	};
 
 	explicit GraphicsScene(QObject *parent = 0);
-
-	QFont font() const {
-		return mFont;
-	}
-
-	QColor textColor() const {
-		return mTextColor;
-	}
-
-	QColor itemColor() const {
-		return mItemColor;
-	}
-
-	QColor lineColor() const {
-		return mLineColor;
-	}
-
-	void setLineColor(const QColor &color);
-	void setTextColor(const QColor &color);
-	void setItemColor(const QColor &color);
-	void setFont(const QFont &font);
 
 	qreal printXMax() {
 		return mPrintXMax;
@@ -120,14 +96,9 @@ public:
 
 public slots:
 	void setInsertMode(sceneOpMode mode);
-	//void setGraphicsPolygonItemType(GraphicsPolygonItem::GraphicsPolygonType type);
-	//void textItemLostFocus(GraphicsTextItem *item);
 
 signals:
-	//void itemInserted(GraphicsPolygonItem *item);
 	void itemInserted(QGraphicsItem *item);
-	void itemSelected(QGraphicsItem *item);
-	void textInserted(QGraphicsTextItem *item);
 
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) Q_DECL_OVERRIDE;
@@ -137,16 +108,8 @@ protected:
 	void drawForeground(QPainter *painter, const QRectF &rect) Q_DECL_OVERRIDE;
 
 private:
-
-	QFont mFont;
-	QColor mTextColor;
-	QColor mItemColor;
-	QColor mLineColor;
-	QRectF mVisualRect;
-
-	//GraphicsPolygonItem::GraphicsPolygonType mGraphicsPolygonItemType;
 	sceneOpMode mSceneOpMode;
-	//QGraphicsLineItem *mGraphicsLineItem;
+
 	GraphicsQRItem *mGraphicsQRItem;
 	GraphicsTextItem *mTextGraphicsItem;
 
@@ -154,9 +117,13 @@ private:
 	int mHeight;
 	int mRuleHeight;
 	int mGridMargin;
-	qreal mPrintXMax;
+
 	QPointF mCurrentPoint;
-	bool mInPrinting;
+
+    qreal mPrintXMax;
+    QRectF mVisualRect;
+
+    bool mInPrinting;
 
 	int mItemWidth;
 	int mItemHeight;
@@ -166,6 +133,5 @@ private:
 	void drawBGRule(QPainter *painter, const QRectF &rect);
 	void drawFGPos(QPainter *painter, const QRectF &rect);
 };
-//! [0]
 
 #endif // GRAPHICSSCENE_H

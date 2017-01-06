@@ -1,42 +1,40 @@
 #include "graphicstextitem.h"
 #include "graphicsscene.h"
 
-//! [0]
-GraphicsTextItem::GraphicsTextItem(QGraphicsItem *parent)
-	: QGraphicsTextItem(parent)
+
+QString GraphicsTextItem::mText = QString("xiaofei");
+QColor GraphicsTextItem::mFgColor = QColor(Qt::black);
+QColor GraphicsTextItem::mBgColor = QColor(Qt::white);
+QFont GraphicsTextItem::mFont = QFont();
+
+GraphicsTextItem::GraphicsTextItem(QGraphicsItem *parent) : QGraphicsTextItem(parent)
 {
-	setFlag(QGraphicsItem::ItemIsMovable);
+	//setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
-}
-//! [0]
-
-//! [1]
-QVariant GraphicsTextItem::itemChange(GraphicsItemChange change, const QVariant &value)
-{
-	if (change == QGraphicsItem::ItemSelectedHasChanged) {
-		emit selectedChange(this);
-	}
-
-	return value;
-}
-//! [1]
-
-//! [2]
-void GraphicsTextItem::focusOutEvent(QFocusEvent *event)
-{
 	setTextInteractionFlags(Qt::NoTextInteraction);
-	emit lostFocus(this);
-	QGraphicsTextItem::focusOutEvent(event);
 }
-//! [2]
 
-//! [5]
-void GraphicsTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
-{
-	if (textInteractionFlags() == Qt::NoTextInteraction) {
-		setTextInteractionFlags(Qt::TextEditorInteraction);
-	}
-
-	QGraphicsTextItem::mouseDoubleClickEvent(event);
-}
-//! [5]
+//QVariant GraphicsTextItem::itemChange(GraphicsItemChange change, const QVariant &value)
+//{
+//	if (change == QGraphicsItem::ItemSelectedHasChanged) {
+//		emit selectedChange(this);
+//	}
+//
+//	return value;
+//}
+//
+//void GraphicsTextItem::focusOutEvent(QFocusEvent *event)
+//{
+//	setTextInteractionFlags(Qt::NoTextInteraction);
+//	emit lostFocus(this);
+//	QGraphicsTextItem::focusOutEvent(event);
+//}
+//
+//void GraphicsTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+//{
+//	if (textInteractionFlags() == Qt::NoTextInteraction) {
+//		setTextInteractionFlags(Qt::TextEditorInteraction);
+//	}
+//
+//	QGraphicsTextItem::mouseDoubleClickEvent(event);
+//}

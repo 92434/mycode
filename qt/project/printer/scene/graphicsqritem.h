@@ -123,16 +123,16 @@ protected:
 	//void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
-	Zint::QZint bc;
-	Zint::QZint::AspectRatioMode ar;
-	int mW;
-	int mH;
-	int mZoom;
-	std::vector<style_name_t> vecStyleName;
-	int currentType;
+	static int mW;
+	static int mH;
+	static int mZoom;
+	static QColor mFgcolor;
+	static QColor mBgcolor;
+	static int mCurrentType;
 
-	QColor m_fgcolor;
-	QColor m_bgcolor;
+	Zint::QZint mZint;
+	Zint::QZint::AspectRatioMode mZintAspectRationMode;
+	std::vector<style_name_t> mVectorStyleName;
 
 	void init();
 };
