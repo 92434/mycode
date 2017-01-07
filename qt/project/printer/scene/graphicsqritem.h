@@ -2,6 +2,9 @@
 #define GRAPHICSQRITEM_H
 #include <QGraphicsItem>
 #include <qzint.h>
+#include <QComboBox>
+
+#include "../settingdialogs/qrsetttingdialog.h"
 
 typedef struct _type_name {
 	int type;
@@ -113,6 +116,58 @@ public:
 		mZoom = zoom;
 	}
 
+	static int rotate() {
+		return mRotate;
+	}
+
+	static void setRotate(int rotate) {
+		mRotate = rotate;
+	}
+
+	static bool mirrorHorizontal() {
+		return mMirrorHorizontal;
+	}
+
+	static void setMirrorHorizontal(bool b) {
+		mMirrorHorizontal = b;
+	}
+
+	static bool mirrorVertical() {
+		return mMirrorvertical;
+	}
+
+	static void setMirrorVertical(bool b) {
+		mMirrorvertical = b;
+	}
+
+	static bool lock() {
+		return mLock;
+	}
+
+	static void setLock(bool b) {
+		mLock = b;
+	}
+
+	static QColor FGColor() {
+		return mFgcolor;
+	}
+
+	static void setFGColor(QColor color) {
+		mFgcolor = color;
+	}
+
+	static QColor BGColor() {
+		return mBgcolor;
+	}
+
+	static void setBGColor(QColor color) {
+		mBgcolor = color;
+	}
+
+    static unsigned int zintTypeIndex() {
+        return mZintTypeIndex;
+    }
+
 signals:
 	//void lostFocus(GraphicsTextItem *item);
 	//void selectedChange(QGraphicsItem *item);
@@ -120,20 +175,27 @@ signals:
 protected:
 	//QVariant itemChange(GraphicsItemChange change, const QVariant &value) Q_DECL_OVERRIDE;
 	//void focusOutEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
-	//void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
 	static int mW;
 	static int mH;
 	static int mZoom;
+	static int mRotate;
+	static bool mMirrorHorizontal;
+	static bool mMirrorvertical;
+	static bool mLock;
 	static QColor mFgcolor;
 	static QColor mBgcolor;
-	static int mCurrentType;
+    static unsigned int mZintTypeIndex;
 
 	Zint::QZint mZint;
 	Zint::QZint::AspectRatioMode mZintAspectRationMode;
 	std::vector<style_name_t> mVectorStyleName;
 
 	void init();
+	void updateGraphicsQRItem();
+    void initGraphicsQRItem();
+    void addZintType();
 };
 #endif

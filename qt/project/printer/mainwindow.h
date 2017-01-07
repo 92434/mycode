@@ -9,7 +9,6 @@
 #include "scene/graphicspolygonitem.h"
 #include "scene/graphicsscene.h"
 #include "scene/graphicstextitem.h"
-#include "settingdialogs/textsettingdialog.h"
 #include "settingdialogs/qrsetttingdialog.h"
 
 namespace Ui
@@ -34,9 +33,8 @@ protected:
 private slots:
 	void datetimeUpdateTimeout(QTimerEvent *event);
 	void statusThumbnailTimeout(QTimerEvent *event);
+
 	void itemInserted(QGraphicsItem *item);
-	//void textInserted(QGraphicsTextItem *);
-	//void itemSelected(QGraphicsItem *item);
 
 	void on_pushButton_exit_clicked();
 

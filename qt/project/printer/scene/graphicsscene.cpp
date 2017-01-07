@@ -58,8 +58,6 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			break;
 		case InsertGraphicsTextItem:
 			mTextGraphicsItem = new GraphicsTextItem();
-            mTextGraphicsItem->setPlainText(mTextGraphicsItem->text());
-            mTextGraphicsItem->setMatrix(QMatrix(-1, 0, 0, 1, 0, 0));
 			mTextGraphicsItem->setPos(pos);
 			addItem(mTextGraphicsItem);
 			emit itemInserted(mTextGraphicsItem);
@@ -113,6 +111,8 @@ void GraphicsScene::drawBG(QPainter *painter, const QRectF &rect)
 	painter->fillRect(validRect.x(), validRect.y(), validRect.width(), validRect.height(), colorGridBG);
 	//painter->fillRect(validRect.x(), vsetPosalidRect.y() + validRect.height(), validRect.width(), mGridMargin, colorMargin);
 }
+
+
 
 void GraphicsScene::drawBGGrid(QPainter *painter, const QRectF &rect)
 {

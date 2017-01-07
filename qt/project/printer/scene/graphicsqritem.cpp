@@ -4,45 +4,23 @@
 int GraphicsQRItem::mW = 17;
 int GraphicsQRItem::mH = 17;
 int GraphicsQRItem::mZoom = 3;
+int GraphicsQRItem::mRotate = 0;
+bool GraphicsQRItem::mMirrorHorizontal = false;
+bool GraphicsQRItem::mMirrorvertical = false;
+bool GraphicsQRItem::mLock = true;
 QColor GraphicsQRItem::mFgcolor = QColor(Qt::black);
 QColor GraphicsQRItem::mBgcolor = QColor(Qt::white);
-int GraphicsQRItem::mCurrentType = 53;
+unsigned int GraphicsQRItem::mZintTypeIndex = 53;
 
 GraphicsQRItem::GraphicsQRItem() : QGraphicsItem()
 {
-	//setFlag(QGraphicsItem::ItemIsMovable);
-	setFlag(QGraphicsItem::ItemIsSelectable);
-
-	setWidth(17);
-	setHeight(17);
-	setZoom(3);
-	mCurrentType = 53;
-	mFgcolor = QColor(Qt::black);
-	mBgcolor = QColor(Qt::white);
-
+	addZintType();
+	updateGraphicsQRItem();
+	initGraphicsQRItem();
 	init();
 }
 
-
-QRectF GraphicsQRItem::boundingRect() const
-{
-	return QRectF(0, 0, this->mW * this->mZoom, this->mH * this->mZoom);
-}
-
-void GraphicsQRItem::paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * /*widget*/)
-{
-	if(isSelected()) {
-		mZint.setFgColor(mBgcolor);
-		mZint.setBgColor(mFgcolor);
-	} else {
-		mZint.setFgColor(mFgcolor);
-		mZint.setBgColor(mBgcolor);
-	}
-
-	mZint.render(*painter, boundingRect(), mZintAspectRationMode);
-}
-
-void GraphicsQRItem::init()
+void GraphicsQRItem::addZintType()
 {
 	style_name_t styleNames[] = {
 		{NAME_TYPE_BARCODE_AUSREDIRECT, "Australia Post Redirect Code"},
@@ -108,11 +86,77 @@ void GraphicsQRItem::init()
 		{NAME_TYPE_BARCODE_ONECODE, "USPS Intelligent Mail"},
 	};
 
-
 	for (unsigned int i = 0; i < sizeof(styleNames) / sizeof(style_name_t); i++) {
 		mVectorStyleName.push_back(styleNames[i]);
 	}
+}
 
+
+void GraphicsQRItem::updateGraphicsQRItem()
+{
+	QRSetttingDialog *dialog = new QRSetttingDialog;
+	QComboBox *box = dialog->zintTypeBox();
+    unsigned int i;
+
+    for(i = 0; i < mVectorStyleName.size(); i++) {
+        box->addItem(mVectorStyleName.at(i).name);
+    }
+
+    box->setCurrentIndex(mZintTypeIndex);
+
+	dialog->setRotate(rotate());
+	dialog->setMirrorHorizontal(mirrorHorizontal());
+	dialog->setMirrorVertical(mirrorVertical());
+	dialog->setLock(lock());
+
+	if(dialog->exec() == QDialog::Accepted) {
+		setRotate(dialog->rotate());
+		setMirrorHorizontal(dialog->mirrorHorizontal());
+		setMirrorVertical(dialog->mirrorVertical());
+		setLock(dialog->lock());
+        setZintTypeIndex(dialog->zintTypeIndex());
+	}
+}
+
+void GraphicsQRItem::initGraphicsQRItem()
+{
+	resetMatrix();
+
+	if(mMirrorHorizontal) {
+		setMatrix(QMatrix(-1, 0, 0, 1, 0, 0), true);
+	}
+
+	if(mMirrorvertical) {
+		setMatrix(QMatrix(1, 0, 0, -1, 0, 0), true);
+	}
+
+	setRotation(mRotate);
+
+	setFlag(QGraphicsItem::ItemIsMovable, !mLock);
+
+	setFlag(QGraphicsItem::ItemIsSelectable, true);
+}
+
+QRectF GraphicsQRItem::boundingRect() const
+{
+	return QRectF(0, 0, this->mW * this->mZoom, this->mH * this->mZoom);
+}
+
+void GraphicsQRItem::paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * /*widget*/)
+{
+	if(isSelected()) {
+		mZint.setFgColor(mBgcolor);
+		mZint.setBgColor(mFgcolor);
+	} else {
+		mZint.setFgColor(mFgcolor);
+		mZint.setBgColor(mBgcolor);
+	}
+
+	mZint.render(*painter, boundingRect(), mZintAspectRationMode);
+}
+
+void GraphicsQRItem::init()
+{
 	mZintAspectRationMode = (Zint::QZint::AspectRatioMode)1;
 
 	//if(chkComposite->isChecked() == true) {
@@ -133,7 +177,7 @@ void GraphicsQRItem::init()
 	//	bc.setHideText(true);
 	//}
 
-	switch(mVectorStyleName.at(mCurrentType).type) {
+    switch(mVectorStyleName.at(mZintTypeIndex).type) {
 		case NAME_TYPE_BARCODE_CODE128:
 
 			//if(m_optionWidget->findChild<QRadioButton *>("radC128Stand")->isChecked()) {
@@ -459,7 +503,7 @@ void GraphicsQRItem::init()
 			break;
 
 		default:
-			mZint.setSymbol(mVectorStyleName.at(mCurrentType).type);
+            mZint.setSymbol(mVectorStyleName.at(mZintTypeIndex).type);
 			break;
 	}
 
@@ -477,4 +521,12 @@ void GraphicsQRItem::init()
 	mZint.setWhitespace(0);
 	mZint.setFgColor(mFgcolor);
 	mZint.setBgColor(mBgcolor);
+}
+
+void GraphicsQRItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+	event = event;
+	updateGraphicsQRItem();
+	initGraphicsQRItem();
+	init();
 }

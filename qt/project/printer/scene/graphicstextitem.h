@@ -5,6 +5,9 @@
 #include <QPen>
 #include <QFont>
 
+#include "../settingdialogs/textsettingdialog.h"
+#include "../utils/xiaofei_debug.h"
+
 QT_BEGIN_NAMESPACE
 class QFocusEvent;
 class QGraphicsItem;
@@ -25,35 +28,59 @@ public:
 		return Type;
 	}
 
-	QString text() {
+	static QString text() {
 		return mText;
 	}
 
-	void setText(QString text) {
+	static void setText(QString text) {
 		mText = text;
 	}
 
-	QColor fgColor() {
-		return mFgColor;
+	static int rotate() {
+		return mRotate;
 	}
 
-	void setFgColor(QColor color) {
-		mFgColor = color;
+	static void setRotate(int rotate) {
+		mRotate = rotate;
 	}
 
-	QColor bgColor() {
-		return mBgColor;
+	static bool mirrorHorizontal() {
+		return mMirrorHorizontal;
 	}
 
-	void setBgColor(QColor color) {
-		mBgColor = color;
+	static void setMirrorHorizontal(bool b) {
+		mMirrorHorizontal = b;
 	}
 
-	QFont font() {
+	static bool mirrorVertical() {
+		return mMirrorvertical;
+	}
+
+	static void setMirrorVertical(bool b) {
+		mMirrorvertical = b;
+	}
+
+	static bool lock() {
+		return mLock;
+	}
+
+	static void setLock(bool b) {
+		mLock = b;
+	}
+
+	static QColor color() {
+		return mColor;
+	}
+
+	static void setColor(QColor color) {
+		mColor = color;
+	}
+
+	static QFont font() {
 		return mFont;
 	}
 
-	void setFont(QFont font) {
+	static void setFont(QFont font) {
 		mFont = font;
 	}
 
@@ -64,13 +91,18 @@ signals:
 protected:
 	//QVariant itemChange(GraphicsItemChange change, const QVariant &value) Q_DECL_OVERRIDE;
 	//void focusOutEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
-	//void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
 	static QString mText;
-	static QColor mFgColor;
-	static QColor mBgColor;
+	static int mRotate;
+	static bool mMirrorHorizontal;
+	static bool mMirrorvertical;
+	static bool mLock;
+	static QColor mColor;
 	static QFont mFont;
+	void updateGraphicsTextItem();
+	void initGraphicsTextItem();
 };
 
 #endif // TEXTGRAPHICSITEM_H
