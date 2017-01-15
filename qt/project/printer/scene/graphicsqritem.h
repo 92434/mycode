@@ -86,87 +86,112 @@ public:
 	GraphicsQRItem();
 	~GraphicsQRItem() {}
 
-	int type() const Q_DECL_OVERRIDE {
+	int type() const Q_DECL_OVERRIDE
+	{
 		return Type;
 	}
 
 	QRectF boundingRect() const Q_DECL_OVERRIDE;
 
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
-	int getWidth() {
+	int getWidth()
+	{
 		return mW;
 	}
-	void setWidth(int w) {
+	void setWidth(int w)
+	{
 		mW = w;
 	}
 
-	int getHeight() {
+	int getHeight()
+	{
 		return mH;
 	}
 
-	void setHeight(int h) {
+	void setHeight(int h)
+	{
 		mH = h;
 	}
 
-	int zoom() {
+	int zoom()
+	{
 		return mZoom;
 	}
 
-	void setZoom(int zoom) {
+	void setZoom(int zoom)
+	{
 		mZoom = zoom;
 	}
 
-	static int rotate() {
+	static int rotate()
+	{
 		return mRotate;
 	}
 
-	static void setRotate(int rotate) {
+	static void setRotate(int rotate)
+	{
 		mRotate = rotate;
 	}
 
-	static bool mirrorHorizontal() {
+	static bool mirrorHorizontal()
+	{
 		return mMirrorHorizontal;
 	}
 
-	static void setMirrorHorizontal(bool b) {
+	static void setMirrorHorizontal(bool b)
+	{
 		mMirrorHorizontal = b;
 	}
 
-	static bool mirrorVertical() {
+	static bool mirrorVertical()
+	{
 		return mMirrorvertical;
 	}
 
-	static void setMirrorVertical(bool b) {
+	static void setMirrorVertical(bool b)
+	{
 		mMirrorvertical = b;
 	}
 
-	static bool lock() {
+	static bool lock()
+	{
 		return mLock;
 	}
 
-	static void setLock(bool b) {
+	static void setLock(bool b)
+	{
 		mLock = b;
 	}
 
-	static QColor FGColor() {
+	static QColor FGColor()
+	{
 		return mFgcolor;
 	}
 
-	static void setFGColor(QColor color) {
+	static void setFGColor(QColor color)
+	{
 		mFgcolor = color;
 	}
 
-	static QColor BGColor() {
+	static QColor BGColor()
+	{
 		return mBgcolor;
 	}
 
-	static void setBGColor(QColor color) {
+	static void setBGColor(QColor color)
+	{
 		mBgcolor = color;
 	}
 
-    static unsigned int zintTypeIndex() {
-        return mZintTypeIndex;
-    }
+	static unsigned int zintTypeIndex()
+	{
+		return mZintTypeIndex;
+	}
+
+	static void setZintTypeIndex(unsigned int index)
+	{
+		mZintTypeIndex = index;
+	}
 
 signals:
 	//void lostFocus(GraphicsTextItem *item);
@@ -187,7 +212,7 @@ private:
 	static bool mLock;
 	static QColor mFgcolor;
 	static QColor mBgcolor;
-    static unsigned int mZintTypeIndex;
+	static unsigned int mZintTypeIndex;
 
 	Zint::QZint mZint;
 	Zint::QZint::AspectRatioMode mZintAspectRationMode;
@@ -195,7 +220,7 @@ private:
 
 	void init();
 	void updateGraphicsQRItem();
-    void initGraphicsQRItem();
-    void addZintType();
+	void initGraphicsQRItem();
+	void addZintType();
 };
 #endif
