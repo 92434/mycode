@@ -1,7 +1,6 @@
 TEMPLATE = subdirs
 
-SUBDIRS += project/printer \
-    image
+SUBDIRS += project/printer
 SUBDIRS += test
 
 message($$escape_expand("QT:$${QT}"))
