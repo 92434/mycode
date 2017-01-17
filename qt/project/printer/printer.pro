@@ -39,6 +39,8 @@ unix:!macx: LIBS += -L$$PWD/qr/zint-master/build/backend -lzint
 unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/qr/zint-master/backend
 unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/qr/zint-master/backend_qt4
 unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/../../utils
+unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/scene
+unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/settingdialogs
 
 
 RESOURCES += \

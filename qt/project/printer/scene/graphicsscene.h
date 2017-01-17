@@ -8,14 +8,18 @@
 #include <QGraphicsScene>
 #include <QPainter>
 
-QT_BEGIN_NAMESPACE
-class QGraphicsSceneMouseEvent;
-class QPointF;
-class QGraphicsLineItem;
-class QFont;
-class QGraphicsTextItem;
-class QColor;
-QT_END_NAMESPACE
+
+#include "qrsetttingdialog.h"
+#include "graphicsqritem.h"
+
+//QT_BEGIN_NAMESPACE
+//class QGraphicsSceneMouseEvent;
+//class QPointF;
+//class QGraphicsLineItem;
+//class QFont;
+//class QGraphicsTextItem;
+//class QColor;
+//QT_END_NAMESPACE
 
 class GraphicsScene : public QGraphicsScene
 {
@@ -27,7 +31,7 @@ public:
 		Delete,
 		Esc,
 		InsertGraphicsQRItem,
-        InsertGraphicsTextItem
+		InsertGraphicsTextItem
 	};
 
 	explicit GraphicsScene(QObject *parent = 0);
@@ -110,8 +114,11 @@ protected:
 private:
 	sceneOpMode mSceneOpMode;
 
+
+	//QRSetttingDialog *mQRSettingDialog;
+
 	GraphicsQRItem *mGraphicsQRItem;
-	GraphicsTextItem *mTextGraphicsItem;
+	//GraphicsTextItem *mTextGraphicsItem;
 
 	int mZoom;
 	int mHeight;
@@ -120,10 +127,10 @@ private:
 
 	QPointF mCurrentPoint;
 
-    qreal mPrintXMax;
-    QRectF mVisualRect;
+	qreal mPrintXMax;
+	QRectF mVisualRect;
 
-    bool mInPrinting;
+	bool mInPrinting;
 
 	int mItemWidth;
 	int mItemHeight;
@@ -132,6 +139,9 @@ private:
 	void drawBG(QPainter *painter, const QRectF &rect);
 	void drawBGRule(QPainter *painter, const QRectF &rect);
 	void drawFGPos(QPainter *painter, const QRectF &rect);
+
+	void insertItem(QPointF pos);
+	void prepareQRItem(GraphicsQRItem *originItem = 0);
 };
 
 #endif // GRAPHICSSCENE_H

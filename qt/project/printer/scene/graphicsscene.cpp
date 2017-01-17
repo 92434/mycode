@@ -29,6 +29,33 @@ void GraphicsScene::setInsertMode(sceneOpMode mode)
 	mSceneOpMode = mode;
 }
 
+void GraphicsScene::prepareQRItem(GraphicsQRItem *originItem)
+{
+	QRSetttingDialog *dialog = new QRSetttingDialog;
+	mGraphicsQRItem = new GraphicsQRItem();
+
+	if(originItem != 0) {
+		dialog->setHeight(originItem->H());
+		dialog->setRotate(originItem->rotate());
+		dialog->setMirrorHorizontal(originItem->mirrorHorizontal());
+		dialog->setMirrorVertical(originItem->mirrorVertical());
+		dialog->setLock(originItem->lock());
+		dialog->setSymbol(originItem->symbol());
+	}
+
+	if(dialog->exec() == QDialog::Accepted) {
+		mGraphicsQRItem->setH(dialog->height());
+		mGraphicsQRItem->setRotate(dialog->rotate());
+		mGraphicsQRItem->setMirrorHorizontal(dialog->mirrorHorizontal());
+		mGraphicsQRItem->setMirrorVertical(dialog->mirrorVertical());
+		mGraphicsQRItem->setLock(dialog->lock());
+		mGraphicsQRItem->setSymbol(dialog->symbol());
+	}
+
+	delete dialog;
+}
+
+
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
 	QPointF pos = mouseEvent->scenePos();
@@ -46,21 +73,20 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 	//qDebug() << pos;
 
+
 	switch (mSceneOpMode) {
 		case InsertGraphicsQRItem:
-			mGraphicsQRItem = new GraphicsQRItem();
-			mGraphicsQRItem->setWidth(mItemWidth);
-			mGraphicsQRItem->setHeight(mItemHeight);
-			mGraphicsQRItem->setZoom(mZoom);
+			prepareQRItem();
 			mGraphicsQRItem->setPos(pos);
 			addItem(mGraphicsQRItem);
 			emit itemInserted(mGraphicsQRItem);
 			break;
 		case InsertGraphicsTextItem:
-			mTextGraphicsItem = new GraphicsTextItem();
-			mTextGraphicsItem->setPos(pos);
-			addItem(mTextGraphicsItem);
-			emit itemInserted(mTextGraphicsItem);
+			//mTextGraphicsItem = new GraphicsTextItem();
+			//mTextGraphicsItem->setPos(pos);
+			//addItem(mTextGraphicsItem);
+			//emit itemInserted(mTextGraphicsItem);
+			break;
 		default:
 			break;
 	}
