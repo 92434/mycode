@@ -13,6 +13,3 @@ SOURCES += \
 HEADERS += \
     dialog.h \
     ../app/application.h
-
-DISTFILES +=
-

@@ -18,7 +18,7 @@ HEADERS += \
     scene/graphicspolygonitem.h \
     scene/graphicstextitem.h \
     scene/graphicsqritem.h \
-    qr/zint-master/backend_qt4/qzint.h \
+    qr/qzint.h \
     settingdialogs/textsettingdialog.h \
     settingdialogs/qrsetttingdialog.h
 
@@ -31,14 +31,14 @@ SOURCES += \
     scene/graphicspolygonitem.cpp \
     scene/graphicstextitem.cpp \
     scene/graphicsqritem.cpp \
-    qr/zint-master/backend_qt4/qzint.cpp \
+    qr/qzint.cpp \
     settingdialogs/textsettingdialog.cpp \
     settingdialogs/qrsetttingdialog.cpp
 
-unix:!macx: LIBS += -L$$PWD/qr/zint-master/build/backend -lzint
-unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/qr/zint-master/backend
-unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/qr/zint-master/backend_qt4
+unix:!macx: LIBS += -L$$PWD/qr/libs-arm -lzint
+unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/qr
 unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/../../utils
+unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/../../app
 unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/scene
 unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/settingdialogs
 

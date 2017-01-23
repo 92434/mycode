@@ -88,7 +88,7 @@ private:
 
 	std::vector<style_name_t> mVectorStyleName;
 
-	void updateSymbol(int index);
+	void symbolIndexChanged(int index);
 	void addZintType();
 };
 

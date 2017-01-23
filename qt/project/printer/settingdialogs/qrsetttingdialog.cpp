@@ -2,11 +2,13 @@
 #include "ui_qrsetttingdialog.h"
 #include "xiaofei_debug.h"
 
-QRSetttingDialog::QRSetttingDialog(QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::QRSetttingDialog)
+QRSetttingDialog::QRSetttingDialog(QWidget *parent) : QDialog(parent), ui(new Ui::QRSetttingDialog)
 {
 	ui->setupUi(this);
+	addZintType();
+	setSymbol(BARCODE_QRCODE);
+	setHeight(17);
+	setRotate(0);
 }
 
 QRSetttingDialog::~QRSetttingDialog()
@@ -108,8 +110,8 @@ void QRSetttingDialog::on_checkBox_lock_clicked()
 
 void QRSetttingDialog::setSymbol(int symbol)
 {
-    for (unsigned int i = 0; i < mVectorStyleName.size(); i++) {
-        if(mVectorStyleName.at(i).type == symbol) {
+	for (unsigned int i = 0; i < mVectorStyleName.size(); i++) {
+		if(mVectorStyleName.at(i).type == symbol) {
 			ui->comboBox_zint_type->setCurrentIndex(i);
 			return;
 		}
@@ -118,12 +120,12 @@ void QRSetttingDialog::setSymbol(int symbol)
 
 void QRSetttingDialog::on_comboBox_zint_type_currentIndexChanged(int index)
 {
-	updateSymbol(index);
+	symbolIndexChanged(index);
 }
 
 void QRSetttingDialog::on_lineEdit_height_textChanged(const QString &arg1)
 {
-	int height = ui->lineEdit_height->text().toInt();
+	int height = arg1.toInt();
 
 	if(height != 0) {
 		mHeight = height;
@@ -144,7 +146,7 @@ void QRSetttingDialog::addZintType()
 		{BARCODE_CODE11, "Code 11"},
 		{BARCODE_CODE128, "Code 128 (ISO 15417)"},
 		{BARCODE_CODE16K, "Code 16k"},
-        {BARCODE_C25LOGIC, "Code 2 of 5 Data Logic"},
+		{BARCODE_C25LOGIC, "Code 2 of 5 Data Logic"},
 		{BARCODE_C25IATA, "Code 2 of 5 IATA"},
 		{BARCODE_C25IND, "Code 2 of 5 Industrial"},
 		{BARCODE_C25INTER, "Code 2 of 5 Interleaved"},
@@ -154,7 +156,7 @@ void QRSetttingDialog::addZintType()
 		{BARCODE_EXCODE39, "Code 39 Extended"},
 		{BARCODE_CODE49, "Code 49"},
 		{BARCODE_CODE93, "Code 93"},
-        {BARCODE_CODEONE, "Code One"},
+		{BARCODE_CODEONE, "Code One"},
 		{BARCODE_RSS14, "Databar"},
 		{BARCODE_RSS_EXP, "Databar Expanded"},
 		{BARCODE_RSS_EXPSTACK, "Databar Expanded Stacked"},
@@ -203,7 +205,7 @@ void QRSetttingDialog::addZintType()
 }
 
 
-void QRSetttingDialog::updateSymbol(int index)
+void QRSetttingDialog::symbolIndexChanged(int index)
 {
 	switch(mVectorStyleName.at(index).type) {
 		case BARCODE_CODE128:
@@ -340,7 +342,7 @@ void QRSetttingDialog::updateSymbol(int index)
 
 			break;
 
-        case BARCODE_CODEONE:
+		case BARCODE_CODEONE:
 			mSymbol = BARCODE_CODEONE;
 
 			break;

@@ -10,6 +10,7 @@
 #include "scene/graphicsscene.h"
 #include "scene/graphicstextitem.h"
 #include "settingdialogs/qrsetttingdialog.h"
+#include "xiaofei_debug.h"
 
 namespace Ui
 {
