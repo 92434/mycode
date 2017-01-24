@@ -3,8 +3,8 @@
 
 GraphicsQRItem::GraphicsQRItem() : QGraphicsItem()
 {
-    mWidth = 17;
-    mHeight = 17;
+	mWidth = 17;
+	mHeight = 17;
 	mZoom = 3;
 	mRotate = 0;
 	mMirrorHorizontal = false;
@@ -14,11 +14,10 @@ GraphicsQRItem::GraphicsQRItem() : QGraphicsItem()
 	mBgcolor = QColor(Qt::white);
 	mSymbol = BARCODE_QRCODE;
 
-	updateGraphicsQRItem();
-	setZint();
+	updateItem();
 }
 
-void GraphicsQRItem::updateGraphicsQRItem()
+void GraphicsQRItem::updateItem()
 {
 	resetMatrix();
 
@@ -35,11 +34,15 @@ void GraphicsQRItem::updateGraphicsQRItem()
 	setFlag(QGraphicsItem::ItemIsMovable, !mLock);
 
 	setFlag(QGraphicsItem::ItemIsSelectable, true);
+
+	setZint();
+
+	printf("mMirrorHorizontal:%d, mMirrorvertical:%d, mRotate:%d, mLock:%d\n", mMirrorHorizontal, mMirrorvertical, mRotate, mLock);
 }
 
 QRectF GraphicsQRItem::boundingRect() const
 {
-    return QRectF(0, 0, mWidth * mZoom, mHeight * mZoom);
+	return QRectF(0, 0, mWidth * mZoom, mHeight * mZoom);
 }
 
 void GraphicsQRItem::paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * /*widget*/)
@@ -93,11 +96,4 @@ void GraphicsQRItem::setZint()
 	mZint.setWhitespace(0);
 	mZint.setFgColor(mFgcolor);
 	mZint.setBgColor(mBgcolor);
-}
-
-void GraphicsQRItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
-{
-	event = event;
-	updateGraphicsQRItem();
-	setZint();
 }

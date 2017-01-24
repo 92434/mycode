@@ -6,9 +6,13 @@ QRSetttingDialog::QRSetttingDialog(QWidget *parent) : QDialog(parent), ui(new Ui
 {
 	ui->setupUi(this);
 	addZintType();
-	setSymbol(BARCODE_QRCODE);
-	setHeight(17);
+
 	setRotate(0);
+	setMirrorHorizontal(false);
+	setMirrorVertical(false);
+	setLock(true);
+	setHeight(17);
+	setSymbol(BARCODE_QRCODE);
 }
 
 QRSetttingDialog::~QRSetttingDialog()

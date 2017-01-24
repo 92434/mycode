@@ -106,6 +106,7 @@ signals:
 
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) Q_DECL_OVERRIDE;
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent) Q_DECL_OVERRIDE;
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) Q_DECL_OVERRIDE;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) Q_DECL_OVERRIDE;
 	void drawBackground(QPainter *painter, const QRectF &rect) Q_DECL_OVERRIDE;
@@ -141,7 +142,7 @@ private:
 	void drawFGPos(QPainter *painter, const QRectF &rect);
 
 	void insertItem(QPointF pos);
-	void prepareQRItem(GraphicsQRItem *originItem = 0);
+	GraphicsQRItem *prepareQRItem(GraphicsQRItem *originItem = 0, bool allocItem = true);
 };
 
 #endif // GRAPHICSSCENE_H

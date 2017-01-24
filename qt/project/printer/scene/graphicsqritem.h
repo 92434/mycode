@@ -22,18 +22,18 @@ public:
 	QRectF boundingRect() const Q_DECL_OVERRIDE;
 
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
-	int W() {
+	int width() {
 		return mWidth;
 	}
-	void setW(int w) {
+	void setWidth(int w) {
 		mWidth = w;
 	}
 
-	int H() {
+	int height() {
 		return mHeight;
 	}
 
-	void setH(int h) {
+	void setHeight(int h) {
 		mHeight = h;
 	}
 
@@ -108,7 +108,7 @@ signals:
 protected:
 	//QVariant itemChange(GraphicsItemChange change, const QVariant &value) Q_DECL_OVERRIDE;
 	//void focusOutEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
-	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
+	//void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
 	int mWidth;
@@ -127,6 +127,7 @@ private:
 	Zint::QZint::AspectRatioMode mZintAspectRationMode;
 
 	void setZint();
-	void updateGraphicsQRItem();
+public:
+	void updateItem();
 };
 #endif

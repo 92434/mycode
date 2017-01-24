@@ -35,7 +35,7 @@ SOURCES += \
     settingdialogs/textsettingdialog.cpp \
     settingdialogs/qrsetttingdialog.cpp
 
-unix:!macx: LIBS += -L$$PWD/qr/libs-arm -lzint
+unix:!macx: LIBS += -L$$PWD/qr/libs -lzint
 unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/qr
 unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/../../utils
 unix:!macx: QMAKE_CXXFLAGS += -I$$PWD/../../app

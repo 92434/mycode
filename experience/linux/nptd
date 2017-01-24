@@ -1,0 +1,34 @@
+一、背景
+机器装的是busybox，使用的是最小集合的linux。硬件时钟是本地时间，而内核时钟是UTC时间，没有设置时区，也没有任何时区设置的选项。
+二、需求
+这台机器需要定时进行NTP时间同步。同步之后显示给用户的是本地时间。
+三、过程
+1．时区的支持
+（1）hwclock
+为了查看硬件时钟是否为本地时间，运行命令hwclock –r。结果系统提示：“Could not open RTC: No such file or directory”，即找不到RTC文件。
+（2）/dev/rtc
+        由于内核在编译过程中没有提供RTC支持，需要重新编译内核（或为内核增加一个module）。方法为，在make menuconfig阶段，选中“Character device”的“Enhanced Real Time Clock Support”一项的支持。
+为内核增加了该模块后，目录/proc/drive/下已出现了rtc文件，cat也能查看到正常的内容。但/dev/目录下仍没有rtc文件。
+于是通过mknod命令在/dev目录下增加rtc文件。通过man rtc可以得知，RTC为只读字符设备，主10，从135。因此命令为“mknod /dev/rtc c 10 135”。命令执行完毕后，/dev下成功生成了rtc文件。
+运行hwclock –r，能够看到硬件时间为本地时间。通过date命令查看系统时间，却为UTC时间。这说明系统没有进行本地时间的设置。
+（3）/etc/localtime
+        Linux的系统时区是通过符号连接/etc/localtime来得到的。可以通过tzset命令来设置时区。如果没有该命令，可以通过命令“ln –s /etc/localtime /usr/share/zoneinfo/Asia/Shanghai”来将时区设置为亚洲的上海。
+由于最初构建系统的时候没有包含zoneinfo信息，因此/usr/share目录下不存在zoneinfo目录及其文件。所以将包含zoneinfo信息的机器的/usr/share目录下的整个zoneinfo目录复制到本机的/usr/share目录下。
+通过date命令检查时间，发现已变成了正常的本地时间：
+Mon Aug 29 13:14:29 CST 2005
+（4）/etc/sysconfig/clock
+        该配置文件可用来设置用户选择何种方式显示时间。如果硬件时钟为本地时间，则UTC设为0，并且不用设置环境变量TZ。如果硬件时钟为UTC时间，则要设置UTC为1，并设置环境变量TZ（或配置文件/etc/TZ）为时区信息，如“Asia/Shanghai”。
+我机器的硬件时间为本地时间，因此该配置文件内容为：
+ZONE="Asia/Shanghai"
+UTC=0
+ARC=0
+2．NTP同步设置
+（1）ntpdate
+如果只是通过NTP服务器同步系统时间，可以使用命令ntpdate（位于/usr/sbin/下，使用ntpd会提供更佳全面的功能）。Ntpdate用到的库包括：libcap.so.1 => /lib/libcap.so.1、libc.so.6 => /lib/tls/libc.so.6、        /lib/ld-linux.so.2 (0xf6fdf000)。将该命令文件及相关的库都复制到这台机器上，并找到一个最近的稳定的NTP服务器。我使用的是nets.org.sg（IP：203.117.180.36）。运行命令“ntpdate 203.117.180.36”，再通过date命令查看时间，发现时间已更新。
+四、相关知识
+Linux时钟
+Linux机器里有两个时钟，一个是硬件时钟（CMOS时钟），一个是内核时钟。硬件时钟是电池驱动的，通过专门的芯片工作。可以通过BIOS设置屏或一些系统命令（如hwclock）进行设置。内核时钟是由内核维护的，启动时从硬件读取时间，之后独立运行。
+RTC（Real Time Clock）
+        即Linux实时的时钟驱动，通常它们被嵌在计算机的芯片中，也有一些是在主板上使用Motorola MC146818（或clone）实现的。该硬件设备可映射到/dev/rtc，供root编程访问。
+NTP（Network time protocol）
+NTP为一种网络时间协议，是一种确保网络上的主机调整时间的方法。很多地方都会提供NTP服务器（ISP或网管，也可以在[url]http://www.eecis.udel.edu/~mills/ntp/clock[/url]1a.html寻找一个最近的服务器）。
