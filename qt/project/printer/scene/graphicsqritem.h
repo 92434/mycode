@@ -35,6 +35,14 @@ public:
 
 	void setHeight(int h) {
 		mHeight = h;
+
+		switch(mSymbol) {
+			case BARCODE_QRCODE:
+				setWidth(mHeight);
+				break;
+			default:
+				break;
+		}
 	}
 
 	int zoom() {
@@ -101,6 +109,8 @@ public:
 		mBgcolor = color;
 	}
 
+	void updateItem();
+
 signals:
 	//void lostFocus(GraphicsTextItem *item);
 	//void selectedChange(QGraphicsItem *item);
@@ -127,7 +137,5 @@ private:
 	Zint::QZint::AspectRatioMode mZintAspectRationMode;
 
 	void setZint();
-public:
-	void updateItem();
 };
 #endif

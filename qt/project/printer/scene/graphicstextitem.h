@@ -3,7 +3,7 @@
 
 #include <QGraphicsTextItem>
 #include <QPen>
-#include <QFont>
+//#include <QFont>
 
 #include "../settingdialogs/textsettingdialog.h"
 #include "../utils/xiaofei_debug.h"
@@ -28,61 +28,55 @@ public:
 		return Type;
 	}
 
-	static QString text() {
+	QString text() {
 		return mText;
 	}
 
-	static void setText(QString text) {
+	void setText(QString text) {
 		mText = text;
 	}
 
-	static int rotate() {
+	int rotate() {
 		return mRotate;
 	}
 
-	static void setRotate(int rotate) {
+	void setRotate(int rotate) {
 		mRotate = rotate;
 	}
 
-	static bool mirrorHorizontal() {
+	bool mirrorHorizontal() {
 		return mMirrorHorizontal;
 	}
 
-	static void setMirrorHorizontal(bool b) {
+	void setMirrorHorizontal(bool b) {
 		mMirrorHorizontal = b;
 	}
 
-	static bool mirrorVertical() {
+	bool mirrorVertical() {
 		return mMirrorvertical;
 	}
 
-	static void setMirrorVertical(bool b) {
+	void setMirrorVertical(bool b) {
 		mMirrorvertical = b;
 	}
 
-	static bool lock() {
+	bool lock() {
 		return mLock;
 	}
 
-	static void setLock(bool b) {
+	void setLock(bool b) {
 		mLock = b;
 	}
 
-	static QColor color() {
+	QColor color() {
 		return mColor;
 	}
 
-	static void setColor(QColor color) {
+	void setColor(QColor color) {
 		mColor = color;
 	}
 
-	static QFont font() {
-		return mFont;
-	}
-
-	static void setFont(QFont font) {
-		mFont = font;
-	}
+	void updateItem();
 
 signals:
 	//void lostFocus(GraphicsTextItem *item);
@@ -91,18 +85,15 @@ signals:
 protected:
 	//QVariant itemChange(GraphicsItemChange change, const QVariant &value) Q_DECL_OVERRIDE;
 	//void focusOutEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
-	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
+	//void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
-	static QString mText;
-	static int mRotate;
-	static bool mMirrorHorizontal;
-	static bool mMirrorvertical;
-	static bool mLock;
-	static QColor mColor;
-	static QFont mFont;
-	void updateGraphicsTextItem();
-	void initGraphicsTextItem();
+	QString mText;
+	int mRotate;
+	bool mMirrorHorizontal;
+	bool mMirrorvertical;
+	bool mLock;
+	QColor mColor;
 };
 
 #endif // TEXTGRAPHICSITEM_H

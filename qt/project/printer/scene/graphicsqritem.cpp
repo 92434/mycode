@@ -36,8 +36,6 @@ void GraphicsQRItem::updateItem()
 	setFlag(QGraphicsItem::ItemIsSelectable, true);
 
 	setZint();
-
-	printf("mMirrorHorizontal:%d, mMirrorvertical:%d, mRotate:%d, mLock:%d\n", mMirrorHorizontal, mMirrorvertical, mRotate, mLock);
 }
 
 QRectF GraphicsQRItem::boundingRect() const

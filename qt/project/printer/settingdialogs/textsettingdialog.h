@@ -1,6 +1,7 @@
 #ifndef TEXTSETTINGDIALOG_H
 #define TEXTSETTINGDIALOG_H
 
+#include <QApplication>
 #include <QDialog>
 #include <QFontDialog>
 #include <QDebug>
@@ -27,8 +28,8 @@ public:
 	void setMirrorVertical(bool b);
 	bool lock();
 	void setLock(bool b);
-    QFont font();
-    void setFont(QFont font);
+	QFont font();
+	void setFont(QFont font);
 private slots:
 	void on_pushButton_ok_clicked();
 

@@ -16,13 +16,13 @@ typedef struct _type_name {
 	QString name;
 } style_name_t;
 
-class QRSetttingDialog : public QDialog
+class QRSettingDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit QRSetttingDialog(QWidget *parent = 0);
-	~QRSetttingDialog();
+	explicit QRSettingDialog(QWidget *parent = 0);
+	~QRSettingDialog();
 
 	int rotate() {
 		return mRotate;

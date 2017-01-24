@@ -2,7 +2,7 @@
 #include "ui_qrsetttingdialog.h"
 #include "xiaofei_debug.h"
 
-QRSetttingDialog::QRSetttingDialog(QWidget *parent) : QDialog(parent), ui(new Ui::QRSetttingDialog)
+QRSettingDialog::QRSettingDialog(QWidget *parent) : QDialog(parent), ui(new Ui::QRSetttingDialog)
 {
 	ui->setupUi(this);
 	addZintType();
@@ -15,19 +15,19 @@ QRSetttingDialog::QRSetttingDialog(QWidget *parent) : QDialog(parent), ui(new Ui
 	setSymbol(BARCODE_QRCODE);
 }
 
-QRSetttingDialog::~QRSetttingDialog()
+QRSettingDialog::~QRSettingDialog()
 {
 	delete ui;
 }
 
-void QRSetttingDialog::setHeight(int height)
+void QRSettingDialog::setHeight(int height)
 {
 	mHeight = height;
 	ui->lineEdit_height->setText(QString::number(mHeight));
 }
 
 
-void QRSetttingDialog::setRotate(int rotate)
+void QRSettingDialog::setRotate(int rotate)
 {
 	mRotate = rotate;
 
@@ -49,70 +49,70 @@ void QRSetttingDialog::setRotate(int rotate)
 	}
 }
 
-void QRSetttingDialog::setMirrorHorizontal(bool b)
+void QRSettingDialog::setMirrorHorizontal(bool b)
 {
 	mMirrorHorizontal = b;
 	ui->checkBox_horizontal->setChecked(mMirrorHorizontal);
 }
 
-void QRSetttingDialog::setMirrorVertical(bool b)
+void QRSettingDialog::setMirrorVertical(bool b)
 {
 	mMirrorVertical = b;
 	ui->checkBox_vertical->setChecked(mMirrorVertical);
 }
 
-void QRSetttingDialog::setLock(bool b)
+void QRSettingDialog::setLock(bool b)
 {
 	mLock = b;
 	ui->checkBox_lock->setChecked(mLock);
 }
 
-void QRSetttingDialog::on_pushButton_ok_clicked()
+void QRSettingDialog::on_pushButton_ok_clicked()
 {
 	accept();
 }
 
-void QRSetttingDialog::on_pushButton_cancel_clicked()
+void QRSettingDialog::on_pushButton_cancel_clicked()
 {
 	reject();
 }
 
-void QRSetttingDialog::on_radioButton_no_totate_clicked()
+void QRSettingDialog::on_radioButton_no_totate_clicked()
 {
 	mRotate = 0;
 }
 
-void QRSetttingDialog::on_radioButton_rotate_90_clicked()
+void QRSettingDialog::on_radioButton_rotate_90_clicked()
 {
 	mRotate = 90;
 }
 
-void QRSetttingDialog::on_radioButton_rotate_180_clicked()
+void QRSettingDialog::on_radioButton_rotate_180_clicked()
 {
 	mRotate = 180;
 }
 
-void QRSetttingDialog::on_radioButton_rorate_270_clicked()
+void QRSettingDialog::on_radioButton_rorate_270_clicked()
 {
 	mRotate = 270;
 }
 
-void QRSetttingDialog::on_checkBox_horizontal_clicked()
+void QRSettingDialog::on_checkBox_horizontal_clicked()
 {
 	mMirrorHorizontal = ui->checkBox_horizontal->isChecked();
 }
 
-void QRSetttingDialog::on_checkBox_vertical_clicked()
+void QRSettingDialog::on_checkBox_vertical_clicked()
 {
 	mMirrorVertical = ui->checkBox_vertical->isChecked();
 }
 
-void QRSetttingDialog::on_checkBox_lock_clicked()
+void QRSettingDialog::on_checkBox_lock_clicked()
 {
 	mLock = ui->checkBox_lock->isChecked();
 }
 
-void QRSetttingDialog::setSymbol(int symbol)
+void QRSettingDialog::setSymbol(int symbol)
 {
 	for (unsigned int i = 0; i < mVectorStyleName.size(); i++) {
 		if(mVectorStyleName.at(i).type == symbol) {
@@ -122,12 +122,12 @@ void QRSetttingDialog::setSymbol(int symbol)
 	}
 }
 
-void QRSetttingDialog::on_comboBox_zint_type_currentIndexChanged(int index)
+void QRSettingDialog::on_comboBox_zint_type_currentIndexChanged(int index)
 {
 	symbolIndexChanged(index);
 }
 
-void QRSetttingDialog::on_lineEdit_height_textChanged(const QString &arg1)
+void QRSettingDialog::on_lineEdit_height_textChanged(const QString &arg1)
 {
 	int height = arg1.toInt();
 
@@ -136,7 +136,7 @@ void QRSetttingDialog::on_lineEdit_height_textChanged(const QString &arg1)
 	}
 }
 
-void QRSetttingDialog::addZintType()
+void QRSettingDialog::addZintType()
 {
 	style_name_t styleNames[] = {
 		{BARCODE_AUSREDIRECT, "Australia Post Redirect Code"},
@@ -209,7 +209,7 @@ void QRSetttingDialog::addZintType()
 }
 
 
-void QRSetttingDialog::symbolIndexChanged(int index)
+void QRSettingDialog::symbolIndexChanged(int index)
 {
 	switch(mVectorStyleName.at(index).type) {
 		case BARCODE_CODE128:

@@ -9,7 +9,7 @@
 //! [0]
 GraphicsPolygonItem::GraphicsPolygonItem(GraphicsPolygonType graphicsPolygonType, QGraphicsItem *parent) : QGraphicsPolygonItem(parent)
 {
-    mGraphicsPolygonType = graphicsPolygonType;
+	mGraphicsPolygonType = graphicsPolygonType;
 
 	QPainterPath path;
 
@@ -25,18 +25,18 @@ GraphicsPolygonItem::GraphicsPolygonItem(GraphicsPolygonType graphicsPolygonType
 			break;
 		case Conditional:
 			mPolygon << QPointF(-100, 0) << QPointF(0, 100)
-					  << QPointF(100, 0) << QPointF(0, -100)
-					  << QPointF(-100, 0);
+					 << QPointF(100, 0) << QPointF(0, -100)
+					 << QPointF(-100, 0);
 			break;
 		case Step:
 			mPolygon << QPointF(-100, -100) << QPointF(100, -100)
-					  << QPointF(100, 100) << QPointF(-100, 100)
-					  << QPointF(-100, -100);
+					 << QPointF(100, 100) << QPointF(-100, 100)
+					 << QPointF(-100, -100);
 			break;
 		default:
 			mPolygon << QPointF(-120, -80) << QPointF(-70, 80)
-					  << QPointF(120, 80) << QPointF(70, -80)
-					  << QPointF(-120, -80);
+					 << QPointF(120, 80) << QPointF(70, -80)
+					 << QPointF(-120, -80);
 			break;
 	}
 

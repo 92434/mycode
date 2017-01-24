@@ -2,6 +2,7 @@
 #define GRAPHICSSCENE_H
 
 //#include "graphicspolygonitem.h"
+#include <QApplication>
 #include "graphicstextitem.h"
 #include "graphicsqritem.h"
 
@@ -11,15 +12,7 @@
 
 #include "qrsetttingdialog.h"
 #include "graphicsqritem.h"
-
-//QT_BEGIN_NAMESPACE
-//class QGraphicsSceneMouseEvent;
-//class QPointF;
-//class QGraphicsLineItem;
-//class QFont;
-//class QGraphicsTextItem;
-//class QColor;
-//QT_END_NAMESPACE
+#include "graphicstextitem.h"
 
 class GraphicsScene : public QGraphicsScene
 {
@@ -119,7 +112,7 @@ private:
 	//QRSetttingDialog *mQRSettingDialog;
 
 	GraphicsQRItem *mGraphicsQRItem;
-	//GraphicsTextItem *mTextGraphicsItem;
+	GraphicsTextItem *mGraphicsTextItem;
 
 	int mZoom;
 	int mHeight;
@@ -143,6 +136,7 @@ private:
 
 	void insertItem(QPointF pos);
 	GraphicsQRItem *prepareQRItem(GraphicsQRItem *originItem = 0, bool allocItem = true);
+	GraphicsTextItem *prepareTextItem(GraphicsTextItem *originItem = 0, bool allocItem = true);
 };
 
 #endif // GRAPHICSSCENE_H

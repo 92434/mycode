@@ -32,10 +32,10 @@ void GraphicsScene::setInsertMode(sceneOpMode mode)
 GraphicsQRItem *GraphicsScene::prepareQRItem(GraphicsQRItem *originItem, bool allocItem)
 {
 	GraphicsQRItem *item = 0;
-	QRSetttingDialog *dialog = new QRSetttingDialog;
+	QRSettingDialog *dialog = new QRSettingDialog;
 
 	if(originItem != 0) {
-		printf("originItem->height():%d, originItem->rotate():%d, originItem->mirrorHorizontal():%d, originItem->mirrorVertical():%d, originItem->lock():%d, originItem->symbol():%d\n", originItem->height(), originItem->rotate(), originItem->mirrorHorizontal(), originItem->mirrorVertical(), originItem->lock(), originItem->symbol());
+		//printf("originItem->height():%d, originItem->rotate():%d, originItem->mirrorHorizontal():%d, originItem->mirrorVertical():%d, originItem->lock():%d, originItem->symbol():%d\n", originItem->height(), originItem->rotate(), originItem->mirrorHorizontal(), originItem->mirrorVertical(), originItem->lock(), originItem->symbol());
 		dialog->setHeight(originItem->height());
 		dialog->setRotate(originItem->rotate());
 		dialog->setMirrorHorizontal(originItem->mirrorHorizontal());
@@ -45,14 +45,14 @@ GraphicsQRItem *GraphicsScene::prepareQRItem(GraphicsQRItem *originItem, bool al
 	}
 
 	if(allocItem) {
-		item = new GraphicsQRItem();
+		item = new GraphicsQRItem;
 	} else {
 		item = originItem;
 	}
 
 	if(item != 0) {
 		if(dialog->exec() == QDialog::Accepted) {
-			printf("dialog->height():%d, dialog->rotate():%d, dialog->mirrorHorizontal():%d, dialog->mirrorVertical():%d, dialog->lock():%d, dialog->symbol():%d\n", dialog->height(), dialog->rotate(), dialog->mirrorHorizontal(), dialog->mirrorVertical(), dialog->lock(), dialog->symbol());
+			//printf("dialog->height():%d, dialog->rotate():%d, dialog->mirrorHorizontal():%d, dialog->mirrorVertical():%d, dialog->lock():%d, dialog->symbol():%d\n", dialog->height(), dialog->rotate(), dialog->mirrorHorizontal(), dialog->mirrorVertical(), dialog->lock(), dialog->symbol());
 			item->setHeight(dialog->height());
 			item->setRotate(dialog->rotate());
 			item->setMirrorHorizontal(dialog->mirrorHorizontal());
@@ -67,6 +67,43 @@ GraphicsQRItem *GraphicsScene::prepareQRItem(GraphicsQRItem *originItem, bool al
 	return item;
 }
 
+GraphicsTextItem *GraphicsScene::prepareTextItem(GraphicsTextItem *originItem, bool allocItem)
+{
+	GraphicsTextItem *item = 0;
+	TextSettingDialog *dialog = new TextSettingDialog;
+
+	if(originItem != 0) {
+		//printf("originItem->text():%s, originItem->font():%s, originItem->rotate():%d, originItem->mirrorHorizontal():%d, originItem->mirrorVertical():%d, originItem->lock():%d\n", originItem->text().toLatin1().data(), originItem->font().toString().toLocal8Bit().data(), originItem->rotate(), originItem->mirrorHorizontal(), originItem->mirrorVertical(), originItem->lock());
+		dialog->setText(originItem->text());
+		dialog->setFont(originItem->font());
+		dialog->setRotate(originItem->rotate());
+		dialog->setMirrorHorizontal(originItem->mirrorHorizontal());
+		dialog->setMirrorVertical(originItem->mirrorVertical());
+		dialog->setLock(originItem->lock());
+	}
+
+	if(allocItem) {
+		item = new GraphicsTextItem;
+	} else {
+		item = originItem;
+	}
+
+	if(item != 0) {
+		if(dialog->exec() == QDialog::Accepted) {
+			//printf("dialog->text():%s, dialog->font():%s, dialog->rotate():%d, dialog->mirrorHorizontal():%d, dialog->mirrorVertical():%d, dialog->lock():%d\n", dialog->text().toLatin1().data(), dialog->font().toString().toLocal8Bit().data(), dialog->rotate(), dialog->mirrorHorizontal(), dialog->mirrorVertical(), dialog->lock());
+			item->setText(dialog->text());
+			item->setFont(dialog->font());
+			item->setRotate(dialog->rotate());
+			item->setMirrorHorizontal(dialog->mirrorHorizontal());
+			item->setMirrorVertical(dialog->mirrorVertical());
+			item->setLock(dialog->lock());
+		}
+	}
+
+	delete dialog;
+
+	return item;
+}
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
@@ -99,12 +136,17 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 		}
 
 		break;
-		case InsertGraphicsTextItem:
-			//mTextGraphicsItem = new GraphicsTextItem();
-			//mTextGraphicsItem->setPos(pos);
-			//addItem(mTextGraphicsItem);
-			//emit itemInserted(mTextGraphicsItem);
-			break;
+		case InsertGraphicsTextItem: {
+			mGraphicsTextItem = prepareTextItem();
+
+			if(mGraphicsTextItem != 0) {
+				mGraphicsTextItem->updateItem();
+				mGraphicsTextItem->setPos(pos);
+				addItem(mGraphicsTextItem);
+				emit itemInserted(mGraphicsTextItem);
+			}
+		}
+		break;
 		default:
 			break;
 	}
@@ -121,6 +163,14 @@ void GraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 				if(mGraphicsQRItem != 0) {
 					mGraphicsQRItem->updateItem();
+				}
+			}
+			break;
+			case GraphicsTextItem::Type: {
+				mGraphicsTextItem = prepareTextItem((GraphicsTextItem *)item, false);
+
+				if(mGraphicsTextItem != 0) {
+					mGraphicsTextItem->updateItem();
 				}
 			}
 			break;

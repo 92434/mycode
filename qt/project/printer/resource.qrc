@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>resource/MainForm_64_64.ico</file>
+        <file>resource/小米兰亭字体.ttf</file>
     </qresource>
 </RCC>

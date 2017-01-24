@@ -17,7 +17,7 @@ bool Application::setSingleWindow(QWidget *w)
 
 	this->w = w;
 
-	printf("serverName:%s\n", qPrintable(serverName));
+	//printf("serverName:%s\n", qPrintable(serverName));
 
 	socket.connectToServer(serverName);
 
@@ -74,11 +74,11 @@ void Application::newLocalSocketConnection()
 
 bool Application::addFont(const QString &fileName)
 {
-    bool status = false;
+	bool status = false;
 	int nIndex = QFontDatabase::addApplicationFont(fileName);
 
 	if(nIndex != -1) {
-        status = true;
+		status = true;
 
 		QStringList strList(QFontDatabase::applicationFontFamilies(nIndex));
 
@@ -86,7 +86,10 @@ bool Application::addFont(const QString &fileName)
 			QFont font(strList.at(0));
 			font.setPointSize(9);
 			setFont(font);
+		} else {
+			printf("failed!!!");
 		}
 	}
-    return status;
+
+	return status;
 }

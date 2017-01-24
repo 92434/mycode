@@ -18,27 +18,35 @@ QT_END_NAMESPACE
 class GraphicsArrowItem : public QGraphicsLineItem
 {
 public:
-    enum { Type = UserType + 4 };
+	enum { Type = UserType + 4 };
 
-    GraphicsArrowItem(GraphicsPolygonItem *startItem, GraphicsPolygonItem *endItem, QGraphicsItem *parent = 0);
+	GraphicsArrowItem(GraphicsPolygonItem *startItem, GraphicsPolygonItem *endItem, QGraphicsItem *parent = 0);
 
-    int type() const Q_DECL_OVERRIDE { return Type; }
-    QRectF boundingRect() const Q_DECL_OVERRIDE;
-    QPainterPath shape() const Q_DECL_OVERRIDE;
-    void setColor(const QColor &color) { mColor = color; }
-    GraphicsPolygonItem *startItem() const { return mGraphicsPolygonItemStart; }
-    GraphicsPolygonItem *endItem() const { return mGraphicsPolygonItemEnd; }
+	int type() const Q_DECL_OVERRIDE {
+		return Type;
+	}
+	QRectF boundingRect() const Q_DECL_OVERRIDE;
+	QPainterPath shape() const Q_DECL_OVERRIDE;
+	void setColor(const QColor &color) {
+		mColor = color;
+	}
+	GraphicsPolygonItem *startItem() const {
+		return mGraphicsPolygonItemStart;
+	}
+	GraphicsPolygonItem *endItem() const {
+		return mGraphicsPolygonItemEnd;
+	}
 
-    void updatePosition();
+	void updatePosition();
 
 protected:
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0) Q_DECL_OVERRIDE;
+	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0) Q_DECL_OVERRIDE;
 
 private:
-    GraphicsPolygonItem *mGraphicsPolygonItemStart;
-    GraphicsPolygonItem *mGraphicsPolygonItemEnd;
-    QColor mColor;
-    QPolygonF mQPolygonF;
+	GraphicsPolygonItem *mGraphicsPolygonItemStart;
+	GraphicsPolygonItem *mGraphicsPolygonItemEnd;
+	QColor mColor;
+	QPolygonF mQPolygonF;
 };
 //! [0]
 

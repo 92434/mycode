@@ -7,7 +7,12 @@ TextSettingDialog::TextSettingDialog(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->checkBox_diy_font->setCheckable(false);
-	mFont = QApplication::font();
+	setText("http://www.baidu.com");
+	setRotate(0);
+	setMirrorHorizontal(false);
+	setMirrorVertical(false);
+	setLock(true);
+	setFont(QApplication::font());
 }
 
 TextSettingDialog::~TextSettingDialog()
