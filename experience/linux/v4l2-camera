@@ -1,0 +1,308 @@
+1. video4linux基础相关
+ 
+1.1  v4l的介绍与一些基础知识的介绍
+ 
+I.首先说明一下video4linux(v4l)。
+        它是一些视频系统、视频软件、音频软件的基础，经常使用在需要采集图像的场合，如视频监控、webcam、可视电话，经常应用在embedded linux中，是linux嵌入式开发中经常使用的系统接口。它是linux内核提供给用户空间的编程接口，各种的视频和音频设备开发相应的驱动程序后，就可以通过v4l提供的系统API来控制视频和音频设备，也就是说v4l分为两层，底层为音视频设备在内核中的驱动，上层为系统提供的API，而对于我们来说需要的就是使用这些系统的API。
+II.Linux系统中的文件操作
+       有关Linux系统中的文件操作不属于本文的内容。但是还是要了解相关系统调用的作用和使用方法。其中包括open()，read()，close()，ioctl()，mmap()。详细的使用不作说明。在Linux系统中各种设备（当然包括视频设备）也都是用文件的形式来使用的。他们存在与dev目录下，所以本质上说，在Linux中各种外设的使用（如果它们已经正确的被驱动），与文件操作本质上是没有什么区别的。
+ 
+1.2 建立一套简单的v4l函数库
+ 
+       这一节将一边介绍v4l的使用方法，一边建立一套简单的函数，应该说是一套很基本的函数，它完成很基本的功能但足够展示如何使用v4l。这些函数可以用来被其他程序使用，封装基本的v4l功能。本文只介绍一些和摄像头相关的编程方法，并且是最基础和最简单的，所以一些内容并没有介绍，一些与其他视频设备（如视频采集卡）和音频设备有关的内容也没有介绍，本人也不是很理解这方面的内容。
+       这里先给出接下来将要开发出来函数的一个总览。
+       相关结构体和函数的定义我们就放到一个名为v4l.h的文件中，相关函数的编写就放在一个名为v4l.c的文件中。对于这个函数库共有如下的定义（也就是大体v4l.h中的内容）：
+[cpp] view plain copy
+
+    #ifndef _V4L_H_  
+    #define _V4L_H_  
+    #include <sys/types.h>  
+    #include <linux/videodev.h> //使用v4l必须包含的头文件   
+
+      videodev.h头文件可以在/usr/include/linux下找到，里面包含了对v4l各种结构的定义，以及各种ioctl的使用方法，所以在下文中有关v4l的相关结构体并不做详细的介绍，可以参看此文件就会得到你想要的内容。
+      下面是定义的结构体，和相关函数，突然给出这么多的代码很唐突，不过随着一点点解释条理就会很清晰了。
+[cpp] view plain copy
+
+    struct _v4l_struct   
+          {  
+             int fd;//保存打开视频文件的设备描述符  
+              struct video_capability capability;//设备的基本信息（设备名称、支持的分辨率等）  
+              struct video_picture picture;//采集图像的各种属性  
+              struct video_mmap mmap;  
+              struct video_mbuf mbuf;//利用mmap映射的帧的信息  
+             unsigned char *map;//用于指向图像数据的指针  
+              int frame_current;  
+             int frame_using[VIDEO_MAXFRAME];//这两个变量用于双缓冲在后面介绍。  
+          };  
+    typedef struct _v4l_struct v4l_device;  
+
+上面的定义的结构体，有的文中章有定义channel的变量，但对于摄像头来说设置这个变量意义不大通常只有一个channel，本文不是为了写出一个大而全且成熟的函数库，只是为了介绍如何使用v4l，再加上本人水平也有限，能够给读者一个路线我就很知足了,所以并没有设置这个变量同时与channel相关的函数也没有给出。
+[cpp] view plain copy
+
+    extern int v4l_open(char *, v4l_device *);  
+    extern int v4l_close(v4l_device *);  
+    extern int v4l_get_capability(v4l_device *);  
+    extern int v4l_get_picture(v4l_device *);  
+    extern int v4l_get_mbuf(v4l_device *);  
+    extern int v4l_set_picture(v4l_device *, int, int, int, int, int,);  
+    extern int v4l_grab_picture(v4l_device *, unsigned int);   
+    extern int v4l_mmap_init(v4l_device *);  
+    extern int v4l_grab_init(v4l_device *, int, int);  
+    extern int v4l_grab_frame(v4l_device *, int);  
+    extern int v4l_grab_sync(v4l_device *);  
+
+上述函数会在下文中逐渐完成，功能也会逐渐介绍，虽然现在看起来没什么感觉只能从函数名上依稀体会它的功能，或许看起来很烦，不过看完下文就会好了。
+       前面已经说过使用v4l视频编程的流程和对文件操作并没有什么本质的不同，大概的流程如下：
+       1.打开视频设备(通常是/dev/video0)
+       2.获得设备信息。
+       3.根据需要更改设备的相关设置。
+       4.获得采集到的图像数据（在这里v4l提供了两种方式，直接通过打开的设备读取数据，使用mmap内存映射的方式获取数据）。
+       5.对采集到的数据进行操作（如显示到屏幕，图像处理，存储成图片文件）。
+       6.关闭视频设备。
+知道了流程之后，我们就需要根据流程完成相应的函数。
+ 
+     那么我们首先完成第1步打开视频设备，需要完成int v4l_open(char *, v4l_device *);具体的函数如下：
+[cpp] view plain copy
+
+    #define DEFAULT_DEVICE “/dev/video0”  
+    int v4l_open(char *dev , v4l_device *vd)  
+    {  
+           if(!dev)dev= DEFAULT_DEVICE;  
+           if((vd->fd=open(dev,O_RDWR))<0){perror(“v4l_open:”);return -1;}  
+           if(v4l_get_capability(vd))return -1;  
+           if(v4l_get_picture(vd))return -1;//这两个函数就是即将要完成的获取设备信息的函数  
+           return 0  
+    }  
+
+    同样对于第6步也十分简单，就是int v4l_close(v4l_device *);的作用。函数如下：
+[cpp] view plain copy
+
+    int v4l_close(v4l_device *vd)  
+    {close(vd->fd);return 0;}  
+
+    现在我们完成第2步中获得设备信息的任务，下面先给出函数再对函数作出相应的说明。
+[cpp] view plain copy
+
+    int v4l_get_capability(v4l_device *vd)  
+    {     
+       if (ioctl(vd->fd, VIDIOCGCAP, &(vd->capability)) < 0) {     
+          perror("v4l_get_capability:");     
+          return -1;     
+       }     
+       return 0;     
+    }  
+    int v4l_get_picture(v4l_device *vd)     
+    {     
+       if (ioctl(vd->fd, VIDIOCGPICT, &(vd->picture)) < 0) {     
+          perror("v4l_get_picture:");     
+          return -1;     
+       }     
+       return 0;     
+    }  
+
+对于以上两个函数我们不熟悉的地方可有vd->capability和vd->picture两个结构体，和这两个函数中最主要的语句ioctl。对于ioctl的行为它是由驱动程序提供和定义的，在这里当然是由v4l所定义的，其中宏VIDIOCGCAP和VIDIOCGPICT的分别表示获得视频设备的capability和picture。对于其他的宏功能定义可以在你的Linux系统中的/usr/include/linux/videodev.h中找到，这个头文件也包含了capability和picture的定义。例如：
+[cpp] view plain copy
+
+    struct video_capability  
+    {  
+           char name[32];  
+           int type;  
+           int channels;    /* Num channels */  
+           int audios;      /* Num audio devices */  
+           int maxwidth;    /* Supported width */  
+           int maxheight;   /* And height */  
+           int minwidth;   /* Supported width */  
+           int minheight;  /* And height */  
+    };//capability结构它包括了视频设备的名称，频道数，音频设备数，支持的最大最小宽度和高度等信息。  
+    struct video_picture  
+    {  
+           __u16     brightness;  
+           __u16     hue;  
+           __u16     colour;  
+           __u16     contrast;  
+           __u16     whiteness;       /* Black and white only */  
+           __u16     depth;            /* Capture depth */  
+           __u16     palette;    /* Palette in use */  
+    };//picture结构包括了亮度，对比度，色深，调色板等等信息。头文件里还列出了palette相关的值，这里并没有给出。  
+
+了解了以上也就了解了这两个简单函数的作用，现在我们已经获取到了相关视频设备的capabilty和picture属性。
+     这里直接给出另外一个函数
+[cpp] view plain copy
+
+    int v4l_get_mbuf(v4l_device *vd)     
+    {     
+    if (ioctl(vd->fd, VIDIOCGMBUF ,&(vd->mbuf)) < 0) {     
+          perror("v4l_get_mbuf:");     
+          return -1;     
+       }     
+       return 0;     
+    }  
+
+对于结构体video_mbuf在v4l中的定义如下，video_mbuf结构体是为了服务使用mmap内存映射来获取图像的方法而设置的结构体，通过这个结构体可以获得摄像头设备存储图像的内存大小。具体的定义如下，各变量的使用也会在下文详细说明。
+[cpp] view plain copy
+
+    struct video_mbuf  
+    {  
+          int   size;        可映射的摄像头内存大小  
+           int   frames;    摄像头可同时存储的帧数  
+           int   offsets[VIDEO_MAX_FRAME];每一帧图像的偏移量  
+    };  
+
+       下面完成第3步按照需要更改设备的相应设置，事实上可以更改的设置很多，本文以更改picture属性为例说明更改属性的一般方法。
+       那么我们就完成extern int v4l_set_picture(v4l_device *, int, int, int, int, int,);这个函数吧
+[cpp] view plain copy
+
+    int v4l_set_picture(v4l_device *vd,int br,int hue,int col,int cont,int white)  
+    {  
+       if(br)   vd->picture.brightnesss=br;  
+       if(hue)  vd->picture.hue=hue;  
+       if(col)  vd->picture.color=col;  
+       if(cont) vd->picture.contrast=cont;  
+       if(white) vd->picture.whiteness=white;  
+       if(ioctl(vd->fd,VIDIOCSPICT,&(vd->picture))<0)  
+       {perror("v4l_set_picture: ");return -1;}     
+       return 0;  
+    }  
+
+上述函数就是更改picture相关属性的例子，其核心还是v4l给我们提供的ioctl的相关调用，通过这个函数可以修改如亮度，对比度等相关的值。
+第4步获得采集到的图像数据
+       这一步是使用v4l比较重要的一步，涉及到几个函数的编写。当然使用v4l就是为了要获得图像，所以这一步很关键，但是当你获得了图像数据后，还需要根据你想要达到的目的和具体情况做进一步的处理，也就是第5步所做的事情，这些内容将在后面第三部分提到。这里讲如何获得采集到的数据。
+       如前所述获得图像的方式有两种，分别是直接读取设备和使用mmap内存映射，而通常大家使用的方法都是后者。
+1）直接读取设备
+直接读设备的方式就是使用read()函数，我们先前定义的
+[cpp] view plain copy
+
+    extern int v4l_grab_picture(v4l_device *, unsigned int);//函数就是完成这个工作的，它的实现也很简单。  
+       
+    int v4l_grab_picture(v4l_device *vd, unsighed int size)  
+    {  
+       if(read(vd->fd,&(vd->map),size)==0)return -1;  
+       return 0；  
+    }  
+
+该函数的使用也很简单，就是给出图像数据的大小，vd->map所指向的数据就是图像数据。而图像数据的大小你要根据设备的属性自己计算获得。
+2）使用mmap内存映射来获取图像
+       在这部分涉及到下面几个函数，它们配合来完成最终图像采集的功能。
+[cpp] view plain copy
+
+    extern int v4l_mmap_init(v4l_device *);//该函数把摄像头图像数据映射到进程内存中，也就是只要使用vd->map指针就可以使用采集到的图像数据（下文详细说明）  
+    extern int v4l_grab_init(v4l_device *, int, int);//该函数完成图像采集前的初始化工作。  
+    extern int v4l_grab_frame(v4l_device *, int);//该函数是真正完成图像采集的一步，在本文使用了一个通常都会使用的一个小技巧，可以在处理一帧数据时同时采集下一帧的数据，因为通常我们使用的摄像头都可以至少存储两帧的数据。  
+    extern int v4l_grab_sync(v4l_device *);//该函数用来完成截取图像的同步工作，在截取一帧图像后调用，返回表明一帧截取结束。  
+
+       下面分别介绍这几个函数。
+       1.mmap()系统调用使得进程之间通过映射同一个普通文件实现共享内存。普通文件被映射到进程地址空间后，进程可以像访问普通内存一样对文件进行访问，不必在调用read()，write()等操作。两个不同进程A、B共享内存的意思是，同一块物理内存被映射到进程A、B各自的进程地址空间。进程A可以即时访问进程B对共享内存中数据的更新，反之亦然。
+       采用共享内存通信的一个显而易见的好处是减少I/O操作提高读取效率，因为使用mmap后进程可以直接读取内存而不需要任何数据的拷贝。
+       mmap的函数原型如下:
+[cpp] view plain copy
+
+    void* mmap ( void * addr , size_t len , int prot , int flags , int fd , off_t offset )  
+
+addr：共享内存的起始地址，一般设为0，表示由系统分配。
+len:指定映射内存的大小。在我们这里，该值为摄像头mbuf结构体的size值，即图像数据的总大小。
+port：指定共享内存的访问权限 PROT_READ(可读)，PROT_WRITE（可写）
+flags：一般设置为MAP_SHARED
+fd：同享文件的文件描述符。
+ 
+     介绍完了mmap的使用，就可以介绍上文中定义的函数extern int v4l_mmap_init(v4l_device *);了。先给出这个函数的代码，再做说明。
+[cpp] view plain copy
+
+    int v4l_mmap_init(v4l_device *vd)     
+    {     
+       if (v4l_get_mbuf(vd) < 0)     
+       return -1;     
+       if ((vd->map = mmap(0, vd->mbuf.size, PROT_READ|PROT_WRITE, MAP_SHARED, vd->fd, 0)) < 0) {     
+          perror("v4l_mmap_init:mmap");     
+          return -1;     
+       }     
+       return 0;     
+    }  
+
+这个函数首先使用v4l_get_mbuf(vd)获得一个摄像头重要的参数，就是需要映射内存的大小，即vd->mbuf.size，然后调用mmap，当我们在编程是调用v4l_mmap_init后，vd.map指针所指向的内存空间即为我们将要采集的图像数据。
+       2.获得图像前的初始化工作v4l_grab_init();该函数十分简单直接粘上去，其中将。vd->frame_using[0]和vd->frame_using[1]都设为FALSE，表示两帧的截取都没有开始。
+[cpp] view plain copy
+
+    int v4l_grab_init(v4l_device *vd, int width, int height)     
+    {     
+       vd->mmap.width  = width;      
+       vd->mmap.height = height;      
+       vd->mmap.format = vd->picture.palette;      
+       vd->frame_current = 0;     
+       vd->frame_using[0] = FALSE;     
+       vd->frame_using[1] = FALSE;     
+         
+       return v4l_grab_frame(vd, 0);     
+    }   
+
+     3.真正获得图像的函数extern int v4l_grab_frame(v4l_device *, int);
+[cpp] view plain copy
+
+    <span style="color:#330033;">int v4l_grab_frame(v4l_device *vd, int frame)     
+    {     
+       if (vd->frame_using[frame]) {     
+          fprintf(stderr, "v4l_grab_frame: frame %d is already used.\n", frame);     
+          return -1;     
+       }     
+         
+       vd->mmap.frame = frame;     
+       if (ioctl(vd->fd, VIDIOCMCAPTURE, &(vd->mmap)) < 0) {     
+          perror("v4l_grab_frame");     
+          return -1;     
+       }     
+       vd->frame_using[frame] = TRUE;     
+       vd->frame_current = frame;     
+       return 0;     
+    } </span>    
+
+读到这里，应该觉得这个函数也是相当的简单。最关键的一步即为调用ioctl(vd->fd, VIDIOCMCAPTURE, &(vd->mmap))，调用后相应的图像就已经获取完毕。其他的代码是为了完成双缓冲就是截取两帧图像用的，可以自己理解下。
+       4.在截取图像后还要进行同步操作，就是调用extern int v4l_grab_sync(v4l_device *);函数，该函数如下
+[cpp] view plain copy
+
+    int v4l_grab_sync(v4l_device *vd)     
+    {     
+       if (ioctl(vd->fd, VIDIOCSYNC, &(vd->frame_current)) < 0) {     
+          perror("v4l_grab_sync");     
+       }     
+       vd->frame_using[vd->frame_current] = FALSE;     
+       return 0;     
+    }     
+
+该函数返回0说明你想要获取的图像帧已经获取完毕。
+图像存在了哪里？
+       最终我们使用v4l的目的是为了获取设备中的图像，那么图像存在哪里？从上面的文章可以知道，vd.mmap指针所指就是你要获得的第一帧图像。图像的位置，存在vd.mmap+vd.mbuf.offsets[vd.frame_current]处。其中vd.frame_current=0，即为第一帧的位置，vd.frame_current=1，为第二帧的位置。
+1.3上述v4l库使用的方法
+       给出了上述的一些代码，这里用一些简单的代码表明如何来使用它。上文中已经说过将相关结构体和函数的定义放到一个名为v4l.h的文件中，相关函数的编写放在一个名为v4l.c的文件。
+       现在我们要使用它们。使用的方法很简单，你创建一个.c文件，假设叫test.c吧，那么test.c如下
+[cpp] view plain copy
+
+//test.c
+include “v4l.h”
+...
+v4l_device vd;
+
+void main()
+{
+	v4l_open(DEFAULT_DEVICE, &vd);
+	v4l_mmap_init(&vd);
+	v4l_grab_init(&vd, 320, 240);
+	v4l_grab_sync(&vd);//此时就已经获得了一帧的图像，存在vd.map中
+
+	while(1) {
+		vd.frame_current ^= 1;
+		v4l_grab_frame(&vd, vd.frame_current);
+		v4l_grab_sync(&vd);
+		图像处理函数（vd.map + vd. vd.map + vd.mbuf.offsets[vd.frame_current]）；
+		//循环采集，调用你设计的图像处理函数来处理图像
+		//其中vd.map+vd. vd.map+vd.mbuf.offsets[vd.frame_current]就是图像所在位置。
+	}
+}
+
+1.4 有关获取的图像的一些问题
+问：我获取到的图像究竟长什么样？
+答：每个摄像头获取的图像数据的格式可能都不尽相同，可以通过picture. palette获得。获得的图像有黑白的，有yuv格式的，RGB格式的，也有直接为jpeg格式的。你要根据实际情况，和你的需要对图像进行处理。比如常见的，如果你要在嵌入式的LCD上显示假设LCD是RGB24的，但是你获得图像是YUV格式的那么你就将他转换为RGB24的。具体的转换方法可以上网查找，也可参考前面提到过的effectTV中的相关代码。
+ 
+问：如何显示图像或将图像保存？
+答：假设你采集到的图像为RGB24格式的，我接触过的可以使用SDL库显示（网络上很流行的叫spcaview的软件就是这样的，不过它将图像数据压缩为jpeg的格式后显示，这个软件也被经常的移植到一些嵌入式平台使用，如ARM的）。当然也可以使用嵌入式linux的Framebuffer直接写屏显示。将图像保存可以用libjpeg将其保存为jpeg图片直接存储，相关的使用方法可以上网查找。也可以使用一些视频编码，将其编码保存（我希望学习一下相关的技术因为我对这方面一点不懂，如果你有一些资料可以推荐给我看，我十分想看一看）。
+ 
+       一边写文章一边才发现自己很菜，因为很多都是参考别人的文章，而自己想写出来去一落键盘就写不出什么。就写这么多，因为我只会这么多。高手见笑，新手和我一样我们互相讨论
+ 
