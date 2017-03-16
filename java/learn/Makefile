@@ -54,4 +54,21 @@ include $(BUILD_CLASS)
 StaticClassMember:
 	java -jar out/bin/StaticClassMember.jar
 
+#LOCAL_PRECONDITION := resource
+
+java_files := serial/DSerialPort.java
+
+jar_name := DSerialPort
+
+#package_inc := -C resources .
+
+#include_class_path := out/bin/DSerialPort.jar
+
+entry_point := serial.DSerialPort
+
+#include $(BUILD_CLASS)
+
+DSerialPort:
+	java -jar out/bin/DSerialPort.jar
+
 include $(ADD_TARGET)
