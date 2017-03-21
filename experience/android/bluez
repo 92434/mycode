@@ -1,0 +1,6 @@
+1， uart口取得蓝牙模块的数据；
+2， uart口通过ldisc传给hci_uart；
+3， hci_uart传给在其上的h4；
+4， h4传给hci层；
+5， hci层传给l2cap层
+6， l2cap层再传给rfcomm；
