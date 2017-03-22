@@ -133,7 +133,7 @@ module monitor #(
 	reg [7 : 0] mpeg_data_d2 = 0;
 	reg [7 : 0] mpeg_data_d3 = 0;
 
-	always @(posedge mpeg_clk) begin
+	always @(negedge mpeg_clk) begin
 		if(rst_n == 0) begin
 			mpeg_sync_d1 <= 0;
 			mpeg_sync_d2 <= 0;
@@ -166,7 +166,7 @@ module monitor #(
 	assign matched_word_index = matched_index / 4;
 	assign matched_index_word_offset = (8 * (matched_index % 4));
 
-	always @(posedge mpeg_clk) begin
+	always @(negedge mpeg_clk) begin
 		if(rst_n == 0) begin
 			matched_pid <= 0;
 			matched_index <= PACK_BYTE_SIZE;

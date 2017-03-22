@@ -56,9 +56,9 @@ module tb #(
 	reg start_test_replacer = 0;
 
 	initial begin
-		$readmemh("/home/action/vivadoworkspace/ip_repo/axi4_tsp/src/filter1.txt", filter1, 0);
-		$readmemh("/home/action/vivadoworkspace/ip_repo/axi4_tsp/src/filter2.txt", filter2, 0);
-		$readmemh("/home/action/vivadoworkspace/ip_repo/axi4_tsp/src/ts4.txt", mpeg_in,0);
+		$readmemh("/home/xiaofei/workspace/code/mycode/xilinx/kc705/ip_repo/axi4_tsp/src/filter1.txt", filter1, 0);
+		$readmemh("/home/xiaofei/workspace/code/mycode/xilinx/kc705/ip_repo/axi4_tsp/src/filter2.txt", filter2, 0);
+		$readmemh("/home/xiaofei/workspace/code/mycode/xilinx/kc705/ip_repo/axi4_tsp/src/ts4.txt", mpeg_in,0);
 		#2;
 		rst_n = 1;
 

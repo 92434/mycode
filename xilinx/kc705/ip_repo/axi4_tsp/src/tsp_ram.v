@@ -415,7 +415,7 @@ module tsp_ram #(
 	assign ts_out = ts_out_reg;
 	assign ts_out_sync = ts_out_sync_reg;
 
-	always @(posedge mpeg_clk) begin
+	always @(negedge mpeg_clk) begin
 		if(rst_n == 0) begin
 			ts_out_index <= 0;
 			ts_out_valid_reg <= 0;

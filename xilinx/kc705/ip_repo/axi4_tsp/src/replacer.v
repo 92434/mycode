@@ -217,7 +217,7 @@ module replacer #(
 	reg [7 : 0] mpeg_data_d2 = 0;
 	reg [7 : 0] mpeg_data_d3 = 0;
 
-	always @(posedge mpeg_clk) begin
+	always @(negedge mpeg_clk) begin
 		if(rst_n == 0) begin
 			mpeg_sync_d1 <= 0;
 			mpeg_sync_d2 <= 0;
@@ -293,7 +293,7 @@ module replacer #(
 	//wire [1 : 0] adaption_field_control;
 	//assign adaption_field_control = 2'b11;
 
-	always @(posedge mpeg_clk) begin
+	always @(negedge mpeg_clk) begin
 		if(rst_n == 0) begin
 			matched_state <= 0;
 
