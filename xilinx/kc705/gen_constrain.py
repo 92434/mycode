@@ -869,16 +869,19 @@ def map_port_list_property_multi_tsp():
 
     ip_num = 4
     list_port_width_list_port_name = [
-        (1, ['mpeg_clk_P', 'mpeg_clk_N', 'mpeg_valid_in', 'mpeg_valid_N', 'mpeg_sync_P', 'mpeg_sync_N', 'mpeg_data_P', 'mpeg_data_N']),
+        (1, ['mpeg_clk_in']),
+        #(1, ['mpeg_clk_P', 'mpeg_clk_N', 'mpeg_valid_P', 'mpeg_valid_N', 'mpeg_sync_P', 'mpeg_sync_N', 'mpeg_data_P', 'mpeg_data_N']),
     ]
-    str_append = '[0:0]'
+    str_append = ''
     list_all_ports_name = get_list_all_ports_name(ip_num, list_port_width_list_port_name, str_append)
-    property_item1 = 'set_property IOSTANDARD DIFF_SSTL25 [get_ports {%s}]'
+    #property_item1 = 'set_property IOSTANDARD DIFF_SSTL15 [get_ports {%s}]'
     property_item2 = 'set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {%s}]'
     for i in list_all_ports_name:
-        list_property = [property_item1]
+        list_property = ['set_property IOSTANDARD LVCMOS25 [get_ports {%s}]']
+        #list_property = [property_item1]
         if 'clk' in i:
             list_property.append(property_item2)
+            pass
         item = {i : list_property}
         map_port_list_property.update(item)
 
@@ -896,10 +899,10 @@ def list_pin_port_new_board_multi_tsp(list_slot_list_portnum_pin_net):
 
     J94 = 0
     list_index_portnum_for_i2s_16_inst = [
-        #(J94, 5),
-        #(J94, 6),
-        #(J94, 18),
-        #(J94, 7),
+        (J94, 5),
+        (J94, 6),
+        (J94, 18),
+        (J94, 7),
         #(J94, 8),
         #(J94, 9),
         #(J94, 13),
@@ -908,31 +911,35 @@ def list_pin_port_new_board_multi_tsp(list_slot_list_portnum_pin_net):
         #(J94, 14),
         #(J94, 19),
 
-        #(J94, 29),
-        #(J94, 31),
+        (J94, 29),
+        (J94, 31),
 
 
-        (J94, 6),
-        (J94, 8),
-        (J94, 9),
-        (J94, 11),
-        (J94, 10),
-        (J94, 12),
-        (J94, 5),
-        (J94, 7),
+        #(J94, 6),
+        #(J94, 8),
+        #(J94, 9),
+        #(J94, 11),
+        #(J94, 10),
+        #(J94, 12),
+        #(J94, 5),
+        #(J94, 7),
 
-        (J94, 30),
-        (J94, 32),
+        #(J94, 30),
+        #(J94, 32),
     ]
 
 
     ip_num = len(list_list_slots)
     list_port_width_list_port_name = [
-        (1, ['mpeg_clk_P', 'mpeg_clk_N', 'mpeg_valid_in', 'mpeg_valid_N', 'mpeg_sync_P', 'mpeg_sync_N', 'mpeg_data_P', 'mpeg_data_N']),
+        (1, ['mpeg_clk_in', 'mpeg_sync_in', 'mpeg_valid_in']),
         #(8, ['mpeg_data']),
+        (1, ['mpeg_data_in']),
         (1, ['asi_out_p', 'asi_out_n']),
+        #(1, ['mpeg_clk_P', 'mpeg_clk_N', 'mpeg_valid_P', 'mpeg_valid_N', 'mpeg_sync_P', 'mpeg_sync_N', 'mpeg_data_P', 'mpeg_data_N']),
+        ##(8, ['mpeg_data']),
+        #(1, ['asi_out_p', 'asi_out_n']),
     ]
-    str_append = '[0:0]'
+    str_append = ''
     list_all_ports_name = get_list_all_ports_name(ip_num, list_port_width_list_port_name, str_append)
 
     list_pin_net = get_list_pin_net_from_list_slot_list_portnum_pin_net(list_slot_list_portnum_pin_net, list_list_slots, list_index_portnum_for_i2s_16_inst)
@@ -1096,17 +1103,23 @@ def list_pin_des_multi_tsp(list_slot_list_portnum_pin_net):
 
     J94 = 0
     list_index_portnum_for_multi_tsp_inst = [
-        (J94, 17),
-        (J94, 18),
+        (J94, 10),
+        (J94, 11),
+        (J94, 21),
+        (J94, 22),
+        (J94, 23),
+
+        #(J94, 17),
+        #(J94, 18),
         #(J94, 21),
-        (J94, 19),
-        (J94, 20),
+        #(J94, 19),
+        #(J94, 20),
     ]
 
     ip_num = len(list_list_slots)
     list_port_width_list_des = [
         (1, ['i2c_sck', 'i2c_sda',
-        #'lnb1_on_off', 
+        'lnb1_on_off', 
         'nim_reset', 'tunb_33_on_off']),
     ]
     str_append = ''
