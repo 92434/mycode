@@ -1,0 +1,7 @@
+. build/envsetup.sh
+lunch full-eng
+#make clean
+#rm -rf out
+make showcommands
+#make sdk showcommands
+#./gen_emulator_env

@@ -1,0 +1,2 @@
+echo export PATH="\$PATH:$(pwd)/out/host/linux-x86/bin" >export_emulator
+echo export ANDROID_PRODUCT_OUT="$(pwd)/out/target/product/generic" >>export_emulator

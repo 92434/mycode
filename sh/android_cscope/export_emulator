@@ -1,0 +1,2 @@
+export PATH=$PATH:/home/xiaofei/workspace/android_src/out/host/linux-x86/bin
+export ANDROID_PRODUCT_OUT=/home/xiaofei/workspace/android_src/out/target/product/generic

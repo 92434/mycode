@@ -24,6 +24,8 @@ PATH=~/bin:$PATH
 curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
 chmod a+x ~/bin/repo
 或者使用tuna的git-repo镜像
+export REPO_URL='https://mirrors.tuna.tsinghua.edu.cn/git/git-repo/'
+
 
 使用每月更新的初始化包
 
