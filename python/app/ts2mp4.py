@@ -100,7 +100,7 @@ class ts2mp4(object):
         self.out_file = out_file
 
     def _InitHttp(self):
-        timeout = 3 # in seconds
+        timeout = 30 # in seconds
         socket.setdefaulttimeout(timeout)
         
         handlers = []
