@@ -36,61 +36,118 @@ class _Options(object):
 
 
 class Progress(object):
-  def __init__(self, title, total=0, units=''):
-    self._title = title
-    self._total = total
-    self._done = 0
-    self._lastp = -1
-    self._start = time()
-    self._show = False
-    self._units = units
+    def __init__(self, title, total=0, units=''):
+        self._title = title
+        self._total = total
+        self._done = 0
+        self._lastp = -1
+        self._start = time()
+        self._show = False
+        self._units = units
+        self._index = 0
+        self._task_info = {}
+        self._task_info_old = {}
+        self.t = None
 
-  def update(self, inc=1):
-    self._done += inc
+    def show_task_info(self):
+        self.t = _threading.Timer(1, self.show_task_info)
+        self.t.start()
 
-    if _NOT_TTY:
-      return
+        if not self._task_info:
+            self.t.cancel()
+            self.t = None
+            return
 
-    if not self._show:
-      if 0.5 <= time() - self._start:
-        self._show = True
-      else:
-        return
+        items = self._task_info.items()
+        length = len(items)
+        index = self._index % length
+        self._index += 1
 
-    if self._total <= 0:
-      sys.stderr.write('\r%s: %d, ' % (
-        self._title,
-        self._done))
-      sys.stderr.flush()
-    else:
-      p = (100 * self._done) / self._total
+        cur_url, cur_info = items[index]
+        old_info = self._task_info_old.get(cur_url, None)
+        d = {cur_url : cur_info}
+        self._task_info_old.update(d)
 
-      if self._lastp != p:
-        self._lastp = p
-        sys.stderr.write('\r%s: %3d%% (%d%s/%d%s)  ' % (
-          self._title,
-          p,
-          self._done, self._units,
-          self._total, self._units))
-        sys.stderr.flush()
+        if not old_info:
+            return
 
-  def end(self):
-    if _NOT_TTY or not self._show:
-      return
+        cur_pos, cur_total = cur_info
+        old_pos, old_total = old_info
+        duration = length
 
-    if self._total <= 0:
-      sys.stderr.write('\r%s: %d, done.  \n' % (
-        self._title,
-        self._done))
-      sys.stderr.flush()
-    else:
-      p = (100 * self._done) / self._total
-      sys.stderr.write('\r%s: %3d%% (%d%s/%d%s), done.  \n' % (
-        self._title,
-        p,
-        self._done, self._units,
-        self._total, self._units))
-      sys.stderr.flush()
+        speed = ((cur_pos - old_pos) / 1024.0) / duration
+        percent = cur_pos * 100.0 / cur_total
+
+        info = '\rurl:%s %20d/%-20d %5dK/S %3.2f%%    ' %(cur_url, cur_pos, cur_total, speed, percent)
+        self.update(inc = 0, info = info)
+
+    def add_task_info(self, url, pos, total):
+        cur_info = (pos, total)
+        d = {url : cur_info}
+        self._task_info.update(d)
+
+        if _NOT_TTY:
+            return
+
+        if not self.t:
+            self.t = _threading.Timer(1, self.show_task_info)
+            self.t.start()
+
+    def remove_task_info(self, url):
+        self._task_info.pop(url, None)
+        self._task_info_old.pop(url, None)
+
+    def update(self, inc=1, info = ''):
+        self._done += inc
+
+        if _NOT_TTY:
+            return
+
+        if not self._show:
+            if 0.5 <= time() - self._start:
+                self._show = True
+            else:
+                return
+
+        if self._total <= 0:
+            sys.stderr.write('\r%s: %d, ' % (
+                self._title,
+                self._done))
+            sys.stderr.flush()
+        else:
+            p = (100 * self._done) / self._total
+
+            if self._lastp != p:
+                self._lastp = p
+                sys.stderr.write('\r%s: %3d%% (%d%s/%d%s)   ' % (
+                    self._title,
+                    p,
+                    self._done, self._units,
+                    self._total, self._units))
+                sys.stderr.flush()
+        if info:
+            sys.stderr.write('\r%s' %(info))
+            sys.stderr.flush()
+
+    def end(self):
+        if _NOT_TTY or not self._show:
+            return
+
+        self.t.cancel()
+
+        if self._total <= 0:
+            sys.stderr.write('\r%s: %d, done.\n' % (
+                self._title,
+                self._done))
+            sys.stderr.flush()
+        else:
+            p = (100 * self._done) / self._total
+            sys.stderr.write('\r%s: %3d%% (%d%s/%d%s), done.\n' % (
+                self._title,
+                p,
+                self._done, self._units,
+                self._total, self._units))
+            sys.stderr.flush()
 
 class ts2mp4(object):
     def __init__(self, force_broken, url_m3u8, jobs, out_file):
@@ -98,6 +155,7 @@ class ts2mp4(object):
         self.url_m3u8 = url_m3u8
         self.jobs = jobs
         self.out_file = out_file
+        self.error_task = {}
 
     def _InitHttp(self):
         timeout = 30 # in seconds
@@ -125,12 +183,27 @@ class ts2mp4(object):
             handlers.append(urllib.request.HTTPSHandler(debuglevel=1))
             urllib.request.install_opener(urllib.request.build_opener(*handlers))
 
-    def download_file_by_url(self, url, dest_file):
-        dest = open(dest_file, 'w+b')
-        _print('Get %s' % url, file=sys.stderr)
+    def download_file_by_url(self, url, dest_file, pm):
+        BLOCK_SIZE = 8192
+        current_size = 0
+
+        if os.path.exists(dest_file):
+            current_size = os.path.getsize(dest_file)
+            dest = open(dest_file, 'r+b')
+
+            dest.seek(0, os.SEEK_END)
+        else:
+            dest = open(dest_file, 'w+b')
+
         try:
             try:
-                r = urllib.request.urlopen(url)
+                request = urllib.request.Request(url, None)
+                request.add_header('Range', 'bytes=%d-' %(current_size))
+                r = urllib.request.urlopen(request)
+                FILE_SIZE = int(r.headers.getheader("Content-Length"))
+
+                _print('Get %s' %(url), file=sys.stderr)
+
             except urllib.error.HTTPError as e:
                 if e.code in [401, 403, 404, 501]:
                     return False
@@ -145,16 +218,25 @@ class ts2mp4(object):
                 _print('fatal: Cannot get %s' % url, file=sys.stderr)
                 _print('fatal: error %s' % e, file=sys.stderr)
                 return False
+
             try:
                 while True:
-                    buf = r.read(8192)
-                    if buf == '':
+                    buf = r.read(BLOCK_SIZE)
+                    if buf == '' and current_size == FILE_SIZE:
                         return True
+
                     dest.write(buf)
-            except:
+                    current_size += len(buf)
+                    pm.add_task_info(url, current_size, FILE_SIZE)
+
+                    if current_size > FILE_SIZE:
+                        return False
+            except Exception as e:
+                _print('fatal: error %s' % e, file=sys.stderr)
                 _print('download %s Error!!!' % url, file=sys.stderr)
                 return False
             finally:
+                pm.remove_task_info(url)
                 r.close()
         finally:
             dest.close()
@@ -162,15 +244,27 @@ class ts2mp4(object):
     def download_file(self, url_file, lock, fetched, pm, sem, err_event):
         head, tail = os.path.split(url_file)
         dest_file = os.path.join(os.path.curdir, tail)
-        if os.path.exists(dest_file) or self.download_file_by_url(url_file, dest_file):
+        dest_file_suffix = '.part'
+        dest_file_part = dest_file + dest_file_suffix
+        count = self.error_task.get(url_file, 0)
+        if os.path.exists(dest_file) or self.download_file_by_url(url_file, dest_file_part, pm):
+            if os.path.exists(dest_file_part):
+                os.rename(dest_file_part, dest_file_part.rstrip(dest_file_suffix))
             lock.acquire()
             fetched.add(url_file)
             pm.update()
             lock.release()
         else:
-            if os.path.exists(dest_file):
-                os.remove(dest_file)
+            count += 1
+            if count >= 5:
+                os.remove(dest_file_part)
+                count = 0
             err_event.set()
+
+        if count == 0:
+            self.error_task.pop(url_file, 0)
+        else:
+            self.error_task.update({url_file : count})
 
         sem.release()
 
@@ -226,7 +320,7 @@ class ts2mp4(object):
             url_files = map(lambda x : os.path.join(head, x), url_files)
             os.remove(filename)
 
-        return url_files[:8]
+        return url_files
 
     def ts2mp4(self, url_files):
         ts_files = map(lambda x : os.path.join(os.path.curdir, os.path.split(x)[1]), url_files)
@@ -251,8 +345,7 @@ class ts2mp4(object):
             _print('failed!', file=sys.stderr)
         else:
             for i in ts_files:
-                #os.remove(i)
-                pass
+                os.remove(i)
 
 
 def main(argv):
@@ -261,10 +354,14 @@ def main(argv):
     options.add_option('-b', '--force-broken', action='store_true', dest='force_broken', help='force_broken', default=False)
     options.add_option('-j', '--jobs', type='int', dest='jobs', help='jobs', default=6)
     options.add_option('-o', '--out-filename', dest='out_file', help='out_file', default='out.mp4')
-    options.add_option('-u', '--m3u8-url', dest='url_m3u8', help='url_m3u8', metavar='URL', default='http://201610.shipinmp4.com/x/20170419/ekdv-478/1/hls/index.m3u8')
+    #options.add_option('-u', '--m3u8-url', dest='url_m3u8', help='url_m3u8', metavar='URL', default='http://201610.shipinmp4.com/x/20170419/ekdv-478/1/hls/index.m3u8')
+    options.add_option('-u', '--m3u8-url', dest='url_m3u8', help='url_m3u8', metavar='URL', default='')
     opts, args = options.parse_args(argv)
     _print('opts:%s' %(opts), file=sys.stderr)
     _print('args:%s' %(args), file=sys.stderr)
+    if not opts.url_m3u8:
+        options.print_help()
+        return
     ts2mp4_inst = ts2mp4(opts.force_broken, opts.url_m3u8, opts.jobs, opts.out_file)
     ts2mp4_inst._InitHttp()
     url_files = ts2mp4_inst.parse_m3u8()
