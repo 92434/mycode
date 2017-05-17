@@ -15,6 +15,8 @@ KERNEL-OBJS += mod_info.o
 KERNEL-OBJS += cdev.o
 test-module-objs := test_utils.o utils/xiaofei_timer.o utils/xiaofei_list_buffer.o utils/xiaofei_kthread.o
 KERNEL-OBJS += test-module.o
+#ftsfp-objs := focaltech_finger_print/ftsfp_spi.o focaltech_finger_print/platform.o
+#KERNEL-OBJS += focaltech_finger_print/ftsfp.o
 
 include $(BUILD_KO)
 

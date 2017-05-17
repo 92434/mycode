@@ -4,6 +4,8 @@
 #include<linux/list.h>
 #include<linux/cpumask.h>
 #include <linux/ctype.h>
+#include <linux/time.h>
+#include <linux/rtc.h>
 
 #define mydebug(format, ...) printk(KERN_DEBUG "[%s:%s:%d]:" format, __FILE__, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__)
 #define myprintf(format, ...) printk(KERN_ERR format, ## __VA_ARGS__)
@@ -40,6 +42,9 @@ static int __init mod_info_init(void)
 {
 	struct module *mod, *relate;
 	int i;
+	struct rtc_time tm;
+	struct timeval tv;
+
 
 	mydebug("name:%s, state:%d\n", THIS_MODULE->name,THIS_MODULE->state);
 
@@ -90,6 +95,11 @@ static int __init mod_info_init(void)
 		}
 		printk("name:%s state:%d refcnt:%lu\n",mod->name,mod->state,module_refcount(mod));
 	}
+
+
+
+	do_gettimeofday(&tv);
+	rtc_time_to_tm(tv.tv_sec, &tm);
 	return 0;
 }
 

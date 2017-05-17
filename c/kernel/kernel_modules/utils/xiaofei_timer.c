@@ -1,4 +1,5 @@
 #include <linux/module.h>
+#include <linux/vmalloc.h>
 #include "xiaofei_timer.h"
 #include "xiaofei_debug.h"
 

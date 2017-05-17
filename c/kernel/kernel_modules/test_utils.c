@@ -1,5 +1,6 @@
 #include <linux/module.h>
 #include <linux/version.h>
+#include <linux/vmalloc.h>
 
 #include "utils/xiaofei_debug.h"
 
