@@ -1,2 +1,8 @@
 updateFingerprintListeningState
 上层更新fingerprint状态机
+MSG_STARTED_WAKING_UP
+/home/xiaofei/data/source/aosp/system/core/fingerprintd/IFingerprintDaemon.h
+/home/xiaofei/data/source/aosp/system/core/fingerprintd/IFingerprintDaemon.cpp
+/home/xiaofei/data/source/aosp/system/core/fingerprintd/FingerprintDaemonProxy.cpp
+/home/xiaofei/data/source/aosp/system/core/fingerprintd/FingerprintDaemonProxy.h
+/home/xiaofei/data/source/aosp/frameworks/base/core/java/android/hardware/fingerprint/IFingerprintDaemon.aidl

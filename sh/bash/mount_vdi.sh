@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#用qemu-nbd实现mount虚拟硬盘到Host上的功能，需要这么做：
+#rmmod nbd
+#modprobenbd max_part=8
+
 function load_vdi() {
 	local num="$1"
 	local vdi="$2"

@@ -17,6 +17,9 @@ with open('testcfg.cfg','w+') as cfgfile:
 
 	config.write(cfgfile)
 
+with open('testcfg.cfg','r+') as cfgfile: 
+    print(cfgfile.read())
+
 with open('testcfg.cfg','w+') as cfgfile: 
 	config.readfp(cfgfile) 
 
