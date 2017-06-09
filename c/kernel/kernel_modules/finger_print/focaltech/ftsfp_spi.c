@@ -44,8 +44,7 @@
 #include <linux/fb.h>
 #include <linux/pm_qos.h>
 #include <linux/cpufreq.h>
-#include <linux/time.h>
-#include <linux/rtc.h>
+
 #include "ftsfp_spi.h"
 
 #if defined(USE_SPI_BUS)
@@ -396,6 +395,7 @@ static long ftsfp_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 
 		case FTSFP_IOC_GET_MCU_STATUS:
 			retval = __put_user(__gpio_get_value(ftsfp_dev->irq_gpio), (u8 __user *)arg);
+			//ftsfp_dbg ("get mcu status : irq = %d\n", arg);
 			break;
 
 		case FTSFP_IOC_GET_IO_RESOURCE:
@@ -437,17 +437,6 @@ static long ftsfp_compat_ioctl (struct file *filp, unsigned int cmd, unsigned lo
 }
 #endif /*CONFIG_COMPAT*/
 
-void get_time_of_int(void)
-{
-	struct rtc_time tm;
-	struct timeval tv;
-
-	do_gettimeofday(&tv);
-	rtc_time_to_tm(tv.tv_sec, &tm);
-
-	ftsfp_dbg("-----------------interrupt-----------------recevice focalfp event  time : %d : %d : %d : %d\n\n" , tm.tm_hour , tm.tm_min , tm.tm_sec , (tv.tv_usec / 1000));
-}
-
 static irqreturn_t ftsfp_irq (int irq, void *handle)
 {
 	struct ftsfp_dev *ftsfp_dev = &g_ftsfp_dev;
@@ -462,12 +451,10 @@ static irqreturn_t ftsfp_irq (int irq, void *handle)
 #else
 	char *envp[2];
 
-	get_time_of_int();
 	envp[0] = "FOCAL=fingeron";
 	envp[1] = NULL;
 	kobject_uevent_env(&ftsfp_dev->spi->dev.kobj, KOBJ_CHANGE, envp);
-	//ftsfp_dbg("-----------------interrupt-----------------\n");
-	get_time_of_int();
+	ftsfp_dbg("-----------------interrupt-----------------\n");
 #endif
 
 	return IRQ_HANDLED;

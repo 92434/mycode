@@ -20,7 +20,7 @@
 #endif
 
 /**********************************************************/
-enum FP_MODE {
+enum FP_MODE{
 	FTSFP_IMAGE_MODE = 0,
 	FTSFP_KEY_MODE,
 	FTSFP_SLEEP_MODE,
@@ -33,9 +33,10 @@ struct ftsfp_key {
 	int value;
 };
 
-struct ftsfp_key_map_ft {
-	char *name;
-	unsigned short val;
+struct ftsfp_key_map_ft
+{
+    char *name;
+    unsigned short val;
 };
 
 #define  FTSFP_IOC_MAGIC         'G'
@@ -56,7 +57,7 @@ struct ftsfp_key_map_ft {
 #define  FTSFP_IOC_MAXNR        11
 
 /*#define AP_CONTROL_CLK    1 */
-#define USE_PLATFORM_BUS  1
+#define USE_PLATFORM_BUS  1 
 /*#define  USE_SPI_BUS	    1 */
 
 #define FTSFP_FASYNC           1   /*If support fasync mechanism.*/
@@ -92,7 +93,7 @@ struct ftsfp_dev {
 	struct pinctrl_state *pinctrl_state_irq_active;
 };
 
-int ftsfp_parse_dts(struct ftsfp_dev *ftsfp_dev);
+int ftsfp_parse_dts(struct ftsfp_dev* ftsfp_dev);
 void ftsfp_cleanup(struct ftsfp_dev *ftsfp_dev);
 
 int ftsfp_power_on(struct ftsfp_dev *ftsfp_dev);
