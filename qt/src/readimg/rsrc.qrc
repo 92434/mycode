@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>image/ft_enroll_error_TestVer_id0_7.bmp</file>
+        <file>image/test.bmp</file>
+    </qresource>
+</RCC>
