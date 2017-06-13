@@ -1,5 +1,1 @@
-$HOME/.vim:/home/xiaofei/.vim
-$VIM/vimfiles:/usr/share/vim/vimfiles
-$VIMRUNTIME:/usr/share/vim/vim74
-$VIM/vimfiles/after:/usr/share/vim/vimfiles/after
-$HOME/.vim/after:/home/xiaofei/.vim/after
+set runtimepath

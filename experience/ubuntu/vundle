@@ -1,0 +1,54 @@
+Vundle是基于Git仓库的插件管理软件。Vundle将插件的安装简化为类似yum软件安装的过程，只要:BundleInstall插件就安装完了，:BundleClean之后插件就卸载了。
+一、Vundle的安装和使用
+1. Vundle的安装
+[ruby] view plain copy
+$ git clone http://github.com/gmarik/vundle.git ~/.vim/bundle/vundle  
+
+2. 更新.vimrc配置文件
+[python] view plain copy
+set nocompatible              " be iMproved  
+filetype off                  " required!  
+  
+set rtp+=~/.vim/bundle/vundle/  
+call vundle#rc()  
+  
+" let Vundle manage Vundle  
+" required!   
+Bundle 'gmarik/vundle'  
+  
+" 可以通过以下四种方式指定插件的来源  
+" a) 指定Github中vim-scripts仓库中的插件，直接指定插件名称即可，插件明中的空格使用“-”代替。  
+Bundle 'L9'  
+  
+" b) 指定Github中其他用户仓库的插件，使用“用户名/插件名称”的方式指定  
+Bundle 'tpope/vim-fugitive'  
+Bundle 'Lokaltog/vim-easymotion'  
+Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}  
+Bundle 'tpope/vim-rails.git'  
+  
+" c) 指定非Github的Git仓库的插件，需要使用git地址  
+Bundle 'git://git.wincent.com/command-t.git'  
+  
+" d) 指定本地Git仓库中的插件  
+Bundle 'file:///Users/gmarik/path/to/plugin'  
+  
+filetype plugin indent on     " required!  
+
+3. 安装插件:
+[python] view plain copy
+:BundleInstall  
+
+4. 卸载插件
+如果要卸载插件就只需要删除.vimrc中的Bundle，然后在Vim中执行
+[python] view plain copy
+:BundleClean  
+
+二、Vundle常用命令
+[python] view plain copy
+:BundleList              -列举列表(也就是.vimrc)中配置的所有插件  
+:BundleInstall          -安装列表中的全部插件  
+:BundleInstall!         -更新列表中的全部插件  
+:BundleSearch foo   -查找foo插件  
+:BundleSearch! foo  -刷新foo插件缓存  
+:BundleClean           -清除列表中没有的插件  
+:BundleClean!          -清除列表中没有的插件  
