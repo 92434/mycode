@@ -1,8 +1,26 @@
-#include <QtWidgets>
-
 #include "mainwindow.h"
 
-#include <qmenubar.h>
+struct BMP_FILEHDR {                     // BMP file header
+	qint8   bfType[2];                   // "BM"
+	qint32  bfSize;                      // size of file
+	qint16  bfReserved1;
+	qint16  bfReserved2;
+	qint32  bfOffBits;                   // pointer to the pixmap bits
+};
+
+struct BMP_INFOHDR {                     // BMP information header
+	qint32  biSize;                      // size of this struct
+	qint32  biWidth;                     // pixmap width
+	qint32  biHeight;                    // pixmap height
+	qint16  biPlanes;                    // should be 1
+	qint16  biBitCount;                  // number of bits per pixel
+	qint32  biCompression;               // compression method
+	qint32  biSizeImage;                 // size of image
+	qint32  biXPelsPerMeter;             // horizontal resolution
+	qint32  biYPelsPerMeter;             // vertical resolution
+	qint32  biClrUsed;                   // number of colors used
+	qint32  biClrImportant;              // number of important colors
+};
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -13,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	//console->setEnabled(false);
 	//console->setLocalEchoEnabled(true);
+	//
 
 	createActions();
 	createStatusBar();
@@ -60,29 +79,175 @@ void MainWindow::createStatusBar()
 	statusBar()->showMessage(tr("Ready"));
 }
 
+int MainWindow::set_label_bmp(QString filename, QLabel *label)
+{
+#define add_debug_info(x, fmt) do { \
+	console->putData(QString::asprintf(#x fmt, x, x).toLatin1()); \
+} while(0)
+
+	int ret = 0;
+
+	BMP_FILEHDR bmp_file_header;
+	BMP_INFOHDR bmp_info_header;
+
+	int len;
+	unsigned char *buffer;
+
+	QFile f(filename);
+
+	if (f.open(QIODevice::ReadOnly) == 0) {
+		console->putData("File can not be opened!");
+		ret = -1;
+		return ret;
+	}
+
+	QDataStream in(&f);
+	//in.setVersion(QDataStream::Qt_4_0);
+
+	in.setByteOrder(QDataStream::LittleEndian);
+
+	in >> bmp_file_header.bfType[0];
+	in >> bmp_file_header.bfType[1];
+	in >> bmp_file_header.bfSize;
+	in >> bmp_file_header.bfReserved1;
+	in >> bmp_file_header.bfReserved2;
+	in >> bmp_file_header.bfOffBits;
+
+	in >> bmp_info_header.biSize;
+	in >> bmp_info_header.biWidth;
+	in >> bmp_info_header.biHeight;
+	in >> bmp_info_header.biPlanes;
+	in >> bmp_info_header.biBitCount;
+	in >> bmp_info_header.biCompression;
+	in >> bmp_info_header.biSizeImage;
+	in >> bmp_info_header.biXPelsPerMeter;
+	in >> bmp_info_header.biYPelsPerMeter;
+	in >> bmp_info_header.biClrUsed;
+	in >> bmp_info_header.biClrImportant;
+
+	add_debug_info(bmp_file_header.bfType[0], ":%02x(%c)\n");
+	add_debug_info(bmp_file_header.bfType[1], ":%02x(%c)\n");
+	add_debug_info(bmp_file_header.bfSize, ":%08x(%d)\n");
+	add_debug_info(bmp_file_header.bfReserved1, ":%04x(%d)\n");
+	add_debug_info(bmp_file_header.bfReserved2, ":%04x(%d)\n");
+	add_debug_info(bmp_file_header.bfOffBits, ":%08x(%d)\n");
+
+	add_debug_info(bmp_info_header.biSize, ":%08x(%d)\n");
+	add_debug_info(bmp_info_header.biWidth, ":%08x(%d)\n");
+	add_debug_info(bmp_info_header.biHeight, ":%08x(%d)\n");
+	add_debug_info(bmp_info_header.biPlanes, ":%04x(%d)\n");
+	add_debug_info(bmp_info_header.biBitCount, ":%04x(%d)\n");
+	add_debug_info(bmp_info_header.biCompression, ":%08x(%d)\n");
+	add_debug_info(bmp_info_header.biSizeImage, ":%08x(%d)\n");
+	add_debug_info(bmp_info_header.biXPelsPerMeter, ":%08x(%d)\n");
+	add_debug_info(bmp_info_header.biYPelsPerMeter, ":%08x(%d)\n");
+	add_debug_info(bmp_info_header.biClrUsed, ":%08x(%d)\n");
+	add_debug_info(bmp_info_header.biClrImportant, ":%08x(%d)\n");
+
+	f.seek(bmp_file_header.bfOffBits);
+
+	len = bmp_info_header.biWidth * bmp_info_header.biHeight;
+	buffer = new unsigned char[len];
+
+	in.readRawData((char *)buffer, len);
+
+	QImage image = QImage(buffer, bmp_info_header.biWidth, bmp_info_header.biHeight, QImage::Format_Grayscale8);
+
+	image = image.mirrored();
+
+	f.close();
+
+	label->setPixmap(QPixmap::fromImage(image));
+
+	return ret;
+}
+
+void MainWindow::update_list_view(QString path, QListWidget *list_widget)
+{
+	QFileInfoList file_info_list = getFileList(path);
+
+	foreach (QFileInfo info, file_info_list) {
+		QWidget *widget = new QWidget;
+
+		//console->putData(info.absoluteFilePath().toLatin1());
+		//console->putData("\n");
+
+		QVBoxLayout *layout = new QVBoxLayout();
+		QLabel *lab1 = new QLabel;
+		QLabel *lab2 = new QLabel;
+
+		set_label_bmp(info.absoluteFilePath(), lab1);
+
+		lab2->setText(info.absoluteFilePath());
+		lab2->setAlignment(Qt::AlignCenter);
+
+		layout->addWidget(lab1);
+		layout->addWidget(lab2);
+		widget->setLayout(layout);
+
+        QListWidgetItem *item = new QListWidgetItem(list_widget);
+		item->setSizeHint(QSize(64, 128));
+		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+		list_widget->setItemWidget(item, widget);
+	}
+}
+
+void MainWindow::update_enroll_list_view()
+{
+	update_list_view(enroll_edit->text(), enroll_list);
+}
+
+void MainWindow::get_enroll_dir()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Choose enroll dir"), enroll_edit->text());
+
+	if (dir.isEmpty()) {
+		return;
+	}
+
+	enroll_edit->setText(dir);
+
+	update_enroll_list_view();
+}
+
 void MainWindow::createEnrollLists(QDockWidget *dock)
 {
-	enroll_list = new QListWidget(dock);
-	enroll_list->addItems(QStringList()
-						  << "John Doe, Harmony Enterprises, 12 Lakeside, Ambleton"
-						  << "Jane Doe, Memorabilia, 23 Watersedge, Beaton"
-						  << "Tammy Shea, Tiblanka, 38 Sea Views, Carlton"
-						  << "Tim Sheen, Caraba Gifts, 48 Ocean Way, Deal"
-						  << "Sol Harvey, Chicos Coffee, 53 New Springs, Eccleston"
-						  << "Sally Hobart, Tiroli Tea, 67 Long River, Fedula");
-	dock->setWidget(enroll_list);
+
+	QWidget *dock_widget = new QWidget(dock);
+
+	QHBoxLayout *hbox = new QHBoxLayout(dock);
+	enroll_edit = new QLineEdit();
+	enroll_edit->setText(QFileInfo(".").absolutePath());
+	hbox->addWidget(enroll_edit);
+	enroll_btn = new QPushButton(tr("enroll path"));
+	hbox->addWidget(enroll_btn);
+
+	QVBoxLayout *vbox = new QVBoxLayout(dock);
+	vbox->addLayout(hbox);
+
+	enroll_list = new QListWidget();
+	enroll_list->setMovement(QListView::Static);
+	vbox->addWidget(enroll_list);
+
+	dock_widget->setLayout(vbox);
+	dock->setWidget(dock_widget);
+
+	update_enroll_list_view();
+	connect(enroll_edit, SIGNAL(returnPressed()), this, SLOT(update_enroll_list_view()));
+	connect(enroll_btn, SIGNAL(clicked()), this, SLOT(get_enroll_dir()));
 }
 
 void MainWindow::createIdentifyLists(QDockWidget *dock)
 {
 	identify_list = new QListWidget(dock);
-	identify_list->addItems(QStringList()
-						  << "John Doe, Harmony Enterprises, 12 Lakeside, Ambleton"
-						  << "Jane Doe, Memorabilia, 23 Watersedge, Beaton"
-						  << "Tammy Shea, Tiblanka, 38 Sea Views, Carlton"
-						  << "Tim Sheen, Caraba Gifts, 48 Ocean Way, Deal"
-						  << "Sol Harvey, Chicos Coffee, 53 New Springs, Eccleston"
-						  << "Sally Hobart, Tiroli Tea, 67 Long River, Fedula");
+	//identify_list->addItems(QStringList()
+	//						<< "John Doe, Harmony Enterprises, 12 Lakeside, Ambleton"
+	//						<< "Jane Doe, Memorabilia, 23 Watersedge, Beaton"
+	//						<< "Tammy Shea, Tiblanka, 38 Sea Views, Carlton"
+	//						<< "Tim Sheen, Caraba Gifts, 48 Ocean Way, Deal"
+	//						<< "Sol Harvey, Chicos Coffee, 53 New Springs, Eccleston"
+	//						<< "Sally Hobart, Tiroli Tea, 67 Long River, Fedula");
+	identify_list->setMovement(QListView::Static);
 	dock->setWidget(identify_list);
 }
 
@@ -104,4 +269,27 @@ void MainWindow::createDockWindows()
 	viewToolBar->addAction(dock->toggleViewAction());
 	createIdentifyLists(dock);
 }
+
+QFileInfoList MainWindow::getFileList(QString path, QStringList filters)
+{
+	QDir dir_file(path);
+	QDir dir_dir(path);
+
+	if(filters.size() != 0) {
+		dir_file.setNameFilters(filters);
+	}
+
+	QFileInfoList file_list = dir_file.entryInfoList(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
+	QFileInfoList folder_list = dir_dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+	for(int i = 0; i != folder_list.size(); i++) {
+		QString name = folder_list.at(i).absoluteFilePath();
+		QFileInfoList child_file_list = getFileList(name, filters);
+
+		file_list.append(child_file_list);
+	}
+
+	return file_list;
+}
+
 

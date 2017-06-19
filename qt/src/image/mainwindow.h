@@ -3,8 +3,9 @@
 
 #include "console.h"
 
+#include <QFileInfoList>
 #include <QMainWindow>
-#include <qlistwidget.h>
+#include <QtWidgets>
 
 class MainWindow : public QMainWindow
 {
@@ -20,7 +21,10 @@ private:
 	QToolBar *fileToolBar;
 	QToolBar *viewToolBar;
 
+	QLineEdit *enroll_edit;
+	QPushButton *enroll_btn;
 	QListWidget *enroll_list;
+
 	QListWidget *identify_list;
 
 private:
@@ -30,9 +34,15 @@ private:
 	void about();
 	void createEnrollLists(QDockWidget *dock);
 	void createIdentifyLists(QDockWidget *dock);
+	QFileInfoList getFileList(QString path, QStringList filters = QStringList());
+    void update_list_view(QString path, QListWidget *list_widget);
+    int set_label_bmp(QString filename, QLabel *label);
 public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
+private slots:
+	void get_enroll_dir();
+	void update_enroll_list_view();
 };
 
 #endif // MAINWINDOW_H
