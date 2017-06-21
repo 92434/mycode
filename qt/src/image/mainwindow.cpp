@@ -82,7 +82,7 @@ void MainWindow::createStatusBar()
 int MainWindow::set_label_bmp(QString filename, QLabel *label)
 {
 #define add_debug_info(x, fmt) do { \
-	console->putData(QString::asprintf(#x fmt, x, x).toLatin1()); \
+    log->putData(QString::asprintf(#x fmt, x, x).toLatin1()); \
 } while(0)
 
 	int ret = 0;
@@ -96,7 +96,7 @@ int MainWindow::set_label_bmp(QString filename, QLabel *label)
 	QFile f(filename);
 
 	if (f.open(QIODevice::ReadOnly) == 0) {
-		console->putData("File can not be opened!");
+		log->putData("File can not be opened!");
 		ret = -1;
 		return ret;
 	}
@@ -125,24 +125,24 @@ int MainWindow::set_label_bmp(QString filename, QLabel *label)
 	in >> bmp_info_header.biClrUsed;
 	in >> bmp_info_header.biClrImportant;
 
-	add_debug_info(bmp_file_header.bfType[0], ":%02x(%c)\n");
-	add_debug_info(bmp_file_header.bfType[1], ":%02x(%c)\n");
-	add_debug_info(bmp_file_header.bfSize, ":%08x(%d)\n");
-	add_debug_info(bmp_file_header.bfReserved1, ":%04x(%d)\n");
-	add_debug_info(bmp_file_header.bfReserved2, ":%04x(%d)\n");
-	add_debug_info(bmp_file_header.bfOffBits, ":%08x(%d)\n");
+	//add_debug_info(bmp_file_header.bfType[0], ":%02x(%c)\n");
+	//add_debug_info(bmp_file_header.bfType[1], ":%02x(%c)\n");
+	//add_debug_info(bmp_file_header.bfSize, ":%08x(%d)\n");
+	//add_debug_info(bmp_file_header.bfReserved1, ":%04x(%d)\n");
+	//add_debug_info(bmp_file_header.bfReserved2, ":%04x(%d)\n");
+	//add_debug_info(bmp_file_header.bfOffBits, ":%08x(%d)\n");
 
-	add_debug_info(bmp_info_header.biSize, ":%08x(%d)\n");
-	add_debug_info(bmp_info_header.biWidth, ":%08x(%d)\n");
-	add_debug_info(bmp_info_header.biHeight, ":%08x(%d)\n");
-	add_debug_info(bmp_info_header.biPlanes, ":%04x(%d)\n");
-	add_debug_info(bmp_info_header.biBitCount, ":%04x(%d)\n");
-	add_debug_info(bmp_info_header.biCompression, ":%08x(%d)\n");
-	add_debug_info(bmp_info_header.biSizeImage, ":%08x(%d)\n");
-	add_debug_info(bmp_info_header.biXPelsPerMeter, ":%08x(%d)\n");
-	add_debug_info(bmp_info_header.biYPelsPerMeter, ":%08x(%d)\n");
-	add_debug_info(bmp_info_header.biClrUsed, ":%08x(%d)\n");
-	add_debug_info(bmp_info_header.biClrImportant, ":%08x(%d)\n");
+	//add_debug_info(bmp_info_header.biSize, ":%08x(%d)\n");
+	//add_debug_info(bmp_info_header.biWidth, ":%08x(%d)\n");
+	//add_debug_info(bmp_info_header.biHeight, ":%08x(%d)\n");
+	//add_debug_info(bmp_info_header.biPlanes, ":%04x(%d)\n");
+	//add_debug_info(bmp_info_header.biBitCount, ":%04x(%d)\n");
+	//add_debug_info(bmp_info_header.biCompression, ":%08x(%d)\n");
+	//add_debug_info(bmp_info_header.biSizeImage, ":%08x(%d)\n");
+	//add_debug_info(bmp_info_header.biXPelsPerMeter, ":%08x(%d)\n");
+	//add_debug_info(bmp_info_header.biYPelsPerMeter, ":%08x(%d)\n");
+	//add_debug_info(bmp_info_header.biClrUsed, ":%08x(%d)\n");
+	//add_debug_info(bmp_info_header.biClrImportant, ":%08x(%d)\n");
 
 	f.seek(bmp_file_header.bfOffBits);
 
@@ -151,42 +151,47 @@ int MainWindow::set_label_bmp(QString filename, QLabel *label)
 
 	in.readRawData((char *)buffer, len);
 
+	f.close();
 	QImage image = QImage(buffer, bmp_info_header.biWidth, bmp_info_header.biHeight, QImage::Format_Grayscale8);
 
 	image = image.mirrored();
 
-	f.close();
+	delete buffer;
 
 	label->setPixmap(QPixmap::fromImage(image));
+
 
 	return ret;
 }
 
 void MainWindow::update_list_view(QString path, QListWidget *list_widget)
 {
-	QFileInfoList file_info_list = getFileList(path);
+	QStringList filters;
+	filters << "*.bmp";
+	QFileInfoList file_info_list = getFileList(path, filters);
 
 	foreach (QFileInfo info, file_info_list) {
 		QWidget *widget = new QWidget;
 
-		//console->putData(info.absoluteFilePath().toLatin1());
-		//console->putData("\n");
+		log->putData(info.absoluteFilePath().toLatin1());
+		log->putData("\n");
 
 		QVBoxLayout *layout = new QVBoxLayout();
 		QLabel *lab1 = new QLabel;
 		QLabel *lab2 = new QLabel;
 
 		set_label_bmp(info.absoluteFilePath(), lab1);
+		lab1->setAlignment(Qt::AlignCenter);
 
-		lab2->setText(info.absoluteFilePath());
+		lab2->setText(info.baseName());
 		lab2->setAlignment(Qt::AlignCenter);
 
 		layout->addWidget(lab1);
 		layout->addWidget(lab2);
 		widget->setLayout(layout);
 
-        QListWidgetItem *item = new QListWidgetItem(list_widget);
-		item->setSizeHint(QSize(64, 128));
+		QListWidgetItem *item = new QListWidgetItem(list_widget);
+		item->setSizeHint(widget->sizeHint());
 		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 		list_widget->setItemWidget(item, widget);
 	}
@@ -194,6 +199,7 @@ void MainWindow::update_list_view(QString path, QListWidget *list_widget)
 
 void MainWindow::update_enroll_list_view()
 {
+	enroll_list->clear();
 	update_list_view(enroll_edit->text(), enroll_list);
 }
 
@@ -210,6 +216,12 @@ void MainWindow::get_enroll_dir()
 	update_enroll_list_view();
 }
 
+void MainWindow::createLog(QDockWidget *dock)
+{
+	log = new Console;
+	//setCentralWidget(log);
+	dock->setWidget(log);
+}
 void MainWindow::createEnrollLists(QDockWidget *dock)
 {
 
@@ -232,28 +244,67 @@ void MainWindow::createEnrollLists(QDockWidget *dock)
 	dock_widget->setLayout(vbox);
 	dock->setWidget(dock_widget);
 
-	update_enroll_list_view();
+	//update_enroll_list_view();
 	connect(enroll_edit, SIGNAL(returnPressed()), this, SLOT(update_enroll_list_view()));
 	connect(enroll_btn, SIGNAL(clicked()), this, SLOT(get_enroll_dir()));
 }
 
+void MainWindow::update_idnentify_list_view()
+{
+	identify_list->clear();
+	update_list_view(idnentify_edit->text(), identify_list);
+}
+
+void MainWindow::get_idnentify_dir()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Choose idnentify dir"), idnentify_edit->text());
+
+	if (dir.isEmpty()) {
+		return;
+	}
+
+	idnentify_edit->setText(dir);
+
+	update_idnentify_list_view();
+}
+
 void MainWindow::createIdentifyLists(QDockWidget *dock)
 {
-	identify_list = new QListWidget(dock);
-	//identify_list->addItems(QStringList()
-	//						<< "John Doe, Harmony Enterprises, 12 Lakeside, Ambleton"
-	//						<< "Jane Doe, Memorabilia, 23 Watersedge, Beaton"
-	//						<< "Tammy Shea, Tiblanka, 38 Sea Views, Carlton"
-	//						<< "Tim Sheen, Caraba Gifts, 48 Ocean Way, Deal"
-	//						<< "Sol Harvey, Chicos Coffee, 53 New Springs, Eccleston"
-	//						<< "Sally Hobart, Tiroli Tea, 67 Long River, Fedula");
+	QWidget *dock_widget = new QWidget(dock);
+
+	QHBoxLayout *hbox = new QHBoxLayout(dock);
+	idnentify_edit = new QLineEdit();
+	idnentify_edit->setText(QFileInfo(".").absolutePath());
+	hbox->addWidget(idnentify_edit);
+	idnentify_btn = new QPushButton(tr("idnetify path"));
+	hbox->addWidget(idnentify_btn);
+
+	QVBoxLayout *vbox = new QVBoxLayout(dock);
+	vbox->addLayout(hbox);
+
+	identify_list = new QListWidget();
 	identify_list->setMovement(QListView::Static);
-	dock->setWidget(identify_list);
+	vbox->addWidget(identify_list);
+
+	dock_widget->setLayout(vbox);
+	dock->setWidget(dock_widget);
+
+	//update_idnentify_list_view();
+	connect(idnentify_edit, SIGNAL(returnPressed()), this, SLOT(update_idnentify_list_view()));
+	connect(idnentify_btn, SIGNAL(clicked()), this, SLOT(get_idnentify_dir()));
 }
 
 void MainWindow::createDockWindows()
 {
 	QDockWidget *dock;
+
+
+	dock = new QDockWidget(tr("log"), this);
+	dock->setAllowedAreas(Qt::BottomDockWidgetArea);
+	addDockWidget(Qt::BottomDockWidgetArea, dock);
+	viewMenu->addAction(dock->toggleViewAction());
+	viewToolBar->addAction(dock->toggleViewAction());
+	createLog(dock);
 
 	dock = new QDockWidget(tr("enroll"), this);
 	dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -291,5 +342,3 @@ QFileInfoList MainWindow::getFileList(QString path, QStringList filters)
 
 	return file_list;
 }
-
-

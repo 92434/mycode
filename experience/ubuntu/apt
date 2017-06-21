@@ -1,0 +1,46 @@
+Ubuntu使用apt-get安装本地deb包
+我们都喜欢使用apt-get，因为它实在是让我们大大的省心。但是，有时候我们会为网速慢，安装源不好而烦恼，所以我们可能会将一些常用软件包的deb文件保存在本地以备不时之需。当然了使用dpkg也可以直接来安装保存在本地的deb软件包，问题是它并不能处理软件包之间的依赖 (dependence)关系，那么如何使用apt-get来安装保存在本地的软件包和源代码呢？
+
+下面是如何让apt-get使用本地deb文件的步骤：
+
+第一步：将你所有的deb文件放在同一个目录内，如：
+
+# mkdir /var/debs
+
+第二步：使用dpkg-scanpackages 命令生成APT可以使用的软件包索引文件
+
+/var# dpkg-scanpackages debs  /dev/null  | gzip > debs/Packages.gz
+
+注：/dev/null位置的参数是指定一个文件，文件名不限，该文件的作用是用来重写覆盖deb软件包中控制文件的某些定义，它的第一行的格式，一行对应一个软件包：
+
+package priority section
+
+package指定你所要修改的软件包
+
+priority 有low,medium,high三个值
+
+section 用来指定软件包属于哪个section
+
+如果不需要对deb软件包做任何修改你就可以像例子中那样直接指定一个/dev/null文件。
+
+第三步：在你的sources.list中添加一行
+
+deb file:/var debs/
+
+这样你就可以使用apt-get命令来安装这些软件包了，命令格式没有任何差异，apt-get会为我们处理软件包之间的依赖关系，不过要注意，在修改sources.list之后一定要执行一下apt-get update命令。
+
+ 
+
+让 apt-get使用本地的源代码进行安装也是一样的，不过需要注意下列几点：
+
+1、第一个软件包的orig.tar.gz(源程序文件), .dsc（debian控制文件） and .diff.gz（描述在debian能使用该程序之前需要进行的修改部分）文件必须在同一目录下。
+
+2、生成的索引文件要使用Sources.gz ，而不能用Packages.gz
+
+3、扫描程序使用dpkg-scansources
+
+# dpkg-scansources debs | gzip > debs/Sources.gz
+
+4、最后还需要在sources.list中添加一行
+
+deb-src file:/root debs/

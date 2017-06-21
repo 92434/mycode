@@ -13,6 +13,7 @@ class MainWindow : public QMainWindow
 
 private:
 	Console *console;
+	Console *log;
 
 	QMenu *fileMenu;
 	QMenu *viewMenu;
@@ -25,6 +26,8 @@ private:
 	QPushButton *enroll_btn;
 	QListWidget *enroll_list;
 
+	QLineEdit *idnentify_edit;
+	QPushButton *idnentify_btn;
 	QListWidget *identify_list;
 
 private:
@@ -35,14 +38,17 @@ private:
 	void createEnrollLists(QDockWidget *dock);
 	void createIdentifyLists(QDockWidget *dock);
 	QFileInfoList getFileList(QString path, QStringList filters = QStringList());
-    void update_list_view(QString path, QListWidget *list_widget);
-    int set_label_bmp(QString filename, QLabel *label);
+	void update_list_view(QString path, QListWidget *list_widget);
+	int set_label_bmp(QString filename, QLabel *label);
+	void createLog(QDockWidget *dock);
 public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 private slots:
 	void get_enroll_dir();
 	void update_enroll_list_view();
+	void get_idnentify_dir();
+	void update_idnentify_list_view();
 };
 
 #endif // MAINWINDOW_H

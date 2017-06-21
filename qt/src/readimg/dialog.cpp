@@ -64,7 +64,7 @@ int Dialog::read_bmp(QString filename, QLabel *label)
 	unsigned char *buffer;
 	int i;
 
-    //QFile f(":/image/test.bmp");
+	//QFile f(":/image/test.bmp");
 
 	QFile f(filename);
 
@@ -134,6 +134,7 @@ int Dialog::read_bmp(QString filename, QLabel *label)
 	in.readRawData((char *)buffer, len);
 
 	str_debug = QString::asprintf("bmp data:\n");
+
 	for(i = 0; i < len; i++) {
 		if((i != 0) && (i % 64 == 0)) {
 			str_debug.append("\n");
@@ -141,11 +142,12 @@ int Dialog::read_bmp(QString filename, QLabel *label)
 
 		str_debug.append(QString::asprintf("%02X ", buffer[i]));
 	}
+
 	qDebug() << qPrintable(str_debug);
 
 	QImage image = QImage(buffer, bmp_info_header.biWidth, bmp_info_header.biHeight, QImage::Format_Grayscale8);
 
-    image = image.mirrored();
+	image = image.mirrored();
 	label->setPixmap(QPixmap::fromImage(image));
 
 	f.close();
