@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include <QHostAddress>
+
 
 struct BMP_FILEHDR {                     // BMP file header
 	qint8   bfType[2];                   // "BM"
@@ -26,18 +28,49 @@ struct BMP_INFOHDR {                     // BMP information header
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
-	console = new Console;
-	setCentralWidget(console);
-
-	//console->setEnabled(false);
-	//console->setLocalEchoEnabled(true);
-	//
-
 	createActions();
 	createStatusBar();
+	createCentralWindow();
 	createDockWindows();
 
 	setWindowTitle(tr("image"));
+
+	connect(&tcpClient, SIGNAL(connected()), this, SLOT(startTransfer()));
+	connect(&tcpClient, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(displayError(QAbstractSocket::SocketError)));
+	tcpClient.connectToHost(QHostAddress::LocalHost, 5558);
+}
+
+void MainWindow::startTransfer()
+{
+	typedef struct _temp {
+		int i;
+		int j;
+		char k;
+		short k1;
+		int l;
+	} temp_t;
+	temp_t temp = {
+		.i = 1,
+		.j = 2,
+		.k = 3,
+		.k1 = 4,
+		.l = 5,
+	};
+	// called when the TCP client connected to the loopback server
+	tcpClient.write((char *)&temp, sizeof(temp_t));
+}
+
+void MainWindow::displayError(QAbstractSocket::SocketError socketError)
+{
+	if (socketError == QTcpSocket::RemoteHostClosedError) {
+		return;
+	}
+
+	QMessageBox::information(this, tr("Network error"),
+							 tr("The following error occurred: %1.")
+							 .arg(tcpClient.errorString()));
+
+	tcpClient.close();
 }
 
 MainWindow::~MainWindow()
@@ -77,6 +110,18 @@ void MainWindow::createActions()
 void MainWindow::createStatusBar()
 {
 	statusBar()->showMessage(tr("Ready"));
+}
+
+void MainWindow::createCentralWindow()
+{
+	info_view = new QTableView(this);
+
+	info_model = new QStandardItemModel(0, 2, info_view);
+	info_model->setHeaderData(0, Qt::Horizontal, tr("Label"));
+	info_model->setHeaderData(1, Qt::Horizontal, tr("Quantity"));
+	info_view->setModel(info_model);
+
+	setCentralWidget(info_view);
 }
 
 int MainWindow::set_label_bmp(QString filename, QLabel *label)
@@ -220,8 +265,17 @@ void MainWindow::createLog(QDockWidget *dock)
 {
 	log = new Console;
 	//setCentralWidget(log);
+	//log->setEnabled(false);
+	//log->setLocalEchoEnabled(true);
+
 	dock->setWidget(log);
 }
+
+void MainWindow::enroll_list_clicked(int row)
+{
+	log->putData(QString::asprintf("enroll_list %d clicked!\n", row).toLatin1());
+}
+
 void MainWindow::createEnrollLists(QDockWidget *dock)
 {
 
@@ -247,6 +301,7 @@ void MainWindow::createEnrollLists(QDockWidget *dock)
 	//update_enroll_list_view();
 	connect(enroll_edit, SIGNAL(returnPressed()), this, SLOT(update_enroll_list_view()));
 	connect(enroll_btn, SIGNAL(clicked()), this, SLOT(get_enroll_dir()));
+	connect(enroll_list, SIGNAL(currentRowChanged(int)), this, SLOT(enroll_list_clicked(int)));
 }
 
 void MainWindow::update_idnentify_list_view()

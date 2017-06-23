@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets network
 
 TARGET = image
 TEMPLATE = app
@@ -25,7 +25,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    console.cpp
+    console.cpp \
+    task_info.cpp
 
 HEADERS  += mainwindow.h \
-    console.h
+    console.h \
+    task_info.h
