@@ -60,12 +60,16 @@ int test_command_parser(int argc, char **argv) {
 		ret = -1;
 		return ret;
 	}
+	printf("%s:%s:%d:xiaofei\n", __FILE__, __func__, __LINE__);
 
 	if(cp.get_curparser() != cp2) {
 		cp.p_help();
 
 		return ret;
 	}
+	cp.p_help();
+
+	printf("%s:%s:%d:xiaofei\n", __FILE__, __func__, __LINE__);
 
 	cp.p_result();
 	cp1->p_result();
