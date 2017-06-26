@@ -24,6 +24,7 @@ int main(int argc, char **argv)
 		perror(strerror(errno));
 		return -1;
 	}
+
 	char *src = argv[1];
 	char *pattern = argv[2];
 
