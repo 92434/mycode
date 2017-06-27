@@ -70,16 +70,10 @@ private:
 	static command_parser *cur_parser;
 public:
 	command_parser() : command_name("default") {
-		if(cur_parser == NULL) {
-			cur_parser = this;
-		}
 		msub_commands.clear();
 	}
 
 	command_parser(std::string command) : command_name(command) {
-		if(cur_parser == NULL) {
-			cur_parser = this;
-		}
 		msub_commands.clear();
 	}
 
