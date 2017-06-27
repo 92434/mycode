@@ -1,6 +1,8 @@
 #include "optparse.h"
 
 //#define printf(format, ...) fprintf(stderr, format, ## __VA_ARGS__)
+//
+//#define ENABLE_INFO
 
 int optparse::add_option(char opt, bool has_arg, std::string info)
 {
@@ -55,6 +57,7 @@ int optparse::parse_option(int argc, char **argv, char *optstring)
 	int ret = 0;
 	int opt;
 	int i;
+#if defined(ENABLE_INFO)
 	printf("%-20s:%d\n", "argc", argc);
 	printf("%-20s:", "argv");
 
@@ -64,10 +67,13 @@ int optparse::parse_option(int argc, char **argv, char *optstring)
 
 	printf("\n");
 	printf("%-20s:%s\n", "optstring", optstring);
+#endif
 	optind = 1;
 
 	while ((opt = getopt(argc, argv, optstring)) != -1) {
+#if defined(ENABLE_INFO)
 		printf("option is %c(%x), option argument is %s; optind=%d\n", opt, opt, optarg, optind);
+#endif
 
 		if(opt == 1) {
 			if(moption["para"].size()) {
@@ -86,6 +92,8 @@ int optparse::parse_option(int argc, char **argv, char *optstring)
 
 	}
 
+#if defined(ENABLE_INFO)
+
 	if (optind < argc) {
 		printf("name argument =");
 
@@ -101,6 +109,8 @@ int optparse::parse_option(int argc, char **argv, char *optstring)
 
 		printf("\n");
 	}
+
+#endif
 
 	return ret;
 }
@@ -212,6 +222,7 @@ int optparse::parse_long_option(int argc, char **argv, char *optstring, struct o
 	int option_index = 0;
 	int i;
 
+#if defined(ENABLE_INFO)
 	printf("%-20s:%d\n", "argc", argc);
 	printf("%-20s:", "argv");
 
@@ -233,9 +244,12 @@ int optparse::parse_long_option(int argc, char **argv, char *optstring, struct o
 			  );
 	}
 
+#endif
+
 	optind = 1;
 
 	while((opt = getopt_long(argc, argv, optstring, long_options, &option_index)) != -1) {
+#if defined(ENABLE_INFO)
 		printf("option is %c(%x), option_index is %d, long option arg is %s, optind=%d\n",
 			   opt,
 			   opt,
@@ -243,10 +257,10 @@ int optparse::parse_long_option(int argc, char **argv, char *optstring, struct o
 			   optarg,
 			   optind
 			  );
+#endif
 
 		if(opt == 0) {
-			printf("%s:%s:%d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-
+			//printf("%s:%s:%d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			if(long_options[option_index].flag != 0) {//default use short option name
 				std::string o;
 				o.push_back(vals[option_index]);
@@ -255,7 +269,6 @@ int optparse::parse_long_option(int argc, char **argv, char *optstring, struct o
 				moption[long_options[option_index].name] = optarg ? optarg : "";
 			}
 
-			ret = -1;
 		} else if(opt == 1) {
 			if(moption["para"].size()) {
 				moption["para"] += " ";
@@ -272,6 +285,7 @@ int optparse::parse_long_option(int argc, char **argv, char *optstring, struct o
 		}
 	}
 
+#if defined(ENABLE_INFO)
 	if (optind < argc) {
 		printf("name argument =");
 
@@ -287,6 +301,8 @@ int optparse::parse_long_option(int argc, char **argv, char *optstring, struct o
 
 		printf("\n");
 	}
+
+#endif
 
 	return ret;
 }
@@ -376,10 +392,12 @@ int optparse::p_result(std::string parsername)
 		return ret;
 	}
 
-	printf("%s result:\n", parsername.c_str());
+	printf("[result:%s]:\n", parsername.c_str());
 
 	for(it = moption.begin(); it != moption.end(); it++) {
-		printf("%20s:%s\n", it->first.c_str(), it->second.c_str());
+		if(it->second.size() != 0) {
+			printf("%20s:%s\n", it->first.c_str(), it->second.c_str());
+		}
 	}
 
 	return ret;
@@ -448,10 +466,9 @@ int command_parser::get_option(int argc, char **argv, short_option_mode_t mode)
 
 	for(it = msub_commands.begin(); it != msub_commands.end(); it++) {
 		if(it->first.compare(argv[optind]) == 0) {
-			optind += 1;
 			moption["para"] = "";
 			cur_parser = it->second;
-			ret = cur_parser->get_option(argc - (optind - 1), argv + (optind - 1));
+			ret = cur_parser->get_option(argc - optind, argv + optind);
 			break;
 		}
 	}
@@ -470,6 +487,7 @@ int command_parser::get_long_option(int argc, char **argv, short_option_mode_t m
 	ret = optparse::get_long_option(argc, argv, MODE_PARA);
 
 	if(ret != 0) {
+		printf("%s:%s:%d:\n", __FILE__, __func__, __LINE__);
 		return ret;
 	}
 
@@ -481,10 +499,9 @@ int command_parser::get_long_option(int argc, char **argv, short_option_mode_t m
 
 	for(it = msub_commands.begin(); it != msub_commands.end(); it++) {
 		if(it->first.compare(argv[optind]) == 0) {
-			optind += 1;
 			moption["para"] = "";
 			cur_parser = it->second;
-			ret = cur_parser->get_long_option(argc - (optind - 1), argv + (optind - 1));
+			ret = cur_parser->get_long_option(argc - optind, argv + optind);
 			break;
 		}
 	}
@@ -494,7 +511,7 @@ int command_parser::get_long_option(int argc, char **argv, short_option_mode_t m
 
 int command_parser::p_help()
 {
-	printf("command:%s\n", command_name.c_str());
+	printf("[command:%s]\n", command_name.c_str());
 	optparse::p_help();
 
 	std::string sub_commands;
