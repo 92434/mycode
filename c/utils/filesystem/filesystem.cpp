@@ -6,12 +6,12 @@
  *   文件名称：filesystem.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 09时39分21秒
- *   修改日期：2017年06月26日 星期一 17时48分27秒
+ *   修改日期：2017年06月28日 星期三 17时55分18秒
  *   描    述：
  *
  *================================================================*/
 #include "filesystem.h"
-
+//#define ENABLE_INFO
 
 filesystem::filesystem()
 {
@@ -67,7 +67,9 @@ std::vector<std::string> filesystem::scan_files(std::string dirname, std::vector
 				}
 			}
 
+#if defined(ENABLE_INFO)
 			printf("add file:%s%s\n", dirname.c_str(), filename.c_str());
+#endif
 			file_list.push_back(dirname + filename);
 		} else if(entry->d_type == DT_DIR) {
 			if(0 == strcmp(".", entry->d_name) || 0 == strcmp("..", entry->d_name)) {
@@ -109,9 +111,6 @@ std::vector<std::string> filesystem::dir_scan_files(std::string dirname, std::ve
 	if(*rit != '/') {
 		dirname += "/";
 	}
-
-	printf("Directory scan of %s\n", dirname.c_str());
-
 
 	file_list = scan_files(dirname, filter_list);
 

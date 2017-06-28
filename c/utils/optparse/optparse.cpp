@@ -58,15 +58,15 @@ int optparse::parse_option(int argc, char **argv, char *optstring)
 	int opt;
 	int i;
 #if defined(ENABLE_INFO)
-	printf("%-20s:%d\n", "argc", argc);
-	printf("%-20s:", "argv");
+	printf("%-40s:%d\n", "argc", argc);
+	printf("%-40s:", "argv");
 
 	for(i = 0; i < argc; i++) {
 		printf("%s ", argv[i]);
 	}
 
 	printf("\n");
-	printf("%-20s:%s\n", "optstring", optstring);
+	printf("%-40s:%s\n", "optstring", optstring);
 #endif
 	optind = 1;
 
@@ -223,19 +223,19 @@ int optparse::parse_long_option(int argc, char **argv, char *optstring, struct o
 	int i;
 
 #if defined(ENABLE_INFO)
-	printf("%-20s:%d\n", "argc", argc);
-	printf("%-20s:", "argv");
+	printf("%-40s:%d\n", "argc", argc);
+	printf("%-40s:", "argv");
 
 	for(i = 0; i < argc; i++) {
 		printf("%s ", argv[i]);
 	}
 
 	printf("\n");
-	printf("%-20s:%s\n", "optstring", optstring);
-	printf("%-20s:\n", "long_options");
+	printf("%-40s:%s\n", "optstring", optstring);
+	printf("%-40s:\n", "long_options");
 
 	for(i = 0; i < (int)vlong_option.size(); i++) {
-		printf("%-20s:%20s%20s%20s%5c\n",
+		printf("%-40s:%20s%20s%20s%5c\n",
 			   "",
 			   long_options[i].name,
 			   (long_options[i].has_arg == no_argument) ? "no_argument" : (long_options[i].has_arg == required_argument) ? "required_argument" : "optional_argument",
@@ -359,7 +359,7 @@ int optparse::p_help()
 {
 	int ret = 0;
 	int i;
-	printf("%20s==help==\n", "");
+	printf("%40s==help==\n", "");
 
 	for(i = 0; i < (int)voption.size(); i++) {
 		printf("%20c%5s%s\n", voption[i].optstring[0], "", voption[i].info.c_str());
@@ -376,7 +376,7 @@ int optparse::p_help()
 			s += "[para]";
 		}
 
-		printf("%20s%5s%s\n", s.c_str(), "", vlong_option[i].info.c_str());
+		printf("%40s%5s%s\n", s.c_str(), "", vlong_option[i].info.c_str());
 	}
 
 	return ret;
@@ -396,7 +396,7 @@ int optparse::p_result(std::string parsername)
 
 	for(it = moption.begin(); it != moption.end(); it++) {
 		if(it->second.size() != 0) {
-			printf("%20s:%s\n", it->first.c_str(), it->second.c_str());
+			printf("%40s:%s\n", it->first.c_str(), it->second.c_str());
 		}
 	}
 
@@ -527,7 +527,7 @@ int command_parser::p_help()
 	}
 
 	if(sub_commands.size() != 0) {
-		printf("%20s%5s%s\n", "subcommands:", "", sub_commands.c_str());
+		printf("%40s%5s%s\n", "subcommands:", "", sub_commands.c_str());
 	}
 
 	for(it = msub_commands.begin(); it != msub_commands.end(); it++) {
