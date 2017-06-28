@@ -11,6 +11,12 @@ test_scan_files/scanfiles.cpp.LOCAL_DEPS := $(top)/c/utils/out/lib/libxiaofei.a
 test_scan_files/scanfiles.cpp.LOCAL_LIBS := $(top)/c/utils/out/lib/libxiaofei.a
 test_scan_files/scanfiles.cpp.LOCAL_CFLAGS := -I$(top)/c/utils
 #test_scan_files/scanfiles.cpp.LOCAL_LDFLAGS := -lxiaofei
+
+c_files += test_config/test_config.cpp
+test_config/test_config.cpp.LOCAL_DEPS := $(top)/c/utils/out/lib/libxiaofei.a
+test_config/test_config.cpp.LOCAL_LIBS := $(top)/c/utils/out/lib/libxiaofei.a
+test_config/test_config.cpp.LOCAL_CFLAGS := -I$(top)/c/utils
+
 include $(BUILD_BINS)
 
 app_c_files := main.cpp
@@ -21,4 +27,3 @@ LOCAL_CFLAGS := -I$(top)/c/utils
 include $(BUILD_APP)
 
 include $(ADD_TARGET)
-
