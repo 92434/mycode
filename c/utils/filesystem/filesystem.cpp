@@ -6,7 +6,7 @@
  *   文件名称：filesystem.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 09时39分21秒
- *   修改日期：2017年06月28日 星期三 17时55分18秒
+ *   修改日期：2017年06月29日 星期四 18时09分50秒
  *   描    述：
  *
  *================================================================*/
@@ -115,4 +115,41 @@ std::vector<std::string> filesystem::dir_scan_files(std::string dirname, std::ve
 	file_list = scan_files(dirname, filter_list);
 
 	return file_list;
+}
+
+int filesystem::mkdirs(std::string dirname, mode_t flags)
+{
+	int ret = 0;
+	size_t pos = dirname.find('/', 0);
+#if defined(ENABLE_INFO)
+	printf("pos:%d\n", (int)pos);
+#endif
+
+	while(std::string::npos != pos) {
+		std::string dirname_dirname = dirname.substr(0, pos);
+#if defined(ENABLE_INFO)
+		printf("dirname_dirname:%s\n", dirname_dirname.c_str());
+#endif
+
+		if(dirname_dirname.size() != 0) {
+			ret = access(dirname_dirname.c_str(), F_OK);
+
+			if(ret != 0) {
+				ret = mkdir(dirname_dirname.c_str(), flags);
+
+				if(ret != 0) {
+					printf("mkdir:%s failed!!! (%s)!\n", dirname_dirname.c_str(), strerror(errno));
+					break;
+				}
+			}
+		}
+
+		pos += 1;
+		pos = dirname.find('/', pos);
+#if defined(ENABLE_INFO)
+		printf("pos:%d\n", (int)pos);
+#endif
+	}
+
+	return ret;
 }

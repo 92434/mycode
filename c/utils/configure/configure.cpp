@@ -6,7 +6,7 @@
  *   文件名称：configure.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月28日 星期三 14时18分04秒
- *   修改日期：2017年06月28日 星期三 14时52分35秒
+ *   修改日期：2017年06月29日 星期四 15时36分06秒
  *   描    述：
  *
  *================================================================*/
@@ -115,6 +115,7 @@ int configure::load(std::string filename)
 	ifs.open(filename.c_str());
 
 	if(!ifs.good()) {
+		printf("open:%s failed!!! (%s)!\n", filename.c_str(), strerror(errno));
 		ret = -1;
 		return ret;
 	}
@@ -150,6 +151,7 @@ int configure::save(std::string filename)
 	ofs.open(filename.c_str());
 
 	if(!ofs.good()) {
+		printf("open:%s failed!!! (%s)!\n", filename.c_str(), strerror(errno));
 		ret = -1;
 		return ret;
 	}

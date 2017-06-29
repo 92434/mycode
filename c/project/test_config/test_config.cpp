@@ -6,12 +6,13 @@
  *   文件名称：test_config.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月28日 星期三 08时54分44秒
- *   修改日期：2017年06月28日 星期三 14时46分35秒
+ *   修改日期：2017年06月29日 星期四 15时39分45秒
  *   描    述：
  *
  *================================================================*/
 //#include "test_config.h"
 #include "configure/configure.h"
+#include "filesystem/filesystem.h"
 
 int main(int argc, char **argv)
 {
@@ -51,6 +52,8 @@ int main(int argc, char **argv)
 	} else {
 		printf("no class:%s, key:%s!!!\n", "key1", "xiaofei3");
 	}
+	filesystem fs;
+	fs.mkdirs(save_filename);
 	cfg.save(save_filename);
 
 	return ret;
