@@ -6,7 +6,7 @@
  *   文件名称：main.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 18时15分41秒
- *   修改日期：2017年06月29日 星期四 18时25分26秒
+ *   修改日期：2017年06月30日 星期五 12时23分22秒
  *   描    述：
  *
  *================================================================*/
@@ -26,6 +26,7 @@ class task_bmp
 public:
 	matched_type_t matched_type;
 	std::string bmp_path;
+	std::string person;
 	std::string id;
 	std::string serial_no;
 
@@ -42,30 +43,62 @@ public:
 	}
 };
 
-class task_list
+class samples_list
 {
 public:
-	task_list()
+	samples_list()
 	{
+		enroll_samples = NULL;
+		fr_samples = NULL;
+		fa_samples = NULL;
 	};
 
-	~task_list()
+	int release_type_samples(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples)
 	{
+		int ret = 0;
+
+		std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *>::iterator sample_it;
+
+		if(samples != NULL) {
+			for(sample_it = samples->begin(); sample_it != samples->end(); sample_it++) {
+				std::map<std::string, std::vector<task_bmp> *> *person = sample_it->second;
+				std::map<std::string, std::vector<task_bmp> *>::iterator person_it;
+
+				for(person_it = person->begin(); person_it != person->end(); person_it++) {
+					std::vector<task_bmp> *id = person_it->second;
+
+					delete id;
+				}
+
+				delete person;
+			}
+
+			delete samples;
+		}
+
+		return ret;
+	}
+
+	~samples_list()
+	{
+		release_type_samples(enroll_samples);
+		release_type_samples(fr_samples);
+		release_type_samples(fa_samples);
 	};
 
 	std::string dirname;
 	std::string enroll_pattern;
-	std::map<std::string, std::vector<task_bmp> > enroll_task_list;
+	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *enroll_samples;
 
 	std::string fr_pattern;
 	std::string fr_success_pattern;
 	std::string fr_fail_pattern;
-	std::map<std::string, std::vector<task_bmp> > fr_task_list;
+	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *fr_samples;
 
 	std::string fa_pattern;
 	std::string fa_success_pattern;
 	std::string fa_fail_pattern;
-	std::map<std::string, std::vector<task_bmp> > fa_task_list;
+	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *fa_samples;
 
 	int parse_args(int argc, char **argv)
 	{
@@ -148,6 +181,53 @@ public:
 		return bmp_file_list;
 	}
 
+	int new_type_bmp(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> **p_samples, task_bmp bmp)
+	{
+		int ret = 0;
+
+		std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples;
+
+		std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *>::iterator sample_it;
+		std::map<std::string, std::vector<task_bmp> *> *person;
+
+		std::map<std::string, std::vector<task_bmp> *>::iterator person_it;
+		std::vector<task_bmp> *id;
+
+		if(p_samples == 0) {
+			ret = -1;
+			return ret;
+		}
+
+		samples = *p_samples;
+
+		if(samples == NULL) {
+			samples = new std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *>;
+			*p_samples = samples;
+		}
+
+		sample_it = samples->find(bmp.person);
+
+		if(sample_it != samples->end()) {
+			person = sample_it->second;
+		} else {
+			person = new std::map<std::string, std::vector<task_bmp> *>;
+			samples->insert(std::pair<std::string, std::map<std::string, std::vector<task_bmp> *> *>(bmp.person, person));
+		}
+
+		person_it = person->find(bmp.id);
+
+		if(person_it != person->end()) {
+			id = person_it->second;
+		} else {
+			id = new std::vector<task_bmp>;
+			person->insert(std::pair<std::string, std::vector<task_bmp> *>(bmp.id, id));
+		}
+
+		id->push_back(bmp);
+
+		return ret;
+	}
+
 	int update_task_list()
 	{
 		int ret = 0;
@@ -159,25 +239,19 @@ public:
 		for(std::vector<std::string>::iterator it = bmp_file_list.begin(); it != bmp_file_list.end(); it++) {
 			//printf("file in list:%s\n", it->c_str());
 			regexp r;
-			task_bmp bmp;
 			std::vector<std::string> matched_list = r.match(*it, enroll_pattern);
 
-			if(matched_list.size() == 3) {
-				std::map<std::string, std::vector<task_bmp> >::iterator it_task;
-				std::vector<task_bmp> bmp_set;
+			if(matched_list.size() == 4) {
+				task_bmp bmp;
+
 				bmp.bmp_path = *it;
-				bmp.id = matched_list.at(1);
-				bmp.serial_no = matched_list.at(2);
+				bmp.person = matched_list.at(1);
+				bmp.id = matched_list.at(2);
+				bmp.serial_no = matched_list.at(3);
 
-				printf("enroll:%s, id:%s, serial_no:%s\n", it->c_str(), matched_list.at(1).c_str(), matched_list.at(2).c_str());
-				it_task = enroll_task_list.find(bmp.id);
+				//printf("enroll:%s, person:%s, id:%s, serial_no:%s\n", it->c_str(), matched_list.at(1).c_str(), matched_list.at(2).c_str(), matched_list.at(3).c_str());
 
-				if(it_task != enroll_task_list.end()) {
-					bmp_set = it_task->second;
-				}
-
-				bmp_set.push_back(bmp);
-				enroll_task_list[bmp.id] = bmp_set;
+				new_type_bmp(&enroll_samples, bmp);
 			}
 		}
 
@@ -187,44 +261,37 @@ public:
 			task_bmp bmp;
 			std::vector<std::string> matched_list = r.match(*it, fr_pattern);
 
-			if(matched_list.size() == 3) {
+			if(matched_list.size() == 4) {
 				bmp.matched_type = UNKNOW;
 			} else {
 				matched_list = r.match(*it, fr_success_pattern);
 
-				if(matched_list.size() == 3) {
+				if(matched_list.size() == 4) {
 					bmp.matched_type = MATCHED;
 				} else {
 					matched_list = r.match(*it, fr_fail_pattern);
 
-					if(matched_list.size() == 3) {
+					if(matched_list.size() == 4) {
 						bmp.matched_type = UNMATCHED;
 					}
 				}
 			}
 
-			if(matched_list.size() == 3) {
-				std::map<std::string, std::vector<task_bmp> >::iterator it_task;
-				std::vector<task_bmp> bmp_set;
+			if(matched_list.size() == 4) {
 				bmp.bmp_path = *it;
-				bmp.id = matched_list.at(1);
-				bmp.serial_no = matched_list.at(2);
+				bmp.person = matched_list.at(1);
+				bmp.id = matched_list.at(2);
+				bmp.serial_no = matched_list.at(3);
 
-				printf("fr:%s, id:%s, serial_no:%s, matched_type:%s\n", 
-						it->c_str(), 
-						matched_list.at(1).c_str(), 
-						matched_list.at(2).c_str(), 
-						bmp.matched_type == UNKNOW ? "UNKNOW" : 
-						bmp.matched_type == MATCHED ? "MATCHED":
-						"UNMATCHED");
-				it_task = fr_task_list.find(bmp.id);
-
-				if(it_task != fr_task_list.end()) {
-					bmp_set = it_task->second;
-				}
-
-				bmp_set.push_back(bmp);
-				fr_task_list[bmp.id] = bmp_set;
+				//printf("fr:%s, person:%s, id:%s, serial_no:%s, matched_type:%s\n",
+				//	   it->c_str(),
+				//	   matched_list.at(1).c_str(),
+				//	   matched_list.at(2).c_str(),
+				//	   matched_list.at(3).c_str(),
+				//	   bmp.matched_type == UNKNOW ? "UNKNOW" :
+				//	   bmp.matched_type == MATCHED ? "MATCHED" :
+				//	   "UNMATCHED");
+				new_type_bmp(&fr_samples, bmp);
 			}
 
 		}
@@ -235,48 +302,95 @@ public:
 			task_bmp bmp;
 			std::vector<std::string> matched_list = r.match(*it, fa_pattern);
 
-			if(matched_list.size() == 3) {
+			if(matched_list.size() == 4) {
 				bmp.matched_type = UNKNOW;
 			} else {
 				matched_list = r.match(*it, fa_success_pattern);
 
-				if(matched_list.size() == 3) {
+				if(matched_list.size() == 4) {
 					bmp.matched_type = MATCHED;
 				} else {
 					matched_list = r.match(*it, fa_fail_pattern);
 
-					if(matched_list.size() == 3) {
+					if(matched_list.size() == 4) {
 						bmp.matched_type = UNMATCHED;
 					}
 				}
 			}
 
-			if(matched_list.size() == 3) {
-				std::map<std::string, std::vector<task_bmp> >::iterator it_task;
-				std::vector<task_bmp> bmp_set;
+			if(matched_list.size() == 4) {
 				bmp.bmp_path = *it;
-				bmp.id = matched_list.at(1);
-				bmp.serial_no = matched_list.at(2);
+				bmp.person = matched_list.at(1);
+				bmp.id = matched_list.at(2);
+				bmp.serial_no = matched_list.at(3);
 
-				printf("fa:%s, id:%s, serial_no:%s, matched_type:%s\n", 
-						it->c_str(), 
-						matched_list.at(1).c_str(), 
-						matched_list.at(2).c_str(), 
-						bmp.matched_type == UNKNOW ? "UNKNOW" : 
-						bmp.matched_type == MATCHED ? "MATCHED":
-						"UNMATCHED");
-				it_task = fa_task_list.find(bmp.id);
+				//printf("fa:%s, person:%s, id:%s, serial_no:%s, matched_type:%s\n",
+				//	   it->c_str(),
+				//	   matched_list.at(1).c_str(),
+				//	   matched_list.at(2).c_str(),
+				//	   matched_list.at(3).c_str(),
+				//	   bmp.matched_type == UNKNOW ? "UNKNOW" :
+				//	   bmp.matched_type == MATCHED ? "MATCHED" :
+				//	   "UNMATCHED");
 
-				if(it_task != fa_task_list.end()) {
-					bmp_set = it_task->second;
-				}
-
-				bmp_set.push_back(bmp);
-				fa_task_list[bmp.id] = bmp_set;
+				new_type_bmp(&fa_samples, bmp);
 			}
 
 		}
 
+		return ret;
+	}
+
+	int p_type_samples(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples)
+	{
+		int ret = 0;
+		std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *>::iterator sample_it;
+
+		std::string type = (samples == enroll_samples ? "enroll" :
+							samples == fr_samples ? "fr" :
+							"fa");
+		//printf("samples type:%s\n", type.c_str());
+
+		if(samples != NULL) {
+			for(sample_it = samples->begin(); sample_it != samples->end(); sample_it++) {
+				std::map<std::string, std::vector<task_bmp> *> *person = sample_it->second;
+				std::map<std::string, std::vector<task_bmp> *>::iterator person_it;
+
+				//printf("person:%s\n", sample_it->first.c_str());
+				for(person_it = person->begin(); person_it != person->end(); person_it++) {
+					//printf("id:%s\n", person_it->first.c_str());
+					std::vector<task_bmp> *id = person_it->second;
+
+					std::vector<task_bmp>::iterator id_it;
+
+					for(id_it = id->begin(); id_it != id->end(); id_it++) {
+						//printf("serial_no:%s\n", id_it->serial_no.c_str());
+						task_bmp bmp = *id_it;
+
+						printf("%s:%s, person:%s, id:%s, serial_no:%s, matched_type:%s\n",
+							   type.c_str(),
+							   bmp.bmp_path.c_str(),
+							   bmp.person.c_str(),
+							   bmp.id.c_str(),
+							   bmp.serial_no.c_str(),
+							   bmp.matched_type == UNKNOW ? "UNKNOW" :
+							   bmp.matched_type == MATCHED ? "MATCHED" :
+							   "UNMATCHED");
+					}
+
+				}
+			}
+		}
+
+		return ret;
+	}
+
+
+	int p_samples() {
+		int ret = 0;
+		p_type_samples(enroll_samples);
+		p_type_samples(fr_samples);
+		p_type_samples(fa_samples);
 		return ret;
 	}
 
@@ -286,13 +400,15 @@ int main(int argc, char **argv)
 {
 	int ret = 0;
 
-	task_list task_list;
+	samples_list samples_list;
 
-	ret = task_list.parse_args(argc, argv);
+	ret = samples_list.parse_args(argc, argv);
 
 	if(ret != 0) {
 		return ret;
 	}
+
+	samples_list.p_samples();
 
 
 	printf("Done!\n");
