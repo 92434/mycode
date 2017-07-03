@@ -6,7 +6,7 @@
  *   文件名称：main.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 18时15分41秒
- *   修改日期：2017年06月30日 星期五 12时23分22秒
+ *   修改日期：2017年07月03日 星期一 20时04分59秒
  *   描    述：
  *
  *================================================================*/
@@ -14,6 +14,7 @@
 #include "optparse/optparse.h"
 #include "filesystem/filesystem.h"
 #include "regexp/regexp.h"
+#include "configure/configure.h"
 
 typedef enum _matched_type {
 	UNKNOW = 0,
@@ -86,6 +87,7 @@ public:
 		release_type_samples(fa_samples);
 	};
 
+	std::string configure_file;
 	std::string dirname;
 	std::string enroll_pattern;
 	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *enroll_samples;
@@ -100,7 +102,7 @@ public:
 	std::string fa_fail_pattern;
 	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *fa_samples;
 
-	int parse_args(int argc, char **argv)
+	int parse_args_from_console(int argc, char **argv)
 	{
 		int ret = 0;
 		bool have_dir = false;
@@ -163,6 +165,97 @@ public:
 
 		if(ret == 0) {
 			opt.p_result();
+			ret = update_task_list();
+		}
+
+		return ret;
+	}
+
+	int parse_args_from_configuration(int argc, char **argv)
+	{
+		int ret = 0;
+		bool have_configure_file = false;
+		bool have_dir = false;
+		bool have_enroll_pattern = false;
+		bool have_fr_pattern = false;
+		bool have_fa_pattern = false;
+
+		optparse opt;
+		opt.add_long_option("configure-file", true, false, 'f', "assign configuration file");
+
+		ret = opt.get_long_option(argc, argv);
+
+		if(ret != 0) {
+			opt.p_help();
+		} else {
+			have_configure_file = true;
+
+			if(opt.have_option("f")) {
+				configure_file = opt.option_value("f");
+			} else {
+				configure_file = "default.ini";
+			}
+		}
+
+		if(have_configure_file) {
+			configure cfg;
+			ret = cfg.load(configure_file);
+
+			if(ret == 0) {
+				cfg.p_configure();
+				dirname = cfg.get("dir", "directory");
+
+				enroll_pattern = cfg.get("resource-pattern", "enroll-pattern");
+
+				fr_pattern = cfg.get("resource-pattern", "fr-pattern");
+				fr_success_pattern = cfg.get("resource-pattern", "fr-success-pattern");
+				fr_fail_pattern = cfg.get("resource-pattern", "fr-fail-pattern");
+
+				fa_pattern = cfg.get("resource-pattern", "fa-pattern");
+				fa_success_pattern = cfg.get("resource-pattern", "fa-success-pattern");
+				fa_fail_pattern = cfg.get("resource-pattern", "fa-fail-pattern");
+			} else {
+				printf("load configuration file failed!!!\n");
+			}
+
+
+			if(dirname.size()) {
+				have_dir = true;
+			} else {
+				printf("no dirname!\n");
+			}
+
+			if(enroll_pattern.size()) {
+				have_enroll_pattern = true;
+			} else {
+				printf("no enroll_pattern!\n");
+			}
+
+			if(fr_pattern.size()) {
+				have_fr_pattern = true;
+			} else if(fr_success_pattern.size() && fr_fail_pattern.size()) {
+				have_fr_pattern = true;
+			} else {
+				printf("no fr pattern!\n");
+			}
+
+			if(fa_pattern.size()) {
+				have_fa_pattern = true;
+			} else if(fa_success_pattern.size() && fa_fail_pattern.size()) {
+				have_fa_pattern = true;
+			} else {
+				printf("no fa pattern!\n");
+			}
+		}
+
+
+		if(have_dir && have_enroll_pattern && (have_fr_pattern || have_fa_pattern)) {
+		} else {
+			ret = -1;
+			printf("%s!!!\n", "参数信息不足");
+		}
+
+		if(ret == 0) {
 			ret = update_task_list();
 		}
 
@@ -344,6 +437,7 @@ public:
 	int p_type_samples(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples)
 	{
 		int ret = 0;
+		int index = 0;
 		std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *>::iterator sample_it;
 
 		std::string type = (samples == enroll_samples ? "enroll" :
@@ -367,8 +461,9 @@ public:
 						//printf("serial_no:%s\n", id_it->serial_no.c_str());
 						task_bmp bmp = *id_it;
 
-						printf("%s:%s, person:%s, id:%s, serial_no:%s, matched_type:%s\n",
+						printf("%s[%d]:%s, person:%s, id:%s, serial_no:%s, matched_type:%s\n",
 							   type.c_str(),
+							   index++,
 							   bmp.bmp_path.c_str(),
 							   bmp.person.c_str(),
 							   bmp.id.c_str(),
@@ -386,7 +481,8 @@ public:
 	}
 
 
-	int p_samples() {
+	int p_samples()
+	{
 		int ret = 0;
 		p_type_samples(enroll_samples);
 		p_type_samples(fr_samples);
@@ -402,7 +498,7 @@ int main(int argc, char **argv)
 
 	samples_list samples_list;
 
-	ret = samples_list.parse_args(argc, argv);
+	ret = samples_list.parse_args_from_configuration(argc, argv);
 
 	if(ret != 0) {
 		return ret;

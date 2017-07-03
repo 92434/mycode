@@ -6,7 +6,7 @@
  *   文件名称：configure.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月28日 星期三 14时18分04秒
- *   修改日期：2017年06月29日 星期四 15时36分06秒
+ *   修改日期：2017年07月03日 星期一 19时55分03秒
  *   描    述：
  *
  *================================================================*/
@@ -69,7 +69,7 @@ int configure::match_class(std::string content)
 {
 	int ret = 0;
 	std::vector<std::string> matched_list;
-	std::string pattern = "[ \t]*\\[[ \t]*([^ \t]*)[ \t]*\\][ \t]*";
+	std::string pattern = "^[[:space:]]*\\[[[:space:]]*([^[:space:]]*)[[:space:]]*\\][[:space:]]*$";
 	regexp r;
 
 	matched_list = r.match(content, pattern);
@@ -88,7 +88,7 @@ int configure::match_key_value(std::string content)
 {
 	int ret = 0;
 	std::vector<std::string> matched_list;
-	std::string pattern = "[ \t]*([^ \t]+)[ \t]*=[ \t]*([^ \t]+)[ \t]*";
+	std::string pattern = "^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*([^[:space:]]+)[[:space:]]*$";
 	regexp r;
 
 	matched_list = r.match(content, pattern);
@@ -108,7 +108,7 @@ int configure::match_key_value(std::string content)
 
 int configure::load(std::string filename)
 {
-	int ret;
+	int ret = 0;
 	std::ifstream ifs;
 	char buffer[256];
 
@@ -139,6 +139,7 @@ int configure::load(std::string filename)
 
 	ifs.close();
 
+	return ret;
 }
 
 int configure::save(std::string filename)
@@ -174,10 +175,10 @@ int configure::save(std::string filename)
 int configure::p_configure()
 {
 	for(std::map<std::string, std::map<std::string, std::string> >::iterator it1 = m_configuration.begin(); it1 != m_configuration.end(); it1++) {
-		printf("class:%s:\n", it1->first.c_str());
+		printf("class:\"%s\":\n", it1->first.c_str());
 
 		for(std::map<std::string, std::string>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); it2++) {
-			printf("key:%s, value:%s\n", it2->first.c_str(), it2->second.c_str());
+			printf("key:\"%s\", value:\"%s\"\n", it2->first.c_str(), it2->second.c_str());
 		}
 	}
 }
