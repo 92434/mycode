@@ -6,7 +6,7 @@
  *   文件名称：main.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 18时15分41秒
- *   修改日期：2017年07月03日 星期一 20时04分59秒
+ *   修改日期：2017年07月04日 星期二 19时54分29秒
  *   描    述：
  *
  *================================================================*/
@@ -15,6 +15,12 @@
 #include "filesystem/filesystem.h"
 #include "regexp/regexp.h"
 #include "configure/configure.h"
+#include <set>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <stdarg.h>
+#include <sys/time.h>
 
 typedef enum _matched_type {
 	UNKNOW = 0,
@@ -22,10 +28,24 @@ typedef enum _matched_type {
 	UNMATCHED
 } matched_type_t;
 
+typedef enum _test_type {
+	FOR_UNKNOW = 0,
+	FOR_ENROLL,
+	FOR_FR,
+	FOR_FA
+} test_type_t;
+
+typedef enum _select_type {
+	SELECT_ALL = 0,
+	SELECT_SAME,
+	SELECT_DIFFERENT
+} select_type_t;
+
 class task_bmp
 {
 public:
 	matched_type_t matched_type;
+	test_type_t test_type;
 	std::string bmp_path;
 	std::string person;
 	std::string id;
@@ -38,21 +58,239 @@ public:
 	{
 		matched_type = UNKNOW;
 		new_matched_type = UNKNOW;
+		test_type = FOR_UNKNOW;
 	}
 	~task_bmp()
 	{
 	}
 };
 
+class test_task
+{
+private:
+	std::vector<task_bmp> enroll_list;
+	std::vector<task_bmp> identify_list;
+	std::set<std::string> enroll_ids;
+	std::ofstream ofs;
+
+public:
+	test_task()
+	{
+		clear();
+	}
+
+	~test_task()
+	{
+		clear();
+	}
+
+	int clear()
+	{
+		int ret = 0;
+		enroll_list.clear();
+		identify_list.clear();
+		enroll_ids.clear();
+		return ret;
+	}
+
+	int add_enroll_item(task_bmp bmp)
+	{
+		int ret = 0;
+		enroll_list.push_back(bmp);
+		enroll_ids.insert(bmp.person + ":" + bmp.id);
+		return ret;
+	}
+
+	int add_identify_item(task_bmp bmp)
+	{
+		int ret = 0;
+		identify_list.push_back(bmp);
+		return ret;
+	}
+
+	int run_list()
+	{
+		int ret = 0;
+		return ret;
+	}
+
+	int log_file_start()
+	{
+		int ret = 0;
+		char buffer[1024];
+		int len = 0;
+		struct tm *tm;
+		struct timeval tv;
+		struct timezone tz;
+		filesystem fs;
+
+		gettimeofday(&tv, &tz);
+
+		tm = localtime(&tv.tv_sec);
+
+		len = snprintf(buffer, 1023, "logs/%04d%02d%02d%02d%02d%02d_%06d.log",
+					   tm->tm_year + 1900,
+					   tm->tm_mon + 1,
+					   tm->tm_mday + 1,
+					   tm->tm_hour,
+					   tm->tm_min,
+					   tm->tm_sec,
+					   (int)tv.tv_usec
+					  );
+		buffer[len] = 0;
+
+		fs.mkdirs(buffer);
+
+		ofs.open(buffer);
+
+		if(!ofs.good()) {
+			printf("open:%s failed!!! (%s)!\n", buffer, strerror(errno));
+			ret = -1;
+			return ret;
+		}
+
+
+		return ret;
+	}
+
+	int log_file(const char *fmt, ...)
+	{
+		int ret = 0;
+		int len = 0;
+		char buffer[1024];
+		va_list ap;
+
+		va_start(ap, fmt);
+		len = vsnprintf(buffer, 1023, fmt, ap);
+		buffer[len] = 0;
+		va_end(ap);
+		ofs.write(buffer, len);
+
+		return ret;
+	}
+
+	int log_file_end()
+	{
+		int ret = 0;
+		ofs.close();
+		return ret;
+	}
+
+	int start_task()
+	{
+		int ret = 0;
+
+		if(enroll_ids.size() != 0) {
+			int pid = fork();
+
+			if(pid == -1) {
+			} else if(pid == 0) {
+				ret  = log_file_start();
+
+				std::set<std::string>::iterator ids_it;
+
+				for(ids_it = enroll_ids.begin(); ids_it != enroll_ids.end(); ids_it++) {
+					log_file("pid:%d, ppid:%d, process:%s\n", (int)getpid(), (int)getppid(), ids_it->c_str());
+				}
+
+				log_file("pid:%d, ppid:%d, enroll_list.size():%d\n", (int)getpid(), (int)getppid(), (int)enroll_list.size());
+				{
+					std::vector<task_bmp>::iterator enroll_list_it;
+
+					for(enroll_list_it = enroll_list.begin(); enroll_list_it != enroll_list.end(); enroll_list_it++) {
+						task_bmp bmp = *enroll_list_it;
+						log_file("pid:%d, ppid:%d, enroll:person:%s, id:%s, serial_no:%s\n", (int)getpid(), (int)getppid(), bmp.person.c_str(), bmp.id.c_str(), bmp.serial_no.c_str());
+					}
+				}
+				log_file("pid:%d, ppid:%d, identify_list.size():%d\n", (int)getpid(), (int)getppid(), (int)identify_list.size());
+				{
+					std::vector<task_bmp>::iterator identify_list_it;
+
+					for(identify_list_it = identify_list.begin(); identify_list_it != identify_list.end(); identify_list_it++) {
+						task_bmp bmp = *identify_list_it;
+						log_file("pid:%d, ppid:%d, identify:person:%s, id:%s, serial_no:%s\n", (int)getpid(), (int)getppid(), bmp.person.c_str(), bmp.id.c_str(), bmp.serial_no.c_str());
+					}
+				}
+				log_file("\n");
+				log_file("\n");
+
+				log_file_end();
+				send_client_result();
+				exit(0);
+			} else {
+				ret = pid;
+				return ret;
+			}
+
+			//run_list();
+		} else {
+		}
+
+		return ret;
+	}
+
+	int send_client_result()
+	{
+		int ret = 0;
+		/* create a socket */
+		int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+
+		struct sockaddr_un address;
+		address.sun_family = AF_UNIX;
+		strcpy(address.sun_path, "server_socket");
+
+		/* connect to the server */
+		int result = connect(sockfd, (struct sockaddr *)&address, sizeof(address));
+
+		if(result == -1) {
+			perror("connect failed: ");
+			exit(1);
+		}
+
+		/* exchange data */
+		int pid = getpid();
+
+		write(sockfd, &pid, sizeof(int));
+		read(sockfd, &pid, sizeof(int));
+		//printf("get pid from server:%d(%x)\n", pid, pid);
+
+		/* close the socket */
+		close(sockfd);
+		return ret;
+	}
+};
+
 class samples_list
 {
+private:
+	int server_fd;
+	std::string configure_file;
+	std::string dirname;
+	std::string enroll_pattern;
+	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *enroll_samples;
+
+	std::string fr_pattern;
+	std::string fr_success_pattern;
+	std::string fr_fail_pattern;
+	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *fr_samples;
+
+	std::string fa_pattern;
+	std::string fa_success_pattern;
+	std::string fa_fail_pattern;
+	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *fa_samples;
+
+	std::set<int> task_list;
+	int max_task_number;
+
 public:
 	samples_list()
 	{
+		server_fd = 0;
 		enroll_samples = NULL;
 		fr_samples = NULL;
 		fa_samples = NULL;
-	};
+		max_task_number = 1;
+	}
 
 	int release_type_samples(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples)
 	{
@@ -85,22 +323,7 @@ public:
 		release_type_samples(enroll_samples);
 		release_type_samples(fr_samples);
 		release_type_samples(fa_samples);
-	};
-
-	std::string configure_file;
-	std::string dirname;
-	std::string enroll_pattern;
-	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *enroll_samples;
-
-	std::string fr_pattern;
-	std::string fr_success_pattern;
-	std::string fr_fail_pattern;
-	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *fr_samples;
-
-	std::string fa_pattern;
-	std::string fa_success_pattern;
-	std::string fa_fail_pattern;
-	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *fa_samples;
+	}
 
 	int parse_args_from_console(int argc, char **argv)
 	{
@@ -490,6 +713,196 @@ public:
 		return ret;
 	}
 
+	int add_test_task_person_id(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples,
+								test_task *task,
+								std::string person_name,
+								std::string id_name,
+								test_type_t test_type,
+								select_type_t select_type)
+	{
+		int ret = 0;
+
+		std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *>::iterator sample_it;
+
+		if(samples == NULL) {
+			ret = -1;
+			return ret;
+		}
+
+		for(sample_it = samples->begin(); sample_it != samples->end(); sample_it++) {
+			std::map<std::string, std::vector<task_bmp> *> *person = sample_it->second;
+			std::map<std::string, std::vector<task_bmp> *>::iterator person_it;
+
+			//printf("person:%s\n", sample_it->first.c_str());
+			for(person_it = person->begin(); person_it != person->end(); person_it++) {
+				//printf("id:%s\n", person_it->first.c_str());
+				std::vector<task_bmp> *id = person_it->second;
+
+				std::vector<task_bmp>::iterator id_it;
+
+				for(id_it = id->begin(); id_it != id->end(); id_it++) {
+					//printf("serial_no:%s\n", id_it->serial_no.c_str());
+					task_bmp bmp = *id_it;
+					bool add = false;
+
+
+					if(select_type == SELECT_ALL) {
+						add = true;
+					} else if(select_type == SELECT_SAME) {
+						if((bmp.person.compare(person_name) == 0) && (bmp.id.compare(id_name) == 0)) {
+							add = true;
+						}
+					} else if(select_type == SELECT_DIFFERENT) {
+						if((bmp.person.compare(person_name) == 0) && (bmp.id.compare(id_name) == 0)) {
+						} else {
+							add = true;
+						}
+					}
+
+					if(add) {
+						bmp.test_type = test_type;
+						ret = task->add_identify_item(bmp);
+					}
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	int create_server()
+	{
+		int ret = 0;
+		/* create a socket */
+		server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+		struct sockaddr_un server_addr;
+		server_addr.sun_family = AF_UNIX;
+		strcpy(server_addr.sun_path, "server_socket");
+
+		/* bind with the local file */
+		ret = bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+		if(ret != 0) {
+			printf("bind socket error!(%s)\n", strerror(errno));
+			return ret;
+		}
+
+		/* listen */
+		ret = listen(server_fd, 64);
+
+		if(ret != 0) {
+			printf("bind socket error!(%s)\n", strerror(errno));
+			return ret;
+		}
+
+		return ret;
+	}
+
+	int stop_server()
+	{
+		int ret = 0;
+
+		if(server_fd != 0) {
+			close(server_fd);
+		}
+
+		if(access("server_socket", F_OK) == 0) {
+			unlink("server_socket");
+		}
+
+		return ret;
+	}
+
+	int get_client_result()
+	{
+		int ret = 0;
+		int client_sockfd;
+		struct sockaddr_un client_addr;
+		socklen_t len = sizeof(client_addr);
+		int pid;
+
+		client_sockfd = accept(server_fd, (struct sockaddr *)&client_addr, &len);
+
+		/* exchange data */
+		read(client_sockfd, &pid, sizeof(int));
+		//printf("get pid from client:%d(%x)\n", pid, pid);
+		write(client_sockfd, &pid, sizeof(int));
+
+		/* close the socket */
+		close(client_sockfd);
+
+		ret = pid;
+		return ret;
+	}
+
+	int add_test_task()
+	{
+		int ret = 0;
+		std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *>::iterator sample_it;
+		test_task task;
+
+		stop_server();
+
+		if(ret = create_server()) {
+			return ret;
+		}
+
+		if(enroll_samples != NULL) {
+			for(sample_it = enroll_samples->begin(); sample_it != enroll_samples->end(); sample_it++) {
+				std::map<std::string, std::vector<task_bmp> *> *person = sample_it->second;
+				std::map<std::string, std::vector<task_bmp> *>::iterator person_it;
+
+				//printf("person:%s\n", sample_it->first.c_str());
+				for(person_it = person->begin(); person_it != person->end(); person_it++) {
+					//printf("id:%s\n", person_it->first.c_str());
+					std::vector<task_bmp> *id = person_it->second;
+
+					std::vector<task_bmp>::iterator id_it;
+
+					for(id_it = id->begin(); id_it != id->end(); id_it++) {
+						//printf("serial_no:%s\n", id_it->serial_no.c_str());
+						task_bmp bmp = *id_it;
+						bmp.test_type = FOR_ENROLL;
+						ret = task.add_enroll_item(bmp);
+					}
+
+					ret = add_test_task_person_id(fr_samples, &task, sample_it->first, person_it->first, FOR_FR, SELECT_SAME);
+					//ret = add_test_task_person_id(fa_samples, &task, sample_it->first, person_it->first, FOR_FA, SELECT_ALL);
+
+					ret = task.start_task();
+
+					if(ret != 0) {
+						printf("start pid:%d(%x)\n", ret, ret);
+						task_list.insert(ret);
+						task.clear();
+
+						if(task_list.size() >= max_task_number) {
+							int pid = get_client_result();
+							printf("stop pid:%d(%x)\n", pid, pid);
+							task_list.erase(pid);
+						}
+					}
+				}
+			}
+
+			ret = task.start_task();
+
+			if(ret != 0) {
+				printf("start pid:%d(%x)\n", ret, ret);
+				task_list.insert(ret);
+				task.clear();
+			}
+
+			while(task_list.size() != 0) {
+				int pid = get_client_result();
+				printf("stop pid:%d(%x)\n", pid, pid);
+				task_list.erase(pid);
+			}
+		}
+
+		return ret;
+	}
+
 };
 
 int main(int argc, char **argv)
@@ -504,8 +917,8 @@ int main(int argc, char **argv)
 		return ret;
 	}
 
-	samples_list.p_samples();
-
+	//samples_list.p_samples();
+	samples_list.add_test_task();
 
 	printf("Done!\n");
 
