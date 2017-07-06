@@ -6,7 +6,7 @@
  *   文件名称：main.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 18时15分41秒
- *   修改日期：2017年07月05日 星期三 17时48分16秒
+ *   修改日期：2017年07月06日 星期四 14时53分31秒
  *   描    述：
  *
  *================================================================*/
@@ -649,15 +649,18 @@ public:
 		return ret;
 	}
 
-	int get_pattern_order(std::string pattern, int index) {
+	int get_pattern_order(std::string pattern, int index)
+	{
 		int ret = 0;
 		char c = pattern.at(index);
+
 		if((c >= '0') && (c <= '9')) {
 			ret = c - '0';
 		} else {
 			printf("pattern order invalid!\n");
 			exit(0);
 		}
+
 		return ret;
 	}
 
