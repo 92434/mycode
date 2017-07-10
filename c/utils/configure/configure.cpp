@@ -6,7 +6,7 @@
  *   文件名称：configure.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月28日 星期三 14时18分04秒
- *   修改日期：2017年07月04日 星期二 18时50分21秒
+ *   修改日期：2017年07月07日 星期五 09时24分33秒
  *   描    述：
  *
  *================================================================*/
@@ -122,10 +122,17 @@ int configure::load(std::string filename)
 
 	while(ifs.good()) {
 		std::string content;
-		std::vector<std::string> matched_list;
+		size_t pos;
 
 		ifs.getline(buffer, 256);
 		content = buffer;
+
+		pos = content.find('#');
+
+		if(std::string::npos != pos) {
+			content = content.substr(0, pos);
+		}
+
 #if defined(ENABLE_INFO)
 		printf("content:\"%s\", size:%d\n", buffer, (int)content.size());
 #endif

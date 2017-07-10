@@ -6,7 +6,7 @@
  *   文件名称：regexp.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 10时06分48秒
- *   修改日期：2017年06月28日 星期三 11时35分51秒
+ *   修改日期：2017年07月07日 星期五 10时13分17秒
  *   描    述：
  *
  *================================================================*/
@@ -36,6 +36,10 @@ std::vector<std::string> regexp::match(std::string content, std::string pattern)
 	printf("content: %s\n", content.c_str());
 	printf("pattern: \"%s\"\n", pattern.c_str());
 #endif
+
+	if(pattern.size() == 0) {
+		return matched_groups;
+	}
 
 	/* 编译正则表达式 */
 	error = regcomp(&re, pattern.c_str(), REG_EXTENDED);

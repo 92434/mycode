@@ -23,7 +23,7 @@ app_c_files := main.cpp
 app_name := main
 LOCAL_DEPS := $(top)/c/utils/out/lib/libxiaofei.a
 LOCAL_LIBS := $(top)/c/utils/out/lib/libxiaofei.a
-LOCAL_CFLAGS := -I$(top)/c/utils
+LOCAL_CFLAGS := -I$(top)/c/utils -g
 #LOCAL_LDFLAGS := -Wl,-Map,main.map
 include $(BUILD_APP)
 

@@ -177,3 +177,111 @@ void  syslog(int priority, const char *format, ...);
 应用：
     如果我们的程序要使用系统日志功能，只需要在程序启动时使用openlog函数来连接syslogd程序，后面随时用syslog函数写日志就行了。
     另外，作为syslog的替代程序的新一代工具是syslog-ng，syslog-ng具有很强的网络功能，可以方便地把多台机器上的日志保存到一台中心日志服务器上。
+
+
+日志文件内容的一般格式
+
+一般来说，系统产生的信息经过syslogd记录下来的数据中，每条信息均记录下面的几个重要数据：
+
+事件发生的日期与时间；
+发生此事的主机名；
+启动此事件的服务名称（如 samba, xinetd等）或函数名称（如 libpam）；
+该信息的实际数据内容；
+当然，这些信息的详细度是可以修改的，下面是/var/log/secure所记录的信息：
+
+复制代码
+1 Dec 27 01:04:51 localhost sshd[5677]: pam_succeed_if(sshd:auth): requirement "uid >= 1000" not met by user "root"
+2 Dec 27 01:04:52 localhost sshd[5679]: Failed password for root from 122.225.103.103 port 4059 ssh2
+3 Dec 27 01:04:52 localhost sshd[5679]: fatal: Read from socket failed: Connection reset by peer [preauth]
+4 Dec 27 01:04:54 localhost sshd[5677]: Failed password for root from 122.225.103.103 port 3787 ssh2
+5 Dec 27 01:04:54 localhost sshd[5677]: fatal: Write failed: Connection reset by peer [preauth]
+6 Dec 27 14:12:39 localhost polkitd[877]: Loading rules from directory /etc/polkit-1/rules.d
+7 Dec 27 14:12:39 localhost polkitd[877]: Loading rules from directory /usr/share/polkit-1/rules.d
+8 Dec 27 14:12:39 localhost polkitd[877]: Finished loading, compiling and executing 5 rules
+9 Dec 27 14:12:39 localhost polkitd[877]: Acquired the name org.freedesktop.PolicyKit1 on the system bus
+  |---日期/时间---|-------服务与函数-------|------------------------信息说明-----------------
+复制代码
+ 
+
+对第一条进行解析：12月27日的1点04分51秒在本地主机的sshd（PID为5677）传来的消息，这个消息有pam_succeed模块提出，信息内容为requirement "uid >=1000" not met by user "root"。
+
+syslogd的配置文件：/etc/syslog.conf
+
+/etc/syslog.conf这个文件规定了什么服务的什么等级信息以及需要被记录在什么文件或设备，语法为：
+
+复制代码
+1 服务名称[.=!]信息等级　　信息记录的文件或设备或主机
+2 
+3 #下面以mail这个服务产生的info等级为例：
+4 
+5 mail.info　　/var/log/maillog_info
+6 
+7 #这行说明：mail服务产生的大于等于info等级的信息都记录到/var/maillog_info文件中。
+复制代码
+ 
+
+服务名称
+
+syslogd本身有设置一些服务，主要有下面这些（可使用man 3 syslog查询到相关的信息）。
+
+服务类型	说明
+auth(authpriv)	主要与认证有关的机制，例如：login,ssh,su等需要帐号/密码
+cron	就是例行性工作调度cron/at等生成信息日志的地方
+daemon	与各个daemon有关的信息
+kern	就是内核(kernel)产生信息的地方
+lpr	即是打印相关的信息
+mail	只要与邮件收发有关的信息记录都属于这个
+news	与新闻组服务器有关的东西
+syslog	就是syslogd这个程序本身生成的信息
+user,uucp,local0~lcocal7	与Unix like机器本身有关的一些信息
+以上都是syslog自行定制的服务名称，软件可通过调用上述的服务名称来记录它们产生的信息。如：sendmail与postfix及dovecot都是与邮件有关的软件，这些软件在设计日志记录时都会主动调用syslogd内的mail服务名称（LOG_MAIL），所以上述软件所产生的信息被syslogd记录在maillog文件中。
+
+信息等级
+
+同一个服务所产生的信息也是有差别的，有启动时仅通知系统而已的一般信息(information)，有出现还不至于影响到正常运行的警告信息(warn)，还有系统硬件发生严重错误时所产生的重大问题信息(error等)；syslog将信息分为7个主要等级。
+
+等级	等级名称	说明
+1	info	仅是一些基本的信息说明
+2	notice	除了info外还需要注意的一些信息内容
+3	warning(warn)	警示的信息，可能有问题，但还不至于影响到某个daemon运行的信息；基本上，info,notice,warn这三个信息都是在告知一些基本信息而已，应该还不至于造成一些系统运行困扰
+4	err(error)	一些重大的错误信息，例如配置文件的某些设置值造成该服务无法启动的信息说明，通常通过err的错误告知，应该可以了解到该服务无法启动的问题
+5	crit	比err还要严重的错误信息，这个crit是临界点(critical)的缩写，这个错误已经很严重了
+6	aiert	警告，已经很有问题，比crit还要严重
+7	emerg(panic)	“疼痛”等级，指系统几乎要死机的状态，很严重的错误信息。通常是硬件出问题导致整个内核无法顺利运行就会出现这样的信息
+除了这些等级外还有两个特殊的等级，debug(错误检测等级)和none(不需等录等级)。当我们要做一些错误检测或忽略掉某些服务的信息时，可用这两个等级。
+
+等级信息前[.=!]所代表的意思是：
+
+“.”　　代表比后面还要高的等级(含该等级)都被记录下来。
+
+“=”　　代表所需要的等级，就是后面接的等级。
+
+“！”　　代表不等于，即除了该等级外的其他等级都要记录。
+
+信息记录的文件名或设备或主机
+
+这个告诉syslogd将信息记录到什么地方，通常是记录文件，但也可以输出到设备，例如打印机之类的。也可以记录到不同的主机上。下面是一些常见的放置处：
+
+文件的绝对路径：通常就是放在/var/log里
+打印机或其他：例如/dev/lp0这个打印机设备。
+用户名称：显示给用户。
+远程主机：例如@www.vbird.tsai，当然，需要对方主机的支持。
+*：代表目前在线的所有人，类似wall这个命令。
+日志文件的安全性设置
+
+可以通过chattr设置a这个属性来增加日志文件的隐藏属性，让日志文件只能增加不能被删除。不过在进行日志文件轮替时将无法移动该日志文件的文件名，需要通过使用logrotate的配置文件来解决。
+
+复制代码
+1 [root@www ~]# chattr +a /var/log/messages
+2 
+3 #将messages文件添加隐藏属性
+4 
+5 [root@www ~]# chattr -a /var/log/messages
+6 
+7 #删除隐藏属性
+复制代码
+ 附：
+
+日志文件无法记录信息：
+
+导致日志文件无法记录信息的原因有很多，其中有一个就是在打开日志文件时对文件进行了编辑，如用vim打开日志文件后在离开时使用了“：wq”，这就会导致日志文件无法继续记录信息。因为syslog的日志文件只要“被编辑过”就无法继续记录，这才导致无法记录。只要重新启动syslog即可。
