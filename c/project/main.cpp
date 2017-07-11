@@ -6,7 +6,7 @@
  *   文件名称：main.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 18时15分41秒
- :   修改日期：2017年07月10日 星期一 20时16分03秒
+ :   修改日期：2017年07月11日 星期二 18时34分52秒
  *   描    述：
  *
  *================================================================*/
@@ -38,8 +38,7 @@ typedef enum _test_type {
 
 typedef enum _select_type {
 	SELECT_ALL = 0,
-	SELECT_SAME,
-	SELECT_DIFFERENT
+	SELECT_SAME_CATAGORY,
 } select_type_t;
 
 typedef enum _task_start_reason {
@@ -649,16 +648,19 @@ public:
 		return ret;
 	}
 
-	int start_task(settings *g_settings, task_start_reason_t reason, std::string server_path)
+	std::set<task_bmp, bmp_enroll_set_comp> &get_enroll_ids()
 	{
-		int ret = 0;
+		return enroll_ids;
+	}
 
-		bool start = false;
+	bool can_start_task(settings *g_settings, task_start_reason_t reason)
+	{
+		bool ret = false;
 		static int add_catagory_this_proc = 0;
 
 		if(reason == ADD_ID_FINISHED) {
 			if(enroll_ids.size() >= g_settings->max_number_of_id_per_proc) {
-				start = true;
+				ret = true;
 			}
 		} else if(reason == ADD_CATAGORY_FINISHED) {
 			add_catagory_this_proc++;
@@ -667,27 +669,30 @@ public:
 				if(enroll_ids.size() > 0) {
 					add_catagory_this_proc = 0;
 
-					start = true;
+					ret = true;
 				}
 			}
 		}
 
-		if(start) {
-			int pid = fork();
+		return ret;
+	}
 
-			if(pid == -1) {
-			} else if(pid == 0) {
-				ret = do_task(g_settings);
-				//sleep(1);
-				send_client_result(server_path);
-				exit(ret);
-			} else {
-				clear();
-				ret = pid;
-				return ret;
-			}
+	int start_task(settings *g_settings, task_start_reason_t reason, std::string server_path)
+	{
+		int ret = 0;
 
+		int pid = fork();
+
+		if(pid == -1) {
+		} else if(pid == 0) {
+			ret = do_task(g_settings);
+			//sleep(1);
+			send_client_result(server_path);
+			exit(ret);
 		} else {
+			clear();
+			ret = pid;
+			return ret;
 		}
 
 		return ret;
@@ -1060,12 +1065,11 @@ public:
 		return ret;
 	}
 
-	int add_test_task_catagory_id(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples,
-								  test_task *task,
-								  std::string catagory_name,
-								  std::string id_name,
-								  test_type_t test_type,
-								  select_type_t select_type)
+	int add_test_task_catagory(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples,
+							   test_task *task,
+							   std::string catagory_name,
+							   test_type_t test_type,
+							   select_type_t select_type)
 	{
 		int ret = 0;
 
@@ -1095,13 +1099,8 @@ public:
 
 					if(select_type == SELECT_ALL) {
 						add = true;
-					} else if(select_type == SELECT_SAME) {
-						if((bmp.catagory.compare(catagory_name) == 0) && (bmp.id.compare(id_name) == 0)) {
-							add = true;
-						}
-					} else if(select_type == SELECT_DIFFERENT) {
-						if((bmp.catagory.compare(catagory_name) != 0) || (bmp.id.compare(id_name) != 0)) {
-						} else {
+					} else if(select_type == SELECT_SAME_CATAGORY) {
+						if(bmp.catagory.compare(catagory_name) == 0) {
 							add = true;
 						}
 					}
@@ -1192,13 +1191,33 @@ public:
 	int try_to_start_task_and_wait(settings *g_settings, test_task *task, task_start_reason_t reason, bool wait = false)
 	{
 		int ret = 0;
+		bool ready = task->can_start_task(g_settings, reason);
 
-		ret = task->start_task(g_settings, reason, server_path);
+		if(ready) {
+			std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
+			std::set<task_bmp, bmp_enroll_set_comp> ids = task->get_enroll_ids();
+			std::set<std::string> set_catagory;
+			std::set<std::string>::iterator catagory_it;
 
-		if(ret != 0) {
-			printf("pid start:%d(%x)\n", ret, ret);
-			pid_list.insert(ret);
+			for(ids_it = ids.begin(); ids_it != ids.end(); ids_it++) {
+				task_bmp bmp = *ids_it;
+				set_catagory.insert(bmp.catagory);
+			}
+
+			for(catagory_it = set_catagory.begin(); catagory_it != set_catagory.end(); catagory_it++) {
+				printf("add catagory:%s\n", catagory_it->c_str());
+				add_test_task_catagory(fr_samples, task, *catagory_it, FOR_FR, SELECT_SAME_CATAGORY);
+				add_test_task_catagory(fa_samples, task, *catagory_it, FOR_FA, SELECT_ALL);
+			}
+
+			ret = task->start_task(g_settings, reason, server_path);
+
+			if(ret != 0) {
+				printf("pid start:%d(%x)\n", ret, ret);
+				pid_list.insert(ret);
+			}
 		}
+
 
 		while((pid_list.size() >= max_proc_number) || (wait && (pid_list.size() > 0))) {
 			int pid = get_client_result();
@@ -1240,8 +1259,6 @@ public:
 						ret = task.add_enroll_item(bmp);
 					}
 
-					ret = add_test_task_catagory_id(fr_samples, &task, sample_it->first, catagory_it->first, FOR_FR, SELECT_SAME);
-					ret = add_test_task_catagory_id(fa_samples, &task, sample_it->first, catagory_it->first, FOR_FA, SELECT_ALL);
 					try_to_start_task_and_wait(g_settings, &task, ADD_ID_FINISHED);
 				}
 
