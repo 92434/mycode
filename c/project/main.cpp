@@ -6,7 +6,7 @@
  *   文件名称：main.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 18时15分41秒
- :   修改日期：2017年07月11日 星期二 18时34分52秒
+ :   修改日期：2017年07月12日 星期三 19时00分59秒
  *   描    述：
  *
  *================================================================*/
@@ -22,6 +22,8 @@
 #include <stdarg.h>
 #include <sys/time.h>
 #include <algorithm>    // std::sort
+
+#include "ft_lib.h"
 
 typedef enum _matched_type {
 	UNKNOW = 0,
@@ -104,14 +106,38 @@ public:
 
 	int max_number_of_id_per_proc;
 	int max_number_of_catagory_per_proc;
+	select_type_t fr_select_type;
+	select_type_t fa_select_type;
 
-public:
+	static settings *g_settings;
+
 	settings()
 	{
 		max_number_of_id_per_proc = 5;
 		max_number_of_catagory_per_proc = 1;
+		fr_select_type = SELECT_SAME_CATAGORY;
+		fa_select_type = SELECT_SAME_CATAGORY;
 	}
-	~settings() {}
+
+	~settings()
+	{
+		printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
+		abort();
+
+		if(g_settings == NULL) {
+			delete g_settings;
+			g_settings = NULL;
+		}
+	}
+public:
+	static settings *get_instance()
+	{
+		if(g_settings == NULL) {
+			g_settings = new settings();
+		}
+
+		return g_settings;
+	}
 
 	int check_configuration()
 	{
@@ -279,6 +305,8 @@ public:
 
 };
 
+settings *settings::g_settings = NULL;
+
 class hardware
 {
 private:
@@ -286,35 +314,26 @@ private:
 	int height;
 	static hardware *hw;
 
-	char *buffer;
-	int len;
-
 	hardware()
 	{
 	}
 
 	hardware(int width, int height)
 	{
-		buffer = NULL;
-		len = 0;
 		this->width = width;
 		this->height = height;
+		ft_lib_init();
 
 		//printf("%s:%s:%d:width:%d, height:%d\n", __FILE__, __func__, __LINE__, this->width, this->height);
 	}
 
 	~hardware()
 	{
-		if(buffer != NULL) {
-			delete buffer;
-			len = 0;
-		}
-
+		ft_lib_uninit();
 		//printf("%s:%s:%d:width:%d, height:%d\n", __FILE__, __func__, __LINE__, this->width, this->height);
 	}
 
 public:
-
 	static hardware *get_instance(int width, int height)
 	{
 		if(hw == NULL) {
@@ -329,32 +348,27 @@ public:
 		return hw;
 	}
 
-	int set_image(std::string bmp_path)
+	int set_log(ft_printf_t ft_printf)
 	{
 		int ret = 0;
 
-		if(buffer != NULL) {
-			if(len != bmp_path.size()) {
-				delete buffer;
-				len = 0;
-			}
-		}
-
-		len = bmp_path.size();
-		buffer = new char [len + 1];
-
-		memcpy(buffer, bmp_path.c_str(), len);
-		buffer[len] = 0;
-
-		//printf("\"%s\" size:%d\n", bmp_path.c_str(), (int)bmp_path.size());
+		ret = ft_lib_set_log(ft_printf);
 
 		return ret;
 	}
 
-	int get_image(char *buffer)
+	int set_image(std::string bmp_path)
+	{
+		int ret = 0;
+
+		ft_set_image(bmp_path.c_str(), (int)bmp_path.size());
+		return ret;
+	}
+
+	int get_image(char *buffer, int len)
 	{
 		int ret = len;
-		memcpy(buffer, this->buffer, len);
+		ft_get_image(buffer, len);
 		return ret;
 	}
 
@@ -362,9 +376,9 @@ public:
 	int read_flash(int offset, char *buffer, int len);
 };
 
-//#define HW_GET_INSTANCE() hardware::get_instance(96, 96)
-
 hardware *hardware::hw = NULL;
+
+//#define HW_GET_INSTANCE() hardware::get_instance(96, 96)
 
 struct bmp_enroll_set_comp {
 	bool operator() (const task_bmp &bmp1, const task_bmp &bmp2) const
@@ -393,8 +407,11 @@ private:
 	std::vector<task_bmp> fr_identify_list;
 	std::vector<task_bmp> fa_identify_list;
 	std::set<task_bmp, bmp_enroll_set_comp> enroll_ids;
+	std::string timestamp;
 	std::ofstream ofs;
+	static std::ofstream ofs_hardware;
 	std::string logfile;
+	std::string logfile_hardware;
 
 public:
 	test_task()
@@ -415,6 +432,8 @@ public:
 		fa_identify_list.clear();
 		enroll_ids.clear();
 		logfile.clear();
+		logfile_hardware.clear();
+		timestamp.clear();
 		return ret;
 	}
 
@@ -443,7 +462,7 @@ public:
 		return ret;
 	}
 
-	int log_file_start()
+	int get_timestamp()
 	{
 		int ret = 0;
 		char buffer[1024];
@@ -457,7 +476,7 @@ public:
 
 		tm = localtime(&tv.tv_sec);
 
-		len = snprintf(buffer, 1023, "logs/%04d%02d%02d%02d%02d%02d_%06d.log",
+		len = snprintf(buffer, 1023, "%04d%02d%02d%02d%02d%02d_%06d",
 					   tm->tm_year + 1900,
 					   tm->tm_mon + 1,
 					   tm->tm_mday + 1,
@@ -467,18 +486,44 @@ public:
 					   (int)tv.tv_usec
 					  );
 		buffer[len] = 0;
+		timestamp = buffer;
+		return ret;
+	}
+
+	int log_file_start()
+	{
+		int ret = 0;
+		char buffer[1024];
+		int len = 0;
+		filesystem fs;
+
+
+		len = snprintf(buffer, 1023, "logs/%s.log", timestamp.c_str());
+		buffer[len] = 0;
 		logfile = buffer;
 
+		len = snprintf(buffer, 1023, "logs/%s_hardware.log", timestamp.c_str());
+		buffer[len] = 0;
+		logfile_hardware = buffer;
+
 		fs.mkdirs(logfile);
+		fs.mkdirs(logfile_hardware);
 
 		ofs.open(logfile.c_str());
 
 		if(!ofs.good()) {
-			printf("open:%s failed!!! (%s)!\n", buffer, strerror(errno));
+			printf("open:%s failed!!! (%s)!\n", logfile.c_str(), strerror(errno));
 			ret = -1;
 			return ret;
 		}
 
+		ofs_hardware.open(logfile_hardware.c_str());
+
+		if(!ofs_hardware.good()) {
+			printf("open:%s failed!!! (%s)!\n", logfile_hardware.c_str(), strerror(errno));
+			ret = -1;
+			return ret;
+		}
 
 		return ret;
 	}
@@ -499,10 +544,29 @@ public:
 		return ret;
 	}
 
+	static int log_file_hardware(const char *fmt, ...)
+	{
+		int ret = 0;
+		int len = 0;
+		char buffer[1024];
+		va_list ap;
+
+		va_start(ap, fmt);
+		len = vsnprintf(buffer, 1023, fmt, ap);
+		buffer[len] = 0;
+		va_end(ap);
+		ofs_hardware.write(buffer, len);
+
+		return ret;
+	}
+
 	int log_file_end()
 	{
 		int ret = 0;
+
 		ofs.close();
+		ofs_hardware.close();
+
 		return ret;
 	}
 
@@ -556,10 +620,12 @@ public:
 		return false;
 	}
 
-	int do_task(settings *g_settings)
+	int do_task()
 	{
 		int ret = 0;
-		ret  = log_file_start();
+
+		ret = get_timestamp();
+		ret = log_file_start();
 
 		std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
 
@@ -579,13 +645,15 @@ public:
 			for(enroll_list_it = enroll_list.begin(); enroll_list_it != enroll_list.end(); enroll_list_it++) {
 				task_bmp bmp = *enroll_list_it;
 				log_file("pid:%d, ppid:%d, enroll:catagory:%s, id:%s, serial_no:%s\n", (int)getpid(), (int)getppid(), bmp.catagory.c_str(), bmp.id.c_str(), bmp.serial_no.c_str());
+				log_file("pid:%d, ppid:%d, path:%s\n\n", (int)getpid(), (int)getppid(), bmp.bmp_path.c_str());
 
 				char *buffer = new char [bmp.bmp_path.size() + 1];
 				int len = 0;
 				hardware *hw = hardware::get_instance(96, 96);
+				hw->set_log((ft_printf_t)&test_task::log_file_hardware);
 				hw->set_image(bmp.bmp_path);
-				len = hw->get_image(buffer);
-				buffer[len] = 0;
+				hw->get_image(buffer, (int)bmp.bmp_path.size());
+				buffer[bmp.bmp_path.size()] = 0;
 				log_file("pid:%d, ppid:%d, buffer:%s\n", (int)getpid(), (int)getppid(), buffer);
 				delete buffer;
 			}
@@ -597,6 +665,7 @@ public:
 			for(identify_list_it = fr_identify_list.begin(); identify_list_it != fr_identify_list.end(); identify_list_it++) {
 				task_bmp bmp = *identify_list_it;
 				log_file("pid:%d, ppid:%d, identify:catagory:%s, id:%s, serial_no:%s\n", (int)getpid(), (int)getppid(), bmp.catagory.c_str(), bmp.id.c_str(), bmp.serial_no.c_str());
+				log_file("pid:%d, ppid:%d, path:%s\n\n", (int)getpid(), (int)getppid(), bmp.bmp_path.c_str());
 			}
 		}
 		log_file("pid:%d, ppid:%d, fa_identify_list.size():%d\n", (int)getpid(), (int)getppid(), (int)fa_identify_list.size());
@@ -606,6 +675,7 @@ public:
 			for(identify_list_it = fa_identify_list.begin(); identify_list_it != fa_identify_list.end(); identify_list_it++) {
 				task_bmp bmp = *identify_list_it;
 				log_file("pid:%d, ppid:%d, identify:catagory:%s, id:%s, serial_no:%s\n", (int)getpid(), (int)getppid(), bmp.catagory.c_str(), bmp.id.c_str(), bmp.serial_no.c_str());
+				log_file("pid:%d, ppid:%d, path:%s\n\n", (int)getpid(), (int)getppid(), bmp.bmp_path.c_str());
 			}
 		}
 
@@ -653,10 +723,11 @@ public:
 		return enroll_ids;
 	}
 
-	bool can_start_task(settings *g_settings, task_start_reason_t reason)
+	bool can_start_task(task_start_reason_t reason)
 	{
 		bool ret = false;
 		static int add_catagory_this_proc = 0;
+		settings *g_settings = settings::get_instance();
 
 		if(reason == ADD_ID_FINISHED) {
 			if(enroll_ids.size() >= g_settings->max_number_of_id_per_proc) {
@@ -677,7 +748,7 @@ public:
 		return ret;
 	}
 
-	int start_task(settings *g_settings, task_start_reason_t reason, std::string server_path)
+	int start_task(task_start_reason_t reason, std::string server_path)
 	{
 		int ret = 0;
 
@@ -685,7 +756,7 @@ public:
 
 		if(pid == -1) {
 		} else if(pid == 0) {
-			ret = do_task(g_settings);
+			ret = do_task();
 			//sleep(1);
 			send_client_result(server_path);
 			exit(ret);
@@ -699,6 +770,9 @@ public:
 	}
 
 };
+
+std::ofstream test_task::ofs_hardware;
+
 
 class samples_list
 {
@@ -830,9 +904,10 @@ public:
 		return ret;
 	}
 
-	int update_enroll_samples_list(std::vector<std::string> &bmp_file_list, settings *g_settings)
+	int update_enroll_samples_list(std::vector<std::string> &bmp_file_list)
 	{
 		int ret = 0;
+		settings *g_settings = settings::get_instance();
 
 		for(std::vector<std::string>::iterator it = bmp_file_list.begin(); it != bmp_file_list.end(); it++) {
 			//printf("file in list:%s\n", it->c_str());
@@ -866,9 +941,10 @@ public:
 		return ret;
 	}
 
-	int update_fr_samples_list(std::vector<std::string> &bmp_file_list, settings *g_settings)
+	int update_fr_samples_list(std::vector<std::string> &bmp_file_list)
 	{
 		int ret = 0;
+		settings *g_settings = settings::get_instance();
 
 		for(std::vector<std::string>::iterator it = bmp_file_list.begin(); it != bmp_file_list.end(); it++) {
 			//printf("file in list:%s\n", it->c_str());
@@ -929,9 +1005,10 @@ public:
 		return ret;
 	}
 
-	int update_fa_samples_list(std::vector<std::string> &bmp_file_list, settings *g_settings)
+	int update_fa_samples_list(std::vector<std::string> &bmp_file_list)
 	{
 		int ret = 0;
+		settings *g_settings = settings::get_instance();
 
 		for(std::vector<std::string>::iterator it = bmp_file_list.begin(); it != bmp_file_list.end(); it++) {
 			//printf("file in list:%s\n", it->c_str());
@@ -995,16 +1072,17 @@ public:
 		return ret;
 	}
 
-	int update_samples_list(settings *g_settings)
+	int update_samples_list()
 	{
 		int ret = 0;
 		std::vector<std::string> bmp_file_list;
+		settings *g_settings = settings::get_instance();
 
 		bmp_file_list = get_bmp_filelist(g_settings->dirname);
 
-		update_enroll_samples_list(bmp_file_list, g_settings);
-		update_fr_samples_list(bmp_file_list, g_settings);
-		update_fa_samples_list(bmp_file_list, g_settings);
+		update_enroll_samples_list(bmp_file_list);
+		update_fr_samples_list(bmp_file_list);
+		update_fa_samples_list(bmp_file_list);
 
 		return ret;
 	}
@@ -1068,12 +1146,12 @@ public:
 	int add_test_task_catagory(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples,
 							   test_task *task,
 							   std::string catagory_name,
-							   test_type_t test_type,
-							   select_type_t select_type)
+							   test_type_t test_type)
 	{
 		int ret = 0;
 
 		std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *>::iterator sample_it;
+		settings *g_settings = settings::get_instance();
 
 		if(samples == NULL) {
 			ret = -1;
@@ -1095,7 +1173,15 @@ public:
 					//printf("serial_no:%s\n", id_it->serial_no.c_str());
 					task_bmp bmp = *id_it;
 					bool add = false;
+					select_type_t select_type;
 
+					bmp.test_type = test_type;
+
+					if(bmp.test_type == FOR_FR) {
+						select_type = g_settings->fr_select_type;
+					} else if(bmp.test_type == FOR_FA) {
+						select_type = g_settings->fa_select_type;
+					}
 
 					if(select_type == SELECT_ALL) {
 						add = true;
@@ -1106,7 +1192,6 @@ public:
 					}
 
 					if(add) {
-						bmp.test_type = test_type;
 						ret = task->add_identify_item(bmp);
 					}
 				}
@@ -1188,10 +1273,10 @@ public:
 		return ret;
 	}
 
-	int try_to_start_task_and_wait(settings *g_settings, test_task *task, task_start_reason_t reason, bool wait = false)
+	int try_to_start_task_and_wait(test_task *task, task_start_reason_t reason, bool wait = false)
 	{
 		int ret = 0;
-		bool ready = task->can_start_task(g_settings, reason);
+		bool ready = task->can_start_task(reason);
 
 		if(ready) {
 			std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
@@ -1206,11 +1291,11 @@ public:
 
 			for(catagory_it = set_catagory.begin(); catagory_it != set_catagory.end(); catagory_it++) {
 				printf("add catagory:%s\n", catagory_it->c_str());
-				add_test_task_catagory(fr_samples, task, *catagory_it, FOR_FR, SELECT_SAME_CATAGORY);
-				add_test_task_catagory(fa_samples, task, *catagory_it, FOR_FA, SELECT_ALL);
+				add_test_task_catagory(fr_samples, task, *catagory_it, FOR_FR);
+				add_test_task_catagory(fa_samples, task, *catagory_it, FOR_FA);
 			}
 
-			ret = task->start_task(g_settings, reason, server_path);
+			ret = task->start_task(reason, server_path);
 
 			if(ret != 0) {
 				printf("pid start:%d(%x)\n", ret, ret);
@@ -1228,7 +1313,7 @@ public:
 		return ret;
 	}
 
-	int start_test_task(settings *g_settings)
+	int start_test_task()
 	{
 		int ret = 0;
 		std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *>::iterator sample_it;
@@ -1259,16 +1344,16 @@ public:
 						ret = task.add_enroll_item(bmp);
 					}
 
-					try_to_start_task_and_wait(g_settings, &task, ADD_ID_FINISHED);
+					try_to_start_task_and_wait(&task, ADD_ID_FINISHED);
 				}
 
-				try_to_start_task_and_wait(g_settings, &task, ADD_CATAGORY_FINISHED);
+				try_to_start_task_and_wait(&task, ADD_CATAGORY_FINISHED);
 
 			}
 
 		}
 
-		try_to_start_task_and_wait(g_settings, &task, ADD_CATAGORY_FINISHED, true);
+		try_to_start_task_and_wait(&task, ADD_CATAGORY_FINISHED, true);
 
 		return ret;
 	}
@@ -1279,22 +1364,22 @@ int main(int argc, char **argv)
 {
 	int ret = 0;
 
-	settings settings;
-	ret = settings.parse_args_from_configuration(argc, argv);
+	settings *g_settings = settings::get_instance();
+	ret = g_settings->parse_args_from_configuration(argc, argv);
 
 	if(ret != 0) {
 		return ret;
 	}
 
 	samples_list samples_list;
-	ret = samples_list.update_samples_list(&settings);
+	ret = samples_list.update_samples_list();
 
 	if(ret != 0) {
 		return ret;
 	}
 
 	//samples_list.p_result();
-	samples_list.start_test_task(&settings);
+	samples_list.start_test_task();
 
 	printf("Done!\n");
 
