@@ -6,7 +6,7 @@
  *   文件名称：main.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 18时15分41秒
- :   修改日期：2017年07月13日 星期四 16时17分29秒
+ :   修改日期：2017年07月13日 星期四 18时40分25秒
  *   描    述：
  *
  *================================================================*/
@@ -404,6 +404,13 @@ public:
 		return ret;
 	}
 
+	int set_save_bmp(save_bmp_t save_bmp)
+	{
+		int ret = 0;
+		ret = ft_lib_set_save_bmp(save_bmp);
+		return ret;
+	}
+
 	int set_image(std::string bmp_path)
 	{
 		int ret = 0;
@@ -459,6 +466,8 @@ private:
 	static std::ofstream ofs_hardware;
 	std::string logfile;
 	std::string logfile_hardware;
+
+	static std::string cur_bmp_path;
 
 public:
 	test_task()
@@ -617,6 +626,28 @@ public:
 		return ret;
 	}
 
+	static int save_bmp(char *label, char *buffer, int len)
+	{
+		int ret = 0;
+		int pos = cur_bmp_path.rfind('.');
+		char *buffer_bmp = new char [len + 1];
+		std::string filename;
+
+		if(pos != std::string::npos) {
+			filename = cur_bmp_path.substr(0, pos);
+		} else {
+			ret = -1;
+			return ret;
+		}
+
+		filename = filename + "." + label + ".bmp";
+		memcpy(buffer_bmp, buffer, len);
+		buffer_bmp[len] = 0;
+		printf("new filename:%s, buffer:%s, len:%d\n", filename.c_str(), buffer_bmp, len);
+
+		return ret;
+	}
+
 	static bool enroll_less_than(task_bmp bmp1, task_bmp bmp2)
 	{
 		char *invalid_pos;
@@ -694,10 +725,13 @@ public:
 				log_file("pid:%d, ppid:%d, enroll:catagory:%s, id:%s, serial_no:%s\n", (int)getpid(), (int)getppid(), bmp.catagory.c_str(), bmp.id.c_str(), bmp.serial_no.c_str());
 				log_file("pid:%d, ppid:%d, path:%s\n\n", (int)getpid(), (int)getppid(), bmp.bmp_path.c_str());
 
+				cur_bmp_path = bmp.bmp_path;
+
 				char *buffer = new char [bmp.bmp_path.size() + 1];
 				int len = 0;
 				hardware *hw = hardware::get_instance(96, 96);
 				hw->set_log((ft_printf_t)&test_task::log_file_hardware);
+				hw->set_save_bmp((save_bmp_t)&test_task::save_bmp);
 				hw->set_image(bmp.bmp_path);
 				hw->get_image(buffer, (int)bmp.bmp_path.size());
 				buffer[bmp.bmp_path.size()] = 0;
@@ -819,6 +853,7 @@ public:
 };
 
 std::ofstream test_task::ofs_hardware;
+std::string test_task::cur_bmp_path;
 
 
 class samples_list
@@ -1345,8 +1380,8 @@ int main(int argc, char **argv)
 		return ret;
 	}
 
-	samples_list.p_result();
-	//samples_list.start_test_task();
+	//samples_list.p_result();
+	samples_list.start_test_task();
 
 	printf("Done!\n");
 

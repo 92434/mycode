@@ -6,7 +6,7 @@
  *   文件名称：ft_lib.c
  *   创 建 者：肖飞
  *   创建日期：2017年07月12日 星期三 11时54分55秒
- *   修改日期：2017年07月13日 星期四 11时14分57秒
+ *   修改日期：2017年07月13日 星期四 18时22分57秒
  *   描    述：
  *
  *================================================================*/
@@ -22,6 +22,7 @@ typedef struct _ft_device {
 	//int  (*get_image)(char *buffer, int len);
 	//int  (*set_image)(char *buffer, int len);
 	ft_printf_t ft_printf;
+	save_bmp_t save_bmp;
 } ft_device_t;
 
 static ft_device_t *ft_device;
@@ -100,6 +101,37 @@ static int ft_printf(char *fmt, ...)
 	return ret;
 }
 
+int ft_lib_set_save_bmp(save_bmp_t save_bmp)
+{
+	int ret = 0;
+
+	if(ft_device == NULL) {
+		ret = -1;
+		return ret;
+	}
+
+	ft_device->save_bmp = save_bmp;
+	return ret;
+}
+
+int save_bmp(char *label, char *buffer, int len)
+{
+	int ret = 0;
+
+	if(ft_device == NULL) {
+		ret = -1;
+		return ret;
+	}
+
+	if(ft_device->save_bmp == NULL) {
+		ret = -1;
+		return ret;
+	}
+
+	ret = ft_device->save_bmp(label, buffer, len);
+	return ret;
+}
+
 int ft_get_image(char *buffer, int len)
 {
 	int ret = 0;
@@ -113,6 +145,7 @@ int ft_get_image(char *buffer, int len)
 
 	if((ft_device->buffer != NULL) && (ft_device->size >= len)) {
 		memcpy((void *)buffer, (void *)ft_device->buffer, len);
+		save_bmp("spa26", buffer, len);
 	} else {
 		ret = -1;
 	}

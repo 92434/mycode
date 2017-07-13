@@ -19,7 +19,8 @@ endef
 
 define transform-o-files-to-lib-file
 	$(silent)mkdir -p $(dir $@)
-	$(silent)$(TOOLCHAIN_PREFIX)$(AR) -cru $@ $($@.o_files)
+	#$(silent)$(TOOLCHAIN_PREFIX)$(AR) -cru $@ $($@.o_files)
+	$(silent)$(TOOLCHAIN_PREFIX)$(AR) -cr $@ $($@.o_files)
 endef
 
 staticd_lib_name := $(strip $(call gen-lib-name-from-user-defined, $(staticd_lib_name)))
