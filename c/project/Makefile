@@ -31,4 +31,6 @@ LOCAL_CFLAGS += -Ift_lib/
 #LOCAL_LDFLAGS := -Wl,-Map,main.map
 include $(BUILD_APP)
 
+SUB_DIRS += ft_lib
+
 include $(ADD_TARGET)

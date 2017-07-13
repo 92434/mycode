@@ -6,7 +6,7 @@
  *   文件名称：main.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 18时15分41秒
- :   修改日期：2017年07月13日 星期四 11时11分59秒
+ :   修改日期：2017年07月13日 星期四 16时17分29秒
  *   描    述：
  *
  *================================================================*/
@@ -82,27 +82,39 @@ public:
 	}
 };
 
+struct pattern_info {
+	std::string pattern;
+	std::string pattern_order;
+
+	std::string success_pattern;
+	std::string success_pattern_order;
+	std::string fail_pattern;
+	std::string fail_pattern_order;
+
+	pattern_info()
+	{
+		pattern.clear();
+		pattern_order.clear();
+
+		success_pattern.clear();
+		success_pattern_order.clear();
+		fail_pattern.clear();
+		fail_pattern_order.clear();
+	}
+	~pattern_info()
+	{
+	}
+};
+
 class settings
 {
 public:
 	std::string configure_file;
 	std::string dirname;
-	std::string enroll_pattern;
-	std::string enroll_pattern_order;
 
-	std::string fr_pattern;
-	std::string fr_pattern_order;
-	std::string fr_success_pattern;
-	std::string fr_success_pattern_order;
-	std::string fr_fail_pattern;
-	std::string fr_fail_pattern_order;
-
-	std::string fa_pattern;
-	std::string fa_pattern_order;
-	std::string fa_success_pattern;
-	std::string fa_success_pattern_order;
-	std::string fa_fail_pattern;
-	std::string fa_fail_pattern_order;
+	std::vector<pattern_info> enroll_pattern;
+	std::vector<pattern_info> fr_pattern;
+	std::vector<pattern_info> fa_pattern;
 
 	int max_number_of_id_per_proc;
 	int max_number_of_catagory_per_proc;
@@ -156,23 +168,19 @@ public:
 			printf("no dirname!\n");
 		}
 
-		if(enroll_pattern.size() && enroll_pattern_order.size()) {
+		if(enroll_pattern.size()) {
 			have_enroll_pattern = true;
 		} else {
 			printf("no enroll_pattern!\n");
 		}
 
-		if(fr_pattern.size() && fr_pattern_order.size()) {
-			have_fr_pattern = true;
-		} else if(fr_success_pattern.size() && fr_fail_pattern.size() && fr_success_pattern_order.size() && fr_fail_pattern_order.size()) {
+		if(fr_pattern.size()) {
 			have_fr_pattern = true;
 		} else {
 			printf("no fr pattern!\n");
 		}
 
-		if(fa_pattern.size() && fa_pattern_order.size()) {
-			have_fa_pattern = true;
-		} else if(fa_success_pattern.size() && fa_fail_pattern.size() && fa_success_pattern_order.size() && fa_fail_pattern_order.size()) {
+		if(fa_pattern.size()) {
 			have_fa_pattern = true;
 		} else {
 			printf("no fa pattern!\n");
@@ -187,63 +195,114 @@ public:
 		return ret;
 	}
 
-	int parse_args_from_console(int argc, char **argv)
+	std::vector<pattern_info> get_pattern_info(configure &cfg, std::string pattern_base)
+	{
+		std::vector<pattern_info> vec_pattern;
+		std::map<std::string, std::string> pattern_class = cfg.get_class("resource_pattern");
+		std::map<std::string, std::string>::iterator pattern_class_it;
+
+		std::string pattern = pattern_base + "_([[:digit:]]+)$";
+		std::string pattern_success = pattern_base + "_success_([[:digit:]]+)$";
+		std::string pattern_fail = pattern_base + "_fail_([[:digit:]]+)$";
+
+		std::set<std::string> set_pattern_key;
+		std::set<std::string> set_state_pattern_key;
+
+		std::set<std::string>::iterator set_it;
+
+		printf("%s:%s:%d:add pattern for %s!\n", __FILE__, __func__, __LINE__, pattern_base.c_str());
+
+		for(pattern_class_it = pattern_class.begin(); pattern_class_it != pattern_class.end(); pattern_class_it++) {
+			regexp r;
+			std::string key = pattern_class_it->first;
+
+			std::vector<std::string> matched_list;
+
+			matched_list = r.match(key, pattern);
+
+			if(matched_list.size() == 2) {
+				//printf("%s:%s:%d:add pattern:%s\n", __FILE__, __func__, __LINE__, key.c_str());
+				set_pattern_key.insert(matched_list.at(1));
+			}
+
+			matched_list = r.match(key, pattern_success);
+
+			if(matched_list.size() == 2) {
+				//printf("%s:%s:%d:add success pattern:%s\n", __FILE__, __func__, __LINE__, key.c_str());
+				set_state_pattern_key.insert(matched_list.at(1));
+			}
+
+			matched_list = r.match(key, pattern_fail);
+
+			if(matched_list.size() == 2) {
+				//printf("%s:%s:%d:add fail pattern:%s\n", __FILE__, __func__, __LINE__, key.c_str());
+				set_state_pattern_key.insert(matched_list.at(1));
+			}
+		}
+
+		for(set_it = set_pattern_key.begin(); set_it != set_pattern_key.end(); set_it++) {
+			pattern_info pattern_info;
+			std::string pattern_key = pattern_base + "_" + *set_it;
+			std::string pattern_key_order = pattern_base + "_order_" + *set_it;
+
+			pattern_info.pattern = cfg.get("resource_pattern", pattern_key);
+			pattern_info.pattern_order = cfg.get("resource_pattern", pattern_key_order);
+
+			printf(
+				"%s:%s:%d:pattern:%s, pattern_order:%s\n",
+				__FILE__,
+				__func__,
+				__LINE__,
+				pattern_info.pattern.c_str(),
+				pattern_info.pattern_order.c_str());
+
+			if((pattern_info.pattern.size() != 0) && (pattern_info.pattern_order.size() != 0)) {
+				vec_pattern.push_back(pattern_info);
+			}
+		}
+
+		for(set_it = set_state_pattern_key.begin(); set_it != set_state_pattern_key.end(); set_it++) {
+			pattern_info pattern_info;
+			std::string success_pattern_key = pattern_base + "_success_" + *set_it;
+			std::string success_pattern_key_order = pattern_base + "_success_order_" + *set_it;
+
+			std::string fail_pattern_key = pattern_base + "_fail_" + *set_it;
+			std::string fail_pattern_key_order = pattern_base + "_fail_order_" + *set_it;
+
+			pattern_info.success_pattern = cfg.get("resource_pattern", success_pattern_key);
+			pattern_info.success_pattern_order = cfg.get("resource_pattern", success_pattern_key_order);
+			pattern_info.fail_pattern = cfg.get("resource_pattern", fail_pattern_key);
+			pattern_info.fail_pattern_order = cfg.get("resource_pattern", fail_pattern_key_order);
+			printf(
+				"%s:%s:%d:success_pattern:%s, success_pattern_order:%s, fail_pattern:%s, fail_pattern_order:%s\n",
+				__FILE__,
+				__func__,
+				__LINE__,
+				pattern_info.success_pattern.c_str(),
+				pattern_info.success_pattern_order.c_str(),
+				pattern_info.fail_pattern.c_str(),
+				pattern_info.fail_pattern_order.c_str());
+
+			if(
+				(pattern_info.success_pattern.size() != 0)
+				&& (pattern_info.success_pattern_order.size() != 0)
+				&& (pattern_info.fail_pattern.size() != 0)
+				&& (pattern_info.fail_pattern_order.size() != 0)
+			) {
+				vec_pattern.push_back(pattern_info);
+			}
+		}
+
+		return vec_pattern;
+	}
+
+	int get_pattern_from_configuration(configure &cfg)
 	{
 		int ret = 0;
-		bool have_dir = false;
-		bool have_enroll_pattern = false;
-		bool have_fr_pattern = false;
-		bool have_fa_pattern = false;
 
-		optparse opt;
-		opt.add_long_option("dir", true, false, 'a', "picture directory");
-		opt.add_long_option("enroll-pattern", true, false, 'b', "enroll pattern");
-
-		opt.add_long_option("fr-pattern", true, false, 'c', "fr pattern");
-		opt.add_long_option("fr-success-pattern", true, false, 'd', "fr success pattern");
-		opt.add_long_option("fr-fail-pattern", true, false, 'e', "fr fail pattern");
-
-		opt.add_long_option("fa-pattern", true, false, 'f', "fa pattern");
-		opt.add_long_option("fa-success-pattern", true, false, 'g', "fa success pattern");
-		opt.add_long_option("fa-fail-pattern", true, false, 'h', "fa fail pattern");
-
-		ret = opt.get_long_option(argc, argv);
-
-		if(ret == 0) {
-			if(opt.have_option("a")) {
-				have_dir = true;
-				dirname = opt.option_value("a");
-			}
-
-			if(opt.have_option("b")) {
-				have_enroll_pattern = true;
-				enroll_pattern = opt.option_value("b");
-			}
-
-			if(opt.have_option("c")) {
-				have_fr_pattern = true;
-				fr_pattern = opt.option_value("c");
-			} else if(opt.have_option("d") && opt.have_option("e")) {
-				have_fr_pattern = true;
-				fr_success_pattern = opt.option_value("d");
-				fr_fail_pattern = opt.option_value("e");
-			}
-
-			if(opt.have_option("f")) {
-				have_fa_pattern = true;
-				fa_pattern = opt.option_value("f");
-			} else if(opt.have_option("g") && opt.have_option("h")) {
-				have_fa_pattern = true;
-				fa_success_pattern = opt.option_value("g");
-				fa_fail_pattern = opt.option_value("h");
-			}
-		} else {
-			opt.p_help();
-		}
-
-		if(ret == 0) {
-			ret = check_configuration();
-		}
+		enroll_pattern = get_pattern_info(cfg, "enroll_pattern");
+		fr_pattern = get_pattern_info(cfg, "fr_pattern");
+		fa_pattern = get_pattern_info(cfg, "fa_pattern");
 
 		return ret;
 	}
@@ -253,7 +312,7 @@ public:
 		int ret = 0;
 		bool have_configure_file = false;
 		optparse opt;
-		opt.add_long_option("configure-file", true, false, 'f', "assign configuration file");
+		opt.add_long_option("configure_file", true, false, 'f', "assign configuration file");
 
 		ret = opt.get_long_option(argc, argv);
 
@@ -277,22 +336,8 @@ public:
 				cfg.p_configure();
 				dirname = cfg.get("dir", "directory");
 
-				enroll_pattern = cfg.get("resource-pattern", "enroll-pattern");
-				enroll_pattern_order = cfg.get("resource-pattern", "enroll-pattern-order");
+				ret = get_pattern_from_configuration(cfg);
 
-				fr_pattern = cfg.get("resource-pattern", "fr-pattern");
-				fr_pattern_order = cfg.get("resource-pattern", "fr-pattern-order");
-				fr_success_pattern = cfg.get("resource-pattern", "fr-success-pattern");
-				fr_success_pattern_order = cfg.get("resource-pattern", "fr-success-pattern-order");
-				fr_fail_pattern = cfg.get("resource-pattern", "fr-fail-pattern");
-				fr_fail_pattern_order = cfg.get("resource-pattern", "fr-fail-pattern-order");
-
-				fa_pattern = cfg.get("resource-pattern", "fa-pattern");
-				fa_pattern_order = cfg.get("resource-pattern", "fa-pattern-order");
-				fa_success_pattern = cfg.get("resource-pattern", "fa-success-pattern");
-				fa_success_pattern_order = cfg.get("resource-pattern", "fa-success-pattern-order");
-				fa_fail_pattern = cfg.get("resource-pattern", "fa-fail-pattern");
-				fa_fail_pattern_order = cfg.get("resource-pattern", "fa-fail-pattern-order");
 			} else {
 				printf("load configuration file failed!!!\n");
 			}
@@ -904,167 +949,88 @@ public:
 		return ret;
 	}
 
-	int update_enroll_samples_list(std::vector<std::string> &bmp_file_list)
+	int update_sub_samples_list(
+		std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> **samples,
+		std::vector<std::string> &bmp_file_list,
+		std::vector<pattern_info> &vec_pattern)
 	{
 		int ret = 0;
 		settings *g_settings = settings::get_instance();
+		regexp r;
+		std::vector<std::string> matched_list;
 
 		for(std::vector<std::string>::iterator it = bmp_file_list.begin(); it != bmp_file_list.end(); it++) {
 			//printf("file in list:%s\n", it->c_str());
-			regexp r;
-			bool matched = false;
 
-			std::vector<std::string> matched_list;
 
-			if((g_settings->enroll_pattern.size() != 0) && (g_settings->enroll_pattern_order.size() != 0)) {
-				matched_list = r.match(*it, g_settings->enroll_pattern);
+			std::vector<pattern_info>::iterator vec_pattern_it;
 
-				if(matched_list.size() == get_pattern_order(g_settings->enroll_pattern_order, 0)) {
-					matched = true;
-				}
-			}
+			for(
+				vec_pattern_it = vec_pattern.begin();
+				vec_pattern_it != vec_pattern.end();
+				vec_pattern_it++) {
 
-			if(matched) {
-				task_bmp bmp;
+				pattern_info pattern_info = *vec_pattern_it;
 
-				bmp.bmp_path = *it;
-				bmp.catagory = matched_list.at(get_pattern_order(g_settings->enroll_pattern_order, 1));
-				bmp.id = matched_list.at(get_pattern_order(g_settings->enroll_pattern_order, 2));
-				bmp.serial_no = matched_list.at(get_pattern_order(g_settings->enroll_pattern_order, 3));
+				if((pattern_info.pattern.size() != 0) && (pattern_info.pattern_order.size() != 0)) {
+					matched_list = r.match(*it, pattern_info.pattern);
 
-				//printf("enroll:%s, catagory:%s, id:%s, serial_no:%s\n", it->c_str(), matched_list.at(1).c_str(), matched_list.at(2).c_str(), matched_list.at(3).c_str());
+					if(matched_list.size() == get_pattern_order(pattern_info.pattern_order, 0)) {
+						task_bmp bmp;
 
-				new_type_bmp(&enroll_samples, bmp);
-			}
-		}
+						bmp.bmp_path = *it;
+						bmp.matched_type = UNKNOW;
+						bmp.catagory = matched_list.at(get_pattern_order(pattern_info.pattern_order, 1));
+						bmp.id = matched_list.at(get_pattern_order(pattern_info.pattern_order, 2));
+						bmp.serial_no = matched_list.at(get_pattern_order(pattern_info.pattern_order, 3));
 
-		return ret;
-	}
+						//printf("enroll:%s, catagory:%s, id:%s, serial_no:%s\n", it->c_str(), matched_list.at(1).c_str(), matched_list.at(2).c_str(), matched_list.at(3).c_str());
 
-	int update_fr_samples_list(std::vector<std::string> &bmp_file_list)
-	{
-		int ret = 0;
-		settings *g_settings = settings::get_instance();
+						new_type_bmp(samples, bmp);
 
-		for(std::vector<std::string>::iterator it = bmp_file_list.begin(); it != bmp_file_list.end(); it++) {
-			//printf("file in list:%s\n", it->c_str());
-			regexp r;
-			task_bmp bmp;
-			std::string fr_pattern_order;
-			std::vector<std::string> matched_list;
-			bool matched = false;
-
-			if((!matched) && (g_settings->fr_pattern.size() != 0) && (g_settings->fr_pattern_order.size() != 0)) {
-				matched_list = r.match(*it, g_settings->fr_pattern);
-
-				if(matched_list.size() == get_pattern_order(g_settings->fr_pattern_order, 0)) {
-					fr_pattern_order = g_settings->fr_pattern_order;
-					bmp.matched_type = UNKNOW;
-					matched = true;
-				}
-			}
-
-			if((!matched) && (g_settings->fr_success_pattern.size() != 0) && (g_settings->fr_success_pattern_order.size() != 0)) {
-				matched_list = r.match(*it, g_settings->fr_success_pattern);
-
-				if(matched_list.size() == get_pattern_order(g_settings->fr_success_pattern_order, 0)) {
-					fr_pattern_order = g_settings->fr_success_pattern_order;
-					bmp.matched_type = MATCHED;
-					matched = true;
-				}
-			}
-
-			if((!matched) && (g_settings->fr_fail_pattern.size() != 0) && (g_settings->fr_fail_pattern_order.size() != 0)) {
-				matched_list = r.match(*it, g_settings->fr_fail_pattern);
-
-				if(matched_list.size() == get_pattern_order(g_settings->fr_fail_pattern_order, 0)) {
-					fr_pattern_order = g_settings->fr_fail_pattern_order;
-					bmp.matched_type = UNMATCHED;
-					matched = true;
-				}
-			}
-
-			if(matched) {
-				bmp.bmp_path = *it;
-				bmp.catagory = matched_list.at(get_pattern_order(fr_pattern_order, 1));
-				bmp.id = matched_list.at(get_pattern_order(fr_pattern_order, 2));
-				bmp.serial_no = matched_list.at(get_pattern_order(fr_pattern_order, 3));
-
-				//printf("fr:%s, catagory:%s, id:%s, serial_no:%s, matched_type:%s\n",
-				//	   it->c_str(),
-				//	   matched_list.at(1).c_str(),
-				//	   matched_list.at(2).c_str(),
-				//	   matched_list.at(3).c_str(),
-				//	   bmp.matched_type == UNKNOW ? "UNKNOW" :
-				//	   bmp.matched_type == MATCHED ? "MATCHED" :
-				//	   "UNMATCHED");
-				new_type_bmp(&fr_samples, bmp);
-			}
-		}
-
-		return ret;
-	}
-
-	int update_fa_samples_list(std::vector<std::string> &bmp_file_list)
-	{
-		int ret = 0;
-		settings *g_settings = settings::get_instance();
-
-		for(std::vector<std::string>::iterator it = bmp_file_list.begin(); it != bmp_file_list.end(); it++) {
-			//printf("file in list:%s\n", it->c_str());
-			regexp r;
-			task_bmp bmp;
-			std::string fa_pattern_order;
-			std::vector<std::string> matched_list;
-			bool matched = false;
-
-			if((!matched) && (g_settings->fa_pattern.size() != 0) && (g_settings->fa_pattern_order.size() != 0)) {
-				matched_list = r.match(*it, g_settings->fa_pattern);
-
-				if(matched_list.size() == get_pattern_order(g_settings->fa_pattern_order, 0)) {
-					fa_pattern_order = g_settings->fa_pattern_order;
-					bmp.matched_type = UNKNOW;
-					matched = true;
+						break;
+					}
 				}
 
-			}
+				if((pattern_info.success_pattern.size() != 0) && (pattern_info.success_pattern_order.size() != 0)) {
+					matched_list = r.match(*it, pattern_info.success_pattern);
 
-			if((!matched) && (g_settings->fa_success_pattern.size() != 0) && (g_settings->fa_success_pattern_order.size() != 0)) {
-				matched_list = r.match(*it, g_settings->fa_success_pattern);
+					if(matched_list.size() == get_pattern_order(pattern_info.success_pattern_order, 0)) {
+						task_bmp bmp;
 
-				if(matched_list.size() == get_pattern_order(g_settings->fa_success_pattern_order, 0)) {
-					fa_pattern_order = g_settings->fa_success_pattern_order;
-					bmp.matched_type = MATCHED;
-					matched = true;
+						bmp.bmp_path = *it;
+						bmp.matched_type = MATCHED;
+						bmp.catagory = matched_list.at(get_pattern_order(pattern_info.success_pattern_order, 1));
+						bmp.id = matched_list.at(get_pattern_order(pattern_info.success_pattern_order, 2));
+						bmp.serial_no = matched_list.at(get_pattern_order(pattern_info.success_pattern_order, 3));
+
+						//printf("enroll:%s, catagory:%s, id:%s, serial_no:%s\n", it->c_str(), matched_list.at(1).c_str(), matched_list.at(2).c_str(), matched_list.at(3).c_str());
+
+						new_type_bmp(samples, bmp);
+
+						break;
+					}
 				}
-			}
 
-			if((!matched) && (g_settings->fa_fail_pattern.size() != 0) && (g_settings->fa_fail_pattern_order.size() != 0)) {
-				matched_list = r.match(*it, g_settings->fa_fail_pattern);
+				if((pattern_info.fail_pattern.size() != 0) && (pattern_info.fail_pattern_order.size() != 0)) {
+					matched_list = r.match(*it, pattern_info.fail_pattern);
 
-				if(matched_list.size() == get_pattern_order(g_settings->fa_fail_pattern_order, 0)) {
-					fa_pattern_order = g_settings->fa_fail_pattern_order;
-					bmp.matched_type = UNMATCHED;
-					matched = true;
+					if(matched_list.size() == get_pattern_order(pattern_info.fail_pattern_order, 0)) {
+						task_bmp bmp;
+
+						bmp.bmp_path = *it;
+						bmp.matched_type = UNMATCHED;
+						bmp.catagory = matched_list.at(get_pattern_order(pattern_info.fail_pattern_order, 1));
+						bmp.id = matched_list.at(get_pattern_order(pattern_info.fail_pattern_order, 2));
+						bmp.serial_no = matched_list.at(get_pattern_order(pattern_info.fail_pattern_order, 3));
+
+						//printf("enroll:%s, catagory:%s, id:%s, serial_no:%s\n", it->c_str(), matched_list.at(1).c_str(), matched_list.at(2).c_str(), matched_list.at(3).c_str());
+
+						new_type_bmp(samples, bmp);
+
+						break;
+					}
 				}
-			}
-
-			if(matched) {
-				bmp.bmp_path = *it;
-				bmp.catagory = matched_list.at(get_pattern_order(fa_pattern_order, 1));
-				bmp.id = matched_list.at(get_pattern_order(fa_pattern_order, 2));
-				bmp.serial_no = matched_list.at(get_pattern_order(fa_pattern_order, 3));
-
-				//printf("fa:%s, catagory:%s, id:%s, serial_no:%s, matched_type:%s\n",
-				//	   it->c_str(),
-				//	   matched_list.at(1).c_str(),
-				//	   matched_list.at(2).c_str(),
-				//	   matched_list.at(3).c_str(),
-				//	   bmp.matched_type == UNKNOW ? "UNKNOW" :
-				//	   bmp.matched_type == MATCHED ? "MATCHED" :
-				//	   "UNMATCHED");
-
-				new_type_bmp(&fa_samples, bmp);
 			}
 
 		}
@@ -1080,9 +1046,9 @@ public:
 
 		bmp_file_list = get_bmp_filelist(g_settings->dirname);
 
-		update_enroll_samples_list(bmp_file_list);
-		update_fr_samples_list(bmp_file_list);
-		update_fa_samples_list(bmp_file_list);
+		update_sub_samples_list(&enroll_samples, bmp_file_list, g_settings->enroll_pattern);
+		update_sub_samples_list(&fr_samples, bmp_file_list, g_settings->fr_pattern);
+		update_sub_samples_list(&fa_samples, bmp_file_list, g_settings->fa_pattern);
 
 		return ret;
 	}
@@ -1379,8 +1345,8 @@ int main(int argc, char **argv)
 		return ret;
 	}
 
-	//samples_list.p_result();
-	samples_list.start_test_task();
+	samples_list.p_result();
+	//samples_list.start_test_task();
 
 	printf("Done!\n");
 
