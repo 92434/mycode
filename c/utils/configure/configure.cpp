@@ -6,7 +6,7 @@
  *   文件名称：configure.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月28日 星期三 14时18分04秒
- *   修改日期：2017年07月07日 星期五 09时24分33秒
+ *   修改日期：2017年07月13日 星期四 11时21分50秒
  *   描    述：
  *
  *================================================================*/
@@ -63,6 +63,22 @@ std::string configure::get(std::string class_name, std::string key)
 	value = it2->second;
 
 	return value;
+}
+
+std::map<std::string, std::string> configure::get_class(std::string class_name)
+{
+	std::map<std::string, std::string> key_value_set;
+	std::map<std::string, std::map<std::string, std::string> >::iterator it1;
+
+	it1 = m_configuration.find(class_name);
+
+	if(it1 == m_configuration.end()) {
+		return key_value_set;
+	}
+
+	key_value_set = it1->second;
+
+	return key_value_set;
 }
 
 int configure::match_class(std::string content)

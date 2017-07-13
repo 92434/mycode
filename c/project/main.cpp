@@ -6,7 +6,7 @@
  *   文件名称：main.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 18时15分41秒
- :   修改日期：2017年07月12日 星期三 19时00分59秒
+ :   修改日期：2017年07月13日 星期四 11时11分59秒
  *   描    述：
  *
  *================================================================*/
@@ -108,11 +108,13 @@ public:
 	int max_number_of_catagory_per_proc;
 	select_type_t fr_select_type;
 	select_type_t fa_select_type;
+	int max_proc_number;
 
 	static settings *g_settings;
 
 	settings()
 	{
+		max_proc_number = 32;
 		max_number_of_id_per_proc = 5;
 		max_number_of_catagory_per_proc = 1;
 		fr_select_type = SELECT_SAME_CATAGORY;
@@ -783,7 +785,6 @@ private:
 	std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *fa_samples;
 
 	std::set<int> pid_list;
-	int max_proc_number;
 	std::string server_path;
 
 public:
@@ -793,7 +794,6 @@ public:
 		enroll_samples = NULL;
 		fr_samples = NULL;
 		fa_samples = NULL;
-		max_proc_number = 32;
 		server_path = "/tmp/.server_socket";
 	}
 
@@ -1277,6 +1277,7 @@ public:
 	{
 		int ret = 0;
 		bool ready = task->can_start_task(reason);
+		settings *g_settings = settings::get_instance();
 
 		if(ready) {
 			std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
@@ -1304,7 +1305,7 @@ public:
 		}
 
 
-		while((pid_list.size() >= max_proc_number) || (wait && (pid_list.size() > 0))) {
+		while((pid_list.size() >= g_settings->max_proc_number) || (wait && (pid_list.size() > 0))) {
 			int pid = get_client_result();
 			printf("pid stop:%d(%x)\n", pid, pid);
 			pid_list.erase(pid);

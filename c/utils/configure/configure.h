@@ -6,7 +6,7 @@
  *   文件名称：configure.h
  *   创 建 者：肖飞
  *   创建日期：2017年06月28日 星期三 14时20分53秒
- *   修改日期：2017年06月29日 星期四 15时35分12秒
+ *   修改日期：2017年07月13日 星期四 11时23分11秒
  *   描    述：
  *
  *================================================================*/
@@ -40,6 +40,7 @@ public:
 	int load(std::string filename);
 	int save(std::string filename);
 	int add(std::string class_name, std::string key, std::string value);
+	std::map<std::string, std::string> get_class(std::string class_name);
 	std::string get(std::string class_name, std::string key);
 	int p_configure();
 };

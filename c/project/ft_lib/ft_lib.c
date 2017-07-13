@@ -6,7 +6,7 @@
  *   文件名称：ft_lib.c
  *   创 建 者：肖飞
  *   创建日期：2017年07月12日 星期三 11时54分55秒
- *   修改日期：2017年07月12日 星期三 16时11分49秒
+ *   修改日期：2017年07月13日 星期四 11时14分57秒
  *   描    述：
  *
  *================================================================*/
@@ -104,7 +104,6 @@ int ft_get_image(char *buffer, int len)
 {
 	int ret = 0;
 
-	//printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 	ft_printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 
 	if(ft_device == NULL) {
@@ -125,7 +124,6 @@ int ft_set_image(const char *buffer, int len)
 {
 	int ret = 0;
 
-	//printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 	ft_printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 
 	if(ft_device == NULL) {
