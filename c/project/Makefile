@@ -19,18 +19,6 @@ test_config/test_config.cpp.LOCAL_CFLAGS := -I$(top)/c/utils
 
 include $(BUILD_BINS)
 
-app_c_files := main.cpp
-app_name := main
-LOCAL_DEPS := $(top)/c/utils/out/lib/libxiaofei.a
-LOCAL_DEPS += ft_lib/out/lib/libft_lib.a
-LOCAL_LIBS := $(top)/c/utils/out/lib/libxiaofei.a
-LOCAL_LIBS += ft_lib/out/lib/libft_lib.a
-LOCAL_CFLAGS := -g
-LOCAL_CFLAGS += -I$(top)/c/utils
-LOCAL_CFLAGS += -Ift_lib/
-#LOCAL_LDFLAGS := -Wl,-Map,main.map
-include $(BUILD_APP)
-
-SUB_DIRS += ft_lib
+SUB_DIRS += spark
 
 include $(ADD_TARGET)
