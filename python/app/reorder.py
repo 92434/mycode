@@ -6,7 +6,7 @@
 #   文件名称：reorder.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月15日 星期六 16时54分21秒
-#   修改日期：2017年07月15日 星期六 19时06分08秒
+#   修改日期：2017年07月16日 星期日 12时00分36秒
 #   描    述：
 #
 #================================================================
@@ -16,12 +16,12 @@ import optparse
 import os
 import shutil
 
-def create_ordered_file(dirname, state, finger_id, index, line):
+def create_ordered_file(dirname, person_id, state, index, line):
     if not os.access(line, os.F_OK):
         return
     
     basename = os.path.basename(line)
-    new_filename = os.path.join(dirname, state, '%s' %(finger_id), '%d_' %(index) + basename)
+    new_filename = os.path.join(dirname, '%s' %(person_id), state, '%d_' %(index) + basename)
     if not os.access(os.path.dirname(new_filename), os.F_OK):
         os.makedirs(os.path.dirname(new_filename))
     shutil.copy2(line, new_filename)
@@ -37,24 +37,23 @@ def reorder_from_list(filelist):
         print('%s exists!' %(dirname))
         return
 
+    enroll_person_id = 0
+    verify_person_id = 0
     person_id = 0
-    enroll_finger_id = 0
-    verify_finger_id = 0
-    finger_id = 0
     index = 0
     state = ''
     for line in lines:
         if '[enroll]' == line.strip():
-            enroll_finger_id += 1
-            finger_id = enroll_finger_id
+            enroll_person_id += 1
+            person_id = enroll_person_id
             state = 'enroll'
         elif '[verify]' == line.strip():
-            verify_finger_id += 1
-            finger_id = verify_finger_id
+            verify_person_id += 1
+            person_id = verify_person_id
             state = 'verify'
         elif len(line.strip()):
-            print('state:%s, finger_id:%d, index:%d' %(state, finger_id, index))
-            create_ordered_file(dirname, state, finger_id, index, line)
+            print('state:%s, person_id:%d, index:%d' %(state, person_id, index))
+            create_ordered_file(dirname, person_id, state, index, line.strip())
             index += 1
 
 
