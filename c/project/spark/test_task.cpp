@@ -6,14 +6,12 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月14日 星期五 15时59分35秒
+ *   修改日期：2017年07月17日 星期一 20时53分27秒
  *   描    述：
  *
  *================================================================*/
 #include "test_task.h"
 
-std::ofstream test_task::ofs_hardware;
-std::string test_task::cur_bmp_path;
 test_task::test_task()
 {
 	clear();
@@ -32,7 +30,6 @@ int test_task::clear()
 	fa_identify_list.clear();
 	enroll_ids.clear();
 	logfile.clear();
-	logfile_hardware.clear();
 	timestamp.clear();
 	return ret;
 }
@@ -70,7 +67,6 @@ int test_task::get_timestamp()
 	struct tm *tm;
 	struct timeval tv;
 	struct timezone tz;
-	filesystem fs;
 
 	gettimeofday(&tv, &tz);
 
@@ -90,13 +86,11 @@ int test_task::get_timestamp()
 	return ret;
 }
 
-int test_task::log_file_start()
+int test_task::gen_log_file_names()
 {
 	int ret = 0;
 	char buffer[1024];
 	int len = 0;
-	filesystem fs;
-
 
 	len = snprintf(buffer, 1023, "logs/%s.log", timestamp.c_str());
 	buffer[len] = 0;
@@ -106,21 +100,23 @@ int test_task::log_file_start()
 	buffer[len] = 0;
 	logfile_hardware = buffer;
 
-	fs.mkdirs(logfile);
-	fs.mkdirs(logfile_hardware);
+	return ret;
+}
+int test_task::log_file_start()
+{
+	int ret = 0;
+	filesystem fs;
 
-	ofs.open(logfile.c_str());
-
-	if(!ofs.good()) {
-		printf("open:%s failed!!! (%s)!\n", logfile.c_str(), strerror(errno));
+	if(logfile.size() == 0) {
 		ret = -1;
 		return ret;
 	}
 
-	ofs_hardware.open(logfile_hardware.c_str());
+	fs.mkdirs(logfile);
+	ofs.open(logfile.c_str());
 
-	if(!ofs_hardware.good()) {
-		printf("open:%s failed!!! (%s)!\n", logfile_hardware.c_str(), strerror(errno));
+	if(!ofs.good()) {
+		printf("open:%s failed!!! (%s)!\n", logfile.c_str(), strerror(errno));
 		ret = -1;
 		return ret;
 	}
@@ -144,50 +140,11 @@ int test_task::log_file(const char *fmt, ...)
 	return ret;
 }
 
-int test_task::log_file_hardware(const char *fmt, ...)
-{
-	int ret = 0;
-	int len = 0;
-	char buffer[1024];
-	va_list ap;
-
-	va_start(ap, fmt);
-	len = vsnprintf(buffer, 1023, fmt, ap);
-	buffer[len] = 0;
-	va_end(ap);
-	ofs_hardware.write(buffer, len);
-
-	return ret;
-}
-
 int test_task::log_file_end()
 {
 	int ret = 0;
 
 	ofs.close();
-	ofs_hardware.close();
-
-	return ret;
-}
-
-int test_task::save_bmp(char *label, char *buffer, int len)
-{
-	int ret = 0;
-	int pos = cur_bmp_path.rfind('.');
-	char *buffer_bmp = new char [len + 1];
-	std::string filename;
-
-	if(pos != std::string::npos) {
-		filename = cur_bmp_path.substr(0, pos);
-	} else {
-		ret = -1;
-		return ret;
-	}
-
-	filename = filename + "." + label + ".bmp";
-	memcpy(buffer_bmp, buffer, len);
-	buffer_bmp[len] = 0;
-	printf("new filename:%s, buffer:%s, len:%d\n", filename.c_str(), buffer_bmp, len);
 
 	return ret;
 }
@@ -242,12 +199,30 @@ bool test_task::identify_less_than(task_bmp bmp1, task_bmp bmp2)
 	return false;
 }
 
-int test_task::do_task()
+int test_task::pre_task()
 {
 	int ret = 0;
+	hardware *hw = hardware::get_instance();
+
+	hw->set_save_bmp();
 
 	ret = get_timestamp();
+	ret = gen_log_file_names();
+
+	ret = hw->set_log_file_name(logfile_hardware);
+
 	ret = log_file_start();
+	ret = hw->log_file_start();
+
+	ret = hw->hardware_init();
+
+	return ret;
+}
+
+int test_task::do_task_list()
+{
+	int ret = 0;
+	hardware *hw = hardware::get_instance();
 
 	std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
 
@@ -269,13 +244,8 @@ int test_task::do_task()
 			log_file("pid:%d, ppid:%d, enroll:catagory:%s, id:%s, serial_no:%s\n", (int)getpid(), (int)getppid(), bmp.catagory.c_str(), bmp.id.c_str(), bmp.serial_no.c_str());
 			log_file("pid:%d, ppid:%d, path:%s\n\n", (int)getpid(), (int)getppid(), bmp.bmp_path.c_str());
 
-			cur_bmp_path = bmp.bmp_path;
-
 			char *buffer = new char [bmp.bmp_path.size() + 1];
 			int len = 0;
-			hardware *hw = hardware::get_instance(96, 96);
-			hw->set_log((ft_printf_t)&test_task::log_file_hardware);
-			hw->set_save_bmp((save_bmp_t)&test_task::save_bmp);
 			hw->set_image(bmp.bmp_path);
 			hw->get_image(buffer, (int)bmp.bmp_path.size());
 			buffer[bmp.bmp_path.size()] = 0;
@@ -303,8 +273,27 @@ int test_task::do_task()
 			log_file("pid:%d, ppid:%d, path:%s\n\n", (int)getpid(), (int)getppid(), bmp.bmp_path.c_str());
 		}
 	}
+	return ret;
+}
+
+int test_task::post_task() {
+	int ret = 0;
+	hardware *hw = hardware::get_instance();
+
+	hw->log_file_end();
 
 	log_file_end();
+	return ret;
+}
+
+int test_task::do_task()
+{
+	int ret = 0;
+
+	ret = pre_task();
+	ret = do_task_list();
+	ret = post_task();
+
 	return ret;
 }
 

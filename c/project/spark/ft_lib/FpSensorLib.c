@@ -1,28 +1,30 @@
 
 
 /*================================================================
- *   Copyright (C) 2017年07月12日 肖飞 All rights reserved
+ *   Copyright (C) 2017年07月17日 肖飞 All rights reserved
  *
- *   文件名称：ft_lib.c
+ *   文件名称：FpSensorLib.c
  *   创 建 者：肖飞
- *   创建日期：2017年07月12日 星期三 11时54分55秒
- *   修改日期：2017年07月14日 星期五 18时20分08秒
+ *   创建日期：2017年07月17日 星期一 12时08分57秒
+ *   修改日期：2017年07月17日 星期一 17时15分21秒
  *   描    述：
  *
  *================================================================*/
-#include "ft_lib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+
+#include "FpSensorLib.h"
 
 typedef struct _ft_device {
 	char *buffer;
 	int size;
 	//int  (*get_image)(char *buffer, int len);
 	//int  (*set_image)(char *buffer, int len);
-	ft_printf_t ft_printf;
+	FtSetLogFunc ft_printf;
 	save_bmp_t save_bmp;
+	FtGetSystemTimeFunc get_system_time;
 } ft_device_t;
 
 static ft_device_t *ft_device;
@@ -63,20 +65,6 @@ int ft_lib_uninit()
 	return ret;
 }
 
-int ft_lib_set_log(ft_printf_t ft_printf)
-{
-	int ret = 0;
-
-	if(ft_device == NULL) {
-		ret = -1;
-		return ret;
-	}
-
-	ft_device->ft_printf = ft_printf;
-
-	return ret;
-}
-
 static int ft_printf(char *fmt, ...)
 {
 	int ret = 0;
@@ -97,7 +85,7 @@ static int ft_printf(char *fmt, ...)
 	ret = vsnprintf(buffer, 1024, fmt, ap);
 	va_end(ap);
 
-	ret = ft_device->ft_printf(buffer);
+	ft_device->ft_printf(buffer);
 	return ret;
 }
 
@@ -184,4 +172,24 @@ int ft_set_image(const char *buffer, int len)
 	}
 
 	return ret;
+}
+
+void focal_InitFuncGetSystemTime(FtGetSystemTimeFunc func)
+{
+	ft_printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
+
+	if(ft_device == NULL) {
+		return;
+	}
+
+	ft_device->get_system_time = func;
+}
+
+void focal_InitFuncLog(FtSetLogFunc func)
+{
+	if(ft_device == NULL) {
+		return;
+	}
+
+	ft_device->ft_printf = func;
 }

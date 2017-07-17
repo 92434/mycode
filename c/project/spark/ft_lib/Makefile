@@ -7,7 +7,7 @@ CFLAGS += -I$(shell pwd)
 
 LDFLAGS += -lpthread
 
-c_files := ft_lib.c
+c_files := FpSensorLib.c
 
 staticd_lib_c_files := $(c_files)
 staticd_lib_name := ft_lib

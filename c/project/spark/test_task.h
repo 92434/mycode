@@ -6,7 +6,7 @@
  *   文件名称：test_task.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时27分38秒
- *   修改日期：2017年07月14日 星期五 15时59分04秒
+ *   修改日期：2017年07月17日 星期一 20时53分21秒
  *   描    述：
  *
  *================================================================*/
@@ -30,7 +30,8 @@ extern "C"
 #include "task_bmp.h"
 #include "settings.h"
 #include "filesystem.h"
-#include "hardware.h"
+#include "hw.h"
+
 typedef enum _task_start_reason {
 	ADD_ID_FINISHED = 0,
 	ADD_CATAGORY_FINISHED,
@@ -70,11 +71,8 @@ private:
 	std::set<task_bmp, bmp_enroll_set_comp> enroll_ids;
 	std::string timestamp;
 	std::ofstream ofs;
-	static std::ofstream ofs_hardware;
 	std::string logfile;
 	std::string logfile_hardware;
-
-	static std::string cur_bmp_path;
 
 public:
 	test_task();
@@ -89,19 +87,23 @@ public:
 
 	int get_timestamp();
 
+	int gen_log_file_names();
+
 	int log_file_start();
 
 	int log_file(const char *fmt, ...);
 
-	static int log_file_hardware(const char *fmt, ...);
-
 	int log_file_end();
-
-	static int save_bmp(char *label, char *buffer, int len);
 
 	static bool enroll_less_than(task_bmp bmp1, task_bmp bmp2);
 
 	static bool identify_less_than(task_bmp bmp1, task_bmp bmp2);
+
+	int pre_task();
+
+	int do_task_list();
+
+	int post_task();
 
 	int do_task();
 
@@ -112,6 +114,5 @@ public:
 	bool can_start_task(task_start_reason_t reason);
 
 	int start_task(task_start_reason_t reason, std::string server_path);
-
 };
 #endif //TEST_TASK_H
