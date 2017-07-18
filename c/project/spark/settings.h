@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年07月14日 星期五 15时52分52秒
+ *   修改日期：2017年07月18日 星期二 19时00分08秒
  *   描    述：
  *
  *================================================================*/
@@ -72,6 +72,34 @@ public:
 	select_type_t fr_select_type;
 	select_type_t fa_select_type;
 	int max_proc_number;
+
+	std::string debug_switch;
+	std::string algorithm_mode;
+	std::string enroll_max_templates;
+	std::string algorithm_max_templates;
+	std::string spa_enable;
+	std::string algorithm_far_level;
+	std::string update_template_far_level;
+	std::string update_template_threshold;
+	std::string verify_quickly_enable;
+	std::string update_template_outside_enable;
+	std::string image_quality_score;
+	std::string verify_image_quality_score;
+	std::string enroll_duplicate_area_check_enable;
+	std::string valid_area_scale;
+	std::string enrollment_tips_enable;
+	std::string enrollment_tips_parameter1;
+	std::string enrollment_tips_parameter2;
+	std::string enrollment_tips_parameter3;
+	std::string verify_improve_enable;
+	std::string verify_improve_level;
+	std::string mcu_image_bit;
+	std::string mcu_interrupt_mode;
+	std::string mcu_state_check_mode;
+	std::string repeat_get_image_count;
+	std::string template_buffer_enable;
+	std::string transfer_bytes_max;
+	std::string config_debuginfo_switch;
 
 	static settings *g_settings;
 

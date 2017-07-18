@@ -2,11 +2,11 @@
 
 /*================================================================
  *   Copyright (C) 2017年07月14日 肖飞 All rights reserved
- *   
+ *
  *   文件名称：task_bmp.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分02秒
- *   修改日期：2017年07月14日 星期五 13时50分05秒
+ *   修改日期：2017年07月18日 星期二 14时36分55秒
  *   描    述：
  *
  *================================================================*/
@@ -20,6 +20,9 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
+
+#include <stdio.h>
+
 typedef enum _matched_type {
 	UNKNOW = 0,
 	MATCHED,
@@ -60,6 +63,71 @@ public:
 	}
 	~task_bmp()
 	{
+	}
+
+
+	unsigned long int get_finger_id()
+	{
+		unsigned long int finger_id;
+		char *invalid_pos;
+		finger_id = strtoul(id.c_str(), &invalid_pos, 10);
+
+		return finger_id;
+	}
+
+	int set_finger_id(int finger_id)
+	{
+		int ret = 0;
+		char buffer[1024];
+		int len;
+
+		len = snprintf(buffer, 1024, "%d", finger_id);
+		buffer[len] = 0;
+		id = buffer;
+		return ret;
+	}
+
+	unsigned long int get_matched_finger_id()
+	{
+		unsigned long int matched_finger_id;
+		char *invalid_pos;
+		matched_finger_id = strtoul(new_matched_id.c_str(), &invalid_pos, 10);
+
+		return matched_finger_id;
+	}
+
+	int set_matched_finger_id(int matched_finger_id)
+	{
+		int ret = 0;
+		char buffer[1024];
+		int len;
+
+		len = snprintf(buffer, 1024, "%d", matched_finger_id);
+		buffer[len] = 0;
+		new_matched_id = buffer;
+		return ret;
+	}
+
+	std::string get_matched_type()
+	{
+
+		std::string ret;
+
+		ret = (matched_type == MATCHED) ? "MATCHED" :
+			  (matched_type == UNMATCHED) ? "UNMATCHED" :
+			  "UNKNOW";
+		return ret;
+	}
+
+	std::string get_new_matched_type()
+	{
+
+		std::string ret;
+
+		ret = (new_matched_type == MATCHED) ? "MATCHED" :
+			  (new_matched_type == UNMATCHED) ? "UNMATCHED" :
+			  "UNKNOW";
+		return ret;
 	}
 };
 #endif //TASK_BMP_H

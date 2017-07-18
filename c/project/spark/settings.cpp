@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年07月14日 星期五 15时56分07秒
+ *   修改日期：2017年07月18日 星期二 18时48分31秒
  *   描    述：
  *
  *================================================================*/
@@ -99,7 +99,7 @@ std::vector<pattern_info> settings::get_pattern_info(configure &cfg, std::string
 
 	std::set<std::string>::iterator set_it;
 
-	printf("%s:%s:%d:add pattern for %s!\n", __FILE__, __func__, __LINE__, pattern_base.c_str());
+	//printf("%s:%s:%d:add pattern for %s!\n", __FILE__, __func__, __LINE__, pattern_base.c_str());
 
 	for(pattern_class_it = pattern_class.begin(); pattern_class_it != pattern_class.end(); pattern_class_it++) {
 		regexp r;
@@ -137,13 +137,13 @@ std::vector<pattern_info> settings::get_pattern_info(configure &cfg, std::string
 		pattern_info.pattern = cfg.get("resource_pattern", pattern_key);
 		pattern_info.pattern_order = cfg.get("resource_pattern", pattern_key_order);
 
-		printf(
-			"%s:%s:%d:pattern:%s, pattern_order:%s\n",
-			__FILE__,
-			__func__,
-			__LINE__,
-			pattern_info.pattern.c_str(),
-			pattern_info.pattern_order.c_str());
+		//printf(
+		//	"%s:%s:%d:pattern:%s, pattern_order:%s\n",
+		//	__FILE__,
+		//	__func__,
+		//	__LINE__,
+		//	pattern_info.pattern.c_str(),
+		//	pattern_info.pattern_order.c_str());
 
 		if((pattern_info.pattern.size() != 0) && (pattern_info.pattern_order.size() != 0)) {
 			vec_pattern.push_back(pattern_info);
@@ -162,15 +162,15 @@ std::vector<pattern_info> settings::get_pattern_info(configure &cfg, std::string
 		pattern_info.success_pattern_order = cfg.get("resource_pattern", success_pattern_key_order);
 		pattern_info.fail_pattern = cfg.get("resource_pattern", fail_pattern_key);
 		pattern_info.fail_pattern_order = cfg.get("resource_pattern", fail_pattern_key_order);
-		printf(
-			"%s:%s:%d:success_pattern:%s, success_pattern_order:%s, fail_pattern:%s, fail_pattern_order:%s\n",
-			__FILE__,
-			__func__,
-			__LINE__,
-			pattern_info.success_pattern.c_str(),
-			pattern_info.success_pattern_order.c_str(),
-			pattern_info.fail_pattern.c_str(),
-			pattern_info.fail_pattern_order.c_str());
+		//printf(
+		//	"%s:%s:%d:success_pattern:%s, success_pattern_order:%s, fail_pattern:%s, fail_pattern_order:%s\n",
+		//	__FILE__,
+		//	__func__,
+		//	__LINE__,
+		//	pattern_info.success_pattern.c_str(),
+		//	pattern_info.success_pattern_order.c_str(),
+		//	pattern_info.fail_pattern.c_str(),
+		//	pattern_info.fail_pattern_order.c_str());
 
 		if(
 			(pattern_info.success_pattern.size() != 0)
@@ -222,11 +222,37 @@ int settings::parse_args_from_configuration(int argc, char **argv)
 		ret = cfg.load(configure_file);
 
 		if(ret == 0) {
-			cfg.p_configure();
+			//cfg.p_configure();
 			dirname = cfg.get("dir", "directory");
 
 			ret = get_pattern_from_configuration(cfg);
-
+			debug_switch = cfg.get("sensor_lib", "debug_switch");
+			algorithm_mode = cfg.get("sensor_lib", "algorithm_mode");
+			enroll_max_templates = cfg.get("sensor_lib", "enroll_max_templates");
+			algorithm_max_templates = cfg.get("sensor_lib", "algorithm_max_templates");
+			spa_enable = cfg.get("sensor_lib", "spa_enable");
+			algorithm_far_level = cfg.get("sensor_lib", "algorithm_far_level");
+			update_template_far_level = cfg.get("sensor_lib", "update_template_far_level");
+			update_template_threshold = cfg.get("sensor_lib", "update_template_threshold");
+			verify_quickly_enable = cfg.get("sensor_lib", "verify_quickly_enable");
+			update_template_outside_enable = cfg.get("sensor_lib", "update_template_outside_enable");
+			image_quality_score = cfg.get("sensor_lib", "image_quality_score");
+			verify_image_quality_score = cfg.get("sensor_lib", "verify_image_quality_score");
+			enroll_duplicate_area_check_enable = cfg.get("sensor_lib", "enroll_duplicate_area_check_enable");
+			valid_area_scale = cfg.get("sensor_lib", "valid_area_scale");
+			enrollment_tips_enable = cfg.get("sensor_lib", "enrollment_tips_enable");
+			enrollment_tips_parameter1 = cfg.get("sensor_lib", "enrollment_tips_parameter1");
+			enrollment_tips_parameter2 = cfg.get("sensor_lib", "enrollment_tips_parameter2");
+			enrollment_tips_parameter3 = cfg.get("sensor_lib", "enrollment_tips_parameter3");
+			verify_improve_enable = cfg.get("sensor_lib", "verify_improve_enable");
+			verify_improve_level = cfg.get("sensor_lib", "verify_improve_level");
+			mcu_image_bit = cfg.get("sensor_lib", "mcu_image_bit");
+			mcu_interrupt_mode = cfg.get("sensor_lib", "mcu_interrupt_mode");
+			mcu_state_check_mode = cfg.get("sensor_lib", "mcu_state_check_mode");
+			repeat_get_image_count = cfg.get("sensor_lib", "repeat_get_image_count");
+			template_buffer_enable = cfg.get("sensor_lib", "template_buffer_enable");
+			transfer_bytes_max = cfg.get("sensor_lib", "transfer_bytes_max");
+			config_debuginfo_switch = cfg.get("sensor_lib", "config_debuginfo_switch");
 		} else {
 			printf("load configuration file failed!!!\n");
 		}

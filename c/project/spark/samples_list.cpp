@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年07月14日 星期五 14时04分30秒
+ *   修改日期：2017年07月18日 星期二 12时52分34秒
  *   描    述：
  *
  *================================================================*/
@@ -436,7 +436,7 @@ int samples_list::try_to_start_task_and_wait(test_task *task, task_start_reason_
 		}
 
 		for(catagory_it = set_catagory.begin(); catagory_it != set_catagory.end(); catagory_it++) {
-			printf("add catagory:%s\n", catagory_it->c_str());
+			//printf("add catagory:%s\n", catagory_it->c_str());
 			add_test_task_catagory(fr_samples, task, *catagory_it, FOR_FR);
 			add_test_task_catagory(fa_samples, task, *catagory_it, FOR_FA);
 		}

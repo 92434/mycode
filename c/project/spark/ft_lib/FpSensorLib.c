@@ -6,7 +6,7 @@
  *   文件名称：FpSensorLib.c
  *   创 建 者：肖飞
  *   创建日期：2017年07月17日 星期一 12时08分57秒
- *   修改日期：2017年07月17日 星期一 17时15分21秒
+ *   修改日期：2017年07月18日 星期二 17时27分31秒
  *   描    述：
  *
  *================================================================*/
@@ -20,10 +20,10 @@
 typedef struct _ft_device {
 	char *buffer;
 	int size;
-	//int  (*get_image)(char *buffer, int len);
-	//int  (*set_image)(char *buffer, int len);
 	FtSetLogFunc ft_printf;
 	save_bmp_t save_bmp;
+
+	FtGetMcuStatusFunc get_mcu_status;
 	FtGetSystemTimeFunc get_system_time;
 } ft_device_t;
 
@@ -185,6 +185,21 @@ void focal_InitFuncGetSystemTime(FtGetSystemTimeFunc func)
 	ft_device->get_system_time = func;
 }
 
+void focal_InitFuncUsleep(FtFpUsleepFunc func)
+{
+}
+
+void focal_InitFuncGetMcuStatus(FtGetMcuStatusFunc func)
+{
+	ft_printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
+
+	if(ft_device == NULL) {
+		return;
+	}
+
+	ft_device->get_mcu_status = func;
+}
+
 void focal_InitFuncLog(FtSetLogFunc func)
 {
 	if(ft_device == NULL) {
@@ -192,4 +207,151 @@ void focal_InitFuncLog(FtSetLogFunc func)
 	}
 
 	ft_device->ft_printf = func;
+}
+
+
+void focal_debuginfo_switch(__ft_u8 debug)
+{
+}
+
+void focal_GetLibVersion(__ft_u8 *pstrBuf)
+{
+	snprintf(pstrBuf, 100, "test lib version!!!");
+}
+
+void focal_SetFpSensorColsRows(__ft_u8 cols, __ft_u8 rows)
+{
+}
+
+void focal_SetEnrollMaxTpl(__ft_s32 maxtpl)
+{
+}
+
+void focal_SetAlgoMode(__ft_u8 ucMode)
+{
+}
+
+void focal_spa_en(__ft_u8 ucEnable)
+{
+}
+
+
+void focal_SetFpAlgMaxTpl(__ft_s32 maxtpl)
+{
+}
+
+__ft_s32 focal_InitFpAlg(void)
+{
+	__ft_s32 ret = 0;
+	return ret;
+}
+
+void focal_SetAlgFarLevel(ft_far_t far_level)
+{
+}
+
+void focal_SetUpdateTemplateFarLevel(ft_far_t far_level)
+{
+}
+
+void focal_SetUpdateTemplateThreshold(__ft_u16 usThreshold)
+{
+}
+
+void focal_verify_quickly_en(__ft_u8 ucEnable)
+{
+}
+
+void focal_updateTemplate_Outside_en(__ft_u8 ucenable)
+{
+}
+
+void focal_SetImageQualityScore(__ft_u8 imageQuality)
+{
+}
+
+void focal_SetImageVerifyQualityScore(__ft_u8 imageVerifyQuality)
+{
+}
+
+void focal_enrollment_duplicatecheck_en(__ft_u8 ucCheckEn)
+{
+}
+
+__ft_s32 focal_SetImageValidAreaScale(__ft_float validAreaScale)
+{
+}
+
+void focal_SetEnrollmentTipsEn(__ft_u8 ucenable)
+{
+}
+
+void focal_SetEnrollmentTipsParameter(__ft_u32 usScores, __ft_u8 ucDeltaxyThr, __ft_u8 ucDeltaAngThr)
+{
+}
+
+void focal_SetImprovedFrrEn(__ft_u8 ucFlg)
+{
+}
+
+void focal_SetImprovedLevel(__ft_u8 ucFlg)
+{
+}
+
+__ft_s32 focal_SetImageBit(__ft_u8 bit)
+{
+	__ft_s32 ret = 0;
+	return ret;
+}
+
+__ft_s32 focal_SetMcuInterrupMode(__ft_u8 ucMode)
+{
+	__ft_s32 ret = 0;
+	return ret;
+}
+
+__ft_u8 focal_setMcuStateCheckMode(__ft_u8 mode)
+{
+	__ft_u8 ret = 0;
+	return ret;
+}
+
+void focal_SetImageRepeatEn(__ft_u8 ucMode)
+{
+}
+
+void focal_SetTemplateBuffEn(__ft_u8 ucFlg)
+{
+}
+
+void focal_SetTransferBytesMax(__ft_u32 usTransferBytesMax)
+{
+}
+
+void focal_config_debuginfo_switch(__ft_u8 debug)
+{
+}
+
+__ft_s32 focal_Enroll(__ft_u16 fingerId, __ft_u8 enroll_index, __ft_u8 *penroll_coverage)
+{
+	__ft_s32 ret = 0;
+	return ret;
+}
+
+__ft_s32 focal_Identify(__ft_u8 *pfingerId, __ft_u8 *pupdateTpl)
+{
+	__ft_s32 ret = 0;
+	return ret;
+}
+
+__ft_s32 focal_UpdateTemplate(__ft_s32 update, __ft_s32 *finger_id)
+{
+	__ft_s32 ret = 0;
+	return ret;
+}
+
+__ft_s32 focal_DelFinger(__ft_u8 fingerId)
+{
+	__ft_s32 ret = 0;
+	return ret;
 }
