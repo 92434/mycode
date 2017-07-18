@@ -2,6 +2,8 @@
 #define _XIAOFEI_DEBUG_H
 #include <stdio.h>
 
+//#define mydebug(format, args...) printf("[%s:%s:%d]:"format, __FILE__, __PRETTY_FUNCTION__, __LINE__, ## args)
+#define mydebug(format, ...) printf("[%s:%s:%d]:"format, __FILE__, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__)
 #define mydebug(format, ...) printf("[%s:%s:%d]:"format, __FILE__, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__)
 #define myprintf(format, ...) printf(format, ## __VA_ARGS__)
 #define myprintf_once(condition, format, ...) ({ \

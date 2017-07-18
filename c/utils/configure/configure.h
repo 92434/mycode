@@ -6,16 +6,19 @@
  *   文件名称：configure.h
  *   创 建 者：肖飞
  *   创建日期：2017年06月28日 星期三 14时20分53秒
- *   修改日期：2017年07月13日 星期四 11时23分11秒
+ *   修改日期：2017年07月14日 星期五 14时00分24秒
  *   描    述：
  *
  *================================================================*/
 #ifndef _CONFIGURE_H
 #define _CONFIGURE_H
-//#ifdef __cplusplus
-//extern "C"
-//{
-//#endif
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+#ifdef __cplusplus
+}
+#endif
 
 #include <string>
 #include <fstream>
@@ -44,7 +47,4 @@ public:
 	std::string get(std::string class_name, std::string key);
 	int p_configure();
 };
-//#ifdef __cplusplus
-//}
-//#endif
 #endif //CONFIGURE_H
