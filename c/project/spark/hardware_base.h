@@ -1,17 +1,17 @@
 
 
 /*================================================================
- *   Copyright (C) 2017年07月17日 肖飞 All rights reserved
- *
- *   文件名称：hardware.h
+ *   Copyright (C) 2017年07月19日 肖飞 All rights reserved
+ *   
+ *   文件名称：hardware_base.h
  *   创 建 者：肖飞
- *   创建日期：2017年07月17日 星期一 12时26分15秒
- *   修改日期：2017年07月18日 星期二 18时58分23秒
+ *   创建日期：2017年07月19日 星期三 09时09分53秒
+ *   修改日期：2017年07月19日 星期三 09时14分23秒
  *   描    述：
  *
  *================================================================*/
-#ifndef _HARDWARE_H
-#define _HARDWARE_H
+#ifndef _HARDWARE_BASE_H
+#define _HARDWARE_BASE_H
 #ifdef __cplusplus
 extern "C"
 {
@@ -123,4 +123,4 @@ public:
 
 	int delete_template(char fingerId);
 };
-#endif //HARDWARE_H
+#endif //HARDWARE_BASE_H

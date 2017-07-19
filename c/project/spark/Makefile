@@ -6,7 +6,7 @@
 #   文件名称：Makefile
 #   创 建 者：肖飞
 #   创建日期：2017年07月14日 星期五 12时52分37秒
-#   修改日期：2017年07月17日 星期一 13时55分51秒
+#   修改日期：2017年07月19日 星期三 09时11分39秒
 #   描    述：
 #
 #================================================================
@@ -21,7 +21,7 @@ app_c_files += filesystem.cpp
 ifneq ($(PROJECT),)
 app_c_files += hardware_$(PROJECT).cpp
 endif
-app_c_files += hardware.cpp
+app_c_files += hardware_base.cpp
 app_c_files += optparse.cpp
 app_c_files += regexp.cpp
 app_c_files += samples_list.cpp
