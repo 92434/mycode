@@ -6,7 +6,7 @@
  *   文件名称：FpSensorLib.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月17日 星期一 12时09分03秒
- *   修改日期：2017年07月18日 星期二 17时17分42秒
+ *   修改日期：2017年07月19日 星期三 17时08分07秒
  *   描    述：
  *
  *================================================================*/
@@ -49,6 +49,8 @@ typedef enum ft_far_e {
 	FT_FAR_Inf = 28
 } ft_far_t;
 
+#define FOCAL_PER_TEMPLATE_SIZE (400 * 1024 - 8)//(32768*32 - 8)
+
 typedef char __ft_s8;
 typedef short __ft_s16;
 typedef int __ft_s32;
@@ -60,15 +62,15 @@ typedef unsigned long long __ft_u64;
 
 typedef int (*save_bmp_t)(char *label, char *buffer, int len);
 
-//typedef __ft_s32 (*FtFpSpiWriteFunc)(__ft_u8 *, __ft_u32);
-//typedef __ft_s32 (*FtFpSpiReadFunc)(__ft_u8 *, __ft_u8 *, __ft_u32);
+typedef __ft_s32 (*FtFpSpiWriteFunc)(__ft_u8 *, __ft_u32);
+typedef __ft_s32 (*FtFpSpiReadFunc)(__ft_u8 *, __ft_u8 *, __ft_u32);
 typedef void (*FtFpUsleepFunc)(__ft_u32);
 typedef __ft_s32 (*FtGetMcuStatusFunc)(void);
 typedef __ft_u64 (*FtGetSystemTimeFunc)(void);
 typedef void (*FtSetLogFunc)(const char *fmt, ...);
 
-//void focal_InitFuncSpiWrite(FtFpSpiWriteFunc func);//xiaofei
-//void focal_InitFuncSpiRead(FtFpSpiReadFunc func);//xiaofei
+void focal_InitFuncSpiWrite(FtFpSpiWriteFunc func);//xiaofei
+void focal_InitFuncSpiRead(FtFpSpiReadFunc func);//xiaofei
 void focal_InitFuncUsleep(FtFpUsleepFunc func);//xiaofei
 void focal_InitFuncGetMcuStatus(FtGetMcuStatusFunc func);//xiaofei
 void focal_InitFuncGetSystemTime(FtGetSystemTimeFunc func);//xiaofei
@@ -112,6 +114,8 @@ __ft_s32 focal_Enroll(__ft_u16 fingerId, __ft_u8 enroll_index, __ft_u8 *penroll_
 __ft_s32 focal_Identify(__ft_u8 *pfingerId, __ft_u8 *pupdateTpl);
 __ft_s32 focal_UpdateTemplate(__ft_s32 update, __ft_s32 *finger_id);
 __ft_s32 focal_DelFinger(__ft_u8 fingerId);
+__ft_s32 focal_SaveAlgTplData(__ft_u16 fingerId, __ft_u8 *tpl_type, __ft_u32 *tpl_size, __ft_u8 * tpl_data);
+
 #ifdef __cplusplus
 }
 #endif

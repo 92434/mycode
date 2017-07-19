@@ -6,7 +6,7 @@
  *   文件名称：test_task.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时27分38秒
- *   修改日期：2017年07月18日 星期二 12时35分42秒
+ *   修改日期：2017年07月19日 星期三 18时29分33秒
  *   描    述：
  *
  *================================================================*/
@@ -37,9 +37,15 @@ typedef enum _task_start_reason {
 	ADD_CATAGORY_FINISHED,
 } task_start_reason_t;
 
+typedef enum _report_type {
+	REPORT_PROCESS = 0,
+	REPORT_EXIT,
+} report_type_t;
+
 typedef struct _result_notifier {
+	report_type_t type;
 	int pid;
-	char filename[1024];
+	char buffer[1024];
 } result_notifier_t;
 
 struct bmp_enroll_set_comp {
@@ -73,6 +79,12 @@ private:
 	std::ofstream ofs;
 	std::string logfile;
 	std::string logfile_hardware;
+	std::string server_path;
+
+	int total_tasks;
+	int current_tasks;
+	int start_time;
+	int current_percent;
 
 public:
 	test_task();
@@ -99,6 +111,8 @@ public:
 
 	static bool identify_less_than(task_bmp bmp1, task_bmp bmp2);
 
+	int account_task(int tasks);
+
 	int pre_task();
 
 	int do_task_list();
@@ -109,12 +123,12 @@ public:
 
 	int do_task();
 
-	int send_client_result(std::string server_path);
+	int send_client_result(report_type_t report_type, std::string content);
 
 	std::set<task_bmp, bmp_enroll_set_comp> &get_enroll_ids();
 
 	bool can_start_task(task_start_reason_t reason);
 
-	int start_task(task_start_reason_t reason, std::string server_path);
+	int start_task(std::string server_path);
 };
 #endif //TEST_TASK_H

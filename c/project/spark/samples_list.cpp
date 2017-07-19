@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年07月18日 星期二 12时52分34秒
+ *   修改日期：2017年07月19日 星期三 17时55分02秒
  *   描    述：
  *
  *================================================================*/
@@ -289,9 +289,9 @@ int samples_list::p_result()
 }
 
 int samples_list::add_test_task_catagory(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples,
-						   test_task *task,
-						   std::string catagory_name,
-						   test_type_t test_type)
+		test_task *task,
+		std::string catagory_name,
+		test_type_t test_type)
 {
 	int ret = 0;
 
@@ -407,9 +407,12 @@ int samples_list::get_client_result()
 		return ret;
 	}
 
-	printf("get log from client:pid:%d, filename:%s\n", notifier.pid, notifier.filename);
+	if(notifier.type == REPORT_EXIT) {
+		ret = notifier.pid;
+	}
 
-	ret = notifier.pid;
+	printf("client:pid:%d, content:%s\n", notifier.pid, notifier.buffer);
+
 
 	/* close the socket */
 	close(client_sockfd);
@@ -441,7 +444,7 @@ int samples_list::try_to_start_task_and_wait(test_task *task, task_start_reason_
 			add_test_task_catagory(fa_samples, task, *catagory_it, FOR_FA);
 		}
 
-		ret = task->start_task(reason, server_path);
+		ret = task->start_task(server_path);
 
 		if(ret != 0) {
 			printf("pid start:%d(%x)\n", ret, ret);
@@ -452,8 +455,11 @@ int samples_list::try_to_start_task_and_wait(test_task *task, task_start_reason_
 
 	while((pid_list.size() >= g_settings->max_proc_number) || (wait && (pid_list.size() > 0))) {
 		int pid = get_client_result();
-		printf("pid stop:%d(%x)\n", pid, pid);
-		pid_list.erase(pid);
+
+		if(pid != 0) {
+			printf("pid stop:%d(%x)\n", pid, pid);
+			pid_list.erase(pid);
+		}
 	}
 
 	return ret;

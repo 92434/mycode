@@ -6,7 +6,7 @@
  *   文件名称：FpSensorLib.c
  *   创 建 者：肖飞
  *   创建日期：2017年07月17日 星期一 12时08分57秒
- *   修改日期：2017年07月18日 星期二 17时27分31秒
+ *   修改日期：2017年07月19日 星期三 17时08分40秒
  *   描    述：
  *
  *================================================================*/
@@ -23,6 +23,7 @@ typedef struct _ft_device {
 	FtSetLogFunc ft_printf;
 	save_bmp_t save_bmp;
 
+	FtFpUsleepFunc usleep;
 	FtGetMcuStatusFunc get_mcu_status;
 	FtGetSystemTimeFunc get_system_time;
 } ft_device_t;
@@ -161,7 +162,9 @@ int ft_set_image(const char *buffer, int len)
 		}
 
 		ft_device->buffer = (char *)malloc(len);
-		ft_device->size = len;
+		if(ft_device->buffer != NULL) {
+			ft_device->size = len;
+		}
 	}
 
 
@@ -187,6 +190,13 @@ void focal_InitFuncGetSystemTime(FtGetSystemTimeFunc func)
 
 void focal_InitFuncUsleep(FtFpUsleepFunc func)
 {
+	ft_printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
+
+	if(ft_device == NULL) {
+		return;
+	}
+
+	ft_device->usleep = func;
 }
 
 void focal_InitFuncGetMcuStatus(FtGetMcuStatusFunc func)
@@ -352,6 +362,18 @@ __ft_s32 focal_UpdateTemplate(__ft_s32 update, __ft_s32 *finger_id)
 
 __ft_s32 focal_DelFinger(__ft_u8 fingerId)
 {
+	__ft_s32 ret = 0;
+	return ret;
+}
+
+void focal_InitFuncSpiWrite(FtFpSpiWriteFunc func) {
+}
+
+void focal_InitFuncSpiRead(FtFpSpiReadFunc func) {
+}
+
+
+__ft_s32 focal_SaveAlgTplData(__ft_u16 fingerId, __ft_u8 *tpl_type, __ft_u32 *tpl_size, __ft_u8 * tpl_data) {
 	__ft_s32 ret = 0;
 	return ret;
 }

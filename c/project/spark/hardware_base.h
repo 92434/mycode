@@ -2,11 +2,11 @@
 
 /*================================================================
  *   Copyright (C) 2017年07月19日 肖飞 All rights reserved
- *   
+ *
  *   文件名称：hardware_base.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月19日 星期三 09时09分53秒
- *   修改日期：2017年07月19日 星期三 09时14分23秒
+ *   修改日期：2017年07月19日 星期三 19时39分37秒
  *   描    述：
  *
  *================================================================*/
@@ -63,6 +63,15 @@ struct BGR_PALETTE {
 	unsigned char unused;
 };
 
+#define FT_TPL_MAX_SIZE FOCAL_PER_TEMPLATE_SIZE
+
+typedef struct fp_alg_tpl {
+	unsigned char tpl_type;
+	unsigned short tpl_id;
+	unsigned int tpl_size;
+	unsigned char tpl_data[FT_TPL_MAX_SIZE];
+} fp_alg_tpl_t;
+
 class hardware_base
 {
 protected:
@@ -105,6 +114,10 @@ public:
 
 	int get_image(char *buffer, int len);
 
+	static __ft_s32 spi_write(__ft_u8 *buffer, __ft_u32 len);
+
+	static __ft_s32 spi_read(__ft_u8 *buffer_out, __ft_u8 *buffer_in, __ft_u32 len);
+
 	static void hw_usleep(__ft_u32 usec);
 
 	static __ft_s32 get_mcu_status(void);
@@ -117,7 +130,7 @@ public:
 
 	int enroll(unsigned short finger_id, unsigned char enroll_index, unsigned char *penroll_coverage);
 
-	int idnetify(unsigned char *finger_id, unsigned char *update_template);
+	int identify(unsigned char *finger_id, unsigned char *update, unsigned char *update_outside, int *update_template_finger_id);
 
 	int update_template(int update, int *finger_id);
 

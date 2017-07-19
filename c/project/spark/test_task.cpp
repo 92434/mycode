@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月18日 星期二 17时09分45秒
+ *   修改日期：2017年07月19日 星期三 19时39分46秒
  *   描    述：
  *
  *================================================================*/
@@ -31,6 +31,10 @@ int test_task::clear()
 	enroll_ids.clear();
 	logfile.clear();
 	timestamp.clear();
+	total_tasks = 0;
+	current_tasks = 0;
+	start_time = 0;
+	current_percent = 0;
 	return ret;
 }
 
@@ -70,6 +74,8 @@ int test_task::get_timestamp()
 	struct timezone tz;
 
 	gettimeofday(&tv, &tz);
+
+	start_time = tv.tv_sec;
 
 	tm = localtime(&tv.tv_sec);
 
@@ -200,6 +206,40 @@ bool test_task::identify_less_than(task_bmp bmp1, task_bmp bmp2)
 	return false;
 }
 
+int test_task::account_task(int tasks)
+{
+	int ret = 0;
+	int percent;
+	int elapsed_time;
+	int left_time;
+
+	current_tasks += tasks;
+
+	if(total_tasks != 0) {
+		percent = current_tasks * 100 / total_tasks;
+	}
+
+	if((percent / 10) != (current_percent / 10)) {
+		struct timeval tv;
+		struct timezone tz;
+
+		current_percent = percent;
+		gettimeofday(&tv, &tz);
+		elapsed_time = tv.tv_sec - start_time;
+
+		if(current_tasks != 0) {
+			char buffer[1024];
+			int len;
+			left_time = elapsed_time * (total_tasks - current_tasks) / current_tasks;
+			len = sprintf(buffer, "processed %d/%d(%d%%) %d seconds left!", current_tasks, total_tasks, percent, left_time);
+			buffer[len] = 0;
+			send_client_result(REPORT_PROCESS, buffer);
+		}
+	}
+
+	return ret;
+}
+
 int test_task::pre_task()
 {
 	int ret = 0;
@@ -217,6 +257,8 @@ int test_task::pre_task()
 
 	ret = hw->hardware_init();
 
+	total_tasks = enroll_list.size() + fr_identify_list.size() + fr_identify_list.size();
+
 	return ret;
 }
 
@@ -224,6 +266,7 @@ int test_task::do_task_list()
 {
 	int ret = 0;
 	hardware *hw = hardware::get_instance();
+	settings *g_settings = settings::get_instance();
 
 
 	std::sort(enroll_list.begin(), enroll_list.end(), enroll_less_than);
@@ -242,12 +285,14 @@ int test_task::do_task_list()
 			unsigned short finger_id = enroll_list_it->current_enroll_id;
 			unsigned char enroll_coverage;
 
-			hw->set_image(enroll_list_it->bmp_path);
+			account_task(1);
 
-			if(finger_id != finger_id_pre) {
+			if(finger_id_pre != finger_id) {
 				finger_id_pre = finger_id;
 				index = 0;
 			}
+
+			hw->set_image(enroll_list_it->bmp_path);
 
 			ret = hw->enroll(finger_id, index, &enroll_coverage);
 
@@ -265,20 +310,33 @@ int test_task::do_task_list()
 		for(identify_list_it = fr_identify_list.begin(); identify_list_it != fr_identify_list.end(); identify_list_it++) {
 			unsigned char finger_id = 0;
 			unsigned char update_template = 0;
+			unsigned char update_template_outside = 0;
+			int update_template_finger_id = 0;
+
+			account_task(1);
 
 			hw->set_image(identify_list_it->bmp_path);
 
-			ret = hw->idnetify(&finger_id, &update_template);
+			ret = hw->identify(&finger_id, &update_template, &update_template_outside, &update_template_finger_id);
 
 			if(ret == 0) {
 				std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
 
 				identify_list_it->new_matched_type = MATCHED;
 
+				if((update_template == 1) || (update_template_outside == 1)) {
+					identify_list_it->update_template = 1;
+				}
+
 				for(ids_it = enroll_ids.begin(); ids_it != enroll_ids.end(); ids_it++) {
 					if(ids_it->current_enroll_id == finger_id) {
 						identify_list_it->new_matched_catagory = ids_it->catagory;
 						identify_list_it->new_matched_id = ids_it->id;
+					}
+
+					if((identify_list_it->update_template == 1) && (ids_it->current_enroll_id == update_template_finger_id)) {
+						identify_list_it->update_template_catagory = ids_it->catagory;
+						identify_list_it->update_template_id = ids_it->id;
 					}
 				}
 			} else {
@@ -298,9 +356,11 @@ int test_task::do_task_list()
 			unsigned char finger_id = 0;
 			unsigned char update_template = 0;
 
+			account_task(1);
+
 			hw->set_image(identify_list_it->bmp_path);
 
-			ret = hw->idnetify(&finger_id, &update_template);
+			ret = hw->identify(&finger_id, &update_template, NULL, NULL);
 
 			if(ret == 0) {
 				std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
@@ -313,6 +373,8 @@ int test_task::do_task_list()
 						identify_list_it->new_matched_id = ids_it->id;
 					}
 				}
+			} else {
+				identify_list_it->new_matched_type = UNMATCHED;
 			}
 		}
 
@@ -407,7 +469,7 @@ int test_task::do_task()
 	return ret;
 }
 
-int test_task::send_client_result(std::string server_path)
+int test_task::send_client_result(report_type_t report_type, std::string content)
 {
 	int ret = 0;
 	/* create a socket */
@@ -428,9 +490,10 @@ int test_task::send_client_result(std::string server_path)
 	}
 
 	/* exchange data */
+	notifier.type = report_type;
 	notifier.pid = getpid();
-	len = snprintf(notifier.filename, 1023, "%s", logfile.c_str());
-	notifier.filename[len] = 0;
+	len = snprintf(notifier.buffer, 1023, "%s", content.c_str());
+	notifier.buffer[len] = 0;
 	len = write(sockfd, &notifier, sizeof(result_notifier_t));
 
 	if(len != sizeof(result_notifier_t)) {
@@ -472,17 +535,19 @@ bool test_task::can_start_task(task_start_reason_t reason)
 	return ret;
 }
 
-int test_task::start_task(task_start_reason_t reason, std::string server_path)
+int test_task::start_task(std::string server_path)
 {
 	int ret = 0;
 
 	int pid = fork();
 
+	this->server_path = server_path;
+
 	if(pid == -1) {
 	} else if(pid == 0) {
 		ret = do_task();
 		//sleep(1);
-		send_client_result(server_path);
+		send_client_result(REPORT_EXIT, logfile);
 		exit(ret);
 	} else {
 		clear();

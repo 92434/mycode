@@ -2,11 +2,11 @@
 
 /*================================================================
  *   Copyright (C) 2017年07月19日 肖飞 All rights reserved
- *   
+ *
  *   文件名称：hardware_base.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月19日 星期三 09时09分48秒
- *   修改日期：2017年07月19日 星期三 09时10分27秒
+ *   修改日期：2017年07月19日 星期三 19时40分31秒
  *   描    述：
  *
  *================================================================*/
@@ -36,6 +36,19 @@ hardware_base::~hardware_base()
 	//printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 }
 
+
+__ft_s32 hardware_base::spi_write(__ft_u8 *buffer, __ft_u32 len)
+{
+	__ft_s32 ret = 0;
+	return ret;
+}
+
+__ft_s32 hardware_base::spi_read(__ft_u8 *buffer_out, __ft_u8 *buffer_in, __ft_u32 len)
+{
+	__ft_s32 ret = 0;
+	return ret;
+}
+
 void hardware_base::hw_usleep(__ft_u32 usec)
 {
 	usleep(usec);
@@ -61,7 +74,8 @@ __ft_u64 hardware_base::get_system_time(void)
 	return ret;
 }
 
-double hw_strtod(std::string number) {
+double hw_strtod(std::string number)
+{
 	double ret = 0;
 	char *invalid_pos;
 
@@ -81,8 +95,8 @@ int hardware_base::hardware_init()
 	unsigned char ucVersion[100] = {0};
 	settings *g_settings = settings::get_instance();
 
-	//focal_InitFuncSpiWrite(qseeSpiWrite);
-	//focal_InitFuncSpiRead(qseeSpiRead);
+	focal_InitFuncSpiWrite((FtFpSpiWriteFunc)&hardware_base::spi_write);
+	focal_InitFuncSpiRead((FtFpSpiReadFunc)&hardware_base::spi_read);
 	focal_InitFuncUsleep((FtFpUsleepFunc)&hardware_base::hw_usleep);
 	focal_InitFuncGetMcuStatus((FtGetMcuStatusFunc)&hardware_base::get_mcu_status);
 	focal_InitFuncGetSystemTime((FtGetSystemTimeFunc)&hardware_base::get_system_time);
@@ -126,8 +140,8 @@ int hardware_base::hardware_init()
 	focal_SetImageValidAreaScale(hw_strtod(g_settings->valid_area_scale));//
 	focal_SetEnrollmentTipsEn((int)hw_strtod(g_settings->enrollment_tips_enable));// 重复区域使能
 	focal_SetEnrollmentTipsParameter((int)hw_strtod(g_settings->enrollment_tips_parameter1),
-			(int)hw_strtod(g_settings->enrollment_tips_parameter2),
-			(int)hw_strtod(g_settings->enrollment_tips_parameter3));// 0 30 45   10000 30 45
+									 (int)hw_strtod(g_settings->enrollment_tips_parameter2),
+									 (int)hw_strtod(g_settings->enrollment_tips_parameter3));// 0 30 45   10000 30 45
 	focal_SetImprovedFrrEn((int)hw_strtod(g_settings->verify_improve_enable));// 1 1
 
 	focal_SetImprovedLevel((int)hw_strtod(g_settings->verify_improve_level));// 5 5
@@ -273,6 +287,7 @@ void hardware_base::hardware_log(const char *fmt, ...)
 	buffer[len] = 0;
 	va_end(ap);
 	ofs_hardware.write(buffer, len);
+	ofs_hardware.write("\n", 1);
 }
 
 int hardware_base::log_file_end()
@@ -333,11 +348,10 @@ int hardware_base::set_image(std::string bmp_path)
 	}
 
 	offset = bmp_file_header.bfOffBits;
-	ifs.seekg(offset, ifs.beg);
-
 	len = bmp_info_header.biWidth * bmp_info_header.biHeight * bmp_info_header.biBitCount / 8;
 	buffer = new char[len];
 
+	ifs.seekg(offset, ifs.beg);
 	ifs.read(buffer, len);
 
 	if(!ifs.good()) {
@@ -378,14 +392,43 @@ int hardware_base::set_save_bmp()
 int hardware_base::enroll(unsigned short finger_id, unsigned char enroll_index, unsigned char *penroll_coverage)
 {
 	int ret = 0;
-	ret = focal_Enroll(finger_id, enroll_index, penroll_coverage);
+	settings *g_settings = settings::get_instance();
+
+	if(enroll_index < (unsigned short)hw_strtod(g_settings->enroll_max_templates)) {
+		ret = focal_Enroll(finger_id, enroll_index, penroll_coverage);
+
+		if(ret == 0) {
+			if(enroll_index == ((unsigned short)hw_strtod(g_settings->enroll_max_templates) - 1)) {
+				fp_alg_tpl_t fp_tpl;
+				ret = focal_SaveAlgTplData(finger_id, &fp_tpl.tpl_type, &fp_tpl.tpl_size, fp_tpl.tpl_data);
+			}
+		}
+	}
+
 	return ret;
 }
 
-int hardware_base::idnetify(unsigned char *finger_id, unsigned char *update_template)
+int hardware_base::identify(unsigned char *finger_id, unsigned char *update, unsigned char *update_outside, int *update_template_finger_id)
 {
 	int ret = 0;
-	ret = focal_Identify(finger_id, update_template);
+	ret = focal_Identify(finger_id, update);
+
+	if(ret == 0) {
+		settings *g_settings = settings::get_instance();
+
+		if(((int)hw_strtod(g_settings->update_template_outside_enable) == 1)
+		   && (update_outside != NULL)
+		   && (update_template_finger_id != NULL)) {
+			ret = update_template(1, update_template_finger_id);
+
+			if(ret == 0) {
+				*update_outside = 1;
+			}
+		}
+
+		ret = 0;
+	}
+
 	return ret;
 }
 
