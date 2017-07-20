@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年07月18日 星期二 19时00分08秒
+ *   修改日期：2017年07月20日 星期四 16时03分45秒
  *   描    述：
  *
  *================================================================*/
@@ -31,6 +31,7 @@ extern "C"
 typedef enum _select_type {
 	SELECT_ALL = 0,
 	SELECT_SAME_CATAGORY,
+	SELECT_DIFFENENT_ID,
 } select_type_t;
 
 struct pattern_info {
@@ -113,7 +114,13 @@ public:
 
 	std::vector<pattern_info> get_pattern_info(configure &cfg, std::string pattern_base);
 
+	double value_strtod(std::string number);
+
 	int get_pattern_from_configuration(configure &cfg);
+
+	int get_sensor_lib_settings_from_configuration(configure &cfg);
+
+	int get_task_settings_from_configuration(configure &cfg);
 
 	int parse_args_from_configuration(int argc, char **argv);
 

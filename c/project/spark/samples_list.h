@@ -2,11 +2,11 @@
 
 /*================================================================
  *   Copyright (C) 2017年07月14日 肖飞 All rights reserved
- *   
+ *
  *   文件名称：samples_list.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时28分39秒
- *   修改日期：2017年07月14日 星期五 14时03分38秒
+ *   修改日期：2017年07月20日 星期四 16时50分27秒
  *   描    述：
  *
  *================================================================*/
@@ -43,6 +43,11 @@ private:
 	std::set<int> pid_list;
 	std::string server_path;
 
+	int fr_fail_count;
+	int fr_total_count;
+	int fa_success_count;
+	int fa_total_count;
+
 public:
 	samples_list();
 
@@ -70,12 +75,16 @@ public:
 
 	int add_test_task_catagory(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples,
 							   test_task *task,
-							   std::string catagory_name,
+							   std::set<task_bmp, bmp_enroll_set_comp> &enroll_ids,
 							   test_type_t test_type);
 
 	int create_server();
 
 	int stop_server();
+
+	int parse_pid_result(char *buffer);
+
+	int report_result();
 
 	int get_client_result();
 

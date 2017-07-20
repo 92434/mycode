@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月19日 星期三 19时39分46秒
+ *   修改日期：2017年07月20日 星期四 16时36分44秒
  *   描    述：
  *
  *================================================================*/
@@ -31,10 +31,14 @@ int test_task::clear()
 	enroll_ids.clear();
 	logfile.clear();
 	timestamp.clear();
+
 	total_tasks = 0;
 	current_tasks = 0;
 	start_time = 0;
 	current_percent = 0;
+
+	fr_fail_count = 0;
+	fa_success_count = 0;
 	return ret;
 }
 
@@ -257,7 +261,7 @@ int test_task::pre_task()
 
 	ret = hw->hardware_init();
 
-	total_tasks = enroll_list.size() + fr_identify_list.size() + fr_identify_list.size();
+	total_tasks = enroll_list.size() + fr_identify_list.size() + fa_identify_list.size();
 
 	return ret;
 }
@@ -340,6 +344,7 @@ int test_task::do_task_list()
 					}
 				}
 			} else {
+				fr_fail_count++;
 				identify_list_it->new_matched_type = UNMATCHED;
 			}
 		}
@@ -365,6 +370,7 @@ int test_task::do_task_list()
 			if(ret == 0) {
 				std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
 
+				fa_success_count++;
 				identify_list_it->new_matched_type = MATCHED;
 
 				for(ids_it = enroll_ids.begin(); ids_it != enroll_ids.end(); ids_it++) {
@@ -380,6 +386,31 @@ int test_task::do_task_list()
 
 		return ret;
 	}
+}
+
+int test_task::report_result()
+{
+	int ret = 0;
+	char buffer[1024];
+	int len;
+	int fr_total = fr_identify_list.size();
+	int fa_total = fa_identify_list.size();
+
+	if(fr_total > 0) {
+		len = sprintf(buffer, "fr:%d:%d", fr_fail_count, fr_total);
+		buffer[len] = 0;
+		send_client_result(REPORT_RESULT, buffer);
+		log_file("pid:%d, ppid:%d, fr result:%d/%d(%f%%)\n", (int)getpid(), (int)getppid(), fr_fail_count, fr_total, fr_fail_count * 100.0 / fr_total);
+	}
+
+	if(fa_total > 0) {
+		len = sprintf(buffer, "fa:%d:%d", fa_success_count, fa_total);
+		buffer[len] = 0;
+		send_client_result(REPORT_RESULT, buffer);
+		log_file("pid:%d, ppid:%d, fr result:%d/%d(%f%%)\n", (int)getpid(), (int)getppid(), fa_success_count, fa_total, fa_success_count * 100.0 / fa_total);
+	}
+
+	return ret;
 }
 
 int test_task::report_task()
@@ -443,6 +474,8 @@ int test_task::report_task()
 			log_file("path:%s\n\n", identify_list_it->bmp_path.c_str());
 		}
 	}
+
+	report_result();
 	return ret;
 }
 

@@ -6,7 +6,7 @@
  *   文件名称：test_task.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时27分38秒
- *   修改日期：2017年07月19日 星期三 18时29分33秒
+ *   修改日期：2017年07月20日 星期四 17时59分57秒
  *   描    述：
  *
  *================================================================*/
@@ -30,7 +30,7 @@ extern "C"
 #include "task_bmp.h"
 #include "settings.h"
 #include "filesystem.h"
-#include "hw.h"
+#include "hardware.h"
 
 typedef enum _task_start_reason {
 	ADD_ID_FINISHED = 0,
@@ -39,6 +39,7 @@ typedef enum _task_start_reason {
 
 typedef enum _report_type {
 	REPORT_PROCESS = 0,
+	REPORT_RESULT,
 	REPORT_EXIT,
 } report_type_t;
 
@@ -86,6 +87,9 @@ private:
 	int start_time;
 	int current_percent;
 
+	int fr_fail_count;
+	int fa_success_count;
+
 public:
 	test_task();
 
@@ -116,6 +120,8 @@ public:
 	int pre_task();
 
 	int do_task_list();
+
+	int report_result();
 
 	int report_task();
 

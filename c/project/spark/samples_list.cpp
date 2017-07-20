@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年07月19日 星期三 17时55分02秒
+ *   修改日期：2017年07月20日 星期四 16时50分54秒
  *   描    述：
  *
  *================================================================*/
@@ -19,6 +19,11 @@ samples_list::samples_list()
 	fr_samples = NULL;
 	fa_samples = NULL;
 	server_path = "/tmp/.server_socket";
+
+	fr_fail_count = 0;
+	fr_total_count = 0;
+	fa_success_count = 0;
+	fa_total_count = 0;
 }
 
 int samples_list::release_type_samples(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples)
@@ -290,7 +295,7 @@ int samples_list::p_result()
 
 int samples_list::add_test_task_catagory(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples,
 		test_task *task,
-		std::string catagory_name,
+		std::set<task_bmp, bmp_enroll_set_comp> &enroll_ids,
 		test_type_t test_type)
 {
 	int ret = 0;
@@ -319,6 +324,7 @@ int samples_list::add_test_task_catagory(std::map<std::string, std::map<std::str
 				task_bmp bmp = *id_it;
 				bool add = false;
 				select_type_t select_type;
+				std::set<task_bmp, bmp_enroll_set_comp>::iterator enroll_ids_it;
 
 				bmp.test_type = test_type;
 
@@ -331,8 +337,22 @@ int samples_list::add_test_task_catagory(std::map<std::string, std::map<std::str
 				if(select_type == SELECT_ALL) {
 					add = true;
 				} else if(select_type == SELECT_SAME_CATAGORY) {
-					if(bmp.catagory.compare(catagory_name) == 0) {
-						add = true;
+					for(enroll_ids_it = enroll_ids.begin(); enroll_ids_it != enroll_ids.end(); enroll_ids_it++) {
+						if(bmp.catagory.compare(enroll_ids_it->catagory) == 0) {
+							add = true;
+							break;
+						}
+					}
+				} else if(select_type == SELECT_DIFFENENT_ID) {
+					add = true;
+
+					for(enroll_ids_it = enroll_ids.begin(); enroll_ids_it != enroll_ids.end(); enroll_ids_it++) {
+						if(bmp.catagory.compare(enroll_ids_it->catagory) == 0) {
+							if(bmp.id.compare(enroll_ids_it->id) == 0) {
+								add = false;
+								break;
+							}
+						}
 					}
 				}
 
@@ -389,6 +409,40 @@ int samples_list::stop_server()
 	return ret;
 }
 
+int samples_list::parse_pid_result(char *buffer)
+{
+	int ret = 0;
+	std::string content = buffer;
+	std::string pattern = "([^:]+):([^:]+):([^:]+)";
+	std::vector<std::string> matched_list;
+	regexp r;
+	settings *g_settings = settings::get_instance();
+
+	matched_list = r.match(content, pattern);
+	if(matched_list.size() == 4) {
+		if(matched_list.at(1) == "fr") {
+			fr_fail_count += (int)g_settings->value_strtod(matched_list.at(2));
+			fr_total_count += (int)g_settings->value_strtod(matched_list.at(3));
+		} else if(matched_list.at(1) == "fa") {
+			fa_success_count += (int)g_settings->value_strtod(matched_list.at(2));
+			fa_total_count += (int)g_settings->value_strtod(matched_list.at(3));
+		}
+	}
+	return ret;
+}
+
+int samples_list::report_result()
+{
+	int ret = 0;
+	if(fr_total_count > 0) {
+		printf("fr result:%d/%d(%f%%)\n", fr_fail_count, fr_total_count, fr_fail_count * 100.0 / fr_total_count);
+	}
+	if(fa_total_count > 0) {
+		printf("fa result:%d/%d(%f%%)\n", fa_success_count, fa_total_count, fa_success_count * 100.0 / fa_total_count);
+	}
+	return ret;
+}
+
 int samples_list::get_client_result()
 {
 	int ret = 0;
@@ -407,8 +461,11 @@ int samples_list::get_client_result()
 		return ret;
 	}
 
+
 	if(notifier.type == REPORT_EXIT) {
 		ret = notifier.pid;
+	} else if(notifier.type == REPORT_RESULT) {
+		parse_pid_result(notifier.buffer);
 	}
 
 	printf("client:pid:%d, content:%s\n", notifier.pid, notifier.buffer);
@@ -428,21 +485,10 @@ int samples_list::try_to_start_task_and_wait(test_task *task, task_start_reason_
 	settings *g_settings = settings::get_instance();
 
 	if(ready) {
-		std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
-		std::set<task_bmp, bmp_enroll_set_comp> ids = task->get_enroll_ids();
-		std::set<std::string> set_catagory;
-		std::set<std::string>::iterator catagory_it;
+		std::set<task_bmp, bmp_enroll_set_comp> enroll_ids = task->get_enroll_ids();
 
-		for(ids_it = ids.begin(); ids_it != ids.end(); ids_it++) {
-			task_bmp bmp = *ids_it;
-			set_catagory.insert(bmp.catagory);
-		}
-
-		for(catagory_it = set_catagory.begin(); catagory_it != set_catagory.end(); catagory_it++) {
-			//printf("add catagory:%s\n", catagory_it->c_str());
-			add_test_task_catagory(fr_samples, task, *catagory_it, FOR_FR);
-			add_test_task_catagory(fa_samples, task, *catagory_it, FOR_FA);
-		}
+		add_test_task_catagory(fr_samples, task, enroll_ids, FOR_FR);
+		add_test_task_catagory(fa_samples, task, enroll_ids, FOR_FA);
 
 		ret = task->start_task(server_path);
 
@@ -506,6 +552,8 @@ int samples_list::start_test_task()
 	}
 
 	try_to_start_task_and_wait(&task, ADD_CATAGORY_FINISHED, true);
+
+	report_result();
 
 	return ret;
 }

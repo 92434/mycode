@@ -1,23 +1,21 @@
 
 
 /*================================================================
- *   Copyright (C) 2017年07月19日 肖飞 All rights reserved
- *
- *   文件名称：hardware_base.h
+ *   Copyright (C) 2017年07月20日 肖飞 All rights reserved
+ *   
+ *   文件名称：hardware.h
  *   创 建 者：肖飞
- *   创建日期：2017年07月19日 星期三 09时09分53秒
- *   修改日期：2017年07月19日 星期三 19时39分37秒
+ *   创建日期：2017年07月20日 星期四 17时55分24秒
+ *   修改日期：2017年07月20日 星期四 18时16分38秒
  *   描    述：
  *
  *================================================================*/
-#ifndef _HARDWARE_BASE_H
-#define _HARDWARE_BASE_H
+#ifndef _HARDWARE_H
+#define _HARDWARE_H
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "FpSensorLib.h"
 
 #ifdef __cplusplus
 }
@@ -32,6 +30,8 @@ extern "C"
 
 #include "filesystem.h"
 #include "settings.h"
+#include "hw.h"
+
 #pragma pack(1)
 struct BMP_FILEHDR {                     // BMP file header
 	char   bfType[2];                   // "BM"
@@ -63,22 +63,10 @@ struct BGR_PALETTE {
 	unsigned char unused;
 };
 
-#define FT_TPL_MAX_SIZE FOCAL_PER_TEMPLATE_SIZE
-
-typedef struct fp_alg_tpl {
-	unsigned char tpl_type;
-	unsigned short tpl_id;
-	unsigned int tpl_size;
-	unsigned char tpl_data[FT_TPL_MAX_SIZE];
-} fp_alg_tpl_t;
-
-class hardware_base
+class hardware : public hardware_base
 {
-protected:
-
-	int width;
-	int height;
-
+private:
+	static hardware *hw;
 	static BMP_FILEHDR bmp_file_header;
 	static BMP_INFOHDR bmp_info_header;
 	static BGR_PALETTE bmp_palette[256];
@@ -88,13 +76,13 @@ protected:
 
 	static std::string cur_bmp_path;
 
-	hardware_base();
 
-	hardware_base(int width, int height);
+	hardware();
 
-	~hardware_base();
+	~hardware();
 
 public:
+	static hardware *get_instance();
 
 	int hardware_init();
 
@@ -114,19 +102,11 @@ public:
 
 	int get_image(char *buffer, int len);
 
-	static __ft_s32 spi_write(__ft_u8 *buffer, __ft_u32 len);
-
-	static __ft_s32 spi_read(__ft_u8 *buffer_out, __ft_u8 *buffer_in, __ft_u32 len);
-
 	static void hw_usleep(__ft_u32 usec);
 
 	static __ft_s32 get_mcu_status(void);
 
 	static __ft_u64 get_system_time(void);
-
-	int write_flash(int offset, char *buffer, int len);
-
-	int read_flash(int offset, char *buffer, int len);
 
 	int enroll(unsigned short finger_id, unsigned char enroll_index, unsigned char *penroll_coverage);
 
@@ -136,4 +116,4 @@ public:
 
 	int delete_template(char fingerId);
 };
-#endif //HARDWARE_BASE_H
+#endif //HARDWARE_H

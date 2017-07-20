@@ -1,0 +1,12 @@
+>>> s = '肖飞'
+>>> su = u'肖飞'
+>>> s
+'\xe8\x82\x96\xe9\xa3\x9e'
+>>> su
+u'\u8096\u98de'
+>>> s.decode('utf-8')
+u'\u8096\u98de'
+>>> su.encode('utf-8')
+'\xe8\x82\x96\xe9\xa3\x9e'
+>>> print '中文'.decode('utf-8').encode('gb2312').decode('gb2312')
+中文

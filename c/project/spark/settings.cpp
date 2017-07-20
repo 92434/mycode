@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年07月18日 星期二 18时48分31秒
+ *   修改日期：2017年07月20日 星期四 16时03分51秒
  *   描    述：
  *
  *================================================================*/
@@ -19,7 +19,7 @@ settings::settings()
 	max_number_of_id_per_proc = 5;
 	max_number_of_catagory_per_proc = 1;
 	fr_select_type = SELECT_SAME_CATAGORY;
-	fa_select_type = SELECT_SAME_CATAGORY;
+	fa_select_type = SELECT_DIFFENENT_ID;
 }
 
 settings::~settings()
@@ -196,6 +196,73 @@ int settings::get_pattern_from_configuration(configure &cfg)
 	return ret;
 }
 
+int settings::get_sensor_lib_settings_from_configuration(configure &cfg)
+{
+	int ret = 0;
+	debug_switch = cfg.get("sensor_lib", "debug_switch");
+	algorithm_mode = cfg.get("sensor_lib", "algorithm_mode");
+	enroll_max_templates = cfg.get("sensor_lib", "enroll_max_templates");
+	algorithm_max_templates = cfg.get("sensor_lib", "algorithm_max_templates");
+	spa_enable = cfg.get("sensor_lib", "spa_enable");
+	algorithm_far_level = cfg.get("sensor_lib", "algorithm_far_level");
+	update_template_far_level = cfg.get("sensor_lib", "update_template_far_level");
+	update_template_threshold = cfg.get("sensor_lib", "update_template_threshold");
+	verify_quickly_enable = cfg.get("sensor_lib", "verify_quickly_enable");
+	update_template_outside_enable = cfg.get("sensor_lib", "update_template_outside_enable");
+	image_quality_score = cfg.get("sensor_lib", "image_quality_score");
+	verify_image_quality_score = cfg.get("sensor_lib", "verify_image_quality_score");
+	enroll_duplicate_area_check_enable = cfg.get("sensor_lib", "enroll_duplicate_area_check_enable");
+	valid_area_scale = cfg.get("sensor_lib", "valid_area_scale");
+	enrollment_tips_enable = cfg.get("sensor_lib", "enrollment_tips_enable");
+	enrollment_tips_parameter1 = cfg.get("sensor_lib", "enrollment_tips_parameter1");
+	enrollment_tips_parameter2 = cfg.get("sensor_lib", "enrollment_tips_parameter2");
+	enrollment_tips_parameter3 = cfg.get("sensor_lib", "enrollment_tips_parameter3");
+	verify_improve_enable = cfg.get("sensor_lib", "verify_improve_enable");
+	verify_improve_level = cfg.get("sensor_lib", "verify_improve_level");
+	mcu_image_bit = cfg.get("sensor_lib", "mcu_image_bit");
+	mcu_interrupt_mode = cfg.get("sensor_lib", "mcu_interrupt_mode");
+	mcu_state_check_mode = cfg.get("sensor_lib", "mcu_state_check_mode");
+	repeat_get_image_count = cfg.get("sensor_lib", "repeat_get_image_count");
+	template_buffer_enable = cfg.get("sensor_lib", "template_buffer_enable");
+	transfer_bytes_max = cfg.get("sensor_lib", "transfer_bytes_max");
+	config_debuginfo_switch = cfg.get("sensor_lib", "config_debuginfo_switch");
+	return ret;
+}
+
+
+double settings::value_strtod(std::string number)
+{
+	double ret = 0;
+	char *invalid_pos;
+
+	if(number.size() == 0) {
+		printf("parameter not set!!!\n");
+	}
+
+	ret = strtod(number.c_str(), &invalid_pos);
+
+	return ret;
+}
+
+int settings::get_task_settings_from_configuration(configure &cfg)
+{
+	int ret = 0;
+	std::string value;
+	max_number_of_id_per_proc = (int)value_strtod(cfg.get("settings", "max_number_of_id_per_proc"));
+	max_number_of_catagory_per_proc = (int)value_strtod(cfg.get("settings", "max_number_of_catagory_per_proc"));
+	value = cfg.get("settings", "fr_select_type");
+	fr_select_type = (value == "SELECT_ALL") ? SELECT_ALL
+					 : (value == "SELECT_SAME_CATAGORY") ? SELECT_SAME_CATAGORY
+					 : SELECT_DIFFENENT_ID;
+	value = cfg.get("settings", "fa_select_type");
+	fa_select_type = (value == "SELECT_ALL") ? SELECT_ALL
+					 : (value == "SELECT_SAME_CATAGORY") ? SELECT_SAME_CATAGORY
+					 : SELECT_DIFFENENT_ID;
+
+	max_proc_number = (int)value_strtod(cfg.get("settings", "max_proc_number"));
+	return ret;
+}
+
 int settings::parse_args_from_configuration(int argc, char **argv)
 {
 	int ret = 0;
@@ -226,33 +293,8 @@ int settings::parse_args_from_configuration(int argc, char **argv)
 			dirname = cfg.get("dir", "directory");
 
 			ret = get_pattern_from_configuration(cfg);
-			debug_switch = cfg.get("sensor_lib", "debug_switch");
-			algorithm_mode = cfg.get("sensor_lib", "algorithm_mode");
-			enroll_max_templates = cfg.get("sensor_lib", "enroll_max_templates");
-			algorithm_max_templates = cfg.get("sensor_lib", "algorithm_max_templates");
-			spa_enable = cfg.get("sensor_lib", "spa_enable");
-			algorithm_far_level = cfg.get("sensor_lib", "algorithm_far_level");
-			update_template_far_level = cfg.get("sensor_lib", "update_template_far_level");
-			update_template_threshold = cfg.get("sensor_lib", "update_template_threshold");
-			verify_quickly_enable = cfg.get("sensor_lib", "verify_quickly_enable");
-			update_template_outside_enable = cfg.get("sensor_lib", "update_template_outside_enable");
-			image_quality_score = cfg.get("sensor_lib", "image_quality_score");
-			verify_image_quality_score = cfg.get("sensor_lib", "verify_image_quality_score");
-			enroll_duplicate_area_check_enable = cfg.get("sensor_lib", "enroll_duplicate_area_check_enable");
-			valid_area_scale = cfg.get("sensor_lib", "valid_area_scale");
-			enrollment_tips_enable = cfg.get("sensor_lib", "enrollment_tips_enable");
-			enrollment_tips_parameter1 = cfg.get("sensor_lib", "enrollment_tips_parameter1");
-			enrollment_tips_parameter2 = cfg.get("sensor_lib", "enrollment_tips_parameter2");
-			enrollment_tips_parameter3 = cfg.get("sensor_lib", "enrollment_tips_parameter3");
-			verify_improve_enable = cfg.get("sensor_lib", "verify_improve_enable");
-			verify_improve_level = cfg.get("sensor_lib", "verify_improve_level");
-			mcu_image_bit = cfg.get("sensor_lib", "mcu_image_bit");
-			mcu_interrupt_mode = cfg.get("sensor_lib", "mcu_interrupt_mode");
-			mcu_state_check_mode = cfg.get("sensor_lib", "mcu_state_check_mode");
-			repeat_get_image_count = cfg.get("sensor_lib", "repeat_get_image_count");
-			template_buffer_enable = cfg.get("sensor_lib", "template_buffer_enable");
-			transfer_bytes_max = cfg.get("sensor_lib", "transfer_bytes_max");
-			config_debuginfo_switch = cfg.get("sensor_lib", "config_debuginfo_switch");
+			ret = get_sensor_lib_settings_from_configuration(cfg);
+			ret = get_task_settings_from_configuration(cfg);
 		} else {
 			printf("load configuration file failed!!!\n");
 		}
