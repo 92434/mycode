@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年07月20日 星期四 16时50分54秒
+ *   修改日期：2017年07月21日 星期五 14时49分44秒
  *   描    述：
  *
  *================================================================*/
@@ -228,7 +228,7 @@ int samples_list::update_samples_list()
 	std::vector<std::string> bmp_file_list;
 	settings *g_settings = settings::get_instance();
 
-	bmp_file_list = get_bmp_filelist(g_settings->dirname);
+	bmp_file_list = get_bmp_filelist(g_settings->pictures_dirname);
 
 	update_sub_samples_list(&enroll_samples, bmp_file_list, g_settings->enroll_pattern);
 	update_sub_samples_list(&fr_samples, bmp_file_list, g_settings->fr_pattern);
@@ -343,7 +343,7 @@ int samples_list::add_test_task_catagory(std::map<std::string, std::map<std::str
 							break;
 						}
 					}
-				} else if(select_type == SELECT_DIFFENENT_ID) {
+				} else if(select_type == SELECT_DIFFERENT_ID) {
 					add = true;
 
 					for(enroll_ids_it = enroll_ids.begin(); enroll_ids_it != enroll_ids.end(); enroll_ids_it++) {
@@ -434,12 +434,53 @@ int samples_list::parse_pid_result(char *buffer)
 int samples_list::report_result()
 {
 	int ret = 0;
+	settings *g_settings = settings::get_instance();
+
+	gen_log_file_names();
+
+	log_file_start();
+
+	log_file("configuration_name:%s,", g_settings->configure_file.c_str());
+	log_file("test_type:%s,", g_settings->test_type.c_str());
+	log_file("log_dirname:%s,", g_settings->log_dirname.c_str());
+	log_file("pictures_directory:%s,", g_settings->pictures_dirname.c_str());
+	log_file("debug_switch:%s,", g_settings->debug_switch.c_str());
+	log_file("algorithm_mode:%s,", g_settings->algorithm_mode.c_str());
+	log_file("enroll_max_templates:%s,", g_settings->enroll_max_templates.c_str());
+	log_file("algorithm_max_templates:%s,", g_settings->algorithm_max_templates.c_str());
+	log_file("spa_enable:%s,", g_settings->spa_enable.c_str());
+	log_file("algorithm_far_level:%s,", g_settings->algorithm_far_level.c_str());
+	log_file("update_template_far_level:%s,", g_settings->update_template_far_level.c_str());
+	log_file("update_template_threshold:%s,", g_settings->update_template_threshold.c_str());
+	log_file("verify_quickly_enable:%s,", g_settings->verify_quickly_enable.c_str());
+	log_file("update_template_outside_enable:%s,", g_settings->update_template_outside_enable.c_str());
+	log_file("image_quality_score:%s,", g_settings->image_quality_score.c_str());
+	log_file("verify_image_quality_score:%s,", g_settings->verify_image_quality_score.c_str());
+	log_file("enroll_duplicate_area_check_enable:%s,", g_settings->enroll_duplicate_area_check_enable.c_str());
+	log_file("valid_area_scale:%s,", g_settings->valid_area_scale.c_str());
+	log_file("enrollment_tips_enable:%s,", g_settings->enrollment_tips_enable.c_str());
+	log_file("enrollment_tips_parameter1:%s,", g_settings->enrollment_tips_parameter1.c_str());
+	log_file("enrollment_tips_parameter2:%s,", g_settings->enrollment_tips_parameter2.c_str());
+	log_file("enrollment_tips_parameter3:%s,", g_settings->enrollment_tips_parameter3.c_str());
+	log_file("verify_improve_enable:%s,", g_settings->verify_improve_enable.c_str());
+	log_file("verify_improve_level:%s,", g_settings->verify_improve_level.c_str());
+	log_file("mcu_image_bit:%s,", g_settings->mcu_image_bit.c_str());
+	log_file("mcu_interrupt_mode:%s,", g_settings->mcu_interrupt_mode.c_str());
+	log_file("mcu_state_check_mode:%s,", g_settings->mcu_state_check_mode.c_str());
+	log_file("repeat_get_image_count:%s,", g_settings->repeat_get_image_count.c_str());
+	log_file("template_buffer_enable:%s,", g_settings->template_buffer_enable.c_str());
+	log_file("transfer_bytes_max:%s,", g_settings->transfer_bytes_max.c_str());
+	log_file("config_debuginfo_switch:%s,", g_settings->config_debuginfo_switch.c_str());
 	if(fr_total_count > 0) {
 		printf("fr result:%d/%d(%f%%)\n", fr_fail_count, fr_total_count, fr_fail_count * 100.0 / fr_total_count);
+		log_file("fr_result:%d/%d(%f%%),", fr_fail_count, fr_total_count, fr_fail_count * 100.0 / fr_total_count);
 	}
 	if(fa_total_count > 0) {
 		printf("fa result:%d/%d(%f%%)\n", fa_success_count, fa_total_count, fa_success_count * 100.0 / fa_total_count);
+		log_file("fa_result:%d/%d(%f%%)", fa_success_count, fa_total_count, fa_success_count * 100.0 / fa_total_count);
 	}
+
+	log_file_end();
 	return ret;
 }
 
@@ -554,6 +595,67 @@ int samples_list::start_test_task()
 	try_to_start_task_and_wait(&task, ADD_CATAGORY_FINISHED, true);
 
 	report_result();
+
+	return ret;
+}
+
+int samples_list::gen_log_file_names()
+{
+	int ret = 0;
+	settings *g_settings = settings::get_instance();
+	char buffer[1024];
+	int len = 0;
+
+	len = snprintf(buffer, 1023, "logs/%s/report.log", g_settings->log_dirname.c_str());
+	buffer[len] = 0;
+	logfile = buffer;
+
+	return ret;
+}
+
+int samples_list::log_file_start()
+{
+	int ret = 0;
+	filesystem fs;
+
+	if(logfile.size() == 0) {
+		ret = -1;
+		return ret;
+	}
+
+	fs.mkdirs(logfile);
+	ofs.open(logfile.c_str());
+
+	if(!ofs.good()) {
+		printf("open:%s failed!!! (%s)!\n", logfile.c_str(), strerror(errno));
+		ret = -1;
+		return ret;
+	}
+
+	return ret;
+}
+
+int samples_list::log_file(const char *fmt, ...)
+{
+	int ret = 0;
+	int len = 0;
+	char buffer[1024];
+	va_list ap;
+
+	va_start(ap, fmt);
+	len = vsnprintf(buffer, 1023, fmt, ap);
+	buffer[len] = 0;
+	va_end(ap);
+	ofs.write(buffer, len);
+
+	return ret;
+}
+
+int samples_list::log_file_end()
+{
+	int ret = 0;
+
+	ofs.close();
 
 	return ret;
 }

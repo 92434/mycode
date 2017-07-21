@@ -6,7 +6,7 @@
  *   文件名称：test_task.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时27分38秒
- *   修改日期：2017年07月20日 星期四 17时59分57秒
+ *   修改日期：2017年07月21日 星期五 09时36分03秒
  *   描    述：
  *
  *================================================================*/
@@ -23,7 +23,6 @@ extern "C"
 
 #include <fstream>
 #include <algorithm>    // std::sort
-#include <sys/time.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <stdarg.h>
@@ -100,8 +99,6 @@ public:
 	int add_enroll_item(task_bmp bmp);
 
 	int add_identify_item(task_bmp bmp);
-
-	int get_timestamp();
 
 	int gen_log_file_names();
 

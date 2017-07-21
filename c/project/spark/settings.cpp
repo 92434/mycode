@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年07月20日 星期四 16时03分51秒
+ *   修改日期：2017年07月21日 星期五 14时50分09秒
  *   描    述：
  *
  *================================================================*/
@@ -19,7 +19,9 @@ settings::settings()
 	max_number_of_id_per_proc = 5;
 	max_number_of_catagory_per_proc = 1;
 	fr_select_type = SELECT_SAME_CATAGORY;
-	fa_select_type = SELECT_DIFFENENT_ID;
+	fa_select_type = SELECT_DIFFERENT_ID;
+
+	log_dirname = get_timestamp();
 }
 
 settings::~settings()
@@ -42,6 +44,59 @@ settings *settings::get_instance()
 	return g_settings;
 }
 
+double settings::value_strtod(std::string number)
+{
+	double ret = 0;
+	char *invalid_pos;
+
+	if(number.size() == 0) {
+		printf("parameter not set!!!\n");
+	}
+
+	ret = strtod(number.c_str(), &invalid_pos);
+
+	return ret;
+}
+
+int settings::get_time_val(struct timeval *timeval)
+{
+	int ret = 0;
+	struct timeval tv;
+	struct timezone tz;
+
+	gettimeofday(&tv, &tz);
+
+	*timeval = tv;
+
+	return ret;
+}
+
+std::string settings::get_timestamp()
+{
+	std::string ret;
+	char buffer[1024];
+	int len = 0;
+	struct tm *tm;
+	struct timeval tv;
+
+	get_time_val(&tv);
+
+	tm = localtime(&tv.tv_sec);
+
+	len = snprintf(buffer, 1023, "%04d%02d%02d%02d%02d%02d_%06d",
+				   tm->tm_year + 1900,
+				   tm->tm_mon + 1,
+				   tm->tm_mday,
+				   tm->tm_hour,
+				   tm->tm_min,
+				   tm->tm_sec,
+				   (int)tv.tv_usec
+				  );
+	buffer[len] = 0;
+	ret = buffer;
+	return ret;
+}
+
 int settings::check_configuration()
 {
 	int ret = 0;
@@ -51,16 +106,16 @@ int settings::check_configuration()
 	bool have_fr_pattern = false;
 	bool have_fa_pattern = false;
 
-	if(dirname.size()) {
+	if(pictures_dirname.size()) {
 		have_dir = true;
 	} else {
-		printf("no dirname!\n");
+		printf("no pictures pictures_dirname!\n");
 	}
 
 	if(enroll_pattern.size()) {
 		have_enroll_pattern = true;
 	} else {
-		printf("no enroll_pattern!\n");
+		printf("no enroll pattern!\n");
 	}
 
 	if(fr_pattern.size()) {
@@ -80,6 +135,15 @@ int settings::check_configuration()
 		ret = -1;
 		printf("%s!!!\n", "参数信息不足");
 	}
+
+	return ret;
+}
+
+int settings::get_app_settings_from_configuration(configure &cfg)
+{
+	int ret = 0;
+	pictures_dirname = cfg.get("app", "pictures_directory");
+	test_type = cfg.get("app", "test_type");
 
 	return ret;
 }
@@ -230,20 +294,6 @@ int settings::get_sensor_lib_settings_from_configuration(configure &cfg)
 }
 
 
-double settings::value_strtod(std::string number)
-{
-	double ret = 0;
-	char *invalid_pos;
-
-	if(number.size() == 0) {
-		printf("parameter not set!!!\n");
-	}
-
-	ret = strtod(number.c_str(), &invalid_pos);
-
-	return ret;
-}
-
 int settings::get_task_settings_from_configuration(configure &cfg)
 {
 	int ret = 0;
@@ -253,11 +303,11 @@ int settings::get_task_settings_from_configuration(configure &cfg)
 	value = cfg.get("settings", "fr_select_type");
 	fr_select_type = (value == "SELECT_ALL") ? SELECT_ALL
 					 : (value == "SELECT_SAME_CATAGORY") ? SELECT_SAME_CATAGORY
-					 : SELECT_DIFFENENT_ID;
+					 : SELECT_DIFFERENT_ID;
 	value = cfg.get("settings", "fa_select_type");
 	fa_select_type = (value == "SELECT_ALL") ? SELECT_ALL
 					 : (value == "SELECT_SAME_CATAGORY") ? SELECT_SAME_CATAGORY
-					 : SELECT_DIFFENENT_ID;
+					 : SELECT_DIFFERENT_ID;
 
 	max_proc_number = (int)value_strtod(cfg.get("settings", "max_proc_number"));
 	return ret;
@@ -290,8 +340,7 @@ int settings::parse_args_from_configuration(int argc, char **argv)
 
 		if(ret == 0) {
 			//cfg.p_configure();
-			dirname = cfg.get("dir", "directory");
-
+			ret = get_app_settings_from_configuration(cfg);
 			ret = get_pattern_from_configuration(cfg);
 			ret = get_sensor_lib_settings_from_configuration(cfg);
 			ret = get_task_settings_from_configuration(cfg);

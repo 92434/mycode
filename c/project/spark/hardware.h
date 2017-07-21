@@ -6,7 +6,7 @@
  *   文件名称：hardware.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时55分24秒
- *   修改日期：2017年07月20日 星期四 18时16分38秒
+ *   修改日期：2017年07月21日 星期五 09时52分22秒
  *   描    述：
  *
  *================================================================*/
@@ -26,7 +26,6 @@ extern "C"
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
 
 #include "filesystem.h"
 #include "settings.h"

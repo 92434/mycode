@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年07月20日 星期四 16时03分45秒
+ *   修改日期：2017年07月21日 星期五 14时49分37秒
  *   描    述：
  *
  *================================================================*/
@@ -25,13 +25,14 @@ extern "C"
 #include <vector>
 #include <set>
 #include <stdlib.h>
+#include <sys/time.h>
 #include "configuration.h"
 #include "optparse.h"
 
 typedef enum _select_type {
 	SELECT_ALL = 0,
 	SELECT_SAME_CATAGORY,
-	SELECT_DIFFENENT_ID,
+	SELECT_DIFFERENT_ID,
 } select_type_t;
 
 struct pattern_info {
@@ -62,7 +63,9 @@ class settings
 {
 public:
 	std::string configure_file;
-	std::string dirname;
+	std::string pictures_dirname;
+	std::string test_type;
+	std::string log_dirname;
 
 	std::vector<pattern_info> enroll_pattern;
 	std::vector<pattern_info> fr_pattern;
@@ -110,11 +113,17 @@ public:
 public:
 	static settings *get_instance();
 
+	double value_strtod(std::string number);
+
+	int get_time_val(struct timeval *timeval);
+
+	std::string get_timestamp();
+
 	int check_configuration();
 
-	std::vector<pattern_info> get_pattern_info(configure &cfg, std::string pattern_base);
+	int get_app_settings_from_configuration(configure &cfg);
 
-	double value_strtod(std::string number);
+	std::vector<pattern_info> get_pattern_info(configure &cfg, std::string pattern_base);
 
 	int get_pattern_from_configuration(configure &cfg);
 

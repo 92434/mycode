@@ -6,7 +6,7 @@
  *   文件名称：hardware.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时56分34秒
- *   修改日期：2017年07月20日 星期四 18时24分09秒
+ *   修改日期：2017年07月21日 星期五 09时52分00秒
  *   描    述：
  *
  *================================================================*/
@@ -360,11 +360,11 @@ __ft_s32 hardware::get_mcu_status(void)
 __ft_u64 hardware::get_system_time(void)
 {
 	__ft_u64 ret = 0;
+	settings *g_settings = settings::get_instance();
 
 	struct timeval tv;
-	struct timezone tz;
 
-	gettimeofday(&tv, &tz);
+	g_settings->get_time_val(&tv);
 
 	ret = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 

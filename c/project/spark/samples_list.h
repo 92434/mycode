@@ -6,7 +6,7 @@
  *   文件名称：samples_list.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时28分39秒
- *   修改日期：2017年07月20日 星期四 16时50分27秒
+ *   修改日期：2017年07月21日 星期五 10时49分59秒
  *   描    述：
  *
  *================================================================*/
@@ -47,6 +47,10 @@ private:
 	int fr_total_count;
 	int fa_success_count;
 	int fa_total_count;
+
+	std::ofstream ofs;
+
+	std::string logfile;
 
 public:
 	samples_list();
@@ -92,5 +96,12 @@ public:
 
 	int start_test_task();
 
+	int gen_log_file_names();
+
+	int log_file_start();
+
+	int log_file(const char *fmt, ...);
+
+	int log_file_end();
 };
 #endif //SAMPLES_LIST_H

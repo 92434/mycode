@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月20日 星期四 16时36分44秒
+ *   修改日期：2017年07月21日 星期五 10时48分44秒
  *   描    述：
  *
  *================================================================*/
@@ -68,51 +68,31 @@ int test_task::add_identify_item(task_bmp bmp)
 	return ret;
 }
 
-int test_task::get_timestamp()
-{
-	int ret = 0;
-	char buffer[1024];
-	int len = 0;
-	struct tm *tm;
-	struct timeval tv;
-	struct timezone tz;
-
-	gettimeofday(&tv, &tz);
-
-	start_time = tv.tv_sec;
-
-	tm = localtime(&tv.tv_sec);
-
-	len = snprintf(buffer, 1023, "%04d%02d%02d%02d%02d%02d_%06d",
-				   tm->tm_year + 1900,
-				   tm->tm_mon + 1,
-				   tm->tm_mday + 1,
-				   tm->tm_hour,
-				   tm->tm_min,
-				   tm->tm_sec,
-				   (int)tv.tv_usec
-				  );
-	buffer[len] = 0;
-	timestamp = buffer;
-	return ret;
-}
-
 int test_task::gen_log_file_names()
 {
 	int ret = 0;
+	struct timeval tv;
+	settings *g_settings = settings::get_instance();
 	char buffer[1024];
 	int len = 0;
 
-	len = snprintf(buffer, 1023, "logs/%s.log", timestamp.c_str());
+	g_settings->get_time_val(&tv);
+
+	start_time = tv.tv_sec;
+
+	timestamp = g_settings->get_timestamp();
+
+	len = snprintf(buffer, 1023, "logs/%s/%s.log", g_settings->log_dirname.c_str(), timestamp.c_str());
 	buffer[len] = 0;
 	logfile = buffer;
 
-	len = snprintf(buffer, 1023, "logs/%s_hardware.log", timestamp.c_str());
+	len = snprintf(buffer, 1023, "logs/%s/%s_hardware.log", g_settings->log_dirname.c_str(), timestamp.c_str());
 	buffer[len] = 0;
 	logfile_hardware = buffer;
 
 	return ret;
 }
+
 int test_task::log_file_start()
 {
 	int ret = 0;
@@ -251,7 +231,6 @@ int test_task::pre_task()
 
 	hw->set_save_bmp();
 
-	ret = get_timestamp();
 	ret = gen_log_file_names();
 
 	ret = hw->set_log_file_name(logfile_hardware);
