@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年07月21日 星期五 14时49分44秒
+ *   修改日期：2017年07月21日 星期五 19时06分24秒
  *   描    述：
  *
  *================================================================*/
@@ -473,11 +473,13 @@ int samples_list::report_result()
 	log_file("config_debuginfo_switch:%s,", g_settings->config_debuginfo_switch.c_str());
 	if(fr_total_count > 0) {
 		printf("fr result:%d/%d(%f%%)\n", fr_fail_count, fr_total_count, fr_fail_count * 100.0 / fr_total_count);
-		log_file("fr_result:%d/%d(%f%%),", fr_fail_count, fr_total_count, fr_fail_count * 100.0 / fr_total_count);
+		log_file("fr_result:%d/%d,", fr_fail_count, fr_total_count);
+		log_file("frr:%f%%,", fr_fail_count * 100.0 / fr_total_count);
 	}
 	if(fa_total_count > 0) {
 		printf("fa result:%d/%d(%f%%)\n", fa_success_count, fa_total_count, fa_success_count * 100.0 / fa_total_count);
-		log_file("fa_result:%d/%d(%f%%)", fa_success_count, fa_total_count, fa_success_count * 100.0 / fa_total_count);
+		log_file("fa_result:%d/%d,", fa_success_count, fa_total_count);
+		log_file("far:%f%%", fa_success_count * 100.0 / fa_total_count);
 	}
 
 	log_file_end();
