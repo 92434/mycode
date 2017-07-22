@@ -6,7 +6,7 @@
 #   文件名称：gen_report.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月21日 星期五 11时49分06秒
-#   修改日期：2017年07月21日 星期五 19时07分51秒
+#   修改日期：2017年07月22日 星期六 17时32分51秒
 #   描    述：
 #
 #================================================================
@@ -51,20 +51,20 @@ def build_database_for_report(directory):
 '''
     
 def style(fontname, height, highlight, bold = False): 
-    style = xlwt.XFStyle() # 初始化样式 
+    xlstyle = xlwt.XFStyle() # 初始化样式 
     
     font = xlwt.Font() # 为样式创建字体 
     font.name = fontname # 'Times New Roman' 
     font.bold = bold 
-    font.color_index = 4 
     font.height = height 
+    xlstyle.font = font 
 
     #print(xlwt.Style.colour_map)
-    pattern = xlwt.Pattern() # Create the Pattern
-    pattern.pattern = xlwt.Pattern.SOLID_PATTERN # May be: NO_PATTERN, SOLID_PATTERN, or 0x00 through 0x12
     if highlight:
+        pattern = xlwt.Pattern() # Create the Pattern
+        pattern.pattern = xlwt.Pattern.SOLID_PATTERN # May be: NO_PATTERN, SOLID_PATTERN, or 0x00 through 0x12
         pattern.pattern_fore_colour = 2 # May be: 8 through 63. 0 = Black, 1 = White, 2 = Red, 3 = Green, 4 = Blue, 5 = Yellow, 6 = Magenta, 7 = Cyan, 16 = Maroon, 17 = Dark Green, 18 = Dark Blue, 19 = Dark Yellow , almost brown), 20 = Dark Magenta, 21 = Teal, 22 = Light Gray, 23 = Dark Gray, the list goes on...
-    style.pattern = pattern # Add Pattern to Style
+        xlstyle.pattern = pattern # Add Pattern to Style
     
     # borders= xlwt.Borders() 
     # borders.left= 6 
@@ -72,10 +72,9 @@ def style(fontname, height, highlight, bold = False):
     # borders.top= 6 
     # borders.bottom= 6 
     
-    style.font = font 
-    # style.borders = borders 
+    # xlstyle.borders = borders 
     
-    return style 
+    return xlstyle 
 
 def gen_xls_from_map_database_list(map_database_list):
     f = xlwt.Workbook() #创建工作簿 
@@ -131,7 +130,7 @@ def gen_xls_from_map_database_list(map_database_list):
             info_list = [row, col]
             map_sheet_info_list.update({test_type:info_list})
             map_pre_line_list.update({test_type:current_line_list})
-    f.save('report.xlsx') #保存文件 
+    f.save('report.xls') #保存文件 
 
 def main():
     argv = sys.argv[1:]
