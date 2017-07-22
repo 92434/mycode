@@ -6,7 +6,7 @@
  *   文件名称：hardware.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时56分34秒
- *   修改日期：2017年07月21日 星期五 09时52分00秒
+ *   修改日期：2017年07月22日 星期六 09时53分44秒
  *   描    述：
  *
  *================================================================*/
@@ -25,7 +25,7 @@ BGR_PALETTE hardware::bmp_palette[256];
 hardware::hardware()
 {
 	ft_lib_init();
-	printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
+	//printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 }
 
 hardware::~hardware()

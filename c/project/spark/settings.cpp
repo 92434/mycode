@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年07月21日 星期五 14时50分09秒
+ *   修改日期：2017年07月22日 星期六 09时20分17秒
  *   描    述：
  *
  *================================================================*/
@@ -106,25 +106,25 @@ int settings::check_configuration()
 	bool have_fr_pattern = false;
 	bool have_fa_pattern = false;
 
-	if(pictures_dirname.size()) {
+	if(pictures_dirname.size() > 0) {
 		have_dir = true;
 	} else {
 		printf("no pictures pictures_dirname!\n");
 	}
 
-	if(enroll_pattern.size()) {
+	if(enroll_pattern.size() > 0) {
 		have_enroll_pattern = true;
 	} else {
 		printf("no enroll pattern!\n");
 	}
 
-	if(fr_pattern.size()) {
+	if(fr_pattern.size() > 0) {
 		have_fr_pattern = true;
 	} else {
 		printf("no fr pattern!\n");
 	}
 
-	if(fa_pattern.size()) {
+	if(fa_pattern.size() > 0) {
 		have_fa_pattern = true;
 	} else {
 		printf("no fa pattern!\n");
