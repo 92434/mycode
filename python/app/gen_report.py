@@ -6,7 +6,7 @@
 #   文件名称：gen_report.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月21日 星期五 11时49分06秒
-#   修改日期：2017年07月22日 星期六 17时32分51秒
+#   修改日期：2017年07月22日 星期六 18时18分52秒
 #   描    述：
 #
 #================================================================
@@ -56,6 +56,7 @@ def style(fontname, height, highlight, bold = False):
     font = xlwt.Font() # 为样式创建字体 
     font.name = fontname # 'Times New Roman' 
     font.bold = bold 
+    font.colour_index = 4
     font.height = height 
     xlstyle.font = font 
 
