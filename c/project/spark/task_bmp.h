@@ -6,7 +6,7 @@
  *   文件名称：task_bmp.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分02秒
- *   修改日期：2017年07月19日 星期三 19时34分50秒
+ *   修改日期：2017年07月24日 星期一 19时27分15秒
  *   描    述：
  *
  *================================================================*/
@@ -56,6 +56,8 @@ public:
 	unsigned char update_template;
 	std::string update_template_catagory;
 	std::string update_template_id;
+
+	int ret_code;
 	
 
 	task_bmp()
@@ -64,6 +66,7 @@ public:
 		test_type = FOR_UNKNOW;
 		current_enroll_id = -1;
 		update_template = 0;
+		ret_code = 0;
 
 		new_matched_type = UNKNOW;
 	}

@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年07月22日 星期六 09时20分17秒
+ *   修改日期：2017年07月24日 星期一 12时53分13秒
  *   描    述：
  *
  *================================================================*/
@@ -15,6 +15,7 @@ settings *settings::g_settings = NULL;
 
 settings::settings()
 {
+	dryrun = false;
 	max_proc_number = 32;
 	max_number_of_id_per_proc = 5;
 	max_number_of_catagory_per_proc = 1;
@@ -319,6 +320,7 @@ int settings::parse_args_from_configuration(int argc, char **argv)
 	bool have_configure_file = false;
 	optparse opt;
 	opt.add_long_option("configure_file", true, false, 'f', "assign configuration file");
+	opt.add_long_option("dryrun", false, false, 'd', "dry run");
 
 	ret = opt.get_long_option(argc, argv);
 
@@ -331,6 +333,10 @@ int settings::parse_args_from_configuration(int argc, char **argv)
 			configure_file = opt.option_value("f");
 		} else {
 			configure_file = "default.ini";
+		}
+
+		if(opt.have_option("d")) {
+			dryrun = true;
 		}
 	}
 

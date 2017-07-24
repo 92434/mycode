@@ -2,11 +2,11 @@
 
 /*================================================================
  *   Copyright (C) 2017年07月14日 肖飞 All rights reserved
- *   
+ *
  *   文件名称：main.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时52分09秒
- *   修改日期：2017年07月14日 星期五 13时35分51秒
+ *   修改日期：2017年07月24日 星期一 12时49分20秒
  *   描    述：
  *
  *================================================================*/
@@ -31,8 +31,11 @@ int main(int argc, char **argv)
 		return ret;
 	}
 
-	//samples_list.p_result();
-	samples_list.start_test_task();
+	if(g_settings->dryrun) {
+		samples_list.p_result();
+	} else {
+		samples_list.start_test_task();
+	}
 
 	printf("Done!\n");
 

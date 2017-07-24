@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年07月21日 星期五 14时49分37秒
+ *   修改日期：2017年07月24日 星期一 12时47分35秒
  *   描    述：
  *
  *================================================================*/
@@ -62,6 +62,7 @@ struct pattern_info {
 class settings
 {
 public:
+	bool dryrun;
 	std::string configure_file;
 	std::string pictures_dirname;
 	std::string test_type;

@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月21日 星期五 10时48分44秒
+ *   修改日期：2017年07月24日 星期一 19时28分46秒
  *   描    述：
  *
  *================================================================*/
@@ -279,9 +279,7 @@ int test_task::do_task_list()
 
 			ret = hw->enroll(finger_id, index, &enroll_coverage);
 
-			if(ret != 0) {
-				log_file("pid:%d, ppid:%d, enroll error code:%d, enroll_coverage:%x\n", (int)getpid(), (int)getppid(), ret, enroll_coverage);
-			}
+			enroll_list_it->ret_code = ret;
 
 			index++;
 		}
@@ -301,6 +299,8 @@ int test_task::do_task_list()
 			hw->set_image(identify_list_it->bmp_path);
 
 			ret = hw->identify(&finger_id, &update_template, &update_template_outside, &update_template_finger_id);
+
+			identify_list_it->ret_code = ret;
 
 			if(ret == 0) {
 				std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
@@ -345,6 +345,8 @@ int test_task::do_task_list()
 			hw->set_image(identify_list_it->bmp_path);
 
 			ret = hw->identify(&finger_id, &update_template, NULL, NULL);
+
+			identify_list_it->ret_code = ret;
 
 			if(ret == 0) {
 				std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
@@ -425,15 +427,17 @@ int test_task::report_task()
 		std::vector<task_bmp>::iterator identify_list_it;
 
 		for(identify_list_it = fr_identify_list.begin(); identify_list_it != fr_identify_list.end(); identify_list_it++) {
-			log_file("fr:catagory:%s, id:%s, serial_no:%s, match_state:%s, new_match_state:%s, new_matched_catagory:%s, new_matched_id:%s\n",
+			log_file("fr:catagory:%s, id:%s, serial_no:%s, match_state:%s, new_match_state:%s, new_matched_catagory:%s, new_matched_id:%s, update_template_catagory:%s, update_template_id:%s\n",
 					 identify_list_it->catagory.c_str(),
 					 identify_list_it->id.c_str(),
 					 identify_list_it->serial_no.c_str(),
 					 identify_list_it->get_matched_type().c_str(),
 					 identify_list_it->get_new_matched_type().c_str(),
 					 identify_list_it->new_matched_catagory.c_str(),
-					 identify_list_it->new_matched_id.c_str());
-			log_file("path:%s\n\n", identify_list_it->bmp_path.c_str());
+					 identify_list_it->new_matched_id.c_str(),
+					 identify_list_it->update_template_catagory.c_str(),
+					 identify_list_it->update_template_id.c_str());
+			//log_file("path:%s\n\n", identify_list_it->bmp_path.c_str());
 		}
 	}
 
@@ -442,15 +446,17 @@ int test_task::report_task()
 		std::vector<task_bmp>::iterator identify_list_it;
 
 		for(identify_list_it = fa_identify_list.begin(); identify_list_it != fa_identify_list.end(); identify_list_it++) {
-			log_file("fa:catagory:%s, id:%s, serial_no:%s, match_state:%s, new_match_state:%s, new_matched_catagory:%s, new_matched_id:%s\n",
+			log_file("fa:catagory:%s, id:%s, serial_no:%s, match_state:%s, new_match_state:%s, new_matched_catagory:%s, new_matched_id:%s, update_template_catagory:%s, update_template_id:%s\n",
 					 identify_list_it->catagory.c_str(),
 					 identify_list_it->id.c_str(),
 					 identify_list_it->serial_no.c_str(),
 					 identify_list_it->get_matched_type().c_str(),
 					 identify_list_it->get_new_matched_type().c_str(),
 					 identify_list_it->new_matched_catagory.c_str(),
-					 identify_list_it->new_matched_id.c_str());
-			log_file("path:%s\n\n", identify_list_it->bmp_path.c_str());
+					 identify_list_it->new_matched_id.c_str(),
+					 identify_list_it->update_template_catagory.c_str(),
+					 identify_list_it->update_template_id.c_str());
+			//log_file("path:%s\n\n", identify_list_it->bmp_path.c_str());
 		}
 	}
 
