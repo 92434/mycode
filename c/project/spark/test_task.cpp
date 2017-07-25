@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月25日 星期二 14时19分56秒
+ *   修改日期：2017年07月25日 星期二 14时55分46秒
  *   描    述：
  *
  *================================================================*/
@@ -252,7 +252,6 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 
 	int i;
 	int size = (int)enroll_id_list.size();
-	bool enrolled = false;
 
 	if(size <= start_index) {
 		return ret;
@@ -271,7 +270,6 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 		hw->set_image(bmp.bmp_path);
 		ret = hw->enroll(finger_id, i - start_index, &enroll_coverage);
 		bmp.ret_code = ret;
-		enrolled = true;
 		account_task(1);
 
 		log_file("enroll:current_enroll_id:%d, catagory:%s, id:%s, serial_no:%s, path:%s, ret_code:%d\n",
@@ -283,9 +281,7 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 				 bmp.ret_code);
 	}
 
-	if(enrolled) {
-		hw->save_one_template(finger_id);
-	}
+	hw->save_one_template(finger_id);
 
 	return ret;
 }
