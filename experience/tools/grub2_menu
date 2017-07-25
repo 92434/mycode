@@ -1,0 +1,79 @@
+重启写法
+
+menuentry "重启"{
+    reboot
+}
+
+关机写法
+
+menuentry "关机"{
+    halt
+}
+
+从主引导启动
+
+#最后一句或者 chainloader (hd0)+1
+menuentry "启动主引导记录 " {
+    set root=(hd0)
+    chainloader +1
+}
+
+从某个分区启动
+
+#从第一磁盘的第一分区启动
+#最后一句或者 chainloader (hd0,1)+1
+menuentry "启动分区引导记录 1" {
+    set root=(hd0,1)
+    chainloader +1
+}
+
+从存在bootmgr文件的那个分区启动
+
+menuentry "启动分区引导记录 2" {
+    search --file /bootmgr --set=root
+    chainloader +1
+}
+#最后一句或者 chainloader (hd0,1)+1
+
+启动某个引导文件：
+
+menuentry "启动 G4D"{
+    search --file /grldr --set=root
+    insmod ntldr
+    ntldr /grldr
+}
+
+启动efi件：
+
+menuentry "启动EFI SHELL" {
+    echo "正在启动EFI SHELL，请等待...."
+    search --file /rdtobot/efi_file/boot/bootx64.efi --set=root
+    chainloader ($root)/rdtobot/efi_file/boot/bootx64.efi
+}
+
+启动IMG文件：
+
+menuentry "启动 MHDD" {
+    search --file /neyan/grub/memdisk --set=root
+    linux16  /neyan/grub/memdisk 
+    initrd16 /rdtobot/MHDD.img
+}
+
+启动ISO文件：
+
+menuentry "列出操作系统" {
+    search --file /neyan/grub/memdisk --set=root
+    linux16  /neyan/grub/memdisk  iso
+    initrd16 /rdtobot/LSTSYS.iso
+}
+
+子菜单写法：
+
+submenu "我是一级菜单" {
+    menuentry "我是二级菜单1" {
+    echo "我是运行结果1"
+    }
+    menuentry "我是二级菜单2" {
+    echo "我是运行结果2"
+    }
+}

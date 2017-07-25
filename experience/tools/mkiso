@@ -1,0 +1,12 @@
+mkisofs -o output.iso -b isolinux/isolinux.bin -c 
+isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -l -J -r  root-of-iso-tree
+
+解释：
+mkisofs是产生ISO光盘镜像的命令；
+-o 输出文件
+-b 引导程序
+-c 引导目录文件
+-l 允许32 字符长度的文件名（取代默认iso9660标准的8.3文件名）
+-J Joliet文件系统（Windows兼容）
+-r RockRide Unix扩展支持
+root-of-iso-tree 你的iso目录树（必须预先将要生成ISO镜像的文件加入此目录）
