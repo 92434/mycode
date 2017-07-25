@@ -6,7 +6,7 @@
  *   文件名称：test_task.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时27分38秒
- *   修改日期：2017年07月25日 星期二 11时41分53秒
+ *   修改日期：2017年07月25日 星期二 14时31分10秒
  *   描    述：
  *
  *================================================================*/
@@ -45,13 +45,8 @@ typedef enum _report_type {
 typedef struct _result_notifier {
 	report_type_t type;
 	int pid;
-	char buffer[1024];
+	char buffer[BUFFER_LEN];
 } result_notifier_t;
-
-typedef enum _test_verify_type {
-	FR_TEST = 0,
-	FA_TEST,
-} test_verify_type_t;
 
 struct bmp_enroll_set_comp {
 	bool operator() (const task_bmp &bmp1, const task_bmp &bmp2) const

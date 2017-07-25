@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年07月21日 星期五 19时06分24秒
+ *   修改日期：2017年07月25日 星期二 14时20分50秒
  *   描    述：
  *
  *================================================================*/
@@ -605,10 +605,10 @@ int samples_list::gen_log_file_names()
 {
 	int ret = 0;
 	settings *g_settings = settings::get_instance();
-	char buffer[1024];
+	char buffer[BUFFER_LEN];
 	int len = 0;
 
-	len = snprintf(buffer, 1023, "logs/%s/report.log", g_settings->log_dirname.c_str());
+	len = snprintf(buffer, BUFFER_LEN, "logs/%s/report.log", g_settings->log_dirname.c_str());
 	buffer[len] = 0;
 	logfile = buffer;
 
@@ -641,11 +641,11 @@ int samples_list::log_file(const char *fmt, ...)
 {
 	int ret = 0;
 	int len = 0;
-	char buffer[1024];
+	char buffer[BUFFER_LEN];
 	va_list ap;
 
 	va_start(ap, fmt);
-	len = vsnprintf(buffer, 1023, fmt, ap);
+	len = vsnprintf(buffer, BUFFER_LEN, fmt, ap);
 	buffer[len] = 0;
 	va_end(ap);
 	ofs.write(buffer, len);

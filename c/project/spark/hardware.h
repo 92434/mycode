@@ -6,7 +6,7 @@
  *   文件名称：hardware.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时55分24秒
- *   修改日期：2017年07月25日 星期二 10时26分28秒
+ *   修改日期：2017年07月25日 星期二 14时27分57秒
  *   描    述：
  *
  *================================================================*/
@@ -116,7 +116,5 @@ public:
 	int update_template(int update, int *finger_id);
 
 	int delete_template(char fingerId);
-
-	int clear_all_template();
 };
 #endif //HARDWARE_H

@@ -6,7 +6,7 @@
  *   文件名称：hardware.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时56分34秒
- *   修改日期：2017年07月25日 星期二 10时25分21秒
+ *   修改日期：2017年07月25日 星期二 14时22分18秒
  *   描    述：
  *
  *================================================================*/
@@ -211,7 +211,7 @@ int hardware::set_log_file_name(std::string filename)
 int hardware::log_file_start()
 {
 	int ret = 0;
-	char buffer[1024];
+	char buffer[BUFFER_LEN];
 	int len = 0;
 	filesystem fs;
 
@@ -236,11 +236,11 @@ int hardware::log_file_start()
 void hardware::hardware_log(const char *fmt, ...)
 {
 	int len = 0;
-	char buffer[1024];
+	char buffer[BUFFER_LEN];
 	va_list ap;
 
 	va_start(ap, fmt);
-	len = vsnprintf(buffer, 1023, fmt, ap);
+	len = vsnprintf(buffer, BUFFER_LEN, fmt, ap);
 	buffer[len] = 0;
 	va_end(ap);
 	ofs_hardware.write(buffer, len);
@@ -423,23 +423,5 @@ int hardware::delete_template(char finger_id)
 {
 	int ret = 0;
 	ret = focal_DelFinger(finger_id);
-	return ret;
-}
-
-
-int hardware::clear_all_template()
-{
-	int ret = 0;
-	int i;
-	settings *g_settings = settings::get_instance();
-
-	for(i = 0; i < g_settings->max_number_of_id_per_proc; i++) {
-		ret = delete_template((char)i);
-
-		if(ret != 0) {
-			break;
-		}
-	}
-
 	return ret;
 }

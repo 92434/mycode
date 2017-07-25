@@ -6,7 +6,7 @@
  *   文件名称：task_bmp.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分02秒
- *   修改日期：2017年07月24日 星期一 19时27分15秒
+ *   修改日期：2017年07月25日 星期二 14时38分07秒
  *   描    述：
  *
  *================================================================*/
@@ -22,6 +22,7 @@ extern "C"
 #endif
 
 #include <stdio.h>
+#include "constant.h"
 
 typedef enum _matched_type {
 	UNKNOW = 0,
@@ -87,10 +88,10 @@ public:
 	int set_finger_id(int finger_id)
 	{
 		int ret = 0;
-		char buffer[1024];
+		char buffer[BUFFER_LEN];
 		int len;
 
-		len = snprintf(buffer, 1024, "%d", finger_id);
+		len = snprintf(buffer, BUFFER_LEN, "%d", finger_id);
 		buffer[len] = 0;
 		id = buffer;
 		return ret;
@@ -108,10 +109,10 @@ public:
 	int set_matched_finger_id(int matched_finger_id)
 	{
 		int ret = 0;
-		char buffer[1024];
+		char buffer[BUFFER_LEN];
 		int len;
 
-		len = snprintf(buffer, 1024, "%d", matched_finger_id);
+		len = snprintf(buffer, BUFFER_LEN, "%d", matched_finger_id);
 		buffer[len] = 0;
 		new_matched_id = buffer;
 		return ret;

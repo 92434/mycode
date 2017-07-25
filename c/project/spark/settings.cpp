@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年07月24日 星期一 12时53分13秒
+ *   修改日期：2017年07月25日 星期二 14时30分19秒
  *   描    述：
  *
  *================================================================*/
@@ -75,7 +75,7 @@ int settings::get_time_val(struct timeval *timeval)
 std::string settings::get_timestamp()
 {
 	std::string ret;
-	char buffer[1024];
+	char buffer[BUFFER_LEN];
 	int len = 0;
 	struct tm *tm;
 	struct timeval tv;
@@ -84,7 +84,7 @@ std::string settings::get_timestamp()
 
 	tm = localtime(&tv.tv_sec);
 
-	len = snprintf(buffer, 1023, "%04d%02d%02d%02d%02d%02d_%06d",
+	len = snprintf(buffer, BUFFER_LEN, "%04d%02d%02d%02d%02d%02d_%06d",
 				   tm->tm_year + 1900,
 				   tm->tm_mon + 1,
 				   tm->tm_mday,

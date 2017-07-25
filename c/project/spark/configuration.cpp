@@ -6,7 +6,7 @@
  *   文件名称：configuration.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时22分47秒
- *   修改日期：2017年07月14日 星期五 12时22分54秒
+ *   修改日期：2017年07月25日 星期二 14时32分58秒
  *   描    述：
  *
  *================================================================*/
@@ -126,7 +126,7 @@ int configure::load(std::string filename)
 {
 	int ret = 0;
 	std::ifstream ifs;
-	char buffer[256];
+	char buffer[BUFFER_LEN];
 
 	ifs.open(filename.c_str());
 
@@ -140,7 +140,7 @@ int configure::load(std::string filename)
 		std::string content;
 		size_t pos;
 
-		ifs.getline(buffer, 256);
+		ifs.getline(buffer, BUFFER_LEN);
 		content = buffer;
 
 		pos = content.find('#');
@@ -169,7 +169,7 @@ int configure::save(std::string filename)
 {
 	int ret = 0;
 	std::ofstream ofs;
-	char buffer[256];
+	char buffer[BUFFER_LEN];
 	int len = 0;
 
 	ofs.open(filename.c_str());
@@ -181,12 +181,12 @@ int configure::save(std::string filename)
 	}
 
 	for(std::map<std::string, std::map<std::string, std::string> >::iterator it1 = m_configuration.begin(); it1 != m_configuration.end(); it1++) {
-		len = snprintf(buffer, 255, "[%s]\n", it1->first.c_str());
+		len = snprintf(buffer, BUFFER_LEN, "[%s]\n", it1->first.c_str());
 		buffer[len] = 0;
 		ofs.write(buffer, len);
 
 		for(std::map<std::string, std::string>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); it2++) {
-			len = snprintf(buffer, 255, "%s=%s\n", it2->first.c_str(), it2->second.c_str());
+			len = snprintf(buffer, BUFFER_LEN, "%s=%s\n", it2->first.c_str(), it2->second.c_str());
 			buffer[len] = 0;
 			ofs.write(buffer, len);
 		}

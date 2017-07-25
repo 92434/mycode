@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月25日 星期二 11时44分07秒
+ *   修改日期：2017年07月25日 星期二 14时19分56秒
  *   描    述：
  *
  *================================================================*/
@@ -75,7 +75,7 @@ int test_task::gen_log_file_names()
 	int ret = 0;
 	struct timeval tv;
 	settings *g_settings = settings::get_instance();
-	char buffer[1024];
+	char buffer[BUFFER_LEN];
 	int len = 0;
 
 	g_settings->get_time_val(&tv);
@@ -84,11 +84,11 @@ int test_task::gen_log_file_names()
 
 	timestamp = g_settings->get_timestamp();
 
-	len = snprintf(buffer, 1023, "logs/%s/%s.log", g_settings->log_dirname.c_str(), timestamp.c_str());
+	len = snprintf(buffer, BUFFER_LEN, "logs/%s/%s.log", g_settings->log_dirname.c_str(), timestamp.c_str());
 	buffer[len] = 0;
 	logfile = buffer;
 
-	len = snprintf(buffer, 1023, "logs/%s/%s_hardware.log", g_settings->log_dirname.c_str(), timestamp.c_str());
+	len = snprintf(buffer, BUFFER_LEN, "logs/%s/%s_hardware.log", g_settings->log_dirname.c_str(), timestamp.c_str());
 	buffer[len] = 0;
 	logfile_hardware = buffer;
 
@@ -121,11 +121,11 @@ int test_task::log_file(const char *fmt, ...)
 {
 	int ret = 0;
 	int len = 0;
-	char buffer[1024];
+	char buffer[BUFFER_LEN];
 	va_list ap;
 
 	va_start(ap, fmt);
-	len = vsnprintf(buffer, 1023, fmt, ap);
+	len = vsnprintf(buffer, BUFFER_LEN, fmt, ap);
 	buffer[len] = 0;
 	va_end(ap);
 	ofs.write(buffer, len);
@@ -214,10 +214,10 @@ int test_task::account_task(int tasks)
 		elapsed_time = tv.tv_sec - start_time;
 
 		if(current_tasks != 0) {
-			char buffer[1024];
+			char buffer[BUFFER_LEN];
 			int len;
 			left_time = elapsed_time * (total_tasks - current_tasks) / current_tasks;
-			len = sprintf(buffer, "processed %d/%d(%d%%) %d seconds left!", current_tasks, total_tasks, percent, left_time);
+			len = snprintf(buffer, BUFFER_LEN, "processed %d/%d(%d%%) %d seconds left!", current_tasks, total_tasks, percent, left_time);
 			buffer[len] = 0;
 			send_client_result(REPORT_PROCESS, buffer);
 		}
@@ -253,6 +253,16 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 	int i;
 	int size = (int)enroll_id_list.size();
 	bool enrolled = false;
+
+	if(size <= start_index) {
+		return ret;
+	}
+
+	if(size > start_index + number) {
+		size = start_index + number;
+	}
+
+	ret = hw->delete_template(finger_id);
 
 	for(i = start_index; i < size; i++) {
 		unsigned char enroll_coverage;
@@ -375,18 +385,18 @@ int test_task::task_verify(std::vector<task_bmp> &identify_list, test_type_t tes
 int test_task::report_result()
 {
 	int ret = 0;
-	char buffer[1024];
+	char buffer[BUFFER_LEN];
 	int len;
 
 	if(fr_total_tasks > 0) {
-		len = sprintf(buffer, "fr:%d:%d", fr_fail_count, fr_total_tasks);
+		len = snprintf(buffer, BUFFER_LEN, "fr:%d:%d", fr_fail_count, fr_total_tasks);
 		buffer[len] = 0;
 		send_client_result(REPORT_RESULT, buffer);
 		log_file("pid:%d, ppid:%d, fr result:%d/%d(%f%%)\n", (int)getpid(), (int)getppid(), fr_fail_count, fr_total_tasks, fr_fail_count * 100.0 / fr_total_tasks);
 	}
 
 	if(fa_total_tasks > 0) {
-		len = sprintf(buffer, "fa:%d:%d", fa_success_count, fa_total_tasks);
+		len = snprintf(buffer, BUFFER_LEN, "fa:%d:%d", fa_success_count, fa_total_tasks);
 		buffer[len] = 0;
 		send_client_result(REPORT_RESULT, buffer);
 		log_file("pid:%d, ppid:%d, fr result:%d/%d(%f%%)\n", (int)getpid(), (int)getppid(), fa_success_count, fa_total_tasks, fa_success_count * 100.0 / fa_total_tasks);
@@ -435,8 +445,6 @@ int test_task::do_task_list()
 	total_tasks = enroll_list.size() + fr_total_tasks + fa_total_tasks;
 
 	for(i = 0; i < enroll_loops; i++) {
-		hw->clear_all_template();
-
 		for(enroll_id_map_it = enroll_id_map.begin(); enroll_id_map_it != enroll_id_map.end(); enroll_id_map_it++) {
 			task_enroll_id(enroll_id_map_it->first, enroll_id_map_it->second, i * enroll_max_templates, enroll_max_templates);
 		}
@@ -494,7 +502,7 @@ int test_task::send_client_result(report_type_t report_type, std::string content
 	/* exchange data */
 	notifier.type = report_type;
 	notifier.pid = getpid();
-	len = snprintf(notifier.buffer, 1023, "%s", content.c_str());
+	len = snprintf(notifier.buffer, BUFFER_LEN, "%s", content.c_str());
 	notifier.buffer[len] = 0;
 	len = write(sockfd, &notifier, sizeof(result_notifier_t));
 

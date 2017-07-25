@@ -6,7 +6,7 @@
  *   文件名称：FpSensorLib.c
  *   创 建 者：肖飞
  *   创建日期：2017年07月17日 星期一 12时08分57秒
- *   修改日期：2017年07月19日 星期三 17时08分40秒
+ *   修改日期：2017年07月25日 星期二 14时37分34秒
  *   描    述：
  *
  *================================================================*/
@@ -16,6 +16,7 @@
 #include <stdarg.h>
 
 #include "FpSensorLib.h"
+#define BUFFER_LEN 4096
 
 typedef struct _ft_device {
 	char *buffer;
@@ -70,7 +71,7 @@ static int ft_printf(char *fmt, ...)
 {
 	int ret = 0;
 	va_list ap;
-	char buffer[1024];
+	char buffer[BUFFER_LEN];
 
 	if(ft_device == NULL) {
 		ret = -1;
@@ -83,7 +84,7 @@ static int ft_printf(char *fmt, ...)
 	}
 
 	va_start(ap, fmt);
-	ret = vsnprintf(buffer, 1024, fmt, ap);
+	ret = vsnprintf(buffer, BUFFER_LEN, fmt, ap);
 	va_end(ap);
 
 	ft_device->ft_printf(buffer);
