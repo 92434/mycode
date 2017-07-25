@@ -2,11 +2,11 @@
 
 /*================================================================
  *   Copyright (C) 2017年07月20日 肖飞 All rights reserved
- *   
+ *
  *   文件名称：hardware.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时56分34秒
- *   修改日期：2017年07月22日 星期六 09时53分44秒
+ *   修改日期：2017年07月25日 星期二 10时25分21秒
  *   描    述：
  *
  *================================================================*/
@@ -371,21 +371,19 @@ __ft_u64 hardware::get_system_time(void)
 	return ret;
 }
 
+int hardware::save_one_template(unsigned short finger_id)
+{
+	int ret = 0;
+	fp_alg_tpl_t fp_tpl;
+	ret = focal_SaveAlgTplData(finger_id, &fp_tpl.tpl_type, &fp_tpl.tpl_size, fp_tpl.tpl_data);
+	return ret;
+}
+
 int hardware::enroll(unsigned short finger_id, unsigned char enroll_index, unsigned char *penroll_coverage)
 {
 	int ret = 0;
-	settings *g_settings = settings::get_instance();
 
-	if(enroll_index < (unsigned short)g_settings->value_strtod(g_settings->enroll_max_templates)) {
-		ret = focal_Enroll(finger_id, enroll_index, penroll_coverage);
-
-		if(ret == 0) {
-			if(enroll_index == ((unsigned short)g_settings->value_strtod(g_settings->enroll_max_templates) - 1)) {
-				fp_alg_tpl_t fp_tpl;
-				ret = focal_SaveAlgTplData(finger_id, &fp_tpl.tpl_type, &fp_tpl.tpl_size, fp_tpl.tpl_data);
-			}
-		}
-	}
+	ret = focal_Enroll(finger_id, enroll_index, penroll_coverage);
 
 	return ret;
 }
@@ -425,5 +423,23 @@ int hardware::delete_template(char finger_id)
 {
 	int ret = 0;
 	ret = focal_DelFinger(finger_id);
+	return ret;
+}
+
+
+int hardware::clear_all_template()
+{
+	int ret = 0;
+	int i;
+	settings *g_settings = settings::get_instance();
+
+	for(i = 0; i < g_settings->max_number_of_id_per_proc; i++) {
+		ret = delete_template((char)i);
+
+		if(ret != 0) {
+			break;
+		}
+	}
+
 	return ret;
 }

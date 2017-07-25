@@ -6,7 +6,7 @@
  *   文件名称：test_task.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时27分38秒
- *   修改日期：2017年07月21日 星期五 09时36分03秒
+ *   修改日期：2017年07月25日 星期二 11时41分53秒
  *   描    述：
  *
  *================================================================*/
@@ -48,6 +48,11 @@ typedef struct _result_notifier {
 	char buffer[1024];
 } result_notifier_t;
 
+typedef enum _test_verify_type {
+	FR_TEST = 0,
+	FA_TEST,
+} test_verify_type_t;
+
 struct bmp_enroll_set_comp {
 	bool operator() (const task_bmp &bmp1, const task_bmp &bmp2) const
 	{
@@ -81,6 +86,8 @@ private:
 	std::string logfile_hardware;
 	std::string server_path;
 
+	int fr_total_tasks;
+	int fa_total_tasks;
 	int total_tasks;
 	int current_tasks;
 	int start_time;
@@ -116,11 +123,13 @@ public:
 
 	int pre_task();
 
-	int do_task_list();
+	int task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_list, int start_index, int number);
+
+	int task_verify(std::vector<task_bmp> &identify_list, test_type_t test_type);
 
 	int report_result();
 
-	int report_task();
+	int do_task_list();
 
 	int post_task();
 

@@ -2,11 +2,11 @@
 
 /*================================================================
  *   Copyright (C) 2017年07月20日 肖飞 All rights reserved
- *   
+ *
  *   文件名称：hardware.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时55分24秒
- *   修改日期：2017年07月21日 星期五 09时52分22秒
+ *   修改日期：2017年07月25日 星期二 10时26分28秒
  *   描    述：
  *
  *================================================================*/
@@ -107,6 +107,8 @@ public:
 
 	static __ft_u64 get_system_time(void);
 
+	int save_one_template(unsigned short finger_id);
+
 	int enroll(unsigned short finger_id, unsigned char enroll_index, unsigned char *penroll_coverage);
 
 	int identify(unsigned char *finger_id, unsigned char *update, unsigned char *update_outside, int *update_template_finger_id);
@@ -114,5 +116,7 @@ public:
 	int update_template(int update, int *finger_id);
 
 	int delete_template(char fingerId);
+
+	int clear_all_template();
 };
 #endif //HARDWARE_H

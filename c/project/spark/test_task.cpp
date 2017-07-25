@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月24日 星期一 19时28分46秒
+ *   修改日期：2017年07月25日 星期二 11时44分07秒
  *   描    述：
  *
  *================================================================*/
@@ -32,6 +32,8 @@ int test_task::clear()
 	logfile.clear();
 	timestamp.clear();
 
+	fr_total_tasks = 0;
+	fa_total_tasks = 0;
 	total_tasks = 0;
 	current_tasks = 0;
 	start_time = 0;
@@ -240,7 +242,155 @@ int test_task::pre_task()
 
 	ret = hw->hardware_init();
 
-	total_tasks = enroll_list.size() + fr_identify_list.size() + fa_identify_list.size();
+	return ret;
+}
+
+int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_list, int start_index, int number)
+{
+	int ret = 0;
+	hardware *hw = hardware::get_instance();
+
+	int i;
+	int size = (int)enroll_id_list.size();
+	bool enrolled = false;
+
+	for(i = start_index; i < size; i++) {
+		unsigned char enroll_coverage;
+		task_bmp bmp = enroll_id_list.at(i);
+
+		hw->set_image(bmp.bmp_path);
+		ret = hw->enroll(finger_id, i - start_index, &enroll_coverage);
+		bmp.ret_code = ret;
+		enrolled = true;
+		account_task(1);
+
+		log_file("enroll:current_enroll_id:%d, catagory:%s, id:%s, serial_no:%s, path:%s, ret_code:%d\n",
+				 bmp.current_enroll_id,
+				 bmp.catagory.c_str(),
+				 bmp.id.c_str(),
+				 bmp.serial_no.c_str(),
+				 bmp.bmp_path.c_str(),
+				 bmp.ret_code);
+	}
+
+	if(enrolled) {
+		hw->save_one_template(finger_id);
+	}
+
+	return ret;
+}
+
+int test_task::task_verify(std::vector<task_bmp> &identify_list, test_type_t test_type)
+{
+	int ret = 0;
+	hardware *hw = hardware::get_instance();
+	std::vector<task_bmp>::iterator identify_list_it;
+
+	unsigned char finger_id = 0;
+	unsigned char update_template = 0;
+
+	unsigned char update_template_outside = 0;
+	int update_template_finger_id = 0;
+
+	unsigned char *pupdate_template_outside;
+	int *pupdate_template_finger_id;
+	std::string label;
+
+	if(test_type == FOR_FR) {
+		label = "fr";
+		pupdate_template_outside = &update_template_outside;
+		pupdate_template_finger_id = &update_template_finger_id;
+	} else {
+		label = "fa";
+		pupdate_template_outside = NULL;
+		pupdate_template_finger_id = NULL;
+	}
+
+	for(identify_list_it = identify_list.begin(); identify_list_it != identify_list.end(); identify_list_it++) {
+
+
+		hw->set_image(identify_list_it->bmp_path);
+
+		finger_id = 0;
+		update_template = 0;
+		update_template_outside = 0;
+		update_template_finger_id = 0;
+		ret = hw->identify(&finger_id, &update_template, pupdate_template_outside, pupdate_template_finger_id);
+
+		identify_list_it->ret_code = ret;
+
+		if(ret == 0) {
+			if(test_type == FOR_FA) {
+				fa_success_count++;
+			}
+
+			std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
+
+			identify_list_it->new_matched_type = MATCHED;
+
+			if((update_template == 1) || (update_template_outside == 1)) {
+				identify_list_it->update_template = 1;
+			}
+
+			for(ids_it = enroll_ids.begin(); ids_it != enroll_ids.end(); ids_it++) {
+				if(ids_it->current_enroll_id == finger_id) {
+					identify_list_it->new_matched_catagory = ids_it->catagory;
+					identify_list_it->new_matched_id = ids_it->id;
+				}
+
+				if((identify_list_it->update_template == 1) && (ids_it->current_enroll_id == update_template_finger_id)) {
+					identify_list_it->update_template_catagory = ids_it->catagory;
+					identify_list_it->update_template_id = ids_it->id;
+				}
+			}
+		} else {
+
+			if(test_type == FOR_FR) {
+				fr_fail_count++;
+			}
+
+			identify_list_it->new_matched_type = UNMATCHED;
+		}
+
+		account_task(1);
+
+		log_file("%s:catagory:%s, id:%s, serial_no:%s, match_state:%s, new_match_state:%s, new_matched_catagory:%s, new_matched_id:%s, update_template_catagory:%s, update_template_id:%s, path:%s, ret_code:%d\n",
+				 label.c_str(),
+				 identify_list_it->catagory.c_str(),
+				 identify_list_it->id.c_str(),
+				 identify_list_it->serial_no.c_str(),
+				 identify_list_it->get_matched_type().c_str(),
+				 identify_list_it->get_new_matched_type().c_str(),
+				 identify_list_it->new_matched_catagory.c_str(),
+				 identify_list_it->new_matched_id.c_str(),
+				 identify_list_it->update_template_catagory.c_str(),
+				 identify_list_it->update_template_id.c_str(),
+				 identify_list_it->bmp_path.c_str(),
+				 identify_list_it->ret_code);
+	}
+
+	return ret;
+}
+
+int test_task::report_result()
+{
+	int ret = 0;
+	char buffer[1024];
+	int len;
+
+	if(fr_total_tasks > 0) {
+		len = sprintf(buffer, "fr:%d:%d", fr_fail_count, fr_total_tasks);
+		buffer[len] = 0;
+		send_client_result(REPORT_RESULT, buffer);
+		log_file("pid:%d, ppid:%d, fr result:%d/%d(%f%%)\n", (int)getpid(), (int)getppid(), fr_fail_count, fr_total_tasks, fr_fail_count * 100.0 / fr_total_tasks);
+	}
+
+	if(fa_total_tasks > 0) {
+		len = sprintf(buffer, "fa:%d:%d", fa_success_count, fa_total_tasks);
+		buffer[len] = 0;
+		send_client_result(REPORT_RESULT, buffer);
+		log_file("pid:%d, ppid:%d, fr result:%d/%d(%f%%)\n", (int)getpid(), (int)getppid(), fa_success_count, fa_total_tasks, fa_success_count * 100.0 / fa_total_tasks);
+	}
 
 	return ret;
 }
@@ -250,214 +400,49 @@ int test_task::do_task_list()
 	int ret = 0;
 	hardware *hw = hardware::get_instance();
 	settings *g_settings = settings::get_instance();
-
+	std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
+	std::vector<task_bmp>::iterator enroll_list_it;
+	std::map<int, std::vector<task_bmp> > enroll_id_map;
+	std::map<int, std::vector<task_bmp> >::iterator enroll_id_map_it;
+	int enroll_id_size_max = 0;
+	int enroll_max_templates = (int)g_settings->value_strtod(g_settings->enroll_max_templates);
+	int enroll_loops;
+	int i;
 
 	std::sort(enroll_list.begin(), enroll_list.end(), enroll_less_than);
 	std::sort(fr_identify_list.begin(), fr_identify_list.end(), identify_less_than);
 	std::sort(fa_identify_list.begin(), fa_identify_list.end(), identify_less_than);
 
-	//enroll
-	{
-		std::vector<task_bmp>::iterator enroll_list_it;
-
-		unsigned short finger_id_pre = 0;
-		unsigned short index = 0;
-
-		for(enroll_list_it = enroll_list.begin(); enroll_list_it != enroll_list.end(); enroll_list_it++) {
-			char *invalid_pos;
-			unsigned short finger_id = enroll_list_it->current_enroll_id;
-			unsigned char enroll_coverage;
-
-			account_task(1);
-
-			if(finger_id_pre != finger_id) {
-				finger_id_pre = finger_id;
-				index = 0;
-			}
-
-			hw->set_image(enroll_list_it->bmp_path);
-
-			ret = hw->enroll(finger_id, index, &enroll_coverage);
-
-			enroll_list_it->ret_code = ret;
-
-			index++;
-		}
-	}
-	//fr test
-	{
-		std::vector<task_bmp>::iterator identify_list_it;
-
-		for(identify_list_it = fr_identify_list.begin(); identify_list_it != fr_identify_list.end(); identify_list_it++) {
-			unsigned char finger_id = 0;
-			unsigned char update_template = 0;
-			unsigned char update_template_outside = 0;
-			int update_template_finger_id = 0;
-
-			account_task(1);
-
-			hw->set_image(identify_list_it->bmp_path);
-
-			ret = hw->identify(&finger_id, &update_template, &update_template_outside, &update_template_finger_id);
-
-			identify_list_it->ret_code = ret;
-
-			if(ret == 0) {
-				std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
-
-				identify_list_it->new_matched_type = MATCHED;
-
-				if((update_template == 1) || (update_template_outside == 1)) {
-					identify_list_it->update_template = 1;
-				}
-
-				for(ids_it = enroll_ids.begin(); ids_it != enroll_ids.end(); ids_it++) {
-					if(ids_it->current_enroll_id == finger_id) {
-						identify_list_it->new_matched_catagory = ids_it->catagory;
-						identify_list_it->new_matched_id = ids_it->id;
-					}
-
-					if((identify_list_it->update_template == 1) && (ids_it->current_enroll_id == update_template_finger_id)) {
-						identify_list_it->update_template_catagory = ids_it->catagory;
-						identify_list_it->update_template_id = ids_it->id;
-					}
-				}
-			} else {
-				fr_fail_count++;
-				identify_list_it->new_matched_type = UNMATCHED;
-			}
-		}
-
-		//char *buffer = new char[96 * 96];
-		//hw->get_image(buffer, 96 * 96);
-		//delete buffer;
-	}
-	//fa test
-	{
-		std::vector<task_bmp>::iterator identify_list_it;
-
-		for(identify_list_it = fa_identify_list.begin(); identify_list_it != fa_identify_list.end(); identify_list_it++) {
-			unsigned char finger_id = 0;
-			unsigned char update_template = 0;
-
-			account_task(1);
-
-			hw->set_image(identify_list_it->bmp_path);
-
-			ret = hw->identify(&finger_id, &update_template, NULL, NULL);
-
-			identify_list_it->ret_code = ret;
-
-			if(ret == 0) {
-				std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
-
-				fa_success_count++;
-				identify_list_it->new_matched_type = MATCHED;
-
-				for(ids_it = enroll_ids.begin(); ids_it != enroll_ids.end(); ids_it++) {
-					if(ids_it->current_enroll_id == finger_id) {
-						identify_list_it->new_matched_catagory = ids_it->catagory;
-						identify_list_it->new_matched_id = ids_it->id;
-					}
-				}
-			} else {
-				identify_list_it->new_matched_type = UNMATCHED;
-			}
-		}
-
-		return ret;
-	}
-}
-
-int test_task::report_result()
-{
-	int ret = 0;
-	char buffer[1024];
-	int len;
-	int fr_total = fr_identify_list.size();
-	int fa_total = fa_identify_list.size();
-
-	if(fr_total > 0) {
-		len = sprintf(buffer, "fr:%d:%d", fr_fail_count, fr_total);
-		buffer[len] = 0;
-		send_client_result(REPORT_RESULT, buffer);
-		log_file("pid:%d, ppid:%d, fr result:%d/%d(%f%%)\n", (int)getpid(), (int)getppid(), fr_fail_count, fr_total, fr_fail_count * 100.0 / fr_total);
+	for(ids_it = enroll_ids.begin(); ids_it != enroll_ids.end(); ids_it++) {
+		std::string process = ids_it->catagory + ":" +  ids_it->id;
+		log_file("pid:%d, ppid:%d, process:%s\n", (int)getpid(), (int)getppid(), process.c_str());
 	}
 
-	if(fa_total > 0) {
-		len = sprintf(buffer, "fa:%d:%d", fa_success_count, fa_total);
-		buffer[len] = 0;
-		send_client_result(REPORT_RESULT, buffer);
-		log_file("pid:%d, ppid:%d, fr result:%d/%d(%f%%)\n", (int)getpid(), (int)getppid(), fa_success_count, fa_total, fa_success_count * 100.0 / fa_total);
+	for(enroll_list_it = enroll_list.begin(); enroll_list_it != enroll_list.end(); enroll_list_it++) {
+		enroll_id_map[enroll_list_it->current_enroll_id].push_back(*enroll_list_it);
 	}
 
-	return ret;
-}
-
-int test_task::report_task()
-{
-	int ret = 0;
-	hardware *hw = hardware::get_instance();
-
-	{
-		std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
-
-		for(ids_it = enroll_ids.begin(); ids_it != enroll_ids.end(); ids_it++) {
-			std::string process = ids_it->catagory + ":" +  ids_it->id;
-			log_file("pid:%d, ppid:%d, process:%s\n", (int)getpid(), (int)getppid(), process.c_str());
+	for(enroll_id_map_it = enroll_id_map.begin(); enroll_id_map_it != enroll_id_map.end(); enroll_id_map_it++) {
+		if(enroll_id_size_max < enroll_id_map_it->second.size()) {
+			enroll_id_size_max = enroll_id_map_it->second.size();
 		}
 	}
 
-	log_file("pid:%d, ppid:%d, enroll_list.size():%d\n", (int)getpid(), (int)getppid(), (int)enroll_list.size());
-	{
-		std::vector<task_bmp>::iterator enroll_list_it;
+	enroll_loops = (enroll_id_size_max + enroll_max_templates - 1) / enroll_max_templates;
 
-		for(enroll_list_it = enroll_list.begin(); enroll_list_it != enroll_list.end(); enroll_list_it++) {
-			log_file("enroll:catagory:%s, id:%s, serial_no:%s, current_enroll_id:%d\n",
-					 enroll_list_it->catagory.c_str(),
-					 enroll_list_it->id.c_str(),
-					 enroll_list_it->serial_no.c_str(),
-					 enroll_list_it->current_enroll_id);
-			log_file("path:%s\n\n", enroll_list_it->bmp_path.c_str());
+	fr_total_tasks = fr_identify_list.size() * enroll_loops;
+	fa_total_tasks = fa_identify_list.size() * enroll_loops;
+	total_tasks = enroll_list.size() + fr_total_tasks + fa_total_tasks;
+
+	for(i = 0; i < enroll_loops; i++) {
+		hw->clear_all_template();
+
+		for(enroll_id_map_it = enroll_id_map.begin(); enroll_id_map_it != enroll_id_map.end(); enroll_id_map_it++) {
+			task_enroll_id(enroll_id_map_it->first, enroll_id_map_it->second, i * enroll_max_templates, enroll_max_templates);
 		}
-	}
 
-	log_file("pid:%d, ppid:%d, fr_identify_list.size():%d\n", (int)getpid(), (int)getppid(), (int)fr_identify_list.size());
-	{
-		std::vector<task_bmp>::iterator identify_list_it;
-
-		for(identify_list_it = fr_identify_list.begin(); identify_list_it != fr_identify_list.end(); identify_list_it++) {
-			log_file("fr:catagory:%s, id:%s, serial_no:%s, match_state:%s, new_match_state:%s, new_matched_catagory:%s, new_matched_id:%s, update_template_catagory:%s, update_template_id:%s\n",
-					 identify_list_it->catagory.c_str(),
-					 identify_list_it->id.c_str(),
-					 identify_list_it->serial_no.c_str(),
-					 identify_list_it->get_matched_type().c_str(),
-					 identify_list_it->get_new_matched_type().c_str(),
-					 identify_list_it->new_matched_catagory.c_str(),
-					 identify_list_it->new_matched_id.c_str(),
-					 identify_list_it->update_template_catagory.c_str(),
-					 identify_list_it->update_template_id.c_str());
-			//log_file("path:%s\n\n", identify_list_it->bmp_path.c_str());
-		}
-	}
-
-	log_file("pid:%d, ppid:%d, fa_identify_list.size():%d\n", (int)getpid(), (int)getppid(), (int)fa_identify_list.size());
-	{
-		std::vector<task_bmp>::iterator identify_list_it;
-
-		for(identify_list_it = fa_identify_list.begin(); identify_list_it != fa_identify_list.end(); identify_list_it++) {
-			log_file("fa:catagory:%s, id:%s, serial_no:%s, match_state:%s, new_match_state:%s, new_matched_catagory:%s, new_matched_id:%s, update_template_catagory:%s, update_template_id:%s\n",
-					 identify_list_it->catagory.c_str(),
-					 identify_list_it->id.c_str(),
-					 identify_list_it->serial_no.c_str(),
-					 identify_list_it->get_matched_type().c_str(),
-					 identify_list_it->get_new_matched_type().c_str(),
-					 identify_list_it->new_matched_catagory.c_str(),
-					 identify_list_it->new_matched_id.c_str(),
-					 identify_list_it->update_template_catagory.c_str(),
-					 identify_list_it->update_template_id.c_str());
-			//log_file("path:%s\n\n", identify_list_it->bmp_path.c_str());
-		}
+		task_verify(fr_identify_list, FOR_FR);
+		task_verify(fa_identify_list, FOR_FA);
 	}
 
 	report_result();
@@ -481,7 +466,6 @@ int test_task::do_task()
 
 	ret = pre_task();
 	ret = do_task_list();
-	ret = report_task();
 	ret = post_task();
 
 	return ret;
