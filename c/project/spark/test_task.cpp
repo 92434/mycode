@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月25日 星期二 14时55分46秒
+ *   修改日期：2017年07月25日 星期二 15时50分18秒
  *   描    述：
  *
  *================================================================*/
@@ -249,11 +249,15 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 {
 	int ret = 0;
 	hardware *hw = hardware::get_instance();
+	bool have_valid_template = false;
 
 	int i;
 	int size = (int)enroll_id_list.size();
 
+	ret = hw->delete_template(finger_id);
+
 	if(size <= start_index) {
+		ret = -1;
 		return ret;
 	}
 
@@ -261,14 +265,15 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 		size = start_index + number;
 	}
 
-	ret = hw->delete_template(finger_id);
-
 	for(i = start_index; i < size; i++) {
 		unsigned char enroll_coverage;
 		task_bmp bmp = enroll_id_list.at(i);
 
 		hw->set_image(bmp.bmp_path);
 		ret = hw->enroll(finger_id, i - start_index, &enroll_coverage);
+		if(ret == 0) {
+			have_valid_template = true;
+		}
 		bmp.ret_code = ret;
 		account_task(1);
 
@@ -281,7 +286,11 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 				 bmp.ret_code);
 	}
 
-	hw->save_one_template(finger_id);
+	if(have_valid_template) {
+		ret = hw->save_one_template(finger_id);
+	} else {
+		ret = -1;
+	}
 
 	return ret;
 }
@@ -414,6 +423,7 @@ int test_task::do_task_list()
 	int enroll_max_templates = (int)g_settings->value_strtod(g_settings->enroll_max_templates);
 	int enroll_loops;
 	int i;
+	bool have_valid_template = false;
 
 	std::sort(enroll_list.begin(), enroll_list.end(), enroll_less_than);
 	std::sort(fr_identify_list.begin(), fr_identify_list.end(), identify_less_than);
@@ -442,11 +452,17 @@ int test_task::do_task_list()
 
 	for(i = 0; i < enroll_loops; i++) {
 		for(enroll_id_map_it = enroll_id_map.begin(); enroll_id_map_it != enroll_id_map.end(); enroll_id_map_it++) {
-			task_enroll_id(enroll_id_map_it->first, enroll_id_map_it->second, i * enroll_max_templates, enroll_max_templates);
+			ret = task_enroll_id(enroll_id_map_it->first, enroll_id_map_it->second, i * enroll_max_templates, enroll_max_templates);
+
+			if(ret == 0) {
+				have_valid_template = true;
+			}
 		}
 
-		task_verify(fr_identify_list, FOR_FR);
-		task_verify(fa_identify_list, FOR_FA);
+		if(have_valid_template) {
+			task_verify(fr_identify_list, FOR_FR);
+			task_verify(fa_identify_list, FOR_FA);
+		}
 	}
 
 	report_result();
