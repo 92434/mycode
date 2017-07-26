@@ -6,7 +6,7 @@
 #   文件名称：gen_report.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月21日 星期五 11时49分06秒
-#   修改日期：2017年07月22日 星期六 18时18分52秒
+#   修改日期：2017年07月26日 星期三 11时59分40秒
 #   描    述：
 #
 #================================================================
@@ -84,6 +84,11 @@ def gen_xls_from_map_database_list(map_database_list):
     map_sheet = {}
     map_sheet_info_list = {}
     map_pre_line_list = {}
+    use_style = None
+    header_style = style('Times New Roman', 220, False, True)
+    normal_style = style('Times New Roman', 220, False, False)
+    highlight_style = style('Times New Roman', 220, True, False)
+    current_line_list = []
     for map_database in map_database_list:
         test_type = map_database.get('test_type', None)
         if test_type:
@@ -103,7 +108,7 @@ def gen_xls_from_map_database_list(map_database_list):
                 col = info_list[1]
                 index = 0
                 for i in header:
-                    sheet.write(row + index, col, header[index], style('Times New Roman', 220, False, True))
+                    sheet.write(row + index, col, header[index], header_style)
                     index += 1
                 row = 0
                 col += 1
@@ -114,7 +119,6 @@ def gen_xls_from_map_database_list(map_database_list):
             if not pre_line_list:
                 pre_line_list = []
                 
-            current_line_list = []
             index = 0
             for key in keys:
                 highlight = False
@@ -124,7 +128,12 @@ def gen_xls_from_map_database_list(map_database_list):
                     pre_value = pre_line_list[index]
                     if value != pre_value:
                         highlight = True
-                sheet.write(row + index, col, value, style('Times New Roman', 220, highlight))
+                if highlight:
+                    use_style = highlight_style
+                else:
+                    use_style = normal_style
+
+                sheet.write(row + index, col, value, use_style)
                 index += 1
             row = 0
             col += 1
