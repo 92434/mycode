@@ -6,11 +6,22 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年07月26日 星期三 15时04分17秒
+ *   修改日期：2017年07月26日 星期三 15时51分21秒
  *   描    述：
  *
  *================================================================*/
 #include "samples_list.h"
+
+int samples_list::gen_server_path()
+{
+	int ret = 0;
+	char buffer[BUFFER_LEN];
+	int len = 0;
+	len = snprintf(buffer, BUFFER_LEN, "/tmp/.server_socket.pid%d", getpid());
+	buffer[len] = 0;
+	server_path = buffer;
+	return ret;
+}
 
 samples_list::samples_list()
 {
@@ -18,7 +29,7 @@ samples_list::samples_list()
 	enroll_samples = NULL;
 	fr_samples = NULL;
 	fa_samples = NULL;
-	server_path = "/tmp/.server_socket";
+	gen_server_path();
 
 	fr_fail_count = 0;
 	fr_total_count = 0;
@@ -610,6 +621,8 @@ int samples_list::start_test_task()
 	try_to_start_task_and_wait(&task, ADD_CATAGORY_FINISHED, true);
 
 	report_result();
+
+	stop_server();
 
 	return ret;
 }

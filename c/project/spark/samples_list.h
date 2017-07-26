@@ -6,7 +6,7 @@
  *   文件名称：samples_list.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时28分39秒
- *   修改日期：2017年07月21日 星期五 10时49分59秒
+ *   修改日期：2017年07月26日 星期三 15时45分22秒
  *   描    述：
  *
  *================================================================*/
@@ -53,6 +53,7 @@ private:
 	std::string logfile;
 
 public:
+	int gen_server_path();
 	samples_list();
 
 	int release_type_samples(std::map<std::string, std::map<std::string, std::vector<task_bmp> *> *> *samples);
