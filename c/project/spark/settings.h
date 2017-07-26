@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年07月26日 星期三 15时06分30秒
+ *   修改日期：2017年07月26日 星期三 16时03分44秒
  *   描    述：
  *
  *================================================================*/
@@ -77,6 +77,7 @@ public:
 	int max_number_of_catagory_per_proc;
 	select_type_t fr_select_type;
 	select_type_t fa_select_type;
+	int strict_identify_mode;
 	int max_proc_number;
 
 	std::string debug_switch;

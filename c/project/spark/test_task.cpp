@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月25日 星期二 15时50分18秒
+ *   修改日期：2017年07月26日 星期三 17时09分09秒
  *   描    述：
  *
  *================================================================*/
@@ -31,6 +31,7 @@ int test_task::clear()
 	enroll_ids.clear();
 	logfile.clear();
 	timestamp.clear();
+	current_enroll_ids.clear();
 
 	fr_total_tasks = 0;
 	fa_total_tasks = 0;
@@ -269,11 +270,14 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 		unsigned char enroll_coverage;
 		task_bmp bmp = enroll_id_list.at(i);
 
+		current_enroll_ids.insert(bmp);
 		hw->set_image(bmp.bmp_path);
 		ret = hw->enroll(finger_id, i - start_index, &enroll_coverage);
+
 		if(ret == 0) {
 			have_valid_template = true;
 		}
+
 		bmp.ret_code = ret;
 		account_task(1);
 
@@ -299,6 +303,7 @@ int test_task::task_verify(std::vector<task_bmp> &identify_list, test_type_t tes
 {
 	int ret = 0;
 	hardware *hw = hardware::get_instance();
+	settings *g_settings = settings::get_instance();
 	std::vector<task_bmp>::iterator identify_list_it;
 
 	unsigned char finger_id = 0;
@@ -323,7 +328,6 @@ int test_task::task_verify(std::vector<task_bmp> &identify_list, test_type_t tes
 
 	for(identify_list_it = identify_list.begin(); identify_list_it != identify_list.end(); identify_list_it++) {
 
-
 		hw->set_image(identify_list_it->bmp_path);
 
 		finger_id = 0;
@@ -335,10 +339,6 @@ int test_task::task_verify(std::vector<task_bmp> &identify_list, test_type_t tes
 		identify_list_it->ret_code = ret;
 
 		if(ret == 0) {
-			if(test_type == FOR_FA) {
-				fa_success_count++;
-			}
-
 			std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
 
 			identify_list_it->new_matched_type = MATCHED;
@@ -358,10 +358,35 @@ int test_task::task_verify(std::vector<task_bmp> &identify_list, test_type_t tes
 					identify_list_it->update_template_id = ids_it->id;
 				}
 			}
+
+			if(test_type == FOR_FA) {
+				if(g_settings->strict_identify_mode == 0) {
+					fa_success_count++;
+				} else {
+					if((identify_list_it->catagory.compare(identify_list_it->new_matched_catagory) == 0)
+					   && (identify_list_it->id.compare(identify_list_it->new_matched_id) == 0)) {
+					} else {
+						fa_success_count++;
+					}
+				}
+			}
 		} else {
+			std::set<task_bmp, bmp_enroll_set_comp>::iterator ids_it;
 
 			if(test_type == FOR_FR) {
-				fr_fail_count++;
+				if(g_settings->strict_identify_mode == 0) {
+					fr_fail_count++;
+				} else {
+					for(ids_it = current_enroll_ids.begin(); ids_it != current_enroll_ids.end(); ids_it++) {
+						if((identify_list_it->catagory.compare(ids_it->catagory) == 0)
+						   && (identify_list_it->id.compare(ids_it->id) == 0)) {
+							fr_fail_count++;
+							break;
+						} else {
+						}
+					}
+				}
+
 			}
 
 			identify_list_it->new_matched_type = UNMATCHED;
@@ -451,6 +476,8 @@ int test_task::do_task_list()
 	total_tasks = enroll_list.size() + fr_total_tasks + fa_total_tasks;
 
 	for(i = 0; i < enroll_loops; i++) {
+		current_enroll_ids.clear();
+
 		for(enroll_id_map_it = enroll_id_map.begin(); enroll_id_map_it != enroll_id_map.end(); enroll_id_map_it++) {
 			ret = task_enroll_id(enroll_id_map_it->first, enroll_id_map_it->second, i * enroll_max_templates, enroll_max_templates);
 

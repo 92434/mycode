@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年07月25日 星期二 14时30分19秒
+ *   修改日期：2017年07月26日 星期三 16时24分03秒
  *   描    述：
  *
  *================================================================*/
@@ -21,6 +21,7 @@ settings::settings()
 	max_number_of_catagory_per_proc = 1;
 	fr_select_type = SELECT_SAME_CATAGORY;
 	fa_select_type = SELECT_DIFFERENT_ID;
+	strict_identify_mode = 0;
 
 	log_dirname = get_timestamp();
 }
@@ -52,6 +53,7 @@ double settings::value_strtod(std::string number)
 
 	if(number.size() == 0) {
 		printf("parameter not set!!!\n");
+		exit(1);
 	}
 
 	ret = strtod(number.c_str(), &invalid_pos);
@@ -311,6 +313,7 @@ int settings::get_task_settings_from_configuration(configure &cfg)
 					 : SELECT_DIFFERENT_ID;
 
 	max_proc_number = (int)value_strtod(cfg.get("settings", "max_proc_number"));
+	strict_identify_mode = (int)value_strtod(cfg.get("settings", "strict_identify_mode"));
 	return ret;
 }
 

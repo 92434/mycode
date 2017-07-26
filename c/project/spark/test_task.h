@@ -6,7 +6,7 @@
  *   文件名称：test_task.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时27分38秒
- *   修改日期：2017年07月25日 星期二 14时31分10秒
+ *   修改日期：2017年07月26日 星期三 16时14分35秒
  *   描    述：
  *
  *================================================================*/
@@ -80,6 +80,7 @@ private:
 	std::string logfile;
 	std::string logfile_hardware;
 	std::string server_path;
+	std::set<task_bmp, bmp_enroll_set_comp> current_enroll_ids;
 
 	int fr_total_tasks;
 	int fa_total_tasks;

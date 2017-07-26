@@ -6,7 +6,7 @@
 #   文件名称：log_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月26日 星期三 09时11分14秒
-#   修改日期：2017年07月26日 星期三 12时51分52秒
+#   修改日期：2017年07月26日 星期三 16时45分57秒
 #   描    述：
 #
 #================================================================
@@ -73,9 +73,12 @@ def parse_log_list(filelist):
                         new_catagory = new_matched_catagory_info.split(':')[1]
                         new_id = new_matched_id_info.split(':')[1]
                         path = path_info.split(':')[1]
-                        enroll_list = map_enroll_catagory_map_id_path_list.get(new_catagory).get(new_id)
-                        fa_result_item = result_info(image_catagory, image_id, image_serial_no, new_catagory, new_id, path, enroll_list)
-                        fa_result.append(fa_result_item)
+                        if image_catagory == new_catagory and image_id == new_id:
+                            pass
+                        else:
+                            enroll_list = map_enroll_catagory_map_id_path_list.get(new_catagory).get(new_id)
+                            fa_result_item = result_info(image_catagory, image_id, image_serial_no, new_catagory, new_id, path, enroll_list)
+                            fa_result.append(fa_result_item)
     return fr_result, fa_result
 
 ''' 
