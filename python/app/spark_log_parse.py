@@ -6,7 +6,7 @@
 #   文件名称：log_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月26日 星期三 09时11分14秒
-#   修改日期：2017年07月26日 星期三 12时02分27秒
+#   修改日期：2017年07月26日 星期三 12时51分52秒
 #   描    述：
 #
 #================================================================
@@ -148,9 +148,18 @@ def gen_xls(fr_result, fa_result):
     now = datetime.datetime.now()
     f.save('parse_result_%04d%02d%02d%02d%02d%02d_%06d.xls' %(now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)) #保存文件 
 
+def fa_result_key(x):
+    image_catagory = x.image_catagory
+    image_id = x.image_id
+    image_serial_no = x.image_serial_no
+    new_catagory = x.new_catagory
+    new_id = x.new_id
+    return new_catagory, int(new_id), image_catagory, int(image_id), int(image_serial_no)
+
 def main():
     argv = sys.argv[1:]
     fr_result, fa_result = parse_log_list(argv)
+    fa_result = sorted(fa_result, key = lambda x : fa_result_key(x))
     gen_xls(fr_result, fa_result)
 
 if '__main__' == __name__:
