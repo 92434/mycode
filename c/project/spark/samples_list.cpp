@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年07月25日 星期二 14时20分50秒
+ *   修改日期：2017年07月26日 星期三 15时04分17秒
  *   描    述：
  *
  *================================================================*/
@@ -336,6 +336,15 @@ int samples_list::add_test_task_catagory(std::map<std::string, std::map<std::str
 
 				if(select_type == SELECT_ALL) {
 					add = true;
+				} else if(select_type == SELECT_SAME_ID) {
+					for(enroll_ids_it = enroll_ids.begin(); enroll_ids_it != enroll_ids.end(); enroll_ids_it++) {
+						if(bmp.catagory.compare(enroll_ids_it->catagory) == 0) {
+							if(bmp.id.compare(enroll_ids_it->id) == 0) {
+								add = true;
+								break;
+							}
+						}
+					}
 				} else if(select_type == SELECT_SAME_CATAGORY) {
 					for(enroll_ids_it = enroll_ids.begin(); enroll_ids_it != enroll_ids.end(); enroll_ids_it++) {
 						if(bmp.catagory.compare(enroll_ids_it->catagory) == 0) {
@@ -419,6 +428,7 @@ int samples_list::parse_pid_result(char *buffer)
 	settings *g_settings = settings::get_instance();
 
 	matched_list = r.match(content, pattern);
+
 	if(matched_list.size() == 4) {
 		if(matched_list.at(1) == "fr") {
 			fr_fail_count += (int)g_settings->value_strtod(matched_list.at(2));
@@ -428,6 +438,7 @@ int samples_list::parse_pid_result(char *buffer)
 			fa_total_count += (int)g_settings->value_strtod(matched_list.at(3));
 		}
 	}
+
 	return ret;
 }
 
@@ -471,11 +482,13 @@ int samples_list::report_result()
 	log_file("template_buffer_enable:%s,", g_settings->template_buffer_enable.c_str());
 	log_file("transfer_bytes_max:%s,", g_settings->transfer_bytes_max.c_str());
 	log_file("config_debuginfo_switch:%s,", g_settings->config_debuginfo_switch.c_str());
+
 	if(fr_total_count > 0) {
 		printf("fr result:%d/%d(%f%%)\n", fr_fail_count, fr_total_count, fr_fail_count * 100.0 / fr_total_count);
 		log_file("fr_result:%d/%d,", fr_fail_count, fr_total_count);
 		log_file("frr:%f%%,", fr_fail_count * 100.0 / fr_total_count);
 	}
+
 	if(fa_total_count > 0) {
 		printf("fa result:%d/%d(%f%%)\n", fa_success_count, fa_total_count, fa_success_count * 100.0 / fa_total_count);
 		log_file("fa_result:%d/%d,", fa_success_count, fa_total_count);

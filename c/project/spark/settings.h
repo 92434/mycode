@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年07月24日 星期一 12时47分35秒
+ *   修改日期：2017年07月26日 星期三 15时06分30秒
  *   描    述：
  *
  *================================================================*/
@@ -32,6 +32,7 @@ extern "C"
 typedef enum _select_type {
 	SELECT_ALL = 0,
 	SELECT_SAME_CATAGORY,
+	SELECT_SAME_ID,
 	SELECT_DIFFERENT_ID,
 } select_type_t;
 
