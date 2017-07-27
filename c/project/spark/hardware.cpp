@@ -6,32 +6,77 @@
  *   文件名称：hardware.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时56分34秒
- *   修改日期：2017年07月25日 星期二 14时22分18秒
+ *   修改日期：2017年07月27日 星期四 12时01分48秒
  *   描    述：
  *
  *================================================================*/
 #include "hardware.h"
 
 hardware *hardware::hw = NULL;
+bmp_cache_item *hardware::cache_item = NULL;
 
 std::ofstream hardware::ofs_hardware;
-std::string hardware::cur_bmp_path;
 
-BMP_FILEHDR hardware::bmp_file_header;
-BMP_INFOHDR hardware::bmp_info_header;
-BGR_PALETTE hardware::bmp_palette[256];
+bmp_cache_item::bmp_cache_item()
+{
+	buffer = NULL;
+	len = 0;
+}
 
+bmp_cache_item::~bmp_cache_item()
+{
+	if(buffer != NULL) {
+		printf("%s:%s:%d:delete %s buffer\n", __FILE__, __func__, __LINE__, bmp_path.c_str());
+		delete buffer;
+		buffer = NULL;
+		len = 0;
+	}
+}
+
+int bmp_cache_item::alloc_bmp_buffer(int len)
+{
+	int ret = 0;
+
+	this->len = len;
+
+	buffer = new char[this->len];
+
+	if(buffer == NULL) {
+		printf("%s:%s:%d:alloc %s while no memory!\n", __FILE__, __func__, __LINE__, bmp_path.c_str());
+		ret = -1;
+	}
+
+	return ret;
+}
+
+int hardware::clear_cache()
+{
+	int ret = 0;
+	std::map<std::string, bmp_cache_item *>::iterator bmp_cache_it;
+
+	for(bmp_cache_it = bmp_cache.begin(); bmp_cache_it != bmp_cache.end(); bmp_cache_it++) {
+		printf("%s:%s:%d:delete %s cache item\n", __FILE__, __func__, __LINE__, bmp_cache_it->first.c_str());
+		delete bmp_cache_it->second;
+	}
+
+	bmp_cache.clear();
+	return ret;
+}
 
 hardware::hardware()
 {
+	clear_cache();
 	ft_lib_init();
 	//printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 }
 
 hardware::~hardware()
 {
+	hw = NULL;
+
 	ft_lib_uninit();
-	//printf("%s:%s:%d:width\n", __FILE__, __func__, __LINE__);
+	clear_cache();
+	//printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 }
 
 hardware *hardware::get_instance()
@@ -131,17 +176,23 @@ int hardware::hardware_init()
 	return ret;
 }
 
-int hardware::save_bmp(char *label, char *buffer, int len)
+int hardware::save_bmp(char *label, const char *buffer, int len)
 {
 	int ret = 0;
-	int pos = cur_bmp_path.rfind('.');
-	char *buffer_bmp = new char [len + 1];
+	int pos;
 	std::string filename;
 	std::ofstream ofs;
 	int offset = 0;
 
+	if(cache_item == NULL) {
+		ret = -1;
+		return ret;
+	}
+
+	pos = cache_item->bmp_path.rfind('.');
+
 	if(pos != std::string::npos) {
-		filename = cur_bmp_path.substr(0, pos);
+		filename = cache_item->bmp_path.substr(0, pos);
 	} else {
 		ret = -1;
 		return ret;
@@ -154,38 +205,38 @@ int hardware::save_bmp(char *label, char *buffer, int len)
 	if(!ofs.good()) {
 		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
-		goto exit;
+		goto exit_close;
 	}
 
 	ofs.seekp(offset, ofs.beg);
-	ofs.write((char *)&bmp_file_header, sizeof(BMP_FILEHDR));
+	ofs.write((char *)&cache_item->bmp_file_header, sizeof(BMP_FILEHDR));
 
 	if(!ofs.good()) {
 		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
-		goto exit;
+		goto exit_close;
 	}
 
 	offset += sizeof(BMP_FILEHDR);
 
 	ofs.seekp(offset, ofs.beg);
-	ofs.write((char *)&bmp_info_header, sizeof(BMP_INFOHDR));
+	ofs.write((char *)&cache_item->bmp_info_header, sizeof(BMP_INFOHDR));
 
 	if(!ofs.good()) {
 		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
-		goto exit;
+		goto exit_close;
 	}
 
 	offset += sizeof(BMP_INFOHDR);
 
 	ofs.seekp(offset, ofs.beg);
-	ofs.write((char *)&bmp_palette[0], sizeof(BGR_PALETTE) * 256);
+	ofs.write((char *)&cache_item->bmp_palette[0], sizeof(BGR_PALETTE) * 256);
 
 	if(!ofs.good()) {
 		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
-		goto exit;
+		goto exit_close;
 	}
 
 	offset += sizeof(BGR_PALETTE) * 256;
@@ -193,7 +244,7 @@ int hardware::save_bmp(char *label, char *buffer, int len)
 	ofs.seekp(offset, ofs.beg);
 	ofs.write(buffer, len);
 
-exit:
+exit_close:
 	ofs.close();
 
 	return ret;
@@ -263,86 +314,109 @@ int hardware::set_save_bmp()
 	return ret;
 }
 
-int hardware::set_image(std::string bmp_path)
+int hardware::get_image_info(std::string bmp_path)
 {
 	int ret = 0;
 	std::ifstream ifs;
 	int offset = 0;
-	char *buffer = NULL;
 	int len;
-	int i;
 
-	cur_bmp_path = bmp_path;
+	std::map<std::string, bmp_cache_item *>::iterator bmp_cache_it;
 
-	ifs.open(cur_bmp_path.c_str());
+	bmp_cache_it = bmp_cache.find(bmp_path);
+
+	if(bmp_cache_it != bmp_cache.end()) {
+		cache_item = bmp_cache_it->second;
+		goto exit;
+	} else {
+		cache_item = new bmp_cache_item;
+
+		if(cache_item == NULL) {
+			ret = -1;
+			goto exit;
+		}
+
+		bmp_cache[bmp_path] = cache_item;
+	}
+
+	cache_item->bmp_path = bmp_path;
+
+	ifs.open(cache_item->bmp_path.c_str());
 
 	if(!ifs.good()) {
 		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
-		goto exit;
+		goto exit_close;
 	}
 
 	ifs.seekg(offset, ifs.beg);
-	ifs.read((char *)&bmp_file_header, sizeof(BMP_FILEHDR));
+	ifs.read((char *)&cache_item->bmp_file_header, sizeof(BMP_FILEHDR));
 
 	if(!ifs.good()) {
 		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
-		goto exit;
+		goto exit_close;
 	}
 
 	offset += sizeof(BMP_FILEHDR);
 
 	ifs.seekg(offset, ifs.beg);
-	ifs.read((char *)&bmp_info_header, sizeof(BMP_INFOHDR));
+	ifs.read((char *)&cache_item->bmp_info_header, sizeof(BMP_INFOHDR));
 
 	if(!ifs.good()) {
 		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
-		goto exit;
+		goto exit_close;
 	}
 
 	offset += sizeof(BMP_INFOHDR);
-	ifs.read((char *)&bmp_palette[0], sizeof(BGR_PALETTE) * 256);
+	ifs.read((char *)&cache_item->bmp_palette[0], sizeof(BGR_PALETTE) * 256);
 
 	if(!ifs.good()) {
 		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
-		goto exit;
+		goto exit_close;
 	}
 
-	offset = bmp_file_header.bfOffBits;
-	len = bmp_info_header.biWidth * bmp_info_header.biHeight * bmp_info_header.biBitCount / 8;
-	buffer = new char[len];
+	offset = cache_item->bmp_file_header.bfOffBits;
+	len = cache_item->bmp_info_header.biWidth * cache_item->bmp_info_header.biHeight * cache_item->bmp_info_header.biBitCount / 8;
+	ret = cache_item->alloc_bmp_buffer(len);
+
+	if(ret != 0) {
+		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		ret = -1;
+		goto exit_close;
+	}
 
 	ifs.seekg(offset, ifs.beg);
-	ifs.read(buffer, len);
+	ifs.read(cache_item->buffer, cache_item->len);
 
 	if(!ifs.good()) {
 		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
-		goto exit;
+		goto exit_close;
 	}
 
 	//printf("len:%d, width * height:%d\n", len, bmp_info_header.biWidth * bmp_info_header.biHeight);
-
-	ft_set_image(buffer, len);
-
-exit:
-
-	if(buffer != NULL) {
-		delete buffer;
-	}
-
+exit_close:
 	ifs.close();
+exit:
 
 	return ret;
 }
 
-int hardware::get_image(char *buffer, int len)
+int hardware::set_image(std::string bmp_path)
 {
-	int ret = len;
-	ft_get_image(buffer, len);
+	int ret = 0;
+
+	ret = get_image_info(bmp_path);
+
+	if(ret != 0) {
+		return ret;
+	}
+
+	ft_set_image(cache_item->buffer, cache_item->len);
+
 	return ret;
 }
 

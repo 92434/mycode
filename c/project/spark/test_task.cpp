@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月26日 星期三 17时09分09秒
+ *   修改日期：2017年07月27日 星期四 11时48分21秒
  *   描    述：
  *
  *================================================================*/
@@ -271,12 +271,16 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 		task_bmp bmp = enroll_id_list.at(i);
 
 		current_enroll_ids.insert(bmp);
-		hw->set_image(bmp.bmp_path);
-		ret = hw->enroll(finger_id, i - start_index, &enroll_coverage);
+		ret = hw->set_image(bmp.bmp_path);
 
 		if(ret == 0) {
-			have_valid_template = true;
+			ret = hw->enroll(finger_id, i - start_index, &enroll_coverage);
+
+			if(ret == 0) {
+				have_valid_template = true;
+			}
 		}
+
 
 		bmp.ret_code = ret;
 		account_task(1);
@@ -327,14 +331,15 @@ int test_task::task_verify(std::vector<task_bmp> &identify_list, test_type_t tes
 	}
 
 	for(identify_list_it = identify_list.begin(); identify_list_it != identify_list.end(); identify_list_it++) {
-
-		hw->set_image(identify_list_it->bmp_path);
-
 		finger_id = 0;
 		update_template = 0;
 		update_template_outside = 0;
 		update_template_finger_id = 0;
-		ret = hw->identify(&finger_id, &update_template, pupdate_template_outside, pupdate_template_finger_id);
+
+		ret = hw->set_image(identify_list_it->bmp_path);
+		if(ret == 0) {
+			ret = hw->identify(&finger_id, &update_template, pupdate_template_outside, pupdate_template_finger_id);
+		}
 
 		identify_list_it->ret_code = ret;
 
@@ -417,6 +422,7 @@ int test_task::report_result()
 	int ret = 0;
 	char buffer[BUFFER_LEN];
 	int len;
+	hardware *hw = hardware::get_instance();
 
 	if(fr_total_tasks > 0) {
 		len = snprintf(buffer, BUFFER_LEN, "fr:%d:%d", fr_fail_count, fr_total_tasks);

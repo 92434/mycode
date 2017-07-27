@@ -6,7 +6,7 @@
 #   文件名称：gen_report.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月21日 星期五 11时49分06秒
-#   修改日期：2017年07月26日 星期三 11时59分40秒
+#   修改日期：2017年07月27日 星期四 09时36分03秒
 #   描    述：
 #
 #================================================================
@@ -16,7 +16,6 @@ import optparse
 import xlwt
 
 def get_filelist(dirname, ext_list):
-
     filelist = []
     for dir_name, sub_dir_list, sub_filelist in os.walk(dirname):
         for i in sub_filelist:
@@ -145,7 +144,7 @@ def gen_xls_from_map_database_list(map_database_list):
 def main():
     argv = sys.argv[1:]
     options = optparse.OptionParser()
-    options.add_option('-d', '--dir', action='store', dest='report_directory', help='report directory', default="os.curdir")
+    options.add_option('-d', '--dir', action='store', dest='report_directory', help='report directory', default=os.curdir)
     opts, args = options.parse_args(argv)
     print('opts:%s' %(opts))
     print('args:%s' %(args))

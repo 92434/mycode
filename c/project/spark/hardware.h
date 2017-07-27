@@ -6,7 +6,7 @@
  *   文件名称：hardware.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时55分24秒
- *   修改日期：2017年07月25日 星期二 14时27分57秒
+ *   修改日期：2017年07月27日 星期四 11时41分22秒
  *   描    述：
  *
  *================================================================*/
@@ -62,30 +62,47 @@ struct BGR_PALETTE {
 	unsigned char unused;
 };
 
+class bmp_cache_item
+{
+public:
+	std::string bmp_path;
+	BMP_FILEHDR bmp_file_header;
+	BMP_INFOHDR bmp_info_header;
+	BGR_PALETTE bmp_palette[256];
+	char *buffer;
+	int len;
+
+	bmp_cache_item();
+
+	~bmp_cache_item();
+
+	int alloc_bmp_buffer(int len);
+};
+
 class hardware : public hardware_base
 {
 private:
 	static hardware *hw;
-	static BMP_FILEHDR bmp_file_header;
-	static BMP_INFOHDR bmp_info_header;
-	static BGR_PALETTE bmp_palette[256];
 
 	std::string logfile_hardware;
 	static std::ofstream ofs_hardware;
 
-	static std::string cur_bmp_path;
+	static bmp_cache_item *cache_item;
+	std::map<std::string, bmp_cache_item *> bmp_cache;
 
+	int clear_cache();
 
 	hardware();
 
 	~hardware();
-
 public:
 	static hardware *get_instance();
 
 	int hardware_init();
 
-	static int save_bmp(char *label, char *buffer, int len);
+	static int save_bmp(char *label, const char *buffer, int len);
+
+	int get_image_info(std::string bmp_path);
 
 	int set_log_file_name(std::string filename);
 
@@ -98,8 +115,6 @@ public:
 	int set_save_bmp();
 
 	int set_image(std::string bmp_path);
-
-	int get_image(char *buffer, int len);
 
 	static void hw_usleep(__ft_u32 usec);
 

@@ -6,7 +6,7 @@
  *   文件名称：FpSensorLib.c
  *   创 建 者：肖飞
  *   创建日期：2017年07月17日 星期一 12时08分57秒
- *   修改日期：2017年07月25日 星期二 14时37分34秒
+ *   修改日期：2017年07月27日 星期四 11时27分04秒
  *   描    述：
  *
  *================================================================*/
@@ -104,7 +104,7 @@ int ft_lib_set_save_bmp(save_bmp_t save_bmp)
 	return ret;
 }
 
-int save_bmp(char *label, char *buffer, int len)
+int save_bmp(char *label, const char *buffer, int len)
 {
 	int ret = 0;
 
@@ -119,27 +119,6 @@ int save_bmp(char *label, char *buffer, int len)
 	}
 
 	ret = ft_device->save_bmp(label, buffer, len);
-	return ret;
-}
-
-int ft_get_image(char *buffer, int len)
-{
-	int ret = 0;
-
-	ft_printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
-
-	if(ft_device == NULL) {
-		ret = -1;
-		return ret;
-	}
-
-	if((ft_device->buffer != NULL) && (ft_device->size >= len)) {
-		memcpy((void *)buffer, (void *)ft_device->buffer, len);
-		save_bmp("spa26", buffer, len);
-	} else {
-		ret = -1;
-	}
-
 	return ret;
 }
 
@@ -163,6 +142,7 @@ int ft_set_image(const char *buffer, int len)
 		}
 
 		ft_device->buffer = (char *)malloc(len);
+
 		if(ft_device->buffer != NULL) {
 			ft_device->size = len;
 		}
@@ -171,6 +151,8 @@ int ft_set_image(const char *buffer, int len)
 
 	if(ft_device->buffer != NULL) {
 		memcpy((void *)ft_device->buffer, (void *)buffer, len);
+		save_bmp("spa26", buffer, len);
+
 	} else {
 		ret = -1;
 	}
@@ -367,14 +349,17 @@ __ft_s32 focal_DelFinger(__ft_u8 fingerId)
 	return ret;
 }
 
-void focal_InitFuncSpiWrite(FtFpSpiWriteFunc func) {
+void focal_InitFuncSpiWrite(FtFpSpiWriteFunc func)
+{
 }
 
-void focal_InitFuncSpiRead(FtFpSpiReadFunc func) {
+void focal_InitFuncSpiRead(FtFpSpiReadFunc func)
+{
 }
 
 
-__ft_s32 focal_SaveAlgTplData(__ft_u16 fingerId, __ft_u8 *tpl_type, __ft_u32 *tpl_size, __ft_u8 * tpl_data) {
+__ft_s32 focal_SaveAlgTplData(__ft_u16 fingerId, __ft_u8 *tpl_type, __ft_u32 *tpl_size, __ft_u8 *tpl_data)
+{
 	__ft_s32 ret = 0;
 	return ret;
 }

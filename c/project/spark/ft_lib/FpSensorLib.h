@@ -6,7 +6,7 @@
  *   文件名称：FpSensorLib.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月17日 星期一 12时09分03秒
- *   修改日期：2017年07月19日 星期三 17时08分07秒
+ *   修改日期：2017年07月27日 星期四 11时22分35秒
  *   描    述：
  *
  *================================================================*/
@@ -60,7 +60,7 @@ typedef unsigned short __ft_u16;
 typedef unsigned int __ft_u32;
 typedef unsigned long long __ft_u64;
 
-typedef int (*save_bmp_t)(char *label, char *buffer, int len);
+typedef int (*save_bmp_t)(char *label, const char *buffer, int len);
 
 typedef __ft_s32 (*FtFpSpiWriteFunc)(__ft_u8 *, __ft_u32);
 typedef __ft_s32 (*FtFpSpiReadFunc)(__ft_u8 *, __ft_u8 *, __ft_u32);
