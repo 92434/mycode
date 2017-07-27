@@ -6,7 +6,7 @@
  *   文件名称：hardware.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时56分34秒
- *   修改日期：2017年07月27日 星期四 12时01分48秒
+ *   修改日期：2017年07月27日 星期四 12时08分16秒
  *   描    述：
  *
  *================================================================*/
@@ -26,7 +26,7 @@ bmp_cache_item::bmp_cache_item()
 bmp_cache_item::~bmp_cache_item()
 {
 	if(buffer != NULL) {
-		printf("%s:%s:%d:delete %s buffer\n", __FILE__, __func__, __LINE__, bmp_path.c_str());
+		//printf("%s:%s:%d:delete %s buffer\n", __FILE__, __func__, __LINE__, bmp_path.c_str());
 		delete buffer;
 		buffer = NULL;
 		len = 0;
@@ -55,7 +55,7 @@ int hardware::clear_cache()
 	std::map<std::string, bmp_cache_item *>::iterator bmp_cache_it;
 
 	for(bmp_cache_it = bmp_cache.begin(); bmp_cache_it != bmp_cache.end(); bmp_cache_it++) {
-		printf("%s:%s:%d:delete %s cache item\n", __FILE__, __func__, __LINE__, bmp_cache_it->first.c_str());
+		//printf("%s:%s:%d:delete %s cache item\n", __FILE__, __func__, __LINE__, bmp_cache_it->first.c_str());
 		delete bmp_cache_it->second;
 	}
 
