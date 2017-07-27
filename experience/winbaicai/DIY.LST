@@ -1,0 +1,24 @@
+﻿timeout 15
+default 3
+gfxmenu /IDBC/GRUB/MESSAGE
+configfile (md)4+8
+title 【01】 Ubuntu 12.04
+find --set-root --ignore-floppies --ignore-cd /GHO/DIY.LST
+kernel	/GHO/casper/12.04/vmlinuz boot=casper only-ubiquity iso-scan/filename=/GHO/IMGDIY/ubuntu-12.04.4-desktop-i386.iso quiet splash --
+initrd	/GHO/casper/12.04/initrd.lz
+title 【02】 Ubuntu 16.04
+find --set-root --ignore-floppies --ignore-cd /GHO/DIY.LST
+kernel	/GHO/casper/16.04/vmlinuz.efi locale=zh_CN keyboard-configuration/layoutcode?=cn boot=casper only-ubiquity iso-scan/filename=/GHO/IMGDIY/ubuntukylin-16.04.1-desktop-amd64.iso  quiet splash ---
+initrd	/GHO/casper/16.04/initrd.lz
+title 【03】 Winly
+find --set-root --ignore-floppies --ignore-cd /GHO/DIY.LST
+RUN /GHO/IMGDIY/winly.iso
+title 【04】 SeaToolsDOS223ALL
+find --set-root --ignore-floppies --ignore-cd /GHO/DIY.LST
+RUN /GHO/IMGDIY/SeaToolsDOS223ALL.iso
+title 【05】 ===返回大白菜U盘启动主菜单===
+configfile (md)4+8
+title 【06】 ===重启计算机===
+reboot
+title 【07】 ===关闭计算机===
+halt
