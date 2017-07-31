@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月27日 星期四 11时48分21秒
+ *   修改日期：2017年07月31日 星期一 10时59分47秒
  *   描    述：
  *
  *================================================================*/
@@ -270,7 +270,6 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 		unsigned char enroll_coverage;
 		task_bmp bmp = enroll_id_list.at(i);
 
-		current_enroll_ids.insert(bmp);
 		ret = hw->set_image(bmp.bmp_path);
 
 		if(ret == 0) {
@@ -278,6 +277,7 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 
 			if(ret == 0) {
 				have_valid_template = true;
+				current_enroll_ids.insert(bmp);
 			}
 		}
 
@@ -337,6 +337,7 @@ int test_task::task_verify(std::vector<task_bmp> &identify_list, test_type_t tes
 		update_template_finger_id = 0;
 
 		ret = hw->set_image(identify_list_it->bmp_path);
+
 		if(ret == 0) {
 			ret = hw->identify(&finger_id, &update_template, pupdate_template_outside, pupdate_template_finger_id);
 		}

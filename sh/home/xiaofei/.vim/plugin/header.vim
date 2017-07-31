@@ -54,8 +54,8 @@ func s:set_header()
 			call setline(13,"#include \"".expand("%:t:r").".h\"") 
 		endif
 	elseif &filetype == 'python'
-		call setline(1, "#!/usr/bin/env python") 
-		call setline(2, "# -*- coding: utf-8 -*-") 
+		call setline(1, "# -*- coding: utf-8 -*-") 
+		call setline(2, "#!/usr/bin/env python") 
 		call setline(3, "#================================================================") 
 		call setline(4, "#   Copyright (C) ".strftime("%Y年%m月%d日")." ".author." All rig") 
 		call setline(4, "#   Copyright (C) ".strftime("%Y年%m月%d日")." ".author." All rights reserved")
@@ -69,10 +69,10 @@ func s:set_header()
 		call setline(12, "#================================================================") 
 
 		call setline(13, "def main():") 
-		call setline(14, "	pass") 
+		call setline(14, "    pass") 
 		call setline(15, "") 
 		call setline(16, "if '__main__' == __name__:") 
-		call setline(17, "	main()") 
+		call setline(17, "    main()") 
 	elseif &filetype == 'sh'
 		call setline(1, "#!/bin/bash") 
 		call setline(2, "") 

@@ -14,7 +14,7 @@ Bundle 'gmarik/vundle'
 Bundle 'OmniCppComplete'  
 Bundle 'winmanager'  
 Bundle 'taglist.vim'  
-Bundle 'superTab'  
+"Bundle 'superTab'  
   
 " b) 指定Github中其他用户仓库的插件，使用“用户名/插件名称”的方式指定  
 "Bundle 'tpope/vim-fugitive'  
