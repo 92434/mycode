@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年07月31日 星期一 18时52分06秒
+#   修改日期：2017年07月31日 星期一 22时33分10秒
 #   描    述：
 #
 #================================================================
@@ -598,15 +598,13 @@ class downloader(object):
             else:
                 print("Can't merge %s files" % ext)
 
-        print()
-
 def main():
     dl = downloader()
     location = dl.get_location('http://www.baidu.com')
     #print(location)
-    html = dl.get_decoded_html('http://www.baidu.com')
-    #print(html)
-    data = dl.get_content('http://fanyi.baidu.com')
+    html = dl.get_decoded_html('http://www.113gan.com/view/index7644.html')
+    print(html)
+    data = dl.get_content('http://www.113gan.com/view/index7644.html')
     #print(data)
     data = dl.post_content('http://fanyi.baidu.com/v2transapi', post_data = {'from':'en', 'to':'zh', 'query':'logging', 'transtype':'realtime', 'simple_means_flag':'3'})
     #print(data)
