@@ -6,15 +6,20 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年07月31日 星期一 22时33分10秒
+#   修改日期：2017年08月01日 星期二 14时23分17秒
 #   描    述：
 #
 #================================================================
 import network
 import log
 import re
+import socket
+import os
+import sys
+import time
+import subprocess
 
-urllib = network.network().default_init(30, 0)
+urllib = network.network().default_init(0)
 logging = log.log().get_logger('debug')
 
 try:
@@ -23,9 +28,6 @@ except ImportError:
   import dummy_threading as _threading
 
 class SimpleProgressBar:
-
-    term_size = 80
-
     def __init__(self, total_size, total_pieces = 1):
         self.displayed = False
         self.total_size = total_size
@@ -40,8 +42,8 @@ class SimpleProgressBar:
         total_str = '%5s' % round(self.total_size / 1048576, 1)
         total_str_width = max(len(total_str), 5)
         self.bar_size = self.get_terminal_size()[1] - 27 - 2*total_pieces_len - 2*total_str_width
-        self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:─<%s}┤[{:>%s}/{:>%s}] {}' % (
-            total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
+        #self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:─<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
+        self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:-<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
 
     def get_terminal_size(self):
         """Get (width, height) of the current terminal."""
@@ -60,12 +62,21 @@ class SimpleProgressBar:
         dots = bar_size * int(percent) // 100
         plus = int(percent) - dots // bar_size * 100
         if plus > 0.8:
-            plus = '█'
+            #plus = '█'
+            plus = '|'
         elif plus > 0.4:
             plus = '>'
         else:
             plus = ''
-        bar = '█' * dots + plus
+        #bar = '█' * dots + plus
+        bar = '|' * dots + plus
+        #print('self.bar:\'%s\'' %(self.bar))
+        #print('percent:\'%f\'' %(percent))
+        #print('round(self.received / 1048576, 1):\'%f\'' %(round(self.received / 1048576, 1)))
+        #print('bar:\'%s\'' %(bar))
+        #print('self.current_piece:\'%d\'' %(self.current_piece))
+        #print('self.total_pieces:\'%d\'' %(self.total_pieces))
+        #print('self.speed:\'%s\'' %(self.speed))
         bar = self.bar.format(percent, round(self.received / 1048576, 1), bar, self.current_piece, self.total_pieces, self.speed)
         sys.stdout.write('\r' + bar)
         sys.stdout.flush()
@@ -146,6 +157,8 @@ class downloader(object):
         m = re.search(pattern, text)
         if m:
             return m.group(1)
+    def tr(self, s):
+        return s
 
     def ungzip(self, data):
         """Decompresses data for Content-Encoding: gzip.
@@ -386,40 +399,50 @@ class downloader(object):
             logging.debug('url_locations: %s' % url)
 
             if faker:
-                response = self.urlopen_with_retry(request.Request(url, headers = fake_headers))
+                response = self.urlopen_with_retry(urllib.request.Request(url, headers = fake_headers))
             elif headers:
-                response = self.urlopen_with_retry(request.Request(url, headers = headers))
+                response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
             else:
-                response = self.urlopen_with_retry(request.Request(url))
+                response = self.urlopen_with_retry(urllib.request.Request(url))
 
             locations.append(response.url)
         return locations
 
-    def url_save(self, url, filepath, bar, piece = None, lock = None, sem = None, force = False, refer = None, is_part = False, faker = False, headers = {}, timeout = None, **kwargs):
+    def url_save(self, url, filepath, bar, piece = None, sem = None, lock = None, force = False, refer = None, is_part = False, faker = False, headers = {}, timeout = None, **kwargs):
 #When a referer specified with param refer, the key must be 'Referer' for the hack here
         if refer is not None:
             headers['Referer'] = refer
         file_size = self.url_size(url, faker = faker, headers = headers)
 
         if os.path.exists(filepath):
-            if lock:
-                lock.acquire()
             if not force and file_size == os.path.getsize(filepath):
                 if not is_part:
                     if bar:
+                        if lock:
+                            lock.acquire()
                         bar.done()
-                    print('Skipping %s: file already exists' % tr(os.path.basename(filepath)))
+                        if lock:
+                            lock.release()
+                    print('Skipping %s: file already exists' % self.tr(os.path.basename(filepath)))
                 else:
                     if bar:
+                        if lock:
+                            lock.acquire()
                         bar.update_received(file_size)
+                        if lock:
+                            lock.release()
+                if sem:
+                    sem.release()
                 return
             else:
                 if not is_part:
                     if bar:
+                        if lock:
+                            lock.acquire()
                         bar.done()
-                    print('Overwriting %s' % tr(os.path.basename(filepath)), '...')
-            if lock:
-                lock.release()
+                        if lock:
+                            lock.release()
+                    print('Overwriting %s' % self.tr(os.path.basename(filepath)), '...')
         elif not os.path.exists(os.path.dirname(filepath)):
             os.mkdir(os.path.dirname(filepath))
 
@@ -431,12 +454,12 @@ class downloader(object):
             if os.path.exists(temp_filepath):
                 received += os.path.getsize(temp_filepath)
 
-                if lock:
-                    lock.acquire()
                 if bar:
+                    if lock:
+                        lock.acquire()
                     bar.update_received(os.path.getsize(temp_filepath))
-                if lock:
-                    lock.release()
+                    if lock:
+                        lock.release()
         else:
             open_mode = 'wb'
 
@@ -453,9 +476,9 @@ class downloader(object):
                 headers['Referer'] = refer
 
             if timeout:
-                response = self.urlopen_with_retry(request.Request(url, headers = headers), timeout = timeout)
+                response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers), timeout = timeout)
             else:
-                response = self.urlopen_with_retry(request.Request(url, headers = headers))
+                response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
             try:
                 range_start = int(response.headers['content-range'][6:].split('/')[0].split('-')[0])
                 end_length = int(response.headers['content-range'][6:].split('/')[1])
@@ -468,12 +491,12 @@ class downloader(object):
                 received = 0
                 open_mode = 'wb'
 
-                if lock:
-                    lock.acquire()
                 if bar:
+                    if lock:
+                        lock.acquire()
                     bar.received = 0
-                if lock:
-                    lock.release()
+                    if lock:
+                        lock.release()
 
             with open(temp_filepath, open_mode) as output:
                 while True:
@@ -483,15 +506,15 @@ class downloader(object):
                             break
                         else: # Unexpected termination. Retry request
                             headers['Range'] = 'bytes=' + str(received) + '-'
-                            response = self.urlopen_with_retry(request.Request(url, headers = headers))
+                            response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
                     output.write(buffer)
                     received += len(buffer)
-                    if lock:
-                        lock.acquire()
                     if bar:
+                        if lock:
+                            lock.acquire()
                         bar.update_received(len(buffer))
-                    if lock:
-                        lock.release()
+                        if lock:
+                            lock.release()
 
         assert received == os.path.getsize(temp_filepath), '%s == %s == %s' % (received, os.path.getsize(temp_filepath), temp_filepath)
 
@@ -515,7 +538,7 @@ class downloader(object):
         cmd.append('-absf')
         cmd.append('aac_adtstoasc')
         cmd.append('%s' %(output_filepath))
-        logging.debug('%s' %(cmd), file=sys.stderr)
+        logging.debug('%s' %(cmd))
 
         if subprocess.Popen(cmd, cwd=os.path.curdir).wait() != 0:
             raise Exception('%s')
@@ -537,6 +560,7 @@ class downloader(object):
         output_filename = '%s.%s' %(title, ext)
         output_filepath = os.path.join(output_dir, output_filename)
 
+        lock = _threading.Lock()
         if total_size:
             if not force and os.path.exists(output_filepath) and os.path.getsize(output_filepath) >= total_size * 0.9:
                 print('Skipping %s: file already exists' % output_filepath)
@@ -547,16 +571,15 @@ class downloader(object):
 
         if len(urls) == 1:
             url = urls[0]
-            print('Downloading %s ...' % tr(output_filename))
+            print('Downloading %s ...' % self.tr(output_filename))
             bar.update()
             self.url_save(url, output_filepath, bar, refer = refer, faker = faker, headers = headers, **kwargs)
             bar.done()
         else:
             parts = []
-            print('Downloading %s.%s ...' % (tr(title), ext))
+            print('Downloading %s.%s ...' % (self.tr(title), ext))
             bar.update()
 
-            lock = _threading.Lock()
             sem = _threading.Semaphore(jobs)
             threads = set()
 
@@ -564,10 +587,12 @@ class downloader(object):
                 filename = '%s[%02d].%s' % (title, i, ext)
                 filepath = os.path.join(output_dir, filename)
                 parts.append(filepath)
-                #print 'Downloading %s [%s/%s]...' % (tr(filename), i + 1, len(urls))
+                #print 'Downloading %s [%s/%s]...' % (self.tr(filename), i + 1, len(urls))
                 bar.update_piece(i + 1)
                 piece = i + 1;
-                local_kwargs = dict(url = url, filepath = filepath, bar = bar, piece = piece, lock = lock, sem = sem, refer = refer, is_part = True, faker = faker, headers = headers)
+
+                sem.acquire()
+                local_kwargs = dict(url = url, filepath = filepath, bar = bar, piece = piece, sem = sem, lock = lock, refer = refer, is_part = True, faker = faker, headers = headers)
                 local_kwargs.update(kwargs)
 
                 t = _threading.Thread(target = self.url_save, kwargs = local_kwargs)
@@ -587,7 +612,7 @@ class downloader(object):
 
             if ext == "mp4":
                 try:
-                    ts2mp4(output_filepath, parts)
+                    self.ts2mp4(output_filepath, parts)
                     print('Merged into %s' % output_filename)
                 except:
                     raise

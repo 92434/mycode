@@ -6,11 +6,10 @@
 #   文件名称：network.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 12时30分28秒
-#   修改日期：2017年07月31日 星期一 16时45分02秒
+#   修改日期：2017年08月01日 星期二 10时53分14秒
 #   描    述：
 #
 #================================================================
-import socket
 import sys
 import six
 
@@ -21,9 +20,6 @@ class network(object):
 
     def __init__(self):
         self.handlers = []
-
-    def set_timeout(self, timeout):
-        socket.setdefaulttimeout(timeout)
 
     def set_verbose_level(self, level = 0):
             http_handler = urllib.request.HTTPHandler(level)
@@ -62,9 +58,8 @@ class network(object):
         opener = urllib.request.build_opener(*self.handlers)
         urllib.request.install_opener(opener)
 
-    def default_init(self, timeout, verbose_level, proxy_urls = []):
+    def default_init(self, verbose_level, proxy_urls = []):
         self.reset_opener()
-        self.set_timeout(timeout)
         self.set_verbose_level(verbose_level)
         for i in proxy_urls:
             self.add_proxy(i)

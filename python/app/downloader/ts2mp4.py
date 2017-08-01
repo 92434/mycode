@@ -355,7 +355,6 @@ def main(argv):
     options.add_option('-j', '--jobs', type='int', dest='jobs', help='jobs', default=6)
     options.add_option('-o', '--out-filename', dest='out_file', help='out_file', default='out.mp4')
     #options.add_option('-u', '--m3u8-url', dest='url_m3u8', help='url_m3u8', metavar='URL', default='http://201610.shipinmp4.com/x/20170419/ekdv-478/1/hls/index.m3u8')
-    #http://mp4.146gan.com/20170720/A47ED6/index.m3u8 -o "和服美女在自己卧室被干的高潮连连.mp4"
     options.add_option('-u', '--m3u8-url', dest='url_m3u8', help='url_m3u8', metavar='URL', default='')
     opts, args = options.parse_args(argv)
     _print('opts:%s' %(opts), file=sys.stderr)
