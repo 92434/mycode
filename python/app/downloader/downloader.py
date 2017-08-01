@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年08月01日 星期二 14时23分17秒
+#   修改日期：2017年08月01日 星期二 14时30分39秒
 #   描    述：
 #
 #================================================================
@@ -543,7 +543,7 @@ class downloader(object):
         if subprocess.Popen(cmd, cwd=os.path.curdir).wait() != 0:
             raise Exception('%s')
 
-    def download_urls(self, urls, title, ext, total_size, jobs = 1, force = False, output_dir = '.', dry_run = False, refer = None, merge = True, faker = False, headers = {}, **kwargs):
+    def download_urls(self, urls, title, ext, total_size = 0, jobs = 1, force = False, output_dir = '.', dry_run = False, refer = None, merge = True, faker = False, headers = {}, **kwargs):
         assert urls
         if dry_run:
             print('Real URLs:\n%s' % '\n'.join(urls))
