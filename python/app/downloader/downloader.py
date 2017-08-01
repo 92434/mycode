@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年08月01日 星期二 14时30分39秒
+#   修改日期：2017年08月01日 星期二 18时54分14秒
 #   描    述：
 #
 #================================================================
@@ -206,6 +206,8 @@ class downloader(object):
         response = self.get_response(url, faker)
         content = response.data
         charset = self.r1(r'charset=([\w-]+)', response.headers['content-type'])
+        logging.debug('charset: %s' % charset)
+        logging.debug('response.headers: %s' % response.headers)
         if charset:
             return content.decode(charset, 'ignore')
         else:
@@ -627,9 +629,10 @@ def main():
     dl = downloader()
     location = dl.get_location('http://www.baidu.com')
     #print(location)
-    html = dl.get_decoded_html('http://www.113gan.com/view/index7644.html')
+    #html = dl.get_decoded_html('http://www.113gan.com/view/index7644.html')
+    html = dl.get_decoded_html('http://www.113gan.com/playdata/220/7644.js?70568.32')
     print(html)
-    data = dl.get_content('http://www.113gan.com/view/index7644.html')
+    #data = dl.get_content('http://www.113gan.com/view/index7644.html')
     #print(data)
     data = dl.post_content('http://fanyi.baidu.com/v2transapi', post_data = {'from':'en', 'to':'zh', 'query':'logging', 'transtype':'realtime', 'simple_means_flag':'3'})
     #print(data)
