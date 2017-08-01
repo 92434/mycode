@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年08月01日 星期二 22时51分47秒
+#   修改日期：2017年08月01日 星期二 23时02分52秒
 #   描    述：
 #
 #================================================================
@@ -179,7 +179,7 @@ class downloader(object):
 
     # DEPRECATED in favor of get_content()
     def get_response(self, url, faker = False):
-        logging.debug('get_response: %s' % url)
+        #logging.debug('get_response: %s' % url)
 
         if faker:
             response = urllib.request.urlopen(urllib.request.Request(url, headers = self.fake_headers), None)
@@ -212,7 +212,7 @@ class downloader(object):
             return content
 
     def get_location(self, url):
-        logging.debug('get_location: %s' % url)
+        #logging.debug('get_location: %s' % url)
 
         response = urllib.request.urlopen(url)
         # urllib will follow redirections and it's too much code to tell urllib
@@ -238,7 +238,7 @@ class downloader(object):
             The content as a string.
         """
 
-        logging.debug('get_content: %s' % url)
+        #logging.debug('get_content: %s' % url)
 
         req = urllib.request.Request(url, headers = headers)
 
@@ -277,7 +277,7 @@ class downloader(object):
             The content as a string.
         """
 
-        logging.debug('post_content: %s \n post_data: %s' % (url, post_data))
+        #logging.debug('post_content: %s \n post_data: %s' % (url, post_data))
 
         req = urllib.request.Request(url, headers = headers)
         post_data_enc = bytes(urllib.parse.urlencode(post_data).encode('utf-8'))
@@ -325,7 +325,7 @@ class downloader(object):
         return sum([self.url_size(url, faker = faker, headers = headers) for url in urls])
 
     def get_head(self, url, headers = {}, get_method = 'HEAD'):
-        logging.debug('get_head: %s' % url)
+        #logging.debug('get_head: %s' % url)
 
         if headers:
             req = urllib.request.Request(url, headers = headers)
@@ -336,7 +336,7 @@ class downloader(object):
         return dict(res.headers)
 
     def url_info(self, url, faker = False, headers = {}):
-        logging.debug('url_info: %s' % url)
+        #logging.debug('url_info: %s' % url)
 
         if faker:
             response = self.urlopen_with_retry(urllib.request.Request(url, headers = fake_headers))
@@ -396,7 +396,7 @@ class downloader(object):
     def url_locations(self, urls, faker = False, headers = {}):
         locations = []
         for url in urls:
-            logging.debug('url_locations: %s' % url)
+            #logging.debug('url_locations: %s' % url)
 
             if faker:
                 response = self.urlopen_with_retry(urllib.request.Request(url, headers = fake_headers))
@@ -538,7 +538,7 @@ class downloader(object):
         cmd.append('-absf')
         cmd.append('aac_adtstoasc')
         cmd.append('%s' %(output_filepath))
-        logging.debug('%s' %(cmd))
+        #logging.debug('%s' %(cmd))
 
         if subprocess.Popen(cmd, cwd=os.path.curdir).wait() != 0:
             raise Exception('%s')
@@ -551,7 +551,8 @@ class downloader(object):
 
         if not total_size:
             try:
-                total_size = self.urls_size(urls, faker=faker, headers=headers)
+                #total_size = self.urls_size(urls, faker=faker, headers=headers)
+                pass
             except:
                 import traceback
                 traceback.print_exc(file=sys.stdout)

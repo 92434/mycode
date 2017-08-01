@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年08月01日 星期二 22时51分11秒
+#   修改日期：2017年08月01日 星期二 22时59分38秒
 #   描    述：
 #
 #================================================================
@@ -121,7 +121,8 @@ class ts_downloader(object):
 
     def download_video(self, url_files):
         logging.debug('get %s total_size...', os.path.join(self.output_dir, self.output_filename))
-        total_size = self.dl.urls_size(url_files)
+        #total_size = self.dl.urls_size(url_files)
+        total_size = 0
         logging.debug('total_size:%d' %(total_size))
         title, ext = os.path.splitext(self.output_filename)
         ext = ext[1:]
