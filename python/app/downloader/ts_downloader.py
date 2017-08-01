@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年08月01日 星期二 19时19分39秒
+#   修改日期：2017年08月01日 星期二 22时51分11秒
 #   描    述：
 #
 #================================================================
@@ -73,14 +73,24 @@ class ts_downloader(object):
         if m:
             output_filename = m.group(1)
         if output_filename:
+            output_filename = '%s.mp4' %(output_filename)
             self.set_output_filename(output_filename)
 
+        m3u8_script_url = None
         pattern = u'<script type="text/javascript"\s+src="([^"]+)"'
         r = re.compile(pattern)
         m = r.search(html)
         if m:
             m3u8_script = m.group(1)
-            print(m3u8_script)
+            m3u8_script_url = urllib.basejoin(domain, m3u8_script)
+        if m3u8_script_url:
+            html = self.dl.get_decoded_html(m3u8_script_url)
+            pattern = u'\[\'([^\$\[]+)\$(?P<m3u8_url>[^\$]+)\$([^\$]+)\'\]'
+            r = re.compile(pattern)
+            m = r.search(html)
+            if m:
+                tips = m.group(1).decode('unicode_escape')
+                self.url_m3u8 = m.group(2)
 
     def parse_m3u8(self):
         url_files = []
@@ -139,8 +149,8 @@ def main():
         return
 
     dl = ts_downloader(opts.url_m3u8, opts.jobs, opts.output_filename, opts.dry_run)
-    dl.get_playlist_form_play_url(opts.play_url)
-    return
+    if opts.play_url:
+        dl.get_playlist_form_play_url(opts.play_url)
 
     url_files = dl.parse_m3u8()
     dl.download_video(url_files)
