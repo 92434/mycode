@@ -6,13 +6,15 @@
 #   文件名称：log_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月26日 星期三 09时11分14秒
-#   修改日期：2017年07月26日 星期三 16时45分57秒
+#   修改日期：2017年08月01日 星期二 15时26分29秒
 #   描    述：
 #
 #================================================================
 import sys
 import datetime
 import xlwt
+import os
+import optparse
 
 class result_info(object):
     image_catagory = ''
@@ -159,9 +161,31 @@ def fa_result_key(x):
     new_id = x.new_id
     return new_catagory, int(new_id), image_catagory, int(image_id), int(image_serial_no)
 
+def get_filelist(dirname, ext_list):
+    filelist = []
+    for dir_name, sub_dir_list, sub_filelist in os.walk(dirname):
+        for i in sub_filelist:
+            if len(ext_list):
+                if os.path.splitext(i)[1] in ext_list:
+                    filelist.append(os.path.join(dir_name, i))
+            else:
+                filelist.append(os.path.join(dir_name, i))
+
+    return filelist
+
 def main():
     argv = sys.argv[1:]
-    fr_result, fa_result = parse_log_list(argv)
+    options = optparse.OptionParser()
+    options.add_option('-d', '--dir', action='store', dest='report_directory', help='report directory', default=os.curdir)
+    opts, args = options.parse_args(argv)
+    print('opts:%s' %(opts))
+    print('args:%s' %(args))
+    if len(args) or not os.access(opts.report_directory, os.F_OK):
+        options.print_help()
+        return
+
+    filelist = get_filelist(opts.report_directory, ['.log'])
+    fr_result, fa_result = parse_log_list(filelist)
     fa_result = sorted(fa_result, key = lambda x : fa_result_key(x))
     gen_xls(fr_result, fa_result)
 
