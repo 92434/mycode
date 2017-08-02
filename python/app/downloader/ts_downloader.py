@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年08月02日 星期三 10时33分44秒
+#   修改日期：2017年08月02日 星期三 10时39分01秒
 #   描    述：
 #
 #================================================================
@@ -105,7 +105,7 @@ class ts_downloader(object):
         filepath = os.path.join(self.output_dir, tail)
 
         if filepath.endswith('.m3u8'):
-            self.dl.download_urls([self.url_m3u8], title, ext, total_size, jobs = self.jobs, output_dir = self.output_dir, dry_run = self.dry_run)
+            self.dl.download_urls([self.url_m3u8], title, ext, total_size, jobs = self.jobs, output_dir = self.output_dir, dry_run = False)
 
         if os.path.exists(filepath) and os.path.getsize(filepath):
             with open(filepath, 'r') as f:
@@ -123,7 +123,7 @@ class ts_downloader(object):
         logging.debug('get %s total_size...', os.path.join(self.output_dir, self.output_filename))
         total_size = self.dl.urls_size(url_files[:1])
         total_size = total_size * len(url_files)
-        #logging.debug('total_size:%d' %(total_size))
+        logging.debug('total_size:%d' %(total_size))
         title, ext = os.path.splitext(self.output_filename)
         ext = ext[1:]
         self.dl.download_urls(url_files, title, ext, total_size, jobs = self.jobs, output_dir = self.output_dir, dry_run = self.dry_run)
