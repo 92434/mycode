@@ -6,7 +6,7 @@
 #   文件名称：log_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月26日 星期三 09时11分14秒
-#   修改日期：2017年08月02日 星期三 17时22分45秒
+#   修改日期：2017年08月02日 星期三 19时00分01秒
 #   描    述：
 #
 #================================================================
@@ -17,6 +17,7 @@ import os
 import optparse
 
 class result_info(object):
+    matched_state_changed = False
     image_catagory = ''
     image_id = ''
     image_serial_no = ''
@@ -27,7 +28,8 @@ class result_info(object):
     update_id = ''
     enroll_list = []
 
-    def __init__(self, image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list):
+    def __init__(self, matched_state_changed, image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list):
+        self.matched_state_changed = matched_state_changed
         self.image_catagory = image_catagory
         self.image_id = image_id
         self.image_serial_no = image_serial_no
@@ -69,35 +71,34 @@ def parse_log_list(filelist):
 
             elif len(fields) == 11:
                 catagory_info, id_info, serial_no_info, match_state_info, new_match_state_info, new_matched_catagory_info, new_matched_id_info, update_template_catagory_info,  update_template_id_info, path_info, ret_info = fields
+                matched_state_changed = False
+                if match_state_info.split(':')[1] != 'UNKNOW' and new_match_state_info.split(':')[1] != 'UNKNOW':
+                    if match_state_info.split(':')[1] != new_match_state_info.split(':')[1]:
+                        matched_state_changed = True
+
+                image_catagory = catagory_info.split(':')[2]
+                image_id = id_info.split(':')[1]
+                image_serial_no = serial_no_info.split(':')[1]
+                new_catagory = new_matched_catagory_info.split(':')[1]
+                new_id = new_matched_id_info.split(':')[1]
+                update_catagory = update_template_catagory_info.split(':')[1]
+                update_id = update_template_id_info.split(':')[1]
+                path = path_info.split(':')[1]
+
                 if mode != catagory_info.split(':')[0]:
                     mode = catagory_info.split(':')[0]
+
                 if mode == 'fa':
                     if new_match_state_info.split(':')[1] == 'MATCHED':
-                        image_catagory = catagory_info.split(':')[2]
-                        image_id = id_info.split(':')[1]
-                        image_serial_no = serial_no_info.split(':')[1]
-                        new_catagory = new_matched_catagory_info.split(':')[1]
-                        new_id = new_matched_id_info.split(':')[1]
-                        update_catagory = update_template_catagory_info.split(':')[1]
-                        update_id = update_template_id_info.split(':')[1]
-                        path = path_info.split(':')[1]
                         if image_catagory == new_catagory and image_id == new_id:
                             pass
                         else:
                             enroll_list = map_enroll_catagory_map_id_path_list.get(new_catagory).get(new_id)
-                            fa_result_item = result_info(image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list)
+                            fa_result_item = result_info(matched_state_changed, image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list)
                             fa_result.append(fa_result_item)
                 if mode == 'fr':
-                    image_catagory = catagory_info.split(':')[2]
-                    image_id = id_info.split(':')[1]
-                    image_serial_no = serial_no_info.split(':')[1]
-                    new_catagory = new_matched_catagory_info.split(':')[1]
-                    new_id = new_matched_id_info.split(':')[1]
-                    update_catagory = update_template_catagory_info.split(':')[1]
-                    update_id = update_template_id_info.split(':')[1]
-                    path = path_info.split(':')[1]
                     enroll_list = []
-                    fr_result_item = result_info(image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list)
+                    fr_result_item = result_info(matched_state_changed, image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list)
                     fr_result.append(fr_result_item)
     return fr_result, fa_result
 
@@ -184,12 +185,19 @@ def gen_xls(fr_result, fa_result):
         l = [i.image_catagory, i.image_id, i.image_serial_no, i.new_catagory, i.new_id, i.update_catagory, i.update_id, i.path]
         for value in l:
             highlight = False
+
             if col == 0 or col == 1 or col == 3 or col == 4:
-                highlight = True
                 if l[0] == l[3] and l[1] == l[4]:
-                    highlight = False
-            if col == 6 or col == 7:
-                if l[6] and l[7]:
+                    pass
+                else:
+                    if l[3] and l[4]:
+                        highlight = True
+                    else:
+                        if i.matched_state_changed:
+                            highlight = True
+
+            if col == 5 or col == 6:
+                if l[5] and l[6]:
                     highlight = True
 
             if highlight:
