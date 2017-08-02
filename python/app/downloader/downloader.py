@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年08月02日 星期三 10时32分24秒
+#   修改日期：2017年08月02日 星期三 10时42分09秒
 #   描    述：
 #
 #================================================================
@@ -541,7 +541,7 @@ class downloader(object):
         #logging.debug('%s' %(cmd))
 
         if subprocess.Popen(cmd, cwd=os.path.curdir).wait() != 0:
-            raise Exception('%s')
+            raise Exception('merge %s failed!!!', output_filepath)
 
     def download_urls(self, urls, title, ext, total_size = 0, jobs = 1, force = False, output_dir = '.', dry_run = False, refer = None, merge = True, faker = False, headers = {}, **kwargs):
         assert urls
