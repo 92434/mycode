@@ -6,7 +6,7 @@
 #   文件名称：gen_report.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月21日 星期五 11时49分06秒
-#   修改日期：2017年07月27日 星期四 09时36分03秒
+#   修改日期：2017年08月02日 星期三 14时32分47秒
 #   描    述：
 #
 #================================================================
@@ -119,6 +119,7 @@ def gen_xls_from_map_database_list(map_database_list):
                 pre_line_list = []
                 
             index = 0
+            current_line_list = []
             for key in keys:
                 highlight = False
                 value = map_database.get(key, u'N/A').decode('utf-8')

@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年07月31日 星期一 10时59分47秒
+ *   修改日期：2017年08月02日 星期三 15时23分11秒
  *   描    述：
  *
  *================================================================*/
@@ -496,6 +496,9 @@ int test_task::do_task_list()
 		if(have_valid_template) {
 			task_verify(fr_identify_list, FOR_FR);
 			task_verify(fa_identify_list, FOR_FA);
+		} else {
+			account_task(fr_identify_list.size());
+			account_task(fa_identify_list.size());
 		}
 	}
 
