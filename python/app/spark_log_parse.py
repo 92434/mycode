@@ -6,7 +6,7 @@
 #   文件名称：log_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月26日 星期三 09时11分14秒
-#   修改日期：2017年08月01日 星期二 15时26分29秒
+#   修改日期：2017年08月02日 星期三 17时22分45秒
 #   描    述：
 #
 #================================================================
@@ -23,15 +23,19 @@ class result_info(object):
     new_catagory = ''
     new_id = ''
     path = ''
+    update_catagory = ''
+    update_id = ''
     enroll_list = []
 
-    def __init__(self, image_catagory, image_id, image_serial_no, new_catagory, new_id, path, enroll_list):
+    def __init__(self, image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list):
         self.image_catagory = image_catagory
         self.image_id = image_id
         self.image_serial_no = image_serial_no
         self.new_catagory = new_catagory
         self.new_id = new_id
         self.path = path
+        self.update_catagory = update_catagory
+        self.update_id = update_id
         self.enroll_list = enroll_list[:]
 
 def parse_log_list(filelist):
@@ -64,7 +68,7 @@ def parse_log_list(filelist):
 
 
             elif len(fields) == 11:
-                catagory_info, id_info, serial_no_info, match_state_info, new_match_state_info, new_matched_catagory_info, new_matched_id_info, update_template_catagory_info,  update_template_if_info, path_info, ret_info = fields
+                catagory_info, id_info, serial_no_info, match_state_info, new_match_state_info, new_matched_catagory_info, new_matched_id_info, update_template_catagory_info,  update_template_id_info, path_info, ret_info = fields
                 if mode != catagory_info.split(':')[0]:
                     mode = catagory_info.split(':')[0]
                 if mode == 'fa':
@@ -74,13 +78,27 @@ def parse_log_list(filelist):
                         image_serial_no = serial_no_info.split(':')[1]
                         new_catagory = new_matched_catagory_info.split(':')[1]
                         new_id = new_matched_id_info.split(':')[1]
+                        update_catagory = update_template_catagory_info.split(':')[1]
+                        update_id = update_template_id_info.split(':')[1]
                         path = path_info.split(':')[1]
                         if image_catagory == new_catagory and image_id == new_id:
                             pass
                         else:
                             enroll_list = map_enroll_catagory_map_id_path_list.get(new_catagory).get(new_id)
-                            fa_result_item = result_info(image_catagory, image_id, image_serial_no, new_catagory, new_id, path, enroll_list)
+                            fa_result_item = result_info(image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list)
                             fa_result.append(fa_result_item)
+                if mode == 'fr':
+                    image_catagory = catagory_info.split(':')[2]
+                    image_id = id_info.split(':')[1]
+                    image_serial_no = serial_no_info.split(':')[1]
+                    new_catagory = new_matched_catagory_info.split(':')[1]
+                    new_id = new_matched_id_info.split(':')[1]
+                    update_catagory = update_template_catagory_info.split(':')[1]
+                    update_id = update_template_id_info.split(':')[1]
+                    path = path_info.split(':')[1]
+                    enroll_list = []
+                    fr_result_item = result_info(image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list)
+                    fr_result.append(fr_result_item)
     return fr_result, fa_result
 
 ''' 
@@ -150,6 +168,39 @@ def gen_xls(fr_result, fa_result):
         row += 1
         col = 0
         pre_line = l
+
+    fr_header = [u'catagory', u'id', u'serial_no', u'match_catagory', u'match_id', u'update_catagory', u'update_id', u'path']
+    sheet = f.add_sheet(u'frr test', cell_overwrite_ok=True) #创建sheet 
+    row = 0
+    col = 0
+    for i in fr_header:
+        sheet.write(row, col, fr_header[col], header_style)
+        col += 1
+
+    row += 1
+    col = 0
+
+    for i in fr_result:
+        l = [i.image_catagory, i.image_id, i.image_serial_no, i.new_catagory, i.new_id, i.update_catagory, i.update_id, i.path]
+        for value in l:
+            highlight = False
+            if col == 0 or col == 1 or col == 3 or col == 4:
+                highlight = True
+                if l[0] == l[3] and l[1] == l[4]:
+                    highlight = False
+            if col == 6 or col == 7:
+                if l[6] and l[7]:
+                    highlight = True
+
+            if highlight:
+                use_style = highlight_style
+            else:
+                use_style = normal_style
+            sheet.write(row, col, value.decode('utf-8'), use_style)
+            col += 1
+        row += 1
+        col = 0
+
     now = datetime.datetime.now()
     f.save('parse_result_%04d%02d%02d%02d%02d%02d_%06d.xls' %(now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)) #保存文件 
 
