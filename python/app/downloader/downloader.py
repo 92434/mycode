@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年08月01日 星期二 23时02分52秒
+#   修改日期：2017年08月02日 星期三 10时32分24秒
 #   描    述：
 #
 #================================================================
@@ -551,8 +551,7 @@ class downloader(object):
 
         if not total_size:
             try:
-                #total_size = self.urls_size(urls, faker=faker, headers=headers)
-                pass
+                total_size = self.urls_size(urls, faker=faker, headers=headers)
             except:
                 import traceback
                 traceback.print_exc(file=sys.stdout)

@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年08月01日 星期二 22时59分38秒
+#   修改日期：2017年08月02日 星期三 10时33分44秒
 #   描    述：
 #
 #================================================================
@@ -121,9 +121,9 @@ class ts_downloader(object):
 
     def download_video(self, url_files):
         logging.debug('get %s total_size...', os.path.join(self.output_dir, self.output_filename))
-        #total_size = self.dl.urls_size(url_files)
-        total_size = 0
-        logging.debug('total_size:%d' %(total_size))
+        total_size = self.dl.urls_size(url_files[:1])
+        total_size = total_size * len(url_files)
+        #logging.debug('total_size:%d' %(total_size))
         title, ext = os.path.splitext(self.output_filename)
         ext = ext[1:]
         self.dl.download_urls(url_files, title, ext, total_size, jobs = self.jobs, output_dir = self.output_dir, dry_run = self.dry_run)
@@ -159,4 +159,3 @@ def main():
 if '__main__' == __name__:
 	main()
 #python ts_downloader.py -u http://chyd-sn.wasu.tv/tbvideo/20141108/a5715565-44de-43ff-864d-2e8c5011e361.m3u8 -o '肖飞.mp4'
-#http://mp4.146gan.com/20170720/A47ED6/index.m3u8 -o "和服美女在自己卧室被干的高潮连连.mp4"
