@@ -1,12 +1,12 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python
 #================================================================
 #   Copyright (C) 2017年07月31日 肖飞 All rights reserved
 #   
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年08月03日 星期四 23时09分21秒
+#   修改日期：2017年08月03日 星期四 23时36分55秒
 #   描    述：
 #
 #================================================================
@@ -16,6 +16,10 @@ import downloader
 import optparse
 import log
 import re
+import sys  
+
+reload(sys)  
+sys.setdefaultencoding('utf8')
 
 logging = log.log().get_logger('debug')
 
@@ -52,14 +56,16 @@ class ts_downloader(object):
         charset = None
         output_filename = None
 
-        pattern = r'charset=([\w-]+)'
+        pattern = r'charset=\"{0,1}([\w-]+)\"{0,1}'
         r = re.compile(pattern)
         m = r.search(html)
         if m:
             charset = m.group(1)
-        charset = 'gb18030'
         if charset:
-            html = html.decode(charset)
+            try:
+                html = html.decode(charset)
+            except:
+                html = html.decode('gb18030')
 
         pattern = u'<title>(.*)在线(播放|观看).*</title>'
         r = re.compile(pattern)
