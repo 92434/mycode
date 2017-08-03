@@ -6,7 +6,7 @@
 #   文件名称：gen_report.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月21日 星期五 11时49分06秒
-#   修改日期：2017年08月02日 星期三 14时32分47秒
+#   修改日期：2017年08月03日 星期四 10时47分13秒
 #   描    述：
 #
 #================================================================
@@ -78,8 +78,8 @@ def style(fontname, height, highlight, bold = False):
 
 def gen_xls_from_map_database_list(map_database_list):
     f = xlwt.Workbook() #创建工作簿 
-    header = [u'configuration_name', u'位置', u'图片目录', u'debug_switch', u'algorithm_mode', u'enroll_max_templates', u'algorithm_max_templates', u'spa_enable', u'algorithm_far_level', u'update_template_far_level', u'update_template_threshold', u'verify_quickly_enable', u'update_template_outside_enable', u'image_quality_score', u'verify_image_quality_score', u'enroll_duplicate_area_check_enable', u'valid_area_scale', u'enrollment_tips_enable', u'enrollment_tips_parameter1', u'enrollment_tips_parameter2', u'enrollment_tips_parameter3', u'verify_improve_enable', u'verify_improve_level', u'mcu_image_bit', u'mcu_interrupt_mode', u'mcu_state_check_mode', u'repeat_get_image_count', u'template_buffer_enable', u'transfer_bytes_max', u'config_debuginfo_switch', u'fr result', u'frr', u'fa result', u'far']
-    keys = ['configuration_name', 'log_dirname', 'pictures_directory', 'debug_switch', 'algorithm_mode', 'enroll_max_templates', 'algorithm_max_templates', 'spa_enable', 'algorithm_far_level', 'update_template_far_level', 'update_template_threshold', 'verify_quickly_enable', 'update_template_outside_enable', 'image_quality_score', 'verify_image_quality_score', 'enroll_duplicate_area_check_enable', 'valid_area_scale', 'enrollment_tips_enable', 'enrollment_tips_parameter1', 'enrollment_tips_parameter2', 'enrollment_tips_parameter3', 'verify_improve_enable', 'verify_improve_level', 'mcu_image_bit', 'mcu_interrupt_mode', 'mcu_state_check_mode', 'repeat_get_image_count', 'template_buffer_enable', 'transfer_bytes_max', 'config_debuginfo_switch', 'fr_result', 'frr', 'fa_result', 'far']
+    header = [u'configuration_name', u'位置', u'图片目录', u'debug_switch', u'algorithm_mode', u'enroll_max_templates', u'algorithm_max_templates', u'spa_enable', u'algorithm_far_level', u'update_template_far_level', u'update_template_threshold', u'verify_quickly_enable', u'update_template_outside_enable', u'image_quality_score', u'verify_image_quality_score', u'enroll_duplicate_area_check_enable', u'valid_area_scale', u'enrollment_tips_enable', u'enrollment_tips_parameter1', u'enrollment_tips_parameter2', u'enrollment_tips_parameter3', u'verify_improve_enable', u'verify_improve_level', u'mcu_image_bit', u'mcu_interrupt_mode', u'mcu_state_check_mode', u'repeat_get_image_count', u'template_buffer_enable', u'transfer_bytes_max', u'config_debuginfo_switch', u'use_dyn_far', u'fr result', u'frr', u'fa result', u'far']
+    keys = ['configuration_name', 'log_dirname', 'pictures_directory', 'debug_switch', 'algorithm_mode', 'enroll_max_templates', 'algorithm_max_templates', 'spa_enable', 'algorithm_far_level', 'update_template_far_level', 'update_template_threshold', 'verify_quickly_enable', 'update_template_outside_enable', 'image_quality_score', 'verify_image_quality_score', 'enroll_duplicate_area_check_enable', 'valid_area_scale', 'enrollment_tips_enable', 'enrollment_tips_parameter1', 'enrollment_tips_parameter2', 'enrollment_tips_parameter3', 'verify_improve_enable', 'verify_improve_level', 'mcu_image_bit', 'mcu_interrupt_mode', 'mcu_state_check_mode', 'repeat_get_image_count', 'template_buffer_enable', 'transfer_bytes_max', 'config_debuginfo_switch', 'use_dyn_far', 'fr_result', 'frr', 'fa_result', 'far']
     map_sheet = {}
     map_sheet_info_list = {}
     map_pre_line_list = {}

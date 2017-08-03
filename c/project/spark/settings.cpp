@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年07月26日 星期三 16时24分03秒
+ *   修改日期：2017年08月03日 星期四 10时16分09秒
  *   描    述：
  *
  *================================================================*/
@@ -293,6 +293,7 @@ int settings::get_sensor_lib_settings_from_configuration(configure &cfg)
 	template_buffer_enable = cfg.get("sensor_lib", "template_buffer_enable");
 	transfer_bytes_max = cfg.get("sensor_lib", "transfer_bytes_max");
 	config_debuginfo_switch = cfg.get("sensor_lib", "config_debuginfo_switch");
+	use_dyn_far = cfg.get("sensor_lib", "use_dyn_far");
 	return ret;
 }
 

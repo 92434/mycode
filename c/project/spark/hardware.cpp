@@ -6,7 +6,7 @@
  *   文件名称：hardware.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时56分34秒
- *   修改日期：2017年07月27日 星期四 12时08分16秒
+ *   修改日期：2017年08月03日 星期四 10时22分46秒
  *   描    述：
  *
  *================================================================*/
@@ -172,6 +172,8 @@ int hardware::hardware_init()
 	focal_SetTransferBytesMax((int)g_settings->value_strtod(g_settings->transfer_bytes_max));
 
 	focal_config_debuginfo_switch((int)g_settings->value_strtod(g_settings->config_debuginfo_switch));//打开debug信息
+
+	focal_use_dyn_far((int)g_settings->value_strtod(g_settings->use_dyn_far));
 
 	return ret;
 }

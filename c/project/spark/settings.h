@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年07月26日 星期三 16时03分44秒
+ *   修改日期：2017年08月03日 星期四 10时42分35秒
  *   描    述：
  *
  *================================================================*/
@@ -24,7 +24,6 @@ extern "C"
 #include <string>
 #include <vector>
 #include <set>
-#include <stdlib.h>
 #include <sys/time.h>
 #include "configuration.h"
 #include "optparse.h"
@@ -107,6 +106,7 @@ public:
 	std::string template_buffer_enable;
 	std::string transfer_bytes_max;
 	std::string config_debuginfo_switch;
+	std::string use_dyn_far;
 
 	static settings *g_settings;
 

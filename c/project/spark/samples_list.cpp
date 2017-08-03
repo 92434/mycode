@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年07月26日 星期三 15时51分21秒
+ *   修改日期：2017年08月03日 星期四 10时45分42秒
  *   描    述：
  *
  *================================================================*/
@@ -493,6 +493,7 @@ int samples_list::report_result()
 	log_file("template_buffer_enable:%s,", g_settings->template_buffer_enable.c_str());
 	log_file("transfer_bytes_max:%s,", g_settings->transfer_bytes_max.c_str());
 	log_file("config_debuginfo_switch:%s,", g_settings->config_debuginfo_switch.c_str());
+	log_file("use_dyn_far:%s,", g_settings->use_dyn_far.c_str());
 
 	if(fr_total_count > 0) {
 		printf("fr result:%d/%d(%f%%)\n", fr_fail_count, fr_total_count, fr_fail_count * 100.0 / fr_total_count);

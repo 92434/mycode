@@ -6,7 +6,7 @@
  *   文件名称：FpSensorLib.c
  *   创 建 者：肖飞
  *   创建日期：2017年07月17日 星期一 12时08分57秒
- *   修改日期：2017年07月27日 星期四 11时27分04秒
+ *   修改日期：2017年08月03日 星期四 10时25分13秒
  *   描    述：
  *
  *================================================================*/
@@ -322,6 +322,10 @@ void focal_SetTransferBytesMax(__ft_u32 usTransferBytesMax)
 }
 
 void focal_config_debuginfo_switch(__ft_u8 debug)
+{
+}
+
+void focal_use_dyn_far(__ft_u32 use_dyn_far)
 {
 }
 

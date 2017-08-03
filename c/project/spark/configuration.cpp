@@ -6,7 +6,7 @@
  *   文件名称：configuration.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时22分47秒
- *   修改日期：2017年07月25日 星期二 14时32分58秒
+ *   修改日期：2017年08月03日 星期四 10时43分04秒
  *   描    述：
  *
  *================================================================*/
@@ -49,7 +49,8 @@ std::string configure::get(std::string class_name, std::string key)
 	it1 = m_configuration.find(class_name);
 
 	if(it1 == m_configuration.end()) {
-		return value;
+		printf("can not get class \"%s\"!\n", class_name.c_str());
+		exit(1);
 	}
 
 	key_value_set = it1->second;
@@ -57,7 +58,8 @@ std::string configure::get(std::string class_name, std::string key)
 	it2 = key_value_set.find(key);
 
 	if(it2 == key_value_set.end()) {
-		return value;
+		printf("can not get class \"%s\", key \"%s\"!\n", class_name.c_str(), key.c_str());
+		exit(1);
 	}
 
 	value = it2->second;

@@ -6,7 +6,7 @@
  *   文件名称：FpSensorLib.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月17日 星期一 12时09分03秒
- *   修改日期：2017年07月27日 星期四 11时22分35秒
+ *   修改日期：2017年08月03日 星期四 10时23分54秒
  *   描    述：
  *
  *================================================================*/
@@ -110,10 +110,12 @@ void focal_SetImageRepeatEn(__ft_u8 ucMode);
 void focal_SetTemplateBuffEn(__ft_u8 ucFlg);
 void focal_SetTransferBytesMax(__ft_u32 usTransferBytesMax);
 void focal_config_debuginfo_switch(__ft_u8 debug);
+void focal_use_dyn_far(__ft_u32 use_dyn_far);
 __ft_s32 focal_Enroll(__ft_u16 fingerId, __ft_u8 enroll_index, __ft_u8 *penroll_coverage);
 __ft_s32 focal_Identify(__ft_u8 *pfingerId, __ft_u8 *pupdateTpl);
 __ft_s32 focal_UpdateTemplate(__ft_s32 update, __ft_s32 *finger_id);
 __ft_s32 focal_DelFinger(__ft_u8 fingerId);
+__ft_s32 focal_SaveAlgTplData(__ft_u16 fingerId, __ft_u8 *tpl_type, __ft_u32 *tpl_size, __ft_u8 * tpl_data);
 __ft_s32 focal_SaveAlgTplData(__ft_u16 fingerId, __ft_u8 *tpl_type, __ft_u32 *tpl_size, __ft_u8 * tpl_data);
 
 #ifdef __cplusplus
