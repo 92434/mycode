@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年08月02日 星期三 10时42分09秒
+#   修改日期：2017年08月03日 星期四 23时06分15秒
 #   描    述：
 #
 #================================================================
@@ -198,7 +198,7 @@ class downloader(object):
     def get_html(self, url, encoding = None, faker = False):
         response = self.get_response(url, faker)
         content = response.data
-        return str(content, 'utf-8', 'ignore')
+        return content.decode('utf-8', 'ignore')
 
 
     # DEPRECATED in favor of get_content()

@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年08月02日 星期三 10时39分01秒
+#   修改日期：2017年08月03日 星期四 23时09分21秒
 #   描    述：
 #
 #================================================================
@@ -15,7 +15,6 @@ import os
 import downloader
 import optparse
 import log
-import urllib
 import re
 
 logging = log.log().get_logger('debug')
@@ -44,19 +43,14 @@ class ts_downloader(object):
         if self.output_filename:
             self.output_dir = os.path.join(os.path.curdir, os.path.splitext(self.output_filename)[0])
 
-    def url_domain(self, play_url):
-        proto, rest = urllib.splittype(play_url)
-        host, rest = urllib.splithost(rest)
-
-        return '%s://%s' %(proto, host)
-
     def get_playlist_form_play_url(self, play_url):
-        domain = self.url_domain(play_url)
+        r = downloader.urllib.parse.urlparse(play_url)
+        domain = '%s://%s' %(r.scheme, r.netloc)
+
         html = self.dl.get_decoded_html(play_url)
 
         charset = None
         output_filename = None
-        m3u8_url = None
 
         pattern = r'charset=([\w-]+)'
         r = re.compile(pattern)
@@ -67,7 +61,7 @@ class ts_downloader(object):
         if charset:
             html = html.decode(charset)
 
-        pattern = u'<title>(.*)在线播放.*</title>'
+        pattern = u'<title>(.*)在线(播放|观看).*</title>'
         r = re.compile(pattern)
         m = r.search(html)
         if m:
@@ -75,6 +69,14 @@ class ts_downloader(object):
         if output_filename:
             output_filename = '%s.mp4' %(output_filename)
             self.set_output_filename(output_filename)
+        
+        pattern = u'a:\'(.*index.m3u8)\','
+        r = re.compile(pattern)
+        m = r.search(html)
+        if m:
+            self.url_m3u8 = m.group(1)
+            print(self.url_m3u8)
+            return
 
         m3u8_script_url = None
         pattern = u'<script type="text/javascript"\s+src="([^"]+)"'
@@ -82,7 +84,7 @@ class ts_downloader(object):
         m = r.search(html)
         if m:
             m3u8_script = m.group(1)
-            m3u8_script_url = urllib.basejoin(domain, m3u8_script)
+            m3u8_script_url = downloader.urllib.parse.urljoin(domain, m3u8_script)
         if m3u8_script_url:
             html = self.dl.get_decoded_html(m3u8_script_url)
             pattern = u'\[\'([^\$\[]+)\$(?P<m3u8_url>[^\$]+)\$([^\$]+)\'\]'
@@ -96,24 +98,17 @@ class ts_downloader(object):
         url_files = []
         fetched = set()
         head, tail = os.path.split(self.url_m3u8)
-        title, ext = os.path.splitext(tail)
-        ext = ext[1:]
-
-        total_size = self.dl.urls_size([self.url_m3u8])
-        #print('total_size:%d' %(total_size))
 
         filepath = os.path.join(self.output_dir, tail)
 
         if filepath.endswith('.m3u8'):
-            self.dl.download_urls([self.url_m3u8], title, ext, total_size, jobs = self.jobs, output_dir = self.output_dir, dry_run = False)
+            content = self.dl.get_html(self.url_m3u8);
 
-        if os.path.exists(filepath) and os.path.getsize(filepath):
-            with open(filepath, 'r') as f:
-                content = f.read().splitlines()
-                for i in content:
-                    line = i.strip()
-                    if not line.startswith('#'):
-                        url_files.append(line)
+            lines = content.splitlines()
+            for i in lines:
+                line = i.strip()
+                if not line.startswith('#'):
+                    url_files.append(line)
 
             url_files = map(lambda x : os.path.join(head, x), url_files)
 
@@ -153,6 +148,8 @@ def main():
     if opts.play_url:
         dl.get_playlist_form_play_url(opts.play_url)
 
+    if not dl.output_filename or not dl.output_dir:
+        return
     url_files = dl.parse_m3u8()
     dl.download_video(url_files)
 
