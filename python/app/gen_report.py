@@ -6,7 +6,7 @@
 #   文件名称：gen_report.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月21日 星期五 11时49分06秒
-#   修改日期：2017年08月03日 星期四 10时47分13秒
+#   修改日期：2017年08月04日 星期五 09时42分48秒
 #   描    述：
 #
 #================================================================
@@ -87,7 +87,6 @@ def gen_xls_from_map_database_list(map_database_list):
     header_style = style('Times New Roman', 220, False, True)
     normal_style = style('Times New Roman', 220, False, False)
     highlight_style = style('Times New Roman', 220, True, False)
-    current_line_list = []
     for map_database in map_database_list:
         test_type = map_database.get('test_type', None)
         if test_type:
@@ -98,26 +97,25 @@ def gen_xls_from_map_database_list(map_database_list):
                 info_list = [0, 0]
                 map_sheet_info_list.update({test_type:info_list})
 
+            row = info_list[0]
+            col = info_list[1]
+
+            pre_line_list = map_pre_line_list.get(test_type, None)
+            if not pre_line_list:
+                pre_line_list = []
+                
             sheet = map_sheet.get(test_type, None)
             if not sheet:
                 sheet = f.add_sheet(test_type.decode('utf-8'), cell_overwrite_ok=True) #创建sheet 
                 map_sheet.update({test_type : sheet})
 
-                row = info_list[0]
-                col = info_list[1]
                 index = 0
                 for i in header:
                     sheet.write(row + index, col, header[index], header_style)
                     index += 1
                 row = 0
                 col += 1
-                info_list = [row, col]
-                map_sheet_info_list.update({test_type:info_list})
 
-            pre_line_list = map_pre_line_list.get(test_type, None)
-            if not pre_line_list:
-                pre_line_list = []
-                
             index = 0
             current_line_list = []
             for key in keys:
