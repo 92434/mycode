@@ -6,7 +6,7 @@
 #   文件名称：gen_report.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月21日 星期五 11时49分06秒
-#   修改日期：2017年08月04日 星期五 09时42分48秒
+#   修改日期：2017年08月04日 星期五 13时29分38秒
 #   描    述：
 #
 #================================================================
@@ -34,15 +34,14 @@ def build_database_for_report(directory):
         content_list = []
         if os.path.basename(i) == "report.log":
             with open(i) as f:
-                content_list = f.read().splitlines()
-            for j in content_list:
-                map_database = {}
-                key_value_list = j.strip().split(',')
-                for key_value in key_value_list:
-                    l = key_value.strip().split(':')
-                    if len(l) == 2:
-                        map_database.update({l[0] : l[1]})
-                map_database_list.append(map_database)
+                for j in f:
+                    map_database = {}
+                    key_value_list = j.strip().split(',')
+                    for key_value in key_value_list:
+                        l = key_value.strip().split(':')
+                        if len(l) == 2:
+                            map_database.update({l[0] : l[1]})
+                    map_database_list.append(map_database)
     return map_database_list
 
 ''' 

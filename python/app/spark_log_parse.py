@@ -6,7 +6,7 @@
 #   文件名称：log_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月26日 星期三 09时11分14秒
-#   修改日期：2017年08月02日 星期三 19时00分01秒
+#   修改日期：2017年08月04日 星期五 10时37分40秒
 #   描    述：
 #
 #================================================================
@@ -48,58 +48,58 @@ def parse_log_list(filelist):
     mode = ''
     for i in filelist:
         with open(i) as f:
-            content = f.read().splitlines()
-        for line in content:
-            fields = line.split(',')
-            if len(fields) == 6:
-                current_enroll_id_info, catagory_info, id_info, serial_no_info, path_info, ret_info = fields
-                if mode != current_enroll_id_info.split(':')[0]:
-                    mode = current_enroll_id_info.split(':')[0]
-                    map_enroll_catagory_map_id_path_list = {}
-                map_id_path_list = map_enroll_catagory_map_id_path_list.get(catagory_info.split(':')[1], None)
-                if not map_id_path_list:
-                    map_id_path_list = {id_info.split(':')[1] : [path_info.split(':')[1]]}
-                    map_enroll_catagory_map_id_path_list.update({catagory_info.split(':')[1] : map_id_path_list})
-                else:
-                    path_list = map_id_path_list.get(id_info.split(':')[1], None)
-                    if not path_list:
-                        path_list = [path_info.split(':')[1]]
-                        map_id_path_list.update({id_info.split(':')[1] : path_list})
+            for line in f:
+                line = line.strip()
+                fields = line.split(',')
+                if len(fields) == 6:
+                    current_enroll_id_info, catagory_info, id_info, serial_no_info, path_info, ret_info = fields
+                    if mode != current_enroll_id_info.split(':')[0]:
+                        mode = current_enroll_id_info.split(':')[0]
+                        map_enroll_catagory_map_id_path_list = {}
+                    map_id_path_list = map_enroll_catagory_map_id_path_list.get(catagory_info.split(':')[1], None)
+                    if not map_id_path_list:
+                        map_id_path_list = {id_info.split(':')[1] : [path_info.split(':')[1]]}
+                        map_enroll_catagory_map_id_path_list.update({catagory_info.split(':')[1] : map_id_path_list})
                     else:
-                        path_list.append(path_info.split(':')[1])
-
-
-            elif len(fields) == 11:
-                catagory_info, id_info, serial_no_info, match_state_info, new_match_state_info, new_matched_catagory_info, new_matched_id_info, update_template_catagory_info,  update_template_id_info, path_info, ret_info = fields
-                matched_state_changed = False
-                if match_state_info.split(':')[1] != 'UNKNOW' and new_match_state_info.split(':')[1] != 'UNKNOW':
-                    if match_state_info.split(':')[1] != new_match_state_info.split(':')[1]:
-                        matched_state_changed = True
-
-                image_catagory = catagory_info.split(':')[2]
-                image_id = id_info.split(':')[1]
-                image_serial_no = serial_no_info.split(':')[1]
-                new_catagory = new_matched_catagory_info.split(':')[1]
-                new_id = new_matched_id_info.split(':')[1]
-                update_catagory = update_template_catagory_info.split(':')[1]
-                update_id = update_template_id_info.split(':')[1]
-                path = path_info.split(':')[1]
-
-                if mode != catagory_info.split(':')[0]:
-                    mode = catagory_info.split(':')[0]
-
-                if mode == 'fa':
-                    if new_match_state_info.split(':')[1] == 'MATCHED':
-                        if image_catagory == new_catagory and image_id == new_id:
-                            pass
+                        path_list = map_id_path_list.get(id_info.split(':')[1], None)
+                        if not path_list:
+                            path_list = [path_info.split(':')[1]]
+                            map_id_path_list.update({id_info.split(':')[1] : path_list})
                         else:
-                            enroll_list = map_enroll_catagory_map_id_path_list.get(new_catagory).get(new_id)
-                            fa_result_item = result_info(matched_state_changed, image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list)
-                            fa_result.append(fa_result_item)
-                if mode == 'fr':
-                    enroll_list = []
-                    fr_result_item = result_info(matched_state_changed, image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list)
-                    fr_result.append(fr_result_item)
+                            path_list.append(path_info.split(':')[1])
+
+
+                elif len(fields) == 11:
+                    catagory_info, id_info, serial_no_info, match_state_info, new_match_state_info, new_matched_catagory_info, new_matched_id_info, update_template_catagory_info,  update_template_id_info, path_info, ret_info = fields
+                    matched_state_changed = False
+                    if match_state_info.split(':')[1] != 'UNKNOW' and new_match_state_info.split(':')[1] != 'UNKNOW':
+                        if match_state_info.split(':')[1] != new_match_state_info.split(':')[1]:
+                            matched_state_changed = True
+
+                    image_catagory = catagory_info.split(':')[2]
+                    image_id = id_info.split(':')[1]
+                    image_serial_no = serial_no_info.split(':')[1]
+                    new_catagory = new_matched_catagory_info.split(':')[1]
+                    new_id = new_matched_id_info.split(':')[1]
+                    update_catagory = update_template_catagory_info.split(':')[1]
+                    update_id = update_template_id_info.split(':')[1]
+                    path = path_info.split(':')[1]
+
+                    if mode != catagory_info.split(':')[0]:
+                        mode = catagory_info.split(':')[0]
+
+                    if mode == 'fa':
+                        if new_match_state_info.split(':')[1] == 'MATCHED':
+                            if image_catagory == new_catagory and image_id == new_id:
+                                pass
+                            else:
+                                enroll_list = map_enroll_catagory_map_id_path_list.get(new_catagory).get(new_id)
+                                fa_result_item = result_info(matched_state_changed, image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list)
+                                fa_result.append(fa_result_item)
+                    if mode == 'fr':
+                        enroll_list = []
+                        fr_result_item = result_info(matched_state_changed, image_catagory, image_id, image_serial_no, new_catagory, new_id, update_catagory, update_id, path, enroll_list)
+                        fr_result.append(fr_result_item)
     return fr_result, fa_result
 
 ''' 
@@ -133,7 +133,7 @@ def style(fontname, height, highlight, bold = False):
     
     return xlstyle 
 
-def gen_xls(fr_result, fa_result):
+def gen_xls(fr_result, fa_result, output_filename):
     header_style = style('Times New Roman', 220, False, True)
     normal_style = style('Times New Roman', 220, False, False)
     highlight_style = style('Times New Roman', 220, True, False)
@@ -208,9 +208,10 @@ def gen_xls(fr_result, fa_result):
             col += 1
         row += 1
         col = 0
-
-    now = datetime.datetime.now()
-    f.save('parse_result_%04d%02d%02d%02d%02d%02d_%06d.xls' %(now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)) #保存文件 
+    if not output_filename:
+        now = datetime.datetime.now()
+        output_filename = 'parse_result_%04d%02d%02d%02d%02d%02d_%06d.xls' %(now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)
+    f.save(output_filename) #保存文件 
 
 def fa_result_key(x):
     image_catagory = x.image_catagory
@@ -236,6 +237,7 @@ def main():
     argv = sys.argv[1:]
     options = optparse.OptionParser()
     options.add_option('-d', '--dir', action='store', dest='report_directory', help='report directory', default=os.curdir)
+    options.add_option('-o', '--output-filename', action='store', dest='output_filename', help='output_filename', default=None)
     opts, args = options.parse_args(argv)
     print('opts:%s' %(opts))
     print('args:%s' %(args))
@@ -246,7 +248,7 @@ def main():
     filelist = get_filelist(opts.report_directory, ['.log'])
     fr_result, fa_result = parse_log_list(filelist)
     fa_result = sorted(fa_result, key = lambda x : fa_result_key(x))
-    gen_xls(fr_result, fa_result)
+    gen_xls(fr_result, fa_result, opts.output_filename)
 
 if '__main__' == __name__:
 	main()
