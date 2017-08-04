@@ -6,7 +6,7 @@
  *   文件名称：samples_list.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时28分39秒
- *   修改日期：2017年07月26日 星期三 15时45分22秒
+ *   修改日期：2017年08月04日 星期五 23时27分59秒
  *   描    述：
  *
  *================================================================*/
@@ -25,6 +25,7 @@ extern "C"
 #include <vector>
 #include <set>
 
+#include <sys/wait.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <stdlib.h>

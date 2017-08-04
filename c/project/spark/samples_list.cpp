@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年08月03日 星期四 10时45分42秒
+ *   修改日期：2017年08月04日 星期五 23时34分02秒
  *   描    述：
  *
  *================================================================*/
@@ -571,7 +571,26 @@ int samples_list::try_to_start_task_and_wait(test_task *task, task_start_reason_
 		int pid = get_client_result();
 
 		if(pid != 0) {
-			printf("pid stop:%d(%x)\n", pid, pid);
+			int w;
+			int status;
+
+			printf("pid %d(%x) will stop!\n", pid, pid);
+			w = waitpid(pid, &status, WUNTRACED | WCONTINUED);
+
+			if (w == -1) {
+				perror("waitpid");
+			}
+
+			if (WIFEXITED(status)) {
+				printf("exited, status=%d\n", WEXITSTATUS(status));
+			} else if (WIFSIGNALED(status)) {
+				printf("killed by signal %d\n", WTERMSIG(status));
+			} else if (WIFSTOPPED(status)) {
+				printf("stopped by signal %d\n", WSTOPSIG(status));
+			} else if (WIFCONTINUED(status)) {
+				printf("continued\n");
+			}
+
 			pid_list.erase(pid);
 		}
 	}
