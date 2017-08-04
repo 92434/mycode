@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年08月03日 星期四 23时36分55秒
+#   修改日期：2017年08月04日 星期五 13时51分53秒
 #   描    述：
 #
 #================================================================
@@ -19,7 +19,7 @@ import re
 import sys  
 
 reload(sys)  
-sys.setdefaultencoding('utf8')
+sys.setdefaultencoding('utf-8')
 
 logging = log.log().get_logger('debug')
 
@@ -52,6 +52,7 @@ class ts_downloader(object):
         domain = '%s://%s' %(r.scheme, r.netloc)
 
         html = self.dl.get_decoded_html(play_url)
+        #print(html)
 
         charset = None
         output_filename = None
@@ -67,22 +68,35 @@ class ts_downloader(object):
             except:
                 html = html.decode('gb18030')
 
-        pattern = u'<title>(.*)在线(播放|观看).*</title>'
-        r = re.compile(pattern)
-        m = r.search(html)
-        if m:
-            output_filename = m.group(1)
+        pattern_list = [
+                u'<title>(.*)在线(播放|观看).*</title>',
+                u'<title>正在.*播放(.*)</title>',
+        ]
+
+        for pattern in pattern_list:
+            r = re.compile(pattern)
+            m = r.search(html)
+            if m:
+                output_filename = m.group(1)
+                break;
+
         if output_filename:
             output_filename = '%s.mp4' %(output_filename)
             self.set_output_filename(output_filename)
-        
-        pattern = u'a:\'(.*index.m3u8)\','
-        r = re.compile(pattern)
-        m = r.search(html)
-        if m:
-            self.url_m3u8 = m.group(1)
-            print(self.url_m3u8)
+        else:
             return
+        
+        pattern_list = [
+                u'a:\'(.*index\.m3u8)\',',
+                u'\$([^\$]+index\.m3u8)\$',
+        ]
+        for pattern in pattern_list:
+            r = re.compile(pattern)
+            m = r.search(html)
+            if m:
+                self.url_m3u8 = m.group(1)
+                print(self.url_m3u8)
+                return
 
         m3u8_script_url = None
         pattern = u'<script type="text/javascript"\s+src="([^"]+)"'
@@ -154,8 +168,9 @@ def main():
     if opts.play_url:
         dl.get_playlist_form_play_url(opts.play_url)
 
-    if not dl.output_filename or not dl.output_dir:
+    if not dl.url_m3u8 or not dl.output_filename or not dl.output_dir:
         return
+
     url_files = dl.parse_m3u8()
     dl.download_video(url_files)
 
