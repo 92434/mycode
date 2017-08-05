@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年08月04日 星期五 23时34分02秒
+ *   修改日期：2017年08月05日 星期六 23时58分35秒
  *   描    述：
  *
  *================================================================*/
@@ -579,6 +579,8 @@ int samples_list::try_to_start_task_and_wait(test_task *task, task_start_reason_
 
 			if (w == -1) {
 				perror("waitpid");
+			} else {
+				pid_list.erase(w);
 			}
 
 			if (WIFEXITED(status)) {
@@ -591,7 +593,6 @@ int samples_list::try_to_start_task_and_wait(test_task *task, task_start_reason_
 				printf("continued\n");
 			}
 
-			pid_list.erase(pid);
 		}
 	}
 

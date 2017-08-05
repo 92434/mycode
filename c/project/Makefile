@@ -17,6 +17,11 @@ test_config/test_config.cpp.LOCAL_DEPS := $(top)/c/utils/out/lib/libxiaofei.a
 test_config/test_config.cpp.LOCAL_LIBS := $(top)/c/utils/out/lib/libxiaofei.a
 test_config/test_config.cpp.LOCAL_CFLAGS := -I$(top)/c/utils
 
+c_files += test_fork/test_fork.cpp
+test_config/test_config.cpp.LOCAL_DEPS := $(top)/c/utils/out/lib/libxiaofei.a
+test_config/test_config.cpp.LOCAL_LIBS := $(top)/c/utils/out/lib/libxiaofei.a
+test_config/test_config.cpp.LOCAL_CFLAGS := -I$(top)/c/utils
+
 include $(BUILD_BINS)
 
 SUB_DIRS += spark
