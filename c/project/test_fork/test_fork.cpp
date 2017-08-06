@@ -6,7 +6,7 @@
  *   文件名称：test_fork.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年08月05日 星期六 23时08分38秒
- *   修改日期：2017年08月05日 星期六 23时54分49秒
+ *   修改日期：2017年08月06日 星期日 10时35分44秒
  *   描    述：
  *
  *================================================================*/
@@ -31,12 +31,15 @@ int main(int argc, char **argv)
 		if(pid == -1) {
 			printf("error %s\n", strerror(errno));
 		} else if(pid == 0) {
-			sleep(3 + i * 2);
+			sleep(6 + i * 1);
 			exit(0);
 		} else {
+			printf("start pid %d\n", pid);
 			pid_list.insert(pid);
 		}
 	}
+
+	sleep(15);
 
 	while(pid_list.size() > 0) {
 		int status;
@@ -48,6 +51,7 @@ int main(int argc, char **argv)
 			perror("waitpid");
 			exit(EXIT_FAILURE);
 		} else {
+			printf("pid %d ", w);
 			pid_list.erase(w);
 		}
 
