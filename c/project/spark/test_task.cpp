@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年08月02日 星期三 15时23分11秒
+ *   修改日期：2017年08月07日 星期一 12时07分43秒
  *   描    述：
  *
  *================================================================*/
@@ -29,8 +29,10 @@ int test_task::clear()
 	fr_identify_list.clear();
 	fa_identify_list.clear();
 	enroll_ids.clear();
-	logfile.clear();
 	timestamp.clear();
+	logfile.clear();
+	logfile_hardware.clear();
+	server_path.clear();
 	current_enroll_ids.clear();
 
 	fr_total_tasks = 0;
