@@ -6,7 +6,7 @@
  *   文件名称：test_task.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时27分38秒
- *   修改日期：2017年07月26日 星期三 16时14分35秒
+ *   修改日期：2017年08月09日 星期三 17时59分40秒
  *   描    述：
  *
  *================================================================*/
@@ -116,6 +116,8 @@ public:
 	static bool identify_less_than(task_bmp bmp1, task_bmp bmp2);
 
 	int account_task(int tasks);
+
+	int wait_for_gdb();
 
 	int pre_task();
 

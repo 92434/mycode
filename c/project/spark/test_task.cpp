@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年08月07日 星期一 12时07分43秒
+ *   修改日期：2017年08月09日 星期三 18时00分59秒
  *   描    述：
  *
  *================================================================*/
@@ -229,10 +229,42 @@ int test_task::account_task(int tasks)
 	return ret;
 }
 
+int test_task::wait_for_gdb()
+{
+	int ret = 0;
+
+	std::ofstream pid_ofs;
+	char buffer[BUFFER_LEN];
+	int len;
+
+	len = snprintf(buffer, BUFFER_LEN, "pid_%d", getpid());
+	buffer[len] = 0;
+
+	pid_ofs.open(buffer);
+
+	if(!pid_ofs.good()) {
+		printf("open:%s failed!!! (%s)!\n", logfile.c_str(), strerror(errno));
+		ret = -1;
+		return ret;
+	}
+
+	pid_ofs.close();
+
+	while(access(buffer, F_OK) == 0) {
+		sleep(1);
+		printf("pid %d wait for gdb...\n", getpid());
+	}
+
+
+	return ret;
+}
+
 int test_task::pre_task()
 {
 	int ret = 0;
 	hardware *hw = hardware::get_instance();
+
+	//wait_for_gdb();
 
 	hw->set_save_bmp();
 

@@ -6,7 +6,7 @@
  *   文件名称：hardware_9348.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时52分18秒
- *   修改日期：2017年07月20日 星期四 18时18分26秒
+ *   修改日期：2017年08月09日 星期三 17时38分53秒
  *   描    述：
  *
  *================================================================*/
@@ -21,6 +21,7 @@ extern "C"
 
 #ifdef __cplusplus
 }
+#endif
 
 #include <stdio.h>
 
@@ -55,5 +56,4 @@ public:
 	int read_flash(int offset, char *buffer, int len);
 
 };
-#endif
 #endif //HARDWARE_9348_H
