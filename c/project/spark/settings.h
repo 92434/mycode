@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年08月03日 星期四 10时42分35秒
+ *   修改日期：2017年08月08日 星期二 13时58分22秒
  *   描    述：
  *
  *================================================================*/
@@ -33,6 +33,7 @@ typedef enum _select_type {
 	SELECT_SAME_CATAGORY,
 	SELECT_SAME_ID,
 	SELECT_DIFFERENT_ID,
+	SELECT_DIFFERENT_CATAGORY,
 } select_type_t;
 
 struct pattern_info {

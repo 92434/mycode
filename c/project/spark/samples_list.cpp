@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年08月05日 星期六 23时58分35秒
+ *   修改日期：2017年08月08日 星期二 14时03分11秒
  *   描    述：
  *
  *================================================================*/
@@ -372,6 +372,15 @@ int samples_list::add_test_task_catagory(std::map<std::string, std::map<std::str
 								add = false;
 								break;
 							}
+						}
+					}
+				} else if(select_type == SELECT_DIFFERENT_CATAGORY) {
+					add = true;
+
+					for(enroll_ids_it = enroll_ids.begin(); enroll_ids_it != enroll_ids.end(); enroll_ids_it++) {
+						if(bmp.catagory.compare(enroll_ids_it->catagory) == 0) {
+							add = false;
+							break;
 						}
 					}
 				}

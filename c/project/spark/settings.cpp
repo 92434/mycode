@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年08月03日 星期四 10时16分09秒
+ *   修改日期：2017年08月08日 星期二 13时59分46秒
  *   描    述：
  *
  *================================================================*/
@@ -307,11 +307,15 @@ int settings::get_task_settings_from_configuration(configure &cfg)
 	value = cfg.get("settings", "fr_select_type");
 	fr_select_type = (value == "SELECT_ALL") ? SELECT_ALL
 					 : (value == "SELECT_SAME_CATAGORY") ? SELECT_SAME_CATAGORY
-					 : SELECT_DIFFERENT_ID;
+					 : (value == "SELECT_SAME_ID") ? SELECT_SAME_ID
+					 : (value == "SELECT_DIFFERENT_ID") ? SELECT_DIFFERENT_ID
+					 : SELECT_DIFFERENT_CATAGORY;
 	value = cfg.get("settings", "fa_select_type");
 	fa_select_type = (value == "SELECT_ALL") ? SELECT_ALL
 					 : (value == "SELECT_SAME_CATAGORY") ? SELECT_SAME_CATAGORY
-					 : SELECT_DIFFERENT_ID;
+					 : (value == "SELECT_SAME_ID") ? SELECT_SAME_ID
+					 : (value == "SELECT_DIFFERENT_ID") ? SELECT_DIFFERENT_ID
+					 : SELECT_DIFFERENT_CATAGORY;
 
 	max_proc_number = (int)value_strtod(cfg.get("settings", "max_proc_number"));
 	strict_identify_mode = (int)value_strtod(cfg.get("settings", "strict_identify_mode"));
