@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年08月09日 星期三 18时00分59秒
+ *   修改日期：2017年08月10日 星期四 16时48分59秒
  *   描    述：
  *
  *================================================================*/
@@ -470,7 +470,7 @@ int test_task::report_result()
 		len = snprintf(buffer, BUFFER_LEN, "fa:%d:%d", fa_success_count, fa_total_tasks);
 		buffer[len] = 0;
 		send_client_result(REPORT_RESULT, buffer);
-		log_file("pid:%d, ppid:%d, fr result:%d/%d(%f%%)\n", (int)getpid(), (int)getppid(), fa_success_count, fa_total_tasks, fa_success_count * 100.0 / fa_total_tasks);
+		log_file("pid:%d, ppid:%d, fa result:%d/%d(%f%%)\n", (int)getpid(), (int)getppid(), fa_success_count, fa_total_tasks, fa_success_count * 100.0 / fa_total_tasks);
 	}
 
 	return ret;
