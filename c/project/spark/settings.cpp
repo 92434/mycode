@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年08月08日 星期二 13时59分46秒
+ *   修改日期：2017年08月10日 星期四 18时34分14秒
  *   描    述：
  *
  *================================================================*/
@@ -271,6 +271,7 @@ int settings::get_sensor_lib_settings_from_configuration(configure &cfg)
 	enroll_max_templates = cfg.get("sensor_lib", "enroll_max_templates");
 	algorithm_max_templates = cfg.get("sensor_lib", "algorithm_max_templates");
 	spa_enable = cfg.get("sensor_lib", "spa_enable");
+	spa_ratio = cfg.get("sensor_lib", "spa_ratio");
 	algorithm_far_level = cfg.get("sensor_lib", "algorithm_far_level");
 	update_template_far_level = cfg.get("sensor_lib", "update_template_far_level");
 	update_template_threshold = cfg.get("sensor_lib", "update_template_threshold");

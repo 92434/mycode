@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年08月08日 星期二 13时58分22秒
+ *   修改日期：2017年08月10日 星期四 18时32分16秒
  *   描    述：
  *
  *================================================================*/
@@ -85,6 +85,7 @@ public:
 	std::string enroll_max_templates;
 	std::string algorithm_max_templates;
 	std::string spa_enable;
+	std::string spa_ratio;
 	std::string algorithm_far_level;
 	std::string update_template_far_level;
 	std::string update_template_threshold;

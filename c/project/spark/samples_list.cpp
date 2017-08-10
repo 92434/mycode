@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年08月08日 星期二 14时03分11秒
+ *   修改日期：2017年08月10日 星期四 18时34分01秒
  *   描    述：
  *
  *================================================================*/
@@ -480,6 +480,7 @@ int samples_list::report_result()
 	log_file("enroll_max_templates:%s,", g_settings->enroll_max_templates.c_str());
 	log_file("algorithm_max_templates:%s,", g_settings->algorithm_max_templates.c_str());
 	log_file("spa_enable:%s,", g_settings->spa_enable.c_str());
+	log_file("spa_ratio:%s,", g_settings->spa_ratio.c_str());
 	log_file("algorithm_far_level:%s,", g_settings->algorithm_far_level.c_str());
 	log_file("update_template_far_level:%s,", g_settings->update_template_far_level.c_str());
 	log_file("update_template_threshold:%s,", g_settings->update_template_threshold.c_str());

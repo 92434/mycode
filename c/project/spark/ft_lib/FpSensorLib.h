@@ -6,7 +6,7 @@
  *   文件名称：FpSensorLib.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月17日 星期一 12时09分03秒
- *   修改日期：2017年08月03日 星期四 10时23分54秒
+ *   修改日期：2017年08月10日 星期四 18时34分46秒
  *   描    述：
  *
  *================================================================*/
@@ -88,6 +88,7 @@ void focal_SetFpSensorColsRows(__ft_u8 cols, __ft_u8 rows);
 void focal_SetEnrollMaxTpl(__ft_s32 maxtpl);
 void focal_SetAlgoMode(__ft_u8 ucMode);
 void focal_spa_en(__ft_u8 ucEnable);
+void focal_spa_ratio(__ft_u8 uc_ratio);
 void focal_SetFpAlgMaxTpl(__ft_s32 maxtpl);
 __ft_s32 focal_InitFpAlg(void);
 void focal_SetAlgFarLevel(ft_far_t far_level);
