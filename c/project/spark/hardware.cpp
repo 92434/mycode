@@ -6,7 +6,7 @@
  *   文件名称：hardware.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时56分34秒
- *   修改日期：2017年08月10日 星期四 18时38分01秒
+ *   修改日期：2017年08月11日 星期五 16时27分00秒
  *   描    述：
  *
  *================================================================*/
@@ -314,6 +314,35 @@ int hardware::set_save_bmp()
 {
 	int ret = 0;
 	ret = ft_lib_set_save_bmp((save_bmp_t)&hardware::save_bmp);
+	return ret;
+}
+
+int hardware::image_v_mirror(char *buffer, int width, int height, int bytes_per_pixel)
+{
+	int ret = 0;
+	int loops = height / 2;
+	int i;
+	int step = width * bytes_per_pixel;
+	char *line_buffer = new char [step];
+
+	if(line_buffer == NULL) {
+		ret = -1;
+		return ret;
+	}
+
+	for(i = 0; i < loops; i++) {
+		char *a_line = buffer + i * step;
+		char *b_line = buffer + (height - 1 - i) * step;
+
+		memcpy(line_buffer, a_line, step);
+		memcpy(a_line, b_line, step);
+		memcpy(b_line, line_buffer, step);
+	}
+
+	if(line_buffer != NULL) {
+		delete line_buffer;
+	}
+
 	return ret;
 }
 
