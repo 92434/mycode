@@ -6,7 +6,7 @@
  *   文件名称：hardware.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时56分34秒
- *   修改日期：2017年08月11日 星期五 16时27分00秒
+ *   修改日期：2017年08月13日 星期日 16时45分06秒
  *   描    述：
  *
  *================================================================*/
@@ -320,27 +320,71 @@ int hardware::set_save_bmp()
 int hardware::image_v_mirror(char *buffer, int width, int height, int bytes_per_pixel)
 {
 	int ret = 0;
-	int loops = height / 2;
 	int i;
+	int j;
+	int loops = height / 2;
 	int step = width * bytes_per_pixel;
-	char *line_buffer = new char [step];
+	char *pixel_buffer = new char [bytes_per_pixel];
 
-	if(line_buffer == NULL) {
+	if(pixel_buffer == NULL) {
 		ret = -1;
 		return ret;
 	}
 
 	for(i = 0; i < loops; i++) {
-		char *a_line = buffer + i * step;
-		char *b_line = buffer + (height - 1 - i) * step;
+		char *a_line = buffer + step * i;
+		char *b_line = buffer + step * ((height - 1) - i);
+		char *a_pixel;
+		char *b_pixel;
 
-		memcpy(line_buffer, a_line, step);
-		memcpy(a_line, b_line, step);
-		memcpy(b_line, line_buffer, step);
+		for(j = 0; j < width; j++) {
+			a_pixel = a_line + bytes_per_pixel * j;
+			b_pixel = b_line + bytes_per_pixel * j;
+
+			memcpy(pixel_buffer, a_pixel, bytes_per_pixel);
+			memcpy(a_pixel, b_pixel, bytes_per_pixel);
+			memcpy(b_pixel, pixel_buffer, bytes_per_pixel);
+		}
 	}
 
-	if(line_buffer != NULL) {
-		delete line_buffer;
+	if(pixel_buffer != NULL) {
+		delete pixel_buffer;
+	}
+
+	return ret;
+}
+
+int hardware::image_h_mirror(char *buffer, int width, int height, int bytes_per_pixel)
+{
+	int ret = 0;
+	int i;
+	int j;
+	int loops = width / 2;
+	int step = width * bytes_per_pixel;
+	char *pixel_buffer = new char [bytes_per_pixel];
+
+	if(pixel_buffer == NULL) {
+		ret = -1;
+		return ret;
+	}
+
+	for(i = 0; i < height; i++) {
+		char *line = buffer + i * step;
+		char *a_pixel;
+		char *b_pixel;
+
+		for(j = 0; j < loops; j++) {
+			a_pixel = line + bytes_per_pixel * j;
+			b_pixel = line + bytes_per_pixel * ((width - 1) - j);
+
+			memcpy(pixel_buffer, a_pixel, bytes_per_pixel);
+			memcpy(a_pixel, b_pixel, bytes_per_pixel);
+			memcpy(b_pixel, pixel_buffer, bytes_per_pixel);
+		}
+	}
+
+	if(pixel_buffer != NULL) {
+		delete pixel_buffer;
 	}
 
 	return ret;
