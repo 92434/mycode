@@ -6,7 +6,7 @@
  *   文件名称：filesystem.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 11时14分43秒
- *   修改日期：2017年07月14日 星期五 11时15分02秒
+ *   修改日期：2017年08月14日 星期一 16时30分16秒
  *   描    述：
  *
  *================================================================*/
@@ -97,7 +97,7 @@ std::vector<std::string> filesystem::dir_scan_files(std::string dirname, std::ve
 	error = stat(dirname.c_str(), &sb);
 
 	if(error != 0) {
-		printf("%s\n", strerror(errno));
+		printf("dirname:%s:%s\n", dirname.c_str(), strerror(errno));
 		return file_list;
 	}
 
