@@ -6,14 +6,14 @@
 #   文件名称：Makefile
 #   创 建 者：肖飞
 #   创建日期：2017年07月14日 星期五 12时52分37秒
-#   修改日期：2017年07月21日 星期五 11时19分10秒
+#   修改日期：2017年08月14日 星期一 12时18分06秒
 #   描    述：
 #
 #================================================================
 
 include $(default_rules)
 
-PROJECT := 9348
+export PROJECT := 9348
 
 app_c_files := main.cpp
 app_c_files += configuration.cpp
@@ -39,7 +39,7 @@ LOCAL_LIBS := ft_lib/out/lib/libft_lib.a
 LOCAL_CFLAGS := -g
 LOCAL_CFLAGS += -Ift_lib/
 ifneq ($(PROJECT),)
-LOCAL_CFLAGS += -DPROJECT=HW$(PROJECT)
+LOCAL_CFLAGS += -DHW$(PROJECT)
 endif
 
 #LOCAL_LDFLAGS := -Wl,-Map,main.map

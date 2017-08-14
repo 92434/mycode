@@ -6,7 +6,7 @@
  *   文件名称：hardware.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月20日 星期四 17时56分34秒
- *   修改日期：2017年08月13日 星期日 16时45分06秒
+ *   修改日期：2017年08月14日 星期一 12时16分16秒
  *   描    述：
  *
  *================================================================*/
@@ -206,7 +206,7 @@ int hardware::save_bmp(char *label, const char *buffer, int len)
 	ofs.open(filename.c_str());
 
 	if(!ofs.good()) {
-		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		printf("%s:%s:%d:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
 		goto exit_close;
 	}
@@ -215,7 +215,7 @@ int hardware::save_bmp(char *label, const char *buffer, int len)
 	ofs.write((char *)&cache_item->bmp_file_header, sizeof(BMP_FILEHDR));
 
 	if(!ofs.good()) {
-		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		printf("%s:%s:%d:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
 		goto exit_close;
 	}
@@ -226,7 +226,7 @@ int hardware::save_bmp(char *label, const char *buffer, int len)
 	ofs.write((char *)&cache_item->bmp_info_header, sizeof(BMP_INFOHDR));
 
 	if(!ofs.good()) {
-		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		printf("%s:%s:%d:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
 		goto exit_close;
 	}
@@ -237,7 +237,7 @@ int hardware::save_bmp(char *label, const char *buffer, int len)
 	ofs.write((char *)&cache_item->bmp_palette[0], sizeof(BGR_PALETTE) * 256);
 
 	if(!ofs.good()) {
-		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		printf("%s:%s:%d:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
 		goto exit_close;
 	}
@@ -420,7 +420,7 @@ int hardware::get_image_info(std::string bmp_path)
 	ifs.open(cache_item->bmp_path.c_str());
 
 	if(!ifs.good()) {
-		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		printf("%s:%s:%d:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
 		goto exit_close;
 	}
@@ -429,7 +429,7 @@ int hardware::get_image_info(std::string bmp_path)
 	ifs.read((char *)&cache_item->bmp_file_header, sizeof(BMP_FILEHDR));
 
 	if(!ifs.good()) {
-		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		printf("%s:%s:%d:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
 		goto exit_close;
 	}
@@ -440,7 +440,7 @@ int hardware::get_image_info(std::string bmp_path)
 	ifs.read((char *)&cache_item->bmp_info_header, sizeof(BMP_INFOHDR));
 
 	if(!ifs.good()) {
-		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		printf("%s:%s:%d:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
 		goto exit_close;
 	}
@@ -449,7 +449,7 @@ int hardware::get_image_info(std::string bmp_path)
 	ifs.read((char *)&cache_item->bmp_palette[0], sizeof(BGR_PALETTE) * 256);
 
 	if(!ifs.good()) {
-		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		printf("%s:%s:%d:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
 		goto exit_close;
 	}
@@ -459,16 +459,17 @@ int hardware::get_image_info(std::string bmp_path)
 	ret = cache_item->alloc_bmp_buffer(len);
 
 	if(ret != 0) {
-		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		printf("%s:%s:%d:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
 		goto exit_close;
 	}
 
 	ifs.seekg(offset, ifs.beg);
 	ifs.read(cache_item->buffer, cache_item->len);
+	image_h_mirror(cache_item->buffer, cache_item->bmp_info_header.biWidth, cache_item->bmp_info_header.biHeight, cache_item->bmp_info_header.biBitCount / 8);
 
 	if(!ifs.good()) {
-		printf("%s:%s:%d:%s", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+		printf("%s:%s:%d:%s\n", __FILE__, __PRETTY_FUNCTION__, __LINE__, strerror(errno));
 		ret = -1;
 		goto exit_close;
 	}

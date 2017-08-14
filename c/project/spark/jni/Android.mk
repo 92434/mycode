@@ -6,7 +6,7 @@
 #   文件名称：Android.mk
 #   创 建 者：肖飞
 #   创建日期：2017年07月14日 星期五 16时08分37秒
-#   修改日期：2017年08月04日 星期五 12时43分33秒
+#   修改日期：2017年08月14日 星期一 12时17分52秒
 #   描    述：
 #
 #================================================================
@@ -32,7 +32,6 @@ endif
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-PROJECT := 9348
 
 app_c_files := $(LOCAL_PATH)/main.cpp
 app_c_files += $(LOCAL_PATH)/configuration.cpp
@@ -50,7 +49,7 @@ app_c_files += $(LOCAL_PATH)/test_task.cpp
 LOCAL_CFLAGS := -g
 LOCAL_CFLAGS += -Ift_lib/
 ifneq ($(PROJECT),)
-LOCAL_CFLAGS += -DPROJECT=HW$(PROJECT)
+LOCAL_CFLAGS += -DHW$(PROJECT)
 endif
 
 #LOCAL_LDFLAGS := -Wl,-Map,main.map
