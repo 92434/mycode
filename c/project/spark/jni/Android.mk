@@ -6,7 +6,7 @@
 #   文件名称：Android.mk
 #   创 建 者：肖飞
 #   创建日期：2017年07月14日 星期五 16时08分37秒
-#   修改日期：2017年08月14日 星期一 12时17分52秒
+#   修改日期：2017年08月15日 星期二 10时46分50秒
 #   描    述：
 #
 #================================================================
@@ -25,8 +25,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := FTLIB
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 LOCAL_SRC_FILES := $(LOCAL_PATH)/obj/local/armeabi-v7a/libft_lib.a
-endif
-ifeq ($(TARGET_ARCH_ABI),x86_64)
+else ifeq ($(TARGET_ARCH_ABI),x86_64)
 LOCAL_SRC_FILES := $(LOCAL_PATH)/obj/local/x86_64/libft_lib.a
 endif
 include $(PREBUILT_STATIC_LIBRARY)
@@ -36,8 +35,8 @@ include $(CLEAR_VARS)
 app_c_files := $(LOCAL_PATH)/main.cpp
 app_c_files += $(LOCAL_PATH)/configuration.cpp
 app_c_files += $(LOCAL_PATH)/filesystem.cpp
-ifneq ($(PROJECT),)
-app_c_files += $(LOCAL_PATH)/hardware_$(PROJECT).cpp
+ifneq ($(LIB_NAME),)
+app_c_files += $(LOCAL_PATH)/hardware_$(LIB_NAME).cpp
 endif
 app_c_files += $(LOCAL_PATH)/hardware.cpp
 app_c_files += $(LOCAL_PATH)/optparse.cpp
@@ -48,8 +47,8 @@ app_c_files += $(LOCAL_PATH)/test_task.cpp
 
 LOCAL_CFLAGS := -g
 LOCAL_CFLAGS += -Ift_lib/
-ifneq ($(PROJECT),)
-LOCAL_CFLAGS += -DHW$(PROJECT)
+ifneq ($(LIB_NAME),)
+LOCAL_CFLAGS += -DHW$(LIB_NAME)
 endif
 
 #LOCAL_LDFLAGS := -Wl,-Map,main.map

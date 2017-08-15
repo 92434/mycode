@@ -6,20 +6,20 @@
 #   文件名称：Makefile
 #   创 建 者：肖飞
 #   创建日期：2017年07月14日 星期五 12时52分37秒
-#   修改日期：2017年08月14日 星期一 12时18分06秒
+#   修改日期：2017年08月15日 星期二 10时46分26秒
 #   描    述：
 #
 #================================================================
 
 include $(default_rules)
 
-export PROJECT := 9348
+export LIB_NAME := 9348
 
 app_c_files := main.cpp
 app_c_files += configuration.cpp
 app_c_files += filesystem.cpp
-ifneq ($(PROJECT),)
-app_c_files += hardware_$(PROJECT).cpp
+ifneq ($(LIB_NAME),)
+app_c_files += hardware_$(LIB_NAME).cpp
 endif
 app_c_files += hardware.cpp
 app_c_files += optparse.cpp
@@ -38,8 +38,8 @@ LOCAL_LIBS := ft_lib/out/lib/libft_lib.a
 
 LOCAL_CFLAGS := -g
 LOCAL_CFLAGS += -Ift_lib/
-ifneq ($(PROJECT),)
-LOCAL_CFLAGS += -DHW$(PROJECT)
+ifneq ($(LIB_NAME),)
+LOCAL_CFLAGS += -DHW$(LIB_NAME)
 endif
 
 #LOCAL_LDFLAGS := -Wl,-Map,main.map

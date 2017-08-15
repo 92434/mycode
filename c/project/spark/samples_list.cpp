@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年08月10日 星期四 18时34分01秒
+ *   修改日期：2017年08月15日 星期二 10时47分17秒
  *   描    述：
  *
  *================================================================*/
@@ -599,9 +599,9 @@ int samples_list::try_to_start_task_and_wait(test_task *task, task_start_reason_
 				printf("killed by signal %d\n", WTERMSIG(status));
 			} else if (WIFSTOPPED(status)) {
 				printf("stopped by signal %d\n", WSTOPSIG(status));
-			} else if (WIFCONTINUED(status)) {
+			}/* else if (WIFCONTINUED(status)) {
 				printf("continued\n");
-			}
+			}*/
 
 		}
 	}
