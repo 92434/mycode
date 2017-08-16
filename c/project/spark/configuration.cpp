@@ -6,7 +6,7 @@
  *   文件名称：configuration.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时22分47秒
- *   修改日期：2017年08月03日 星期四 10时43分04秒
+ *   修改日期：2017年08月16日 星期三 18时16分37秒
  *   描    述：
  *
  *================================================================*/
@@ -106,7 +106,7 @@ int configure::match_key_value(std::string content)
 {
 	int ret = 0;
 	std::vector<std::string> matched_list;
-	std::string pattern = "^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*([^[:space:]]+)[[:space:]]*$";
+	std::string pattern = "^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*(.*[^[:space:]])[[:space:]]*$";
 	regexp r;
 
 	matched_list = r.match(content, pattern);

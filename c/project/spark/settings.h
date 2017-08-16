@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年08月10日 星期四 18时32分16秒
+ *   修改日期：2017年08月16日 星期三 17时45分12秒
  *   描    述：
  *
  *================================================================*/
@@ -73,12 +73,22 @@ public:
 	std::vector<pattern_info> fr_pattern;
 	std::vector<pattern_info> fa_pattern;
 
+	std::string str_max_number_of_id_per_proc;
 	int max_number_of_id_per_proc;
+	std::string str_max_number_of_catagory_per_proc;
 	int max_number_of_catagory_per_proc;
+	std::string str_fr_select_type;
 	select_type_t fr_select_type;
+	std::string str_fa_select_type;
 	select_type_t fa_select_type;
-	int strict_identify_mode;
+	std::string str_max_proc_number;
 	int max_proc_number;
+	std::string str_strict_identify_mode;
+	int strict_identify_mode;
+
+	std::string pb_library_version;
+	std::string firmware_version;
+	std::string ft_lib_verision;
 
 	std::string debug_switch;
 	std::string algorithm_mode;

@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年08月15日 星期二 15时22分10秒
+ *   修改日期：2017年08月16日 星期三 17时50分00秒
  *   描    述：
  *
  *================================================================*/
@@ -475,6 +475,18 @@ int samples_list::report_result()
 	log_file("test_type:%s,", g_settings->test_type.c_str());
 	log_file("log_dirname:%s,", g_settings->log_dirname.c_str());
 	log_file("pictures_directory:%s,", g_settings->pictures_dirname.c_str());
+
+	log_file("max_number_of_id_per_proc:%s,", g_settings->str_max_number_of_id_per_proc.c_str());
+	log_file("max_number_of_catagory_per_proc:%s,", g_settings->str_max_number_of_catagory_per_proc.c_str());
+	log_file("fr_select_type:%s,", g_settings->str_fr_select_type.c_str());
+	log_file("fa_select_type:%s,", g_settings->str_fa_select_type.c_str());
+	log_file("max_proc_number:%s,", g_settings->str_max_proc_number.c_str());
+	log_file("strict_identify_mode:%s,", g_settings->str_strict_identify_mode.c_str());
+
+	log_file("pb_library_version:%s,", g_settings->pb_library_version.c_str());
+	log_file("firmware_version:%s,", g_settings->firmware_version.c_str());
+	log_file("ft_lib_verision:%s,", g_settings->ft_lib_verision.c_str());
+
 	log_file("debug_switch:%s,", g_settings->debug_switch.c_str());
 	log_file("algorithm_mode:%s,", g_settings->algorithm_mode.c_str());
 	log_file("enroll_max_templates:%s,", g_settings->enroll_max_templates.c_str());

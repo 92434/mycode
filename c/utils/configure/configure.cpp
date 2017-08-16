@@ -106,7 +106,7 @@ int configure::match_key_value(std::string content)
 {
 	int ret = 0;
 	std::vector<std::string> matched_list;
-	std::string pattern = "^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*([^[:space:]]+)[[:space:]]*$";
+	std::string pattern = "^[[:space:]]*([^[:space:]]+)[[:space:]]*=[[:space:]]*(.*[^[:space:]])[[:space:]]*$";
 	regexp r;
 
 	matched_list = r.match(content, pattern);

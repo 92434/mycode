@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年08月10日 星期四 18时34分14秒
+ *   修改日期：2017年08月16日 星期三 17时57分59秒
  *   描    述：
  *
  *================================================================*/
@@ -266,6 +266,11 @@ int settings::get_pattern_from_configuration(configure &cfg)
 int settings::get_sensor_lib_settings_from_configuration(configure &cfg)
 {
 	int ret = 0;
+
+	pb_library_version = cfg.get("sensor_lib", "pb_library_version");
+	firmware_version = cfg.get("sensor_lib", "firmware_version");
+	ft_lib_verision = cfg.get("sensor_lib", "ft_lib_verision");
+
 	debug_switch = cfg.get("sensor_lib", "debug_switch");
 	algorithm_mode = cfg.get("sensor_lib", "algorithm_mode");
 	enroll_max_templates = cfg.get("sensor_lib", "enroll_max_templates");
@@ -302,24 +307,31 @@ int settings::get_sensor_lib_settings_from_configuration(configure &cfg)
 int settings::get_task_settings_from_configuration(configure &cfg)
 {
 	int ret = 0;
-	std::string value;
-	max_number_of_id_per_proc = (int)value_strtod(cfg.get("settings", "max_number_of_id_per_proc"));
-	max_number_of_catagory_per_proc = (int)value_strtod(cfg.get("settings", "max_number_of_catagory_per_proc"));
-	value = cfg.get("settings", "fr_select_type");
-	fr_select_type = (value == "SELECT_ALL") ? SELECT_ALL
-					 : (value == "SELECT_SAME_CATAGORY") ? SELECT_SAME_CATAGORY
-					 : (value == "SELECT_SAME_ID") ? SELECT_SAME_ID
-					 : (value == "SELECT_DIFFERENT_ID") ? SELECT_DIFFERENT_ID
+	str_max_number_of_id_per_proc = cfg.get("settings", "max_number_of_id_per_proc");
+	max_number_of_id_per_proc = (int)value_strtod(str_max_number_of_id_per_proc);
+	
+	str_max_number_of_catagory_per_proc = cfg.get("settings", "max_number_of_catagory_per_proc");
+	max_number_of_catagory_per_proc = (int)value_strtod(str_max_number_of_catagory_per_proc);
+
+	str_fr_select_type = cfg.get("settings", "fr_select_type");
+	fr_select_type = (str_fr_select_type == "SELECT_ALL") ? SELECT_ALL
+					 : (str_fr_select_type == "SELECT_SAME_CATAGORY") ? SELECT_SAME_CATAGORY
+					 : (str_fr_select_type == "SELECT_SAME_ID") ? SELECT_SAME_ID
+					 : (str_fr_select_type == "SELECT_DIFFERENT_ID") ? SELECT_DIFFERENT_ID
 					 : SELECT_DIFFERENT_CATAGORY;
-	value = cfg.get("settings", "fa_select_type");
-	fa_select_type = (value == "SELECT_ALL") ? SELECT_ALL
-					 : (value == "SELECT_SAME_CATAGORY") ? SELECT_SAME_CATAGORY
-					 : (value == "SELECT_SAME_ID") ? SELECT_SAME_ID
-					 : (value == "SELECT_DIFFERENT_ID") ? SELECT_DIFFERENT_ID
+	str_fa_select_type = cfg.get("settings", "fa_select_type");
+	fa_select_type = (str_fa_select_type == "SELECT_ALL") ? SELECT_ALL
+					 : (str_fa_select_type == "SELECT_SAME_CATAGORY") ? SELECT_SAME_CATAGORY
+					 : (str_fa_select_type == "SELECT_SAME_ID") ? SELECT_SAME_ID
+					 : (str_fa_select_type == "SELECT_DIFFERENT_ID") ? SELECT_DIFFERENT_ID
 					 : SELECT_DIFFERENT_CATAGORY;
 
-	max_proc_number = (int)value_strtod(cfg.get("settings", "max_proc_number"));
-	strict_identify_mode = (int)value_strtod(cfg.get("settings", "strict_identify_mode"));
+	str_max_proc_number = cfg.get("settings", "max_proc_number");
+	max_proc_number = (int)value_strtod(str_max_proc_number);
+
+	str_strict_identify_mode = cfg.get("settings", "strict_identify_mode");
+	strict_identify_mode = (int)value_strtod(str_strict_identify_mode);
+
 	return ret;
 }
 

@@ -6,7 +6,7 @@
  *   文件名称：regexp.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年06月26日 星期一 16时06分14秒
- *   修改日期：2017年06月26日 星期一 17时49分01秒
+ *   修改日期：2017年08月16日 星期三 18时11分49秒
  *   描    述：
  *
  *================================================================*/
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 	std::vector<std::string>::iterator it;
 
 	for(it = matched_list.begin(); it != matched_list.end(); it++) {
-		printf("result:%s\n", it->c_str());
+		printf("result:\"%s\"\n", it->c_str());
 	}
 
 	return ret;
