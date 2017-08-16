@@ -1,5 +1,25 @@
-#ifndef __OPTPARSE_H
-#define __OPTPARSE_H
+
+
+/*================================================================
+ *   Copyright (C) 2017年07月14日 肖飞 All rights reserved
+ *
+ *   文件名称：optparse.h
+ *   创 建 者：肖飞
+ *   创建日期：2017年07月14日 星期五 11时07分30秒
+ *   修改日期：2017年07月14日 星期五 13时57分32秒
+ *   描    述：
+ *
+ *================================================================*/
+#ifndef _OPTPARSE_H
+#define _OPTPARSE_H
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 #include <vector>
 #include <map>
 #include <string>
@@ -98,4 +118,4 @@ public:
 	int p_help();
 	int p_result(std::string parsername = "");
 };
-#endif//#ifndef __OPTPARSE_H
+#endif //OPTPARSE_H

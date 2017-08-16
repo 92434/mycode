@@ -49,7 +49,8 @@ std::string configure::get(std::string class_name, std::string key)
 	it1 = m_configuration.find(class_name);
 
 	if(it1 == m_configuration.end()) {
-		return value;
+		printf("can not get class \"%s\"!\n", class_name.c_str());
+		exit(1);
 	}
 
 	key_value_set = it1->second;
@@ -57,7 +58,8 @@ std::string configure::get(std::string class_name, std::string key)
 	it2 = key_value_set.find(key);
 
 	if(it2 == key_value_set.end()) {
-		return value;
+		printf("can not get class \"%s\", key \"%s\"!\n", class_name.c_str(), key.c_str());
+		exit(1);
 	}
 
 	value = it2->second;
@@ -126,7 +128,7 @@ int configure::load(std::string filename)
 {
 	int ret = 0;
 	std::ifstream ifs;
-	char buffer[256];
+	char buffer[BUFFER_LEN];
 
 	ifs.open(filename.c_str());
 
@@ -140,7 +142,7 @@ int configure::load(std::string filename)
 		std::string content;
 		size_t pos;
 
-		ifs.getline(buffer, 256);
+		ifs.getline(buffer, BUFFER_LEN);
 		content = buffer;
 
 		pos = content.find('#');
@@ -169,7 +171,7 @@ int configure::save(std::string filename)
 {
 	int ret = 0;
 	std::ofstream ofs;
-	char buffer[256];
+	char buffer[BUFFER_LEN];
 	int len = 0;
 
 	ofs.open(filename.c_str());
@@ -181,12 +183,12 @@ int configure::save(std::string filename)
 	}
 
 	for(std::map<std::string, std::map<std::string, std::string> >::iterator it1 = m_configuration.begin(); it1 != m_configuration.end(); it1++) {
-		len = snprintf(buffer, 255, "[%s]\n", it1->first.c_str());
+		len = snprintf(buffer, BUFFER_LEN, "[%s]\n", it1->first.c_str());
 		buffer[len] = 0;
 		ofs.write(buffer, len);
 
 		for(std::map<std::string, std::string>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); it2++) {
-			len = snprintf(buffer, 255, "%s=%s\n", it2->first.c_str(), it2->second.c_str());
+			len = snprintf(buffer, BUFFER_LEN, "%s=%s\n", it2->first.c_str(), it2->second.c_str());
 			buffer[len] = 0;
 			ofs.write(buffer, len);
 		}

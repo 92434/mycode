@@ -12,10 +12,14 @@
  *================================================================*/
 #ifndef _REGEXP_H
 #define _REGEXP_H
-//#ifdef __cplusplus
-//extern "C"
-//{
-//#endif
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #include <vector>
 #include <string>
@@ -26,15 +30,12 @@
 #define EBUFLEN 128 /* 错误消息buffer长度 */
 #define BUFLEN 1024 /* 匹配到的字符串buffer长度 */
 
-class regexp {
+class regexp
+{
 public:
 	regexp();
 	~regexp();
 
 	std::vector<std::string> match(std::string string, std::string pattern);
 };
-
-//#ifdef __cplusplus
-//}
-//#endif
 #endif //REGEXP_H

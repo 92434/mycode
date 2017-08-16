@@ -6,7 +6,7 @@
  *   文件名称：configure.h
  *   创 建 者：肖飞
  *   创建日期：2017年06月28日 星期三 14时20分53秒
- *   修改日期：2017年07月14日 星期五 14时00分24秒
+ *   修改日期：2017年08月16日 星期三 10时45分01秒
  *   描    述：
  *
  *================================================================*/
@@ -25,8 +25,10 @@ extern "C"
 #include <map>
 #include <string.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "regexp/regexp.h"
+#include "constant.h"
 
 class configure
 {
@@ -47,4 +49,4 @@ public:
 	std::string get(std::string class_name, std::string key);
 	int p_configure();
 };
-#endif //CONFIGURE_H
+#endif //_CONFIGURE_H

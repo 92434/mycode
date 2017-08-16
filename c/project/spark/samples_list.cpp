@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年08月15日 星期二 10时47分17秒
+ *   修改日期：2017年08月15日 星期二 15时22分10秒
  *   描    述：
  *
  *================================================================*/
@@ -416,7 +416,7 @@ int samples_list::create_server()
 	ret = listen(server_fd, 64);
 
 	if(ret != 0) {
-		printf("bind socket error!(%s)\n", strerror(errno));
+		printf("listen socket error!(%s)\n", strerror(errno));
 		return ret;
 	}
 

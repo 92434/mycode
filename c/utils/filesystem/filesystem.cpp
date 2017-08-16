@@ -97,7 +97,7 @@ std::vector<std::string> filesystem::dir_scan_files(std::string dirname, std::ve
 	error = stat(dirname.c_str(), &sb);
 
 	if(error != 0) {
-		printf("%s\n", strerror(errno));
+		printf("dirname:%s:%s\n", dirname.c_str(), strerror(errno));
 		return file_list;
 	}
 
