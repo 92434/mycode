@@ -6,7 +6,7 @@
 #   文件名称：log_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月26日 星期三 09时11分14秒
-#   修改日期：2017年08月04日 星期五 10时37分40秒
+#   修改日期：2017年08月17日 星期四 11时13分41秒
 #   描    述：
 #
 #================================================================
@@ -15,6 +15,7 @@ import datetime
 import xlwt
 import os
 import optparse
+import shutil
 
 class result_info(object):
     matched_state_changed = False
@@ -39,6 +40,13 @@ class result_info(object):
         self.update_catagory = update_catagory
         self.update_id = update_id
         self.enroll_list = enroll_list[:]
+
+def copy_file_from_far(bmp_path, new_dir_name, fa_catagory, fa_id, finger_catagory, finger_id):
+    bmp_basename = os.path.basename(bmp_path)
+    new_bmp_path = os.path.join(new_dir_name, 'images', fa_catagory, fa_id, finger_catagory, finger_id, bmp_basename)
+    if not os.access(os.path.dirname(new_bmp_path), os.F_OK):
+        os.makedirs(os.path.dirname(new_bmp_path))
+    shutil.copy2(bmp_path, new_bmp_path);
 
 def parse_log_list(filelist):
     content = []
@@ -152,6 +160,7 @@ def gen_xls(fr_result, fa_result, output_filename):
 
     pre_line = None
     for i in fa_result:
+        #copy_file_from_far(i.path, os.path.splitext(output_filename)[0], i.new_catagory, i.new_id, i.image_catagory, i.image_id)
         l = [i.image_catagory, i.image_id, i.image_serial_no, i.new_catagory, i.new_id, i.path]
         l.extend(i.enroll_list)
         for value in l:

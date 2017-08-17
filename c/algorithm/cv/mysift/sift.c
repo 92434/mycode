@@ -187,7 +187,7 @@ int _sift_features( IplImage *img, struct feature **feat, int intvls,
 	//██步骤一：██：建立尺度空间，即建立高斯差分(DoG)金字塔dog_pyr
 	//将原图转换为32位灰度图并归一化，然后进行一次高斯平滑，并根据参数img_dbl决定是否将图像尺寸放大为原图的2倍
 	init_img = create_init_img( img, img_dbl, sigma );
-	//计算高斯金字塔的组数octvs
+	//计算高斯金字塔的组数octvs//宽，高中的最小值对2求幂再减2
 	octvs = log( MIN( init_img->width, init_img->height ) ) / log(2) - 2;
 	//为了保证连续性，在每一层的顶层继续用高斯模糊生成3幅图像，所以高斯金字塔每组有intvls+3层，DOG金字塔每组有intvls+2层
 	//建立高斯金字塔gauss_pyr，是一个octvs*(intvls+3)的图像数组
