@@ -5,7 +5,7 @@ autocmd BufWrite * exec "call s:set_last_modify_time(9)"
 function s:set_last_modify_time(lineno)
         let modif_time = strftime("%c")
 	let line = getline(a:lineno)
-	let line = substitute(line, '：.*', '：'.modif_time, "")
+	let line = substitute(line, '修改日期：.*', '修改日期：'.modif_time, "")
 	call setline(a:lineno, line)
 endfunction
 
