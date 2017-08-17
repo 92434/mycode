@@ -38,4 +38,11 @@ int main(){
 	printf("-0.1 < 0:%s\n", -0.1 < 0 ? "true" : "false");
 	printf("0.0 < 1e-10:%s\n", 0.0 < 1e-10 ? "true" : "false");
 	printf("-0.0 == 0.0:%s\n", -0.0 == 0.0 ? "true" : "false");
+	{
+		float a = 0.0000001;
+
+		printf("a == 0.0:%s\n", a == 0.0 ? "true" : "false");
+		printf("1 / a:%f\n", 1 / a);
+		printf("1 / 3:%f\n", 1 / 3.0);
+	}
 }
