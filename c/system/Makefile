@@ -12,6 +12,8 @@ test_optparse.cpp.LOCAL_LIBS := $(top)/c/utils/out/lib/libxiaofei.a
 test_optparse.cpp.LOCAL_CFLAGS := -I$(top)/c/utils -g
 c_files += timer.c
 c_files += time.c
+c_files += test_list.cpp
+test_list.cpp.LOCAL_CFLAGS := -I$(top)/c/utils -g
 include $(BUILD_BINS)
 
 include $(ADD_TARGET)
