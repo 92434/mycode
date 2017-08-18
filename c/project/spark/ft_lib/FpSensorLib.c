@@ -6,7 +6,7 @@
  *   文件名称：FpSensorLib.c
  *   创 建 者：肖飞
  *   创建日期：2017年07月17日 星期一 12时08分57秒
- *   修改日期：2017年08月10日 星期四 18时35分10秒
+ *   修改日期：2017年08月18日 星期五 13时51分12秒
  *   描    述：
  *
  *================================================================*/
@@ -151,7 +151,7 @@ int ft_set_image(const char *buffer, int len)
 
 	if(ft_device->buffer != NULL) {
 		memcpy((void *)ft_device->buffer, (void *)buffer, len);
-		save_bmp("spa26", buffer, len);
+		//save_bmp("spa26", buffer, len);
 
 	} else {
 		ret = -1;
