@@ -49,7 +49,7 @@ func s:set_header()
 			call setline(20, "#ifdef __cplusplus") 
 			call setline(21, "}") 
 			call setline(22, "#endif") 
-			call setline(23, "#endif //".toupper(expand("%:t:r"))."_H") 
+			call setline(23, "#endif //_".toupper(expand("%:t:r"))."_H") 
 		elseif expand("%:e") == 'c' || expand("%:e") == "cpp" || expand("%:e") == "cc"
 			call setline(13,"#include \"".expand("%:t:r").".h\"") 
 		endif
