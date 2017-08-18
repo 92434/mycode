@@ -130,7 +130,7 @@ void free_1(void *ptr)
 int p_mem_info()
 {
 	int ret = 0;
-	printf("meminfo:total_count:%llu, total_size:%llu\n", mem_info.total_size, mem_info.total_count);
+	printf("meminfo:total_count:%llu, total_size:%llu\n", mem_info.total_count, mem_info.total_size);
 	return ret;
 }
 
