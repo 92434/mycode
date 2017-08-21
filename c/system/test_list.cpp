@@ -32,10 +32,12 @@ mem_info_t mem_info = {0};
 
 int init_mem_info()
 {
+	int ret = 0;
 	mem_info.total_count = 0;
 	mem_info.total_size = 0;
 	INIT_LIST_HEAD(&mem_info.head);
 	printf("mem_info.head:%p\n", &mem_info.head);
+	return ret;
 }
 
 int account_malloc(int size, void *ptr)

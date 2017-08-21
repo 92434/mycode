@@ -358,7 +358,7 @@ static IplImage ** *build_gauss_pyr( IplImage *base, int octvs,
 	    sigma_{total}^2 = sigma_{i}^2 + sigma_{i-1}^2   */
 	//计算每次高斯模糊的sigma参数
 	sig[0] = sigma;//初始尺度
-	k = pow( 2.0, 1.0 / intvls );
+	k = pow( 2.0, 1.0 / intvls );//开intvals次方
 
 	for( i = 1; i < intvls + 3; i++ ) {
 		sig_prev = pow( k, i - 1 ) * sigma;//i-1层的尺度
