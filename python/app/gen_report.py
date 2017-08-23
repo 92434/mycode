@@ -6,7 +6,7 @@
 #   文件名称：gen_report.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月21日 星期五 11时49分06秒
-#   修改日期：2017年08月16日 星期三 18时30分03秒
+#   修改日期：2017年08月23日 星期三 12时01分04秒
 #   描    述：
 #
 #================================================================
@@ -30,6 +30,10 @@ def get_filelist(dirname, ext_list):
 def build_database_for_report(directory):
     filelist = get_filelist(directory, ['.log'])
     map_database_list = []
+    try:
+        filelist.sort(key = lambda x : os.path.basename(os.path.dirname(x)))
+    except:
+        filelist.sort()
     for i in filelist:
         content_list = []
         if os.path.basename(i) == "report.log":
