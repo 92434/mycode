@@ -6,7 +6,7 @@
 #   文件名称：log_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月26日 星期三 09时11分14秒
-#   修改日期：2017年08月17日 星期四 11时13分41秒
+#   修改日期：2017年08月24日 星期四 10时29分22秒
 #   描    述：
 #
 #================================================================
@@ -80,7 +80,7 @@ def parse_log_list(filelist):
                 elif len(fields) == 11:
                     catagory_info, id_info, serial_no_info, match_state_info, new_match_state_info, new_matched_catagory_info, new_matched_id_info, update_template_catagory_info,  update_template_id_info, path_info, ret_info = fields
                     matched_state_changed = False
-                    if match_state_info.split(':')[1] != 'UNKNOW' and new_match_state_info.split(':')[1] != 'UNKNOW':
+                    if (match_state_info.split(':')[1] != 'UNKNOW' and new_match_state_info.split(':')[1] != 'UNKNOW') or (match_state_info.split(':')[1] == 'UNKNOW'):
                         if match_state_info.split(':')[1] != new_match_state_info.split(':')[1]:
                             matched_state_changed = True
 
