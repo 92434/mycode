@@ -57,4 +57,9 @@ endef
 test1:
 	$(call pinfo)
 
+labels := 1 2 3.txt
+my-inc := $(foreach l, $(labels), -$(strip $(l)))
+test2:
+	$(info $(my-inc))
+
 include $(ADD_TARGET)
