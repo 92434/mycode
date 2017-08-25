@@ -1402,14 +1402,15 @@ static double ** *descr_hist( IplImage *img, int r, int c, double ori,
 			*/
 			//坐标旋转为主方向
 			//下面看不懂了
+			//求i, j位置旋转ori角度的对应座标相关值
 			c_rot = ( j * cos_t - i * sin_t ) / hist_width;
 			r_rot = ( j * sin_t + i * cos_t ) / hist_width;
 			rbin = r_rot + d / 2 - 0.5;
 			cbin = c_rot + d / 2 - 0.5;
 
 			if( rbin > -1.0  &&  rbin < d  &&  cbin > -1.0  &&  cbin < d )
-				if( calc_grad_mag_ori( img, r + i, c + j, &grad_mag, &grad_ori )) {
-					grad_ori -= ori;
+				if( calc_grad_mag_ori( img, r + i, c + j, &grad_mag, &grad_ori )) {//验证角度及梯度
+					grad_ori -= ori;//应该在0附近
 
 					while( grad_ori < 0.0 ) {
 						grad_ori += PI2;
