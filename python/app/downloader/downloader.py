@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年08月03日 星期四 23时06分15秒
+#   修改日期：2017年08月26日 星期六 19时01分04秒
 #   描    述：
 #
 #================================================================
@@ -21,6 +21,9 @@ import subprocess
 
 urllib = network.network().default_init(0)
 logging = log.log().get_logger('debug')
+
+timeout = 3 # in seconds
+socket.setdefaulttimeout(timeout)
 
 try:
   import threading as _threading
@@ -143,11 +146,12 @@ class DummyProgressBar:
 
 class downloader(object):
     fake_headers = {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        #'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'Accept': '*/*',
         'Accept-Charset': 'UTF-8,*;q=0.5',
         'Accept-Encoding': 'gzip,deflate,sdch',
-        'Accept-Language': 'en-US,en;q=0.8',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0'
+        'Accept-Language': 'zh-CN,zh;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/60.0.3112.78 Chrome/60.0.3112.78 Safari/537.36'
     }
 
     def __init__(self):
@@ -223,8 +227,9 @@ class downloader(object):
         for i in range(10):
             try:
                 return urllib.request.urlopen(*args, **kwargs)
-            except socket.timeout:
-                logging.debug('request attempt %s timeout' % str(i + 1))
+            except Exception as e:
+                #logging.debug('request attempt %s(%s)' %(str(i + 1), e))
+                pass
 
     def get_content(self, url, headers = {}, decoded = True):
         """Gets the content of a URL via sending a HTTP GET request.
@@ -309,17 +314,26 @@ class downloader(object):
         return data
 
     def url_size(self, url, faker = False, headers = {}):
-        if faker:
-            response = self.urlopen_with_retry(urllib.request.Request(url, headers = fake_headers))
-        elif headers:
-            response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
-        else:
-            response = self.urlopen_with_retry(url)
+        size = float('inf')
+        while size == float('inf'):
+            if faker:
+                response = self.urlopen_with_retry(urllib.request.Request(url, headers = self.fake_headers))
+            elif headers:
+                response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
+            else:
+                response = self.urlopen_with_retry(url)
 
-        size = None
-        if 'content-length' in response.headers:
-            size = response.headers['content-length']
-        return int(size) if size != None else float('inf')
+            if 'content-length' in response.headers:
+                size = response.headers['content-length']
+                size = int(size) if size != None else float('inf')
+
+            if size == float('inf'):
+                logging.debug('invalid file size for %s!' %(url))
+            else:
+                #logging.debug('url size %d!' %(size))
+                pass
+
+        return size
 
     def urls_size(self, urls, faker = False, headers = {}):
         return sum([self.url_size(url, faker = faker, headers = headers) for url in urls])
@@ -339,7 +353,7 @@ class downloader(object):
         #logging.debug('url_info: %s' % url)
 
         if faker:
-            response = self.urlopen_with_retry(urllib.request.Request(url, headers = fake_headers))
+            response = self.urlopen_with_retry(urllib.request.Request(url, headers = self.fake_headers))
         elif headers:
             response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
         else:
@@ -399,7 +413,7 @@ class downloader(object):
             #logging.debug('url_locations: %s' % url)
 
             if faker:
-                response = self.urlopen_with_retry(urllib.request.Request(url, headers = fake_headers))
+                response = self.urlopen_with_retry(urllib.request.Request(url, headers = self.fake_headers))
             elif headers:
                 response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
             else:
@@ -412,8 +426,14 @@ class downloader(object):
 #When a referer specified with param refer, the key must be 'Referer' for the hack here
         if refer is not None:
             headers['Referer'] = refer
+        #logging.debug('faker %s' % faker)
+
         file_size = self.url_size(url, faker = faker, headers = headers)
 
+        #logging.debug('filepath %s' %(filepath))
+        #logging.debug('force %s' %(force))
+        #logging.debug('file_size %d' %(file_size))
+        #logging.debug('is_part %d' %(is_part))
         if os.path.exists(filepath):
             if not force and file_size == os.path.getsize(filepath):
                 if not is_part:
@@ -423,7 +443,7 @@ class downloader(object):
                         bar.done()
                         if lock:
                             lock.release()
-                    print('Skipping %s: file already exists' % self.tr(os.path.basename(filepath)))
+                    logging.debug('Skipping %s: file already exists' % self.tr(os.path.basename(filepath)))
                 else:
                     if bar:
                         if lock:
@@ -446,30 +466,33 @@ class downloader(object):
         elif not os.path.exists(os.path.dirname(filepath)):
             os.mkdir(os.path.dirname(filepath))
 
-        temp_filepath = filepath + '.download' if file_size != float('inf') else filepath
+        temp_filepath = filepath + '.download'
         received = 0
+        
+        open_mode  = 'wb'
         if not force:
-            open_mode = 'ab'
-
             if os.path.exists(temp_filepath):
                 received += os.path.getsize(temp_filepath)
 
-                if bar:
-                    if lock:
-                        lock.acquire()
-                    bar.update_received(os.path.getsize(temp_filepath))
-                    if lock:
-                        lock.release()
+                if received <= file_size:
+                    open_mode = 'ab'
+                    if bar:
+                        if lock:
+                            lock.acquire()
+                        bar.update_received(received)
+                        if lock:
+                            lock.release()
         else:
             open_mode = 'wb'
 
         if received < file_size:
             if faker:
-                headers = fake_headers
+                headers = self.fake_headers
             elif headers:
                 headers = headers
             else:
                 headers = {}
+
             if received:
                 headers['Range'] = 'bytes=' + str(received) + '-'
             if refer:
@@ -488,39 +511,71 @@ class downloader(object):
                 range_length = int(content_length) if content_length!=None else float('inf')
 
             if file_size != received + range_length:
-                received = 0
-                open_mode = 'wb'
-
                 if bar:
                     if lock:
                         lock.acquire()
-                    bar.received = 0
+                    bar.update_received(-received)
+                    if lock:
+                        lock.release()
+                received = 0
+                open_mode = 'wb'
+
+        while received != file_size:
+            #logging.debug('temp_filepath:%s, open_mode:%s' %(temp_filepath, open_mode))
+            output = open(temp_filepath, open_mode)
+            buffer = None
+            while received < file_size:
+                read_size = file_size - received
+                if read_size > 1024 * 256:
+                    read_size = 1024 * 256
+                try:
+                    buffer = response.read(read_size)
+                except Exception as e:
+                    #logging.debug('%s' %(e))
+                    pass
+
+                if buffer == None:
+                    headers['Range'] = 'bytes=' + str(received) + '-'
+                    response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
+                    continue
+
+                output.write(buffer)
+                received += len(buffer)
+                if bar:
+                    if lock:
+                        lock.acquire()
+                    bar.update_received(len(buffer))
                     if lock:
                         lock.release()
 
-            with open(temp_filepath, open_mode) as output:
-                while True:
-                    buffer = response.read(1024 * 256)
-                    if not buffer:
-                        if received == file_size: # Download finished
-                            break
-                        else: # Unexpected termination. Retry request
-                            headers['Range'] = 'bytes=' + str(received) + '-'
-                            response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
-                    output.write(buffer)
-                    received += len(buffer)
-                    if bar:
-                        if lock:
-                            lock.acquire()
-                        bar.update_received(len(buffer))
-                        if lock:
-                            lock.release()
+            #logging.debug('temp_filepath:%s, received:%d, file_size:%d' %(temp_filepath, received, file_size))
 
-        assert received == os.path.getsize(temp_filepath), '%s == %s == %s' % (received, os.path.getsize(temp_filepath), temp_filepath)
+            output.close()
 
-        if os.access(filepath, os.W_OK):
-            os.remove(filepath) # on Windows rename could fail if destination filepath exists
-        os.rename(temp_filepath, filepath)
+            if os.path.getsize(temp_filepath) == file_size:
+                break
+            else:
+                if bar:
+                    if lock:
+                        lock.acquire()
+                    bar.update_received(-received)
+                    if lock:
+                        lock.release()
+
+                logging.debug('piece %d failed(received:%d, file_size:%d)! again!' %(piece, received, file_size))
+
+                os.remove(temp_filepath)
+
+                file_size = self.url_size(url, faker = faker, headers = headers)
+                received = 0
+                open_mode = 'wb'
+                headers['Range'] = 'bytes=' + str(received) + '-'
+                response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
+
+        if os.path.getsize(temp_filepath) >= file_size:
+            if os.access(filepath, os.W_OK):
+                os.remove(filepath) # on Windows rename could fail if destination filepath exists
+            os.rename(temp_filepath, filepath)
         if sem:
             sem.release()
 
@@ -618,7 +673,8 @@ class downloader(object):
                     raise
                 else:
                     for part in parts:
-                        os.remove(part)
+                        #os.remove(part)
+                        pass
 
             else:
                 print("Can't merge %s files" % ext)

@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年08月04日 星期五 13时51分53秒
+#   修改日期：2017年08月26日 星期六 11时22分45秒
 #   描    述：
 #
 #================================================================
@@ -136,18 +136,19 @@ class ts_downloader(object):
 
     def download_video(self, url_files):
         logging.debug('get %s total_size...', os.path.join(self.output_dir, self.output_filename))
-        total_size = self.dl.urls_size(url_files[:1])
-        total_size = total_size * len(url_files)
+        pieces_size = self.dl.urls_size(url_files[:5], faker = True)
+        total_size = pieces_size * len(url_files) / (len(url_files[:5]))
+        #total_size = self.dl.urls_size(url_files, faker = True)
         logging.debug('total_size:%d' %(total_size))
         title, ext = os.path.splitext(self.output_filename)
         ext = ext[1:]
-        self.dl.download_urls(url_files, title, ext, total_size, jobs = self.jobs, output_dir = self.output_dir, dry_run = self.dry_run)
+        self.dl.download_urls(url_files, title, ext, total_size, jobs = self.jobs, output_dir = self.output_dir, dry_run = self.dry_run, faker = True)
 
 def main():
 
     argv = sys.argv[1:]
     options = optparse.OptionParser()
-    options.add_option('-j', '--jobs', type='int', dest='jobs', help='jobs', default = 4)
+    options.add_option('-j', '--jobs', type='int', dest='jobs', help='jobs', default = 6)
     options.add_option('-o', '--output-filename', dest='output_filename', help='output_filename', default = None)
     #options.add_option('-u', '--m3u8-url', dest='url_m3u8', help='url_m3u8', metavar='URL', default='http://201610.shipinmp4.com/x/20170419/ekdv-478/1/hls/index.m3u8')
     options.add_option('-u', '--m3u8-url', dest='url_m3u8', help='url_m3u8', metavar='URL', default = None)
