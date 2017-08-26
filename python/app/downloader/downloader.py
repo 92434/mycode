@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年08月26日 星期六 19时01分04秒
+#   修改日期：2017年08月26日 星期六 19时11分49秒
 #   描    述：
 #
 #================================================================
@@ -558,7 +558,7 @@ class downloader(object):
                 if bar:
                     if lock:
                         lock.acquire()
-                    bar.update_received(-received)
+                    bar.received -= received
                     if lock:
                         lock.release()
 
