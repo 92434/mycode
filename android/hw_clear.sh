@@ -154,7 +154,6 @@ function main() {
 	local list_clear=(
 "com.iflytek.speechsuite"
 "com.huawei.cloudwifi"
-"com.cootek.smartdialer_oem_module"
 "com.huawei.systemmanager"
 "com.tencent.transfer"
 "com.android.browser"
@@ -165,14 +164,11 @@ function main() {
 "com.tencent.lightalk"
 "com.tmri.app.main"
 "com.huawei.appmarket"
-"com.android.mediacenter"
 "com.icbc"
 "com.mxtech.videoplayer.ad"
-"com.estrongs.android.pop"
 "com.coomix.app.bus"
 "com.kingpoint.gmcchh"
 "com.sinovatech.unicom.ui"
-"com.huawei.hwid"
 "com.baidu.BaiduMap"
 "com.handsgo.jiakao.android"
 )
