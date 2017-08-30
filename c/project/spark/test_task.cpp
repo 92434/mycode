@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年08月16日 星期三 17时52分20秒
+ *   修改日期：2017年08月30日 星期三 16时05分01秒
  *   描    述：
  *
  *================================================================*/
@@ -525,6 +525,7 @@ int test_task::do_task_list()
 
 	for(i = 0; i < enroll_loops; i++) {
 		current_enroll_ids.clear();
+		have_valid_template = false;
 
 		for(enroll_id_map_it = enroll_id_map.begin(); enroll_id_map_it != enroll_id_map.end(); enroll_id_map_it++) {
 			ret = task_enroll_id(enroll_id_map_it->first, enroll_id_map_it->second, i * enroll_max_templates, enroll_max_templates);
