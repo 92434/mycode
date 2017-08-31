@@ -59,19 +59,19 @@ def getpass(prompt = "Password: "):
 ## end of http://code.activestate.com/recipes/134892/ }}}
 
 def main():
-	command = ""
-	while True:
-	    ch = getch()
-	    if ch == "\r":
-		print("\nExecute command: " + command)
-		command = ""
-		sys.stdout.write("\033[80D")
-	    else:
-		command += ch
-		if command == "quit":
-		    sys.stdout.write("\033[80D")
-		    print "\nBye."
-		    break
+    command = ""
+    while True:
+        ch = getch()
+        if ch == "\r":
+            print("\nExecute command: " + command)
+            command = ""
+            sys.stdout.write("\033[80D")
+        else:
+            command += ch
+        if command == "quit":
+            sys.stdout.write("\033[80D")
+            print "\nBye."
+            break
 
 
 if '__main__' == __name__:

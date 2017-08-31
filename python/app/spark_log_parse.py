@@ -6,7 +6,7 @@
 #   文件名称：log_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月26日 星期三 09时11分14秒
-#   修改日期：2017年08月24日 星期四 10时29分22秒
+#   修改日期：2017年08月31日 星期四 19时15分00秒
 #   描    述：
 #
 #================================================================
@@ -41,9 +41,9 @@ class result_info(object):
         self.update_id = update_id
         self.enroll_list = enroll_list[:]
 
-def copy_file_from_far(bmp_path, new_dir_name, fa_catagory, fa_id, finger_catagory, finger_id):
+def copy_file_from_far(bmp_path, new_dir_name, fa_catagory, fa_id, catagory, id):
     bmp_basename = os.path.basename(bmp_path)
-    new_bmp_path = os.path.join(new_dir_name, 'images', fa_catagory, fa_id, finger_catagory, finger_id, bmp_basename)
+    new_bmp_path = os.path.join(new_dir_name, 'images', fa_catagory, fa_id, catagory, id, bmp_basename)
     if not os.access(os.path.dirname(new_bmp_path), os.F_OK):
         os.makedirs(os.path.dirname(new_bmp_path))
     shutil.copy2(bmp_path, new_bmp_path);
@@ -222,14 +222,6 @@ def gen_xls(fr_result, fa_result, output_filename):
         output_filename = 'parse_result_%04d%02d%02d%02d%02d%02d_%06d.xls' %(now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)
     f.save(output_filename) #保存文件 
 
-def fa_result_key(x):
-    image_catagory = x.image_catagory
-    image_id = x.image_id
-    image_serial_no = x.image_serial_no
-    new_catagory = x.new_catagory
-    new_id = x.new_id
-    return new_catagory, int(new_id), image_catagory, int(image_id), int(image_serial_no)
-
 def get_filelist(dirname, ext_list):
     filelist = []
     for dir_name, sub_dir_list, sub_filelist in os.walk(dirname):
@@ -242,11 +234,103 @@ def get_filelist(dirname, ext_list):
 
     return filelist
 
+def list_far_top_by_catagory(fa_result):
+    print('top count:')
+    number = sys.stdin.readline()
+    number = number.strip()
+
+    try:
+        number = int(number)
+    except:
+        number = None
+
+    map_catagory_farcount = {}
+    for i in fa_result:
+        catagory = i.image_catagory
+        count = map_catagory_farcount.get(catagory)
+        if not count:
+            count = 1
+        else:
+            count += 1
+        map_catagory_farcount.update({catagory : count})
+
+    list_catagory_count = []
+    for i in map_catagory_farcount.items():
+        list_catagory_count.append(i)
+
+    def list_catagory_count_key(x):
+        return x[1]
+    list_catagory_count = sorted(list_catagory_count, key = lambda x : list_catagory_count_key(x))
+
+    list_catagory_count.reverse()
+
+    catagory_width = 0
+    count_width = 0
+    max_count = 0
+    for i in list_catagory_count[:number]:
+        if max_count < i[1]:
+            max_count = i[1]
+
+        width = len(i[0].decode('utf-8'))
+        width *= 2
+        if catagory_width < width:
+            catagory_width = width
+
+        width = len(str(i[1]))
+        if count_width < width:
+            count_width = width
+
+    bar_width = 60
+    for i in list_catagory_count[:number]:
+        filed_size = bar_width * i[1] / max_count
+        bar = '█' * filed_size
+        bar += ' ' * (bar_width - filed_size)
+        catagory = i[0]
+        count = i[1]
+
+        print('%*d %s %s' %(count_width, count, bar, catagory))
+
+def list_far_top_by_id_for_catagory(fa_result, args):
+    print(args)
+
+def interactive_mode(fr_result, fa_result):
+    need_xls = False
+    tips = ''' 
+functions:
+0.exit
+1.create_xls_and_exit
+2.list_far_top_by_catagory
+3.list_far_top_by_id_for_catagory
+>>>'''
+
+    while True:
+        sys.stdout.write(tips)
+        line = sys.stdin.readline()
+        line = line.strip()
+        command = line.split()
+        if not len(command):
+            continue
+
+        cmd = command[0]
+
+        if cmd == '0':
+            break
+        elif cmd == '1':
+            need_xls = True
+            break
+        elif cmd == '2':
+            list_far_top_by_catagory(fa_result)
+        elif cmd == '3':
+            list_far_top_by_id_for_catagory(fa_result)
+    
+    return need_xls
+
 def main():
     argv = sys.argv[1:]
     options = optparse.OptionParser()
     options.add_option('-d', '--dir', action='store', dest='report_directory', help='report directory', default=os.curdir)
     options.add_option('-o', '--output-filename', action='store', dest='output_filename', help='output_filename', default=None)
+    options.add_option('-i', '--interactive', action='store_false', dest='interactive', help='enable interactive mode', default=True)
     opts, args = options.parse_args(argv)
     print('opts:%s' %(opts))
     print('args:%s' %(args))
@@ -256,8 +340,22 @@ def main():
 
     filelist = get_filelist(opts.report_directory, ['.log'])
     fr_result, fa_result = parse_log_list(filelist)
-    fa_result = sorted(fa_result, key = lambda x : fa_result_key(x))
-    gen_xls(fr_result, fa_result, opts.output_filename)
+
+    need_xls = True
+    if opts.interactive:
+        need_xls = interactive_mode(fr_result, fa_result)
+   
+    if need_xls:
+        def fa_result_key(x):
+            image_catagory = x.image_catagory
+            image_id = x.image_id
+            image_serial_no = x.image_serial_no
+            new_catagory = x.new_catagory
+            new_id = x.new_id
+            return new_catagory, int(new_id), image_catagory, int(image_id), int(image_serial_no)
+
+        fa_result = sorted(fa_result, key = lambda x : fa_result_key(x))
+        gen_xls(fr_result, fa_result, opts.output_filename)
 
 if '__main__' == __name__:
-	main()
+    main()
