@@ -6,7 +6,7 @@
 #   文件名称：log_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月26日 星期三 09时11分14秒
-#   修改日期：2017年08月31日 星期四 19时15分00秒
+#   修改日期：2017年09月01日 星期五 14时37分34秒
 #   描    述：
 #
 #================================================================
@@ -234,8 +234,8 @@ def get_filelist(dirname, ext_list):
 
     return filelist
 
-def list_far_top_by_catagory(fa_result):
-    print('top count:')
+def list_far_catagory(fa_result):
+    sys.stdout.write('top count:')
     number = sys.stdin.readline()
     number = number.strip()
 
@@ -258,9 +258,7 @@ def list_far_top_by_catagory(fa_result):
     for i in map_catagory_farcount.items():
         list_catagory_count.append(i)
 
-    def list_catagory_count_key(x):
-        return x[1]
-    list_catagory_count = sorted(list_catagory_count, key = lambda x : list_catagory_count_key(x))
+    list_catagory_count = sorted(list_catagory_count, key = lambda x : x[1])
 
     list_catagory_count.reverse()
 
@@ -288,40 +286,192 @@ def list_far_top_by_catagory(fa_result):
         catagory = i[0]
         count = i[1]
 
+        print('')
         print('%*d %s %s' %(count_width, count, bar, catagory))
 
-def list_far_top_by_id_for_catagory(fa_result, args):
-    print(args)
+def list_far_id_by_catagory(fa_result):
+    sys.stdout.write('input catagory:')
+    catagory = sys.stdin.readline()
+    catagory = catagory.strip()
+
+    sys.stdout.write('top count:')
+    number = sys.stdin.readline()
+    number = number.strip()
+
+    try:
+        number = int(number)
+    except:
+        number = None
+
+    map_id_farcount = {}
+    for i in fa_result:
+        image_catagory = i.image_catagory
+        if catagory == image_catagory:
+            image_id = '%s:%s' %(catagory, i.image_id)
+
+            count = map_id_farcount.get(image_id)
+            if not count:
+                count = 1
+            else:
+                count += 1
+            map_id_farcount.update({image_id : count})
+
+    list_id_count = []
+    for i in map_id_farcount.items():
+        list_id_count.append(i)
+
+    list_id_count = sorted(list_id_count, key = lambda x : x[1])
+
+    list_id_count.reverse()
+
+    id_width = 0
+    count_width = 0
+    max_count = 0
+    for i in list_id_count[:number]:
+        if max_count < i[1]:
+            max_count = i[1]
+
+        width = len(i[0].decode('utf-8'))
+        width *= 2
+        if id_width < width:
+            id_width = width
+
+        width = len(str(i[1]))
+        if count_width < width:
+            count_width = width
+
+    bar_width = 60
+    for i in list_id_count[:number]:
+        filed_size = bar_width * i[1] / max_count
+        bar = '█' * filed_size
+        bar += ' ' * (bar_width - filed_size)
+        image_id = i[0]
+        count = i[1]
+
+        print('')
+        print('%*d %s %s' %(count_width, count, bar, image_id))
+
+def list_far_info_by_id(fa_result):
+    sys.stdout.write('input catagory:')
+    catagory = sys.stdin.readline()
+    catagory = catagory.strip()
+
+    sys.stdout.write('input id:')
+    id = sys.stdin.readline()
+    id = id.strip()
+
+    sys.stdout.write('top count:')
+    number = sys.stdin.readline()
+    number = number.strip()
+
+    try:
+        number = int(number)
+    except:
+        number = None
+
+    map_id_farcount = {}
+    for i in fa_result:
+        image_catagory = i.image_catagory
+        image_id = i.image_id
+        if catagory == image_catagory and id == image_id:
+            new_catagory = i.new_catagory
+            new_id = i.new_id
+
+            image_id = '%s:%s' %(new_catagory, new_id)
+
+            count = map_id_farcount.get(image_id)
+            if not count:
+                count = 1
+            else:
+                count += 1
+            map_id_farcount.update({image_id : count})
+
+    list_id_count = []
+    for i in map_id_farcount.items():
+        list_id_count.append(i)
+
+    list_id_count = sorted(list_id_count, key = lambda x : x[1])
+
+    list_id_count.reverse()
+
+    id_width = 0
+    count_width = 0
+    max_count = 0
+    for i in list_id_count[:number]:
+        if max_count < i[1]:
+            max_count = i[1]
+
+        width = len(i[0].decode('utf-8'))
+        width *= 2
+        if id_width < width:
+            id_width = width
+
+        width = len(str(i[1]))
+        if count_width < width:
+            count_width = width
+
+    bar_width = 60
+    for i in list_id_count[:number]:
+        filed_size = bar_width * i[1] / max_count
+        bar = '█' * filed_size
+        bar += ' ' * (bar_width - filed_size)
+        image_id = i[0]
+        count = i[1]
+
+        print('')
+        print('%*d %s %s' %(count_width, count, bar, image_id))
 
 def interactive_mode(fr_result, fa_result):
     need_xls = False
     tips = ''' 
 functions:
 0.exit
-1.create_xls_and_exit
-2.list_far_top_by_catagory
-3.list_far_top_by_id_for_catagory
+1.exit and create xls
+2.list far catagory
+3.list far id by catagory
+4.list far info by id
 >>>'''
 
+    sys.stdout.write(tips)
     while True:
-        sys.stdout.write(tips)
         line = sys.stdin.readline()
         line = line.strip()
         command = line.split()
         if not len(command):
+            s = '>>>'
+            sys.stdout.write(s)
             continue
 
         cmd = command[0]
 
         if cmd == '0':
+            print('exit')
             break
         elif cmd == '1':
+            s = 'exit and create xls'
+            print('[%s]' %(s))
             need_xls = True
             break
         elif cmd == '2':
-            list_far_top_by_catagory(fa_result)
+            s = 'list far catagory'
+            print('[%s]' %(s))
+            list_far_catagory(fa_result)
+            s = '>>>'
+            sys.stdout.write(s)
         elif cmd == '3':
-            list_far_top_by_id_for_catagory(fa_result)
+            s = 'list far id by catagory'
+            print('[%s]' %(s))
+            list_far_id_by_catagory(fa_result)
+            s = '>>>'
+            sys.stdout.write(s)
+        elif cmd == '4':
+            s = 'list far info by id'
+            print('[%s]' %(s))
+            list_far_info_by_id(fa_result)
+            s = '>>>'
+            sys.stdout.write(s)
+        else:
+            sys.stdout.write(tips)
     
     return need_xls
 
@@ -330,7 +480,7 @@ def main():
     options = optparse.OptionParser()
     options.add_option('-d', '--dir', action='store', dest='report_directory', help='report directory', default=os.curdir)
     options.add_option('-o', '--output-filename', action='store', dest='output_filename', help='output_filename', default=None)
-    options.add_option('-i', '--interactive', action='store_false', dest='interactive', help='enable interactive mode', default=True)
+    options.add_option('-i', '--interactive', action='store_true', dest='interactive', help='enable interactive mode', default=False)
     opts, args = options.parse_args(argv)
     print('opts:%s' %(opts))
     print('args:%s' %(args))
