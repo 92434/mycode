@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年08月30日 星期三 16时05分01秒
+ *   修改日期：2017年09月06日 星期三 13时05分14秒
  *   描    述：
  *
  *================================================================*/
@@ -270,8 +270,6 @@ int test_task::pre_task()
 {
 	int ret = 0;
 	hardware *hw = hardware::get_instance();
-
-	//wait_for_gdb();
 
 	hw->set_save_bmp();
 
@@ -564,6 +562,8 @@ int test_task::post_task()
 int test_task::do_task()
 {
 	int ret = 0;
+
+	//wait_for_gdb();
 
 	ret = pre_task();
 	ret = do_task_list();
