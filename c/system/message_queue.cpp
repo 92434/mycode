@@ -6,10 +6,12 @@
  *   文件名称：message_queue.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年09月07日 星期四 22时30分13秒
- *   修改日期：2017年09月07日 星期四 23时07分15秒
+ *   修改日期：2017年09月07日 星期四 23时10分50秒
  *   描    述：
  *
  *================================================================*/
+#include <stdio.h>
+#include <stdlib.h>
 #include "message_queue.h"
 
 static message_queue_t *queue = NULL;
@@ -27,13 +29,13 @@ int message_queue_init()
 		goto exit_1;
 	}
 
-	ret = sem_init(&sem, 0, 0);
+	ret = sem_init(&queue->sem, 0, 0);
 
 	if(ret != 0) {
 		goto exit_2;
 	}
 
-	ret = pthread_mutex_init(&lock, NULL);
+	ret = pthread_mutex_init(&queue->lock, NULL);
 
 	if(ret != 0) {
 		goto exit_3;
