@@ -6,7 +6,7 @@
  *   文件名称：message_queue.h
  *   创 建 者：肖飞
  *   创建日期：2017年09月07日 星期四 22时32分01秒
- *   修改日期：2017年09月07日 星期四 22时41分41秒
+ *   修改日期：2017年09月08日 星期五 12时43分01秒
  *   描    述：
  *
  *================================================================*/
@@ -27,10 +27,22 @@ extern "C"
 typedef struct _message_queue {
 	struct list_head head;
 	sem_t sem;
-	pthread_mutex_t lock;
 } message_queue_t;
+
 typedef struct _message {
 	int type;
 	int id;
 } message_t;
+
+typedef struct _message_node {
+	struct list_head list;
+	int type;
+	int id;
+} message_node_t;
+
+int message_queue_init();
+int queue_message(message_t *message);
+int dequeue_message(message_t *message);
+int dequeue_messages(message_t **messages, unsigned int *capacity);
+int message_queue_uninit();
 #endif //_MESSAGE_QUEUE_H

@@ -14,8 +14,15 @@ c_files += timer.c
 c_files += time.c
 c_files += test_list.cpp
 test_list.cpp.LOCAL_CFLAGS := -I$(top)/c/utils -g
+
 c_files += message_queue.cpp
 message_queue.cpp.LOCAL_CFLAGS := -I$(top)/c/utils -g
 include $(BUILD_BINS)
+
+app_c_files := message_queue.cpp
+app_c_files += test_message_queue.cpp
+LOCAL_CFLAGS := -I$(top)/c/utils -g
+app_name := message_queue
+include $(BUILD_APP)
 
 include $(ADD_TARGET)
