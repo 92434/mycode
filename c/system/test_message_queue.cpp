@@ -2,11 +2,11 @@
 
 /*================================================================
  *   Copyright (C) 2017年09月08日 肖飞 All rights reserved
- *   
+ *
  *   文件名称：test_message_queue.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年09月08日 星期五 12时39分51秒
- *   修改日期：2017年09月08日 星期五 12时48分43秒
+ *   修改日期：2017年09月08日 星期五 13时07分35秒
  *   描    述：
  *
  *================================================================*/
@@ -27,18 +27,24 @@ typedef struct {
 
 static int stop = 0;
 
+static pthread_mutex_t update_lock;
+
 static void *queue_thread(void *args)
 {
 	int ret = 0;
-	unsigned int count = 0;
+	static unsigned int count = 0;
 
 	while(stop == 0) {
 		message_t message;
 
 		usleep(200000);
 
+		pthread_mutex_lock(&update_lock);
 		message.type = 0;
 		message.id = count;
+		count++;
+		pthread_mutex_unlock(&update_lock);
+
 		ret = queue_message(&message);
 
 		if(ret != 0) {
@@ -47,8 +53,6 @@ static void *queue_thread(void *args)
 
 			printf("%s:%s:%d:id:%d\n", __FILE__, __func__, __LINE__, message.id);
 		}
-
-		count++;
 	}
 
 	return NULL;
@@ -94,6 +98,18 @@ static int test_message_queue(thread_arg_t *args)
 	pthread_t tid_queues[MAX_QUEUE_TIDS];
 	pthread_t tid_dequeue;
 	int i;
+
+	ret = pthread_mutex_destroy(&update_lock);
+
+	if(ret != 0) {
+		printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
+	}
+
+	ret = pthread_mutex_init(&update_lock, NULL);
+
+	if(ret != 0) {
+		printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
+	}
 
 	for(i = 0; i < MAX_QUEUE_TIDS; i++) {
 		ret = pthread_create(&tid_queues[i], NULL, queue_thread, args);
