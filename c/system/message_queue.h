@@ -6,7 +6,7 @@
  *   文件名称：message_queue.h
  *   创 建 者：肖飞
  *   创建日期：2017年09月07日 星期四 22时32分01秒
- *   修改日期：2017年09月08日 星期五 12时43分01秒
+ *   修改日期：2017年09月08日 星期五 13时40分12秒
  *   描    述：
  *
  *================================================================*/
@@ -21,9 +21,9 @@ extern "C"
 }
 #endif
 
+#include <pthread.h>
 #include <semaphore.h>
 #include "list.h"
-#include <pthread.h>
 typedef struct _message_queue {
 	struct list_head head;
 	sem_t sem;

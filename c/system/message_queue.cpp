@@ -6,7 +6,7 @@
  *   文件名称：message_queue.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年09月07日 星期四 22时30分13秒
- *   修改日期：2017年09月08日 星期五 12时44分21秒
+ *   修改日期：2017年09月08日 星期五 13时39分03秒
  *   描    述：
  *
  *================================================================*/
@@ -276,7 +276,6 @@ static unsigned int _queue_capacity()
 int dequeue_messages(message_t **messages, unsigned int *capacity)
 {
 	int ret = 0;
-	message_queue_t *queue = NULL;
 	message_node_t *node = NULL;
 	int i;
 	message_t *messages_list = NULL;
@@ -297,20 +296,12 @@ int dequeue_messages(message_t **messages, unsigned int *capacity)
 		goto exit_2;
 	}
 
-	queue = message_queue;
-
-	if(queue == NULL) {
-		printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
-		ret = -1;
-		goto exit_3;
-	}
-
 	*capacity = _queue_capacity();
 
 	if(*capacity <= 0) {
 		printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 		ret = -1;
-		goto exit_4;
+		goto exit_3;
 	}
 
 	messages_list = (message_t *)calloc(*capacity, sizeof(message_t));
@@ -318,7 +309,7 @@ int dequeue_messages(message_t **messages, unsigned int *capacity)
 	if(messages_list == NULL) {
 		printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 		ret = -1;
-		goto exit_5;
+		goto exit_4;
 	}
 
 	for(i = 0; i < *capacity; i++) {
@@ -327,7 +318,7 @@ int dequeue_messages(message_t **messages, unsigned int *capacity)
 
 		if(ret != 0) {
 			printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
-			goto exit_6;
+			goto exit_5;
 		} else {
 			messages_list[i] = message;
 		}
@@ -340,9 +331,9 @@ int dequeue_messages(message_t **messages, unsigned int *capacity)
 	ret = pthread_mutex_unlock(&queue_lock);
 
 	return ret;
-exit_6:
-	free(messages_list);
+
 exit_5:
+	free(messages_list);
 exit_4:
 exit_3:
 	*messages = NULL;

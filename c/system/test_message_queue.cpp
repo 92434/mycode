@@ -6,7 +6,7 @@
  *   文件名称：test_message_queue.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年09月08日 星期五 12时39分51秒
- *   修改日期：2017年09月08日 星期五 13时07分35秒
+ *   修改日期：2017年09月08日 星期五 13时52分21秒
  *   描    述：
  *
  *================================================================*/
@@ -50,8 +50,7 @@ static void *queue_thread(void *args)
 		if(ret != 0) {
 			printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 		} else {
-
-			printf("%s:%s:%d:id:%d\n", __FILE__, __func__, __LINE__, message.id);
+			//printf("%s:%s:%d:type:%d, id:%d\n", __FILE__, __func__, __LINE__, message.type, message.id);
 		}
 	}
 
@@ -66,14 +65,18 @@ static void *dequeue_thread(void *args)
 		message_t *messages = NULL;
 		unsigned int capacity = 0;
 
-		usleep(200000);
 		ret = dequeue_messages(&messages, &capacity);
 
 		if(ret != 0) {
 			printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
 		} else {
+			int i;
 
 			printf("%s:%s:%d:messages:%p, capacity:%d\n", __FILE__, __func__, __LINE__, messages, capacity);
+
+			for(i = 0; i < capacity; i++) {
+				printf("%s:%s:%d:type:%d, id:%d\n", __FILE__, __func__, __LINE__, messages[i].type, messages[i].id);
+			}
 		}
 
 		if(messages != NULL) {
