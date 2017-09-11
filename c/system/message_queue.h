@@ -6,7 +6,7 @@
  *   文件名称：message_queue.h
  *   创 建 者：肖飞
  *   创建日期：2017年09月07日 星期四 22时32分01秒
- *   修改日期：2017年09月08日 星期五 13时40分12秒
+ *   修改日期：2017年09月11日 星期一 22时43分44秒
  *   描    述：
  *
  *================================================================*/
@@ -36,8 +36,7 @@ typedef struct _message {
 
 typedef struct _message_node {
 	struct list_head list;
-	int type;
-	int id;
+	message_t message;
 } message_node_t;
 
 int message_queue_init();

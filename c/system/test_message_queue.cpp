@@ -6,7 +6,7 @@
  *   文件名称：test_message_queue.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年09月08日 星期五 12时39分51秒
- *   修改日期：2017年09月08日 星期五 13时52分21秒
+ *   修改日期：2017年09月11日 星期一 22时48分04秒
  *   描    述：
  *
  *================================================================*/
@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/time.h>
 #include "message_queue.h"
 
 typedef struct {
@@ -32,15 +33,19 @@ static pthread_mutex_t update_lock;
 static void *queue_thread(void *args)
 {
 	int ret = 0;
+	pthread_t tid;
+	pid_t pid;
 	static unsigned int count = 0;
 
+	pid = getpid();
+	tid = pthread_self();
 	while(stop == 0) {
 		message_t message;
 
 		usleep(200000);
 
 		pthread_mutex_lock(&update_lock);
-		message.type = 0;
+		message.type = tid;
 		message.id = count;
 		count++;
 		pthread_mutex_unlock(&update_lock);
@@ -57,31 +62,67 @@ static void *queue_thread(void *args)
 	return NULL;
 }
 
+static int test_dequeue_messages()
+{
+	int ret = 0;
+	message_t *messages = NULL;
+	unsigned int capacity = 0;
+
+	ret = dequeue_messages(&messages, &capacity);
+
+	if(ret != 0) {
+		printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
+	} else {
+		int i;
+
+		printf("%s:%s:%d:messages:%p, capacity:%d\n", __FILE__, __func__, __LINE__, messages, capacity);
+
+		for(i = 0; i < capacity; i++) {
+			printf("%s:%s:%d:type:%08x, id:%d\n", __FILE__, __func__, __LINE__, messages[i].type, messages[i].id);
+		}
+	}
+
+	if(messages != NULL) {
+		free(messages);
+	}
+
+	return ret;
+}
+
+static int test_dequeue_message()
+{
+	int ret = 0;
+	message_t message;
+
+	ret = dequeue_message(&message);
+
+	if(ret != 0) {
+		printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
+	} else {
+		printf("%s:%s:%d:type:%08x, id:%d\n", __FILE__, __func__, __LINE__, message.type, message.id);
+	}
+
+	return ret;
+}
+
 static void *dequeue_thread(void *args)
 {
 	int ret = 0;
 
 	while(stop == 0) {
-		message_t *messages = NULL;
-		unsigned int capacity = 0;
+		struct timeval tv;
+		struct timezone tz;
+		unsigned long long msecs;
 
-		ret = dequeue_messages(&messages, &capacity);
+		gettimeofday(&tv, &tz);
+		msecs = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 
-		if(ret != 0) {
-			printf("%s:%s:%d\n", __FILE__, __func__, __LINE__);
+		if(((msecs / 1000) % 2) == 0) {
+			test_dequeue_messages();
 		} else {
-			int i;
-
-			printf("%s:%s:%d:messages:%p, capacity:%d\n", __FILE__, __func__, __LINE__, messages, capacity);
-
-			for(i = 0; i < capacity; i++) {
-				printf("%s:%s:%d:type:%d, id:%d\n", __FILE__, __func__, __LINE__, messages[i].type, messages[i].id);
-			}
+			test_dequeue_message();
 		}
 
-		if(messages != NULL) {
-			free(messages);
-		}
 	}
 
 	return NULL;

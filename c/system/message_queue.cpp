@@ -6,7 +6,7 @@
  *   文件名称：message_queue.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年09月07日 星期四 22时30分13秒
- *   修改日期：2017年09月08日 星期五 13时39分03秒
+ *   修改日期：2017年09月11日 星期一 22时45分13秒
  *   描    述：
  *
  *================================================================*/
@@ -140,8 +140,7 @@ int queue_message(message_t *message)
 		goto exit_3;
 	}
 
-	node->type = message->type;
-	node->id = message->id;
+	node->message = *message;
 
 	list_add_tail(&node->list, &queue->head);
 
@@ -190,8 +189,7 @@ static int _dequeue_message(message_t *message)
 	node = list_first_entry(&queue->head, message_node_t, list);
 	list_del(&node->list);
 
-	message->type = node->type;
-	message->id = node->id;
+	*message = node->message;
 
 	free(node);
 
@@ -212,7 +210,10 @@ static int _message_queue_wait()
 		return ret;
 	}
 
-	sem_wait(&queue->sem);
+	if(list_empty(&queue->head)) {
+		ret = sem_wait(&queue->sem);
+	}
+
 	return ret;
 }
 
@@ -243,6 +244,7 @@ int dequeue_message(message_t *message)
 	_message_queue_wait();
 	pthread_mutex_lock(&queue_lock);
 	ret = _dequeue_message(message);
+	_message_queue_clean_up();
 	pthread_mutex_unlock(&queue_lock);
 	return ret;
 }
