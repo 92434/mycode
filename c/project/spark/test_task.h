@@ -6,7 +6,7 @@
  *   文件名称：test_task.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时27分38秒
- *   修改日期：2017年08月09日 星期三 17时59分40秒
+ *   修改日期：2017年10月09日 星期一 12时14分33秒
  *   描    述：
  *
  *================================================================*/
@@ -126,6 +126,8 @@ public:
 	int task_verify(std::vector<task_bmp> &identify_list, test_type_t test_type);
 
 	int report_result();
+
+	int resize_fr_identify_list();
 
 	int do_task_list();
 

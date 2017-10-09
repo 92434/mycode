@@ -6,7 +6,7 @@
  *   文件名称：list.h
  *   创 建 者：肖飞
  *   创建日期：2017年08月18日 星期五 09时34分44秒
- *   修改日期：2017年08月18日 星期五 12时44分20秒
+ *   修改日期：2017年09月26日 星期二 09时34分03秒
  *   描    述：
  *
  *================================================================*/
@@ -176,9 +176,9 @@ static inline int list_empty(const struct list_head *head)
 # define offsetof(typ, memb)     ((unsigned long)((char *)&(((typ *)0)->memb)))
 #endif
 
-#define container_of(ptr, type, member) ({			\
-	const struct list_head *__mptr = (ptr);	\
-	(type *)( (char *)__mptr - offsetof(type, member));})
+#define container_of(ptr, type, member) ({ \
+	const typeof(((type *)0)->member) *__mptr = (ptr);	\
+	(type *)((char *)__mptr - offsetof(type, member));})
 
 /**
  * list_entry - get the struct for this entry

@@ -1,0 +1,7 @@
+sudo systemctl restart NetworkManager
+
+打开ipv6支持
+sudo apt-get install miredo
+vi /etc/default/ufw
+sudo ufw disable
+sudo ufw enable

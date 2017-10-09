@@ -6,7 +6,7 @@
  *   文件名称：test_rbtree.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年09月18日 星期一 11时59分54秒
- *   修改日期：2017年09月18日 星期一 13时17分09秒
+ *   修改日期：2017年09月25日 星期一 11时26分56秒
  *   描    述：
  *
  *================================================================*/
@@ -105,20 +105,19 @@ int my_erase(struct rb_root *root, int d)
 
 static struct rb_root mytree = RB_ROOT;
 
+#define TEST_COUNT 500000
+
 int main(int argc, char **argv)
 {
 	int ret = 0;
 	int i;
 
-	for(i = 0; i < 10; i++) {
+	for(i = 0; i < TEST_COUNT; i++) {
 		printf("insert %d\n", i);
 		my_insert(&mytree, i);
 	}
 
-	printf("insert %d\n", 1);
-	my_insert(&mytree, 1);
-
-	for(i = 0; i < 10; i++) {
+	for(i = 0; i < TEST_COUNT; i++) {
 		printf("erase %d\n", i);
 		my_erase(&mytree, i);
 	}

@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年08月16日 星期三 17时50分00秒
+ *   修改日期：2017年10月09日 星期一 14时54分02秒
  *   描    述：
  *
  *================================================================*/
@@ -408,7 +408,7 @@ int samples_list::create_server()
 	ret = bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
 	if(ret != 0) {
-		printf("bind socket error!(%s)\n", strerror(errno));
+		printf("bind socket %s error!(%s)\n", server_path.c_str(), strerror(errno));
 		return ret;
 	}
 
@@ -416,7 +416,7 @@ int samples_list::create_server()
 	ret = listen(server_fd, 64);
 
 	if(ret != 0) {
-		printf("listen socket error!(%s)\n", strerror(errno));
+		printf("listen socket %s error!(%s)\n", server_path.c_str(), strerror(errno));
 		return ret;
 	}
 
@@ -480,6 +480,8 @@ int samples_list::report_result()
 	log_file("max_number_of_catagory_per_proc:%s,", g_settings->str_max_number_of_catagory_per_proc.c_str());
 	log_file("fr_select_type:%s,", g_settings->str_fr_select_type.c_str());
 	log_file("fa_select_type:%s,", g_settings->str_fa_select_type.c_str());
+	log_file("fr_slice_parts:%s,", g_settings->fr_slice_parts.c_str());
+	log_file("fr_slice_current:%s,", g_settings->fr_slice_current.c_str());
 	log_file("max_proc_number:%s,", g_settings->str_max_proc_number.c_str());
 	log_file("strict_identify_mode:%s,", g_settings->str_strict_identify_mode.c_str());
 

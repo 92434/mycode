@@ -6,7 +6,7 @@
  *   文件名称：settings.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分41秒
- *   修改日期：2017年08月16日 星期三 17时45分12秒
+ *   修改日期：2017年10月09日 星期一 14时55分09秒
  *   描    述：
  *
  *================================================================*/
@@ -81,6 +81,8 @@ public:
 	select_type_t fr_select_type;
 	std::string str_fa_select_type;
 	select_type_t fa_select_type;
+	std::string fr_slice_parts;
+	std::string fr_slice_current;
 	std::string str_max_proc_number;
 	int max_proc_number;
 	std::string str_strict_identify_mode;

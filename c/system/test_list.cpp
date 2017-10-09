@@ -18,6 +18,7 @@
 #define myprintf(fmt, args...) printf(fmt, ## args)
 
 typedef struct _mem_info {
+	int initilized;
 	unsigned long long total_count;
 	unsigned long long total_size;
 	struct list_head head; //need to initilized
@@ -35,6 +36,7 @@ mem_info_t mem_info = {0};
 int init_mem_info()
 {
 	int ret = 0;
+	mem_info.initilized = 1;
 	mem_info.total_count = 0;
 	mem_info.total_size = 0;
 	INIT_LIST_HEAD(&mem_info.head);
@@ -53,6 +55,10 @@ int account_malloc(int size, void *ptr)
 		return ret;
 	}
 
+	if(mem_info.initilized == 0) {
+		init_mem_info();
+	}
+
 	mem_info.total_count += 1;
 	mem_info.total_size += size;
 
@@ -68,6 +74,10 @@ int account_free(void *ptr)
 	int ret = 0;
 	node_t *node = NULL;
 	bool found = false;
+
+	if(mem_info.initilized == 0) {
+		init_mem_info();
+	}
 
 	if(list_empty(&mem_info.head)) {
 		myprintf("meminfo:no meminfo!\n");
@@ -144,6 +154,7 @@ void *calloc_1(size_t nmemb, size_t size)
 void free_1(void *ptr)
 {
 	int ret = 0;
+
 	ret = account_free(ptr);
 
 	if(ret != 0) {
@@ -180,17 +191,23 @@ void *realloc_1(void *ptr, size_t size)
 int p_mem_info()
 {
 	int ret = 0;
-	node_t *node = NULL;
-	unsigned long long total_count = 0;
-	unsigned long long total_size = 0;
 
-	list_for_each_entry(node, &mem_info.head, node_t, list) {
-		total_count += 1;
-		total_size += node->size;
+	//node_t *node = NULL;
+	//unsigned long long total_count = 0;
+	//unsigned long long total_size = 0;
+
+	if(mem_info.initilized == 0) {
+		init_mem_info();
 	}
 
+	//list_for_each_entry(node, &mem_info.head, node_t, list) {
+	//	total_count += 1;
+	//	total_size += node->size;
+	//}
+
+	//myprintf("total_count:%llu, total_size:%llu\n", total_count, total_size);
+	
 	myprintf("mem_info.total_count:%llu, mem_info.total_size:%llu\n", mem_info.total_count, mem_info.total_size);
-	myprintf("total_count:%llu, total_size:%llu\n", total_count, total_size);
 	return ret;
 }
 
@@ -198,8 +215,6 @@ int main(int argc, char **args)
 {
 	int ret = 0;
 	void *p1, *p2, *p3 = NULL, *p4, *p5;
-
-	init_mem_info();
 
 	while(true) {
 		free_1(p5);

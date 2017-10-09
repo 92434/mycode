@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年09月06日 星期三 13时05分14秒
+ *   修改日期：2017年10月09日 星期一 14时53分50秒
  *   描    述：
  *
  *================================================================*/
@@ -255,11 +255,14 @@ int test_task::wait_for_gdb()
 		sleep(1);
 		printf("pid %d wait for gdb...\n", getpid());
 	}
+
 #else
+
 	while(ret == 0) {
 		sleep(1);
 		printf("pid %d wait for gdb...\n", getpid());
 	}
+
 #endif
 
 
@@ -335,6 +338,9 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 
 	if(have_valid_template) {
 		ret = hw->save_one_template(finger_id);
+		if(ret != 0) {
+			log_file("hw->save_one_template:ret:%d\n", ret);
+		}
 	} else {
 		ret = -1;
 	}
@@ -481,6 +487,50 @@ int test_task::report_result()
 	return ret;
 }
 
+int test_task::resize_fr_identify_list()
+{
+	settings *g_settings = settings::get_instance();
+	int fr_slice_parts = (int)g_settings->value_strtod(g_settings->fr_slice_parts);
+	int fr_slice_current = (int)g_settings->value_strtod(g_settings->fr_slice_current);
+	int slice_unit;
+	std::vector<task_bmp> fr_identify_list_slice;
+	int i;
+	int start_index;
+	int end_index;
+
+	if(fr_slice_parts > fr_identify_list.size()) {
+		fr_slice_parts = fr_identify_list.size();
+	}
+
+	if(fr_slice_parts <= 0 ) {
+		fr_slice_parts = 1;
+	}
+	
+	if(fr_slice_current > fr_slice_parts) {
+		fr_slice_current = fr_slice_parts;
+	}
+
+	if(fr_slice_current <= 0 ) {
+		fr_slice_current = 1;
+	}
+
+	slice_unit = fr_identify_list.size() / fr_slice_parts;
+	start_index = slice_unit * (fr_slice_current - 1);
+	end_index = (fr_slice_current < fr_slice_parts) ? (slice_unit * fr_slice_current - 1) : (fr_identify_list.size() - 1);
+
+	fr_identify_list_slice.clear();
+
+	for(i = start_index; i <= end_index; i++) {
+		fr_identify_list_slice.push_back(fr_identify_list.at(i));
+	}
+
+	fr_identify_list.clear();
+
+	for(i = 0; i < fr_identify_list_slice.size(); i++) {
+		fr_identify_list.push_back(fr_identify_list_slice.at(i));
+	}
+}
+
 int test_task::do_task_list()
 {
 	int ret = 0;
@@ -498,6 +548,7 @@ int test_task::do_task_list()
 
 	std::sort(enroll_list.begin(), enroll_list.end(), enroll_less_than);
 	std::sort(fr_identify_list.begin(), fr_identify_list.end(), identify_less_than);
+	resize_fr_identify_list();
 	std::sort(fa_identify_list.begin(), fa_identify_list.end(), identify_less_than);
 
 	for(ids_it = enroll_ids.begin(); ids_it != enroll_ids.end(); ids_it++) {
