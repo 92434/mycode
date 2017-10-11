@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年08月26日 星期六 19时11分49秒
+#   修改日期：2017年10月11日 星期三 09时54分36秒
 #   描    述：
 #
 #================================================================
@@ -46,7 +46,7 @@ class SimpleProgressBar:
         total_str_width = max(len(total_str), 5)
         self.bar_size = self.get_terminal_size()[1] - 27 - 2*total_pieces_len - 2*total_str_width
         #self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:─<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
-        self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:-<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
+        self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:░<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
 
     def get_terminal_size(self):
         """Get (width, height) of the current terminal."""
