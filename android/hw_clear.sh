@@ -169,8 +169,12 @@ function main() {
 "com.coomix.app.bus"
 "com.kingpoint.gmcchh"
 "com.sinovatech.unicom.ui"
-"com.baidu.BaiduMap"
 "com.handsgo.jiakao.android"
+"com.qihoo.browser"
+"com.eg.android.AlipayGphone"
+"com.baidu.BaiduMap"
+"com.tencent.mobileqq"
+"com.MobileTicket"
 )
 
 	local list_mv_rm_system_app=(
