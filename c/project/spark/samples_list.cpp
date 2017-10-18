@@ -6,7 +6,7 @@
  *   文件名称：samples_list.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时38分19秒
- *   修改日期：2017年10月09日 星期一 14时54分02秒
+ *   修改日期：2017年10月18日 星期三 12时01分50秒
  *   描    述：
  *
  *================================================================*/
@@ -328,6 +328,8 @@ int samples_list::add_test_task_catagory(std::map<std::string, std::map<std::str
 			//printf("id:%s\n", catagory_it->first.c_str());
 			std::vector<task_bmp> *id = catagory_it->second;
 
+			std::sort(id->begin(), id->end(), task_bmp::bmp_less_than);
+
 			std::vector<task_bmp>::iterator id_it;
 
 			for(id_it = id->begin(); id_it != id->end(); id_it++) {
@@ -476,12 +478,17 @@ int samples_list::report_result()
 	log_file("log_dirname:%s,", g_settings->log_dirname.c_str());
 	log_file("pictures_directory:%s,", g_settings->pictures_dirname.c_str());
 
+	log_file("enroll_start:%s,", g_settings->enroll_start.c_str());
+	log_file("enroll_end:%s,", g_settings->enroll_start.c_str());
+	log_file("fr_start:%s,", g_settings->fr_start.c_str());
+	log_file("fr_end:%s,", g_settings->fr_end.c_str());
+	log_file("fa_start:%s,", g_settings->fa_start.c_str());
+	log_file("fa_end:%s,", g_settings->fa_end.c_str());
+
 	log_file("max_number_of_id_per_proc:%s,", g_settings->str_max_number_of_id_per_proc.c_str());
 	log_file("max_number_of_catagory_per_proc:%s,", g_settings->str_max_number_of_catagory_per_proc.c_str());
 	log_file("fr_select_type:%s,", g_settings->str_fr_select_type.c_str());
 	log_file("fa_select_type:%s,", g_settings->str_fa_select_type.c_str());
-	log_file("fr_slice_parts:%s,", g_settings->fr_slice_parts.c_str());
-	log_file("fr_slice_current:%s,", g_settings->fr_slice_current.c_str());
 	log_file("max_proc_number:%s,", g_settings->str_max_proc_number.c_str());
 	log_file("strict_identify_mode:%s,", g_settings->str_strict_identify_mode.c_str());
 
@@ -614,6 +621,7 @@ int samples_list::try_to_start_task_and_wait(test_task *task, task_start_reason_
 			} else if (WIFSTOPPED(status)) {
 				printf("stopped by signal %d\n", WSTOPSIG(status));
 			}/* else if (WIFCONTINUED(status)) {
+
 				printf("continued\n");
 			}*/
 
@@ -646,6 +654,8 @@ int samples_list::start_test_task()
 				std::vector<task_bmp> *id = catagory_it->second;
 
 				std::vector<task_bmp>::iterator id_it;
+
+				std::sort(id->begin(), id->end(), task_bmp::bmp_less_than);
 
 				for(id_it = id->begin(); id_it != id->end(); id_it++) {
 					//printf("serial_no:%s\n", id_it->serial_no.c_str());

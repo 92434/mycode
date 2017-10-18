@@ -6,7 +6,7 @@
  *   文件名称：settings.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时43分03秒
- *   修改日期：2017年10月09日 星期一 14时54分47秒
+ *   修改日期：2017年10月18日 星期三 10时49分36秒
  *   描    述：
  *
  *================================================================*/
@@ -260,6 +260,13 @@ int settings::get_pattern_from_configuration(configure &cfg)
 	fr_pattern = get_pattern_info(cfg, "fr_pattern");
 	fa_pattern = get_pattern_info(cfg, "fa_pattern");
 
+	enroll_start = cfg.get("resource_pattern", "enroll_start");
+	enroll_end = cfg.get("resource_pattern", "enroll_end");
+	fr_start = cfg.get("resource_pattern", "fr_start");
+	fr_end = cfg.get("resource_pattern", "fr_end");
+	fa_start = cfg.get("resource_pattern", "fa_start");
+	fa_end = cfg.get("resource_pattern", "fa_end");
+
 	return ret;
 }
 
@@ -325,10 +332,6 @@ int settings::get_task_settings_from_configuration(configure &cfg)
 					 : (str_fa_select_type == "SELECT_SAME_ID") ? SELECT_SAME_ID
 					 : (str_fa_select_type == "SELECT_DIFFERENT_ID") ? SELECT_DIFFERENT_ID
 					 : SELECT_DIFFERENT_CATAGORY;
-
-	fr_slice_parts = cfg.get("settings", "fr_slice_parts");
-
-	fr_slice_current = cfg.get("settings", "fr_slice_current");
 
 	str_max_proc_number = cfg.get("settings", "max_proc_number");
 	max_proc_number = (int)value_strtod(str_max_proc_number);

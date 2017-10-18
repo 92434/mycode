@@ -6,7 +6,7 @@
  *   文件名称：test_task.cpp
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时46分17秒
- *   修改日期：2017年10月09日 星期一 14时53分50秒
+ *   修改日期：2017年10月18日 星期三 12时24分14秒
  *   描    述：
  *
  *================================================================*/
@@ -34,6 +34,9 @@ int test_task::clear()
 	logfile_hardware.clear();
 	server_path.clear();
 	current_enroll_ids.clear();
+	enroll_finger_count_map.clear();
+	fr_finger_count_map.clear();
+	fa_finger_count_map.clear();
 
 	fr_total_tasks = 0;
 	fa_total_tasks = 0;
@@ -47,9 +50,54 @@ int test_task::clear()
 	return ret;
 }
 
+bool test_task::valid_item(std::map<std::string, int> &count_map, task_bmp &bmp, int start, int end)
+{
+	bool valid = true;
+	std::string catagory_id = bmp.catagory + ":" + bmp.id;
+	std::map<std::string, int>::iterator it = count_map.find(catagory_id);
+	int index;
+
+	if(it != count_map.end()) {
+		it->second++;
+		index = it->second;
+	} else {
+		count_map.insert(std::pair<std::string, int>(catagory_id, 0));
+		index = 0;
+	}
+
+	//printf("[%s:%s:%d]add catagory_id:%s %d\n", __FILE__, __FUNCTION__, __LINE__, catagory_id.c_str(), index);
+
+	if(start >= 0) {
+		if(index < start) {
+			valid = false;
+			return valid;
+		}
+	}
+
+	if(end > 0) {
+		if(index > end) {
+			valid = false;
+			return valid;
+		}
+	}
+
+	return valid;
+}
+
 int test_task::add_enroll_item(task_bmp bmp)
 {
 	int ret = 0;
+	bool valid;
+	settings *g_settings = settings::get_instance();
+	int enroll_start = (int)g_settings->value_strtod(g_settings->enroll_start);
+	int enroll_end = (int)g_settings->value_strtod(g_settings->enroll_end);
+
+	valid = valid_item(enroll_finger_count_map, bmp, enroll_start, enroll_end);
+	//printf("[%s:%s:%d]valid:%s\n", __FILE__, __FUNCTION__, __LINE__, valid ? "true" : "false");
+
+	if(!valid) {
+		return ret;
+	}
 
 	enroll_ids.insert(bmp);
 	bmp.current_enroll_id = enroll_ids.size() - 1;
@@ -63,10 +111,30 @@ int test_task::add_enroll_item(task_bmp bmp)
 int test_task::add_identify_item(task_bmp bmp)
 {
 	int ret = 0;
+	bool valid;
+	settings *g_settings = settings::get_instance();
 
 	if(bmp.test_type == FOR_FR) {
+		int fr_start = (int)g_settings->value_strtod(g_settings->fr_start);
+		int fr_end = (int)g_settings->value_strtod(g_settings->fr_end);
+		valid = valid_item(fr_finger_count_map, bmp, fr_start, fr_end);
+		//printf("[%s:%s:%d]valid:%s\n", __FILE__, __FUNCTION__, __LINE__, valid ? "true" : "false");
+
+		if(!valid) {
+			return ret;
+		}
+
 		fr_identify_list.push_back(bmp);
 	} else if(bmp.test_type == FOR_FA) {
+		int fa_start = (int)g_settings->value_strtod(g_settings->fa_start);
+		int fa_end = (int)g_settings->value_strtod(g_settings->fa_end);
+		valid = valid_item(fa_finger_count_map, bmp, fa_start, fa_end);
+		//printf("[%s:%s:%d]valid:%s\n", __FILE__, __FUNCTION__, __LINE__, valid ? "true" : "false");
+
+		if(!valid) {
+			return ret;
+		}
+
 		fa_identify_list.push_back(bmp);
 	}
 
@@ -143,56 +211,6 @@ int test_task::log_file_end()
 	ofs.close();
 
 	return ret;
-}
-
-bool test_task::enroll_less_than(task_bmp bmp1, task_bmp bmp2)
-{
-	char *invalid_pos;
-	unsigned long bmp1_id, bmp2_id;
-	unsigned long bmp1_serial_no, bmp2_serial_no;
-
-	bmp1_id = strtoul(bmp1.id.c_str(), &invalid_pos, 10);
-	bmp2_id = strtoul(bmp2.id.c_str(), &invalid_pos, 10);
-
-	bmp1_serial_no = strtoul(bmp1.serial_no.c_str(), &invalid_pos, 10);
-	bmp2_serial_no = strtoul(bmp2.serial_no.c_str(), &invalid_pos, 10);
-
-	if(bmp1_id < bmp2_id) {
-		return true;
-	} else if(bmp1_id == bmp2_id) {
-		if(bmp1_serial_no < bmp2_serial_no) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool test_task::identify_less_than(task_bmp bmp1, task_bmp bmp2)
-{
-	char *invalid_pos;
-	unsigned long bmp1_id, bmp2_id;
-	unsigned long bmp1_serial_no, bmp2_serial_no;
-
-	bmp1_id = strtoul(bmp1.id.c_str(), &invalid_pos, 10);
-	bmp2_id = strtoul(bmp2.id.c_str(), &invalid_pos, 10);
-
-	bmp1_serial_no = strtoul(bmp1.serial_no.c_str(), &invalid_pos, 10);
-	bmp2_serial_no = strtoul(bmp2.serial_no.c_str(), &invalid_pos, 10);
-
-	if(bmp1.catagory < bmp2.catagory) {
-		return true;
-	} else if(bmp1.catagory == bmp2.catagory) {
-		if(bmp1_serial_no < bmp2_serial_no) {
-			return true;
-		} else if(bmp1_serial_no == bmp2_serial_no) {
-			if(bmp1_id < bmp2_id) {
-				return true;
-			}
-		}
-	}
-
-	return false;
 }
 
 int test_task::account_task(int tasks)
@@ -312,6 +330,8 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 		unsigned char enroll_coverage;
 		task_bmp bmp = enroll_id_list.at(i);
 
+		account_task(1);
+
 		ret = hw->set_image(bmp.bmp_path);
 
 		if(ret == 0) {
@@ -325,7 +345,6 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 
 
 		bmp.ret_code = ret;
-		account_task(1);
 
 		log_file("enroll:current_enroll_id:%d, catagory:%s, id:%s, serial_no:%s, path:%s, ret_code:%d\n",
 				 bmp.current_enroll_id,
@@ -338,6 +357,7 @@ int test_task::task_enroll_id(int finger_id, std::vector<task_bmp> &enroll_id_li
 
 	if(have_valid_template) {
 		ret = hw->save_one_template(finger_id);
+
 		if(ret != 0) {
 			log_file("hw->save_one_template:ret:%d\n", ret);
 		}
@@ -380,6 +400,8 @@ int test_task::task_verify(std::vector<task_bmp> &identify_list, test_type_t tes
 		update_template = 0;
 		update_template_outside = 0;
 		update_template_finger_id = 0;
+
+		account_task(1);
 
 		ret = hw->set_image(identify_list_it->bmp_path);
 
@@ -443,7 +465,11 @@ int test_task::task_verify(std::vector<task_bmp> &identify_list, test_type_t tes
 			identify_list_it->new_matched_type = UNMATCHED;
 		}
 
-		account_task(1);
+		if(test_type == FOR_FR) {
+			fr_total_tasks++;
+		} else {
+			fa_total_tasks++;
+		}
 
 		log_file("%s:catagory:%s, id:%s, serial_no:%s, match_state:%s, new_match_state:%s, new_matched_catagory:%s, new_matched_id:%s, update_template_catagory:%s, update_template_id:%s, path:%s, ret_code:%d\n",
 				 label.c_str(),
@@ -487,50 +513,6 @@ int test_task::report_result()
 	return ret;
 }
 
-int test_task::resize_fr_identify_list()
-{
-	settings *g_settings = settings::get_instance();
-	int fr_slice_parts = (int)g_settings->value_strtod(g_settings->fr_slice_parts);
-	int fr_slice_current = (int)g_settings->value_strtod(g_settings->fr_slice_current);
-	int slice_unit;
-	std::vector<task_bmp> fr_identify_list_slice;
-	int i;
-	int start_index;
-	int end_index;
-
-	if(fr_slice_parts > fr_identify_list.size()) {
-		fr_slice_parts = fr_identify_list.size();
-	}
-
-	if(fr_slice_parts <= 0 ) {
-		fr_slice_parts = 1;
-	}
-	
-	if(fr_slice_current > fr_slice_parts) {
-		fr_slice_current = fr_slice_parts;
-	}
-
-	if(fr_slice_current <= 0 ) {
-		fr_slice_current = 1;
-	}
-
-	slice_unit = fr_identify_list.size() / fr_slice_parts;
-	start_index = slice_unit * (fr_slice_current - 1);
-	end_index = (fr_slice_current < fr_slice_parts) ? (slice_unit * fr_slice_current - 1) : (fr_identify_list.size() - 1);
-
-	fr_identify_list_slice.clear();
-
-	for(i = start_index; i <= end_index; i++) {
-		fr_identify_list_slice.push_back(fr_identify_list.at(i));
-	}
-
-	fr_identify_list.clear();
-
-	for(i = 0; i < fr_identify_list_slice.size(); i++) {
-		fr_identify_list.push_back(fr_identify_list_slice.at(i));
-	}
-}
-
 int test_task::do_task_list()
 {
 	int ret = 0;
@@ -546,10 +528,9 @@ int test_task::do_task_list()
 	int i;
 	bool have_valid_template = false;
 
-	std::sort(enroll_list.begin(), enroll_list.end(), enroll_less_than);
-	std::sort(fr_identify_list.begin(), fr_identify_list.end(), identify_less_than);
-	resize_fr_identify_list();
-	std::sort(fa_identify_list.begin(), fa_identify_list.end(), identify_less_than);
+	std::sort(enroll_list.begin(), enroll_list.end(), task_bmp::bmp_less_than);
+	std::sort(fr_identify_list.begin(), fr_identify_list.end(), task_bmp::bmp_less_than);
+	std::sort(fa_identify_list.begin(), fa_identify_list.end(), task_bmp::bmp_less_than);
 
 	for(ids_it = enroll_ids.begin(); ids_it != enroll_ids.end(); ids_it++) {
 		std::string process = ids_it->catagory + ":" +  ids_it->id;
@@ -568,9 +549,7 @@ int test_task::do_task_list()
 
 	enroll_loops = (enroll_id_size_max + enroll_max_templates - 1) / enroll_max_templates;
 
-	fr_total_tasks = fr_identify_list.size() * enroll_loops;
-	fa_total_tasks = fa_identify_list.size() * enroll_loops;
-	total_tasks = enroll_list.size() + fr_total_tasks + fa_total_tasks;
+	total_tasks = enroll_list.size() + fr_identify_list.size() * enroll_loops + fa_identify_list.size() * enroll_loops;
 
 	for(i = 0; i < enroll_loops; i++) {
 		current_enroll_ids.clear();

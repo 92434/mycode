@@ -6,7 +6,7 @@
  *   文件名称：test_task.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时27分38秒
- *   修改日期：2017年10月09日 星期一 12时14分33秒
+ *   修改日期：2017年10月18日 星期三 11时58分43秒
  *   描    述：
  *
  *================================================================*/
@@ -20,6 +20,8 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
+
+#include <map>
 
 #include <fstream>
 #include <algorithm>    // std::sort
@@ -81,6 +83,9 @@ private:
 	std::string logfile_hardware;
 	std::string server_path;
 	std::set<task_bmp, bmp_enroll_set_comp> current_enroll_ids;
+	std::map<std::string, int> enroll_finger_count_map;
+	std::map<std::string, int> fr_finger_count_map;
+	std::map<std::string, int> fa_finger_count_map;
 
 	int fr_total_tasks;
 	int fa_total_tasks;
@@ -99,6 +104,8 @@ public:
 
 	int clear();
 
+	bool valid_item(std::map<std::string, int> &count_map, task_bmp &bmp, int start, int end);
+
 	int add_enroll_item(task_bmp bmp);
 
 	int add_identify_item(task_bmp bmp);
@@ -111,10 +118,6 @@ public:
 
 	int log_file_end();
 
-	static bool enroll_less_than(task_bmp bmp1, task_bmp bmp2);
-
-	static bool identify_less_than(task_bmp bmp1, task_bmp bmp2);
-
 	int account_task(int tasks);
 
 	int wait_for_gdb();
@@ -126,8 +129,6 @@ public:
 	int task_verify(std::vector<task_bmp> &identify_list, test_type_t test_type);
 
 	int report_result();
-
-	int resize_fr_identify_list();
 
 	int do_task_list();
 

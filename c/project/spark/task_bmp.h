@@ -6,7 +6,7 @@
  *   文件名称：task_bmp.h
  *   创 建 者：肖飞
  *   创建日期：2017年07月14日 星期五 12时25分02秒
- *   修改日期：2017年07月25日 星期二 14时38分07秒
+ *   修改日期：2017年10月18日 星期三 11时57分22秒
  *   描    述：
  *
  *================================================================*/
@@ -59,7 +59,7 @@ public:
 	std::string update_template_id;
 
 	int ret_code;
-	
+
 
 	task_bmp()
 	{
@@ -138,6 +138,33 @@ public:
 			  (new_matched_type == UNMATCHED) ? "UNMATCHED" :
 			  "UNKNOW";
 		return ret;
+	}
+
+	static bool bmp_less_than(task_bmp bmp1, task_bmp bmp2)
+	{
+		char *invalid_pos;
+		unsigned long bmp1_id, bmp2_id;
+		unsigned long bmp1_serial_no, bmp2_serial_no;
+
+		bmp1_id = strtoul(bmp1.id.c_str(), &invalid_pos, 10);
+		bmp2_id = strtoul(bmp2.id.c_str(), &invalid_pos, 10);
+
+		bmp1_serial_no = strtoul(bmp1.serial_no.c_str(), &invalid_pos, 10);
+		bmp2_serial_no = strtoul(bmp2.serial_no.c_str(), &invalid_pos, 10);
+
+		if(bmp1.catagory < bmp2.catagory) {
+			return true;
+		} else if(bmp1.catagory == bmp2.catagory) {
+			if(bmp1_id < bmp2_id) {
+				return true;
+			} else if(bmp1_id == bmp2_id) {
+				if(bmp1_serial_no < bmp2_serial_no) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 };
 #endif //TASK_BMP_H
