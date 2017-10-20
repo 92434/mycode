@@ -1,9 +1,19 @@
 # -*- coding: utf-8 -*-
-
+#!/usr/bin/env python
+#================================================================
+#   Copyright (C) 2017年10月20日 肖飞 All rights reserved
+#   
+#   文件名称：__init__.py
+#   创 建 者：肖飞
+#   创建日期：2017年10月20日 星期五 10时34分43秒
+#   修改日期：2017年10月20日 星期五 10时40分42秒
+#   描    述：
+#
+#================================================================
 import logging
-from config.configure import file_config_content, file_config_filepath, gen_debug_file, debug_file, dict_config
+from config.configure import simple_logger, file_configure, dict_configure
 
-__all__ = ['get_logger', 'get_log', 'logger', 'color']
+__all__ = ['simple_logger', 'file_configure', 'dict_configure', 'color']
 
 # Color escape string
 COLOR_RED='\033[1;31m'
@@ -18,74 +28,27 @@ COLOR_RESET='\033[1;0m'
 
 # Define log color
 LOG_COLORS = {
-	'DEBUG': COLOR_BLUE + '%s' + COLOR_RESET,
-	'INFO': COLOR_GREEN + '%s' + COLOR_RESET,
-	'WARNING': COLOR_YELLOW + '%s' + COLOR_RESET,
-	'ERROR': COLOR_RED + '%s' + COLOR_RESET,
-	'CRITICAL': COLOR_RED + '%s' + COLOR_RESET,
-	'EXCEPTION': COLOR_RED + '%s' + COLOR_RESET,
+    'DEBUG': COLOR_BLUE + '%s' + COLOR_RESET,
+    'INFO': COLOR_GREEN + '%s' + COLOR_RESET,
+    'WARNING': COLOR_YELLOW + '%s' + COLOR_RESET,
+    'ERROR': COLOR_RED + '%s' + COLOR_RESET,
+    'CRITICAL': COLOR_RED + '%s' + COLOR_RESET,
+    'EXCEPTION': COLOR_RED + '%s' + COLOR_RESET,
 }
 
 def color(txt = '', level = 'DEBUG'):
-	return LOG_COLORS.get(level) %(txt)
+    return LOG_COLORS.get(level) %(txt)
 
-def file_configure(filename_user):
-	filename = filename_user
-	if not filename:
-		filename = config.configure.file_config_filepath
-		with open(filename, 'w+') as f:
-			f.write(config.configure.file_config_content)
-	logging.config.fileConfig(filename)
-	return logging
+def main():
+    logging = dict_configure()
+    logger = logging.getLogger('default')
 
-def dict_configure(dict_config_user):
-	if not dict_config_user:
-		dict_config_user = dict_config
-	logging.config.dictConfig(dict_config)
-	return logging
+    logger.debug("debug message")
+    logger.info("info message")
+    logger.warn("warn message")
+    logger.error("error message")
+    logger.critical("critical message")
+    logger.debug(color('xiaofei', 'DEBUG'))
 
-def simple_logger():
-	# create logger with "spam_application"
-	logger = logging.getLogger("spam_application")
-	logger.setLevel(logging.DEBUG)
-	# create file handler which logs even debug messages
-	fh = logging.FileHandler(debug_file)
-	fh.setLevel(logging.DEBUG)
-	# create console handler with a higher log level
-	ch = logging.StreamHandler()
-	ch.setLevel(logging.ERROR)
-	# create formatter and add it to the handlers
-	fh_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-	fh.setFormatter(fh_formatter)
-	ch_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-	ch.setFormatter(ch_formatter)
-	# add the handlers to the logger
-	logger.addHandler(ch)
-	logger.addHandler(fh)
-
-	return logger
-
-
-def get_log(configure = None):
-	if isinstance(configure, str):
-		return file_configure(configure)
-	elif isinstance(configure, dict):
-		return dict_configure(configure)
-	else:
-		return dict_configure(None)
-
-def get_logger(logger_name = 'my_logger'):
-	if logger_name:
-		return get_log().getLogger(logger_name)
-	else:
-		return simple_logger()
-
-logger = get_logger()
-
-if __name__ == '__main__':
-	logger.debug("debug message")
-	logger.info("info message")
-	logger.warn("warn message")
-	logger.error("error message")
-	logger.critical("critical message")
-	color('xiaofei', 'DEBUG')
+if '__main__' == __name__:
+    main()
