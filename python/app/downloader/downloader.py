@@ -6,21 +6,24 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月11日 星期三 10时01分13秒
+#   修改日期：2017年10月21日 星期六 14时16分56秒
 #   描    述：
 #
 #================================================================
 import network
-import log
-import re
 import socket
+import re
 import os
-import sys
-import time
 import subprocess
 
-urllib = network.network().default_init(0)
-logging = log.log().get_logger('debug')
+import log
+import progress_bar
+
+n = network.network()
+n.default_init(0)
+
+logging = log.dict_configure()
+logger = logging.getLogger('default')
 
 timeout = 3 # in seconds
 socket.setdefaulttimeout(timeout)
@@ -30,209 +33,20 @@ try:
 except ImportError:
   import dummy_threading as _threading
 
-class SimpleProgressBar:
-    def __init__(self, total_size, total_pieces = 1):
-        self.displayed = False
-        self.total_size = total_size
-        self.total_pieces = total_pieces
-        self.current_piece = 1
-        self.received = 0
-        self.speed = ''
-        self.last_updated = time.time()
-
-        total_pieces_len = len(str(total_pieces))
-        # 38 is the size of all statically known size in self.bar
-        total_str = '%5s' % round(self.total_size / 1048576, 1)
-        total_str_width = max(len(total_str), 5)
-        self.bar_size = self.get_terminal_size()[1] - 27 - 2*total_pieces_len - 2*total_str_width
-        #self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:─<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
-        self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:-<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
-
-    def get_terminal_size(self):
-        """Get (width, height) of the current terminal."""
-        try:
-            import fcntl, termios, struct # fcntl module only available on Unix
-            return struct.unpack('hh', fcntl.ioctl(1, termios.TIOCGWINSZ, '1234'))
-        except:
-            return (40, 80)
-
-    def update(self):
-        self.displayed = True
-        bar_size = self.bar_size
-        percent = round(self.received * 100 / self.total_size, 1)
-        if percent >= 100:
-            percent = 100
-        dots = bar_size * int(percent) // 100
-        plus = int(percent) - dots // bar_size * 100
-        if plus > 0.8:
-            #plus = '█'
-            #plus = '░'
-            plus = '|'
-        elif plus > 0.4:
-            plus = '>'
-        else:
-            plus = ''
-        #bar = '█' * dots + plus
-        bar = '|' * dots + plus
-        #print('self.bar:\'%s\'' %(self.bar))
-        #print('percent:\'%f\'' %(percent))
-        #print('round(self.received / 1048576, 1):\'%f\'' %(round(self.received / 1048576, 1)))
-        #print('bar:\'%s\'' %(bar))
-        #print('self.current_piece:\'%d\'' %(self.current_piece))
-        #print('self.total_pieces:\'%d\'' %(self.total_pieces))
-        #print('self.speed:\'%s\'' %(self.speed))
-        bar = self.bar.format(percent, round(self.received / 1048576, 1), bar, self.current_piece, self.total_pieces, self.speed)
-        sys.stdout.write('\r' + bar)
-        sys.stdout.flush()
-
-    def update_received(self, n):
-        self.received += n
-        time_diff = time.time() - self.last_updated
-        bytes_ps = n / time_diff if time_diff else 0
-        if bytes_ps >= 1024 ** 3:
-            self.speed = '{:4.0f} GB/s'.format(bytes_ps / 1024 ** 3)
-        elif bytes_ps >= 1024 ** 2:
-            self.speed = '{:4.0f} MB/s'.format(bytes_ps / 1024 ** 2)
-        elif bytes_ps >= 1024:
-            self.speed = '{:4.0f} kB/s'.format(bytes_ps / 1024)
-        else:
-            self.speed = '{:4.0f}  B/s'.format(bytes_ps)
-        self.last_updated = time.time()
-        self.update()
-
-    def update_piece(self, n):
-        self.current_piece = n
-
-    def done(self):
-        if self.displayed:
-            print()
-            self.displayed = False
-
-class PiecesProgressBar:
-    def __init__(self, total_size, total_pieces = 1):
-        self.displayed = False
-        self.total_size = total_size
-        self.total_pieces = total_pieces
-        self.current_piece = 1
-        self.received = 0
-
-    def update(self):
-        self.displayed = True
-        bar = '{0:>5}%[{1:<40}] {2}/{3}'.format('', '=' * 40, self.current_piece, self.total_pieces)
-        sys.stdout.write('\r' + bar)
-        sys.stdout.flush()
-
-    def update_received(self, n):
-        self.received += n
-        self.update()
-
-    def update_piece(self, n):
-        self.current_piece = n
-
-    def done(self):
-        if self.displayed:
-            print()
-            self.displayed = False
-
-class DummyProgressBar:
-    def __init__(self, *args):
-        pass
-    def update_received(self, n):
-        pass
-    def update_piece(self, n):
-        pass
-    def done(self):
-        pass
-
 
 class downloader(object):
-    fake_headers = {
-        #'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'Accept': '*/*',
-        'Accept-Charset': 'UTF-8,*;q=0.5',
-        'Accept-Encoding': 'gzip,deflate,sdch',
-        'Accept-Language': 'zh-CN,zh;q=0.8',
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/60.0.3112.78 Chrome/60.0.3112.78 Safari/537.36'
-    }
-
     def __init__(self):
         pass
-
-    def r1(self, pattern, text):
-        m = re.search(pattern, text)
-        if m:
-            return m.group(1)
-    def tr(self, s):
-        return s
-
-    def ungzip(self, data):
-        """Decompresses data for Content-Encoding: gzip.
-        """
-        from io import BytesIO
-        import gzip
-        buffer = BytesIO(data)
-        f = gzip.GzipFile(fileobj = buffer)
-        return f.read()
-
-    def undeflate(self, data):
-        """Decompresses data for Content-Encoding: deflate.
-        (the zlib compression is used.)
-        """
-        import zlib
-        decompressobj = zlib.decompressobj(-zlib.MAX_WBITS)
-        return decompressobj.decompress(data)+decompressobj.flush()
-
-    # DEPRECATED in favor of get_content()
-    def get_response(self, url, faker = False):
-        #logging.debug('get_response: %s' % url)
-
-        if faker:
-            response = urllib.request.urlopen(urllib.request.Request(url, headers = self.fake_headers), None)
-        else:
-            response = urllib.request.urlopen(url)
-
-        data = response.read()
-        if response.info().get('Content-Encoding') == 'gzip':
-            data = self.ungzip(data)
-        elif response.info().get('Content-Encoding') == 'deflate':
-            data = self.undeflate(data)
-        response.data = data
-        return response
-
-    # DEPRECATED in favor of get_content()
-    def get_html(self, url, encoding = None, faker = False):
-        response = self.get_response(url, faker)
-        content = response.data
-        return content.decode('utf-8', 'ignore')
-
-
-    # DEPRECATED in favor of get_content()
-    def get_decoded_html(self, url, faker = False):
-        response = self.get_response(url, faker)
-        content = response.data
-        charset = self.r1(r'charset=([\w-]+)', response.headers['content-type'])
-        if charset:
-            return content.decode(charset, 'ignore')
-        else:
-            return content
-
-    def get_location(self, url):
-        #logging.debug('get_location: %s' % url)
-
-        response = urllib.request.urlopen(url)
-        # urllib will follow redirections and it's too much code to tell urllib
-        # not to do that
-        return response.geturl()
 
     def urlopen_with_retry(self, *args, **kwargs):
         for i in range(10):
             try:
-                return urllib.request.urlopen(*args, **kwargs)
+                return n.urllib.request.urlopen(*args, **kwargs)
             except Exception as e:
-                #logging.debug('request attempt %s(%s)' %(str(i + 1), e))
+                #logger.debug('request attempt %s(%s)' %(str(i + 1), e))
                 pass
 
-    def get_content(self, url, headers = {}, decoded = True):
+    def get_content(self, url, headers = None):
         """Gets the content of a URL via sending a HTTP GET request.
 
         Args:
@@ -244,34 +58,20 @@ class downloader(object):
             The content as a string.
         """
 
-        #logging.debug('get_content: %s' % url)
+        #logger.debug('get_content: %s' % url)
+        if not headers:
+            headers = n.fake_header
 
-        req = urllib.request.Request(url, headers = headers)
+        req = n.urllib.request.Request(url, headers = headers)
 
         response = self.urlopen_with_retry(req)
         data = response.read()
-
-        # Handle HTTP compression for gzip and deflate (zlib)
-        try:
-            content_encoding = response.headers['Content-Encoding']
-        except:
-            content_encoding = None
-        if content_encoding == 'gzip':
-            data = self.ungzip(data)
-        elif content_encoding == 'deflate':
-            data = self.undeflate(data)
-
-        # Decode the response body
-        if decoded:
-            charset = self.r1(r'charset=([\w-]+)', response.headers['Content-Type'])
-            if charset is not None:
-                data = data.decode(charset)
-            else:
-                data = data.decode('utf-8', 'ignore')
+        data = n.decompresses_response_data(response, data)
+        data = n.decode_response_data(response, data)
 
         return data
 
-    def post_content(self, url, headers = {}, post_data = {}, decoded = True):
+    def post_content(self, url, headers = None, post_data = {}):
         """Post the content of a URL via sending a HTTP POST request.
 
         Args:
@@ -283,87 +83,71 @@ class downloader(object):
             The content as a string.
         """
 
-        #logging.debug('post_content: %s \n post_data: %s' % (url, post_data))
+        #logger.debug('post_content: %s \n post_data: %s' % (url, post_data))
+        if not headers:
+            headers = n.fake_header
 
-        req = urllib.request.Request(url, headers = headers)
-        post_data_enc = bytes(urllib.parse.urlencode(post_data).encode('utf-8'))
+        req = n.urllib.request.Request(url, headers = headers)
+        post_data = n.urllib.parse.urlencode(post_data)
+        post_data_enc = bytes(post_data.encode('utf-8'))
         response = self.urlopen_with_retry(req, data = post_data_enc)
         data = response.read()
-
-        # Handle HTTP compression for gzip and deflate (zlib)
-        try:
-            content_encoding = response.headers('Content-Encoding')
-        except:
-            content_encoding = None
-
-        if content_encoding == 'gzip':
-            data = self.ungzip(data)
-        elif content_encoding == 'deflate':
-            data = self.undeflate(data)
-
-        # Decode the response body
-        if decoded:
-            try:
-                charset = self.r1(r'charset=([\w-]+)', response.headers('Content-Type'))
-            except:
-                charset = None
-            if charset is not None:
-                data = data.decode(charset)
-            else:
-                data = data.decode('utf-8')
+        data = n.decompresses_response_data(response, data)
+        data = n.decode_response_data(response, data)
 
         return data
 
-    def url_size(self, url, faker = False, headers = {}):
+    def url_size(self, url, headers = None):
+        if not headers:
+            headers = n.fake_header
+
+        req = n.urllib.request.Request(url, headers = headers)
+
         size = float('inf')
         while size == float('inf'):
-            if faker:
-                response = self.urlopen_with_retry(urllib.request.Request(url, headers = self.fake_headers))
-            elif headers:
-                response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
-            else:
-                response = self.urlopen_with_retry(url)
+            response = self.urlopen_with_retry(req)
 
-            if 'content-length' in response.headers:
-                size = response.headers['content-length']
-                size = int(size) if size != None else float('inf')
+            size = response.headers.get('content-length')
+            if size:
+                size = int(size)
+            else:
+                size = float('inf')
 
             if size == float('inf'):
-                logging.debug('invalid file size for %s!' %(url))
+                logger.debug('invalid file size for %s!' %(url))
             else:
-                #logging.debug('url size %d!' %(size))
+                #logger.debug('url size %d!' %(size))
                 pass
 
         return size
 
-    def urls_size(self, urls, faker = False, headers = {}):
-        return sum([self.url_size(url, faker = faker, headers = headers) for url in urls])
+    def urls_size(self, urls, headers = None):
+        return sum([self.url_size(url, headers = headers) for url in urls])
 
-    def get_head(self, url, headers = {}, get_method = 'HEAD'):
-        #logging.debug('get_head: %s' % url)
+    def get_head(self, url, headers = None, get_method = 'HEAD'):
+        #logger.debug('get_head: %s' % url)
 
-        if headers:
-            req = urllib.request.Request(url, headers = headers)
-        else:
-            req = urllib.request.Request(url)
+        if not headers:
+            headers = n.fake_header
+
+        req = n.urllib.request.Request(url, headers = headers)
         req.get_method = lambda: get_method
         res = self.urlopen_with_retry(req)
         return dict(res.headers)
 
-    def url_info(self, url, faker = False, headers = {}):
-        #logging.debug('url_info: %s' % url)
+    def url_info(self, url, headers = None):
+        #logger.debug('url_info: %s' % url)
+        if not headers:
+            headers = n.fake_header
 
-        if faker:
-            response = self.urlopen_with_retry(urllib.request.Request(url, headers = self.fake_headers))
-        elif headers:
-            response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
-        else:
-            response = self.urlopen_with_retry(urllib.request.Request(url))
+        req = n.urllib.request.Request(url, headers = headers)
+        response = self.urlopen_with_retry(req)
 
         headers = response.headers
 
-        type = headers['content-type']
-        if type == 'image/jpg; charset=UTF-8' or type == 'image/jpg' : type = 'audio/mpeg'    #fix for netease
+        content_type = headers.get('content-type')
+        if content_type == 'image/jpg; charset=UTF-8' or content_type == 'image/jpg':
+            content_type = 'audio/mpeg'    #fix for netease
 
         mapping = {
             'video/3gpp': '3gp',
@@ -385,13 +169,14 @@ class downloader(object):
             'application/pdf': 'pdf',
         }
 
-        if type in mapping:
-            ext = mapping[type]
+        if content_type in mapping:
+            ext = mapping.get(content_type)
         else:
-            type = None
-            if 'content-disposition' in dir(headers):
+            content_type = None
+            content_disposition = headers.get('content-disposition')
+            if content_disposition:
                 try:
-                    filename = urllib.parse.unquote(r1(r'filename="?([^"]+)"?', headers['content-disposition']))
+                    filename = n.urllib.parse.unquote(n.r(r'filename="?([^"]+)"?', content_disposition), 1)
                     if len(filename.split('.')) > 1:
                         ext = filename.split('.')[-1]
                     else:
@@ -401,71 +186,47 @@ class downloader(object):
             else:
                 ext = None
 
-        if headers['transfer-encoding'] != 'chunked':
-            size = headers['content-length'] and int(headers['content-length'])
+        if headers.get('transfer-encoding') != 'chunked':
+            size = headers.get('content-length')
+            if size:
+                size = int(size)
         else:
             size = None
 
-        return type, ext, size
+        return content_type, ext, size
 
-    def url_locations(self, urls, faker = False, headers = {}):
-        locations = []
-        for url in urls:
-            #logging.debug('url_locations: %s' % url)
-
-            if faker:
-                response = self.urlopen_with_retry(urllib.request.Request(url, headers = self.fake_headers))
-            elif headers:
-                response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
-            else:
-                response = self.urlopen_with_retry(urllib.request.Request(url))
-
-            locations.append(response.url)
-        return locations
-
-    def url_save(self, url, filepath, bar, piece = None, sem = None, lock = None, force = False, refer = None, is_part = False, faker = False, headers = {}, timeout = None, **kwargs):
+    def url_save(self, url, filepath, bar, piece = None, sem = None, force = False, refer = None, is_part = False, headers = None, timeout = None, **kwargs):
 #When a referer specified with param refer, the key must be 'Referer' for the hack here
-        if refer is not None:
-            headers['Referer'] = refer
-        #logging.debug('faker %s' % faker)
+        if not headers:
+            headers = n.fake_header
 
-        file_size = self.url_size(url, faker = faker, headers = headers)
+        if refer:
+            headers.update({'Referer' : refer})
 
-        #logging.debug('filepath %s' %(filepath))
-        #logging.debug('force %s' %(force))
-        #logging.debug('file_size %d' %(file_size))
-        #logging.debug('is_part %d' %(is_part))
+        file_size = self.url_size(url, headers = headers)
         if os.path.exists(filepath):
             if not force and file_size == os.path.getsize(filepath):
                 if not is_part:
                     if bar:
-                        if lock:
-                            lock.acquire()
                         bar.done()
-                        if lock:
-                            lock.release()
-                    logging.debug('Skipping %s: file already exists' % self.tr(os.path.basename(filepath)))
+                    logger.debug('Skipping %s: file already exists' % os.path.basename(filepath))
                 else:
                     if bar:
-                        if lock:
-                            lock.acquire()
                         bar.update_received(file_size)
-                        if lock:
-                            lock.release()
                 if sem:
                     sem.release()
                 return
             else:
                 if not is_part:
                     if bar:
-                        if lock:
-                            lock.acquire()
                         bar.done()
-                        if lock:
-                            lock.release()
-                    print('Overwriting %s' % self.tr(os.path.basename(filepath)), '...')
+                    logger.debug('Overwriting %s' % os.path.basename(filepath), '...')
         elif not os.path.exists(os.path.dirname(filepath)):
-            os.mkdir(os.path.dirname(filepath))
+            try:
+                os.mkdir(os.path.dirname(filepath))
+            except Exception as e:
+                logger.debug('%s' %(e))
+                pass
 
         temp_filepath = filepath + '.download'
         received = 0
@@ -478,78 +239,61 @@ class downloader(object):
                 if received <= file_size:
                     open_mode = 'ab'
                     if bar:
-                        if lock:
-                            lock.acquire()
                         bar.update_received(received)
-                        if lock:
-                            lock.release()
-        else:
-            open_mode = 'wb'
 
         if received < file_size:
-            if faker:
-                headers = self.fake_headers
-            elif headers:
-                headers = headers
-            else:
-                headers = {}
-
             if received:
-                headers['Range'] = 'bytes=' + str(received) + '-'
-            if refer:
-                headers['Referer'] = refer
+                headers.update({'Range' : 'bytes=' + str(received) + '-'})
 
-            if timeout:
-                response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers), timeout = timeout)
-            else:
-                response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
-            try:
-                range_start = int(response.headers['content-range'][6:].split('/')[0].split('-')[0])
-                end_length = int(response.headers['content-range'][6:].split('/')[1])
+            req = n.urllib.request.Request(url, headers = headers)
+            response = self.urlopen_with_retry(req, timeout = timeout)
+
+            content_range = response.headers.get('content-range')
+            if content_range:
+                range_start = int(content_range[6:].split('/')[0].split('-')[0])
+                end_length = int(content_range[6:].split('/')[1])
                 range_length = end_length - range_start
-            except:
-                content_length = response.headers['content-length']
-                range_length = int(content_length) if content_length!=None else float('inf')
+            else:
+                content_length = response.headers.get('content-length')
+                if content_length:
+                    range_length = int(content_length)
+                else:
+                    range_length = float('inf')
 
             if file_size != received + range_length:
                 if bar:
-                    if lock:
-                        lock.acquire()
                     bar.update_received(-received)
-                    if lock:
-                        lock.release()
                 received = 0
                 open_mode = 'wb'
 
         while received != file_size:
-            #logging.debug('temp_filepath:%s, open_mode:%s' %(temp_filepath, open_mode))
+            #logger.debug('temp_filepath:%s, open_mode:%s' %(temp_filepath, open_mode))
             output = open(temp_filepath, open_mode)
-            buffer = None
+
+            data = None
+
             while received < file_size:
                 read_size = file_size - received
                 if read_size > 1024 * 256:
                     read_size = 1024 * 256
                 try:
-                    buffer = response.read(read_size)
+                    data = response.read(read_size)
                 except Exception as e:
-                    #logging.debug('%s' %(e))
+                    #logger.debug('%s' %(e))
                     pass
 
-                if buffer == None:
-                    headers['Range'] = 'bytes=' + str(received) + '-'
-                    response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
+                if not data:
+                    headers.update({'Range' : 'bytes=' + str(received) + '-'})
+                    req = n.urllib.request.Request(url, headers = headers)
+                    response = self.urlopen_with_retry(req)
                     continue
 
-                output.write(buffer)
-                received += len(buffer)
+                output.write(data)
+                received += len(data)
                 if bar:
-                    if lock:
-                        lock.acquire()
-                    bar.update_received(len(buffer))
-                    if lock:
-                        lock.release()
+                    bar.update_received(len(data))
 
-            #logging.debug('temp_filepath:%s, received:%d, file_size:%d' %(temp_filepath, received, file_size))
+            #logger.debug('temp_filepath:%s, received:%d, file_size:%d' %(temp_filepath, received, file_size))
 
             output.close()
 
@@ -557,26 +301,24 @@ class downloader(object):
                 break
             else:
                 if bar:
-                    if lock:
-                        lock.acquire()
                     bar.received -= received
-                    if lock:
-                        lock.release()
 
-                logging.debug('piece %d failed(received:%d, file_size:%d)! again!' %(piece, received, file_size))
+                logger.debug('piece %d failed(received:%d, file_size:%d)! again!' %(piece, received, file_size))
 
                 os.remove(temp_filepath)
 
-                file_size = self.url_size(url, faker = faker, headers = headers)
+                file_size = self.url_size(url, headers = headers)
                 received = 0
                 open_mode = 'wb'
-                headers['Range'] = 'bytes=' + str(received) + '-'
-                response = self.urlopen_with_retry(urllib.request.Request(url, headers = headers))
+                headers.update({'Range' : 'bytes=' + str(received) + '-'})
+                req = n.urllib.request.Request(url, headers = headers)
+                response = self.urlopen_with_retry(req)
 
-        if os.path.getsize(temp_filepath) >= file_size:
+        if os.path.getsize(temp_filepath) == file_size:
             if os.access(filepath, os.W_OK):
                 os.remove(filepath) # on Windows rename could fail if destination filepath exists
             os.rename(temp_filepath, filepath)
+
         if sem:
             sem.release()
 
@@ -594,20 +336,20 @@ class downloader(object):
         cmd.append('-absf')
         cmd.append('aac_adtstoasc')
         cmd.append('%s' %(output_filepath))
-        #logging.debug('%s' %(cmd))
+        #logger.debug('%s' %(cmd))
 
         if subprocess.Popen(cmd, cwd=os.path.curdir).wait() != 0:
             raise Exception('merge %s failed!!!', output_filepath)
 
-    def download_urls(self, urls, title, ext, total_size = 0, jobs = 1, force = False, output_dir = '.', dry_run = False, refer = None, merge = True, faker = False, headers = {}, **kwargs):
+    def download_urls(self, urls, title, ext, total_size = 0, jobs = 1, force = False, output_dir = '.', dry_run = False, refer = None, merge = True, headers = None, **kwargs):
         assert urls
         if dry_run:
-            print('Real URLs:\n%s' % '\n'.join(urls))
+            logger.debug('Real URLs:\n%s' % '\n'.join(urls))
             return
 
         if not total_size:
             try:
-                total_size = self.urls_size(urls, faker=faker, headers=headers)
+                total_size = self.urls_size(urls, headers = headers)
             except:
                 import traceback
                 traceback.print_exc(file=sys.stdout)
@@ -619,22 +361,20 @@ class downloader(object):
         lock = _threading.Lock()
         if total_size:
             if not force and os.path.exists(output_filepath) and os.path.getsize(output_filepath) >= total_size * 0.9:
-                print('Skipping %s: file already exists' % output_filepath)
+                logger.debug('Skipping %s: file already exists' % output_filepath)
                 return
-            bar = SimpleProgressBar(total_size, len(urls))
+            bar = progress_bar.SimpleProgressBar(total_size, len(urls))
         else:
-            bar = PiecesProgressBar(total_size, len(urls))
+            bar = progress_bar.PiecesProgressBar(total_size, len(urls))
 
         if len(urls) == 1:
             url = urls[0]
-            print('Downloading %s ...' % self.tr(output_filename))
-            bar.update()
-            self.url_save(url, output_filepath, bar, refer = refer, faker = faker, headers = headers, **kwargs)
+            logger.debug('Downloading %s ...' % output_filename)
+            self.url_save(url, output_filepath, bar, refer = refer, headers = headers, **kwargs)
             bar.done()
         else:
             parts = []
-            print('Downloading %s.%s ...' % (self.tr(title), ext))
-            bar.update()
+            logger.debug('Downloading %s ...' % (output_filepath))
 
             sem = _threading.Semaphore(jobs)
             threads = set()
@@ -643,12 +383,12 @@ class downloader(object):
                 filename = '%s[%02d].%s' % (title, i, ext)
                 filepath = os.path.join(output_dir, filename)
                 parts.append(filepath)
-                #print 'Downloading %s [%s/%s]...' % (self.tr(filename), i + 1, len(urls))
-                bar.update_piece(i + 1)
+                #logger.debug('Downloading %s [%s/%s]...' % (filename, i + 1, len(urls)))
                 piece = i + 1;
+                bar.update_piece(piece)
 
                 sem.acquire()
-                local_kwargs = dict(url = url, filepath = filepath, bar = bar, piece = piece, sem = sem, lock = lock, refer = refer, is_part = True, faker = faker, headers = headers)
+                local_kwargs = dict(url = url, filepath = filepath, bar = bar, piece = piece, sem = sem, refer = refer, is_part = True, headers = headers)
                 local_kwargs.update(kwargs)
 
                 t = _threading.Thread(target = self.url_save, kwargs = local_kwargs)
@@ -663,40 +403,43 @@ class downloader(object):
             bar.done()
 
             if not merge:
-                print()
                 return
+            
+            can_merge = False
+            if ext != "mp4":
+                can_merge = False
+            for i in urls:
+                if not i.endwith('.ts'):
+                    can_merge = False
+            for i in parts:
+                if not os.access(i):
+                    can_merge = False
 
-            if ext == "mp4":
+            if can_merge:
                 try:
                     self.ts2mp4(output_filepath, parts)
-                    print('Merged into %s' % output_filename)
+                    logger.debug('Merged into %s' % output_filename)
                 except:
                     raise
-                else:
-                    for part in parts:
-                        #os.remove(part)
-                        pass
-
-            else:
-                print("Can't merge %s files" % ext)
+                for part in parts:
+                    os.remove(part)
 
 def main():
     dl = downloader()
-    location = dl.get_location('http://www.baidu.com')
-    #print(location)
-    #html = dl.get_decoded_html('http://www.113gan.com/view/index7644.html')
-    html = dl.get_decoded_html('http://www.113gan.com/playdata/220/7644.js?70568.32')
-    print(html)
+    #logger.debug(location)
+    #html = dl.get_content('http://www.113gan.com/view/index7644.html')
+    html = dl.get_content('http://www.113gan.com/playdata/220/7644.js?70568.32')
+    logger.debug(html)
     #data = dl.get_content('http://www.113gan.com/view/index7644.html')
-    #print(data)
+    #logger.debug(data)
     data = dl.post_content('http://fanyi.baidu.com/v2transapi', post_data = {'from':'en', 'to':'zh', 'query':'logging', 'transtype':'realtime', 'simple_means_flag':'3'})
-    #print(data)
+    #logger.debug(data)
     size = dl.urls_size(['http://sw.bos.baidu.com/sw-search-sp/software/9a2808964b476/QQ_8.9.3.21169_setup.exe'])
-    #print(size)
+    #logger.debug(size)
     head = dl.get_head('http://www.baidu.com')
-    #print(head)
+    #logger.debug(head)
     info = dl.url_info('http://www.baidu.com')
-    #print(info)
+    #logger.debug(info)
 
 if '__main__' == __name__:
     main()

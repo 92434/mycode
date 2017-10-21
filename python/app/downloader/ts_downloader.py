@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年08月26日 星期六 11时22分45秒
+#   修改日期：2017年10月21日 星期六 15时22分30秒
 #   描    述：
 #
 #================================================================
@@ -21,52 +21,34 @@ import sys
 reload(sys)  
 sys.setdefaultencoding('utf-8')
 
-logging = log.log().get_logger('debug')
+logging = log.dict_configure()
+logger = logging.getLogger('default')
 
 class ts_downloader(object):
-    url_m3u8 = ''
-    jobs = 0
-    output_filename = ''
-    output_dir = ''
+    jobs = 1
+    play_url = None
     dl = None
     dry_run = False
 
-    def __init__(self, url_m3u8, jobs, output_filename, dry_run):
-        self.url_m3u8 = url_m3u8
+    download_urls = []
+    output_filename = ''
+    output_dir = ''
+
+    def __init__(self, jobs, paly_url, dry_run):
         self.jobs = jobs
         self.dl = downloader.downloader()
         self.dry_run = dry_run
-        self.set_output_filename(output_filename)
+        self.play_url = play_url
+        #self.output_dir = os.path.join(os.path.curdir, os.path.splitext(self.output_filename)[0])
 
-    def set_output_filename(self, output_filename):
-        if output_filename:
-            self.output_filename = output_filename
-            self.output_dir = os.path.join(os.path.curdir, os.path.splitext(self.output_filename)[0])
-
-    def gen_output_dir(self):
-        if self.output_filename:
-            self.output_dir = os.path.join(os.path.curdir, os.path.splitext(self.output_filename)[0])
-
-    def get_playlist_form_play_url(self, play_url):
-        r = downloader.urllib.parse.urlparse(play_url)
+    def get_info_play_url(self):
+        r = downloader.n.urllib.parse.urlparse(play_url)
         domain = '%s://%s' %(r.scheme, r.netloc)
 
-        html = self.dl.get_decoded_html(play_url)
-        #print(html)
+        html = self.dl.get_content(play_url)
+        #logger.debug(html)
 
-        charset = None
         output_filename = None
-
-        pattern = r'charset=\"{0,1}([\w-]+)\"{0,1}'
-        r = re.compile(pattern)
-        m = r.search(html)
-        if m:
-            charset = m.group(1)
-        if charset:
-            try:
-                html = html.decode(charset)
-            except:
-                html = html.decode('gb18030')
 
         pattern_list = [
                 u'<title>(.*)在线(播放|观看).*</title>',
@@ -95,7 +77,7 @@ class ts_downloader(object):
             m = r.search(html)
             if m:
                 self.url_m3u8 = m.group(1)
-                print(self.url_m3u8)
+                logger.debug(self.url_m3u8)
                 return
 
         m3u8_script_url = None
@@ -104,9 +86,10 @@ class ts_downloader(object):
         m = r.search(html)
         if m:
             m3u8_script = m.group(1)
-            m3u8_script_url = downloader.urllib.parse.urljoin(domain, m3u8_script)
+            m3u8_script_url = downloader.n.urllib.parse.urljoin(domain, m3u8_script)
+
         if m3u8_script_url:
-            html = self.dl.get_decoded_html(m3u8_script_url)
+            html = self.dl.get_content(m3u8_script_url)
             pattern = u'\[\'([^\$\[]+)\$(?P<m3u8_url>[^\$]+)\$([^\$]+)\'\]'
             r = re.compile(pattern)
             m = r.search(html)
@@ -122,7 +105,7 @@ class ts_downloader(object):
         filepath = os.path.join(self.output_dir, tail)
 
         if filepath.endswith('.m3u8'):
-            content = self.dl.get_html(self.url_m3u8);
+            content = self.dl.get_content(self.url_m3u8);
 
             lines = content.splitlines()
             for i in lines:
@@ -135,33 +118,30 @@ class ts_downloader(object):
         return url_files
 
     def download_video(self, url_files):
-        logging.debug('get %s total_size...', os.path.join(self.output_dir, self.output_filename))
-        pieces_size = self.dl.urls_size(url_files[:5], faker = True)
+        logger.debug('get %s total_size...', os.path.join(self.output_dir, self.output_filename))
+        pieces_size = self.dl.urls_size(url_files[:5])
         total_size = pieces_size * len(url_files) / (len(url_files[:5]))
-        #total_size = self.dl.urls_size(url_files, faker = True)
-        logging.debug('total_size:%d' %(total_size))
+        #total_size = self.dl.urls_size(url_files)
+        logger.debug('total_size:%d' %(total_size))
         title, ext = os.path.splitext(self.output_filename)
         ext = ext[1:]
-        self.dl.download_urls(url_files, title, ext, total_size, jobs = self.jobs, output_dir = self.output_dir, dry_run = self.dry_run, faker = True)
+        self.dl.download_urls(url_files, title, ext, total_size, jobs = self.jobs, output_dir = self.output_dir, dry_run = self.dry_run)
 
 def main():
 
     argv = sys.argv[1:]
     options = optparse.OptionParser()
     options.add_option('-j', '--jobs', type='int', dest='jobs', help='jobs', default = 6)
-    options.add_option('-o', '--output-filename', dest='output_filename', help='output_filename', default = None)
-    #options.add_option('-u', '--m3u8-url', dest='url_m3u8', help='url_m3u8', metavar='URL', default='http://201610.shipinmp4.com/x/20170419/ekdv-478/1/hls/index.m3u8')
-    options.add_option('-u', '--m3u8-url', dest='url_m3u8', help='url_m3u8', metavar='URL', default = None)
     options.add_option('-p', '--play-url', dest='play_url', help='play_url', metavar='URL', default = None)
     options.add_option('-d', '--dry-run', action='store_true', dest='dry_run', help='dry_run', default=False)
     opts, args = options.parse_args(argv)
-    print('opts:%s' %(opts))
-    print('args:%s' %(args))
+    logger.debug('opts:%s' %(opts))
+    logger.debug('args:%s' %(args))
     if len(args):
         options.print_help()
         return
 
-    if (not opts.play_url) and (not opts.output_filename or not opts.url_m3u8):
+    if not opts.play_url:
         options.print_help()
         return
 
@@ -170,6 +150,9 @@ def main():
         dl.get_playlist_form_play_url(opts.play_url)
 
     if not dl.url_m3u8 or not dl.output_filename or not dl.output_dir:
+        logger.debug('dl.url_m3u8:%s' %(dl.url_m3u8))
+        logger.debug('dl.output_filename:%s' %(dl.output_filename))
+        logger.debug('dl.output_dir:%s' %(dl.output_dir))
         return
 
     url_files = dl.parse_m3u8()
