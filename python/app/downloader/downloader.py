@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月21日 星期六 14时16分56秒
+#   修改日期：2017年10月21日 星期六 21时25分27秒
 #   描    述：
 #
 #================================================================
@@ -26,7 +26,7 @@ logging = log.dict_configure()
 logger = logging.getLogger('default')
 
 timeout = 3 # in seconds
-socket.setdefaulttimeout(timeout)
+#socket.setdefaulttimeout(timeout)
 
 try:
   import threading as _threading
@@ -341,7 +341,7 @@ class downloader(object):
         if subprocess.Popen(cmd, cwd=os.path.curdir).wait() != 0:
             raise Exception('merge %s failed!!!', output_filepath)
 
-    def download_urls(self, urls, title, ext, total_size = 0, jobs = 1, force = False, output_dir = '.', dry_run = False, refer = None, merge = True, headers = None, **kwargs):
+    def download_urls(self, urls, filename, total_size = 0, jobs = 1, force = False, output_dir = '.', dry_run = False, refer = None, merge = True, headers = None, **kwargs):
         assert urls
         if dry_run:
             logger.debug('Real URLs:\n%s' % '\n'.join(urls))
@@ -355,7 +355,8 @@ class downloader(object):
                 traceback.print_exc(file=sys.stdout)
                 pass
 
-        output_filename = '%s.%s' %(title, ext)
+        output_filename = filename
+        title, ext = os.path.splitext(output_filename)
         output_filepath = os.path.join(output_dir, output_filename)
 
         lock = _threading.Lock()
