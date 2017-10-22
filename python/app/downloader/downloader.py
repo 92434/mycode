@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月22日 星期日 19时40分15秒
+#   修改日期：2017年10月22日 星期日 20时58分48秒
 #   描    述：
 #
 #================================================================
@@ -25,8 +25,8 @@ n.default_init(0)
 logging = log.dict_configure()
 logger = logging.getLogger('default')
 
-timeout = 3 # in seconds
-#socket.setdefaulttimeout(timeout)
+timeout = 30 # in seconds
+socket.setdefaulttimeout(timeout)
 
 try:
   import threading as _threading
@@ -201,6 +201,16 @@ class downloader(object):
         return content_type, ext, size
 
 
+    def url_save_part_thread_wapper(self, *args, **kwargs):
+        try:
+            self.url_save_part(*args, **kwargs)
+        except Exception as e:
+            logger.debug('%s' %(e))
+
+        thread_sem = kwargs.get('thread_sem')
+        if thread_sem:
+            thread_sem.release()
+
     def url_save_part(self, index, url, filepart, file_size, bar, thread_sem = None, force = False, refer = None, headers = None, timeout = None, **kwargs):
         part_size = self.block_size
         base_size = index * self.block_size
@@ -229,8 +239,6 @@ class downloader(object):
                     logger.debug('Skipping %s: file already exists' %(filepart))
                     if bar:
                         bar.update_received(part_size)
-                    if thread_sem:
-                        thread_sem.release()
                     return
                 elif received < part_size:
                     open_mode = 'ab'
@@ -296,8 +304,14 @@ class downloader(object):
                 req = n.urllib.request.Request(url, headers = headers)
                 response = self.urlopen_with_retry(req)
 
-        if thread_sem:
-            thread_sem.release()
+    def url_save_thread_wapper(self, *args, **kwargs):
+        try:
+            self.url_save(*args, **kwargs)
+        except Exception as e:
+            logger.debug('%s' %(e))
+        jobs_sem = kwargs.get('jobs_sem')
+        if jobs_sem:
+            jobs_sem.release()
 
     def url_save(self, url, filepath, bar, threads, jobs_sem = None, force = False, refer = None, multi_urls = False, headers = None, timeout = None, **kwargs):
 #When a referer specified with param refer, the key must be 'Referer' for the hack here
@@ -313,12 +327,7 @@ class downloader(object):
             if multi_urls:
                 if bar:
                     bar.update_received(file_size)
-            else:
-                if bar:
-                    bar.done()
 
-            if jobs_sem:
-                jobs_sem.release()
             return
         else:
             try:
@@ -336,12 +345,12 @@ class downloader(object):
 
         for i in range(0, loops, 1):
             thread_sem.acquire()
-            filepart = '%s[%d].download' %(filepath, i)
+            filepart = '%s.download.%d' %(filepath, i)
             fileparts.append(filepart)
             local_kwargs = dict(index = i, url = url, filepart = filepart, file_size = file_size, bar = bar, thread_sem = thread_sem, refer = refer, headers = headers)
             local_kwargs.update(kwargs)
 
-            t = _threading.Thread(target = self.url_save_part, kwargs = local_kwargs)
+            t = _threading.Thread(target = self.url_save_part_thread_wapper, kwargs = local_kwargs)
             # Ensure that Ctrl-C will not freeze the process.
             t.daemon = True
             threads_set.add(t)
@@ -350,15 +359,16 @@ class downloader(object):
         for t in threads_set:
             t.join()
 
+        for i in fileparts:
+            if not os.access(i, os.W_OK):
+                return
+
         with open(filepath, 'wb') as wfile:
             for i in fileparts:
                 with open(i, 'rb') as rfile:
                     wfile.write(rfile.read())
             for i in fileparts:
                 os.remove(i)
-
-        if jobs_sem:
-            jobs_sem.release()
 
     def download_urls(self, urls, output_filepath, total_size = 0, jobs = 1, threads = 4, force = False, dry_run = False, refer = None, merge = True, headers = None, **kwargs):
         assert urls
@@ -406,7 +416,7 @@ class downloader(object):
                 local_kwargs = dict(url = url, filepath = filepath, bar = bar, threads = threads, jobs_sem = jobs_sem, refer = refer, multi_urls = True, headers = headers)
                 local_kwargs.update(kwargs)
 
-                t = _threading.Thread(target = self.url_save, kwargs = local_kwargs)
+                t = _threading.Thread(target = self.url_save_thread_wapper, kwargs = local_kwargs)
                 # Ensure that Ctrl-C will not freeze the process.
                 t.daemon = True
                 threads_set.add(t)
