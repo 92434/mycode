@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月22日 星期日 19时30分09秒
+#   修改日期：2017年10月22日 星期日 19时40分15秒
 #   描    述：
 #
 #================================================================
@@ -242,7 +242,7 @@ class downloader(object):
             try:
                 os.mkdir(os.path.dirname(filepart))
             except Exception as e:
-                logger.debug('%s' %(e))
+                #logger.debug('%s' %(e))
                 pass
 
         headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
@@ -262,7 +262,7 @@ class downloader(object):
                 try:
                     data = response.read(read_size)
                 except Exception as e:
-                    #logger.debug('%s' %(e))
+                    logger.debug('%s' %(e))
                     pass
 
                 if not data:
@@ -324,7 +324,7 @@ class downloader(object):
             try:
                 os.mkdir(os.path.dirname(filepath))
             except Exception as e:
-                logger.debug('%s' %(e))
+                #logger.debug('%s' %(e))
                 pass
 
         file_size = self.url_size(url, headers = headers)
