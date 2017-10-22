@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月22日 星期日 20时58分48秒
+#   修改日期：2017年10月22日 星期日 21时45分36秒
 #   描    述：
 #
 #================================================================
@@ -35,7 +35,7 @@ except ImportError:
 
 
 class downloader(object):
-    block_size = 2 * 1024 * 1024
+    block_size = 1 * 1024 * 1024
 
     def __init__(self):
         pass
@@ -450,11 +450,39 @@ class downloader(object):
         cmd.append('%s' %(output_filepath))
         #logger.debug('%s' %(cmd))
 
-        if subprocess.Popen(cmd, cwd=os.path.curdir).wait() != 0:
+        if subprocess.Popen(cmd, cwd = os.path.curdir).wait() != 0:
             raise Exception('merge %s failed!!!', output_filepath)
         else:
             for i in ts_files:
                 os.remove(i)
+
+    def merge_mp4(self, output_filepath, mp4_files):
+        for i in mp4_files:
+            if not i.endwith('.mp4'):
+                return
+            if not os.access(i, os.W_OK):
+                return
+
+        ts_files_str = '|'.join(mp4_files)
+
+        cmd = ['ffmpeg']
+        cmd.append('-i')
+        cmd.append('concat:%s' %(ts_files_str))
+        cmd.append('-acodec')
+        cmd.append('copy')
+        cmd.append('-vcodec')
+        cmd.append('copy')
+        cmd.append('-absf')
+        cmd.append('aac_adtstoasc')
+        cmd.append('%s' %(output_filepath))
+        #logger.debug('%s' %(cmd))
+
+        if subprocess.Popen(cmd, cwd = os.path.curdir).wait() != 0:
+            raise Exception('merge %s failed!!!', output_filepath)
+        else:
+            for i in mp4_files:
+                os.remove(i)
+
 
 def main():
     dl = downloader()

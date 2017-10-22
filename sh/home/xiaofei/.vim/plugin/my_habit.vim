@@ -99,6 +99,9 @@ func CodeFormat()
 	elseif &filetype == 'javascript'
 		"执行调用外部程序的命令
 		call JsBeautify()
+	elseif &filetype == 'html'
+		"执行调用外部程序的命令
+		call HtmlBeautify()
 	else
 		"提示信息
 		echo "不支持".&filetype."文件类型。按c类型处理-_-"
