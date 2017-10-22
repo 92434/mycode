@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年10月21日 星期六 21时43分06秒
+#   修改日期：2017年10月22日 星期日 19时19分17秒
 #   描    述：
 #
 #================================================================
@@ -27,6 +27,7 @@ logger = logging.getLogger('default')
 
 class ts_downloader(object):
     jobs = 1
+    threads = 4
     play_url = None
     dl = None
     dry_run = False
@@ -37,8 +38,9 @@ class ts_downloader(object):
     output_dir = ''
     url_m3u8 = None
 
-    def __init__(self, jobs, play_url, dry_run):
+    def __init__(self, jobs, threads, play_url, dry_run):
         self.jobs = jobs
+        self.threads = threads
         self.dl = downloader.downloader()
         self.dry_run = dry_run
         self.play_url = play_url
@@ -118,17 +120,22 @@ class ts_downloader(object):
         return url_files
 
     def download_video(self):
-        logger.debug('get %s total_size...', os.path.join(self.output_dir, self.output_filename))
+        output_filepath = os.path.join(self.output_dir, self.output_filename)
+
+        logger.debug('get %s total_size...', output_filepath)
+
         pieces_size = self.dl.urls_size(self.urls[:5])
         total_size = pieces_size * len(self.urls) / (len(self.urls[:5]))
         #total_size = self.dl.urls_size(self.urls)
         logger.debug('total_size:%d' %(total_size))
-        self.dl.download_urls(self.urls, self.output_filename, total_size, jobs = self.jobs, output_dir = self.output_dir, dry_run = self.dry_run)
+
+        self.dl.download_urls(self.urls, output_filepath, total_size, jobs = self.jobs, threads = self.threads, dry_run = self.dry_run)
 
 def main():
     argv = sys.argv[1:]
     options = optparse.OptionParser()
-    options.add_option('-j', '--jobs', type='int', dest='jobs', help='jobs', default = 6)
+    options.add_option('-j', '--jobs', type='int', dest='jobs', help='jobs', default = 1)
+    options.add_option('-t', '--threads', type='int', dest='threads', help='threads', default = 4)
     options.add_option('-p', '--play-url', dest='play_url', help='play_url', metavar='URL', default = None)
     options.add_option('-d', '--dry-run', action='store_true', dest='dry_run', help='dry_run', default=False)
     opts, args = options.parse_args(argv)
@@ -142,7 +149,7 @@ def main():
         options.print_help()
         return
 
-    dl = ts_downloader(opts.jobs, opts.play_url, opts.dry_run)
+    dl = ts_downloader(opts.jobs, opts.threads, opts.play_url, opts.dry_run)
 
     ret = dl.get_info_form_play_url()
     if not ret:

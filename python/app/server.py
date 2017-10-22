@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import SocketServer
-import logging.handlers
 import cPickle
 import struct
 
-from log import *
+import log
+logging = log.dict_configure()
 
 #rd, wr, ex = select.select([self.socket.fileno()],  [], [],  self.timeout)
 #if rd:
@@ -24,7 +24,7 @@ class MyHandler(SocketServer.StreamRequestHandler):
 		else:
 			name = record.name
 		#print "name:%s" %(name)
-		logger = get_logger(name)
+		logger = logging.getLogger(name)
 		#print "logger:%s" %(logger)
 		# N.B. EVERY record gets logged. This is because Logger.handle
 		# is normally called AFTER logger-level filtering. If you want

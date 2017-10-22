@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月21日 星期六 21时25分27秒
+#   修改日期：2017年10月22日 星期日 19时30分09秒
 #   描    述：
 #
 #================================================================
@@ -35,6 +35,8 @@ except ImportError:
 
 
 class downloader(object):
+    block_size = 2 * 1024 * 1024
+
     def __init__(self):
         pass
 
@@ -97,6 +99,21 @@ class downloader(object):
 
         return data
 
+    def get_response_content_length(self, response):
+        content_length = response.headers.get('content-length')
+        if content_length:
+            content_length = int(content_length)
+        else:
+            content_range = response.headers.get('content-range')
+            if content_range:
+                range_start = int(content_range[6:].split('/')[0].split('-')[0])
+                range_end = int(content_range[6:].split('/')[1])
+                content_length = range_end - range_start
+            else:
+                content_length = float('inf')
+
+        return content_length
+
     def url_size(self, url, headers = None):
         if not headers:
             headers = n.fake_header
@@ -106,19 +123,7 @@ class downloader(object):
         size = float('inf')
         while size == float('inf'):
             response = self.urlopen_with_retry(req)
-
-            size = response.headers.get('content-length')
-            if size:
-                size = int(size)
-            else:
-                size = float('inf')
-
-            if size == float('inf'):
-                logger.debug('invalid file size for %s!' %(url))
-            else:
-                #logger.debug('url size %d!' %(size))
-                pass
-
+            size = self.get_response_content_length(response)
         return size
 
     def urls_size(self, urls, headers = None):
@@ -195,85 +200,63 @@ class downloader(object):
 
         return content_type, ext, size
 
-    def url_save(self, url, filepath, bar, piece = None, sem = None, force = False, refer = None, is_part = False, headers = None, timeout = None, **kwargs):
-#When a referer specified with param refer, the key must be 'Referer' for the hack here
+
+    def url_save_part(self, index, url, filepart, file_size, bar, thread_sem = None, force = False, refer = None, headers = None, timeout = None, **kwargs):
+        part_size = self.block_size
+        base_size = index * self.block_size
+
+        if part_size > file_size - base_size:
+            part_size = file_size - base_size
+
+        #When a referer specified with param refer, the key must be 'Referer' for the hack here
         if not headers:
             headers = n.fake_header
 
         if refer:
             headers.update({'Referer' : refer})
 
-        file_size = self.url_size(url, headers = headers)
-        if os.path.exists(filepath):
-            if not force and file_size == os.path.getsize(filepath):
-                if not is_part:
-                    if bar:
-                        bar.done()
-                    logger.debug('Skipping %s: file already exists' % os.path.basename(filepath))
-                else:
-                    if bar:
-                        bar.update_received(file_size)
-                if sem:
-                    sem.release()
-                return
+        received = 0
+        open_mode  = 'wb'
+
+        if os.path.exists(filepart):
+            received = os.path.getsize(filepart)
+
+            if force:
+                received = 0
+                logger.debug('Overwrite %s: filepart already exists' %(filepart))
             else:
-                if not is_part:
+                if received == part_size:
+                    logger.debug('Skipping %s: file already exists' %(filepart))
                     if bar:
-                        bar.done()
-                    logger.debug('Overwriting %s' % os.path.basename(filepath), '...')
-        elif not os.path.exists(os.path.dirname(filepath)):
+                        bar.update_received(part_size)
+                    if thread_sem:
+                        thread_sem.release()
+                    return
+                elif received < part_size:
+                    open_mode = 'ab'
+                    if bar:
+                        bar.update_received(received)
+                else:
+                    received = 0
+        else:
             try:
-                os.mkdir(os.path.dirname(filepath))
+                os.mkdir(os.path.dirname(filepart))
             except Exception as e:
                 logger.debug('%s' %(e))
                 pass
 
-        temp_filepath = filepath + '.download'
-        received = 0
-        
-        open_mode  = 'wb'
-        if not force:
-            if os.path.exists(temp_filepath):
-                received += os.path.getsize(temp_filepath)
+        headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
+        req = n.urllib.request.Request(url, headers = headers)
+        response = self.urlopen_with_retry(req)
 
-                if received <= file_size:
-                    open_mode = 'ab'
-                    if bar:
-                        bar.update_received(received)
-
-        if received < file_size:
-            if received:
-                headers.update({'Range' : 'bytes=' + str(received) + '-'})
-
-            req = n.urllib.request.Request(url, headers = headers)
-            response = self.urlopen_with_retry(req, timeout = timeout)
-
-            content_range = response.headers.get('content-range')
-            if content_range:
-                range_start = int(content_range[6:].split('/')[0].split('-')[0])
-                end_length = int(content_range[6:].split('/')[1])
-                range_length = end_length - range_start
-            else:
-                content_length = response.headers.get('content-length')
-                if content_length:
-                    range_length = int(content_length)
-                else:
-                    range_length = float('inf')
-
-            if file_size != received + range_length:
-                if bar:
-                    bar.update_received(-received)
-                received = 0
-                open_mode = 'wb'
-
-        while received != file_size:
-            #logger.debug('temp_filepath:%s, open_mode:%s' %(temp_filepath, open_mode))
-            output = open(temp_filepath, open_mode)
+        while received != part_size:
+            #logger.debug('filepart:%s, open_mode:%s' %(filepart, open_mode))
+            output = open(filepart, open_mode)
 
             data = None
 
-            while received < file_size:
-                read_size = file_size - received
+            while received < part_size:
+                read_size = part_size - received
                 if read_size > 1024 * 256:
                     read_size = 1024 * 256
                 try:
@@ -283,7 +266,7 @@ class downloader(object):
                     pass
 
                 if not data:
-                    headers.update({'Range' : 'bytes=' + str(received) + '-'})
+                    headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
                     req = n.urllib.request.Request(url, headers = headers)
                     response = self.urlopen_with_retry(req)
                     continue
@@ -293,37 +276,156 @@ class downloader(object):
                 if bar:
                     bar.update_received(len(data))
 
-            #logger.debug('temp_filepath:%s, received:%d, file_size:%d' %(temp_filepath, received, file_size))
+            #logger.debug('filepart:%s, received:%d, part_size:%d' %(filepart, received, part_size))
 
             output.close()
 
-            if os.path.getsize(temp_filepath) == file_size:
+            if os.path.getsize(filepart) == part_size:
                 break
             else:
                 if bar:
                     bar.received -= received
 
-                logger.debug('piece %d failed(received:%d, file_size:%d)! again!' %(piece, received, file_size))
+                logger.debug('download %s failed(received:%d, part_size:%d)! again!' %(filepart, received, part_size))
 
-                os.remove(temp_filepath)
+                os.remove(filepart)
 
-                file_size = self.url_size(url, headers = headers)
                 received = 0
                 open_mode = 'wb'
-                headers.update({'Range' : 'bytes=' + str(received) + '-'})
+                headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
                 req = n.urllib.request.Request(url, headers = headers)
                 response = self.urlopen_with_retry(req)
 
-        if os.path.getsize(temp_filepath) == file_size:
-            if os.access(filepath, os.W_OK):
-                os.remove(filepath) # on Windows rename could fail if destination filepath exists
-            os.rename(temp_filepath, filepath)
+        if thread_sem:
+            thread_sem.release()
 
-        if sem:
-            sem.release()
+    def url_save(self, url, filepath, bar, threads, jobs_sem = None, force = False, refer = None, multi_urls = False, headers = None, timeout = None, **kwargs):
+#When a referer specified with param refer, the key must be 'Referer' for the hack here
+        if not headers:
+            headers = n.fake_header
 
+        if refer:
+            headers.update({'Referer' : refer})
+
+        if os.path.exists(filepath):
+            logger.debug('Skipping %s: file already exists' % os.path.basename(filepath))
+            file_size = os.path.getsize(filepath)
+            if multi_urls:
+                if bar:
+                    bar.update_received(file_size)
+            else:
+                if bar:
+                    bar.done()
+
+            if jobs_sem:
+                jobs_sem.release()
+            return
+        else:
+            try:
+                os.mkdir(os.path.dirname(filepath))
+            except Exception as e:
+                logger.debug('%s' %(e))
+                pass
+
+        file_size = self.url_size(url, headers = headers)
+        loops = (file_size + (self.block_size - 1)) / self.block_size
+
+        fileparts = []
+        thread_sem = _threading.Semaphore(threads)
+        threads_set = set()
+
+        for i in range(0, loops, 1):
+            thread_sem.acquire()
+            filepart = '%s[%d].download' %(filepath, i)
+            fileparts.append(filepart)
+            local_kwargs = dict(index = i, url = url, filepart = filepart, file_size = file_size, bar = bar, thread_sem = thread_sem, refer = refer, headers = headers)
+            local_kwargs.update(kwargs)
+
+            t = _threading.Thread(target = self.url_save_part, kwargs = local_kwargs)
+            # Ensure that Ctrl-C will not freeze the process.
+            t.daemon = True
+            threads_set.add(t)
+            t.start()
+
+        for t in threads_set:
+            t.join()
+
+        with open(filepath, 'wb') as wfile:
+            for i in fileparts:
+                with open(i, 'rb') as rfile:
+                    wfile.write(rfile.read())
+            for i in fileparts:
+                os.remove(i)
+
+        if jobs_sem:
+            jobs_sem.release()
+
+    def download_urls(self, urls, output_filepath, total_size = 0, jobs = 1, threads = 4, force = False, dry_run = False, refer = None, merge = True, headers = None, **kwargs):
+        assert urls
+        if dry_run:
+            logger.debug('Real URLs:\n%s' % '\n'.join(urls))
+            return
+
+        if not force and os.path.exists(output_filepath):
+            logger.debug('Skipping %s: file already exists' % output_filepath)
+            return
+            
+
+        if not total_size:
+            try:
+                total_size = self.urls_size(urls, headers = headers)
+            except:
+                import traceback
+                traceback.print_exc(file=sys.stdout)
+                pass
+
+        logger.debug('Downloading %s ...' %(output_filepath))
+
+        lock = _threading.Lock()
+        bar = progress_bar.SimpleProgressBar(total_size, len(urls))
+
+        if len(urls) == 1:
+            url = urls[0]
+            self.url_save(url = url, filepath = output_filepath, bar = bar, threads = threads, refer = refer, multi_urls = True, headers = headers, **kwargs)
+            bar.done()
+        else:
+            filepieces = []
+
+            jobs_sem = _threading.Semaphore(jobs)
+            threads_set = set()
+
+            for i, url in enumerate(urls):
+                unixpath, ext = os.path.splitext(output_filepath)
+                filepath = '%s[%02d].%s' % (unixpath, i, ext)
+                filepieces.append(filepath)
+                #logger.debug('Downloading %s [%s/%s]...' % (filepath, i + 1, len(urls)))
+                piece = i + 1;
+                bar.update_piece(piece)
+
+                jobs_sem.acquire()
+                local_kwargs = dict(url = url, filepath = filepath, bar = bar, threads = threads, jobs_sem = jobs_sem, refer = refer, multi_urls = True, headers = headers)
+                local_kwargs.update(kwargs)
+
+                t = _threading.Thread(target = self.url_save, kwargs = local_kwargs)
+                # Ensure that Ctrl-C will not freeze the process.
+                t.daemon = True
+                threads_set.add(t)
+                t.start()
+
+            for t in threads_set:
+                t.join()
+
+            bar.done()
+
+            return filepieces
 
     def ts2mp4(self, output_filepath, ts_files):
+        for i in ts_files:
+            if not i.endwith('.ts'):
+                return
+            if not os.access(i, os.W_OK):
+                return
+
         ts_files_str = '|'.join(ts_files)
 
         cmd = ['ffmpeg']
@@ -340,90 +442,9 @@ class downloader(object):
 
         if subprocess.Popen(cmd, cwd=os.path.curdir).wait() != 0:
             raise Exception('merge %s failed!!!', output_filepath)
-
-    def download_urls(self, urls, filename, total_size = 0, jobs = 1, force = False, output_dir = '.', dry_run = False, refer = None, merge = True, headers = None, **kwargs):
-        assert urls
-        if dry_run:
-            logger.debug('Real URLs:\n%s' % '\n'.join(urls))
-            return
-
-        if not total_size:
-            try:
-                total_size = self.urls_size(urls, headers = headers)
-            except:
-                import traceback
-                traceback.print_exc(file=sys.stdout)
-                pass
-
-        output_filename = filename
-        title, ext = os.path.splitext(output_filename)
-        output_filepath = os.path.join(output_dir, output_filename)
-
-        lock = _threading.Lock()
-        if total_size:
-            if not force and os.path.exists(output_filepath) and os.path.getsize(output_filepath) >= total_size * 0.9:
-                logger.debug('Skipping %s: file already exists' % output_filepath)
-                return
-            bar = progress_bar.SimpleProgressBar(total_size, len(urls))
         else:
-            bar = progress_bar.PiecesProgressBar(total_size, len(urls))
-
-        if len(urls) == 1:
-            url = urls[0]
-            logger.debug('Downloading %s ...' % output_filename)
-            self.url_save(url, output_filepath, bar, refer = refer, headers = headers, **kwargs)
-            bar.done()
-        else:
-            parts = []
-            logger.debug('Downloading %s ...' % (output_filepath))
-
-            sem = _threading.Semaphore(jobs)
-            threads = set()
-
-            for i, url in enumerate(urls):
-                filename = '%s[%02d].%s' % (title, i, ext)
-                filepath = os.path.join(output_dir, filename)
-                parts.append(filepath)
-                #logger.debug('Downloading %s [%s/%s]...' % (filename, i + 1, len(urls)))
-                piece = i + 1;
-                bar.update_piece(piece)
-
-                sem.acquire()
-                local_kwargs = dict(url = url, filepath = filepath, bar = bar, piece = piece, sem = sem, refer = refer, is_part = True, headers = headers)
-                local_kwargs.update(kwargs)
-
-                t = _threading.Thread(target = self.url_save, kwargs = local_kwargs)
-                # Ensure that Ctrl-C will not freeze the process.
-                t.daemon = True
-                threads.add(t)
-                t.start()
-
-            for t in threads:
-                t.join()
-
-            bar.done()
-
-            if not merge:
-                return
-            
-            can_merge = False
-            if ext != "mp4":
-                can_merge = False
-            for i in urls:
-                if not i.endwith('.ts'):
-                    can_merge = False
-            for i in parts:
-                if not os.access(i):
-                    can_merge = False
-
-            if can_merge:
-                try:
-                    self.ts2mp4(output_filepath, parts)
-                    logger.debug('Merged into %s' % output_filename)
-                except:
-                    raise
-                for part in parts:
-                    os.remove(part)
+            for i in ts_files:
+                os.remove(i)
 
 def main():
     dl = downloader()
