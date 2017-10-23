@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年10月22日 星期日 19时36分47秒
+#   修改日期：2017年10月23日 星期一 09时43分27秒
 #   描    述：
 #
 #================================================================
@@ -35,7 +35,6 @@ class ts_downloader(object):
     domain = None
     urls = []
     output_filename = ''
-    output_dir = ''
     url_m3u8 = None
 
     def __init__(self, jobs, threads, play_url, dry_run):
@@ -44,17 +43,12 @@ class ts_downloader(object):
         self.dl = downloader.downloader()
         self.dry_run = dry_run
         self.play_url = play_url
-        #self.output_dir = os.path.join(os.path.curdir, os.path.splitext(self.output_filename)[0])
         r = downloader.n.urllib.parse.urlparse(self.play_url)
         self.domain = '%s://%s' %(r.scheme, r.netloc)
 
     def get_691gao_list_info(self, html):
         ret = False
-        e_title = html.xpath('/html/body/div[4]/div[1]')
         e_play_url = html.xpath('/html/body/div[4]/ul[1]/div[2]/a')
-        #if len(e_title) == 1 and e_title[0].get('class') == 'm_T1':
-        #    self.output_filename = e_title[0].text
-        #    logger.debug('self.output_filename:%s' %(self.output_filename))
         if len(e_play_url) == 1 and e_play_url[0].get('class') == 'txt':
             self.play_url = downloader.n.urllib.parse.urljoin(self.domain, e_play_url[0].get('href'))
             logger.debug('self.play_url:%s' %(self.play_url))
@@ -69,11 +63,11 @@ class ts_downloader(object):
             title = e_title[0].text
             p =  u'\u6b63\u5728\u64ad\u653e (\d+)-(.*)'
             index = downloader.n.r(p, title, 1)
-            self.output_dir = downloader.n.r(p, title, 2)
-            if not index or not self.output_dir:
+            filetitle = downloader.n.r(p, filetitle, 2)
+            if not index or not filetitle:
                 return ret
-            self.output_filename = '%s_%s.mp4' %(self.output_dir, index)
-            #logger.debug('self.output_dir:%s' %(self.output_dir))
+
+            self.output_filename = '%s/%s-%s.mp4' %(filetitle, filetitle, index)
             #logger.debug('self.output_filename:%s' %(self.output_filename))
 
             e_player = html.xpath('//*[@type="text/javascript"]')
@@ -120,16 +114,14 @@ class ts_downloader(object):
         return url_files
 
     def download_video(self):
-        output_filepath = os.path.join(self.output_dir, self.output_filename)
-
-        logger.debug('get %s total_size...', output_filepath)
+        logger.debug('get %s total_size...', self.output_filename)
 
         pieces_size = self.dl.urls_size(self.urls[:5])
         total_size = pieces_size * len(self.urls) / (len(self.urls[:5]))
         #total_size = self.dl.urls_size(self.urls)
         logger.debug('total_size:%d' %(total_size))
 
-        self.dl.download_urls(self.urls, output_filepath, total_size, jobs = self.jobs, threads = self.threads, dry_run = self.dry_run)
+        self.dl.download_urls(self.urls, self.output_filename, total_size, jobs = self.jobs, threads = self.threads, dry_run = self.dry_run)
 
 def main():
     argv = sys.argv[1:]

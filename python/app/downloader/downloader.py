@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月22日 星期日 21时45分36秒
+#   修改日期：2017年10月23日 星期一 09时20分55秒
 #   描    述：
 #
 #================================================================
@@ -99,21 +99,6 @@ class downloader(object):
 
         return data
 
-    def get_response_content_length(self, response):
-        content_length = response.headers.get('content-length')
-        if content_length:
-            content_length = int(content_length)
-        else:
-            content_range = response.headers.get('content-range')
-            if content_range:
-                range_start = int(content_range[6:].split('/')[0].split('-')[0])
-                range_end = int(content_range[6:].split('/')[1])
-                content_length = range_end - range_start
-            else:
-                content_length = float('inf')
-
-        return content_length
-
     def url_size(self, url, headers = None):
         if not headers:
             headers = n.fake_header
@@ -123,7 +108,7 @@ class downloader(object):
         size = float('inf')
         while size == float('inf'):
             response = self.urlopen_with_retry(req)
-            size = self.get_response_content_length(response)
+            size = n.get_response_content_length(response)
         return size
 
     def urls_size(self, urls, headers = None):

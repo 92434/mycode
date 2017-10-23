@@ -6,7 +6,7 @@
 #   文件名称：network.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 12时30分28秒
-#   修改日期：2017年10月21日 星期六 14时13分42秒
+#   修改日期：2017年10月23日 星期一 09时20分36秒
 #   描    述：
 #
 #================================================================
@@ -156,6 +156,21 @@ class network(object):
             logger.debug('location:%s, charset:%s' %(self.get_location(response), charset))
 
         return data
+
+    def get_response_content_length(self, response):
+        content_length = response.headers.get('content-length')
+        if content_length:
+            content_length = int(content_length)
+        else:
+            content_range = response.headers.get('content-range')
+            if content_range:
+                range_start = int(content_range[6:].split('/')[0].split('-')[0])
+                range_end = int(content_range[6:].split('/')[1])
+                content_length = range_end - range_start
+            else:
+                content_length = float('inf')
+
+        return content_length
 
     def get_location(self, response):
         return response.geturl()
