@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月23日 星期一 18时27分26秒
+#   修改日期：2017年10月23日 星期一 21时49分41秒
 #   描    述：
 #
 #================================================================
@@ -330,7 +330,7 @@ class downloader(object):
 
         for i in range(0, loops, 1):
             thread_sem.acquire()
-            filepart = '%s.download.%d' %(filepath, i)
+            filepart = '%s.part%d' %(filepath, i)
             fileparts.append(filepart)
             local_kwargs = dict(index = i, url = url, filepart = filepart, file_size = file_size, bar = bar, thread_sem = thread_sem, refer = refer, headers = headers)
             local_kwargs.update(kwargs)

@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年10月23日 星期一 09时43分27秒
+#   修改日期：2017年10月23日 星期一 22时02分44秒
 #   描    述：
 #
 #================================================================
@@ -63,11 +63,11 @@ class ts_downloader(object):
             title = e_title[0].text
             p =  u'\u6b63\u5728\u64ad\u653e (\d+)-(.*)'
             index = downloader.n.r(p, title, 1)
-            filetitle = downloader.n.r(p, filetitle, 2)
+            filetitle = downloader.n.r(p, title, 2)
             if not index or not filetitle:
                 return ret
 
-            self.output_filename = '%s/%s-%s.mp4' %(filetitle, filetitle, index)
+            self.output_filename = os.path.join('%s' %(filetitle), '%s-%s.mp4' %(filetitle, index))
             #logger.debug('self.output_filename:%s' %(self.output_filename))
 
             e_player = html.xpath('//*[@type="text/javascript"]')
