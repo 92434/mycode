@@ -1,0 +1,18 @@
+django manage
+
+#导出所有的数据
+python manage.py dumpdata > mysite_all_data.json
+
+# 导入所有的数据
+python manage.py loaddata mysite_all_data.json
+
+# 反向导出（从数据库生成Model）,可以指定数据库（配置在setting中的）
+python manage.py inspectdb > models.py
+python manage.py inspectdb > models.py --database 'databasename'
+
+mysql
+
+# 导出
+mysqldump -u username -p --database zqxt > /path/to/zqxt.sql
+
+source /path/to/zqxt.sql
