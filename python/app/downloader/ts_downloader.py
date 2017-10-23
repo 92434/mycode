@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年10月23日 星期一 22时02分44秒
+#   修改日期：2017年10月23日 星期一 23时31分03秒
 #   描    述：
 #
 #================================================================
@@ -79,12 +79,45 @@ class ts_downloader(object):
             url = downloader.n.r(p, ck_player_value, 1)
             if not url:
                 return ret
-            logger.debug('url:%s' %(url))
+            #logger.debug('url:%s' %(url))
             if url:
                 self.urls.append(url)
                 ret = True
         else:
             ret = False
+
+        return ret
+
+    def get_691gao_diao_info(self, html):
+        ret = False
+
+        e_title = html.xpath('//title')
+        if not len(e_title):
+            return ret
+
+        #logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
+        title = e_title[0].text
+        p =  u'(.*)\u5728\u7ebf\u89c2\u770b.*'
+        filetitle = downloader.n.r(p, title, 1)
+        if not filetitle:
+            return ret
+
+        self.output_filename = os.path.join('%s' %(filetitle), '%s.mp4' %(filetitle))
+        #logger.debug('self.output_filename:%s' %(self.output_filename))
+
+        e_player = html.xpath('//*[@type="text/javascript"]')
+        if not len(e_player):
+            return ret
+        #logger.debug('e_player:%s' %([(i.items(), i.text) for i in e_player]))
+        ck_player_value = e_player[5].text
+        p = 'video=\["(.*)"\]'
+        url_m3u8 = downloader.n.r(p, ck_player_value, 1)
+        if not url_m3u8:
+            return ret
+        #logger.debug('url_m3u8:%s' %(url_m3u8))
+        self.urls = self.get_part_urls_from_m3u8(url_m3u8)
+        if len(self.urls):
+            ret = True
 
         return ret
 
@@ -94,14 +127,20 @@ class ts_downloader(object):
         data = self.dl.get_content(self.play_url)
         html = lxml.etree.HTML(data)
         ret = self.get_691gao_list_info(html)
-        #logger.debug(html)
+        ret = self.get_691gao_diao_info(html)
+        if not ret:
+            logger.debug(data)
 
         return ret
 
-    def get_part_urls_from_m3u8(self):
+    def get_part_urls_from_m3u8(self, url_m3u8):
         url_files = []
-        if self.url_m3u8.endswith('.m3u8'):
-            content = self.dl.get_content(self.url_m3u8);
+
+        basename = os.path.basename(url_m3u8)
+        head = url_m3u8.replace(basename, '')
+
+        if url_m3u8.endswith('.m3u8'):
+            content = self.dl.get_content(url_m3u8);
 
             lines = content.splitlines()
             for i in lines:
@@ -109,7 +148,8 @@ class ts_downloader(object):
                 if not line.startswith('#'):
                     url_files.append(line)
 
-            url_files = map(lambda x : os.path.join(head, x), url_files)
+            url_files = map(lambda x : downloader.n.urllib.parse.urljoin(head, x), url_files)
+            #logger.debug('url_files:%s' %(url_files))
 
         return url_files
 
