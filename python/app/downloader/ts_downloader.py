@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年10月23日 星期一 23时31分03秒
+#   修改日期：2017年10月24日 星期二 09时20分46秒
 #   描    述：
 #
 #================================================================
@@ -45,6 +45,29 @@ class ts_downloader(object):
         self.play_url = play_url
         r = downloader.n.urllib.parse.urlparse(self.play_url)
         self.domain = '%s://%s' %(r.scheme, r.netloc)
+
+    def get_part_urls_from_m3u8(self, url_m3u8):
+        url_files = []
+
+        basename = os.path.basename(url_m3u8)
+        p = downloader.n.urllib.parse.urlparse(url_m3u8)
+        m3u8_domain = '%s://%s' %(p.scheme, p.netloc)
+        m3u8_dir = os.path.dirname(p.path)
+        head = downloader.n.urllib.parse.urljoin(m3u8_domain, m3u8_dir)
+
+        if url_m3u8.endswith('.m3u8'):
+            content = self.dl.get_content(url_m3u8);
+
+            lines = content.splitlines()
+            for i in lines:
+                line = i.strip()
+                if not line.startswith('#'):
+                    url_files.append(line)
+
+            url_files = map(lambda x : downloader.n.urllib.parse.urljoin(head, x), url_files)
+            #logger.debug('url_files:%s' %(url_files))
+
+        return url_files
 
     def get_691gao_list_info(self, html):
         ret = False
@@ -132,26 +155,6 @@ class ts_downloader(object):
             logger.debug(data)
 
         return ret
-
-    def get_part_urls_from_m3u8(self, url_m3u8):
-        url_files = []
-
-        basename = os.path.basename(url_m3u8)
-        head = url_m3u8.replace(basename, '')
-
-        if url_m3u8.endswith('.m3u8'):
-            content = self.dl.get_content(url_m3u8);
-
-            lines = content.splitlines()
-            for i in lines:
-                line = i.strip()
-                if not line.startswith('#'):
-                    url_files.append(line)
-
-            url_files = map(lambda x : downloader.n.urllib.parse.urljoin(head, x), url_files)
-            #logger.debug('url_files:%s' %(url_files))
-
-        return url_files
 
     def download_video(self):
         logger.debug('get %s total_size...', self.output_filename)
