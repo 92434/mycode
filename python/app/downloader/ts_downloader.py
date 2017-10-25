@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年10月25日 星期三 22时59分03秒
+#   修改日期：2017年10月25日 星期三 23时07分51秒
 #   描    述：
 #
 #================================================================
@@ -74,6 +74,7 @@ class ts_downloader(object):
         e_play_url = html.xpath('//div[@class="l"]/a[@class="txt" and @href]')
         #logger.debug('e_play_url:%s' %([(i.items(), i.text) for i in e_play_url]))
         if not len(e_play_url):
+            logger.debug('')
             return ret
         self.play_url = downloader.n.urllib.parse.urljoin(self.domain, e_play_url[0].get('href'))
         logger.debug('self.play_url:%s' %(self.play_url))
@@ -99,14 +100,16 @@ class ts_downloader(object):
 
         e_player = html.xpath('//*[@type="text/javascript"]')
         if not len(e_player):
+            logger.debug('data:%s' %(data))
             return ret
         #logger.debug('e_player:%s' %([(i.items(), i.text) for i in e_player]))
         ck_player_value = e_player[3].text
         p = 'video=\["(.*)->video/mp4"\]'
         url = downloader.n.r(p, ck_player_value, 1)
         if not url:
+            logger.debug('data:%s' %(data))
             return ret
-        #logger.debug('url:%s' %(url))
+        logger.debug('url:%s' %(url))
         if url:
             self.urls.append(url)
             ret = True
@@ -151,10 +154,14 @@ class ts_downloader(object):
 
         data = self.dl.get_content(self.play_url)
         html = lxml.etree.HTML(data)
+
         ret = self.get_691gao_list_info(html)
+        if ret:
+            return ret
+
         ret = self.get_691gao_diao_info(html)
-        if not ret:
-            logger.debug(data)
+        if ret:
+            return ret
 
         return ret
 
