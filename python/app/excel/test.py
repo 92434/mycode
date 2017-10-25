@@ -1,18 +1,39 @@
-#! /usr/bin/env python  
-#coding=utf-8  
-  
-# pyexcel_xls 以 OrderedDict 结构处理数据  
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#================================================================
+#   Copyright (C) 2017年10月24日 肖飞 All rights reserved
+#   
+#   文件名称：test.py
+#   创 建 者：肖飞
+#   创建日期：2017年10月24日 星期二 11时12分05秒
+#   修改日期：2017年10月24日 星期二 11时34分59秒
+#   描    述：
+#
+#================================================================
 from collections import OrderedDict  
-  
 from pyexcel_xls import get_data  
 from pyexcel_xls import save_data  
-  
+import log
+logging = log.dict_configure()
+logger = logging.getLogger('default')
   
 def read_xls_file():  
     xls_data = get_data(unicode(r"1.xls", "utf-8"))  
-    print "Get data type:", type(xls_data)  
     for sheet_n in xls_data.keys():  
-        print sheet_n, ":", xls_data[sheet_n]  
+        level = 0
+        logger.debug("%ssheet:%s content:%s", '\t' * level, sheet_n, xls_data[sheet_n])   
+        for i in xls_data[sheet_n]:
+            level = 1
+            logger.debug("%si:%s", '\t' * level, i)   
+            for j in i:
+                level = 2
+                logger.debug("%sj:%s", '\t' * level, j)   
+                if not isinstance(j, list):
+                    continue
+                for k in j:
+                    level = 3
+                    logger.debug("%sk:%s", '\t' * level, k)   
+
     return xls_data  
   
   
@@ -31,7 +52,9 @@ def save_xls_file():
   
     # 保存成xls文件  
     save_data("1.xls", data)  
-  
-  
-if __name__ == '__main__':  
-    save_xls_file()  
+
+def main():
+    read_xls_file()
+
+if '__main__' == __name__:
+    main()

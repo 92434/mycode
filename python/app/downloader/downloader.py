@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月23日 星期一 21时49分41秒
+#   修改日期：2017年10月24日 星期二 13时26分19秒
 #   描    述：
 #
 #================================================================
@@ -472,20 +472,6 @@ class downloader(object):
 
 def main():
     dl = downloader()
-    #logger.debug(location)
-    #html = dl.get_content('http://www.113gan.com/view/index7644.html')
-    #html = dl.get_content('http://www.113gan.com/playdata/220/7644.js?70568.32')
-    #logger.debug(html)
-    #data = dl.get_content('http://www.113gan.com/view/index7644.html')
-    #logger.debug(data)
-    #data = dl.post_content('http://fanyi.baidu.com/v2transapi', post_data = {'from':'en', 'to':'zh', 'query':'logging', 'transtype':'realtime', 'simple_means_flag':'3'})
-    #logger.debug(data)
-    #size = dl.urls_size(['http://sw.bos.baidu.com/sw-search-sp/software/9a2808964b476/QQ_8.9.3.21169_setup.exe'])
-    #logger.debug(size)
-    #head = dl.get_head('http://www.baidu.com')
-    #logger.debug(head)
-    #info = dl.url_info('http://www.baidu.com')
-    #logger.debug(info)
     return dl
 
 if '__main__' == __name__:
