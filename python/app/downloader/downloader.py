@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月24日 星期二 13时26分19秒
+#   修改日期：2017年10月25日 星期三 22时16分39秒
 #   描    述：
 #
 #================================================================
@@ -47,6 +47,7 @@ class downloader(object):
             except Exception as e:
                 #logger.debug('request attempt %s(%s)' %(str(i + 1), e))
                 pass
+        raise Exception('no response!!!')
 
     def get_content(self, url, headers = None):
         """Gets the content of a URL via sending a HTTP GET request.
@@ -437,7 +438,7 @@ class downloader(object):
         #logger.debug('%s' %(cmd))
 
         if subprocess.Popen(cmd, cwd = os.path.curdir).wait() != 0:
-            raise Exception('merge %s failed!!!', output_filepath)
+            raise Exception('merge %s failed!!!' %(output_filepath))
         else:
             for i in ts_files:
                 os.remove(i)
@@ -464,7 +465,7 @@ class downloader(object):
         #logger.debug('%s' %(cmd))
 
         if subprocess.Popen(cmd, cwd = os.path.curdir).wait() != 0:
-            raise Exception('merge %s failed!!!', output_filepath)
+            raise Exception('merge %s failed!!!' %(output_filepath))
         else:
             for i in mp4_files:
                 os.remove(i)

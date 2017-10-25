@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年10月24日 星期二 09时20分46秒
+#   修改日期：2017年10月25日 星期三 22时59分03秒
 #   描    述：
 #
 #================================================================
@@ -71,43 +71,45 @@ class ts_downloader(object):
 
     def get_691gao_list_info(self, html):
         ret = False
-        e_play_url = html.xpath('/html/body/div[4]/ul[1]/div[2]/a')
-        if len(e_play_url) == 1 and e_play_url[0].get('class') == 'txt':
-            self.play_url = downloader.n.urllib.parse.urljoin(self.domain, e_play_url[0].get('href'))
-            logger.debug('self.play_url:%s' %(self.play_url))
-            data = self.dl.get_content(self.play_url)
-            #logger.debug('data:%s' %(data))
-            html = lxml.etree.HTML(data)
-            #e_player = html.xpath('//*[@id="ckplayer_a1"]')
-            e_title = html.xpath('//title')
-            if not len(e_title):
-                return ret
-            #logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
-            title = e_title[0].text
-            p =  u'\u6b63\u5728\u64ad\u653e (\d+)-(.*)'
-            index = downloader.n.r(p, title, 1)
-            filetitle = downloader.n.r(p, title, 2)
-            if not index or not filetitle:
-                return ret
+        e_play_url = html.xpath('//div[@class="l"]/a[@class="txt" and @href]')
+        #logger.debug('e_play_url:%s' %([(i.items(), i.text) for i in e_play_url]))
+        if not len(e_play_url):
+            return ret
+        self.play_url = downloader.n.urllib.parse.urljoin(self.domain, e_play_url[0].get('href'))
+        logger.debug('self.play_url:%s' %(self.play_url))
+        data = self.dl.get_content(self.play_url)
+        #logger.debug('data:%s' %(data))
+        html = lxml.etree.HTML(data)
+        #e_player = html.xpath('//*[@id="ckplayer_a1"]')
+        e_title = html.xpath('//title')
+        if not len(e_title):
+            logger.debug('data:%s' %(data))
+            return ret
+        #logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
+        title = e_title[0].text
+        p =  u'\u6b63\u5728\u64ad\u653e (\d+)-(.*)'
+        index = downloader.n.r(p, title, 1)
+        filetitle = downloader.n.r(p, title, 2)
+        if not index or not filetitle:
+            logger.debug('data:%s' %(data))
+            return ret
 
-            self.output_filename = os.path.join('%s' %(filetitle), '%s-%s.mp4' %(filetitle, index))
-            #logger.debug('self.output_filename:%s' %(self.output_filename))
+        self.output_filename = os.path.join('%s' %(filetitle), '%s-%s.mp4' %(filetitle, index))
+        #logger.debug('self.output_filename:%s' %(self.output_filename))
 
-            e_player = html.xpath('//*[@type="text/javascript"]')
-            if not len(e_player):
-                return ret
-            #logger.debug('e_player:%s' %([(i.items(), i.text) for i in e_player]))
-            ck_player_value = e_player[3].text
-            p = 'video=\["(.*)->video/mp4"\]'
-            url = downloader.n.r(p, ck_player_value, 1)
-            if not url:
-                return ret
-            #logger.debug('url:%s' %(url))
-            if url:
-                self.urls.append(url)
-                ret = True
-        else:
-            ret = False
+        e_player = html.xpath('//*[@type="text/javascript"]')
+        if not len(e_player):
+            return ret
+        #logger.debug('e_player:%s' %([(i.items(), i.text) for i in e_player]))
+        ck_player_value = e_player[3].text
+        p = 'video=\["(.*)->video/mp4"\]'
+        url = downloader.n.r(p, ck_player_value, 1)
+        if not url:
+            return ret
+        #logger.debug('url:%s' %(url))
+        if url:
+            self.urls.append(url)
+            ret = True
 
         return ret
 
@@ -157,7 +159,7 @@ class ts_downloader(object):
         return ret
 
     def download_video(self):
-        logger.debug('get %s total_size...', self.output_filename)
+        logger.debug('get %s total_size...' %(self.output_filename))
 
         pieces_size = self.dl.urls_size(self.urls[:5])
         total_size = pieces_size * len(self.urls) / (len(self.urls[:5]))
