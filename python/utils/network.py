@@ -6,13 +6,15 @@
 #   文件名称：network.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 12时30分28秒
-#   修改日期：2017年10月23日 星期一 09时20分36秒
+#   修改日期：2017年10月27日 星期五 19时03分48秒
 #   描    述：
 #
 #================================================================
 import six
 import cookielib
 import re
+import os
+import sqlite3
 
 import log
 logging = log.dict_configure()
@@ -67,10 +69,49 @@ class network(object):
         self.handlers.append(basic_auth_handler)
         self.handlers.append(digest_auth_handler)
 
+    def load_chromium_cookie(self, sqlite_db_path = None, domain = None):
+        if not os.access(sqlite_db_path, os.F_OK):
+            return
+
+        conn = sqlite3.connect(sqlite_db_path)
+
+        sql = 'select host_key, name, value, path from cookies'
+        if domain:
+            sql += ' where host_key like "%{}%"'.format(domain)
+            
+        for row in conn.execute(sql):
+            logger.debug('cookie %s' %(str(row)))
+            cookie_item = cookielib.Cookie(
+                    version = 0,
+                    name = row[1],
+                    value = row[2],
+                    port = None,
+                    port_specified = None,
+                    domain = row[0],
+                    domain_specified = None,
+                    domain_initial_dot = None,
+                    path = row[3],
+                    path_specified = None,
+                    secure = None,
+                    expires = None,
+                    discard = None,
+                    comment = None,
+                    comment_url = None,
+                    rest = None,
+                    rfc2109 = False,
+                    )
+            self.cookie.set_cookie(cookie_item)    # Apply each cookie_item to cookiejar
+        conn.close()
+
     def add_cookie_handler(self):
         self.cookie = cookielib.CookieJar()
         #self.cookie = cookielib.MozillaCookieJar(self.cookie_file)
         #self.cookie.load()
+
+        #sqlite_db_path = os.path.join('/home/xiaofei/.config', 'chromium/Safe Browsing Cookies')
+        #sqlite_db_path = os.path.join('/home/xiaofei/.config', 'chromium/Default/Cookies')
+        #self.load_chromium_cookie(sqlite_db_path)
+
         cookie_handler = self.urllib.request.HTTPCookieProcessor(self.cookie)  
         self.handlers.append(cookie_handler)
 
