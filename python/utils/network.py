@@ -6,7 +6,7 @@
 #   文件名称：network.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 12时30分28秒
-#   修改日期：2017年10月27日 星期五 19时03分48秒
+#   修改日期：2017年10月28日 星期六 14时40分28秒
 #   描    述：
 #
 #================================================================
@@ -15,6 +15,9 @@ import cookielib
 import re
 import os
 import sqlite3
+import sys
+import Crypto
+import Crypto.Protocol.KDF
 
 import log
 logging = log.dict_configure()
@@ -69,48 +72,95 @@ class network(object):
         self.handlers.append(basic_auth_handler)
         self.handlers.append(digest_auth_handler)
 
-    def load_chromium_cookie(self, sqlite_db_path = None, domain = None):
-        if not os.access(sqlite_db_path, os.F_OK):
-            return
+    def load_chromium_cookie(self, domain = None):
+        salt = b'saltysalt'
+        iv = b' ' * 16
+        length = 16
 
-        conn = sqlite3.connect(sqlite_db_path)
+        def chrome_decrypt(encrypted_value, key = None):
 
-        sql = 'select host_key, name, value, path from cookies'
+            # Encrypted cookies should be prefixed with 'v10' according to the
+            # Chromium code. Strip it off.
+            encrypted_value = encrypted_value[3:]
+
+            # Strip padding by taking off number indicated by padding
+            # eg if last is '\x0e' then ord('\x0e') == 14, so take off 14.
+            # You'll need to change this function to use ord() for python2.
+            def clean(x):
+                return x[:-x[-1]].decode('utf8')
+
+            cipher = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CBC, IV=iv)
+            decrypted = cipher.decrypt(encrypted_value)
+
+            return clean(decrypted)
+
+        # If running Chrome on OSX
+        if sys.platform == 'darwin':
+            my_pass = keyring.get_password('Chrome Safe Storage', 'Chrome')
+            my_pass = my_pass.encode('utf8')
+            iterations = 1003
+            cookie_file = os.path.expanduser(
+                '~/Library/Application Support/Google/Chrome/Default/Cookies'
+            )
+
+        # If running Chromium on Linux
+        elif sys.platform == 'linux' or sys.platform == 'linux2':
+            my_pass = 'peanuts'.encode('utf8')
+            iterations = 1
+            cookie_file = os.path.expanduser(
+                '~/.config/chromium/Profile 4/Cookies'
+            )
+        else:
+            raise Exception("This script only works on OSX or Linux.")
+
+        # Generate key from values above
+        key = Crypto.Protocol.KDF.PBKDF2(my_pass, salt, length, iterations)
+
+        conn = sqlite3.connect(cookie_file)
+
+        sql = 'select host_key, name, value, encrypted_value from cookies'
         if domain:
             sql += ' where host_key like "%{}%"'.format(domain)
-            
-        for row in conn.execute(sql):
-            logger.debug('cookie %s' %(str(row)))
-            cookie_item = cookielib.Cookie(
-                    version = 0,
-                    name = row[1],
-                    value = row[2],
-                    port = None,
-                    port_specified = None,
-                    domain = row[0],
-                    domain_specified = None,
-                    domain_initial_dot = None,
-                    path = row[3],
-                    path_specified = None,
-                    secure = None,
-                    expires = None,
-                    discard = None,
-                    comment = None,
-                    comment_url = None,
-                    rest = None,
-                    rfc2109 = False,
-                    )
-            self.cookie.set_cookie(cookie_item)    # Apply each cookie_item to cookiejar
-        conn.close()
+
+        with conn:
+            for host_key, k, v, ev in conn.execute(sql):
+
+                # if there is a not encrypted value or if the encrypted value
+                # doesn't start with the 'v10' prefix, return v
+                if v or (ev[:3] != b'v10'):
+                    logger.debug('cookie %s, %s, %s' %(host_key, k, v))
+                    pass
+                else:
+                    v = chrome_decrypt(ev, key = key)
+
+                cookie_item = cookielib.Cookie(
+                        version = 0,
+                        name = k,
+                        value = v,
+                        port = None,
+                        port_specified = None,
+                        domain = host_key,
+                        domain_specified = None,
+                        domain_initial_dot = None,
+                        path = None,
+                        path_specified = None,
+                        secure = None,
+                        expires = None,
+                        discard = None,
+                        comment = None,
+                        comment_url = None,
+                        rest = None,
+                        rfc2109 = False,
+                        )
+                self.cookie.set_cookie(cookie_item)    # Apply each cookie_item to cookiejar
+            #conn.close()
 
     def add_cookie_handler(self):
         self.cookie = cookielib.CookieJar()
         #self.cookie = cookielib.MozillaCookieJar(self.cookie_file)
         #self.cookie.load()
 
-        #sqlite_db_path = os.path.join('/home/xiaofei/.config', 'chromium/Safe Browsing Cookies')
-        #sqlite_db_path = os.path.join('/home/xiaofei/.config', 'chromium/Default/Cookies')
-        #self.load_chromium_cookie(sqlite_db_path)
+        self.load_chromium_cookie()
 
         cookie_handler = self.urllib.request.HTTPCookieProcessor(self.cookie)  
         self.handlers.append(cookie_handler)
