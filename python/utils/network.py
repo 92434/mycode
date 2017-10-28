@@ -6,7 +6,7 @@
 #   文件名称：network.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 12时30分28秒
-#   修改日期：2017年10月28日 星期六 14时40分28秒
+#   修改日期：2017年10月28日 星期六 23时29分35秒
 #   描    述：
 #
 #================================================================
@@ -16,8 +16,6 @@ import re
 import os
 import sqlite3
 import sys
-import Crypto
-import Crypto.Protocol.KDF
 
 import log
 logging = log.dict_configure()
@@ -73,6 +71,9 @@ class network(object):
         self.handlers.append(digest_auth_handler)
 
     def load_chromium_cookie(self, domain = None):
+        import Crypto
+        import Crypto.Protocol.KDF
+
         salt = b'saltysalt'
         iv = b' ' * 16
         length = 16
@@ -154,13 +155,34 @@ class network(object):
                         )
                 self.cookie.set_cookie(cookie_item)    # Apply each cookie_item to cookiejar
             #conn.close()
+    def load_local_cookie(self):
+        try:
+            import json
+        except ImportError:
+            import simplejson as json
+
+        local_cookies_file = '.cookies.json'
+        if not os.access(local_cookies_file, os.F_OK):
+            return
+
+        with open('.cookies.json') as f:
+            cookies = f.read()
+
+        if not cookies:
+            return
+
+        for cookie in json.loads(cookies):
+            cookie_item = cookielib.Cookie(**cookie)
+            self.cookie.set_cookie(cookie_item)
 
     def add_cookie_handler(self):
         self.cookie = cookielib.CookieJar()
         #self.cookie = cookielib.MozillaCookieJar(self.cookie_file)
         #self.cookie.load()
 
-        self.load_chromium_cookie()
+        #self.load_chromium_cookie()
+
+        self.load_local_cookie()
 
         cookie_handler = self.urllib.request.HTTPCookieProcessor(self.cookie)  
         self.handlers.append(cookie_handler)
