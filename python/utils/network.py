@@ -6,7 +6,7 @@
 #   文件名称：network.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 12时30分28秒
-#   修改日期：2017年10月28日 星期六 23时29分35秒
+#   修改日期：2017年10月29日 星期日 18时11分23秒
 #   描    述：
 #
 #================================================================
@@ -168,11 +168,31 @@ class network(object):
         with open('.cookies.json') as f:
             cookies = f.read()
 
-        if not cookies:
-            return
 
         for cookie in json.loads(cookies):
-            cookie_item = cookielib.Cookie(**cookie)
+            cookie_default = {
+                    'version' : None, 'name' : None, 'value' : None, 
+                     'port' : None, 'port_specified' : None,
+                     'domain' : None, 'domain_specified' : None, 'domain_initial_dot' : None,
+                     'path' : None, 'path_specified' : None,
+                     'secure' : None,
+                     'expires' : None,
+                     'discard' : None,
+                     'comment' : None,
+                     'comment_url' : None,
+                     'rest' : {},
+                     'rfc2109' : False,
+                    }
+            for i in cookie:
+                if i in cookie_default:
+                    cookie_default.update({i : cookie.get(i)})
+                else:
+                    rest_dict = cookie_default.get('rest')
+                    rest_dict.update({i : cookie.get(i)})
+                    
+            
+            #logger.debug('cookie_default %s' %(cookie_default))
+            cookie_item = cookielib.Cookie(**cookie_default)
             self.cookie.set_cookie(cookie_item)
 
     def add_cookie_handler(self):
