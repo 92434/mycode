@@ -6,7 +6,7 @@
 #   文件名称：network.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 12时30分28秒
-#   修改日期：2017年10月29日 星期日 18时11分23秒
+#   修改日期：2017年10月31日 星期二 22时46分57秒
 #   描    述：
 #
 #================================================================
@@ -27,9 +27,9 @@ class network(object):
     cookie = None
     #cookie_file = 'cookie.txt'
     fake_header = {
-        'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Encoding' : 'gzip, deflate, br',
-        'Accept-Language' : 'zh-CN,zh;q=0.8',
+        #'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        #'Accept-Encoding' : 'gzip, deflate, br',
+        #'Accept-Language' : 'zh-CN,zh;q=0.8',
         'Cache-Control' : 'max-age=0',
         'Connection' : 'keep-alive',
         'Upgrade-Insecure-Requests' : '1',
