@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月30日 星期一 18时12分48秒
+#   修改日期：2017年10月31日 星期二 12时07分16秒
 #   描    述：
 #
 #================================================================
@@ -347,7 +347,7 @@ class downloader(object):
             t.join()
 
         for i in fileparts:
-            if not os.access(i, os.W_OK):
+            if not os.access(i, os.F_OK):
                 return
 
         with open(filepath, 'wb') as wfile:
