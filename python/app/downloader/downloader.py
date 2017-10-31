@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月25日 星期三 22时16分39秒
+#   修改日期：2017年10月30日 星期一 18时12分48秒
 #   描    述：
 #
 #================================================================
@@ -36,6 +36,7 @@ except ImportError:
 
 class downloader(object):
     block_size = 1 * 1024 * 1024
+    max_read_size = 1024 * 256
 
     def __init__(self):
         pass
@@ -251,8 +252,8 @@ class downloader(object):
 
             while received < part_size:
                 read_size = part_size - received
-                if read_size > 1024 * 256:
-                    read_size = 1024 * 256
+                if read_size > self.max_read_size:
+                    read_size = self.max_read_size
                 try:
                     data = response.read(read_size)
                 except Exception as e:

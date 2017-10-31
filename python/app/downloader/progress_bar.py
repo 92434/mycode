@@ -6,7 +6,7 @@
 #   文件名称：progress_bar.py
 #   创 建 者：肖飞
 #   创建日期：2017年10月21日 星期六 09时32分54秒
-#   修改日期：2017年10月21日 星期六 10时18分46秒
+#   修改日期：2017年10月31日 星期二 09时27分53秒
 #   描    述：
 #
 #================================================================
@@ -28,6 +28,7 @@ class SimpleProgressBar:
         self.total_pieces = total_pieces
         self.current_piece = 1
         self.received = 0
+        self.last_received = 0
         self.speed = ''
         self.last_updated = time.time()
 
@@ -81,19 +82,22 @@ class SimpleProgressBar:
         self.received += n
 
         time_diff = time.time() - self.last_updated
-        bytes_ps = n / time_diff if time_diff else 0
-        if bytes_ps >= 1024 ** 3:
-            self.speed = '{:4.0f} GB/s'.format(bytes_ps / 1024 ** 3)
-        elif bytes_ps >= 1024 ** 2:
-            self.speed = '{:4.0f} MB/s'.format(bytes_ps / 1024 ** 2)
-        elif bytes_ps >= 1024:
-            self.speed = '{:4.0f} kB/s'.format(bytes_ps / 1024)
-        else:
-            self.speed = '{:4.0f}  B/s'.format(bytes_ps)
+        if time_diff > 1.0:
+            bytes_diff = self.received - self.last_received
+            bytes_ps = bytes_diff / time_diff
+            if bytes_ps >= 1024 ** 3:
+                self.speed = '{:4.0f} GB/s'.format(bytes_ps / 1024 ** 3)
+            elif bytes_ps >= 1024 ** 2:
+                self.speed = '{:4.0f} MB/s'.format(bytes_ps / 1024 ** 2)
+            elif bytes_ps >= 1024:
+                self.speed = '{:4.0f} kB/s'.format(bytes_ps / 1024)
+            else:
+                self.speed = '{:4.0f}  B/s'.format(bytes_ps)
 
-        self.last_updated = time.time()
+            self.last_received = self.received
+            self.last_updated = time.time()
 
-        self.update()
+            self.update()
 
         self.lock.release()
 
