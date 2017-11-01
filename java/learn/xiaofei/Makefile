@@ -14,6 +14,21 @@ entry_point := xiaofei.Question
 
 include $(BUILD_CLASS)
 
+
+LOCAL_PRECONDITION :=
+
+java_files := WindowTest.java
+
+include_class_path :=
+
+jar_name := WindowTest
+
+package_inc :=
+
+entry_point := xiaofei.WindowTest
+
+include $(BUILD_CLASS)
+
 $(eval all_jars := $(filter %.jar,$(target_files)))
 $(info "all_jars:$(all_jars)")
 
