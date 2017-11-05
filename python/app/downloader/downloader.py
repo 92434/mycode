@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年10月31日 星期二 12时07分16秒
+#   修改日期：2017年11月04日 星期六 22时15分14秒
 #   描    述：
 #
 #================================================================
@@ -473,8 +473,33 @@ class downloader(object):
 
 
 def main():
+    import optparse
+    import sys
+    argv = sys.argv[1:]
+    options = optparse.OptionParser()
+    options.add_option('-t', '--threads', type='int', dest='threads', help='threads', default = 4)
+    options.add_option('-u', '--url', dest='url', help='url', default=None)
+    options.add_option('-o', '--output-path', dest='output_path', help='output_path', default=None)
+    opts, args = options.parse_args(argv)
+    logger.debug('opts:%s' %(opts))
+    logger.debug('args:%s' %(args))
+    if len(args):
+        options.print_help()
+        return
+
+    if not opts.url:
+        return
+
+    urls = [opts.url]
+
     dl = downloader()
-    return dl
+    p = n.urllib.parse.urlparse(opts.url)
+    output_path = None
+    if not opts.output_path:
+        output_path = os.path.join(os.curdir, p.path[1:])
+    else:
+        output_path = opts.output_path
+    dl.download_urls(urls, output_path, threads = opts.threads)
 
 if '__main__' == __name__:
     main()
