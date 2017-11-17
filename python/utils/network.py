@@ -6,7 +6,7 @@
 #   文件名称：network.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 12时30分28秒
-#   修改日期：2017年10月31日 星期二 22时46分57秒
+#   修改日期：2017年11月16日 星期四 11时26分18秒
 #   描    述：
 #
 #================================================================
@@ -308,8 +308,34 @@ class network(object):
     def get_location(self, response):
         return response.geturl()
 
+    def get_ipv4_address_by_if(ifname):
+        import socket
+        import fcntl
+        import struct
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s_f = s.fileno()
+        s_ioc_gifaddr = 0x8915 #SIOCGIFADDR
+        if_buffer = struct.pack('256s', ifname[:15])
+        r = fcntl.ioctl(s_f, s_ioc_gifaddr, if_buffer)
+        ip = socket.inet_ntoa(r[20 : 24])
+        return ip
+
+    def get_all_iface_ip_address(self):
+        import psutil
+        ips = []
+        d = psutil.net_if_addrs()
+        for k, v in d.items():
+            for i in v:
+                if i.family != 2:
+                    continue
+                ips.append(i.address)
+        return ips
+
 def main():
-    pass
+    n = network()
+    n.default_init(0)
+    ips = n.get_all_iface_ip_address()
+    logger.debug('ips:%s' %(ips))
 
 if '__main__' == __name__:
     main()
