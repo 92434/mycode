@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年10月25日 星期三 23时07分51秒
+#   修改日期：2017年11月18日 星期六 11时13分14秒
 #   描    述：
 #
 #================================================================
@@ -54,6 +54,8 @@ class ts_downloader(object):
         m3u8_domain = '%s://%s' %(p.scheme, p.netloc)
         m3u8_dir = os.path.dirname(p.path)
         head = downloader.n.urllib.parse.urljoin(m3u8_domain, m3u8_dir)
+        head += '/'
+        #logger.debug('head:%s' %(head))
 
         if url_m3u8.endswith('.m3u8'):
             content = self.dl.get_content(url_m3u8);
@@ -149,10 +151,62 @@ class ts_downloader(object):
 
         return ret
 
+    def get_yiren05_info(self, html):
+        ret = False
+        filetitle = html.xpath('//div[@class="mainAreaBlack"]/*[@class="navBarBlack px19"]/span/font/text()')
+        if not len(filetitle) == 1:
+            return ret
+        filetitle = filetitle[0]
+        logger.debug('filetitle:%s' %(filetitle))
+        self.output_filename = os.path.join('%s' %(filetitle), '%s.mp4' %(filetitle))
+        url = html.xpath('//video/source/@src')
+        logger.debug('url:%s' %(url))
+        #logger.debug('url:%s' %([(i.tag, i.items(), i.text) for i in url]))
+        if not len(url) == 1:
+            return ret
+        self.urls = url
+        ret = True
+        return ret;
+
+    def get_119gan_info(self, html):
+        ret = False
+        filetitle = html.xpath('//title/text()')
+        if not len(filetitle) == 1:
+            return ret
+        filetitle = filetitle[0]
+        p =  u'(.*)在线播放.*'
+        filetitle = downloader.n.r(p, filetitle, 1)
+        if not filetitle:
+            return ret
+        logger.debug('filetitle:%s' %(filetitle))
+        self.output_filename = os.path.join('%s' %(filetitle), '%s.mp4' %(filetitle))
+
+        url = html.xpath('//div[@class="film_info clearfix"]/script/@src[contains(., "playdata")]')
+        logger.debug('url:%s' %(url))
+        if not len(url) == 1:
+            return ret
+        url = url[0]
+        url = downloader.n.urllib.parse.urljoin(self.domain, url)
+        logger.debug('url:%s' %(url))
+        data = self.dl.get_content(url)
+        logger.debug('data:%s' %(data))
+        url = data.split(u'$')
+        logger.debug('url:%s' %(url))
+        if not len(url) == 3:
+            return ret
+        url_m3u8 = url[1]
+        logger.debug('url_m3u8:%s' %(url_m3u8))
+        self.urls = self.get_part_urls_from_m3u8(url_m3u8)
+        if len(self.urls):
+            ret = True
+        return ret
+
     def get_info_form_play_url(self):
         ret = False
 
         data = self.dl.get_content(self.play_url)
+        #logger.debug('data:%s' %(data))
+
         html = lxml.etree.HTML(data)
 
         ret = self.get_691gao_list_info(html)
@@ -160,6 +214,14 @@ class ts_downloader(object):
             return ret
 
         ret = self.get_691gao_diao_info(html)
+        if ret:
+            return ret
+
+        ret = self.get_yiren05_info(html)
+        if ret:
+            return ret
+
+        ret = self.get_119gan_info(html)
         if ret:
             return ret
 

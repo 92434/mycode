@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #================================================================
-#   Copyright (C) 2017年11月04日 肖飞 All rights reserved
+#   Copyright (C) 2017年11月18日 肖飞 All rights reserved
 #   
-#   文件名称：merge_mp4.py
+#   文件名称：merge_ts.py
 #   创 建 者：肖飞
-#   创建日期：2017年11月04日 星期六 22时39分22秒
-#   修改日期：2017年11月18日 星期六 16时10分46秒
+#   创建日期：2017年11月18日 星期六 11时25分47秒
+#   修改日期：2017年11月18日 星期六 12时28分15秒
 #   描    述：
 #
 #================================================================
@@ -22,47 +22,18 @@ import log
 logging = log.dict_configure()
 logger = logging.getLogger('default')
 
-def mp4_to_ts(mp4_file):
+def merge_ts(output_filepath, ts_files):
     ret = False
-    cmd = ['ffmpeg']
-    cmd.append('-i')
-    cmd.append('%s' %(mp4_file))
-    #cmd.append('-sameq')
-    #cmd.append('%s.mpg' %(mp4_file))
-    cmd.append('-acodec')
-    cmd.append('copy')
-    cmd.append('-vcodec')
-    cmd.append('copy')
-    cmd.append('-vbsf')
-    cmd.append('h264_mp4toannexb')
-    cmd.append('%s.ts' %(mp4_file))
-    #logger.debug('%s' %(cmd))
-
-    if subprocess.Popen(cmd, cwd = os.path.curdir).wait() != 0:
-        raise Exception('merge %s failed!!!' %(output_filepath))
-    else:
-        ret = True
-
-    return ret
-
-
-def merge_mp4(output_filepath, mp4_files):
-    ret = False
-    for i in mp4_files:
-        if not i.endswith('.mp4'):
+    for i in ts_files:
+        if not i.endswith('.ts'):
             return ret
         if not os.access(i, os.W_OK):
             return ret
 
-    for i in mp4_files:
-        if not mp4_to_ts(i):
-            return ret
-
     merge_list_file = 'filelist.txt'
     with open(merge_list_file, 'w+') as f:
-        for i in mp4_files:
-            f.write('file \'%s.ts\'\n' %(i))
-        f.flush()
+        for i in ts_files:
+            f.write('file \'%s\'\n' %(i))
 
     cmd = ['ffmpeg']
     cmd.append('-f')
@@ -78,22 +49,23 @@ def merge_mp4(output_filepath, mp4_files):
     cmd.append('-absf')
     cmd.append('aac_adtstoasc')
     cmd.append('%s' %(output_filepath))
-    #logger.debug('%s' %(cmd))
+    logger.debug('%s' %(cmd))
 
     if subprocess.Popen(cmd, cwd = os.path.curdir).wait() != 0:
         raise Exception('merge %s failed!!!' %(output_filepath))
     else:
-        for i in mp4_files:
+        for i in ts_files:
             os.remove(i)
-            os.remove('%s.ts' %(i))
+        ret = True
+    return ret
 
-def mp4_part_key(path):
-    p = '.*-(\d+).mp4'
+def ts_part_key(path):
+    p = '.*\[(\d+)\]\.ts'
     m = re.search(p, path)
     if m:
         return int(m.group(1))
     else:
-        raise Exception('mp4 file name %s error!!!' %(path))
+        raise Exception('ts file name %s error!!!' %(path))
 
 def main():
     argv = sys.argv[1:]
@@ -114,8 +86,8 @@ def main():
         return
 
     fs = filesystem.filesystem()
-    filelist = fs.get_filelist(opts.dir, ['.mp4'])
-    filelist = sorted(filelist, key = lambda path : (mp4_part_key(path)))
+    filelist = fs.get_filelist(opts.dir, ['.ts'])
+    filelist = sorted(filelist, key = lambda path : (ts_part_key(path)))
 
     output_path = ''
     if not opts.output_path:
@@ -126,7 +98,7 @@ def main():
     #logger.debug('output_path:%s' %(filelist))
     #for i in filelist:
     #    logger.debug('add %s' %(i))
-    merge_mp4(output_path, filelist)
+    merge_ts(output_path, filelist)
 
 if '__main__' == __name__:
     main()

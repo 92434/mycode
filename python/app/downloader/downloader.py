@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年11月04日 星期六 22时15分14秒
+#   修改日期：2017年11月18日 星期六 12时31分14秒
 #   描    述：
 #
 #================================================================
@@ -393,8 +393,10 @@ class downloader(object):
             threads_set = set()
 
             for i, url in enumerate(urls):
-                unixpath, ext = os.path.splitext(output_filepath)
-                filepath = '%s[%02d].%s' % (unixpath, i, ext)
+                unixpath, _ = os.path.splitext(output_filepath)
+                p = n.urllib.parse.urlparse(url)
+                _, ext = os.path.splitext(p.path)
+                filepath = '%s[%02d]%s' % (unixpath, i, ext)
                 filepieces.append(filepath)
                 #logger.debug('Downloading %s [%s/%s]...' % (filepath, i + 1, len(urls)))
                 piece = i + 1;
@@ -415,62 +417,9 @@ class downloader(object):
 
             bar.done()
 
-            return filepieces
-
-    def ts2mp4(self, output_filepath, ts_files):
-        for i in ts_files:
-            if not i.endwith('.ts'):
-                return
-            if not os.access(i, os.W_OK):
-                return
-
-        ts_files_str = '|'.join(ts_files)
-
-        cmd = ['ffmpeg']
-        cmd.append('-i')
-        cmd.append('concat:%s' %(ts_files_str))
-        cmd.append('-acodec')
-        cmd.append('copy')
-        cmd.append('-vcodec')
-        cmd.append('copy')
-        cmd.append('-absf')
-        cmd.append('aac_adtstoasc')
-        cmd.append('%s' %(output_filepath))
-        #logger.debug('%s' %(cmd))
-
-        if subprocess.Popen(cmd, cwd = os.path.curdir).wait() != 0:
-            raise Exception('merge %s failed!!!' %(output_filepath))
-        else:
-            for i in ts_files:
-                os.remove(i)
-
-    def merge_mp4(self, output_filepath, mp4_files):
-        for i in mp4_files:
-            if not i.endwith('.mp4'):
-                return
-            if not os.access(i, os.W_OK):
-                return
-
-        ts_files_str = '|'.join(mp4_files)
-
-        cmd = ['ffmpeg']
-        cmd.append('-i')
-        cmd.append('concat:%s' %(ts_files_str))
-        cmd.append('-acodec')
-        cmd.append('copy')
-        cmd.append('-vcodec')
-        cmd.append('copy')
-        cmd.append('-absf')
-        cmd.append('aac_adtstoasc')
-        cmd.append('%s' %(output_filepath))
-        #logger.debug('%s' %(cmd))
-
-        if subprocess.Popen(cmd, cwd = os.path.curdir).wait() != 0:
-            raise Exception('merge %s failed!!!' %(output_filepath))
-        else:
-            for i in mp4_files:
-                os.remove(i)
-
+            if merge:
+                import merge_ts
+                ret = merge_ts.merge_ts(output_filepath, filepieces)
 
 def main():
     import optparse
