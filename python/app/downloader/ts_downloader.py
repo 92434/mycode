@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年11月18日 星期六 11时13分14秒
+#   修改日期：2017年12月02日 星期六 16时46分56秒
 #   描    述：
 #
 #================================================================
@@ -76,7 +76,7 @@ class ts_downloader(object):
         e_play_url = html.xpath('//div[@class="l"]/a[@class="txt" and @href]')
         #logger.debug('e_play_url:%s' %([(i.items(), i.text) for i in e_play_url]))
         if not len(e_play_url):
-            logger.debug('')
+            #logger.debug('')
             return ret
         self.play_url = downloader.n.urllib.parse.urljoin(self.domain, e_play_url[0].get('href'))
         logger.debug('self.play_url:%s' %(self.play_url))
@@ -94,8 +94,12 @@ class ts_downloader(object):
         index = downloader.n.r(p, title, 1)
         filetitle = downloader.n.r(p, title, 2)
         if not index or not filetitle:
-            logger.debug('data:%s' %(data))
-            return ret
+            p =  u'\u6b63\u5728\u64ad\u653e (.*)'
+            index = 1
+            filetitle = downloader.n.r(p, title, 1)
+            if not filetitle:
+                logger.debug('data:%s' %(data))
+                return ret
 
         self.output_filename = os.path.join('%s' %(filetitle), '%s-%s.mp4' %(filetitle, index))
         #logger.debug('self.output_filename:%s' %(self.output_filename))
