@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年12月06日 星期三 15时14分51秒
+#   修改日期：2017年12月06日 星期三 19时38分00秒
 #   描    述：
 #
 #================================================================
@@ -23,8 +23,6 @@ import request
 
 logging = log.dict_configure()
 logger = logging.getLogger('default')
-
-r = request.request()
 
 timeout = 30 # in seconds
 socket.setdefaulttimeout(timeout)
@@ -43,6 +41,7 @@ class downloader(object):
         pass
 
     def urls_size(self, urls, headers = None):
+        r = request.request()
         return sum([r.request.url_size(url, headers = headers) for url in urls])
 
     def url_save_part_thread_wapper(self, *args, **kwargs):
@@ -64,6 +63,7 @@ class downloader(object):
 
         #When a referer specified with param refer, the key must be 'Referer' for the hack here
         if not headers:
+            r = request.request()
             headers = r.request.fake_headers
 
         if refer:
@@ -108,6 +108,7 @@ class downloader(object):
             headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
 
             try:
+                r = request.request()
                 for data in r.request.iter_content(url, chunk_size = self.max_read_size, headers = headers):
                     if received + len(data) > part_size:
                         data = data[: (part_size - received)]
@@ -118,15 +119,16 @@ class downloader(object):
 
                     if received == part_size:
                         break
-                    elif received < part_size:
-                        open_mode = 'ab'
-                        continue
             except Exception as e:
                     logger.debug('%s' %(e))
 
             #logger.debug('filepart:%s, received:%d, part_size:%d' %(filepart, received, part_size))
 
             output.close()
+
+            if received < part_size:
+                open_mode = 'ab'
+                continue
 
             if os.path.getsize(filepart) == part_size:
                 break
@@ -153,6 +155,7 @@ class downloader(object):
     def url_save(self, url, filepath, bar, threads, jobs_sem = None, force = False, refer = None, multi_urls = False, headers = None, timeout = None, **kwargs):
 #When a referer specified with param refer, the key must be 'Referer' for the hack here
         if not headers:
+            r = request.request()
             headers = r.request.fake_headers
 
         if refer:
@@ -200,12 +203,15 @@ class downloader(object):
             if not os.access(i, os.F_OK):
                 return
 
-        with open(filepath, 'wb') as wfile:
-            for i in fileparts:
-                with open(i, 'rb') as rfile:
-                    wfile.write(rfile.read())
-            for i in fileparts:
-                os.remove(i)
+        wfile = open(filepath, 'wb')
+        for i in fileparts:
+            rfile = open(i, 'rb')
+            wfile.write(rfile.read())
+            rfile.close()
+        wfile.close()
+
+        for i in fileparts:
+            os.remove(i)
 
     def download_urls(self, urls, output_filepath, total_size = 0, jobs = 1, threads = 4, force = False, dry_run = False, refer = None, merge = True, headers = None, **kwargs):
         assert urls
@@ -244,7 +250,8 @@ class downloader(object):
 
             for i, url in enumerate(urls):
                 unixpath, _ = os.path.splitext(output_filepath)
-                p = r.request.urlparse(url)
+                r = request.request()
+                p = r.request.urlparse.urlparse(url)
                 _, ext = os.path.splitext(p.path)
                 filepath = '%s[%02d]%s' % (unixpath, i, ext)
                 filepieces.append(filepath)
@@ -292,13 +299,14 @@ def main():
     urls = [opts.url]
 
     dl = downloader()
-    p = r.request.urlparse(opts.url)
+    r = request.request()
+    p = r.request.urlparse.urlparse(opts.url)
     output_path = None
     if not opts.output_path:
         output_path = os.path.join(os.curdir, p.path[1:])
     else:
         output_path = opts.output_path
-    dl.download_urls(urls, output_path, threads = opts.threads)
+    dl.download_urls(urls, output_path, threads = opts.threads, merge = False)
 
 if '__main__' == __name__:
     main()
