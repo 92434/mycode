@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年12月02日 星期六 16时46分56秒
+#   修改日期：2017年12月06日 星期三 16时06分53秒
 #   描    述：
 #
 #================================================================
@@ -43,22 +43,22 @@ class ts_downloader(object):
         self.dl = downloader.downloader()
         self.dry_run = dry_run
         self.play_url = play_url
-        r = downloader.n.urllib.parse.urlparse(self.play_url)
+        r = downloader.r.request.urlparse.urlparse(self.play_url)
         self.domain = '%s://%s' %(r.scheme, r.netloc)
 
     def get_part_urls_from_m3u8(self, url_m3u8):
         url_files = []
 
         basename = os.path.basename(url_m3u8)
-        p = downloader.n.urllib.parse.urlparse(url_m3u8)
+        p = downloader.r.request.urlparse.urlparse(url_m3u8)
         m3u8_domain = '%s://%s' %(p.scheme, p.netloc)
         m3u8_dir = os.path.dirname(p.path)
-        head = downloader.n.urllib.parse.urljoin(m3u8_domain, m3u8_dir)
+        head = downloader.r.request.urlparse.urljoin(m3u8_domain, m3u8_dir)
         head += '/'
         #logger.debug('head:%s' %(head))
 
         if url_m3u8.endswith('.m3u8'):
-            content = self.dl.get_content(url_m3u8);
+            content = downloader.r.request.get_content(url_m3u8);
 
             lines = content.splitlines()
             for i in lines:
@@ -66,7 +66,7 @@ class ts_downloader(object):
                 if not line.startswith('#'):
                     url_files.append(line)
 
-            url_files = map(lambda x : downloader.n.urllib.parse.urljoin(head, x), url_files)
+            url_files = map(lambda x : downloader.r.request.urlparse.urljoin(head, x), url_files)
             #logger.debug('url_files:%s' %(url_files))
 
         return url_files
@@ -78,9 +78,9 @@ class ts_downloader(object):
         if not len(e_play_url):
             #logger.debug('')
             return ret
-        self.play_url = downloader.n.urllib.parse.urljoin(self.domain, e_play_url[0].get('href'))
+        self.play_url = downloader.r.request.urlparse.urljoin(self.domain, e_play_url[0].get('href'))
         logger.debug('self.play_url:%s' %(self.play_url))
-        data = self.dl.get_content(self.play_url)
+        data = downloader.r.request.get_content(self.play_url)
         #logger.debug('data:%s' %(data))
         html = lxml.etree.HTML(data)
         #e_player = html.xpath('//*[@id="ckplayer_a1"]')
@@ -91,12 +91,12 @@ class ts_downloader(object):
         #logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
         title = e_title[0].text
         p =  u'\u6b63\u5728\u64ad\u653e (\d+)-(.*)'
-        index = downloader.n.r(p, title, 1)
-        filetitle = downloader.n.r(p, title, 2)
+        index = downloader.r.request.r(p, title, 1)
+        filetitle = downloader.r.request.r(p, title, 2)
         if not index or not filetitle:
             p =  u'\u6b63\u5728\u64ad\u653e (.*)'
             index = 1
-            filetitle = downloader.n.r(p, title, 1)
+            filetitle = downloader.r.request.r(p, title, 1)
             if not filetitle:
                 logger.debug('data:%s' %(data))
                 return ret
@@ -111,7 +111,7 @@ class ts_downloader(object):
         #logger.debug('e_player:%s' %([(i.items(), i.text) for i in e_player]))
         ck_player_value = e_player[3].text
         p = 'video=\["(.*)->video/mp4"\]'
-        url = downloader.n.r(p, ck_player_value, 1)
+        url = downloader.r.request.r(p, ck_player_value, 1)
         if not url:
             logger.debug('data:%s' %(data))
             return ret
@@ -132,7 +132,7 @@ class ts_downloader(object):
         #logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
         title = e_title[0].text
         p =  u'(.*)\u5728\u7ebf\u89c2\u770b.*'
-        filetitle = downloader.n.r(p, title, 1)
+        filetitle = downloader.r.request.r(p, title, 1)
         if not filetitle:
             return ret
 
@@ -145,7 +145,7 @@ class ts_downloader(object):
         #logger.debug('e_player:%s' %([(i.items(), i.text) for i in e_player]))
         ck_player_value = e_player[5].text
         p = 'video=\["(.*)"\]'
-        url_m3u8 = downloader.n.r(p, ck_player_value, 1)
+        url_m3u8 = downloader.r.request.r(p, ck_player_value, 1)
         if not url_m3u8:
             return ret
         #logger.debug('url_m3u8:%s' %(url_m3u8))
@@ -179,7 +179,7 @@ class ts_downloader(object):
             return ret
         filetitle = filetitle[0]
         p =  u'(.*)在线播放.*'
-        filetitle = downloader.n.r(p, filetitle, 1)
+        filetitle = downloader.r.request.r(p, filetitle, 1)
         if not filetitle:
             return ret
         logger.debug('filetitle:%s' %(filetitle))
@@ -190,9 +190,9 @@ class ts_downloader(object):
         if not len(url) == 1:
             return ret
         url = url[0]
-        url = downloader.n.urllib.parse.urljoin(self.domain, url)
+        url = downloader.r.request.urlparse.urljoin(self.domain, url)
         logger.debug('url:%s' %(url))
-        data = self.dl.get_content(url)
+        data = downloader.r.request.get_content(url)
         logger.debug('data:%s' %(data))
         url = data.split(u'$')
         logger.debug('url:%s' %(url))
@@ -208,7 +208,7 @@ class ts_downloader(object):
     def get_info_form_play_url(self):
         ret = False
 
-        data = self.dl.get_content(self.play_url)
+        data = downloader.r.request.get_content(self.play_url)
         #logger.debug('data:%s' %(data))
 
         html = lxml.etree.HTML(data)
@@ -234,7 +234,7 @@ class ts_downloader(object):
     def download_video(self):
         logger.debug('get %s total_size...' %(self.output_filename))
 
-        pieces_size = self.dl.urls_size(self.urls[:5])
+        pieces_size = downloader.r.request.urls_size(self.urls[:5])
         total_size = pieces_size * len(self.urls) / (len(self.urls[:5]))
         #total_size = self.dl.urls_size(self.urls)
         logger.debug('total_size:%d' %(total_size))

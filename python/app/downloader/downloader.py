@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年11月18日 星期六 12时31分14秒
+#   修改日期：2017年12月06日 星期三 15时14分51秒
 #   描    述：
 #
 #================================================================
@@ -19,11 +19,12 @@ import subprocess
 import log
 import progress_bar
 
-n = network.network()
-n.default_init(0)
+import request
 
 logging = log.dict_configure()
 logger = logging.getLogger('default')
+
+r = request.request()
 
 timeout = 30 # in seconds
 socket.setdefaulttimeout(timeout)
@@ -41,152 +42,8 @@ class downloader(object):
     def __init__(self):
         pass
 
-    def urlopen_with_retry(self, *args, **kwargs):
-        for i in range(10):
-            try:
-                return n.urllib.request.urlopen(*args, **kwargs)
-            except Exception as e:
-                #logger.debug('request attempt %s(%s)' %(str(i + 1), e))
-                pass
-        raise Exception('no response!!!')
-
-    def get_content(self, url, headers = None):
-        """Gets the content of a URL via sending a HTTP GET request.
-
-        Args:
-            url: A URL.
-            headers: Request headers used by the client.
-            decoded: Whether decode the response body using UTF-8 or the charset specified in Content-Type.
-
-        Returns:
-            The content as a string.
-        """
-
-        #logger.debug('get_content: %s' % url)
-        if not headers:
-            headers = n.fake_header
-
-        req = n.urllib.request.Request(url, headers = headers)
-
-        response = self.urlopen_with_retry(req)
-        data = response.read()
-        data = n.decompresses_response_data(response, data)
-        data = n.decode_response_data(response, data)
-
-        return data
-
-    def post_content(self, url, headers = None, post_data = {}):
-        """Post the content of a URL via sending a HTTP POST request.
-
-        Args:
-            url: A URL.
-            headers: Request headers used by the client.
-            decoded: Whether decode the response body using UTF-8 or the charset specified in Content-Type.
-
-        Returns:
-            The content as a string.
-        """
-
-        #logger.debug('post_content: %s \n post_data: %s' % (url, post_data))
-        if not headers:
-            headers = n.fake_header
-
-        req = n.urllib.request.Request(url, headers = headers)
-        post_data = n.urllib.parse.urlencode(post_data)
-        post_data_enc = bytes(post_data.encode('utf-8'))
-        response = self.urlopen_with_retry(req, data = post_data_enc)
-        data = response.read()
-        data = n.decompresses_response_data(response, data)
-        data = n.decode_response_data(response, data)
-
-        return data
-
-    def url_size(self, url, headers = None):
-        if not headers:
-            headers = n.fake_header
-
-        req = n.urllib.request.Request(url, headers = headers)
-
-        size = float('inf')
-        while size == float('inf'):
-            response = self.urlopen_with_retry(req)
-            size = n.get_response_content_length(response)
-        return size
-
     def urls_size(self, urls, headers = None):
-        return sum([self.url_size(url, headers = headers) for url in urls])
-
-    def get_head(self, url, headers = None, get_method = 'HEAD'):
-        #logger.debug('get_head: %s' % url)
-
-        if not headers:
-            headers = n.fake_header
-
-        req = n.urllib.request.Request(url, headers = headers)
-        req.get_method = lambda: get_method
-        res = self.urlopen_with_retry(req)
-        return dict(res.headers)
-
-    def url_info(self, url, headers = None):
-        #logger.debug('url_info: %s' % url)
-        if not headers:
-            headers = n.fake_header
-
-        req = n.urllib.request.Request(url, headers = headers)
-        response = self.urlopen_with_retry(req)
-
-        headers = response.headers
-
-        content_type = headers.get('content-type')
-        if content_type == 'image/jpg; charset=UTF-8' or content_type == 'image/jpg':
-            content_type = 'audio/mpeg'    #fix for netease
-
-        mapping = {
-            'video/3gpp': '3gp',
-            'video/f4v': 'flv',
-            'video/mp4': 'mp4',
-            'video/MP2T': 'ts',
-            'video/quicktime': 'mov',
-            'video/webm': 'webm',
-            'video/x-flv': 'flv',
-            'video/x-ms-asf': 'asf',
-            'audio/mp4': 'mp4',
-            'audio/mpeg': 'mp3',
-            'audio/wav': 'wav',
-            'audio/x-wav': 'wav',
-            'audio/wave': 'wav',
-            'image/jpeg': 'jpg',
-            'image/png': 'png',
-            'image/gif': 'gif',
-            'application/pdf': 'pdf',
-        }
-
-        if content_type in mapping:
-            ext = mapping.get(content_type)
-        else:
-            content_type = None
-            content_disposition = headers.get('content-disposition')
-            if content_disposition:
-                try:
-                    filename = n.urllib.parse.unquote(n.r(r'filename="?([^"]+)"?', content_disposition), 1)
-                    if len(filename.split('.')) > 1:
-                        ext = filename.split('.')[-1]
-                    else:
-                        ext = None
-                except:
-                    ext = None
-            else:
-                ext = None
-
-        if headers.get('transfer-encoding') != 'chunked':
-            size = headers.get('content-length')
-            if size:
-                size = int(size)
-        else:
-            size = None
-
-        return content_type, ext, size
-
+        return sum([r.request.url_size(url, headers = headers) for url in urls])
 
     def url_save_part_thread_wapper(self, *args, **kwargs):
         try:
@@ -207,7 +64,7 @@ class downloader(object):
 
         #When a referer specified with param refer, the key must be 'Referer' for the hack here
         if not headers:
-            headers = n.fake_header
+            headers = r.request.fake_headers
 
         if refer:
             headers.update({'Referer' : refer})
@@ -240,9 +97,7 @@ class downloader(object):
                 #logger.debug('%s' %(e))
                 pass
 
-        headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
-        req = n.urllib.request.Request(url, headers = headers)
-        response = self.urlopen_with_retry(req)
+
 
         while received != part_size:
             #logger.debug('filepart:%s, open_mode:%s' %(filepart, open_mode))
@@ -250,26 +105,24 @@ class downloader(object):
 
             data = None
 
-            while received < part_size:
-                read_size = part_size - received
-                if read_size > self.max_read_size:
-                    read_size = self.max_read_size
-                try:
-                    data = response.read(read_size)
-                except Exception as e:
+            headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
+
+            try:
+                for data in r.request.iter_content(url, chunk_size = self.max_read_size, headers = headers):
+                    if received + len(data) > part_size:
+                        data = data[: (part_size - received)]
+                    output.write(data)
+                    received += len(data)
+                    if bar:
+                        bar.update_received(len(data))
+
+                    if received == part_size:
+                        break
+                    elif received < part_size:
+                        open_mode = 'ab'
+                        continue
+            except Exception as e:
                     logger.debug('%s' %(e))
-                    pass
-
-                if not data:
-                    headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
-                    req = n.urllib.request.Request(url, headers = headers)
-                    response = self.urlopen_with_retry(req)
-                    continue
-
-                output.write(data)
-                received += len(data)
-                if bar:
-                    bar.update_received(len(data))
 
             #logger.debug('filepart:%s, received:%d, part_size:%d' %(filepart, received, part_size))
 
@@ -287,9 +140,6 @@ class downloader(object):
 
                 received = 0
                 open_mode = 'wb'
-                headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
-                req = n.urllib.request.Request(url, headers = headers)
-                response = self.urlopen_with_retry(req)
 
     def url_save_thread_wapper(self, *args, **kwargs):
         try:
@@ -303,7 +153,7 @@ class downloader(object):
     def url_save(self, url, filepath, bar, threads, jobs_sem = None, force = False, refer = None, multi_urls = False, headers = None, timeout = None, **kwargs):
 #When a referer specified with param refer, the key must be 'Referer' for the hack here
         if not headers:
-            headers = n.fake_header
+            headers = r.request.fake_headers
 
         if refer:
             headers.update({'Referer' : refer})
@@ -323,7 +173,7 @@ class downloader(object):
                 #logger.debug('%s' %(e))
                 pass
 
-        file_size = self.url_size(url, headers = headers)
+        file_size = r.request.url_size(url, headers = headers)
         loops = (file_size + (self.block_size - 1)) / self.block_size
 
         fileparts = []
@@ -394,7 +244,7 @@ class downloader(object):
 
             for i, url in enumerate(urls):
                 unixpath, _ = os.path.splitext(output_filepath)
-                p = n.urllib.parse.urlparse(url)
+                p = r.request.urlparse(url)
                 _, ext = os.path.splitext(p.path)
                 filepath = '%s[%02d]%s' % (unixpath, i, ext)
                 filepieces.append(filepath)
@@ -442,7 +292,7 @@ def main():
     urls = [opts.url]
 
     dl = downloader()
-    p = n.urllib.parse.urlparse(opts.url)
+    p = r.request.urlparse(opts.url)
     output_path = None
     if not opts.output_path:
         output_path = os.path.join(os.curdir, p.path[1:])
