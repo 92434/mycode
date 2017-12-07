@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年12月06日 星期三 19时38分00秒
+#   修改日期：2017年12月07日 星期四 13时17分36秒
 #   描    述：
 #
 #================================================================
@@ -27,6 +27,8 @@ logger = logging.getLogger('default')
 timeout = 30 # in seconds
 socket.setdefaulttimeout(timeout)
 
+r = request.request()
+
 try:
   import threading as _threading
 except ImportError:
@@ -41,7 +43,6 @@ class downloader(object):
         pass
 
     def urls_size(self, urls, headers = None):
-        r = request.request()
         return sum([r.request.url_size(url, headers = headers) for url in urls])
 
     def url_save_part_thread_wapper(self, *args, **kwargs):
@@ -63,8 +64,8 @@ class downloader(object):
 
         #When a referer specified with param refer, the key must be 'Referer' for the hack here
         if not headers:
-            r = request.request()
-            headers = r.request.fake_headers
+            headers = {}
+            headers.update(r.request.fake_headers)
 
         if refer:
             headers.update({'Referer' : refer})
@@ -108,7 +109,6 @@ class downloader(object):
             headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
 
             try:
-                r = request.request()
                 for data in r.request.iter_content(url, chunk_size = self.max_read_size, headers = headers):
                     if received + len(data) > part_size:
                         data = data[: (part_size - received)]
@@ -155,8 +155,8 @@ class downloader(object):
     def url_save(self, url, filepath, bar, threads, jobs_sem = None, force = False, refer = None, multi_urls = False, headers = None, timeout = None, **kwargs):
 #When a referer specified with param refer, the key must be 'Referer' for the hack here
         if not headers:
-            r = request.request()
-            headers = r.request.fake_headers
+            headers = {}
+            headers.update(r.request.fake_headers)
 
         if refer:
             headers.update({'Referer' : refer})
@@ -250,7 +250,6 @@ class downloader(object):
 
             for i, url in enumerate(urls):
                 unixpath, _ = os.path.splitext(output_filepath)
-                r = request.request()
                 p = r.request.urlparse.urlparse(url)
                 _, ext = os.path.splitext(p.path)
                 filepath = '%s[%02d]%s' % (unixpath, i, ext)
@@ -283,7 +282,7 @@ def main():
     import sys
     argv = sys.argv[1:]
     options = optparse.OptionParser()
-    options.add_option('-t', '--threads', type='int', dest='threads', help='threads', default = 4)
+    options.add_option('-t', '--threads', type='int', dest='threads', help='threads', default = 3)
     options.add_option('-u', '--url', dest='url', help='url', default=None)
     options.add_option('-o', '--output-path', dest='output_path', help='output_path', default=None)
     opts, args = options.parse_args(argv)
@@ -299,7 +298,6 @@ def main():
     urls = [opts.url]
 
     dl = downloader()
-    r = request.request()
     p = r.request.urlparse.urlparse(opts.url)
     output_path = None
     if not opts.output_path:

@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年12月06日 星期三 19时34分46秒
+#   修改日期：2017年12月07日 星期四 13时19分56秒
 #   描    述：
 #
 #================================================================
@@ -24,6 +24,8 @@ sys.setdefaultencoding('utf-8')
 
 logging = log.dict_configure()
 logger = logging.getLogger('default')
+
+r = request.request()
 
 class ts_downloader(object):
     jobs = 1
@@ -43,14 +45,11 @@ class ts_downloader(object):
         self.dl = downloader.downloader()
         self.dry_run = dry_run
         self.play_url = play_url
-        r = request.request()
         r = r.request.urlparse.urlparse(self.play_url)
         self.domain = '%s://%s' %(r.scheme, r.netloc)
 
     def get_part_urls_from_m3u8(self, url_m3u8):
         url_files = []
-
-        r = request.request()
 
         basename = os.path.basename(url_m3u8)
         p = r.request.urlparse.urlparse(url_m3u8)
@@ -61,7 +60,7 @@ class ts_downloader(object):
         #logger.debug('head:%s' %(head))
 
         if url_m3u8.endswith('.m3u8'):
-            content = r.request.get_content(url_m3u8);
+            content = r.request.get(url_m3u8);
 
             lines = content.splitlines()
             for i in lines:
@@ -76,7 +75,6 @@ class ts_downloader(object):
 
     def get_691gao_list_info(self, html):
         ret = False
-        r = request.request()
 
         e_play_url = html.xpath('//div[@class="l"]/a[@class="txt" and @href]')
         #logger.debug('e_play_url:%s' %([(i.items(), i.text) for i in e_play_url]))
@@ -85,7 +83,7 @@ class ts_downloader(object):
             return ret
         self.play_url = r.request.urlparse.urljoin(self.domain, e_play_url[0].get('href'))
         logger.debug('self.play_url:%s' %(self.play_url))
-        data = r.request.get_content(self.play_url)
+        data = r.request.get(self.play_url)
         #logger.debug('data:%s' %(data))
         html = lxml.etree.HTML(data)
         #e_player = html.xpath('//*[@id="ckplayer_a1"]')
@@ -129,8 +127,6 @@ class ts_downloader(object):
 
     def get_691gao_diao_info(self, html):
         ret = False
-
-        r = request.request()
 
         e_title = html.xpath('//title')
         if not len(e_title):
@@ -182,7 +178,7 @@ class ts_downloader(object):
 
     def get_119gan_info(self, html):
         ret = False
-        r = request.request()
+
         filetitle = html.xpath('//title/text()')
         if not len(filetitle) == 1:
             return ret
@@ -201,7 +197,7 @@ class ts_downloader(object):
         url = url[0]
         url = r.request.urlparse.urljoin(self.domain, url)
         logger.debug('url:%s' %(url))
-        data = r.request.get_content(url)
+        data = r.request.get(url)
         logger.debug('data:%s' %(data))
         url = data.split(u'$')
         logger.debug('url:%s' %(url))
@@ -217,9 +213,7 @@ class ts_downloader(object):
     def get_info_form_play_url(self):
         ret = False
 
-        r = request.request()
-
-        data = r.request.get_content(self.play_url)
+        data = r.request.get(self.play_url)
         #logger.debug('data:%s' %(data))
 
         html = lxml.etree.HTML(data)
