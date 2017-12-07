@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2017年12月07日 星期四 13时04分25秒
+#   修改日期：2017年12月07日 星期四 14时16分09秒
 #   描    述：
 #
 #================================================================
@@ -225,7 +225,6 @@ class abstract_request(object):
         if charset:
             try:
                 content = self.content.decode(charset)
-                logger.debug('')
             except:
                 logger.debug('charset:%s' %(charset))
         else:
@@ -233,17 +232,16 @@ class abstract_request(object):
 
         return content
 
-
-    def get_content_size(self, response):
-        raise Exception('not valid!')
-
-    def get(self, url, headers = None):
+    def get(self, url, data = None, headers = None):
         raise Exception('not valid!')
 
     def post(self, url, data = None, headers = None):
         raise Exception('not valid!')
 
     def url_size(self, url, data = None, headers = None):
+        raise Exception('not valid!')
+
+    def iter_content(self, url, chunk_size = None, data = None, headers = None):
         raise Exception('not valid!')
 
     def get_ipv4_address_by_if(ifname):
@@ -335,7 +333,10 @@ class urllib_request(abstract_request):
 
         return charset
 
-    def get(self, url, headers = None):
+    def get(self, url, data = None, headers = None):
+        if data:
+            url = '%s?%s' %(url, self.urllib.parse.urlencode(data))
+
         if not headers:
             headers = self.fake_headers
 
@@ -418,6 +419,7 @@ class requests_request(abstract_request):
         super(requests_request, self).__init__()
         import requests
         self.requests = requests
+        self.urlparse.urlencode = requests.models.urlencode
         self.s = self.requests.session()
         self.s.proxies = proxies
         self.s.cookies = self.cookie
@@ -440,23 +442,34 @@ class requests_request(abstract_request):
         charset = response.encoding
         return charset
 
-    def get(self, url, headers = None):
+    def get(self, url, data = None, headers = None):
+        if data:
+            url = '%s?%s' %(url, self.requests.models.urlencode(data))
+
+        if not headers:
+            headers = self.fake_headers
+
         method = self.s.get
         response = self.urlopen_with_retry(method, url, headers = headers)
 
         content = response.content
-        content = self.decompresses(response, content)
-        content = self.decode(response, content)
+        #content = self.decompresses(response, content)
+        #content = self.decode(response, content)
+        content = content.decode('utf-8')
 
         return content
 
     def post(self, url, data = None, headers = None):
+        if not headers:
+            headers = self.fake_headers
+
         method = self.s.post
         response = self.urlopen_with_retry(method, url, data = data, headers = headers)
 
         content = response.content
-        content = self.decompresses(response, content)
-        content = self.decode(response, content)
+        #content = self.decompresses(response, content)
+        #content = self.decode(response, content)
+        content = content.decode('utf-8')
 
         return content
 
