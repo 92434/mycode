@@ -6,7 +6,7 @@
 #   文件名称：baiduyun.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 12时24分48秒
-#   修改日期：2017年12月05日 星期二 18时18分17秒
+#   修改日期：2017年12月05日 星期二 19时32分59秒
 #   描    述：
 #
 #================================================================
@@ -36,7 +36,7 @@ class baiduyun(object):
         conf_file = os.path.join(os.path.dirname(__file__), 'default.ini')
         if not os.path.exists(conf_file):
             self.conf.add_section(self.conf_section)
-            self.conf.set(self.conf_section, 'api_key', 'CM6RxGnc8M9U9LheHN48cU27')
+            self.conf.set(self.conf_section, 'api_key', 'iG6ghsi9r0RR0jTFCrlvTjX9')
             self.conf.set(self.conf_section, 'oauth_url', 'https://openapi.baidu.com/oauth/2.0/authorize')
             self.conf.set(self.conf_section, 'oauth_login', 'https://openapi.baidu.com/oauth/2.0/login_success')
             self.conf.set(self.conf_section, 'pcs_file_url', 'https://c.pcs.baidu.com/rest/2.0/pcs/file')
