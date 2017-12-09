@@ -6,11 +6,10 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年12月07日 星期四 13时17分36秒
+#   修改日期：2017年12月09日 星期六 13时50分51秒
 #   描    述：
 #
 #================================================================
-import network
 import socket
 import re
 import os
@@ -42,18 +41,15 @@ class downloader(object):
     def __init__(self):
         pass
 
-    def urls_size(self, urls, headers = None):
-        return sum([r.request.url_size(url, headers = headers) for url in urls])
-
     def url_save_part_thread_wapper(self, *args, **kwargs):
         try:
             self.url_save_part(*args, **kwargs)
         except Exception as e:
-            logger.debug('%s' %(e))
-
-        thread_sem = kwargs.get('thread_sem')
-        if thread_sem:
-            thread_sem.release()
+            raise e
+        finally:
+            thread_sem = kwargs.get('thread_sem')
+            if thread_sem:
+                thread_sem.release()
 
     def url_save_part(self, index, url, filepart, file_size, bar, thread_sem = None, force = False, refer = None, headers = None, timeout = None, **kwargs):
         part_size = self.block_size
@@ -120,11 +116,11 @@ class downloader(object):
                     if received == part_size:
                         break
             except Exception as e:
-                    logger.debug('%s' %(e))
+                raise e
+            finally:
+                output.close()
 
             #logger.debug('filepart:%s, received:%d, part_size:%d' %(filepart, received, part_size))
-
-            output.close()
 
             if received < part_size:
                 open_mode = 'ab'
@@ -147,10 +143,11 @@ class downloader(object):
         try:
             self.url_save(*args, **kwargs)
         except Exception as e:
-            logger.debug('%s' %(e))
-        jobs_sem = kwargs.get('jobs_sem')
-        if jobs_sem:
-            jobs_sem.release()
+            raise e
+        finally:
+            jobs_sem = kwargs.get('jobs_sem')
+            if jobs_sem:
+                jobs_sem.release()
 
     def url_save(self, url, filepath, bar, threads, jobs_sem = None, force = False, refer = None, multi_urls = False, headers = None, timeout = None, **kwargs):
 #When a referer specified with param refer, the key must be 'Referer' for the hack here
@@ -225,17 +222,10 @@ class downloader(object):
             
 
         if not total_size:
-            try:
-                total_size = self.urls_size(urls, headers = headers)
-            except:
-                import traceback
-                import sys
-                traceback.print_exc(file = sys.stdout)
-                pass
+            total_size = r.request.urls_size(urls, headers = headers)
 
         logger.debug('Downloading %s ...' %(output_filepath))
 
-        lock = _threading.Lock()
         bar = progress_bar.SimpleProgressBar(total_size, len(urls))
 
         if len(urls) == 1:
@@ -249,6 +239,7 @@ class downloader(object):
             threads_set = set()
 
             for i, url in enumerate(urls):
+                jobs_sem.acquire()
                 unixpath, _ = os.path.splitext(output_filepath)
                 p = r.request.urlparse.urlparse(url)
                 _, ext = os.path.splitext(p.path)
@@ -258,7 +249,6 @@ class downloader(object):
                 piece = i + 1;
                 bar.update_piece(piece)
 
-                jobs_sem.acquire()
                 local_kwargs = dict(url = url, filepath = filepath, bar = bar, threads = threads, jobs_sem = jobs_sem, refer = refer, multi_urls = True, headers = headers)
                 local_kwargs.update(kwargs)
 

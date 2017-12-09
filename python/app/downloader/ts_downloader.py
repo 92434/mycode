@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年12月07日 星期四 13时19分56秒
+#   修改日期：2017年12月09日 星期六 10时00分52秒
 #   描    述：
 #
 #================================================================
@@ -18,6 +18,7 @@ import log
 import re
 import sys  
 import lxml.etree
+import request
 
 reload(sys)  
 sys.setdefaultencoding('utf-8')
@@ -45,8 +46,8 @@ class ts_downloader(object):
         self.dl = downloader.downloader()
         self.dry_run = dry_run
         self.play_url = play_url
-        r = r.request.urlparse.urlparse(self.play_url)
-        self.domain = '%s://%s' %(r.scheme, r.netloc)
+        p = r.request.urlparse.urlparse(self.play_url)
+        self.domain = '%s://%s' %(p.scheme, p.netloc)
 
     def get_part_urls_from_m3u8(self, url_m3u8):
         url_files = []
