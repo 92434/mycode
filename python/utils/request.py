@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2017年12月07日 星期四 14时16分09秒
+#   修改日期：2017年12月09日 星期六 17时11分53秒
 #   描    述：
 #
 #================================================================
@@ -223,8 +223,10 @@ class abstract_request(object):
     def decode(self, response, content):
         charset = self.get_charset(response)
         if charset:
+            if charset == 'ISO-8859-1':
+                charset = 'gb18030'
             try:
-                content = self.content.decode(charset)
+                content = content.decode(charset)
             except:
                 logger.debug('charset:%s' %(charset))
         else:
@@ -240,6 +242,9 @@ class abstract_request(object):
 
     def url_size(self, url, data = None, headers = None):
         raise Exception('not valid!')
+
+    def urls_size(self, urls, headers = None):
+        return sum([self.url_size(url, headers = headers) for url in urls])
 
     def iter_content(self, url, chunk_size = None, data = None, headers = None):
         raise Exception('not valid!')
@@ -300,7 +305,7 @@ class urllib_request(abstract_request):
                     mgr.add_password(p[1], 'http://%s/' % host, p[0], p[2])
                     mgr.add_password(p[1], 'https://%s/' % host, p[0], p[2])
             except:
-                pass
+                logger.debug('%s' %(e))
 
             for uri, username, password in auth:
                 mgr.add_password(None, uri, username, password)
@@ -319,7 +324,7 @@ class urllib_request(abstract_request):
             try:
                 return self.urllib.request.urlopen(*args, **kwargs)
             except Exception as e:
-                pass
+                logger.debug('%s' %(e))
         raise Exception('')
 
     def get_content_encoding(self, response):
@@ -431,7 +436,7 @@ class requests_request(abstract_request):
             try:
                 return method(*args, **kwargs)
             except Exception as e:
-                pass
+                logger.debug('%s' %(e))
         raise Exception('')
 
     def get_content_encoding(self, response):
@@ -454,8 +459,7 @@ class requests_request(abstract_request):
 
         content = response.content
         #content = self.decompresses(response, content)
-        #content = self.decode(response, content)
-        content = content.decode('utf-8')
+        content = self.decode(response, content)
 
         return content
 
@@ -468,8 +472,7 @@ class requests_request(abstract_request):
 
         content = response.content
         #content = self.decompresses(response, content)
-        #content = self.decode(response, content)
-        content = content.decode('utf-8')
+        content = self.decode(response, content)
 
         return content
 
@@ -491,7 +494,7 @@ class requests_request(abstract_request):
 
     def iter_content(self, url, chunk_size = None, data = None, headers = None):
         method = self.s.get
-        response = self.urlopen_with_retry(method, url, data = data, headers = headers)
+        response = self.urlopen_with_retry(method, url, data = data, headers = headers, stream = True)
         return response.iter_content(chunk_size = chunk_size)
 
 

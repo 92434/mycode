@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年12月09日 星期六 16时36分23秒
+#   修改日期：2017年12月09日 星期六 21时47分29秒
 #   描    述：
 #
 #================================================================
@@ -19,6 +19,7 @@ import log
 import progress_bar
 
 import request
+import watcher
 
 logging = log.dict_configure()
 logger = logging.getLogger('default')
@@ -178,9 +179,7 @@ class downloader(object):
         threads_set = set()
 
         for i in range(0, loops, 1):
-            import time
             thread_sem.acquire()
-            time.sleep(1)
             filepart = '%s.part%d' %(filepath, i)
             fileparts.append(filepart)
             local_kwargs = dict(index = i, url = url, filepart = filepart, file_size = file_size, bar = bar, thread_sem = thread_sem, refer = refer, headers = headers)
@@ -211,6 +210,7 @@ class downloader(object):
 
     def download_urls(self, urls, output_filepath, total_size = 0, jobs = 1, threads = 4, force = False, dry_run = False, refer = None, merge = True, headers = None, **kwargs):
         assert urls
+        w = watcher.watcher()
         if dry_run:
             logger.debug('Real URLs:\n%s' % '\n'.join(urls))
             return
