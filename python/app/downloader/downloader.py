@@ -6,7 +6,7 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年12月09日 星期六 13时50分51秒
+#   修改日期：2017年12月09日 星期六 16时36分23秒
 #   描    述：
 #
 #================================================================
@@ -45,7 +45,7 @@ class downloader(object):
         try:
             self.url_save_part(*args, **kwargs)
         except Exception as e:
-            raise e
+            logger.debug('%s' %(e))
         finally:
             thread_sem = kwargs.get('thread_sem')
             if thread_sem:
@@ -104,21 +104,18 @@ class downloader(object):
 
             headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
 
-            try:
-                for data in r.request.iter_content(url, chunk_size = self.max_read_size, headers = headers):
-                    if received + len(data) > part_size:
-                        data = data[: (part_size - received)]
-                    output.write(data)
-                    received += len(data)
-                    if bar:
-                        bar.update_received(len(data))
+            for data in r.request.iter_content(url, chunk_size = self.max_read_size, headers = headers):
+                if received + len(data) > part_size:
+                    data = data[: (part_size - received)]
+                output.write(data)
+                received += len(data)
+                if bar:
+                    bar.update_received(len(data))
 
-                    if received == part_size:
-                        break
-            except Exception as e:
-                raise e
-            finally:
-                output.close()
+                if received == part_size:
+                    break
+
+            output.close()
 
             #logger.debug('filepart:%s, received:%d, part_size:%d' %(filepart, received, part_size))
 
@@ -143,7 +140,7 @@ class downloader(object):
         try:
             self.url_save(*args, **kwargs)
         except Exception as e:
-            raise e
+            logger.debug('%s' %(e))
         finally:
             jobs_sem = kwargs.get('jobs_sem')
             if jobs_sem:
@@ -181,7 +178,9 @@ class downloader(object):
         threads_set = set()
 
         for i in range(0, loops, 1):
+            import time
             thread_sem.acquire()
+            time.sleep(1)
             filepart = '%s.part%d' %(filepath, i)
             fileparts.append(filepart)
             local_kwargs = dict(index = i, url = url, filepart = filepart, file_size = file_size, bar = bar, thread_sem = thread_sem, refer = refer, headers = headers)
@@ -189,7 +188,7 @@ class downloader(object):
 
             t = _threading.Thread(target = self.url_save_part_thread_wapper, kwargs = local_kwargs)
             # Ensure that Ctrl-C will not freeze the process.
-            t.daemon = True
+            t.setDaemon(True)
             threads_set.add(t)
             t.start()
 
@@ -254,7 +253,7 @@ class downloader(object):
 
                 t = _threading.Thread(target = self.url_save_thread_wapper, kwargs = local_kwargs)
                 # Ensure that Ctrl-C will not freeze the process.
-                t.daemon = True
+                t.setDaemon(True)
                 threads_set.add(t)
                 t.start()
 
@@ -285,7 +284,7 @@ def main():
     if not opts.url:
         return
 
-    urls = [opts.url]
+    urls = [opts.url, opts.url]
 
     dl = downloader()
     p = r.request.urlparse.urlparse(opts.url)

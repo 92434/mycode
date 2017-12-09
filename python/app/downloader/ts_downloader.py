@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年12月09日 星期六 10时00分52秒
+#   修改日期：2017年12月09日 星期六 17时09分28秒
 #   描    述：
 #
 #================================================================
@@ -62,6 +62,7 @@ class ts_downloader(object):
 
         if url_m3u8.endswith('.m3u8'):
             content = r.request.get(url_m3u8);
+            #logger.debug('content:%s' %(content))
 
             lines = content.splitlines()
             for i in lines:
@@ -199,7 +200,7 @@ class ts_downloader(object):
         url = r.request.urlparse.urljoin(self.domain, url)
         logger.debug('url:%s' %(url))
         data = r.request.get(url)
-        logger.debug('data:%s' %(data))
+        #logger.debug('data:%s' %(data))
         url = data.split(u'$')
         logger.debug('url:%s' %(url))
         if not len(url) == 3:
@@ -215,7 +216,7 @@ class ts_downloader(object):
         ret = False
 
         data = r.request.get(self.play_url)
-        #logger.debug('data:%s' %(data))
+        logger.debug('data:%s' %(data))
 
         html = lxml.etree.HTML(data)
 

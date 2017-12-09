@@ -6,7 +6,7 @@
 #   文件名称：progress_bar.py
 #   创 建 者：肖飞
 #   创建日期：2017年10月21日 星期六 09时32分54秒
-#   修改日期：2017年12月09日 星期六 13时45分33秒
+#   修改日期：2017年12月09日 星期六 14时11分59秒
 #   描    述：
 #
 #================================================================
@@ -41,7 +41,7 @@ class SimpleProgressBar:
             self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:-<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
         
         except Exception as e:
-            raise e
+            pass
         finally:
             self.lock.release()
 
@@ -106,7 +106,7 @@ class SimpleProgressBar:
 
             self.update()
         except Exception as e:
-            raise e
+            pass
         finally:
             self.lock.release()
 
@@ -116,7 +116,7 @@ class SimpleProgressBar:
             self.current_piece = n
             self.update(True)
         except Exception as e:
-            raise e
+            pass
         finally:
             self.lock.release()
 
@@ -129,7 +129,7 @@ class SimpleProgressBar:
                 sys.stdout.flush()
                 self.displayed = False
         except Exception as e:
-            raise e
+            pass
         finally:
             self.lock.release()
 
@@ -145,7 +145,7 @@ class PiecesProgressBar:
             self.current_piece = 1
             self.received = 0
         except Exception as e:
-            raise e
+            pass
         finally:
             self.lock.release()
 
@@ -161,7 +161,7 @@ class PiecesProgressBar:
             self.received += n
             self.update()
         except Exception as e:
-            raise e
+            pass
         finally:
             self.lock.release()
 
@@ -171,7 +171,7 @@ class PiecesProgressBar:
             self.current_piece = n
             self.update()
         except Exception as e:
-            raise e
+            pass
         finally:
             self.lock.release()
 
@@ -183,7 +183,7 @@ class PiecesProgressBar:
                 sys.stdout.flush()
                 self.displayed = False
         except Exception as e:
-            raise e
+            pass
         finally:
             self.lock.release()
 
