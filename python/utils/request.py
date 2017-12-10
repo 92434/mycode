@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2017年12月09日 星期六 17时11分53秒
+#   修改日期：2017年12月10日 星期日 14时20分31秒
 #   描    述：
 #
 #================================================================
@@ -34,6 +34,9 @@ import zlib
 
 logging = log.dict_configure()
 logger = logging.getLogger('default')
+
+timeout = 0.01
+socket.setdefaulttimeout(timeout)
 
 class abstract_request(object):
     def __init__(self):
@@ -228,9 +231,7 @@ class abstract_request(object):
             try:
                 content = content.decode(charset)
             except:
-                logger.debug('charset:%s' %(charset))
-        else:
-            logger.debug('charset:%s' %(charset))
+                logger.exception("")
 
         return content
 
@@ -305,7 +306,7 @@ class urllib_request(abstract_request):
                     mgr.add_password(p[1], 'http://%s/' % host, p[0], p[2])
                     mgr.add_password(p[1], 'https://%s/' % host, p[0], p[2])
             except:
-                logger.debug('%s' %(e))
+                logger.exception("")
 
             for uri, username, password in auth:
                 mgr.add_password(None, uri, username, password)
@@ -323,8 +324,8 @@ class urllib_request(abstract_request):
         for i in range(10):
             try:
                 return self.urllib.request.urlopen(*args, **kwargs)
-            except Exception as e:
-                logger.debug('%s' %(e))
+            except:
+                logger.exception("")
         raise Exception('')
 
     def get_content_encoding(self, response):
@@ -435,8 +436,8 @@ class requests_request(abstract_request):
         for i in range(10):
             try:
                 return method(*args, **kwargs)
-            except Exception as e:
-                logger.debug('%s' %(e))
+            except:
+                logger.exception("")
         raise Exception('')
 
     def get_content_encoding(self, response):

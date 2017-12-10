@@ -6,11 +6,10 @@
 #   文件名称：downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 13时26分00秒
-#   修改日期：2017年12月09日 星期六 21时47分29秒
+#   修改日期：2017年12月10日 星期日 14时26分05秒
 #   描    述：
 #
 #================================================================
-import socket
 import re
 import os
 import subprocess
@@ -23,9 +22,6 @@ import watcher
 
 logging = log.dict_configure()
 logger = logging.getLogger('default')
-
-timeout = 30 # in seconds
-socket.setdefaulttimeout(timeout)
 
 r = request.request()
 
@@ -45,8 +41,8 @@ class downloader(object):
     def url_save_part_thread_wapper(self, *args, **kwargs):
         try:
             self.url_save_part(*args, **kwargs)
-        except Exception as e:
-            logger.debug('%s' %(e))
+        except:
+            logger.exception("")
         finally:
             thread_sem = kwargs.get('thread_sem')
             if thread_sem:
@@ -91,8 +87,7 @@ class downloader(object):
         else:
             try:
                 os.mkdir(os.path.dirname(filepart))
-            except Exception as e:
-                #logger.debug('%s' %(e))
+            except:
                 pass
 
 
@@ -105,18 +100,21 @@ class downloader(object):
 
             headers.update({'Range' : 'bytes=' + str(base_size + received) + '-'})
 
-            for data in r.request.iter_content(url, chunk_size = self.max_read_size, headers = headers):
-                if received + len(data) > part_size:
-                    data = data[: (part_size - received)]
-                output.write(data)
-                received += len(data)
-                if bar:
-                    bar.update_received(len(data))
+            try:
+                for data in r.request.iter_content(url, chunk_size = self.max_read_size, headers = headers):
+                    if received + len(data) > part_size:
+                        data = data[: (part_size - received)]
+                    output.write(data)
+                    received += len(data)
+                    if bar:
+                        bar.update_received(len(data))
 
-                if received == part_size:
-                    break
-
-            output.close()
+                    if received == part_size:
+                        break
+            except:
+                logger.exception("")
+            finally:
+                output.close()
 
             #logger.debug('filepart:%s, received:%d, part_size:%d' %(filepart, received, part_size))
 
@@ -140,14 +138,14 @@ class downloader(object):
     def url_save_thread_wapper(self, *args, **kwargs):
         try:
             self.url_save(*args, **kwargs)
-        except Exception as e:
-            logger.debug('%s' %(e))
+        except:
+            logger.exception("")
         finally:
             jobs_sem = kwargs.get('jobs_sem')
             if jobs_sem:
                 jobs_sem.release()
 
-    def url_save(self, url, filepath, bar, threads, jobs_sem = None, force = False, refer = None, multi_urls = False, headers = None, timeout = None, **kwargs):
+    def url_save(self, url, filepath, bar, threads, jobs_sem = None, force = False, refer = None, headers = None, timeout = None, **kwargs):
 #When a referer specified with param refer, the key must be 'Referer' for the hack here
         if not headers:
             headers = {}
@@ -159,16 +157,13 @@ class downloader(object):
         if os.path.exists(filepath):
             logger.debug('Skipping %s: file already exists' % os.path.basename(filepath))
             file_size = os.path.getsize(filepath)
-            if multi_urls:
-                if bar:
-                    bar.update_received(file_size)
-
+            if bar:
+                bar.update_received(file_size)
             return
         else:
             try:
                 os.makedirs(os.path.dirname(filepath))
-            except Exception as e:
-                #logger.debug('%s' %(e))
+            except:
                 pass
 
         file_size = r.request.url_size(url, headers = headers)
@@ -229,7 +224,7 @@ class downloader(object):
 
         if len(urls) == 1:
             url = urls[0]
-            self.url_save(url = url, filepath = output_filepath, bar = bar, threads = threads, refer = refer, multi_urls = True, headers = headers, **kwargs)
+            self.url_save(url = url, filepath = output_filepath, bar = bar, threads = threads, refer = refer, headers = headers, **kwargs)
             bar.done()
         else:
             filepieces = []
@@ -248,7 +243,7 @@ class downloader(object):
                 piece = i + 1;
                 bar.update_piece(piece)
 
-                local_kwargs = dict(url = url, filepath = filepath, bar = bar, threads = threads, jobs_sem = jobs_sem, refer = refer, multi_urls = True, headers = headers)
+                local_kwargs = dict(url = url, filepath = filepath, bar = bar, threads = threads, jobs_sem = jobs_sem, refer = refer, headers = headers)
                 local_kwargs.update(kwargs)
 
                 t = _threading.Thread(target = self.url_save_thread_wapper, kwargs = local_kwargs)
