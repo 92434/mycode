@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2017年12月10日 星期日 14时20分31秒
+#   修改日期：2017年12月10日 星期日 20时16分31秒
 #   描    述：
 #
 #================================================================
@@ -35,7 +35,7 @@ import zlib
 logging = log.dict_configure()
 logger = logging.getLogger('default')
 
-timeout = 0.01
+timeout = 30
 socket.setdefaulttimeout(timeout)
 
 class abstract_request(object):

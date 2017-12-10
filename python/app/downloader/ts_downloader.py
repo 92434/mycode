@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年12月09日 星期六 17时09分28秒
+#   修改日期：2017年12月10日 星期日 20时26分55秒
 #   描    述：
 #
 #================================================================
@@ -93,13 +93,13 @@ class ts_downloader(object):
         if not len(e_title):
             logger.debug('data:%s' %(data))
             return ret
-        #logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
+        logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
         title = e_title[0].text
-        p =  u'\u6b63\u5728\u64ad\u653e (\d+)-(.*)'
+        p =  u'正在播放 (\d+)-(.*)'
         index = r.request.r(p, title, 1)
         filetitle = r.request.r(p, title, 2)
         if not index or not filetitle:
-            p =  u'\u6b63\u5728\u64ad\u653e (.*)'
+            p =  u'正在播放 (.*)'
             index = 1
             filetitle = r.request.r(p, title, 1)
             if not filetitle:
@@ -136,7 +136,7 @@ class ts_downloader(object):
 
         #logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
         title = e_title[0].text
-        p =  u'(.*)\u5728\u7ebf\u89c2\u770b.*'
+        p =  u'(.*)在线观看.*'
         filetitle = r.request.r(p, title, 1)
         if not filetitle:
             return ret
@@ -216,7 +216,7 @@ class ts_downloader(object):
         ret = False
 
         data = r.request.get(self.play_url)
-        logger.debug('data:%s' %(data))
+        #logger.debug('data:%s' %(data))
 
         html = lxml.etree.HTML(data)
 
