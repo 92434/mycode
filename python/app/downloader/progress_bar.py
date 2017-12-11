@@ -6,7 +6,7 @@
 #   文件名称：progress_bar.py
 #   创 建 者：肖飞
 #   创建日期：2017年10月21日 星期六 09时32分54秒
-#   修改日期：2017年10月31日 星期二 12时46分01秒
+#   修改日期：2017年12月09日 星期六 14时11分59秒
 #   描    述：
 #
 #================================================================
@@ -22,24 +22,28 @@ class SimpleProgressBar:
     def __init__(self, total_size, total_pieces = 1):
         self.lock = _threading.Lock()
         self.lock.acquire()
+        try:
+            self.displayed = False
+            self.total_size = total_size
+            self.total_pieces = total_pieces
+            self.current_piece = 1
+            self.received = 0
+            self.last_received = 0
+            self.speed = ''
+            self.last_updated = time.time()
 
-        self.displayed = False
-        self.total_size = total_size
-        self.total_pieces = total_pieces
-        self.current_piece = 1
-        self.received = 0
-        self.last_received = 0
-        self.speed = ''
-        self.last_updated = time.time()
-
-        total_pieces_len = len(str(total_pieces))
-        # 38 is the size of all statically known size in self.bar
-        total_str = '%5s' % round(self.total_size / 1048576, 1)
-        total_str_width = max(len(total_str), 5)
-        self.bar_size = self.get_terminal_size()[1] - 27 - 2 * total_pieces_len - 2 * total_str_width
-        #self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:─<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
-        self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:-<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
-        self.lock.release()
+            total_pieces_len = len(str(total_pieces))
+            # 38 is the size of all statically known size in self.bar
+            total_str = '%5s' % round(self.total_size / 1048576, 1)
+            total_str_width = max(len(total_str), 5)
+            self.bar_size = self.get_terminal_size()[1] - 27 - 2 * total_pieces_len - 2 * total_str_width
+            #self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:─<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
+            self.bar = '{:>4}%% ({:>%s}/%sMB) ├{:-<%s}┤[{:>%s}/{:>%s}] {}' % (total_str_width, total_str, self.bar_size, total_pieces_len, total_pieces_len)
+        
+        except Exception as e:
+            pass
+        finally:
+            self.lock.release()
 
     def get_terminal_size(self):
         """Get (width, height) of the current terminal."""
@@ -97,38 +101,53 @@ class SimpleProgressBar:
     def update_received(self, n):
         self.lock.acquire()
 
-        self.received += n
+        try:
+            self.received += n
 
-        self.update()
-
-        self.lock.release()
+            self.update()
+        except Exception as e:
+            pass
+        finally:
+            self.lock.release()
 
     def update_piece(self, n):
         self.lock.acquire()
-        self.current_piece = n
-        self.update(True)
-        self.lock.release()
+        try:
+            self.current_piece = n
+            self.update(True)
+        except Exception as e:
+            pass
+        finally:
+            self.lock.release()
 
     def done(self):
         self.lock.acquire()
-        self.update(True)
-        if self.displayed:
-            sys.stdout.write('\n')
-            sys.stdout.flush()
-            self.displayed = False
-        self.lock.release()
+        try:
+            self.update(True)
+            if self.displayed:
+                sys.stdout.write('\n')
+                sys.stdout.flush()
+                self.displayed = False
+        except Exception as e:
+            pass
+        finally:
+            self.lock.release()
 
 class PiecesProgressBar:
     def __init__(self, total_size, total_pieces = 1):
         self.lock = _threading.Lock()
 
-        self.lock.acquire()
-        self.displayed = False
-        self.total_size = total_size
-        self.total_pieces = total_pieces
-        self.current_piece = 1
-        self.received = 0
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.displayed = False
+            self.total_size = total_size
+            self.total_pieces = total_pieces
+            self.current_piece = 1
+            self.received = 0
+        except Exception as e:
+            pass
+        finally:
+            self.lock.release()
 
     def update(self):
         self.displayed = True
@@ -137,40 +156,45 @@ class PiecesProgressBar:
         sys.stdout.flush()
 
     def update_received(self, n):
-        self.lock.acquire()
-        self.received += n
-        self.update()
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.received += n
+            self.update()
+        except Exception as e:
+            pass
+        finally:
+            self.lock.release()
 
     def update_piece(self, n):
-        self.lock.acquire()
-        self.current_piece = n
-        self.update()
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.current_piece = n
+            self.update()
+        except Exception as e:
+            pass
+        finally:
+            self.lock.release()
 
     def done(self):
         self.lock.acquire()
-        if self.displayed:
-            sys.stdout.write('\n')
-            sys.stdout.flush()
-            self.displayed = False
-        self.lock.release()
+        try:
+            if self.displayed:
+                sys.stdout.write('\n')
+                sys.stdout.flush()
+                self.displayed = False
+        except Exception as e:
+            pass
+        finally:
+            self.lock.release()
 
 class DummyProgressBar:
     def __init__(self, *args):
-        self.lock = _threading.Lock()
         pass
     def update_received(self, n):
-        self.lock.acquire()
-        self.lock.release()
         pass
     def update_piece(self, n):
-        self.lock.acquire()
-        self.lock.release()
         pass
     def done(self):
-        self.lock.acquire()
-        self.lock.release()
         pass
 
 def main():

@@ -6,7 +6,7 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年12月07日 星期四 13时19分56秒
+#   修改日期：2017年12月10日 星期日 20时26分55秒
 #   描    述：
 #
 #================================================================
@@ -18,6 +18,7 @@ import log
 import re
 import sys  
 import lxml.etree
+import request
 
 reload(sys)  
 sys.setdefaultencoding('utf-8')
@@ -45,8 +46,8 @@ class ts_downloader(object):
         self.dl = downloader.downloader()
         self.dry_run = dry_run
         self.play_url = play_url
-        r = r.request.urlparse.urlparse(self.play_url)
-        self.domain = '%s://%s' %(r.scheme, r.netloc)
+        p = r.request.urlparse.urlparse(self.play_url)
+        self.domain = '%s://%s' %(p.scheme, p.netloc)
 
     def get_part_urls_from_m3u8(self, url_m3u8):
         url_files = []
@@ -61,6 +62,7 @@ class ts_downloader(object):
 
         if url_m3u8.endswith('.m3u8'):
             content = r.request.get(url_m3u8);
+            #logger.debug('content:%s' %(content))
 
             lines = content.splitlines()
             for i in lines:
@@ -91,13 +93,13 @@ class ts_downloader(object):
         if not len(e_title):
             logger.debug('data:%s' %(data))
             return ret
-        #logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
+        logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
         title = e_title[0].text
-        p =  u'\u6b63\u5728\u64ad\u653e (\d+)-(.*)'
+        p =  u'正在播放 (\d+)-(.*)'
         index = r.request.r(p, title, 1)
         filetitle = r.request.r(p, title, 2)
         if not index or not filetitle:
-            p =  u'\u6b63\u5728\u64ad\u653e (.*)'
+            p =  u'正在播放 (.*)'
             index = 1
             filetitle = r.request.r(p, title, 1)
             if not filetitle:
@@ -134,7 +136,7 @@ class ts_downloader(object):
 
         #logger.debug('e_title:%s' %([(i.items(), i.text) for i in e_title]))
         title = e_title[0].text
-        p =  u'(.*)\u5728\u7ebf\u89c2\u770b.*'
+        p =  u'(.*)在线观看.*'
         filetitle = r.request.r(p, title, 1)
         if not filetitle:
             return ret
@@ -198,7 +200,7 @@ class ts_downloader(object):
         url = r.request.urlparse.urljoin(self.domain, url)
         logger.debug('url:%s' %(url))
         data = r.request.get(url)
-        logger.debug('data:%s' %(data))
+        #logger.debug('data:%s' %(data))
         url = data.split(u'$')
         logger.debug('url:%s' %(url))
         if not len(url) == 3:
