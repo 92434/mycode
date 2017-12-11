@@ -56,7 +56,7 @@ if [ -f .filetype ]; then
 fi
 
 if [ -z "$type" ]; then
-	type="-name *.java -o -name *.cpp -o -name *.cc -o -name *.tcc -o -name *.[ch] -o -name *.xml -o -name *.aidl -o -name *.py -o -name *.cs"
+	type="-name *.java -o -name *.cpp -o -name *.cc -o -name *.tcc -o -name *.[ch] -o -name *.xml -o -name *.aidl -o -name *.py -o -name *.cs -o -name *.hal"
 fi
 type="( $type ) -a ( -type f )"
 

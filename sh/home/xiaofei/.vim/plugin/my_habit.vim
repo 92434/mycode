@@ -9,6 +9,9 @@ au FileType c setlocal sw=8 ts=8 sts=8
 au FileType cpp setlocal sw=8 ts=8 sts=8
 au FileType java setlocal sw=4 ts=4 sts=4
 au FileType python setlocal sw=4 ts=4 sts=4 et
+au FileType html setlocal sw=4 ts=4 sts=4 et
+au FileType css setlocal sw=4 ts=4 sts=4 et
+au FileType htmldjango setlocal sw=4 ts=4 sts=4 et
 
 "autoindent
 set ai	
@@ -102,6 +105,9 @@ func CodeFormat()
 	elseif &filetype == 'html'
 		"执行调用外部程序的命令
 		call HtmlBeautify()
+	elseif &filetype == 'css'
+		"执行调用外部程序的命令
+		call CSSBeautify()
 	else
 		"提示信息
 		echo "不支持".&filetype."文件类型。按c类型处理-_-"
