@@ -6,7 +6,7 @@
 #   文件名称：image.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月07日 星期四 18时09分36秒
-#   修改日期：2017年12月13日 星期三 16时00分45秒
+#   修改日期：2017年12月13日 星期三 16时50分52秒
 #   描    述：
 #
 #================================================================
@@ -68,42 +68,49 @@ def main(argv):
         #widget = QWidget()
         #vlayout = QVBoxLayout()
         f = io.BytesIO(s)
-        with open('%s.csv' %(opts.pid), 'wb+') as bf:
-            for h in range(0, 112):
-                #hlayout = QHBoxLayout()
-                bf_line = ''
-                for w in range(0, table_column):
-                    if i == 6:
-                        c = f.read(1)
+        #bf = open('%s.csv' %(opts.pid), 'wb+')
+        for h in range(0, 112):
+            #hlayout = QHBoxLayout()
+            bf_line = ''
+            for w in range(0, table_column):
+                if i == 6:
+                    c = f.read(1)
+                else:
+                    c = f.read(1)
+                    c = f.read(1)
+                item = QTableWidgetItem()
+                if i == 6:
+                    item.setText('%02x' %(ord(c)))
+                else:
+                    if i % 2 == 0:
+                        item.setText('%02x' %((ord(c) & 0xf0) >> 4))
                     else:
-                        c = f.read(1)
-                        c = f.read(1)
-                    item = QTableWidgetItem()
-                    if i == 6:
-                        item.setText('%02x' %(ord(c)))
-                    else:
-                        if i % 2 == 0:
-                            item.setText('%02x' %((ord(c) & 0xf0) >> 4))
-                        else:
-                            item.setText('%02x' %((ord(c) & 0xf0)))
+                        item.setText('%02x' %((ord(c) & 0xf0)))
 
-                    #item.setSizeHint(QSize(25, 25));
-                    item.setBackground(QBrush(QColor(ord(c), ord(c), ord(c))))
-                    table.setItem(h, w, item)
+                #item.setSizeHint(QSize(25, 25));
+                item.setBackground(QBrush(QColor(ord(c), ord(c), ord(c))))
+                table.setItem(h, w, item)
 
-                    #item = QLabel()
-                    #item.setText('%02x' %(ord(c)))
-                    #pe = QPalette()  
-                    #pe.setColor(QPalette.Background, QColor(ord(c), ord(c), ord(c)))  
-                    #item.setPalette(pe)
-                    #item.setAutoFillBackground(True)
-                    #hlayout.addWidget(item)
+                #item = QLabel()
+                #item.setText('%02x' %(ord(c)))
+                #pe = QPalette()  
+                #pe.setColor(QPalette.Background, QColor(ord(c), ord(c), ord(c)))  
+                #item.setPalette(pe)
+                #item.setAutoFillBackground(True)
+                #hlayout.addWidget(item)
 
-                    bf_line += hex(ord(c)) + ','
-                #vlayout.addItem(hlayout)
+                #bf_line += hex(ord(c)) + ','
 
-                bf_line += '\n'
-                bf.write(bf_line)
+
+            #vlayout.addItem(hlayout)
+
+            #bf_line += '\n'
+            #bf.write(bf_line)
+
+        #widget.setLayout(vlayout)
+        #widget.show()
+
+        #bf.close()
         for c in range(0, table_column):
             table.setColumnWidth(c, 18)
 
@@ -116,9 +123,6 @@ def main(argv):
         item = QListWidgetItem(list_widget)
         item.setSizeHint(table.sizeHint());
         list_widget.setItemWidget(item, table);
-
-        #widget.setLayout(vlayout)
-        #widget.show()
 
         #item = QListWidgetItem(list_widget)
         #image = QImage(s, 112, 132, QImage.Format_Grayscale8)
@@ -134,9 +138,9 @@ def main(argv):
         item = QListWidgetItem(list_widget)
         image = QImage(s, 132, 112, QImage.Format_Grayscale8)
         pixmap = QPixmap.fromImage(image)
-        #img = image_file.image_file(132, 112)
-        #img.write_bmp(opts.pid, s)
         #pixmap.save('%d.bmp' %(i))
+        img = image_file.image_file(132, 112)
+        img.write_bmp('%s-%s-%s' %(opts.file, opts.pid, i), s)
         widget = QWidget()
         layout = QVBoxLayout()
         label = QLabel()

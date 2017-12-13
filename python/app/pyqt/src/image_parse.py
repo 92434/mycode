@@ -6,7 +6,7 @@
 #   文件名称：image_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月13日 星期三 13时14分07秒
-#   修改日期：2017年12月13日 星期三 16时23分04秒
+#   修改日期：2017年12月13日 星期三 18时36分41秒
 #   描    述：
 #
 #================================================================
@@ -143,10 +143,10 @@ class image_database(object):
                 #print('%s' %(byte2))
                 #print('%s' %(byte3))
 
-                xor = 0x55
+                #xor = 0x55
                 #xor = 0xaa
                 #xor = 0xff
-                #xor = 0x00
+                xor = 0x00
                 byte1 = chr(int(byte1, 16) ^ xor)
                 byte2 = chr(int(byte2, 16) ^ xor)
                 byte3 = chr(int(byte3, 16) ^ xor)
@@ -163,8 +163,10 @@ class image_database(object):
                 halfbytes = [byte1_l, byte1_h, byte2_l, byte2_h, byte3_l, byte3_h]
 
                 if index == 6:
-                    pixel1 = chr(ord(byte1_l) + (ord(byte1_h) << 4))
-                    pixel2 = chr(ord(byte2_h) + (ord(byte3_l) << 4))
+                    #pixel1 = chr(ord(byte1_h) + (ord(byte1_l) << 4))
+                    #pixel2 = chr(ord(byte3_l) + (ord(byte2_h) << 4))
+                    pixel1 = chr((ord(byte1_l) + (0 << 4)) ^ 0x0f)
+                    pixel2 = chr((0 + (ord(byte2_h) << 4) ^ 0xf0))
                 else:
                     pixel1 = chr((ord(halfbytes[index]) << 4))
                     pixel2 = chr((ord(halfbytes[index]) << 4))
