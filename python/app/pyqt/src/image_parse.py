@@ -6,7 +6,7 @@
 #   文件名称：image_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月13日 星期三 13时14分07秒
-#   修改日期：2017年12月13日 星期三 18时36分41秒
+#   修改日期：2017年12月14日 星期四 13时26分12秒
 #   描    述：
 #
 #================================================================
@@ -114,6 +114,24 @@ class image_database(object):
                 self.update_conf_setction_item(section, int(item[1], 16))
         self.save()
 
+    def gen_sort_combine(self, l_head, l_data):
+        result = []
+
+        if len(l_data) <= 1:
+            result.append(l_head + l_data)
+        else:
+            for i in l_data:
+                l_head_sub = l_head[:]
+                l_data_sub = l_data[:]
+
+                l_head_sub.append(i)
+                l_data_sub.remove(i)
+                result += self.gen_sort_combine(l_head_sub, l_data_sub)
+
+        return result
+            
+
+
     def gen_pixel_bytes(self, csv_file, pid_select, index):
         d = self.parse_csv_file(csv_file)
         for pid in d:
@@ -124,24 +142,40 @@ class image_database(object):
                 print('skip pid %s' %(pid))
                 continue
 
-            for section in range(1, self.data_size - 4, 3):
+            #for section in range(1, self.data_size - 4, 3):
+            for section in range(1, self.data_size - 4, 6):
                 byte1 = self.get_conf_section(section + 0)
                 byte2 = self.get_conf_section(section + 1)
                 byte3 = self.get_conf_section(section + 2)
+                byte4 = self.get_conf_section(section + 3)
+                byte5 = self.get_conf_section(section + 4)
+                byte6 = self.get_conf_section(section + 5)
                 #if not byte1:
                 #    print('pos %s not found' %(section + 0))
                 #if not byte2:
                 #    print('pos %s not found' %(section + 1))
                 #if not byte3:
                 #    print('pos %s not found' %(section + 2))
+                #if not byte4:
+                #    print('pos %s not found' %(section + 3))
+                #if not byte5:
+                #    print('pos %s not found' %(section + 4))
+                #if not byte6:
+                #    print('pos %s not found' %(section + 5))
 
                 byte1 = byte1 if byte1 else l_data[section + 0][1]
                 byte2 = byte2 if byte2 else l_data[section + 1][1]
                 byte3 = byte3 if byte3 else l_data[section + 2][1]
+                byte4 = byte4 if byte4 else l_data[section + 3][1]
+                byte5 = byte5 if byte5 else l_data[section + 4][1]
+                byte6 = byte6 if byte6 else l_data[section + 5][1]
 
                 #print('%s' %(byte1))
                 #print('%s' %(byte2))
                 #print('%s' %(byte3))
+                #print('%s' %(byte4))
+                #print('%s' %(byte5))
+                #print('%s' %(byte6))
 
                 #xor = 0x55
                 #xor = 0xaa
@@ -150,6 +184,9 @@ class image_database(object):
                 byte1 = chr(int(byte1, 16) ^ xor)
                 byte2 = chr(int(byte2, 16) ^ xor)
                 byte3 = chr(int(byte3, 16) ^ xor)
+                byte4 = chr(int(byte4, 16) ^ xor)
+                byte5 = chr(int(byte5, 16) ^ xor)
+                byte6 = chr(int(byte6, 16) ^ xor)
 
                 byte1_h = chr((ord(byte1) & 0xf0) >> 4)
                 byte1_l = chr((ord(byte1) & 0x0f))
@@ -160,20 +197,35 @@ class image_database(object):
                 byte3_h = chr((ord(byte3) & 0xf0) >> 4)
                 byte3_l = chr((ord(byte3) & 0x0f))
 
-                halfbytes = [byte1_l, byte1_h, byte2_l, byte2_h, byte3_l, byte3_h]
+                byte4_h = chr((ord(byte4) & 0xf0) >> 4)
+                byte4_l = chr((ord(byte4) & 0x0f))
 
-                if index == 6:
-                    #pixel1 = chr(ord(byte1_h) + (ord(byte1_l) << 4))
-                    #pixel2 = chr(ord(byte3_l) + (ord(byte2_h) << 4))
-                    pixel1 = chr((ord(byte1_l) + (0 << 4)) ^ 0x0f)
-                    pixel2 = chr((0 + (ord(byte2_h) << 4) ^ 0xf0))
-                else:
-                    pixel1 = chr((ord(halfbytes[index]) << 4))
-                    pixel2 = chr((ord(halfbytes[index]) << 4))
+                byte5_h = chr((ord(byte5) & 0xf0) >> 4)
+                byte5_l = chr((ord(byte5) & 0x0f))
 
-                #print('%s %s' %(hex(ord(d1)), hex(ord(d2))))
+                byte6_h = chr((ord(byte6) & 0xf0) >> 4)
+                byte6_l = chr((ord(byte6) & 0x0f))
 
-                yield pixel1, pixel2
+                #halfbytes = [byte1_l, byte1_h, byte2_l, byte2_h, byte3_l, byte3_h, byte4_l, byte4_h, byte5_l, byte5_h, byte6_l, byte6_h]
+                halfbytes1 = [byte1_l, byte4_h, byte5_h, byte6_l]
+                halfbytes2 = [byte2_h, byte3_h, byte4_l, byte5_l]
+                halfbytes3 = [byte1_h, byte2_l, byte3_l, byte6_h]
+                
+                pixel_bit_11_8_list = self.gen_sort_combine([], halfbytes1)
+                pixel_bit_9_4_list = self.gen_sort_combine([], halfbytes2)
+
+                index_high = index / len(pixel_bit_11_8_list)
+                index_low = index % len(pixel_bit_9_4_list)
+
+                halfbytes_h = pixel_bit_11_8_list[index_high]
+                halfbytes_l = pixel_bit_9_4_list[index_low]
+
+                pixel1 = chr((ord(halfbytes_h[0]) << 4) + ord(halfbytes_l[0]))
+                pixel2 = chr((ord(halfbytes_h[1]) << 4) + ord(halfbytes_l[1]))
+                pixel3 = chr((ord(halfbytes_h[2]) << 4) + ord(halfbytes_l[2]))
+                pixel4 = chr((ord(halfbytes_h[3]) << 4) + ord(halfbytes_l[3]))
+
+                yield pixel1, pixel2, pixel3, pixel4
 
 def main(argv):
     options = optparse.OptionParser()
@@ -184,12 +236,14 @@ def main(argv):
     if len(args):
         options.print_help()
         return
+    if not opts.file:
+        options.print_help()
+        return
 
     database = image_database()
     database.update_image_info_bitmap(opts.file)
-
-    for i in range(22181):
-        print('%08d:%s' %(i, database.get_conf_section(i)))
+    #for i in range(22181):
+    #    print('%08d:%s' %(i, database.get_conf_section(i)))
 
 if '__main__' == __name__:
     main(sys.argv[1:])
