@@ -6,7 +6,7 @@
 #   文件名称：image.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月07日 星期四 18时09分36秒
-#   修改日期：2017年12月14日 星期四 13时24分14秒
+#   修改日期：2017年12月15日 星期五 14时46分31秒
 #   描    述：
 #
 #================================================================
@@ -36,21 +36,23 @@ def main(argv):
         options.print_help()
         return
 
-    #app = QApplication(argv)
-    #list_widget = QListWidget()
+    app = QApplication(argv)
+    list_widget = QListWidget()
     database = image_parse.image_database()
 
-    #for i in range(0, 7):
-    for i in range(0, 4 * 3 * 2 * 1 * 4 * 3 * 2 * 1):
-        #if i == 6:
-        #if i == 12:
+    #for index in range(0, 7):
+    #for index in range(0, 4 * 3 * 2 * 1 * 4 * 3 * 2 * 1):
+    for index in [168 ,170 ,174 ,176 ,180 ,182 ,24 ,26 ,30 ,32 ,36 ,38]:
+        #if index == 6:
+        #if index == 12:
         #    table_column = 132
         #else:
         #    table_column = 132 / 4
+        table_column = 132
 
         s = ''
-        #for i1, i2 in database.gen_pixel_bytes(opts.file, opts.pid, i):
-        for i1, i2, i3, i4 in database.gen_pixel_bytes(opts.file, opts.pid, i):
+        #for i1, i2 in database.gen_pixel_bytes(opts.file, opts.pid, index):
+        for i1, i2, i3, i4 in database.gen_pixel_bytes(opts.file, opts.pid, index):
             s += i1 + i2 + i3 + i4
 
         #print('len(s):%s' %(len(s)))
@@ -58,44 +60,65 @@ def main(argv):
         if len(s) != 14784:
             continue
 
-        #table = QTableWidget(112, table_column)
-        #font = QFont()
-        #font.setFamily("Calibri")
-        #font.setPointSize(6)
-        #table.setFont(font)
+        valid = True
+        for row in range(112):
+            if row == 0 or row == 111:
+                for col in range(132):
+                    pos = 132 * row + col
+                    if s[pos] != chr(0x00):
+                        valid = False
+                        break
 
-        #table.setEditTriggers(QTableWidget.NoEditTriggers) 
-        #table.verticalHeader().setVisible(False)
-        #table.horizontalHeader().setVisible(False)
+            pos_s = 132 * row + 0
+            pos_e = 132 * row + 131
+            if s[pos_s] != chr(0x00) or s[pos_e] != chr(0x00):
+                valid = False
+                break
+        if not valid:
+            continue
+        
+        print('index:%s' %(index))
+
+        table = QTableWidget(112, table_column)
+        font = QFont()
+        font.setFamily("Calibri")
+        font.setPointSize(6)
+        table.setFont(font)
+
+        table.setEditTriggers(QTableWidget.NoEditTriggers) 
+        table.verticalHeader().setVisible(False)
+        table.horizontalHeader().setVisible(False)
 
         #widget = QWidget()
         #vlayout = QVBoxLayout()
-        #f = io.BytesIO(s)
+        f = io.BytesIO(s)
         ##bf = open('%s.csv' %(opts.pid), 'wb+')
-        #for h in range(0, 112):
+        for h in range(0, 112):
         #    #hlayout = QHBoxLayout()
         #    #bf_line = ''
-        #    for w in range(0, table_column):
-        #        #if i == 6:
-        #        if i == 12:
+            for w in range(0, table_column):
+                c = f.read(1)
+        #        #if index == 6:
+        #        if index == 12:
         #            c = f.read(1)
         #        else:
         #            c = f.read(1)
         #            c = f.read(1)
         #            c = f.read(1)
         #            c = f.read(1)
-        #        item = QTableWidgetItem()
-        #        if i == 12:
+                item = QTableWidgetItem()
+                item.setText('%02x' %(ord(c)))
+        #        if index == 12:
         #            item.setText('%02x' %(ord(c)))
         #        else:
-        #            if i % 2 == 0:
+        #            if index % 2 == 0:
         #                item.setText('%02x' %((ord(c) & 0xf0) >> 4))
         #            else:
         #                item.setText('%02x' %((ord(c) & 0xf0)))
 
         #        #item.setSizeHint(QSize(25, 25));
-        #        item.setBackground(QBrush(QColor(ord(c), ord(c), ord(c))))
-        #        table.setItem(h, w, item)
+                item.setBackground(QBrush(QColor(ord(c), ord(c), ord(c))))
+                table.setItem(h, w, item)
 
         #        #item = QLabel()
         #        #item.setText('%02x' %(ord(c)))
@@ -117,18 +140,18 @@ def main(argv):
         #widget.show()
 
         #bf.close()
-        #for c in range(0, table_column):
-        #    table.setColumnWidth(c, 18)
+        for c in range(0, table_column):
+            table.setColumnWidth(c, 18)
 
-        #for r in range(0, 112):
-        #    table.setRowHeight(r, 18)
+        for r in range(0, 112):
+            table.setRowHeight(r, 18)
 
         #table.resizeColumnsToContents()
         #table.resizeRowsToContents()
         #table.show()
-        #item = QListWidgetItem(list_widget)
-        #item.setSizeHint(table.sizeHint());
-        #list_widget.setItemWidget(item, table);
+        item = QListWidgetItem(list_widget)
+        item.setSizeHint(table.sizeHint());
+        list_widget.setItemWidget(item, table);
 
         #item = QListWidgetItem(list_widget)
         #image = QImage(s, 112, 132, QImage.Format_Grayscale8)
@@ -141,26 +164,26 @@ def main(argv):
         #item.setSizeHint(widget.sizeHint());
         #list_widget.setItemWidget(item, widget);
 
-        #item = QListWidgetItem(list_widget)
-        #image = QImage(s, 132, 112, QImage.Format_Grayscale8)
-        #pixmap = QPixmap.fromImage(image)
-        ##pixmap.save('%d.bmp' %(i))
+        item = QListWidgetItem(list_widget)
+        image = QImage(s, 132, 112, QImage.Format_Grayscale8)
+        pixmap = QPixmap.fromImage(image)
+        #pixmap.save('%d.bmp' %(index))
         img = image_file.image_file(132, 112)
-        img.write_bmp('%s-%s-%s' %(opts.file, opts.pid, i), s)
-        #widget = QWidget()
-        #layout = QVBoxLayout()
-        #label = QLabel()
-        #label.setText(str(i))
-        #layout.addWidget(label)
-        #label = QLabel()
-        #label.setPixmap(pixmap)
-        #layout.addWidget(label)
-        #widget.setLayout(layout)
-        #item.setSizeHint(widget.sizeHint());
-        #list_widget.setItemWidget(item, widget);
+        img.write_bmp('%s-%s-%s' %(opts.file, opts.pid, index), s)
+        widget = QWidget()
+        layout = QVBoxLayout()
+        label = QLabel()
+        label.setText(str(index))
+        layout.addWidget(label)
+        label = QLabel()
+        label.setPixmap(pixmap)
+        layout.addWidget(label)
+        widget.setLayout(layout)
+        item.setSizeHint(widget.sizeHint());
+        list_widget.setItemWidget(item, widget);
 
-    #list_widget.show()
-    #app.exec_()
+    list_widget.show()
+    app.exec_()
 
 if '__main__' == __name__:
     main(sys.argv[1:])

@@ -6,7 +6,7 @@
 #   文件名称：image_parse.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月13日 星期三 13时14分07秒
-#   修改日期：2017年12月14日 星期四 13时26分12秒
+#   修改日期：2017年12月15日 星期五 14时18分30秒
 #   描    述：
 #
 #================================================================
@@ -236,12 +236,37 @@ def main(argv):
     if len(args):
         options.print_help()
         return
+    database = image_database()
+
+    halfbytes1 = ['byte1_l', 'byte4_h', 'byte5_h', 'byte6_l']
+    halfbytes2 = ['byte2_h', 'byte3_h', 'byte4_l', 'byte5_l']
+    halfbytes3 = ['byte1_h', 'byte2_l', 'byte3_l', 'byte6_h']
+    
+    pixel_bit_11_8_list = database.gen_sort_combine([], halfbytes1)
+    pixel_bit_9_4_list = database.gen_sort_combine([], halfbytes2)
+
+
+    for i in range(4 * 3 * 2 * 1 * 4 * 3 * 2 * 1):
+        if not i in [168 ,170 ,174 ,176 ,180 ,182 ,24 ,26 ,30 ,32 ,36 ,38]:
+            continue
+        index_high = i / len(pixel_bit_11_8_list)
+        index_low = i % len(pixel_bit_9_4_list)
+
+        halfbytes_h = pixel_bit_11_8_list[index_high]
+        halfbytes_l = pixel_bit_9_4_list[index_low]
+
+        pixel1 = '%s|%s' %(halfbytes_h[0], halfbytes_l[0])
+        pixel2 = '%s|%s' %(halfbytes_h[1], halfbytes_l[1])
+        pixel3 = '%s|%s' %(halfbytes_h[2], halfbytes_l[2])
+        pixel4 = '%s|%s' %(halfbytes_h[3], halfbytes_l[3])
+        print('[%04s] %s, %s, %s, %s' %(i, pixel1, pixel2, pixel3, pixel4))
+
     if not opts.file:
         options.print_help()
         return
 
-    database = image_database()
     database.update_image_info_bitmap(opts.file)
+
     #for i in range(22181):
     #    print('%08d:%s' %(i, database.get_conf_section(i)))
 
