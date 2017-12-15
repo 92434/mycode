@@ -6,7 +6,7 @@
 #   文件名称：image.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月07日 星期四 18时09分36秒
-#   修改日期：2017年12月15日 星期五 14时46分31秒
+#   修改日期：2017年12月15日 星期五 16时19分51秒
 #   描    述：
 #
 #================================================================
@@ -42,7 +42,7 @@ def main(argv):
 
     #for index in range(0, 7):
     #for index in range(0, 4 * 3 * 2 * 1 * 4 * 3 * 2 * 1):
-    for index in [168 ,170 ,174 ,176 ,180 ,182 ,24 ,26 ,30 ,32 ,36 ,38]:
+    for index in [24]:
         #if index == 6:
         #if index == 12:
         #    table_column = 132
@@ -52,30 +52,61 @@ def main(argv):
 
         s = ''
         #for i1, i2 in database.gen_pixel_bytes(opts.file, opts.pid, index):
+        pos = 0
         for i1, i2, i3, i4 in database.gen_pixel_bytes(opts.file, opts.pid, index):
+            #xor = 0xff
+            #v1 = database.conf.items('%d' %(pos + 1))
+            #v2 = database.conf.items('%d' %(pos + 2))
+            #v3 = database.conf.items('%d' %(pos + 3))
+            #v4 = database.conf.items('%d' %(pos + 4))
+            #if len(v1):
+            #    v1 = int(v1[0][0], 16) ^ xor
+            #    i1 = chr(ord(i1) ^ v1)
+            #if len(v2):
+            #    v2 = int(v2[0][0], 16) ^ xor
+            #    i2 = chr(ord(i2) ^ v2)
+            #if len(v3):
+            #    v3 = int(v3[0][0], 16) ^ xor
+            #    i3 = chr(ord(i3) ^ v3)
+            #if len(v4):
+            #    v4 = int(v4[0][0], 16) ^ xor
+            #    i4 = chr(ord(i4) ^ v4)
+
             s += i1 + i2 + i3 + i4
+            pos += 4
 
         #print('len(s):%s' %(len(s)))
 
         if len(s) != 14784:
             continue
 
-        valid = True
-        for row in range(112):
-            if row == 0 or row == 111:
-                for col in range(132):
-                    pos = 132 * row + col
-                    if s[pos] != chr(0x00):
-                        valid = False
-                        break
+        #valid = True
+        #pos_limit = (112 * 2 / 5) * 132
+        #for row in range(112):
+        #    for col in range(132):
+        #        pos = row * 132 + col
+        #        if pos < pos_limit:
+        #            print('update %s:%s' %(pos, ord(s[pos])))
+        #            database.update_conf_setction_item(pos + 1, ord(s[pos]))
+        #    #if row == 0 or row == 111:
+        #    #    for col in range(132):
+        #    #        pos = 132 * row + col
+        #    #        if s[pos] != chr(0x00):
+        #    #            valid = False
+        #    #            break
 
-            pos_s = 132 * row + 0
-            pos_e = 132 * row + 131
-            if s[pos_s] != chr(0x00) or s[pos_e] != chr(0x00):
-                valid = False
-                break
-        if not valid:
-            continue
+        #    #pos_s = 132 * row + 0
+        #    #pos_e = 132 * row + 131
+        #    #if s[pos_s] != chr(0x00) or s[pos_e] != chr(0x00):
+        #    #    valid = False
+        #    #    break
+        #    pos_s = 132 * row + 0
+        #    if s[pos_s] != chr(0x00):
+        #        valid = False
+        #        break
+        database.save()
+        #if not valid:
+        #    continue
         
         print('index:%s' %(index))
 
