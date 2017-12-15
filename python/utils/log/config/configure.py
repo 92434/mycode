@@ -6,7 +6,7 @@
 #   文件名称：configure.py
 #   创 建 者：肖飞
 #   创建日期：2017年10月20日 星期五 10时05分24秒
-#   修改日期：2017年12月15日 星期五 15时08分16秒
+#   修改日期：2017年12月15日 星期五 18时53分56秒
 #   描    述：
 #
 #================================================================
@@ -146,7 +146,7 @@ default_config_dict = {
     'loggers': {
         'default': {
             #'handlers': ['file', 'console', 'tcp', 'udp'],
-            'handlers': ['console', 'tcp', 'udp'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         },
