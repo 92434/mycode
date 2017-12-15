@@ -10,6 +10,7 @@ au FileType cpp setlocal sw=8 ts=8 sts=8
 au FileType java setlocal sw=4 ts=4 sts=4
 au FileType python setlocal sw=4 ts=4 sts=4 et
 au FileType html setlocal sw=4 ts=4 sts=4 et
+au FileType xhtml setlocal sw=4 ts=4 sts=4 et
 au FileType css setlocal sw=4 ts=4 sts=4 et
 au FileType htmldjango setlocal sw=4 ts=4 sts=4 et
 
@@ -103,6 +104,9 @@ func CodeFormat()
 		"执行调用外部程序的命令
 		call JsBeautify()
 	elseif &filetype == 'html'
+		"执行调用外部程序的命令
+		call HtmlBeautify()
+	elseif &filetype == 'xhtml'
 		"执行调用外部程序的命令
 		call HtmlBeautify()
 	elseif &filetype == 'css'
