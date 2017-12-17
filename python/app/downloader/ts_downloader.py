@@ -6,18 +6,19 @@
 #   文件名称：ts_downloader.py
 #   创 建 者：肖飞
 #   创建日期：2017年07月31日 星期一 22时35分24秒
-#   修改日期：2017年12月16日 星期六 11时49分20秒
+#   修改日期：2017年12月17日 星期日 11时18分57秒
 #   描    述：
 #
 #================================================================
 import sys
 import optparse
-import importlib
 
 import downloader
 
 import log
 import request
+
+import parser
 
 reload(sys)  
 sys.setdefaultencoding('utf-8')
@@ -41,8 +42,9 @@ class ts_downloader(object):
 
         p = r.request.urlparse.urlparse(self.play_url)
         module_name = p.netloc.replace('.', '_')
+        logger.debug('module_name:%s' %(module_name))
+        m = parser.get_module(module_name)
 
-        m = importlib.import_module('.'.join(['parser', module_name]))
         self.output_filename, self.urls = m.parse_url(self.play_url)
         if self.output_filename and len(self.urls):
             ret = True
