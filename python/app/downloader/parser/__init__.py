@@ -6,7 +6,7 @@
 #   文件名称：__init__.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月17日 星期日 11时14分36秒
-#   修改日期：2017年12月17日 星期日 11时20分57秒
+#   修改日期：2017年12月17日 星期日 11时49分52秒
 #   描    述：
 #
 #================================================================
@@ -18,9 +18,9 @@ DICT = {
 def get_module(module_name):
     module = DICT.get(module_name)
     if module:
-        m = importlib.import_module(module)
+        m = importlib.import_module('.'.join([__package__, module]))
     else:
-        m = importlib.import_module(module_name)
+        m = importlib.import_module('.'.join([__package__, module_name]))
 
     return m
 
