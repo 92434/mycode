@@ -6,7 +6,7 @@
 #   文件名称：data_utils.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月18日 星期一 10时43分46秒
-#   修改日期：2017年12月18日 星期一 11时54分05秒
+#   修改日期：2017年12月18日 星期一 15时02分39秒
 #   描    述：
 #
 #================================================================
@@ -100,8 +100,8 @@ class lzma_archive(abstract_archive):
 
 class archive(object):
     def __init__(self):
-        self.archive = zlib_archive()
-        #self.archive = lzma_archive()
+        #self.archive = zlib_archive()
+        self.archive = lzma_archive()
 
 def main():
     a = archive()
