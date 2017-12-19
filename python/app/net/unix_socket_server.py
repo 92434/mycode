@@ -6,7 +6,7 @@
 #   文件名称：unix_socket_server.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月19日 星期二 11时56分36秒
-#   修改日期：2017年12月19日 星期二 13时22分26秒
+#   修改日期：2017年12月19日 星期二 14时52分36秒
 #   描    述：
 #
 #================================================================
@@ -52,6 +52,9 @@ def run_server(sock):
                 else:
                     break
         except socket.timeout, e:
+            #logger.exception('')
+            pass
+        except socket.error, e:
             #logger.exception('')
             pass
         finally:
