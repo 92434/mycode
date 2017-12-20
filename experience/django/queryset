@@ -20,3 +20,4 @@ __year 日期字段的年份
 __month 日期字段的月份
 __day 日期字段的日
 __isnull=True/False
+__regex 正则表达式
