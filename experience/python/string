@@ -1,0 +1,47 @@
+1. 整形列表转str
+
+如：[0x53, 0x21, 0x6A] -> '\x53\x21\x6a'
+方法：list -> bytearray -> str
+[python] view plain copy
+x = [0x53, 0x21, 0x6A]  
+y = str(bytearray(x))  
+
+
+2. str转整形列表
+
+如：'\x53\x21\6a' -> [0x53, 0x21, 0x6A]
+方法：逐个字符转成十进制
+[python] view plain copy
+x = '\x53\x21\x6a'  
+y = [ord(c) for c in x]  
+
+
+3. 整形列表转换为hex string
+
+如： [0x53, 0x21, 0x6A] -> '53216A'
+方法：list -> bytearray -> str -> hexstring
+[python] view plain copy
+import binascii  
+x = [0x53, 0x21, 0x6A]  
+y = str(bytearray(x))  
+z = binascii.b2a_hex(y)  
+
+
+4. hex string转换为整形列表
+
+如： '53216A' -> [0x53, 0x21, 0x6A]
+方法：hexstring -> bytearray -> list
+[python] view plain copy
+x = '53216A'  
+y = bytearray.fromhex(x)  
+z = list(y)  
+
+
+5. hex string转换为str
+
+如： '53216A' -> '\x53\x21\x6A'
+方法：hexstring -> bytearray -> str
+[python] view plain copy
+x = '53216A'  
+y = bytearray.fromhex(x)  
+z = str(y)  
