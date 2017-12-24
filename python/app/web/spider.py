@@ -6,7 +6,7 @@
 #   文件名称：spider.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月24日 星期日 12时41分32秒
-#   修改日期：2017年12月24日 星期日 16时17分24秒
+#   修改日期：2017年12月24日 星期日 16时28分17秒
 #   描    述：
 #
 #================================================================
@@ -43,15 +43,16 @@ def get_page_with_proxy():
  
 def get_page():
     co = webdriver.ChromeOptions()
-    #co.add_argument('--proxy-server=http://127.0.0.1:8087')  
+    co.add_argument('--proxy-server=http://127.0.0.1:8087')  
     driver = webdriver.Chrome(executable_path = chrome_path, chrome_options = co)
-    driver.get("http://ip138.com/")
+    #driver.get("http://ip138.com/")
+    driver.get("https://www.google.com")
     print(driver.page_source)
  
 
 def main():
-    #get_page()
-    get_page_with_proxy()
+    get_page()
+    #get_page_with_proxy()
 
 if '__main__' == __name__:
     main()
