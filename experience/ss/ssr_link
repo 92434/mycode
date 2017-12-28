@@ -1,0 +1,47 @@
+SS及SSR链接的格式小分析
+Published on Sep 21, 2017 in 没有技术 with 0 comment
+ShadowSocks ShadowSocksR
+
+SS = ShadowSocks
+SSR = ShadowSocksR
+
+这篇文章算是我写的一个小脚本的副产物吧，而且以后可能还能用到，趁现在脑子里还有些印象，赶紧记下来 
+(我才不会说我拖延了半个月才强迫自己写下来= =。 
+(懒癌晚期果然没救了是么QwQ
+
+预备知识
+哎，首先说一下，SS/SSR的链接Base64编码类型都是URL Safe类型，就是将标准Base64中的+和/分别改成了-和_，方便在URL中直接传递。此外还有一点，它们Base64编码都没有Padding(就是不在末尾填充=号)
+
+SS链接
+我有段时间没有用SS了，所以信息可能有些过时，如果有误差欢迎指正
+
+SS链接的格式比SSR链接组成简单一些很多很多，Base64编码前的SS链接如下：
+ss://method:password@server:port
+
+一般我们见到的都是Base64编码后的链接，格式如下：
+ss://Base64编码字段
+至于那些被编码的，当然就是method:password@server:port这部分了～～
+
+SSR链接
+SSR链接未Base64编码前格式如下：
+ssr://server:port:protocol:method:obfs:password_base64/?suffix_base64
+
+特殊的地方在于password_base64/?suffix_base64，从名字应该能看出来，这是两个已经被Base64编码的东西，一个是密码，但那个suffix_base64是个什么东西呢？
+好吧，这其实是我随便取的一个名字...它实际是一个包含协议参数，混淆参数，群组名，备注(服务器名)的字段。
+该字段未Base64编码前格式如下：
+/?obfsparam=obfsparam_base64&protoparam=protoparam_base64&remarks=remarks_base64&group=group_base64
+额，没错，里面的参数也被Base64编码了……
+
+我们平常见到的已经被Base64编码的SSR链接是这样的：
+ssr://Base64编码字段
+被Base64编码的字段就是server:port:protocol:method:obfs:password_base64/?suffix_base64这么一大坨东西。
+
+所以说SSR链接比SS链接复杂了很多啊啊啊，（摔
+
+PS. 仔细阅读的童鞋想必不难发现密码，协议参数，混淆参数，群组名，备注(服务器名)这一大堆东西都被Base64编码了两次 (再摔
+
+PSS. 所以decode的时候记得长点心啊～～
+
+本文由 VxBlue 创作，采用 知识共享署名4.0 国际许可协议进行许可
+本站文章除注明转载/出处外，均为本站原创或翻译，转载前请务必署名
+最后编辑时间为: Sep 21, 2017 at 10:19 pm
