@@ -62,7 +62,7 @@ ssr_test(){
 ssr_start() {
     cd $INSTALL_PATH/shadowsocks/
     #python local.py -d start
-    python local.py -vv
+    python local.py -v
     sleep 1
     ssr_test
 }
