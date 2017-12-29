@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2017年12月28日 星期四 11时13分24秒
+#   修改日期：2017年12月29日 星期五 10时39分30秒
 #   描    述：
 #
 #================================================================
@@ -80,23 +80,6 @@ def select_ss_account(list_accounts):
 
     return ip, port, password
 
-def gen_ss_conf(ip, port, password):
-    dict_conf = {
-            'local_address' : '127.0.0.1',
-            'local_port' : 1080,
-            'timeout' : 300,
-            'method' : 'aes-256-cfb',
-            'fast_open' : False,
-            }
-    item = {'server' : ip}
-    dict_conf.update(item)
-    item = {'server_port' : int(port)}
-    dict_conf.update(item)
-    item = {'password' : password}
-    dict_conf.update(item)
-    with open('config.json', 'wb+') as f:
-        f.write(json.dumps(dict_conf, sort_keys=False, indent=2))
-
 def b64decode(b64_content):
     content_decoded = None
     count = 0
@@ -110,107 +93,107 @@ def b64decode(b64_content):
             count += 1
     return content_decoded
 
-def decode_ssr_link(ssr_link):
-    dict_account = None
-    content = ssr_link.replace('ssr://', '')
-    content_decoded = b64decode(content)
-    if not content_decoded:
-        logger.debug('')
-        return dict_account
+def decode_ss_link(link = ''):
+    dict_account = {}
+    item = {'is_ssr' : False}
+    dict_account.update(item)
 
-    p = '(?P<ip>[^:]+):(?P<port>[^:]+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[^/]+)/\?(?P<parameter>.*)'
-    m = re.match(p, content_decoded)
-    if not m:
-        logger.debug('')
-        return dict_account
+    if link.startswith('ssr://'):
+        item = {'is_ssr' : True}
+        dict_account.update(item)
+        link = link.replace('ssr://', '')
+    elif link.startswith('ss://'):
+        link = link.replace('ss://', '')
 
-    dict_account = m.groupdict()
-    password = dict_account.pop('password_base64')
-    password = b64decode(password)
-    dict_account.update({'password' : password})
-    parameter = dict_account.pop('parameter')
-    list_parameter = parameter.split('&')
-    for parameter_item in list_parameter:
-        key, value = parameter_item.split('=')
-        value = b64decode(value)
-        dict_account.update({key : value})
+    logger.debug('link:%s' %(link))
+    decoded_link = b64decode(link)
+    logger.debug('decoded_link:%s' %(decoded_link))
 
-    logger.debug('dict_account:%s' %(dict_account))
+    parameter_start = decoded_link.find('/?')
+    if parameter_start != -1:
+        decoded_account = decoded_link[:parameter_start]
+
+        item = {'is_ssr' : True}
+        dict_account.update(item)
+        parameter_start = parameter_start + len('/?')
+        parameter = decoded_link[parameter_start:]
+        list_parameter = parameter.split('&')
+        for parameter_item in list_parameter:
+            key, value = parameter_item.split('=')
+            value = b64decode(value)
+            item = {key : value}
+            dict_account.update(item)
+    else:
+        decoded_account = decoded_link
+
+    logger.debug('decoded_account:%s' %(decoded_account))
+    is_ssr = dict_account.get('is_ssr')
+    if is_ssr:
+        p = '(?P<server>[^:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[^/]+)'
+        m = re.match(p, decoded_account)
+        if m:
+            dict_matched = m.groupdict()
+            password = dict_matched.pop('password_base64')
+            password = b64decode(password)
+            item = {'password' : password}
+            dict_matched.update(item)
+            dict_account.update(dict_matched)
+
+            if 'obfsparam' in dict_account:
+                obfs_param = dict_account.pop('obfsparam')
+                item = {'obfs_param' : obfs_param}
+                dict_account.update(item)
+
+            if 'protoparam' in dict_account:
+                protocol_param = dict_account.pop('protoparam')
+                item = {'protocol_param' : protocol_param}
+                dict_account.update(item)
+
+            if 'remarks' in dict_account:
+                dict_account.pop('remarks')
+            if 'group' in dict_account:
+                dict_account.pop('group')
+
+            item = {'redirect' : ''}
+            dict_account.update(item)
+
+            item = {'server_ipv6' : '::'}
+            dict_account.update(item)
+            item = {'dns_ipv6' : False}
+            dict_account.update(item)
+            item = {'udp_timeout' : 60}
+            dict_account.update(item)
+            item = {'connect_verbose_info' : 1}
+            dict_account.update(item)
+    else:
+        p = '(?P<method>[^:]+):(?P<password>[^/]+)@(?P<server>[^:]+):(?P<server_port>\d+)'
+        m = re.match(p, decoded_account)
+        if m:
+            dict_matched = m.groupdict()
+            dict_account.update(dict_matched)
+
+    item = {'local_address' : '127.0.0.1'}
+    dict_account.update(item)
+    item = {'local_port' : 1080}
+    dict_account.update(item)
+    item = {'timeout' : 120}
+    dict_account.update(item)
+    item = {'fast_open' : False}
+    dict_account.update(item)
+
+    dict_account.pop('is_ssr')
+    
     return dict_account
 
-def gen_ssr_conf(dict_account):
-    dict_conf = {
-            'server_ipv6': '::',
-            'local_address': '127.0.0.1',
-            'local_port': 1080,
-
-            #'protocol_param': '',
-            #'obfs': 'tls1.2_ticket_auth_compatible',
-            #'speed_limit_per_con': 0,
-            #'speed_limit_per_user': 0,
-
-            #'additional_ports' : {}, // only works under multi-user mode
-            #'additional_ports_only' : False, // only works under multi-user mode
-            'timeout': 120,
-            'udp_timeout': 60,
-            'dns_ipv6': False,
-            'connect_verbose_info': 0,
-            'redirect': '',
-            'fast_open': False,
-            }
-
-    ip = dict_account.get('ip')
-    if not ip:
-        logger.debug('')
-        return
-    item = {'server' : ip}
-    dict_conf.update(item)
-
-    server_port = dict_account.get('port')
-    if not server_port:
-        logger.debug('')
-        return
-    item = {'server_port' : int(server_port)}
-    dict_conf.update(item)
-
-    protocol = dict_account.get('protocol')
-    if not protocol:
-        logger.debug('')
-        return
-    item = {'protocol' : protocol}
-    dict_conf.update(item)
-
-    method = dict_account.get('method')
-    if not method:
-        logger.debug('')
-        return
-    item = {'method' : method}
-    dict_conf.update(item)
-
-    obfs = dict_account.get('obfs')
-    if not obfs:
-        logger.debug('')
-        return
-    item = {'obfs' : obfs}
-    dict_conf.update(item)
-
-    password = dict_account.get('password')
-    if not password:
-        logger.debug('')
-        return
-    item = {'password' : password}
-    dict_conf.update(item)
-
-    obfs_param = dict_account.get('obfsparam')
-    item = {'obfs_param' : obfs_param}
-    dict_conf.update(item)
-
+def gen_ss_conf(dict_account):
+    logger.debug('dict_account:%s' %(dict_account))
     with open('config.json', 'wb+') as f:
-        f.write(json.dumps(dict_conf, sort_keys=False, indent=2))
+        f.write(json.dumps(dict_account, sort_keys=False, indent=2))
 
-def ssr_link_account(ssr_link):
-    dict_account = decode_ssr_link(ssr_link)
-    gen_ssr_conf(dict_account)
+
+def ss_link_account(ss_link):
+    dict_account = decode_ss_link(ss_link)
+    gen_ss_conf(dict_account)
 
 def free_ss_account():
     list_accounts = get_ss_account()
@@ -219,14 +202,21 @@ def free_ss_account():
         return
 
     show_list_accounts(list_accounts)
-    ip, port, password = select_ss_account(list_accounts)
-    gen_ss_conf(ip, port, password)
+    server, server_port, password = select_ss_account(list_accounts)
+    dict_account = decode_ss_link('')
+    item = {'server' : server}
+    dict_account.update(item)
+    item = {'server_port' : int(server_port)}
+    dict_account.update(item)
+    item = {'password' : password}
+    dict_account.update(item)
+    gen_ss_conf(dict_account)
 
 
 def main(argv):
     options = optparse.OptionParser()
     options.add_option('-l', '--ssr_link', dest='ssr_link', help='ssr_link', metavar='URL', default = None)
-    options.add_option('-s', '--ss_account', action='store_true', dest='ss_account', help='ss_account', default=False)
+    options.add_option('-a', '--ss_account', action='store_true', dest='ss_account', help='ss_account', default=False)
     opts, args = options.parse_args(argv)
     logger.debug('opts:%s' %(opts))
     logger.debug('args:%s' %(args))
@@ -237,7 +227,7 @@ def main(argv):
     if opts.ss_account:
         free_ss_account()
     elif opts.ssr_link:
-        ssr_link_account(opts.ssr_link)
+        ss_link_account(opts.ssr_link)
     else:
         options.print_help()
 
