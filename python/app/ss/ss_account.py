@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2017年12月29日 星期五 10时39分30秒
+#   修改日期：2017年12月29日 星期五 11时41分25秒
 #   描    述：
 #
 #================================================================
@@ -31,7 +31,7 @@ import request
 
 r = request.request()
 
-def get_ss_account():
+def ishadowx_account():
     list_accounts = []
     url = 'https://global.ishadowx.net/'
     data = r.request.get(url)
@@ -59,6 +59,30 @@ def get_ss_account():
     #logger.debug('%s' %(list_accounts))
     return list_accounts
 
+dict_web_addr_map = {
+        'ishadowx' : ishadowx_account,
+        }
+
+def select_list_item(list_content):
+    while True:
+        index = int(raw_input("请输入要使用的序列号:"))
+        if index < 0:
+            continue
+        if index >= len(list_content):
+            continue
+        
+        return list_content[index]
+
+def show_list_web_addr(list_web_addr):
+    row_title = ['序列号', '网址']
+    table = PrettyTable(row_title)
+    table.padding_width = 1
+    for i, addr in enumerate(list_web_addr):
+        list_row = [i, addr]
+        table.add_row(list_row)
+    print(table)
+    return select_list_item(list_web_addr)
+
 def show_list_accounts(list_accounts):
     row_title = ['序列号', 'ip', '端口', '密码']
     table = PrettyTable(row_title)
@@ -67,18 +91,8 @@ def show_list_accounts(list_accounts):
         list_row = [i] + account
         table.add_row(list_row)
     print(table)
+    return select_list_item(list_accounts)
 
-def select_ss_account(list_accounts):
-    index = int(raw_input("请输入要使用的序列号:"))
-    if index < 0:
-        return
-    if index >= len(list_accounts):
-        return
-    
-    #logger.debug('%s' %(list_accounts[index]))
-    ip, port, password = list_accounts[index]
-
-    return ip, port, password
 
 def b64decode(b64_content):
     content_decoded = None
@@ -196,13 +210,16 @@ def ss_link_account(ss_link):
     gen_ss_conf(dict_account)
 
 def free_ss_account():
-    list_accounts = get_ss_account()
+    list_web = dict_web_addr_map.keys()
+    web_addr = show_list_web_addr(list_web)
+    account_func = dict_web_addr_map.get(web_addr)
+    list_accounts = account_func()
+
     if not len(list_accounts):
         logger.debug('')
         return
 
-    show_list_accounts(list_accounts)
-    server, server_port, password = select_ss_account(list_accounts)
+    server, server_port, password = show_list_accounts(list_accounts)
     dict_account = decode_ss_link('')
     item = {'server' : server}
     dict_account.update(item)
