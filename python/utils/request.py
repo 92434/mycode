@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2017年12月10日 星期日 20时16分31秒
+#   修改日期：2017年12月29日 星期五 14时23分01秒
 #   描    述：
 #
 #================================================================
@@ -40,14 +40,14 @@ socket.setdefaulttimeout(timeout)
 
 class abstract_request(object):
     def __init__(self):
-        self.cookie = cookielib.CookieJar()
+        self.cookies = cookielib.CookieJar()
         #self.cookie_file = ''
-        #self.cookie = cookielib.MozillaCookieJar(self.cookie_file)
-        #self.cookie.load()
+        #self.cookies = cookielib.MozillaCookieJar(self.cookie_file)
+        #self.cookies.load()
         self.urlparse = urlparse
         self.fake_headers = {
-            'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Encoding' : 'gzip, deflate, br',
+            #'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            #'Accept-Encoding' : 'gzip, deflate, br',
             'Accept-Language' : 'zh-CN,zh;q=0.9',
             'Cache-Control' : 'max-age=0',
             'Connection' : 'keep-alive',
@@ -60,7 +60,7 @@ class abstract_request(object):
         self.load_local_cookie()
 
     def get_cookie_by_name(self, cookie_name):
-        for item in self.cookie:
+        for item in self.cookies:
             if item.name == cookie_name:
                 return item
         return None
@@ -145,7 +145,7 @@ class abstract_request(object):
                         rest = None,
                         rfc2109 = False,
                         )
-                self.cookie.set_cookie(cookie_item)    # Apply each cookie_item to cookiejar
+                self.cookies.set_cookie(cookie_item)    # Apply each cookie_item to cookiejar
 
     def load_local_cookie(self):
 
@@ -180,7 +180,7 @@ class abstract_request(object):
             
             #logger.debug('cookie_default %s' %(cookie_default))
             cookie_item = cookielib.Cookie(**cookie_default)
-            self.cookie.set_cookie(cookie_item)
+            self.cookies.set_cookie(cookie_item)
 
     def ungzip(self, content):
         """Decompresses content for Content-Encoding: gzip.
@@ -213,7 +213,6 @@ class abstract_request(object):
 
     def decompresses(self, response, content):
         content_encoding = self.get_content_encoding(response)
-
         if content_encoding == 'gzip':
             content = self.ungzip(content)
         elif content_encoding == 'deflate':
@@ -231,23 +230,23 @@ class abstract_request(object):
             try:
                 content = content.decode(charset)
             except:
-                logger.exception("")
+                logger.exception('charset:%s' %(charset))
 
         return content
 
-    def get(self, url, data = None, headers = None):
+    def get(self, url, data = None, **kwargs):
         raise Exception('not valid!')
 
-    def post(self, url, data = None, headers = None):
+    def post(self, url, data = None, **kwargs):
         raise Exception('not valid!')
 
-    def url_size(self, url, data = None, headers = None):
+    def url_size(self, url, data = None, **kwargs):
         raise Exception('not valid!')
 
-    def urls_size(self, urls, headers = None):
-        return sum([self.url_size(url, headers = headers) for url in urls])
+    def urls_size(self, urls, **kwargs):
+        return sum([self.url_size(url, **kwargs) for url in urls])
 
-    def iter_content(self, url, chunk_size = None, data = None, headers = None):
+    def iter_content(self, url, chunk_size = None, data = None, **kwargs):
         raise Exception('not valid!')
 
     def get_ipv4_address_by_if(ifname):
@@ -271,9 +270,12 @@ class abstract_request(object):
 
 
 class urllib_request(abstract_request):
-    def __init__(self, level = 0, proxies = None, cookie = None, auth = None):
+    def __init__(self, level = 0, proxies = None, headers = None, cookies = None, auth = None):
         super(urllib_request, self).__init__()
         import six
+        import ssl
+
+        ssl._create_default_https_context = ssl._create_unverified_context
         self.handlers = []
         self.urllib = six.moves.urllib
 
@@ -283,10 +285,10 @@ class urllib_request(abstract_request):
         #self.handlers.append(http_handler)
         #self.handlers.append(https_handler)
 
-        #cookie
-        if cookie:
-            self.cookie = cookie
-        cookie_handler = self.urllib.request.HTTPCookieProcessor(self.cookie)  
+        #cookies
+        if cookies:
+            self.cookies = cookies
+        cookie_handler = self.urllib.request.HTTPCookieProcessor(self.cookies)  
         self.handlers.append(cookie_handler)
 
         #proxies
@@ -306,7 +308,7 @@ class urllib_request(abstract_request):
                     mgr.add_password(p[1], 'http://%s/' % host, p[0], p[2])
                     mgr.add_password(p[1], 'https://%s/' % host, p[0], p[2])
             except:
-                logger.exception("")
+                logger.exception('')
 
             for uri, username, password in auth:
                 mgr.add_password(None, uri, username, password)
@@ -320,13 +322,18 @@ class urllib_request(abstract_request):
         opener = self.urllib.request.build_opener(*self.handlers)
         self.urllib.request.install_opener(opener)
 
+        self.patameter = {}
+        if headers:
+            item = {'headers' : headers}
+            self.patameter.update(item)
+
     def urlopen_with_retry(self, *args, **kwargs):
         for i in range(10):
             try:
                 return self.urllib.request.urlopen(*args, **kwargs)
             except:
-                logger.exception("")
-        raise Exception('')
+                logger.exception('')
+        sys.exit(-1)
 
     def get_content_encoding(self, response):
         return response.headers.get('Content-Encoding')
@@ -339,14 +346,15 @@ class urllib_request(abstract_request):
 
         return charset
 
-    def get(self, url, data = None, headers = None):
+    def get(self, url, data = None, **kwargs):
         if data:
             url = '%s?%s' %(url, self.urllib.parse.urlencode(data))
 
-        if not headers:
-            headers = self.fake_headers
+        parameter = {}
+        parameter.update(self.patameter)
+        parameter.update(**kwargs)
 
-        req = self.urllib.request.Request(url, headers = headers)
+        req = self.urllib.request.Request(url, **parameter)
 
         response = self.urlopen_with_retry(req)
 
@@ -356,14 +364,15 @@ class urllib_request(abstract_request):
 
         return content
 
-    def post(self, url, data = None, headers = None):
-        if not headers:
-            headers = self.fake_headers
-
+    def post(self, url, data = None, **kwargs):
         if data:
             data = self.urllib.parse.urlencode(data)
 
-        req = self.urllib.request.Request(url, data = data, headers = headers)
+        parameter = {}
+        parameter.update(self.patameter)
+        parameter.update(**kwargs)
+
+        req = self.urllib.request.Request(url, data = data, **parameter)
 
         response = self.urlopen_with_retry(req)
 
@@ -389,28 +398,30 @@ class urllib_request(abstract_request):
 
         return content_length
 
-    def url_size(self, url, data = None, headers = None):
-        if not headers:
-            headers = self.fake_headers
-
+    def url_size(self, url, data = None, **kwargs):
         if data:
             data = self.urllib.parse.urlencode(data)
 
-        req = self.urllib.request.Request(url, data = data, headers = headers)
+        parameter = {}
+        parameter.update(self.patameter)
+        parameter.update(**kwargs)
+
+        req = self.urllib.request.Request(url, data = data, **parameter)
 
         response = self.urlopen_with_retry(req)
         size = self.get_content_size(response)
         response.close()
         return size
 
-    def iter_content(self, url, chunk_size = None, data = None, headers = None):
-        if not headers:
-            headers = self.fake_headers
-
+    def iter_content(self, url, chunk_size = None, data = None, **kwargs):
         if data:
             data = self.urllib.parse.urlencode(data)
 
-        req = self.urllib.request.Request(url, data = data, headers = headers)
+        parameter = {}
+        parameter.update(self.patameter)
+        parameter.update(**kwargs)
+
+        req = self.urllib.request.Request(url, data = data, **parameter)
         response = self.urlopen_with_retry(req)
 
         while True:
@@ -421,59 +432,72 @@ class urllib_request(abstract_request):
                 break
 
 class requests_request(abstract_request):
-    def __init__(self, level = 0, proxies = None, cookie = None, auth = None):
+    def __init__(self, level = 0, proxies = None, headers = None, cookies = None, auth = None):
         super(requests_request, self).__init__()
         import requests
         self.requests = requests
         self.urlparse.urlencode = requests.models.urlencode
-        self.s = self.requests.session()
-        self.s.proxies = proxies
-        self.s.cookies = self.cookie
-        self.s.auth = auth
-        self.s.headers = self.fake_headers
+        self.auth = auth
+
+        self.patameter = {}
+        if headers:
+            item = {'headers' : headers}
+            self.patameter.update(item)
+        if proxies:
+            item = {'proxies' : proxies}
+            self.patameter.update(item)
+        if cookies:
+            item = {'cookies' : cookies}
+            self.patameter.update(item)
+        item = {'verify' : False}
+        self.patameter.update(item)
 
     def urlopen_with_retry(self, method, *args, **kwargs):
         for i in range(10):
             try:
+                logger.debug('%s, %s, %s' %(method, args, kwargs))
                 return method(*args, **kwargs)
             except:
-                logger.exception("")
-        raise Exception('')
+                logger.exception('')
+        sys.exit(-1)
 
     def get_content_encoding(self, response):
-        #return response.headers.get('Content-Encoding')
-        return None
+        return response.headers.get('Content-Encoding')
 
     def get_charset(self, response):
         charset = response.encoding
         return charset
 
-    def get(self, url, data = None, headers = None):
+    def get(self, url, data = None, **kwargs):
         if data:
             url = '%s?%s' %(url, self.requests.models.urlencode(data))
 
-        if not headers:
-            headers = self.fake_headers
+        parameter = {}
+        parameter.update(self.patameter)
+        parameter.update(**kwargs)
 
-        method = self.s.get
-        response = self.urlopen_with_retry(method, url, headers = headers)
+        method = self.requests.get
+        response = self.urlopen_with_retry(method, url, **parameter)
 
         content = response.content
         #content = self.decompresses(response, content)
-        content = self.decode(response, content)
+        #content = self.decode(response, content)
 
         return content
 
-    def post(self, url, data = None, headers = None):
-        if not headers:
-            headers = self.fake_headers
+    def post(self, url, data = None, **kwargs):
+        method = self.requests.post
 
-        method = self.s.post
-        response = self.urlopen_with_retry(method, url, data = data, headers = headers)
+        parameter = {}
+        parameter.update(self.patameter)
+        parameter.update(**kwargs)
+
+
+        response = self.urlopen_with_retry(method, url, data = data, **parameter)
 
         content = response.content
         #content = self.decompresses(response, content)
-        content = self.decode(response, content)
+        #content = self.decode(response, content)
 
         return content
 
@@ -486,23 +510,33 @@ class requests_request(abstract_request):
 
         return content_length
 
-    def url_size(self, url, data = None, headers = None):
-        method = self.s.get
-        response = self.urlopen_with_retry(method, url, data = data, headers = headers, stream = True)
+    def url_size(self, url, data = None, **kwargs):
+        method = self.requests.get
+
+        parameter = {}
+        parameter.update(self.patameter)
+        parameter.update(**kwargs)
+
+        response = self.urlopen_with_retry(method, url, data = data, stream = True, **parameter)
         size = self.get_content_size(response)
         response.close()
         return size
 
-    def iter_content(self, url, chunk_size = None, data = None, headers = None):
-        method = self.s.get
-        response = self.urlopen_with_retry(method, url, data = data, headers = headers, stream = True)
+    def iter_content(self, url, chunk_size = None, data = None, **kwargs):
+        method = self.requests.get
+
+        parameter = {}
+        parameter.update(self.patameter)
+        parameter.update(**kwargs)
+
+        response = self.urlopen_with_retry(method, url, data = data, stream = True, **parameter)
         return response.iter_content(chunk_size = chunk_size)
 
 
 class request(object):
-    def __init__(self, level = 0, proxies = None, cookie = None, auth = None):
-        #self.request = urllib_request(level = level, proxies = proxies, cookie = cookie)
-        self.request = requests_request(level = level, proxies = proxies, cookie = cookie)
+    def __init__(self, level = 0, proxies = None, cookies = None, auth = None):
+        #self.request = urllib_request(level = level, proxies = proxies, cookies = cookies)
+        self.request = requests_request(level = level, proxies = proxies, cookies = cookies)
 
 def main():
     argv = sys.argv[1:]
@@ -532,12 +566,10 @@ def main():
     for iter_data in iter_content:
         logger.debug('iter_data:%s' %(iter_data))
 
-    proxies = {'http' : '127.0.0.1:8087'}
+    proxies = {'https' : '127.0.0.1:8087'}
     r = request(level = 0, proxies = proxies)
-    #content = r.request.get('http://www.google.com/')
-    #logger.debug('content:%s' %(len(content)))
-
-
+    content = r.request.get('https://www.google.com/', headers = r.request.fake_headers)
+    logger.debug('content:%s' %(content))
 
 if '__main__' == __name__:
     main()
