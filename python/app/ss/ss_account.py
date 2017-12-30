@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2017年12月30日 星期六 11时16分44秒
+#   修改日期：2017年12月30日 星期六 11时19分50秒
 #   描    述：
 #
 #================================================================
@@ -122,6 +122,8 @@ def decode_ss_link(link = ''):
     logger.debug('link:%s' %(link))
     decoded_link = b64decode(link)
     logger.debug('decoded_link:%s' %(decoded_link))
+    if not decoded_link:
+        return dict_account
 
     parameter_start = decoded_link.find('/?')
     if parameter_start != -1:
