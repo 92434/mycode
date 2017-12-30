@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2017年12月30日 星期六 11时19分50秒
+#   修改日期：2017年12月30日 星期六 11时29分17秒
 #   描    述：
 #
 #================================================================
@@ -143,7 +143,7 @@ def decode_ss_link(link = ''):
         decoded_account = decoded_link
 
     logger.debug('decoded_account:%s' %(decoded_account))
-    is_ssr = dict_account.get('is_ssr')
+    is_ssr = dict_account.pop('is_ssr')
     if is_ssr:
         p = '(?P<server>[^:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[^/]+)'
         m = re.match(p, decoded_account)
@@ -181,12 +181,16 @@ def decode_ss_link(link = ''):
             dict_account.update(item)
             item = {'connect_verbose_info' : 1}
             dict_account.update(item)
+        else:
+            return dict_account
     else:
         p = '(?P<method>[^:]+):(?P<password>[^@]+)@(?P<server>[^:]+):(?P<server_port>\d+)'
         m = re.match(p, decoded_account)
         if m:
             dict_matched = m.groupdict()
             dict_account.update(dict_matched)
+        else:
+            return dict_account
 
     item = {'local_address' : '127.0.0.1'}
     dict_account.update(item)
@@ -197,8 +201,6 @@ def decode_ss_link(link = ''):
     item = {'fast_open' : False}
     dict_account.update(item)
 
-    dict_account.pop('is_ssr')
-    
     return dict_account
 
 def gen_ss_conf(dict_account):
