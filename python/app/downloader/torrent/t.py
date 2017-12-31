@@ -6,7 +6,7 @@
 #   文件名称：t.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月17日 星期日 12时00分14秒
-#   修改日期：2017年12月31日 星期日 19时25分59秒
+#   修改日期：2017年12月31日 星期日 19时37分42秒
 #   描    述：
 #
 #================================================================
@@ -24,7 +24,15 @@ def dump(obj):
         if hasattr(obj, attr):
             obj_attr = getattr(obj, attr)
             logger.debug("obj.%s = %s" % (attr, obj_attr))
-            logger.debug("type(obj.%s) = %s" % (attr, type(obj_attr)))
+
+def dump_dict(obj, indent = 0):
+    if not type(obj) == dict:
+        return
+
+    for key, value in obj.items():
+        logger.debug("%s%s:%s" % ('  ' * indent, key, repr(value)))
+        if type(value) == dict:
+            dump_dict(value, indent + 1)
 
 def open_session():
     s = lt.session()
@@ -36,13 +44,14 @@ def get_torrent_info(torrent_file):
     content = f.read()
     decoded_content = lt.bdecode(content)
     f.close()
+    dump_dict(decoded_content)
     info = lt.torrent_info(decoded_content)
 
     return info
 
 def add_torrent_task(s, torrent_file, output_path = '.'):
     info = get_torrent_info(torrent_file)
-    dump(info)
+    #dump(info)
 
     dict_torrent_params = {
             'save_path': output_path,
