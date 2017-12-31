@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2017年12月29日 星期五 14时23分01秒
+#   修改日期：2017年12月31日 星期日 18时03分02秒
 #   描    述：
 #
 #================================================================
@@ -330,6 +330,7 @@ class urllib_request(abstract_request):
     def urlopen_with_retry(self, *args, **kwargs):
         for i in range(10):
             try:
+                logger.debug('%s, %s, %s' %(method, args, kwargs))
                 return self.urllib.request.urlopen(*args, **kwargs)
             except:
                 logger.exception('')
