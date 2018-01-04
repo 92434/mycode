@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2018年01月04日 星期四 19时40分59秒
+#   修改日期：2018年01月04日 星期四 22时57分26秒
 #   描    述：
 #
 #================================================================
@@ -51,6 +51,8 @@ class abstract_request(object):
             'User-Agent' : 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/61.0.3163.79 Chrome/61.0.3163.79 Safari/537.36',
                 }
 
+        self.patameter = {}
+
         self.cookie_default = {
                 'version' : None, 'name' : None, 'value' : None,
                 'port' : None, 'port_specified' : None,
@@ -65,20 +67,20 @@ class abstract_request(object):
                 'rfc2109' : False,
                 }
 
-        self.cookies = cookielib.CookieJar()
+        #self.cookies = cookielib.CookieJar()
         #self.cookie_file = ''
         #self.cookies = cookielib.MozillaCookieJar(self.cookie_file)
         #self.cookies.load()
         #self.load_chromium_cookie()
         #self.cookiejar_from_list(self.load_local_cookie())
 
-    def get_cookie_by_name(self, cookie_name):
-        for item in self.cookies:
+    def get_cookie_by_name(self, cookies, cookie_name):
+        for item in cookies:
             if item.name == cookie_name:
                 return item
         return None
 
-    def load_chromium_cookie(self, domain = None):
+    def load_chromium_cookie(self, cookies, self.domain = None):
         salt = b'saltysalt'
         iv = b' ' * 16
         length = 16
@@ -158,10 +160,11 @@ class abstract_request(object):
                         _rest = None,
                         rfc2109 = False,
                         )
-                self.cookies.set_cookie(cookie_item)    # Apply each cookie_item to cookiejar
+                cookies.set_cookie(cookie_item)    # Apply each cookie_item to cookiejar
+        return cookies
 
-    def cookiejar_from_list(self, cookies = []):
-        for cookie in cookies:
+    def cookiejar_from_list(self, cookies, list_cookie = []):
+        for cookie in list_cookie:
             cookie_default = {}
             cookie_default.update(self.cookie_default)
 
@@ -174,36 +177,36 @@ class abstract_request(object):
             
             #logger.debug('cookie_default %s' %(cookie_default))
             cookie_item = cookielib.Cookie(**cookie_default)
-            self.cookies.set_cookie(cookie_item)
+            cookies.set_cookie(cookie_item)
+        return cookies
 
-    def cookiejar_to_list(self):
-        cookies = []
-        for cookie in self.cookies:
+    def cookiejar_to_list(self, cookies):
+        list_cookie = []
+        for cookie in cookies:
             cookie_dict = {}
             for key, value in cookie_default.items()
                 item = {key : getattr(cookie, key, self.cookie_default.get(key))}
                 cookie_dict.update(item)
-            cookies.append(cookie_dict)
+            list_cookie.append(cookie_dict)
 
-        return cookies
+        return list_cookie
 
     def load_local_cookie(self, cookie_file = '.cookies.json'):
-        cookies = None
+        list_cookie = {}
 
         if not os.access(cookie_file, os.F_OK):
-            return cookies
+            return list_cookie
 
-        cookies = {}
         with open(cookie_file, 'rb') as f:
-            cookies = f.read()
-            cookies =  json.loads(cookies):
+            content = f.read()
+            list_cookie = json.loads(content):
 
-        return cookies
+        return list_cookie
     
-    def save_local_cookie(self, cookie_file = '.cookies.json'):
+    def save_local_cookie(self, cookies, cookie_file = '.cookies.json'):
         with open(cookie_file, 'wb') as f:
-            cookies = self.cookiejar_to_list()
-            f.write(json.dumps(cookies, sort_keys=False, indent=2))
+            list_cookie = self.cookiejar_to_list(cookies)
+            f.write(json.dumps(list_cookie, sort_keys=False, indent=2))
     
     def ungzip(self, content):
         """Decompresses content for Content-Encoding: gzip.
@@ -298,7 +301,6 @@ class urllib_request(abstract_request):
         import six
         import ssl
 
-
         ssl._create_default_https_context = ssl._create_unverified_context
         self.handlers = []
         self.urllib = six.moves.urllib
@@ -311,10 +313,10 @@ class urllib_request(abstract_request):
 
         #cookie_file
         if cookie_file:
-            self.cookiejar_from_list(self.load_local_cookie(cookie_file))
+            cookies = self.cookiejar_from_list(self.load_local_cookie(cookie_file))
         else:
-            self.cookiejar_from_list(self.load_local_cookie())
-        cookie_handler = self.urllib.request.HTTPCookieProcessor(self.cookies)  
+            cookies = self.cookiejar_from_list(self.load_local_cookie())
+        cookie_handler = self.urllib.request.HTTPCookieProcessor(cookies)  
         self.handlers.append(cookie_handler)
 
         #proxies
@@ -467,19 +469,20 @@ class requests_request(abstract_request):
         self.auth = auth
 
         self.patameter = {}
-        if headers:
-            item = {'headers' : headers}
-            self.patameter.update(item)
+
         if proxies:
             item = {'proxies' : proxies}
             self.patameter.update(item)
 
+        if headers:
+            item = {'headers' : headers}
+            self.patameter.update(item)
         if cookie_file:
-            self.cookiejar_from_list(self.load_local_cookie(cookie_file))
+            cookies = self.cookiejar_from_list(self.load_local_cookie(cookie_file))
         else:
-            self.cookiejar_from_list(self.load_local_cookie())
+            cookies = self.cookiejar_from_list(self.load_local_cookie())
 
-            item = {'cookies' : self.cookies}
+            item = {'cookies' : cookies}
             self.patameter.update(item)
         item = {'verify' : False}
         self.patameter.update(item)
