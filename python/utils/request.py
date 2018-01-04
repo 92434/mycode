@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2017年12月31日 星期日 18时03分02秒
+#   修改日期：2018年01月04日 星期四 19时40分59秒
 #   描    述：
 #
 #================================================================
@@ -40,10 +40,6 @@ socket.setdefaulttimeout(timeout)
 
 class abstract_request(object):
     def __init__(self):
-        self.cookies = cookielib.CookieJar()
-        #self.cookie_file = ''
-        #self.cookies = cookielib.MozillaCookieJar(self.cookie_file)
-        #self.cookies.load()
         self.urlparse = urlparse
         self.fake_headers = {
             #'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -55,9 +51,26 @@ class abstract_request(object):
             'User-Agent' : 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/61.0.3163.79 Chrome/61.0.3163.79 Safari/537.36',
                 }
 
-        #self.load_chromium_cookie()
+        self.cookie_default = {
+                'version' : None, 'name' : None, 'value' : None,
+                'port' : None, 'port_specified' : None,
+                'domain' : None, 'domain_specified' : None, 'domain_initial_dot' : None,
+                'path' : None, 'path_specified' : None,
+                'secure' : None,
+                'expires' : None,
+                'discard' : None,
+                'comment' : None,
+                'comment_url' : None,
+                '_rest' : {},
+                'rfc2109' : False,
+                }
 
-        self.load_local_cookie()
+        self.cookies = cookielib.CookieJar()
+        #self.cookie_file = ''
+        #self.cookies = cookielib.MozillaCookieJar(self.cookie_file)
+        #self.cookies.load()
+        #self.load_chromium_cookie()
+        #self.cookiejar_from_list(self.load_local_cookie())
 
     def get_cookie_by_name(self, cookie_name):
         for item in self.cookies:
@@ -142,46 +155,56 @@ class abstract_request(object):
                         discard = None,
                         comment = None,
                         comment_url = None,
-                        rest = None,
+                        _rest = None,
                         rfc2109 = False,
                         )
                 self.cookies.set_cookie(cookie_item)    # Apply each cookie_item to cookiejar
 
-    def load_local_cookie(self):
+    def cookiejar_from_list(self, cookies = []):
+        for cookie in cookies:
+            cookie_default = {}
+            cookie_default.update(self.cookie_default)
 
-        local_cookies_file = '.cookies.json'
-        if not os.access(local_cookies_file, os.F_OK):
-            return
-
-        with open('.cookies.json') as f:
-            cookies = f.read()
-
-        for cookie in json.loads(cookies):
-            cookie_default = {
-                    'version' : None, 'name' : None, 'value' : None, 
-                     'port' : None, 'port_specified' : None,
-                     'domain' : None, 'domain_specified' : None, 'domain_initial_dot' : None,
-                     'path' : None, 'path_specified' : None,
-                     'secure' : None,
-                     'expires' : None,
-                     'discard' : None,
-                     'comment' : None,
-                     'comment_url' : None,
-                     'rest' : {},
-                     'rfc2109' : False,
-                    }
-            for i in cookie:
-                if i in cookie_default:
-                    cookie_default.update({i : cookie.get(i)})
+            for key in cookie:
+                if key in cookie_default:
+                    cookie_default.update({key : cookie.get(key)})
                 else:
-                    rest_dict = cookie_default.get('rest')
-                    rest_dict.update({i : cookie.get(i)})
-                    
+                    rest_dict = cookie_default.get('_rest')
+                    rest_dict.update({key : cookie.get(key)})
             
             #logger.debug('cookie_default %s' %(cookie_default))
             cookie_item = cookielib.Cookie(**cookie_default)
             self.cookies.set_cookie(cookie_item)
 
+    def cookiejar_to_list(self):
+        cookies = []
+        for cookie in self.cookies:
+            cookie_dict = {}
+            for key, value in cookie_default.items()
+                item = {key : getattr(cookie, key, self.cookie_default.get(key))}
+                cookie_dict.update(item)
+            cookies.append(cookie_dict)
+
+        return cookies
+
+    def load_local_cookie(self, cookie_file = '.cookies.json'):
+        cookies = None
+
+        if not os.access(cookie_file, os.F_OK):
+            return cookies
+
+        cookies = {}
+        with open(cookie_file, 'rb') as f:
+            cookies = f.read()
+            cookies =  json.loads(cookies):
+
+        return cookies
+    
+    def save_local_cookie(self, cookie_file = '.cookies.json'):
+        with open(cookie_file, 'wb') as f:
+            cookies = self.cookiejar_to_list()
+            f.write(json.dumps(cookies, sort_keys=False, indent=2))
+    
     def ungzip(self, content):
         """Decompresses content for Content-Encoding: gzip.
         """
@@ -270,10 +293,11 @@ class abstract_request(object):
 
 
 class urllib_request(abstract_request):
-    def __init__(self, level = 0, proxies = None, headers = None, cookies = None, auth = None):
+    def __init__(self, level = 0, proxies = None, headers = None, cookie_file = None, auth = None):
         super(urllib_request, self).__init__()
         import six
         import ssl
+
 
         ssl._create_default_https_context = ssl._create_unverified_context
         self.handlers = []
@@ -285,9 +309,11 @@ class urllib_request(abstract_request):
         #self.handlers.append(http_handler)
         #self.handlers.append(https_handler)
 
-        #cookies
-        if cookies:
-            self.cookies = cookies
+        #cookie_file
+        if cookie_file:
+            self.cookiejar_from_list(self.load_local_cookie(cookie_file))
+        else:
+            self.cookiejar_from_list(self.load_local_cookie())
         cookie_handler = self.urllib.request.HTTPCookieProcessor(self.cookies)  
         self.handlers.append(cookie_handler)
 
@@ -433,7 +459,7 @@ class urllib_request(abstract_request):
                 break
 
 class requests_request(abstract_request):
-    def __init__(self, level = 0, proxies = None, headers = None, cookies = None, auth = None):
+    def __init__(self, level = 0, proxies = None, headers = None, cookie_file = None, auth = None):
         super(requests_request, self).__init__()
         import requests
         self.requests = requests
@@ -447,8 +473,13 @@ class requests_request(abstract_request):
         if proxies:
             item = {'proxies' : proxies}
             self.patameter.update(item)
-        if cookies:
-            item = {'cookies' : cookies}
+
+        if cookie_file:
+            self.cookiejar_from_list(self.load_local_cookie(cookie_file))
+        else:
+            self.cookiejar_from_list(self.load_local_cookie())
+
+            item = {'cookies' : self.cookies}
             self.patameter.update(item)
         item = {'verify' : False}
         self.patameter.update(item)
@@ -535,9 +566,9 @@ class requests_request(abstract_request):
 
 
 class request(object):
-    def __init__(self, level = 0, proxies = None, cookies = None, auth = None):
-        #self.request = urllib_request(level = level, proxies = proxies, cookies = cookies)
-        self.request = requests_request(level = level, proxies = proxies, cookies = cookies)
+    def __init__(self, level = 0, proxies = None, cookie_file = None, auth = None):
+        #self.request = urllib_request(level = level, proxies = proxies, cookie_file = cookie_file)
+        self.request = requests_request(level = level, proxies = proxies, cookie_file = cookie_file)
 
 def main():
     argv = sys.argv[1:]
