@@ -1,3 +1,10 @@
-tf.truncated_normal(shape, mean, stddev) :shape表示生成张量的维度，mean是均值，stddev是标准差。这个函数产生正太分布，均值和标准差自己设定。这是一个截断的产生正太分布的函数，就是说产生正太分布的值如果与均值的差值大于两倍的标准差，那就重新生成。和一般的正太分布的产生随机数据比起来，这个函数产生的随机数与均值的差距不会超过两倍的标准差，但是一般的别的函数是可能的。
+tf.truncated_normal(shape, mean, stddev): shape表示生成张量的维度，mean是均值，stddev是标准差。这个函数产生正太分布，均值和标准差自己设定。这是一个截断的产生正太分布的函数，就是说产生正太分布的值如果与均值的差值大于两倍的标准差，那就重新生成。和一般的正太分布的产生随机数据比起来，这个函数产生的随机数与均值的差距不会超过两倍的标准差，但是一般的别的函数是可能的。
+
+logit: logit is a function that maps probabilities ([0, 1]) to R ((-inf, inf)), Probability of 0.5 corresponds to a logit of 0. Negative logit correspond to probabilities less than 0.5, positive to > 0.5.
+
+tf.losses.sparse_softmax_cross_entropy(labels=y_, logits=y):不完善的写法:The raw formulation of cross-entropy, tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(tf.nn.softmax(y)), reduction_indices=[1])); can be numerically unstable. So here we use tf.losses.sparse_softmax_cross_entropy on the raw outputs of 'y', and then average across the batch.
+
+reduce_mean(input_tensor, reduction_indices=None, keep_dims=False, name=None, reduction_indices=None):reduction_indices=[0], 沿着行方向求这列平均值, 维度压成一行;reduction_indices=[1],沿着列方向求这行平均值，维度压成一列;reduction_indices为空，全部元素求平均值,维度压成一点;已由axis替代;
+
 
 

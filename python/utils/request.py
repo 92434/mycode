@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2018年01月05日 星期五 12时37分01秒
+#   修改日期：2018年01月06日 星期六 11时09分08秒
 #   描    述：
 #
 #================================================================
@@ -73,33 +73,30 @@ class abstract_request(object):
         #self.load_chromium_cookie()
     
     def update_parameter(self, **kwargs):
-        logger.debug('kwargs %s' %(kwargs))
-
         level = kwargs.pop('level', None)
-        if level:
+        if level != None:
             self.update_parameter_level(level)
 
         proxies = kwargs.pop('proxies', None)
-        if proxies:
+        if proxies != None:
             self.update_parameter_proxies(proxies)
 
         headers = kwargs.pop('headers', None)
-        if headers:
+        if headers != None:
             self.update_parameter_headers(headers)
 
         list_cookie = kwargs.pop('list_cookie', None)
-        if list_cookie:
-            self.update_parameter_cookies(list_cookie)
-
         cookie_file = kwargs.pop('cookie_file', None)
-        if cookie_file:
-            self.update_parameter_cookies(None, cookie_file)
+        self.update_parameter_cookies(list_cookie, cookie_file)
 
         auth = kwargs.pop('auth', None)
-        if auth:
+        if auth != None:
             self.update_parameter_auth(auth)
 
         return kwargs
+
+    def get_cookies(self):
+        return self.parameter.get('cookies', None)
 
     def get_cookie_by_name(self, cookies, cookie_name):
         for item in cookies:
@@ -253,7 +250,6 @@ class abstract_request(object):
 
         item = {'cookies' : cookies}
         self.parameter.update(item)
-        logger.debug('self.parameter %s' %(self.parameter))
 
     def update_parameter_proxies(self, proxies = None):
         #proxies:{'protocol' : 'server:port'}
@@ -383,24 +379,24 @@ class urllib_request(abstract_request):
         parameter.update(self.parameter)
 
         level = parameter.pop('level', None)
-        if level:
+        if level != None:
             http_handler = self.urllib.request.HTTPHandler(level)
             handlers.append(http_handler)
             https_handler = self.urllib.request.HTTPSHandler(level)
             handlers.append(https_handler)
 
         cookies = parameter.pop('cookies', None)
-        if cookies:
+        if cookies != None:
             cookie_handler = self.urllib.request.HTTPCookieProcessor(cookies)  
             handlers.append(cookie_handler)
 
         proxies = parameter.pop('proxies', None)
-        if proxies:
+        if proxies != None:
             proxy_handler = self.urllib.request.ProxyHandler(proxies)
             handlers.append(proxy_handler)
 
         auth = parameter.pop('auth', None)
-        if auth:
+        if auth != None:
             mgr = self.urllib.request.HTTPPasswordMgrWithDefaultRealm()
             try:
                 import netrc
@@ -420,7 +416,7 @@ class urllib_request(abstract_request):
             handlers.append(digest_auth_handler)
 
         #install handler
-        logger.debug('handlers:%s' %(handlers))
+        #logger.debug('handlers:%s' %(handlers))
 
         opener = self.urllib.request.build_opener(*handlers)
         self.urllib.request.install_opener(opener)
@@ -432,7 +428,7 @@ class urllib_request(abstract_request):
 
         for i in range(10):
             try:
-                logger.debug('%s, %s' %(args, kwargs))
+                #logger.debug('%s, %s' %(args, kwargs))
                 return self.urllib.request.urlopen(req)
             except:
                 logger.exception('')
@@ -577,6 +573,9 @@ class requests_request(abstract_request):
 
         method = self.requests.get
         response = self.urlopen_with_retry(method, url, **kwargs)
+        cookies = response.cookies
+        item = {'cookies' : cookies}
+        self.parameter.update(item)
 
         content = response.content
         #content = self.decompresses(response, content)
@@ -591,6 +590,9 @@ class requests_request(abstract_request):
         method = self.requests.post
 
         response = self.urlopen_with_retry(method, url, **kwargs)
+        cookies = response.cookies
+        item = {'cookies' : cookies}
+        self.parameter.update(item)
 
         content = response.content
         #content = self.decompresses(response, content)
@@ -614,6 +616,10 @@ class requests_request(abstract_request):
         method = self.requests.get
 
         response = self.urlopen_with_retry(method, url, stream = True, **kwargs)
+        cookies = response.cookies
+        item = {'cookies' : cookies}
+        self.parameter.update(item)
+
         size = self.get_content_size(response)
         response.close()
         return size
@@ -627,13 +633,17 @@ class requests_request(abstract_request):
         method = self.requests.get
 
         response = self.urlopen_with_retry(method, url, stream = True, **kwargs)
+        cookies = response.cookies
+        item = {'cookies' : cookies}
+        self.parameter.update(item)
+
         return response.iter_content(chunk_size = chunk_size)
 
 
 class request(object):
     def __init__(self, level = None, proxies = None, headers = None, cookie_file = '.cookies.json', auth = None):
-        self.request = urllib_request(level = level, proxies = proxies, headers = headers, cookie_file = cookie_file, auth = auth)
-        #self.request = requests_request(level = level, proxies = proxies, headers = headers, cookie_file = cookie_file, auth = auth)
+        #self.request = urllib_request(level = level, proxies = proxies, headers = headers, cookie_file = cookie_file, auth = auth)
+        self.request = requests_request(level = level, proxies = proxies, headers = headers, cookie_file = cookie_file, auth = auth)
 
 def main():
     argv = sys.argv[1:]
@@ -652,21 +662,26 @@ def main():
 
     size = r.request.url_size('http://sw.bos.baidu.com/sw-search-sp/software/e25c4cc36a934/QQ_8.9.6.22427_setup.exe')
     logger.debug('size:%s' %(size))
+    logger.debug('cookies:%s' %(r.request.get_cookies()))
 
     content = r.request.get('https://www.baidu.com', headers = r.request.fake_headers)
     logger.debug('content:%s' %(len(content)))
+    logger.debug('cookies:%s' %(r.request.get_cookies()))
 
     content = r.request.get('https://www.baidu.com/xiaofei')
     logger.debug('content:%s' %(len(content)))
+    logger.debug('cookies:%s' %(r.request.get_cookies()))
 
     iter_content = r.request.iter_content('http://www.baidu.com', chunk_size = None)
     for iter_data in iter_content:
-        logger.debug('iter_data:%s' %(iter_data))
+        logger.debug('iter_data:%s' %(len(iter_data)))
+    logger.debug('cookies:%s' %(r.request.get_cookies()))
 
-    #proxies = {'socks5' : '127.0.0.1:1080'}
-    #r = request(level = 0, proxies = proxies)
-    #content = r.request.get('https://www.google.com/', headers = r.request.fake_headers)
-    #logger.debug('content:%s' %(content))
+    proxies = {'https' : '127.0.0.1:8087'}
+    r = request(level = 0, proxies = proxies)
+    content = r.request.get('https://www.google.com/', headers = r.request.fake_headers)
+    logger.debug('content:%s' %(len(content)))
+    logger.debug('cookies:%s' %(r.request.get_cookies()))
 
 if '__main__' == __name__:
     main()

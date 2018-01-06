@@ -1,0 +1,130 @@
+1.目的
+	快速仿真指纹终端功能，复现与算法库功能相关已知问题，预测算法库结果及稳定性。
+
+2.app功能
+	1.获取目标图片，分析图片类型,用途。
+	2.利用获取图片，进行录入，比对。
+		1.录入策略：录入任务图片选取。
+		2.比对策略：比对图片选取。
+			1.fr 比对。
+			2.fa 比对。
+
+3.目前程序执行流程:
+	1.获取pictures_directory中指定的图片。
+	2.获取resource_pattern中的规则，根据规则决定录入，fr比对，fa比对的图片资源
+		1.enroll_pattern_数字：录入的图片样本选取规则。主要抓取括号中的三个组，(人)，(手指)，(图片序号)。
+		2.enroll_pattern_order_数字：匹配到的规则中括号中的多个组对应的先后顺序信息：
+			xxxx
+			||||___这个位置写你样式里代表图片序号的组是第几组(索引从0开始)
+			|||____这个位置写你样式里代表手指的组是第几组(索引从0开始)
+			||_____这个位置写你样式里代表person的组是第几组(索引从0开始)
+			|______这个位置填期望匹配到的总组数,用来校验你写的样式最终抓取的组数是不是你预期的数目(正确性验证)
+			
+			example 1:
+				bmp:/pictures/person_1/enroll_success/pb_06_0001_0_11.bmp
+				pattern:pictures/([^/]+)/enroll_success/pb_[0-9]+_[0-9]+_([0-9]+)_([0-9]+).bmp
+					result:"pictures/person_1/enroll_success/pb_06_0001_0_11.bmp"
+					result:"person_1"
+					result:"0"
+					result:"11"
+				这次匹配结果包含如下信息：result组数4, 代表person的组是result中第1组(persion_1), 代表手指的组是result中第2组(0), 代表图片序号的组是result中第3组(11)
+				所以order应该是4 1 2 3
+
+			example 2:
+				bmp:/pictures/手指0/person_1/ft_id_123.bmp
+				pattern:pictures/手指([0-9]+)/([^/]+)/ft_id_([0-9]+).bmp
+					result:"pictures/手指0/person_1/ft_id_123.bmp"
+					result:"0"
+					result:"person_1"
+					result:"123"
+
+				这次匹配结果包含如下信息：result组数4, 代表person的组是result中第2组(persion_1), 代表手指的组是result中第1组(0), 代表图片序号的组是result中第3组(123)
+				所以order应该是4 2 1 3
+
+			example 3:
+				bmp:/pictures/手指0/person_1/ft_id_123.bmp
+				pattern:(pictures)/(手指)([0-9]+)/([^/]+)/(ft_id_)([0-9]+).bmp
+					result:"pictures/手指0/person_1/ft_id_123.bmp"
+					result:"pictures"
+					result:"手指"
+					result:"0"
+					result:"person_1"
+					result:"ft_id_"
+					result:"123"
+				这次匹配结果包含如下信息：result组数7, 代表person的组是result中第4组(persion_1), 代表手指的组是result中第3组(0), 代表图片序号的组是result中第6组(123)
+				所以order应该是7 4 3 6
+
+		3.fr_pattern_success_数字：用于fr比对的图片样本选择。该样本原本的状态是比对成功。规则同上。
+		4.fr_pattern_success_order_数字：匹配到的规则中括号中的多个组对应的先后顺序信息：规则同上。
+		5.fr_pattern_fail_数字：用于fr比对的图片样本选择。该样本原本的状态是比对失败。规则同上。
+		6.fr_pattern_fail_order_数字：匹配到的规则中括号中的多个组对应的先后顺序信息：规则同上。
+		7.fr_pattern_数字：用于fr比对的图片样本选择。该样本原本的状态是未知,不提供原来的比对成功失败信息。规则同上。
+		8.fr_pattern_order_数字：匹配到的规则中括号中的多个组对应的先后顺序信息：规则同上。
+
+		9.fa_pattern_success_数字：用于fa比对的图片样本选择。该样本原本的状态是比对成功。规则同上。
+		10.fa_pattern_success_order_数字：匹配到的规则中括号中的多个组对应的先后顺序信息：规则同上。
+		11.fa_pattern_fail_数字：用于fa比对的图片样本选择。该样本原本的状态是比对失败。规则同上。
+		12.fa_pattern_fail_order_数字：匹配到的规则中括号中的多个组对应的先后顺序信息：规则同上。
+		13.fa_pattern_数字：用于fa比对的图片样本选择。该样本原本的状态是未知,不提供原来的比对成功失败信息。规则同上。
+		14.fa_pattern_order_数字：匹配到的规则中括号中的多个组对应的先后顺序信息：规则同上。
+		15.数字范围：0--无穷大。可追加任意多条规则。每个组独立计数;fr_pattern_success_0, fr_pattern_success_1,fr_pattern_success_2...
+		16.fr_pattern_success, fr_pattern_fail分别代表fr比对样本原本的匹配情况，如果指定，必须同时指定，因为有成功必须有失败，否则没意义。如果不清楚原本的匹配情况，只提供fr_pattern即可。多条规则互不影响。
+
+	3.获取settings中比对策略，根据策略选择样本，加入录入，比对队列。
+		1.max_number_of_id_per_proc:当前的比对任务（进程）支持同时录入的手指数目
+		2.max_number_of_catagory_per_proc:当前的比对任务（进程）支持同时录入的人的数目。（规则1优先于规则2）
+		3.fr_select_type:fr 比对策略(从样本中选择哪些图片来跟模板比对)：
+			1.SELECT_ALL:用fr规则找到的图片都拿来比对
+				用于fr比对的图片有person 1 id0, id1, id2;person 2 id0, id1; person 3 id0, id1;
+				example 1:
+					录入person 1 id0 id1
+					录入person 2 id0
+					比对person 1 id0, id1, id2;person 2 id0, id1; person 3 id0, id1;
+				example 2:
+					录入person 1 id0 id1
+					比对person 1 id0, id1, id2;person 2 id0, id1; person 3 id0, id1;
+			2.SELECT_SAME_CATAGORY:用fr规则找到的图片中选取相同人的图片来比对
+				用于fr比对的图片有person 1 id0, id1, id2;person 2 id0, id1; person 3 id0, id1;
+				example 1:
+					录入person 1 id0 id1
+					录入person 2 id0
+					比对person 1 id0, id1, id2; person 2 id0, id1
+				example 2:
+					录入person 1 id0 id1
+					比对person 1 id0, id1
+			3.SELECT_SAME_ID:用fr规则找到的图片中选取相同id(同一个人的同一个手指)的图片来比对
+				用于fr比对的图片有person 1 id0, id1, id2;person 2 id0, id1; person 3 id0, id1;
+				example 1:
+					录入person 1 id0 id1
+					录入person 2 id0
+					比对person 1 id0, id1; person 2 id0
+				example 2:
+					录入person 1 id0 id1
+					比对person 1 id0, id1
+			4.SELECT_DIFFERENT_CATAGORY:用fr规则找到的图片中选取不同人的图片来比对
+				用于fr比对的图片有person 1 id0, id1, id2;person 2 id0, id1; person 3 id0, id1;
+				example 1:
+					录入person 1 id0 id1
+					录入person 2 id0
+					比对person 3 id0, id1
+				example 2:
+					录入person 1 id0 id1
+					比对person 2 id0, id1; pserson 3 id0, id1
+
+			5.SELECT_DIFFERENT_ID:用fr规则找到的图片中选取不同id(因为支持多个同时录入，选跟录入的所有手指都不同的手指)的图片来比对
+				用于fr比对的图片有person 1 id0, id1, id2;person 2 id0, id1; person 3 id0, id1;
+				example 1:
+					录入person 1 id0 id1
+					录入person 2 id0
+					比对person 1 id2; person 2 id1; person 3 id0, id1
+				example 2:
+					录入person 1 id0 id1
+					比对person 1 id2; person 2 id0, id1; pserson 3 id0, id1
+
+		4.fa_select_type:fa 比对策略同fr
+		5.max_proc_number:模拟的手机终端数（进程数）
+		6.strict_identify_mode:
+			1.为1:fr比对中，只把相同手指比对后不匹配的结果计入frr;fa比对中,只把不同手指比对后匹配的结果计入far
+			2.为0:fr比对中，所有参与比对后不匹配的结果计入frr;fa比对中,所有参与比对后匹配的结果计入far
+
+	4.针对组建的比对队列，进行录入，比对。
