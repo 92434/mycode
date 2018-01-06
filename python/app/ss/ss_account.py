@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月06日 星期六 13时15分01秒
+#   修改日期：2018年01月06日 星期六 13时34分38秒
 #   描    述：
 #
 #================================================================
@@ -39,7 +39,8 @@ def b64decode(b64_content):
     try:
         content_decoded = base64.b64decode(b64_content + pad)
     except:
-        logger.exception('')
+        #logger.exception('')
+        pass
     return content_decoded
 
 def b64decode_retry(b64_content):
@@ -55,7 +56,7 @@ def b64decode_retry(b64_content):
 def decode_utf8_retry(utf8_content):
     while utf8_content:
         try:
-            utf8_content = utf8_content.decode('utf-8').encode('utf-8')
+            utf8_content = utf8_content.decode('utf8').encode('utf8')
             return utf8_content
         except:
             utf8_content = utf8_content[:-1]
@@ -92,6 +93,7 @@ def decode_ss_link(link = ''):
         for parameter_item in list_parameter:
             key, value = parameter_item.split('=')
             value = b64decode_retry(value)
+            value = decode_utf8_retry(value)
             item = {key : value}
             dict_account.update(item)
     else:
@@ -150,11 +152,6 @@ def decode_ss_link(link = ''):
     item = {'timeout' : 120}
     dict_account.update(item)
     item = {'fast_open' : False}
-    dict_account.update(item)
-
-    remarks = dict_account.pop('remarks')
-    remarks = decode_utf8_retry(remarks)
-    item = {'remarks' : remarks}
     dict_account.update(item)
 
     return dict_account
@@ -220,8 +217,7 @@ def ishadowx_account():
     kwargs.update(item)
     ss_parameter_account(**kwargs)
 
-def yahaha_account():
-    url = 'http://www.yahaha.xyz/link/g7dxNkjdaNNg53Qg?mu=0'
+def mu_sccount(url):
     data = r.request.get(url)
     content_decoded = b64decode_retry(data)
     content_decoded = content_decoded.strip()
@@ -239,6 +235,14 @@ def yahaha_account():
     show_list(['序列号', '帐号'], list_remarks)
     dict_account = select_list_item(list_dict_account)
     gen_ss_conf(dict_account)
+
+def yahaha_account():
+    url = 'http://www.yahaha.xyz/link/g7dxNkjdaNNg53Qg?mu=0'
+    mu_sccount(url)
+
+def ashin_account():
+    url = 'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0'
+    mu_sccount(url)
 
 def gen_ss_conf(dict_account):
     logger.debug('dict_account:%s' %(dict_account))
@@ -258,6 +262,7 @@ def ss_parameter_account(**kwargs):
 dict_web_addr_map = {
         'ishadowx' : ishadowx_account,
         'yahaha' : yahaha_account,
+        'ashin' : ashin_account,
         }
 
 def free_ss_account():
