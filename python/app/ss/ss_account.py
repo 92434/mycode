@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月06日 星期六 13时34分38秒
+#   修改日期：2018年01月06日 星期六 22时10分54秒
 #   描    述：
 #
 #================================================================
@@ -244,6 +244,11 @@ def ashin_account():
     url = 'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0'
     mu_sccount(url)
 
+def doub_account():
+    url = 'https://doub.bid/sszhfx/'
+    data = r.request.get(url, headers = r.request.fake_headers)
+    logger.debug('data:%s' %(data))
+
 def gen_ss_conf(dict_account):
     logger.debug('dict_account:%s' %(dict_account))
     with open('config.json', 'wb+') as f:
@@ -263,6 +268,7 @@ dict_web_addr_map = {
         'ishadowx' : ishadowx_account,
         'yahaha' : yahaha_account,
         'ashin' : ashin_account,
+        'doub' : doub_account,
         }
 
 def free_ss_account():
