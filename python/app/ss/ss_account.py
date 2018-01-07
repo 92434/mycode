@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月07日 星期日 15时53分08秒
+#   修改日期：2018年01月07日 星期日 16时02分14秒
 #   描    述：
 #
 #================================================================
@@ -294,11 +294,11 @@ def doub_account():
             if not m:
                 continue
             link = link[m.start():]
-            #logger.debug('link:%s' %(link))
+            logger.debug('link:%s' %(link))
             list_ss_link.append(link)
-            list_item[-1] = m.group().replace('://', '')
+            logger.debug('m.group():%s' %(m.group()))
             #logger.debug('list_item:%s' %(list_item))
-            list_content.append(list_item)
+            list_content.append(list_item[:-1] + [m.group().replace('://', '')])
 
     show_list(['序列号'] + list_des, list_content)
     ss_link = select_list_item(list_ss_link)
