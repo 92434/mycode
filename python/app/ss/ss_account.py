@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月07日 星期日 16时02分14秒
+#   修改日期：2018年01月07日 星期日 22时17分58秒
 #   描    述：
 #
 #================================================================
@@ -153,7 +153,7 @@ def decode_ss_link(link = ''):
             item = {'connect_verbose_info' : 1}
             dict_account.update(item)
     else:
-        p = '(?P<method>[^:]+):(?P<password>[^@]+)@(?P<server>[^:]+):(?P<server_port>\d+)'
+        p = '(?P<method>[^:]+):(?P<password>.+)@(?P<server>.+):(?P<server_port>\d+)'
         m = re.match(p, decoded_account)
         if m:
             dict_matched = m.groupdict()
