@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月06日 星期六 22时10分54秒
+#   修改日期：2018年01月07日 星期日 15时53分08秒
 #   描    述：
 #
 #================================================================
@@ -64,31 +64,45 @@ def decode_utf8_retry(utf8_content):
             continue
     return utf8_content
 
+def filter_ss_link(link):
+    filtered_link = ''
+    p = '[A-Za-z0-9\+-]'
+    for i in link:
+        m = re.match(p, i)
+        if m:
+            filtered_link += i
+    return filtered_link
+
 def decode_ss_link(link = ''):
     dict_account = {}
     item = {'is_ssr' : False}
     dict_account.update(item)
 
-    if link.startswith('ssr://'):
+    p = 's.*s.*r.*:.*/.*/'
+    if re.search(p, link):
         item = {'is_ssr' : True}
         dict_account.update(item)
-        link = link.replace('ssr://', '')
-    elif link.startswith('ss://'):
-        link = link.replace('ss://', '')
+
+    p = 's.*s.*r*.*:.*/.*/'
+    link = re.sub(p, '', link)
+
+    link = filter_ss_link(link)
 
     logger.debug('link:%s' %(link))
+
     decoded_link = b64decode_retry(link)
     logger.debug('decoded_link:%s' %(decoded_link))
 
     parameter_start = decoded_link.rfind('/?')
     if parameter_start != -1:
-        decoded_account = decoded_link[:parameter_start]
-
         item = {'is_ssr' : True}
         dict_account.update(item)
+
+        decoded_account = decoded_link[:parameter_start]
         parameter_start = parameter_start + len('/?')
         parameter = decoded_link[parameter_start:]
         logger.debug('parameter:%s' %(parameter))
+
         list_parameter = parameter.split('&')
         for parameter_item in list_parameter:
             key, value = parameter_item.split('=')
@@ -245,9 +259,51 @@ def ashin_account():
     mu_sccount(url)
 
 def doub_account():
-    url = 'https://doub.bid/sszhfx/'
-    data = r.request.get(url, headers = r.request.fake_headers)
-    logger.debug('data:%s' %(data))
+    url = 'https://doub.io/sszhfx/'
+    proxies = {
+        'https' : '127.0.0.1:8087'
+            }
+    #data = r.request.get(url, headers = r.request.fake_headers, proxies = proxies)
+    f = open('test.html', 'rb')
+    data = f.read()
+    f.close()
+
+    #logger.debug('data:%s' %(data))
+    html = lxml.etree.HTML(data)
+    node = html.xpath('//table[@width="100%"]/tbody/tr')
+    #logger.debug('node:%s' %([(i.items(), i.text) for i in node]))
+
+    if not node:
+        return
+
+    header = node[0]
+    content = node[1:]
+
+    list_des = header.xpath('./th/text()')
+    #logger.debug('list_des:%s' %(list_des))
+    list_content = []
+    list_ss_link = []
+    for item in content:
+        list_item = item.xpath('./td')
+        link = list_item[-1]
+        list_link = link.xpath('./a[@class="dl1" and @href]/@href')
+        list_item = [re.sub('[\s]+', ' ', i.xpath('string(.)').strip()) for i in list_item]
+        for link in list_link:
+            p = 's.*s.*r*://'
+            m = re.search(p, link)
+            if not m:
+                continue
+            link = link[m.start():]
+            #logger.debug('link:%s' %(link))
+            list_ss_link.append(link)
+            list_item[-1] = m.group().replace('://', '')
+            #logger.debug('list_item:%s' %(list_item))
+            list_content.append(list_item)
+
+    show_list(['序列号'] + list_des, list_content)
+    ss_link = select_list_item(list_ss_link)
+    logger.debug('ss_link:%s' %(ss_link))
+    ss_link_account(ss_link)
 
 def gen_ss_conf(dict_account):
     logger.debug('dict_account:%s' %(dict_account))
