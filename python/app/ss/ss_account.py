@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月07日 星期日 23时02分23秒
+#   修改日期：2018年01月10日 星期三 09时12分21秒
 #   描    述：
 #
 #================================================================
@@ -264,12 +264,14 @@ def ashin_account():
 def doub_account():
     url = 'https://doub.io/sszhfx/'
     proxies = {
-        'https' : '127.0.0.1:8087'
+            'https' : 'socks5h://127.0.0.1:1080'
             }
-    #data = r.request.get(url, headers = r.request.fake_headers, proxies = proxies)
-    f = open('test.html', 'rb')
-    data = f.read()
-    f.close()
+    data = r.request.get(url, headers = r.request.fake_headers, proxies = proxies)
+    #url = 'https://doub.bid/sszhfx/'
+    #data = r.request.get(url, headers = r.request.fake_headers)
+    #f = open('test.html', 'rb')
+    #data = f.read()
+    #f.close()
 
     #logger.debug('data:%s' %(data))
     html = lxml.etree.HTML(data)
