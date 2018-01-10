@@ -6,7 +6,7 @@
 #   文件名称：ssh_command.py
 #   创 建 者：肖飞
 #   创建日期：2018年01月08日 星期一 18时28分09秒
-#   修改日期：2018年01月08日 星期一 18时58分14秒
+#   修改日期：2018年01月09日 星期二 12时16分48秒
 #   描    述：
 #
 #================================================================
@@ -57,7 +57,7 @@ def main(argv):
     ssh_client = get_ssh_client(opts.server, opts.username, opts.password)
     stdin, stdout, stderr = execute_command(ssh_client, opts.command)
     print stdout.read()
-    return ssh_client
+    ssh_client.close()
 
 if '__main__' == __name__:
     main(sys.argv[1:])

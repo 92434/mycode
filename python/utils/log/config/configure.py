@@ -6,7 +6,7 @@
 #   文件名称：configure.py
 #   创 建 者：肖飞
 #   创建日期：2017年10月20日 星期五 10时05分24秒
-#   修改日期：2017年12月15日 星期五 18时53分56秒
+#   修改日期：2018年01月10日 星期三 13时18分42秒
 #   描    述：
 #
 #================================================================
@@ -166,7 +166,8 @@ def gen_debug_file(filename = None):
 
 def dict_configure(config_dict = None, default_log_to_file = False):
     if not config_dict:
-        config_dict = default_config_dict
+        config_dict = {}
+        config_dict.update(default_config_dict)
 
     if default_log_to_file:
         try:
