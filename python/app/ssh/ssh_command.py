@@ -6,7 +6,7 @@
 #   文件名称：ssh_command.py
 #   创 建 者：肖飞
 #   创建日期：2018年01月08日 星期一 18时28分09秒
-#   修改日期：2018年01月09日 星期二 12时16分48秒
+#   修改日期：2018年01月12日 星期五 15时05分15秒
 #   描    述：
 #
 #================================================================
@@ -18,10 +18,10 @@ import log
 logging = log.dict_configure()
 logger = logging.getLogger('default')
 
-def get_ssh_client(server, username = None, password = None):
+def get_ssh_client(server, username = None, password = None, timeout = 5.0):
    ssh_client = paramiko.SSHClient() 
    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-   ssh_client.connect(server, username=username, password=password)
+   ssh_client.connect(server, username=username, password=password, timeout = timeout)
    return ssh_client
 
 def execute_command(ssh_client, command):
