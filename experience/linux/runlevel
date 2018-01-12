@@ -1,0 +1,18 @@
+Ubuntu系列运行级别定义如下：
+0 – Halt 关机
+1 –Single 单用户模式
+2 - Full multi-user with display manager (GUI) 
+3 - Full multi-user with display manager (GUI) 
+4 - Full multi-user with display manager (GUI) 
+5 - Full multi-user with display manager (GUI) 
+6 –Reboot  
+2~5级是没有任何区别的，他们为多用户模式
+
+RedHat系列的runlevel级别定义如下：
+0 - Halt 关机
+1 - Single user mode 单用户模式
+2 - Multi user mode  多用户模式
+3 - Multi user mode character interface  字符界面的多用户模式
+4 - Undefinition 未定义
+5 - Multi user mode graphics interface 图形界面的多用户模式
+6 - Reboot  重启

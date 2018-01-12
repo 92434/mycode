@@ -60,9 +60,10 @@ ssr_test(){
 }
 
 ssr_start() {
+    shift
     cd $INSTALL_PATH/shadowsocks/
     #python local.py -d start
-    python local.py
+    python local.py $@
     sleep 1
     ssr_test
 }
@@ -142,7 +143,7 @@ ssr_main() {
         update)         ssr_update      ;;
         config)         ssr_config      ;;
         xclip)          ssr_xclip       ;;
-        start)          ssr_start       ;;
+        start)          ssr_start $@    ;;
         stop)           ssr_stop        ;;
         restart)        ssr_restart     ;;
         test)           ssr_test        ;;
@@ -153,4 +154,4 @@ ssr_main() {
     esac
 }
 
-ssr_main $1
+ssr_main $@
