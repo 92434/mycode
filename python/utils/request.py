@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2018年01月06日 星期六 11时09分08秒
+#   修改日期：2018年01月16日 星期二 16时38分58秒
 #   描    述：
 #
 #================================================================
@@ -575,7 +575,7 @@ class requests_request(abstract_request):
         response = self.urlopen_with_retry(method, url, **kwargs)
         cookies = response.cookies
         item = {'cookies' : cookies}
-        self.parameter.update(item)
+        #self.parameter.update(item)
 
         content = response.content
         #content = self.decompresses(response, content)
@@ -592,7 +592,7 @@ class requests_request(abstract_request):
         response = self.urlopen_with_retry(method, url, **kwargs)
         cookies = response.cookies
         item = {'cookies' : cookies}
-        self.parameter.update(item)
+        #self.parameter.update(item)
 
         content = response.content
         #content = self.decompresses(response, content)
@@ -618,7 +618,7 @@ class requests_request(abstract_request):
         response = self.urlopen_with_retry(method, url, stream = True, **kwargs)
         cookies = response.cookies
         item = {'cookies' : cookies}
-        self.parameter.update(item)
+        #self.parameter.update(item)
 
         size = self.get_content_size(response)
         response.close()
@@ -635,7 +635,7 @@ class requests_request(abstract_request):
         response = self.urlopen_with_retry(method, url, stream = True, **kwargs)
         cookies = response.cookies
         item = {'cookies' : cookies}
-        self.parameter.update(item)
+        #self.parameter.update(item)
 
         return response.iter_content(chunk_size = chunk_size)
 
