@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月18日 星期四 14时32分57秒
+#   修改日期：2018年01月19日 星期五 13时14分17秒
 #   描    述：
 #
 #================================================================
@@ -259,6 +259,16 @@ def yahaha_account():
     url = 'http://www.yahaha.win/link/g7dxNkjdaNNg53Qg?mu=0'
     mu_sccount(url)
 
+def ssr_share_account():
+    list_url = [
+        'https://yzzz.ml/freessr',
+        'http://ssr.izdvy.cn/freessr',
+        'http://javanet.top/freessr',
+            ]
+    show_list(['序列号', 'ssr地址'], list_url)
+    url = select_list_item(list_url)
+    mu_sccount(url)
+
 def ashin_account():
     url = 'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0'
     mu_sccount(url)
@@ -330,8 +340,9 @@ def ss_parameter_account(**kwargs):
 dict_web_addr_map = {
         'ishadowx' : ishadowx_account,
         'yahaha' : yahaha_account,
-        'ashin' : ashin_account,
+        #'ashin' : ashin_account,
         'doub' : doub_account,
+        'ssr_share' : ssr_share_account,
         }
 
 def free_ss_account():
