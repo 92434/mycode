@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月19日 星期五 13时14分17秒
+#   修改日期：2018年01月19日 星期五 19时22分27秒
 #   描    述：
 #
 #================================================================
@@ -59,18 +59,15 @@ def decode_utf8_retry(utf8_content):
             utf8_content = utf8_content.decode('utf8').encode('utf8')
             return utf8_content
         except:
+            logger.exception(utf8_content)
             utf8_content = utf8_content[:-1]
-            #logger.exception('')
             continue
     return utf8_content
 
 def filter_ss_link(link):
-    filtered_link = ''
-    p = '[A-Za-z0-9\+-]'
-    for i in link:
-        m = re.match(p, i)
-        if m:
-            filtered_link += i
+    link = link.replace('!', '')
+    p = '[^A-Za-z0-9\+-]'
+    filtered_link = re.split(p, link)
     return filtered_link
 
 def decode_ss_link(link = ''):
@@ -86,35 +83,38 @@ def decode_ss_link(link = ''):
     p = 's.*s.*r*.*:.*/.*/'
     link = re.sub(p, '', link)
 
-    link = filter_ss_link(link)
+    list_link = filter_ss_link(link)
+    logger.debug('list_link:%s' %(list_link))
 
-    logger.debug('link:%s' %(link))
+    if len(list_link) == 1:
+        decoded_link = b64decode_retry(list_link[0])
+        list_decoded_link = decoded_link.split('/?')
+    elif len(list_link) == 2:
+        list_decoded_link = [b64decode_retry(link).strip('/') for link in list_link]
+    logger.debug('list_decoded_link:%s' %(list_decoded_link))
 
-    decoded_link = b64decode_retry(link)
-    logger.debug('decoded_link:%s' %(decoded_link))
-
-    parameter_start = decoded_link.rfind('/?')
-    if parameter_start != -1:
+    if len(list_decoded_link) == 2:
         item = {'is_ssr' : True}
         dict_account.update(item)
 
-        decoded_account = decoded_link[:parameter_start]
-        parameter_start = parameter_start + len('/?')
-        parameter = decoded_link[parameter_start:]
-        logger.debug('parameter:%s' %(parameter))
+        decoded_account, parameter = list_decoded_link
 
+        logger.debug('parameter:%s' %(parameter))
         list_parameter = parameter.split('&')
         for parameter_item in list_parameter:
             try:
                 key, value = parameter_item.split('=')
             except:
                 continue
+            list_value = filter_ss_link(value)
+            #value = '_'.join([b64decode_retry(value) for value in list_value])
             value = b64decode_retry(value)
             value = decode_utf8_retry(value)
             item = {key : value}
             dict_account.update(item)
-    else:
-        decoded_account = decoded_link
+
+    elif len(list_decoded_link) == 1:
+        decoded_account = list_decoded_link[0]
 
     logger.debug('decoded_account:%s' %(decoded_account))
     is_ssr = dict_account.pop('is_ssr')
@@ -171,6 +171,7 @@ def decode_ss_link(link = ''):
     item = {'fast_open' : False}
     dict_account.update(item)
 
+    #logger.debug('dict_account:%s' %(dict_account))
     return dict_account
 
 def select_list_item(list_content):
