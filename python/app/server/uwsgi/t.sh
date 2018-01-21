@@ -18,7 +18,9 @@ function start_tengine() {
 }
 
 function stop_tengine() {
-	sudo killall -9 nginx
+	#sudo killall -9 nginx
+	PATH="$prefix/sbin:$PATH"; 
+	nginx -s stop
 }
 
 function process_opt() {
