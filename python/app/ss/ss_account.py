@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月19日 星期五 19时22分27秒
+#   修改日期：2018年01月22日 星期一 10时42分49秒
 #   描    述：
 #
 #================================================================
@@ -66,7 +66,7 @@ def decode_utf8_retry(utf8_content):
 
 def filter_ss_link(link):
     link = link.replace('!', '')
-    p = '[^A-Za-z0-9\+-]'
+    p = '[^A-Za-z0-9\+-=]'
     filtered_link = re.split(p, link)
     return filtered_link
 
@@ -191,6 +191,7 @@ def show_list(list_title, list_content):
         if type(list_row) != list:
             list_row = [list_row]
         list_row = [i] + list_row
+        print list_row
         table.add_row(list_row)
     print(table)
 
@@ -270,6 +271,18 @@ def ssr_share_account():
     url = select_list_item(list_url)
     mu_sccount(url)
 
+def rfcvps_club_account():
+    url = 'https://free.rfcvps.club/'
+    data = r.request.get(url, headers = r.request.fake_headers)
+    #logger.debug('data:%s' %(data))
+    html = lxml.etree.HTML(data)
+    node = html.xpath('//body/div/div[@class="address col-md-12 col-lg-12"]/text()')
+    #logger.debug('node:%s' %(node))
+    show_list(['序列号', 'ssr'], node)
+    ss_link = select_list_item(node)
+    #logger.debug('ss_link:%s' %(ss_link))
+    ss_link_account(ss_link)
+
 def ashin_account():
     url = 'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0'
     mu_sccount(url)
@@ -344,6 +357,7 @@ dict_web_addr_map = {
         #'ashin' : ashin_account,
         'doub' : doub_account,
         'ssr_share' : ssr_share_account,
+        'rfcvps_club' : rfcvps_club_account,
         }
 
 def free_ss_account():
