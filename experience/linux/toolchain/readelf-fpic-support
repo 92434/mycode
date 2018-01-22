@@ -1,1 +1,1 @@
-readelf -all *.o | grep -e "\(GOT\|PLT\|JU.MP_SLOT\)"
+readelf -all *.o | grep -e "\(GOT\|PLT\|JU\?MP_SLOT\)"
