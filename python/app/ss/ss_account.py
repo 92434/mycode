@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月23日 星期二 19时22分22秒
+#   修改日期：2018年01月23日 星期二 21时30分09秒
 #   描    述：
 #
 #================================================================
@@ -31,6 +31,23 @@ import request
 
 r = request.request()
 
+def filter_ss_link(link):
+    p = '[^A-Za-z0-9\+/=]'
+
+    link_url = link.replace('-', '+')
+    link_url = link_url.replace('_', '/')
+
+    filtered_link = re.split(p, link_url)
+    if len(filtered_link) == 1:
+        return filtered_link
+
+    link_url = link.replace('-', '+')
+    link_url = link_url.replace('_', '/')
+    filtered_link = re.split(p, link_url)
+    if len(filtered_link) == 1:
+        return filtered_link
+    return None
+
 def b64decode(b64_content):
     content_decoded = ''
     left = len(b64_content) % 4
@@ -44,6 +61,10 @@ def b64decode(b64_content):
     return content_decoded
 
 def b64decode_retry(b64_content):
+    list_b64_content = filter_ss_link(b64_content)
+    logger.debug('list_b64_content:%s' %(list_b64_content))
+    b64_content = list_b64_content[0]
+
     content_decoded = ''
     while b64_content:
         content_decoded = b64decode(b64_content)
@@ -64,23 +85,6 @@ def decode_utf8_retry(utf8_content):
             continue
     return utf8_content
 
-def filter_ss_link(link):
-    p = '[^A-Za-z0-9\+/=]'
-
-    link_url = link.replace('-', '+')
-    link_url = link_url.replace('_', '/')
-
-    filtered_link = re.split(p, link_url)
-    if len(filtered_link) == 1:
-        return filtered_link
-
-    link_url = link.replace('-', '+')
-    link_url = link_url.replace('_', '/')
-    filtered_link = re.split(p, link_url)
-    if len(filtered_link) == 1:
-        return filtered_link
-    return None
-
 def decode_ss_link(link = ''):
     dict_account = {}
     item = {'is_ssr' : False}
@@ -94,10 +98,7 @@ def decode_ss_link(link = ''):
     p = 's.*s.*r*.*:.*/.*/'
     link = re.sub(p, '', link)
 
-    list_link = filter_ss_link(link)
-    logger.debug('list_link:%s' %(list_link))
-
-    decoded_link = b64decode_retry(list_link[0])
+    decoded_link = b64decode_retry(link)
     list_decoded_link = decoded_link.split('/?')
     logger.debug('list_decoded_link:%s' %(list_decoded_link))
 
@@ -114,8 +115,7 @@ def decode_ss_link(link = ''):
                 key, value = parameter_item.split('=')
             except:
                 continue
-            list_value = filter_ss_link(value)
-            value = b64decode_retry(list_value[0])
+            value = b64decode_retry(value)
             value = decode_utf8_retry(value)
             item = {key : value}
             dict_account.update(item)
@@ -126,8 +126,14 @@ def decode_ss_link(link = ''):
     logger.debug('decoded_account:%s' %(decoded_account))
     is_ssr = dict_account.pop('is_ssr')
     if is_ssr:
-        p = '(?P<server>[^:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>.+)'
-        m = re.match(p, decoded_account)
+        p = '(?P<server>[^:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[A-Za-z0-9\+/=]+)'
+        #p_ipv6 = '(?P<server_ipv6>[0-9a-fA-F:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[A-Za-z0-9\+/=]+)'
+        p_ipv6 = '(?P<server>[0-9a-fA-F:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[A-Za-z0-9\+/=]+)'
+        m = None
+        if not m:
+            m = re.match(p, decoded_account)
+        if not m:
+            m = re.match(p_ipv6, decoded_account)
         if m:
             dict_matched = m.groupdict()
             password = dict_matched.pop('password_base64')
@@ -154,17 +160,21 @@ def decode_ss_link(link = ''):
             item = {'redirect' : ''}
             dict_account.update(item)
 
-            item = {'server_ipv6' : '::'}
-            dict_account.update(item)
-            item = {'dns_ipv6' : False}
-            dict_account.update(item)
+            #item = {'dns_ipv6' : False}
+            #dict_account.update(item)
             item = {'udp_timeout' : 60}
             dict_account.update(item)
             item = {'connect_verbose_info' : 1}
             dict_account.update(item)
     else:
         p = '(?P<method>[^:]+):(?P<password>.+)@(?P<server>[^:]+):(?P<server_port>\d+)'
-        m = re.match(p, decoded_account)
+        #p_ipv6 = '(?P<method>[^:]+):(?P<password>.+)@(?P<server_ipv6>[0-9a-fA-F:]+):(?P<server_port>\d+)'
+        p_ipv6 = '(?P<method>[^:]+):(?P<password>.+)@(?P<server>[0-9a-fA-F:]+):(?P<server_port>\d+)'
+        m = None
+        if not m:
+            m = re.match(p, decoded_account)
+        if not m:
+            m = re.match(p_ipv6, decoded_account)
         if m:
             dict_matched = m.groupdict()
             dict_account.update(dict_matched)
