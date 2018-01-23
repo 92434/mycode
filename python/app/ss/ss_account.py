@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月22日 星期一 10时42分49秒
+#   修改日期：2018年01月23日 星期二 09时53分47秒
 #   描    述：
 #
 #================================================================
@@ -338,7 +338,7 @@ def doub_account():
 
 def gen_ss_conf(dict_account):
     logger.debug('dict_account:%s' %(dict_account))
-    with open('config.json', 'wb+') as f:
+    with open('config.json.%s.%s' %(dict_account.get('server'), dict_account.get('server_port')), 'wb+') as f:
         f.write(json.dumps(dict_account, sort_keys=False, indent=2))
 
 
