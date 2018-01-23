@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月23日 星期二 18时47分22秒
+#   修改日期：2018年01月23日 星期二 19时22分22秒
 #   描    述：
 #
 #================================================================
@@ -65,9 +65,21 @@ def decode_utf8_retry(utf8_content):
     return utf8_content
 
 def filter_ss_link(link):
-    p = '[^A-Za-z0-9\+-=]'
-    filtered_link = re.split(p, link)
-    return filtered_link
+    p = '[^A-Za-z0-9\+/=]'
+
+    link_url = link.replace('-', '+')
+    link_url = link_url.replace('_', '/')
+
+    filtered_link = re.split(p, link_url)
+    if len(filtered_link) == 1:
+        return filtered_link
+
+    link_url = link.replace('-', '+')
+    link_url = link_url.replace('_', '/')
+    filtered_link = re.split(p, link_url)
+    if len(filtered_link) == 1:
+        return filtered_link
+    return None
 
 def decode_ss_link(link = ''):
     dict_account = {}
@@ -85,11 +97,8 @@ def decode_ss_link(link = ''):
     list_link = filter_ss_link(link)
     logger.debug('list_link:%s' %(list_link))
 
-    if len(list_link) == 1:
-        decoded_link = b64decode_retry(list_link[0])
-        list_decoded_link = decoded_link.split('/?')
-    elif len(list_link) == 2:
-        list_decoded_link = [b64decode_retry(link).strip('/') for link in list_link]
+    decoded_link = b64decode_retry(list_link[0])
+    list_decoded_link = decoded_link.split('/?')
     logger.debug('list_decoded_link:%s' %(list_decoded_link))
 
     if len(list_decoded_link) == 2:
@@ -106,8 +115,7 @@ def decode_ss_link(link = ''):
             except:
                 continue
             list_value = filter_ss_link(value)
-            #value = '_'.join([b64decode_retry(value) for value in list_value])
-            value = b64decode_retry(value)
+            value = b64decode_retry(list_value[0])
             value = decode_utf8_retry(value)
             item = {key : value}
             dict_account.update(item)
