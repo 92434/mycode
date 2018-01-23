@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月23日 星期二 09时53分47秒
+#   修改日期：2018年01月23日 星期二 18时47分22秒
 #   描    述：
 #
 #================================================================
@@ -65,7 +65,6 @@ def decode_utf8_retry(utf8_content):
     return utf8_content
 
 def filter_ss_link(link):
-    link = link.replace('!', '')
     p = '[^A-Za-z0-9\+-=]'
     filtered_link = re.split(p, link)
     return filtered_link
@@ -191,7 +190,6 @@ def show_list(list_title, list_content):
         if type(list_row) != list:
             list_row = [list_row]
         list_row = [i] + list_row
-        print list_row
         table.add_row(list_row)
     print(table)
 
@@ -324,16 +322,20 @@ def doub_account():
             m = re.search(p, link)
             if not m:
                 continue
-            link = link[m.start():]
+            #link = link[m.start():]
             logger.debug('link:%s' %(link))
             list_ss_link.append(link)
-            logger.debug('m.group():%s' %(m.group()))
+            #logger.debug('m.group():%s' %(m.group()))
             #logger.debug('list_item:%s' %(list_item))
             list_content.append(list_item[:-1] + [m.group().replace('://', '')])
 
     show_list(['序列号'] + list_des, list_content)
     ss_link = select_list_item(list_ss_link)
-    logger.debug('ss_link:%s' %(ss_link))
+    #logger.debug('ss_link:%s' %(ss_link))
+    data = r.request.get(ss_link, headers = r.request.fake_headers)
+    html = lxml.etree.HTML(data)
+    node = html.xpath('//body/p[@style="border-bottom: solid 1px #ddd;"]/a[@href]/@href')
+    ss_link = node[0]
     ss_link_account(ss_link)
 
 def gen_ss_conf(dict_account):
