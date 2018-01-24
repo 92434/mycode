@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月23日 星期二 21时30分09秒
+#   修改日期：2018年01月24日 星期三 09时30分31秒
 #   描    述：
 #
 #================================================================
@@ -41,8 +41,8 @@ def filter_ss_link(link):
     if len(filtered_link) == 1:
         return filtered_link
 
-    link_url = link.replace('-', '+')
-    link_url = link_url.replace('_', '/')
+    link_url = link.replace('!', '+')
+    link_url = link_url.replace('-', '/')
     filtered_link = re.split(p, link_url)
     if len(filtered_link) == 1:
         return filtered_link
