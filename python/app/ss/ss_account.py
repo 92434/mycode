@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月24日 星期三 09时30分31秒
+#   修改日期：2018年01月24日 星期三 13时07分50秒
 #   描    述：
 #
 #================================================================
@@ -191,6 +191,20 @@ def decode_ss_link(link = ''):
     #logger.debug('dict_account:%s' %(dict_account))
     return dict_account
 
+def gen_ss_conf(dict_account):
+    logger.debug('dict_account:%s' %(dict_account))
+    with open('config.json.%s.%s' %(dict_account.get('server'), dict_account.get('server_port')), 'wb+') as f:
+        f.write(json.dumps(dict_account, sort_keys=False, indent=2))
+
+def ss_link_account(ss_link):
+    dict_account = decode_ss_link(ss_link)
+    gen_ss_conf(dict_account)
+
+def ss_parameter_account(**kwargs):
+    dict_account = decode_ss_link('')
+    dict_account.update(kwargs)
+    gen_ss_conf(dict_account)
+
 def select_list_item(list_content):
     while True:
         index = int(raw_input("请输入要使用的序列号:"))
@@ -239,19 +253,6 @@ def ishadowx_list_account():
     #logger.debug('%s' %(list_accounts))
     return list_accounts
 
-def ishadowx_account():
-    list_accounts = ishadowx_list_account()
-    show_list(['序列号', 'ip', '端口', '密码'], list_accounts)
-    server, server_port, password = select_list_item(list_accounts)
-    kwargs = {}
-    item = {'server' : server}
-    kwargs.update(item)
-    item = {'server_port' : int(server_port)}
-    kwargs.update(item)
-    item = {'password' : password}
-    kwargs.update(item)
-    ss_parameter_account(**kwargs)
-
 def mu_sccount(url):
     data = r.request.get(url)
     logger.debug('data:%s' %(data))
@@ -273,19 +274,18 @@ def mu_sccount(url):
     dict_account = select_list_item(list_dict_account)
     gen_ss_conf(dict_account)
 
-def yahaha_account():
-    url = 'http://www.yahaha.win/link/g7dxNkjdaNNg53Qg?mu=0'
-    mu_sccount(url)
-
-def ssr_share_account():
-    list_url = [
-        'https://yzzz.ml/freessr',
-        'http://ssr.izdvy.cn/freessr',
-        'http://javanet.top/freessr',
-            ]
-    show_list(['序列号', 'ssr地址'], list_url)
-    url = select_list_item(list_url)
-    mu_sccount(url)
+def ishadowx_account():
+    list_accounts = ishadowx_list_account()
+    show_list(['序列号', 'ip', '端口', '密码'], list_accounts)
+    server, server_port, password = select_list_item(list_accounts)
+    kwargs = {}
+    item = {'server' : server}
+    kwargs.update(item)
+    item = {'server_port' : int(server_port)}
+    kwargs.update(item)
+    item = {'password' : password}
+    kwargs.update(item)
+    ss_parameter_account(**kwargs)
 
 def rfcvps_club_account():
     url = 'https://free.rfcvps.club/'
@@ -298,10 +298,6 @@ def rfcvps_club_account():
     ss_link = select_list_item(node)
     #logger.debug('ss_link:%s' %(ss_link))
     ss_link_account(ss_link)
-
-def ashin_account():
-    url = 'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0'
-    mu_sccount(url)
 
 def doub_account():
     #url = 'https://doub.io/sszhfx/'
@@ -356,20 +352,27 @@ def doub_account():
     ss_link = node[0]
     ss_link_account(ss_link)
 
-def gen_ss_conf(dict_account):
-    logger.debug('dict_account:%s' %(dict_account))
-    with open('config.json.%s.%s' %(dict_account.get('server'), dict_account.get('server_port')), 'wb+') as f:
-        f.write(json.dumps(dict_account, sort_keys=False, indent=2))
+def yahaha_account():
+    url = 'http://www.yahaha.win/link/g7dxNkjdaNNg53Qg?mu=0'
+    mu_sccount(url)
 
+def xiaoheijia_account():
+    url = 'http://test.xiaoheijia.top/link/5a4NTg1zCaKtnfoh?mu=0'
+    mu_sccount(url)
 
-def ss_link_account(ss_link):
-    dict_account = decode_ss_link(ss_link)
-    gen_ss_conf(dict_account)
+def ssr_share_account():
+    list_url = [
+        'https://yzzz.ml/freessr',
+        'http://ssr.izdvy.cn/freessr',
+        'http://javanet.top/freessr',
+            ]
+    show_list(['序列号', 'ssr地址'], list_url)
+    url = select_list_item(list_url)
+    mu_sccount(url)
 
-def ss_parameter_account(**kwargs):
-    dict_account = decode_ss_link('')
-    dict_account.update(kwargs)
-    gen_ss_conf(dict_account)
+def ashin_account():
+    url = 'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0'
+    mu_sccount(url)
 
 dict_web_addr_map = {
         'ishadowx' : ishadowx_account,
@@ -378,6 +381,7 @@ dict_web_addr_map = {
         'doub' : doub_account,
         'ssr_share' : ssr_share_account,
         'rfcvps_club' : rfcvps_club_account,
+        'xiaoheijia' : xiaoheijia_account,
         }
 
 def free_ss_account():
