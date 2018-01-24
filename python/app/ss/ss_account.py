@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月24日 星期三 13时07分50秒
+#   修改日期：2018年01月24日 星期三 14时37分50秒
 #   描    述：
 #
 #================================================================
@@ -117,6 +117,7 @@ def decode_ss_link(link = ''):
                 continue
             value = b64decode_retry(value)
             value = decode_utf8_retry(value)
+            logger.debug('%s:%s' %(key, value))
             item = {key : value}
             dict_account.update(item)
 
