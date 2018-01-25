@@ -5,3 +5,8 @@ sudo apt-get install miredo
 vi /etc/default/ufw
 sudo ufw disable
 sudo ufw enable
+
+更改接口名
+ifconfig peth0 down  
+ip link set peth0 name eth0  
+ifconfig eth0 up 
