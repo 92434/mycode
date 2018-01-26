@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月26日 星期五 12时39分58秒
+#   修改日期：2018年01月26日 星期五 12时56分21秒
 #   描    述：
 #
 #================================================================
@@ -377,6 +377,7 @@ def ssr_share_account():
         'https://yzzz.ml/freessr',
         'http://ssr.izdvy.cn/freessr',
         'http://javanet.top/freessr',
+        'https://ftp.ssrshare.com/dmsub.txt',
             ]
     show_list(['序列号', 'ssr地址'], list_url)
     url = select_list_item(list_url)
@@ -384,10 +385,6 @@ def ssr_share_account():
 
 def ashin_account():
     url = 'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0'
-    mu_sccount(url)
-
-def GYJ_ssrshare_account():
-    url = 'https://ftp.ssrshare.com/dmsub.txt'
     mu_sccount(url)
 
 dict_web_addr_map = {
@@ -399,7 +396,6 @@ dict_web_addr_map = {
         'rfcvps_club' : rfcvps_club_account,
         'xiaoheijia' : xiaoheijia_account,
         'luckspeed' : luckspeed_account,
-        'GYJ_ssrshare' : GYJ_ssrshare_account,
         }
 
 def free_ss_account():
