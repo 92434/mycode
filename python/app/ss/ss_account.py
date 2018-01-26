@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月24日 星期三 14时37分50秒
+#   修改日期：2018年01月26日 星期五 12时39分58秒
 #   描    述：
 #
 #================================================================
@@ -31,9 +31,9 @@ import request
 
 r = request.request()
 
-def filter_ss_link(link):
-    p = '[^A-Za-z0-9\+/=]'
 
+def filter_ss_link(link):
+    p = '[^\w\+/=]'
     link_url = link.replace('-', '+')
     link_url = link_url.replace('_', '/')
 
@@ -127,9 +127,9 @@ def decode_ss_link(link = ''):
     logger.debug('decoded_account:%s' %(decoded_account))
     is_ssr = dict_account.pop('is_ssr')
     if is_ssr:
-        p = '(?P<server>[^:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[A-Za-z0-9\+/=]+)'
-        #p_ipv6 = '(?P<server_ipv6>[0-9a-fA-F:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[A-Za-z0-9\+/=]+)'
-        p_ipv6 = '(?P<server>[0-9a-fA-F:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[A-Za-z0-9\+/=]+)'
+        p = '(?P<server>[^:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[\w\+/=\-\!]+)'
+        #p_ipv6 = '(?P<server_ipv6>[0-9a-fA-F:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[\w\+/=\-\!]+)'
+        p_ipv6 = '(?P<server>[0-9a-fA-F:]+):(?P<server_port>\d+):(?P<protocol>[^:]+):(?P<method>[^:]+):(?P<obfs>[^:]+):(?P<password_base64>[\w\+/=\-\!]+)'
         m = None
         if not m:
             m = re.match(p, decoded_account)
@@ -165,8 +165,6 @@ def decode_ss_link(link = ''):
             #dict_account.update(item)
             item = {'udp_timeout' : 60}
             dict_account.update(item)
-            item = {'connect_verbose_info' : 1}
-            dict_account.update(item)
     else:
         p = '(?P<method>[^:]+):(?P<password>.+)@(?P<server>[^:]+):(?P<server_port>\d+)'
         #p_ipv6 = '(?P<method>[^:]+):(?P<password>.+)@(?P<server_ipv6>[0-9a-fA-F:]+):(?P<server_port>\d+)'
@@ -187,6 +185,8 @@ def decode_ss_link(link = ''):
     item = {'timeout' : 120}
     dict_account.update(item)
     item = {'fast_open' : False}
+    dict_account.update(item)
+    item = {'connect_verbose_info' : 1}
     dict_account.update(item)
 
     #logger.debug('dict_account:%s' %(dict_account))
@@ -258,13 +258,20 @@ def mu_sccount(url):
     data = r.request.get(url)
     logger.debug('data:%s' %(data))
     content_decoded = b64decode_retry(data)
+    logger.debug('content_decoded:%s' %(content_decoded))
+    p = '[^\w\+/=\-\!:]'
+    content_decoded = re.sub(p, '\n', content_decoded)
     content_decoded = content_decoded.strip()
     logger.debug('content_decoded:%s' %(content_decoded))
-    list_ssr = content_decoded.splitlines()
+    list_ssr = content_decoded.split()
     logger.debug('list_ssr:%s' %(list_ssr))
     list_dict_account = []
     #free = '0倍率'
     for ssr_link in list_ssr:
+        ssr_link = ssr_link.strip()
+        if not ssr_link:
+            continue
+        logger.debug('ssr_link:%s' %(ssr_link))
         dict_account = decode_ss_link(ssr_link)
         #if not free in dict_account.pop('remarks'):
         #    continue
@@ -361,6 +368,10 @@ def xiaoheijia_account():
     url = 'http://test.xiaoheijia.top/link/5a4NTg1zCaKtnfoh?mu=0'
     mu_sccount(url)
 
+def luckspeed_account():
+    url = 'http://luckyss.ml/link/zv0HLPO55WN8xsbT?mu=0'
+    mu_sccount(url)
+
 def ssr_share_account():
     list_url = [
         'https://yzzz.ml/freessr',
@@ -375,6 +386,10 @@ def ashin_account():
     url = 'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0'
     mu_sccount(url)
 
+def GYJ_ssrshare_account():
+    url = 'https://ftp.ssrshare.com/dmsub.txt'
+    mu_sccount(url)
+
 dict_web_addr_map = {
         'ishadowx' : ishadowx_account,
         'yahaha' : yahaha_account,
@@ -383,6 +398,8 @@ dict_web_addr_map = {
         'ssr_share' : ssr_share_account,
         'rfcvps_club' : rfcvps_club_account,
         'xiaoheijia' : xiaoheijia_account,
+        'luckspeed' : luckspeed_account,
+        'GYJ_ssrshare' : GYJ_ssrshare_account,
         }
 
 def free_ss_account():
