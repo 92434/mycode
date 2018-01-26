@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月26日 星期五 12时56分21秒
+#   修改日期：2018年01月26日 星期五 15时55分12秒
 #   描    述：
 #
 #================================================================
@@ -18,6 +18,7 @@ from prettytable import PrettyTable
 import base64
 import optparse
 import re
+import webbrowser
 try:
     import json
 except ImportError:
@@ -242,13 +243,17 @@ def ishadowx_list_account():
                 continue
 
             item_info = node_item.xpath('./span[1]/text()')
-            if not len(item_info):
-                continue
-
-            name = '%s' %(node_item.text.strip())
-            value = '%s' %(item_info[0].strip())
-            #logger.debug('%s%s' %(name, value))
-            if name in ['IP Address:', 'Port:', 'Password:']:
+            if len(item_info):
+                name = '%s' %(node_item.text.strip())
+                value = '%s' %(item_info[0].strip())
+            else:
+                try:
+                    name, value = node_item.text.split(':')
+                except:
+                    logger.debug('node_item.text:%s' %(node_item.text))
+                    continue
+            logger.debug('%s:%s' %(name, value))
+            if name in ['IP Address:', 'Port:', 'Password:', 'Method']:
                 account.append(value)
         list_accounts.append(account)
     #logger.debug('%s' %(list_accounts))
@@ -284,14 +289,16 @@ def mu_sccount(url):
 
 def ishadowx_account():
     list_accounts = ishadowx_list_account()
-    show_list(['序列号', 'ip', '端口', '密码'], list_accounts)
-    server, server_port, password = select_list_item(list_accounts)
+    show_list(['序列号', 'ip', '端口', '密码', '方法'], list_accounts)
+    server, server_port, password, method = select_list_item(list_accounts)
     kwargs = {}
     item = {'server' : server}
     kwargs.update(item)
     item = {'server_port' : int(server_port)}
     kwargs.update(item)
     item = {'password' : password}
+    kwargs.update(item)
+    item = {'method' : method}
     kwargs.update(item)
     ss_parameter_account(**kwargs)
 
@@ -360,6 +367,28 @@ def doub_account():
     ss_link = node[0]
     ss_link_account(ss_link)
 
+def freess_site_account():
+    url = 'https://free-ss.site/ss.json'
+    webbrowser.open(url)
+    data = raw_input("输入得到的json数据:\n")
+    logger.debug('data:%s' %(data))
+    data = json.loads(data)
+    list_account = data.get('data')
+    list_des = ['分值', 'ip', '端口', '密码', '方法', '验证时间', '位置']
+    show_list(['序列号'] + list_des, list_account)
+    _, server, server_port, password, method, _, _ = select_list_item(list_account)
+    kwargs = {}
+    item = {'server' : server}
+    kwargs.update(item)
+    item = {'server_port' : int(server_port)}
+    kwargs.update(item)
+    item = {'password' : password}
+    kwargs.update(item)
+    item = {'method' : method}
+    kwargs.update(item)
+    ss_parameter_account(**kwargs)
+
+
 def yahaha_account():
     url = 'http://www.yahaha.win/link/g7dxNkjdaNNg53Qg?mu=0'
     mu_sccount(url)
@@ -396,6 +425,7 @@ dict_web_addr_map = {
         'rfcvps_club' : rfcvps_club_account,
         'xiaoheijia' : xiaoheijia_account,
         'luckspeed' : luckspeed_account,
+        'free-ss.site' : freess_site_account,
         }
 
 def free_ss_account():
