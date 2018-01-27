@@ -6,7 +6,7 @@
 #   文件名称：demo.py
 #   创 建 者：肖飞
 #   创建日期：2018年01月27日 星期六 10时21分49秒
-#   修改日期：2018年01月27日 星期六 11时35分55秒
+#   修改日期：2018年01月27日 星期六 11时38分44秒
 #   描    述：
 #
 #================================================================
@@ -25,7 +25,7 @@ sys.setdefaultencoding('utf-8')
 display = Display(visible=0, size=(800, 600))
 #display.start()
 
-chrome_path = './chromedriver'
+chrome_path = '~/bin/chromedriver'
 
 def get_page_with_proxy():
     proxyauth_plugin_path = create_proxyauth_extension(
