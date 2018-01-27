@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月27日 星期六 14时07分07秒
+#   修改日期：2018年01月27日 星期六 16时57分04秒
 #   描    述：
 #
 #================================================================
@@ -47,7 +47,7 @@ def filter_ss_link(link):
     filtered_link = re.split(p, link_url)
     if len(filtered_link) == 1:
         return filtered_link
-    return None
+    return [link]
 
 def b64decode(b64_content):
     content_decoded = ''
@@ -369,7 +369,7 @@ def doub_account():
 
 def freess_site_account():
     url = 'https://free-ss.site/ss.json'
-    webbrowser.open(url)
+    webbrowser.open_new_tab(url)
     data = raw_input("输入得到的json数据:\n")
     logger.debug('data:%s' %(data))
     data = json.loads(data)
