@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月27日 星期六 16时57分04秒
+#   修改日期：2018年01月27日 星期六 21时39分35秒
 #   描    述：
 #
 #================================================================
@@ -388,6 +388,21 @@ def freess_site_account():
     kwargs.update(item)
     ss_parameter_account(**kwargs)
 
+def explorer_help_account():
+    list_url = [
+        'https://betaclouds.net/user/node',
+        'https://lanjing.tech/user/node',
+        'https://www.yahaha.win/user/node',
+        'https://oklnk.com/zh/dashboard',
+        'http://test.xiaoheijia.top/user/node',
+        'http://luckyspeed.ml/user/node',
+            ]
+    list_des = ['网址']
+    show_list(['序列号'] + list_des, list_url)
+    url = select_list_item(list_url)
+    webbrowser.open_new_tab(url)
+    link = raw_input("输入得到的ssr链接:\n")
+    ss_link_account(link)
 
 def yahaha_account():
     url = 'http://www.yahaha.win/link/g7dxNkjdaNNg53Qg?mu=0'
@@ -427,6 +442,7 @@ dict_web_addr_map = {
         'xiaoheijia' : xiaoheijia_account,
         'luckspeed' : luckspeed_account,
         'free-ss.site' : freess_site_account,
+        'explorer_help' : explorer_help_account,
         }
 
 def free_ss_account():
