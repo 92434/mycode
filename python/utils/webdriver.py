@@ -6,7 +6,7 @@
 #   文件名称：webdriver.py
 #   创 建 者：肖飞
 #   创建日期：2018年01月27日 星期六 11时33分03秒
-#   修改日期：2018年01月27日 星期六 13时54分07秒
+#   修改日期：2018年01月27日 星期六 19时48分52秒
 #   描    述：
 #
 #================================================================
@@ -32,8 +32,9 @@ class driver(object):
         if proxy:
             self.co.add_argument('--proxy-server=%s' %(proxy))  
         self.driver = webdriver.Chrome(executable_path = os.path.expanduser(self.chrome_path), chrome_options = self.co)
-        self.driver.set_script_timeout(3)
-        self.driver.set_page_load_timeout(5)
+        #self.driver.implicitly_wait(5)
+        #self.driver.set_script_timeout(3)
+        #self.driver.set_page_load_timeout(5)
 
     def set_cookies(self, cookies):
         for cookie in cookies:
@@ -57,16 +58,12 @@ def test_cookie():
     d.driver.get('https://www.baidu.com')
     cookies = d.load_cookie_file()
     d.set_cookies(cookies)
-    try:
-        d.driver.get('https://lanjing.tech/user/node')
-    except:
-        pass
+    d.driver.get('https://lanjing.tech/user/node')
     print('%s' %(d.driver.page_source))
 
 def main():
     import time
     test_cookie()
-    time.sleep(10)
 
 if '__main__' == __name__:
     main()
