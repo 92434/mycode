@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月26日 星期五 15时55分12秒
+#   修改日期：2018年01月27日 星期六 14时07分07秒
 #   描    述：
 #
 #================================================================
@@ -407,6 +407,7 @@ def ssr_share_account():
         'http://ssr.izdvy.cn/freessr',
         'http://javanet.top/freessr',
         'https://ftp.ssrshare.com/dmsub.txt',
+        'https://raw.githubusercontent.com/ImLaoD/sub/master/ssrshare.com',
             ]
     show_list(['序列号', 'ssr地址'], list_url)
     url = select_list_item(list_url)
