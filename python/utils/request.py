@@ -6,7 +6,7 @@
 #   文件名称：request.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月05日 星期二 21时35分55秒
-#   修改日期：2018年01月16日 星期二 16时38分58秒
+#   修改日期：2018年01月27日 星期六 10时04分29秒
 #   描    述：
 #
 #================================================================
@@ -72,29 +72,6 @@ class abstract_request(object):
         #self.cookies = cookielib.MozillaCookieJar(self.cookie_file)
         #self.load_chromium_cookie()
     
-    def update_parameter(self, **kwargs):
-        level = kwargs.pop('level', None)
-        if level != None:
-            self.update_parameter_level(level)
-
-        proxies = kwargs.pop('proxies', None)
-        if proxies != None:
-            self.update_parameter_proxies(proxies)
-
-        headers = kwargs.pop('headers', None)
-        if headers != None:
-            self.update_parameter_headers(headers)
-
-        list_cookie = kwargs.pop('list_cookie', None)
-        cookie_file = kwargs.pop('cookie_file', None)
-        self.update_parameter_cookies(list_cookie, cookie_file)
-
-        auth = kwargs.pop('auth', None)
-        if auth != None:
-            self.update_parameter_auth(auth)
-
-        return kwargs
-
     def get_cookies(self):
         return self.parameter.get('cookies', None)
 
@@ -199,17 +176,25 @@ class abstract_request(object):
                     rest_dict = cookie_default.get('rest')
                     rest_dict.update({key : cookie.get(key)})
             
-            logger.debug('cookie_default %s' %(cookie_default))
+            #logger.debug('cookie_default:%s' %(cookie_default))
             cookie_item = cookielib.Cookie(**cookie_default)
             cookies.set_cookie(cookie_item)
         return cookies
+
+    def cookiejar_from_cookie(self, cookies):
+        list_cookie = self.cookiejar_to_list(cookies)
+        self.update_parameter_cookies(list_cookie, None)
 
     def cookiejar_to_list(self, cookies):
         list_cookie = []
         for cookie in cookies:
             cookie_dict = {}
-            for key, value in cookie_default.items():
-                item = {key : getattr(cookie, key, self.cookie_default.get(key))}
+            for key in self.cookie_default:
+                if key == 'rest':
+                    attr_key = '_rest'
+                else:
+                    attr_key = key
+                item = {key : getattr(cookie, attr_key, self.cookie_default.get(key))}
                 cookie_dict.update(item)
             list_cookie.append(cookie_dict)
 
@@ -230,7 +215,7 @@ class abstract_request(object):
 
         logger.debug('list_cookie %s' %(list_cookie))
         return list_cookie
-    
+
     def save_local_cookie(self, cookies, cookie_file = '.cookies.json'):
         with open(cookie_file, 'wb') as f:
             list_cookie = self.cookiejar_to_list(cookies)
@@ -238,7 +223,7 @@ class abstract_request(object):
             f.write(json.dumps(list_cookie, sort_keys=False, indent=2))
 
     def update_parameter_cookies(self, list_cookie = None, cookie_file = None):
-        cookies = self.parameter.get('cookies')
+        cookies = self.get_cookies()
         if not cookies:
             cookies = cookielib.CookieJar()
 
@@ -276,6 +261,29 @@ class abstract_request(object):
     def process_parameter(self):
         raise Exception('not valid!')
     
+    def update_parameter(self, **kwargs):
+        level = kwargs.pop('level', None)
+        if level != None:
+            self.update_parameter_level(level)
+
+        proxies = kwargs.pop('proxies', None)
+        if proxies != None:
+            self.update_parameter_proxies(proxies)
+
+        headers = kwargs.pop('headers', None)
+        if headers != None:
+            self.update_parameter_headers(headers)
+
+        list_cookie = kwargs.pop('list_cookie', None)
+        cookie_file = kwargs.pop('cookie_file', None)
+        self.update_parameter_cookies(list_cookie, cookie_file)
+
+        auth = kwargs.pop('auth', None)
+        if auth != None:
+            self.update_parameter_auth(auth)
+
+        return kwargs
+
     def ungzip(self, content):
         """Decompresses content for Content-Encoding: gzip.
         """
@@ -428,7 +436,7 @@ class urllib_request(abstract_request):
 
         for i in range(10):
             try:
-                #logger.debug('%s, %s' %(args, kwargs))
+                logger.debug('%s, %s' %(args, kwargs))
                 return self.urllib.request.urlopen(req)
             except:
                 logger.exception('')
@@ -573,9 +581,7 @@ class requests_request(abstract_request):
 
         method = self.requests.get
         response = self.urlopen_with_retry(method, url, **kwargs)
-        cookies = response.cookies
-        item = {'cookies' : cookies}
-        #self.parameter.update(item)
+        self.cookiejar_from_cookie(response.cookies)
 
         content = response.content
         #content = self.decompresses(response, content)
@@ -590,9 +596,7 @@ class requests_request(abstract_request):
         method = self.requests.post
 
         response = self.urlopen_with_retry(method, url, **kwargs)
-        cookies = response.cookies
-        item = {'cookies' : cookies}
-        #self.parameter.update(item)
+        self.cookiejar_from_cookie(response.cookies)
 
         content = response.content
         #content = self.decompresses(response, content)
@@ -616,9 +620,7 @@ class requests_request(abstract_request):
         method = self.requests.get
 
         response = self.urlopen_with_retry(method, url, stream = True, **kwargs)
-        cookies = response.cookies
-        item = {'cookies' : cookies}
-        #self.parameter.update(item)
+        self.cookiejar_from_cookie(response.cookies)
 
         size = self.get_content_size(response)
         response.close()
@@ -633,9 +635,7 @@ class requests_request(abstract_request):
         method = self.requests.get
 
         response = self.urlopen_with_retry(method, url, stream = True, **kwargs)
-        cookies = response.cookies
-        item = {'cookies' : cookies}
-        #self.parameter.update(item)
+        self.cookiejar_from_cookie(response.cookies)
 
         return response.iter_content(chunk_size = chunk_size)
 
