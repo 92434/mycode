@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月27日 星期六 21时51分52秒
+#   修改日期：2018年01月28日 星期日 17时07分32秒
 #   描    述：
 #
 #================================================================
@@ -23,6 +23,7 @@ try:
     import json
 except ImportError:
     import simplejson as json
+import webdriver
 
 import log
 logging = log.dict_configure(default_log_to_file = True)
@@ -388,6 +389,46 @@ def freess_site_account():
     kwargs.update(item)
     ss_parameter_account(**kwargs)
 
+def freess_javanet_account():
+    url = 'http://javanet.top:666/tool/api/free_ssr'
+    #webbrowser.open_new_tab(url)
+    #data = raw_input("输入得到的json数据:\n")
+    d = webdriver.driver()
+    d.driver.get(url)
+    data = d.driver.page_source
+    logger.debug('data:%s' %(data))
+    html = lxml.etree.HTML(data)
+    pre = html.xpath('//body/pre')
+    data = pre[0].text
+    logger.debug('data:%s' %(data))
+    data = json.loads(data)
+    list_account = []
+    list_des = ['状态', '延迟', 'ip', '端口', '密码', '加密方式', '混淆', '混淆参数', '协议', '协议参数']
+    list_key = ['status', 'ms', 'server', 'server_port', 'password', 'method', 'obfs', 'obfsparam', 'protocol', 'protocolparam']
+    for dict_account in data:
+        account = [dict_account.get(key, '') for key in list_key]
+        list_account.append(account)
+    show_list(['序列号'] + list_des[:6], [account[:6] for account in list_account])
+    _, _, server, server_port, password, method, obfs, obfsparam, protocol, protocolparam = select_list_item(list_account)
+    kwargs = {}
+    item = {'server' : server}
+    kwargs.update(item)
+    item = {'server_port' : int(server_port)}
+    kwargs.update(item)
+    item = {'password' : password}
+    kwargs.update(item)
+    item = {'method' : method}
+    kwargs.update(item)
+    item = {'obfs' : obfs}
+    kwargs.update(item)
+    item = {'obfsparam' : obfsparam}
+    kwargs.update(item)
+    item = {'protocol' : protocol}
+    kwargs.update(item)
+    item = {'protocolparam' : protocolparam}
+    kwargs.update(item)
+    ss_parameter_account(**kwargs)
+
 def explorer_help_account():
     list_url = [
         'https://betaclouds.net/user/node',
@@ -396,7 +437,6 @@ def explorer_help_account():
         'https://oklnk.com/zh/dashboard',
         'http://test.xiaoheijia.top/user/node',
         'http://luckyspeed.ml/user/node',
-        'http://javanet.top:666/tool/api/free_ssr',
             ]
     list_des = ['网址']
     show_list(['序列号'] + list_des, list_url)
@@ -443,6 +483,7 @@ dict_web_addr_map = {
         'xiaoheijia' : xiaoheijia_account,
         'luckspeed' : luckspeed_account,
         'free-ss.site' : freess_site_account,
+        'freess_javanet' : freess_javanet_account,
         'explorer_help' : explorer_help_account,
         }
 
