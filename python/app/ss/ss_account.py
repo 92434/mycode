@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月28日 星期日 17时07分32秒
+#   修改日期：2018年01月28日 星期日 21时01分00秒
 #   描    述：
 #
 #================================================================
@@ -397,6 +397,7 @@ def freess_javanet_account():
     d.driver.get(url)
     data = d.driver.page_source
     logger.debug('data:%s' %(data))
+    d = None
     html = lxml.etree.HTML(data)
     pre = html.xpath('//body/pre')
     data = pre[0].text
