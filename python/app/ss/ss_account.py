@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月28日 星期日 21时01分00秒
+#   修改日期：2018年01月29日 星期一 11时39分43秒
 #   描    述：
 #
 #================================================================
@@ -447,7 +447,7 @@ def explorer_help_account():
     ss_link_account(link)
 
 def yahaha_account():
-    url = 'http://www.yahaha.win/link/g7dxNkjdaNNg53Qg?mu=0'
+    url = 'http://www.yahaha.win/link/MMc6Fv9KwatCSf18?mu=0'
     mu_sccount(url)
 
 def xiaoheijia_account():
