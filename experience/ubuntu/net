@@ -10,3 +10,8 @@ sudo ufw enable
 ifconfig peth0 down  
 ip link set peth0 name eth0  
 ifconfig eth0 up 
+
+更改mac地址
+ifconfig eth0 down
+ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx
+ifconfig eth0 up
