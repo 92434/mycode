@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月30日 星期二 11时27分46秒
+#   修改日期：2018年01月30日 星期二 13时41分56秒
 #   描    述：
 #
 #================================================================
@@ -378,9 +378,8 @@ def freess_javanet_account():
     #webbrowser.open_new_tab(url)
     #data = raw_input("输入得到的json数据:\n")
     d = webdriver.driver()
-    d.driver.get(url)
-    data = d.driver.page_source
-    d = None
+    d.get_page(url)
+    data = d.content
     html = lxml.etree.HTML(data)
     pre = html.xpath('//body/pre')
     data = pre[0].text
@@ -418,10 +417,8 @@ def freess_site_account():
     #webbrowser.open_new_tab(url)
     #data = raw_input("输入得到的json数据:\n")
     d = webdriver.driver()
-    d.driver.get(url)
-    time.sleep(5)
-    data = d.driver.page_source
-    d = None
+    d.get_page(url, delay = 5)
+    data = d.content
     html = lxml.etree.HTML(data)
     pre = html.xpath('//body/pre')
     data = pre[0].text
