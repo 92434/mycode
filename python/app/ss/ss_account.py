@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月30日 星期二 13时41分56秒
+#   修改日期：2018年01月30日 星期二 13时44分09秒
 #   描    述：
 #
 #================================================================
@@ -27,7 +27,7 @@ except ImportError:
     import simplejson as json
 
 display = Display(visible=0, size=(800, 600))
-display.start()
+#display.start()
 
 import webdriver
 import log
