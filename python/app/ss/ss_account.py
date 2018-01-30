@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月30日 星期二 09时48分35秒
+#   修改日期：2018年01月30日 星期二 09时50分13秒
 #   描    述：
 #
 #================================================================
@@ -447,7 +447,7 @@ def explorer_help_account():
     ss_link_account(link)
 
 def mu_list_account():
-    list_addr = [
+    list_url = [
         'http://www.yahaha.win/link/MMc6Fv9KwatCSf18?mu=0',
         'http://test.xiaoheijia.top/link/5a4NTg1zCaKtnfoh?mu=0',
         'http://luckyss.ml/link/zv0HLPO55WN8xsbT?mu=0',
@@ -457,6 +457,7 @@ def mu_list_account():
         'https://ftp.ssrshare.com/dmsub.txt',
         'https://raw.githubusercontent.com/ImLaoD/sub/master/ssrshare.com',
         'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0',
+        'http://103.79.76.144:64206/link/wvkeU8exGqHjD8FX?mu=0',
             ]
     show_list(['序列号', 'ssr地址'], list_url)
     url = select_list_item(list_url)
