@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月30日 星期二 09时50分13秒
+#   修改日期：2018年01月30日 星期二 11时27分46秒
 #   描    述：
 #
 #================================================================
@@ -19,12 +19,17 @@ import base64
 import optparse
 import re
 import webbrowser
+import time
+from pyvirtualdisplay import Display
 try:
     import json
 except ImportError:
     import simplejson as json
-import webdriver
 
+display = Display(visible=0, size=(800, 600))
+display.start()
+
+import webdriver
 import log
 logging = log.dict_configure(default_log_to_file = True)
 logger = logging.getLogger('default')
@@ -368,27 +373,6 @@ def doub_account():
     ss_link = node[0]
     ss_link_account(ss_link)
 
-def freess_site_account():
-    url = 'https://free-ss.site/ss.json'
-    webbrowser.open_new_tab(url)
-    data = raw_input("输入得到的json数据:\n")
-    logger.debug('data:%s' %(data))
-    data = json.loads(data)
-    list_account = data.get('data')
-    list_des = ['分值', 'ip', '端口', '密码', '方法', '验证时间', '位置']
-    show_list(['序列号'] + list_des, list_account)
-    _, server, server_port, password, method, _, _ = select_list_item(list_account)
-    kwargs = {}
-    item = {'server' : server}
-    kwargs.update(item)
-    item = {'server_port' : int(server_port)}
-    kwargs.update(item)
-    item = {'password' : password}
-    kwargs.update(item)
-    item = {'method' : method}
-    kwargs.update(item)
-    ss_parameter_account(**kwargs)
-
 def freess_javanet_account():
     url = 'http://javanet.top:666/tool/api/free_ssr'
     #webbrowser.open_new_tab(url)
@@ -396,7 +380,6 @@ def freess_javanet_account():
     d = webdriver.driver()
     d.driver.get(url)
     data = d.driver.page_source
-    logger.debug('data:%s' %(data))
     d = None
     html = lxml.etree.HTML(data)
     pre = html.xpath('//body/pre')
@@ -430,6 +413,35 @@ def freess_javanet_account():
     kwargs.update(item)
     ss_parameter_account(**kwargs)
 
+def freess_site_account():
+    url = 'https://free-ss.site/ss.json'
+    #webbrowser.open_new_tab(url)
+    #data = raw_input("输入得到的json数据:\n")
+    d = webdriver.driver()
+    d.driver.get(url)
+    time.sleep(5)
+    data = d.driver.page_source
+    d = None
+    html = lxml.etree.HTML(data)
+    pre = html.xpath('//body/pre')
+    data = pre[0].text
+    logger.debug('data:%s' %(data))
+    data = json.loads(data)
+    list_account = data.get('data')
+    list_des = ['分值', 'ip', '端口', '密码', '方法', '验证时间', '位置']
+    show_list(['序列号'] + list_des, list_account)
+    _, server, server_port, password, method, _, _ = select_list_item(list_account)
+    kwargs = {}
+    item = {'server' : server}
+    kwargs.update(item)
+    item = {'server_port' : int(server_port)}
+    kwargs.update(item)
+    item = {'password' : password}
+    kwargs.update(item)
+    item = {'method' : method}
+    kwargs.update(item)
+    ss_parameter_account(**kwargs)
+
 def explorer_help_account():
     list_url = [
         'https://betaclouds.net/user/node',
@@ -445,6 +457,18 @@ def explorer_help_account():
     webbrowser.open_new_tab(url)
     link = raw_input("输入得到的ssr链接:\n")
     ss_link_account(link)
+
+def web_driver_account():
+    url_map = {
+            'http://javanet.top:666/tool/api/free_ssr' : freess_javanet_account,
+            'https://free-ss.site/ss.json' : freess_site_account,
+            }
+    list_des = ['网址']
+    list_keys = url_map.keys()
+    show_list(['序列号'] + list_des, list_keys)
+    key = select_list_item(list_keys)
+    account_func = url_map.get(key)
+    account_func()
 
 def mu_list_account():
     list_url = [
@@ -468,10 +492,9 @@ dict_web_addr_map = {
         #'ashin' : ashin_account,
         'doub' : doub_account,
         'rfcvps_club' : rfcvps_club_account,
-        'free-ss.site' : freess_site_account,
-        'freess_javanet' : freess_javanet_account,
-        'explorer_help' : explorer_help_account,
         'mu_list' : mu_list_account,
+        'explorer_help' : explorer_help_account,
+        'web_driver_help' : web_driver_account,
         }
 
 def free_ss_account():
