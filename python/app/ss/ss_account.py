@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月29日 星期一 11时39分43秒
+#   修改日期：2018年01月30日 星期二 09时48分35秒
 #   描    述：
 #
 #================================================================
@@ -260,7 +260,7 @@ def ishadowx_list_account():
     #logger.debug('%s' %(list_accounts))
     return list_accounts
 
-def mu_sccount(url):
+def mu_acount(url):
     data = r.request.get(url)
     logger.debug('data:%s' %(data))
     content_decoded = b64decode_retry(data)
@@ -446,46 +446,31 @@ def explorer_help_account():
     link = raw_input("输入得到的ssr链接:\n")
     ss_link_account(link)
 
-def yahaha_account():
-    url = 'http://www.yahaha.win/link/MMc6Fv9KwatCSf18?mu=0'
-    mu_sccount(url)
-
-def xiaoheijia_account():
-    url = 'http://test.xiaoheijia.top/link/5a4NTg1zCaKtnfoh?mu=0'
-    mu_sccount(url)
-
-def luckspeed_account():
-    url = 'http://luckyss.ml/link/zv0HLPO55WN8xsbT?mu=0'
-    mu_sccount(url)
-
-def ssr_share_account():
-    list_url = [
+def mu_list_account():
+    list_addr = [
+        'http://www.yahaha.win/link/MMc6Fv9KwatCSf18?mu=0',
+        'http://test.xiaoheijia.top/link/5a4NTg1zCaKtnfoh?mu=0',
+        'http://luckyss.ml/link/zv0HLPO55WN8xsbT?mu=0',
         'https://yzzz.ml/freessr',
         'http://ssr.izdvy.cn/freessr',
         'http://javanet.top/freessr',
         'https://ftp.ssrshare.com/dmsub.txt',
         'https://raw.githubusercontent.com/ImLaoD/sub/master/ssrshare.com',
+        'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0',
             ]
     show_list(['序列号', 'ssr地址'], list_url)
     url = select_list_item(list_url)
-    mu_sccount(url)
-
-def ashin_account():
-    url = 'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0'
-    mu_sccount(url)
+    mu_acount(url)
 
 dict_web_addr_map = {
         'ishadowx' : ishadowx_account,
-        'yahaha' : yahaha_account,
         #'ashin' : ashin_account,
         'doub' : doub_account,
-        'ssr_share' : ssr_share_account,
         'rfcvps_club' : rfcvps_club_account,
-        'xiaoheijia' : xiaoheijia_account,
-        'luckspeed' : luckspeed_account,
         'free-ss.site' : freess_site_account,
         'freess_javanet' : freess_javanet_account,
         'explorer_help' : explorer_help_account,
+        'mu_list' : mu_list_account,
         }
 
 def free_ss_account():
