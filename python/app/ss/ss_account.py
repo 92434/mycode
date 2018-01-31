@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月30日 星期二 14时03分14秒
+#   修改日期：2018年01月31日 星期三 14时02分34秒
 #   描    述：
 #
 #================================================================
@@ -374,7 +374,13 @@ def doub_account():
     ss_link_account(ss_link)
 
 def freess_javanet_account():
-    url = 'http://javanet.top:666/tool/api/free_ssr'
+    list_url = [
+        'http://javanet.top:666/tool/api/free_ssr',
+        'https://tool.ssrshare.com/tool/free_ssr',
+            ]
+    list_des = ['网址']
+    show_list(['序列号'] + list_des, list_url)
+    url = select_list_item(list_url)
     #webbrowser.open_new_tab(url)
     #data = raw_input("输入得到的json数据:\n")
     d = webdriver.driver()
