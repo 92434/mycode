@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年01月31日 星期三 14时02分34秒
+#   修改日期：2018年02月01日 星期四 11时17分16秒
 #   描    述：
 #
 #================================================================
@@ -376,7 +376,7 @@ def doub_account():
 def freess_javanet_account():
     list_url = [
         'http://javanet.top:666/tool/api/free_ssr',
-        'https://tool.ssrshare.com/tool/free_ssr',
+        'https://tool.ssrshare.com/tool/api/free_ssr',
             ]
     list_des = ['网址']
     show_list(['序列号'] + list_des, list_url)
