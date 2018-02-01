@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月01日 星期四 11时17分16秒
+#   修改日期：2018年02月01日 星期四 11时23分29秒
 #   描    述：
 #
 #================================================================
@@ -375,8 +375,9 @@ def doub_account():
 
 def freess_javanet_account():
     list_url = [
-        'http://javanet.top:666/tool/api/free_ssr',
+        #'http://javanet.top:666/tool/api/free_ssr',
         'https://tool.ssrshare.com/tool/api/free_ssr',
+        'http://155.94.186.64/tool/api/free_ssr',
             ]
     list_des = ['网址']
     show_list(['序列号'] + list_des, list_url)
@@ -464,7 +465,7 @@ def explorer_help_account():
 
 def web_driver_account():
     url_map = {
-            'http://javanet.top:666/tool/api/free_ssr' : freess_javanet_account,
+            'freess_javanet_account' : freess_javanet_account,
             'https://free-ss.site/ss.json' : freess_site_account,
             }
     list_des = ['网址']
