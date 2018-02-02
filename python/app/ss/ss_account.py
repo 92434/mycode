@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月02日 星期五 15时00分45秒
+#   修改日期：2018年02月02日 星期五 15时06分27秒
 #   描    述：
 #
 #================================================================
@@ -455,6 +455,7 @@ def explorer_help_account():
         'http://test.xiaoheijia.top/user/node',
         'http://luckyspeed.ml/user/node',
         'http://103.79.76.144:64206/user/node',
+        'https://sssss.life/nodes',
             ]
     list_des = ['网址']
     show_list(['序列号'] + list_des, list_url)
