@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月01日 星期四 11时23分29秒
+#   修改日期：2018年02月02日 星期五 15时00分45秒
 #   描    述：
 #
 #================================================================
@@ -487,6 +487,7 @@ def mu_list_account():
         'https://raw.githubusercontent.com/ImLaoD/sub/master/ssrshare.com',
         'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0',
         'http://103.79.76.144:64206/link/wvkeU8exGqHjD8FX?mu=0',
+        'https://sssss.life/LoadSubs?token=bdpGtDtNz1sO89irBBORsFsg0lW5dU5imWg7fnmv7Ia5iqSA4CvACO2etcgVDkDjq94mALo7TBa19zZkEcTdF0r0acK6ZiWjZZcfhc55N5kGYb7nUgbLdWx0YbtGNJ+z',
             ]
     show_list(['序列号', 'ssr地址'], list_url)
     url = select_list_item(list_url)
