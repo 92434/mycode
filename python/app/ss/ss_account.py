@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月02日 星期五 15时06分27秒
+#   修改日期：2018年02月05日 星期一 18时06分16秒
 #   描    述：
 #
 #================================================================
@@ -450,12 +450,14 @@ def explorer_help_account():
     list_url = [
         'https://betaclouds.net/user/node',
         'https://lanjing.tech/user/node',
-        'https://www.yahaha.win/user/node',
+        'https://yahaha.win/user/node',
         'https://oklnk.com/zh/dashboard',
         'http://test.xiaoheijia.top/user/node',
         'http://luckyspeed.ml/user/node',
-        'http://103.79.76.144:64206/user/node',
+        #'http://103.79.76.144:64206/user/node',
         'https://sssss.life/nodes',
+        'http://poro.me/user/node',
+        'http://ss.nwct.ml/user/',
             ]
     list_des = ['网址']
     show_list(['序列号'] + list_des, list_url)
@@ -488,6 +490,7 @@ def mu_list_account():
         'https://raw.githubusercontent.com/ImLaoD/sub/master/ssrshare.com',
         'https://ashin.fun/link/0LHX6exDqSREOz1m?mu=0',
         'http://103.79.76.144:64206/link/wvkeU8exGqHjD8FX?mu=0',
+        'http://ss.nwct.ml/link/l7g59PFXBpc7pobS?mu=0',
         'https://sssss.life/LoadSubs?token=bdpGtDtNz1sO89irBBORsFsg0lW5dU5imWg7fnmv7Ia5iqSA4CvACO2etcgVDkDjq94mALo7TBa19zZkEcTdF0r0acK6ZiWjZZcfhc55N5kGYb7nUgbLdWx0YbtGNJ+z',
             ]
     show_list(['序列号', 'ssr地址'], list_url)
