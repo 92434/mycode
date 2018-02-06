@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月05日 星期一 19时15分14秒
+#   修改日期：2018年02月06日 星期二 13时37分07秒
 #   描    述：
 #
 #================================================================
@@ -459,6 +459,7 @@ def explorer_help_account():
         'http://poro.me/user/node',
         'http://ss.nwct.ml/user/',
         'https://eeeeesile.com/user',
+        'http://canadassr.tk/',
             ]
     list_des = ['网址']
     show_list(['序列号'] + list_des, list_url)
@@ -516,10 +517,32 @@ def free_ss_account():
     account_func = dict_web_addr_map.get(web_addr)
     account_func()
 
+def ss_config():
+    dict_account = {}
+    keys = [
+        'server',
+        'server_port',
+        'password',
+        'method',
+        'protocol',
+        'protocol_param',
+        'obfs',
+        'obfs_param',
+        'group',
+        'remarks',
+            ]
+    for key in keys:
+        value = raw_input("%s:" %(key))
+        item = {key : value}
+        dict_account.update(item)
+
+    gen_ss_conf(dict_account)
+
 def main(argv):
     options = optparse.OptionParser()
     options.add_option('-l', '--ssr_link', dest='ssr_link', help='ssr_link', metavar='URL', default = None)
     options.add_option('-a', '--ss_account', action='store_true', dest='ss_account', help='ss_account', default=False)
+    options.add_option('-c', '--config', action='store_true', dest='ss_config', help='ss_config', default=False)
     opts, args = options.parse_args(argv)
     logger.debug('opts:%s' %(opts))
     logger.debug('args:%s' %(args))
@@ -531,6 +554,8 @@ def main(argv):
         free_ss_account()
     elif opts.ssr_link:
         ss_link_account(opts.ssr_link)
+    elif opts.ss_config:
+        ss_config()
     else:
         options.print_help()
 
