@@ -6,7 +6,7 @@
 #   文件名称：bmp_file.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月13日 星期三 14时39分55秒
-#   修改日期：2018年02月06日 星期二 19时59分56秒
+#   修改日期：2018年02月07日 星期三 13时40分17秒
 #   描    述：
 #
 #================================================================
@@ -74,9 +74,14 @@ class bmp_file():
         self.lut = self.gen_lut()
         self.bmp_des += '1024s' #256 * (r,g,b,a)
 
+        self.bmp_des_info = self.bmp_des
+
         self.bmp_data_offset = struct.calcsize(self.bmp_des)
 
-        self.size_of_image = (self.bpp + 7 / 8) * self.width * self.height
+        #!!!慎用
+        self._width = self.width
+        self._height = self.height
+        self.size_of_image = ((self.bpp + 7) / 8) * self.width * self.height
 
         self.bmp_des_data = '%ss' %(self.size_of_image)
         self.bmp_des += self.bmp_des_data
@@ -95,10 +100,10 @@ class bmp_file():
             data += struct.pack('<c', i)
         return data
 
-    def write_bmp(self, filename, list_buf):
-        data = self.list_buf_to_data(list_buf)
-        print repr(self.bmp_des)
-        bmp_data = struct.pack(self.bmp_des,
+    def write_bmp(self, filename, buf):
+        self.data = buf
+        bmp_data = struct.pack(
+                self.bmp_des,
                 self.format,
                 self.filesize,
                 self.unused_short,
@@ -111,16 +116,29 @@ class bmp_file():
                 self.bpp,
                 self.compress_method,
                 self.size_of_image,
-                self.width,
-                self.height,
+                self._width,
+                self._height,
                 self.number_of_color,
                 self.number_of_important_color,
                 self.lut,
-                data
+                self.data
                 )
         filepath = "%s.bmp" %(filename)
         with open(filepath, 'wb+') as f:
             f.write(bmp_data)
+
+    def read_bmp(self, filename):
+        f = open(filename, 'rb')
+
+        data = f.read(self.bmp_data_offset)
+        self.format, self.filesize, self.unused_short, self.unused_short, self.bmp_data_offset, self.bmp_des_bmpinfo_hdr_size, self.width, self.height, _, self.bpp, self.compress_method, self.size_of_image, self._width, self._height, self.number_of_color, self.number_of_important_color, self.lut = struct.unpack(self.bmp_des_info, data)
+        self.size_of_image = ((self.bpp + 7) / 8) * self.width * self.height
+
+        self.bmp_des_data = '<%ss' %(self.size_of_image)
+
+        self.data = f.read(self.size_of_image)
+
+        f.close()
 
 def main():
     f = bmp_file(16, 16)
@@ -130,6 +148,7 @@ def main():
             s += chr(i * 16 + j)
 
     f.write_bmp('test', s)
+    f.read_bmp('test.bmp')
 
 if '__main__' == __name__:
     main()
