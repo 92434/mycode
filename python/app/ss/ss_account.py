@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月06日 星期二 14时24分50秒
+#   修改日期：2018年02月08日 星期四 09时14分26秒
 #   描    述：
 #
 #================================================================
@@ -114,8 +114,8 @@ def decode_ss_link(link = ''):
         dict_account.update(item)
 
         decoded_account, parameter = list_decoded_link
-
         logger.debug('parameter:%s' %(parameter))
+
         list_parameter = parameter.split('&')
         for parameter_item in list_parameter:
             try:
@@ -146,6 +146,7 @@ def decode_ss_link(link = ''):
             dict_matched = m.groupdict()
             password = dict_matched.pop('password_base64')
             password = b64decode_retry(password)
+            logger.debug('password:%s' %(password))
             item = {'password' : password}
             dict_matched.update(item)
             dict_account.update(dict_matched)
