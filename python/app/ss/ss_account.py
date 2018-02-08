@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月08日 星期四 09时14分26秒
+#   修改日期：2018年02月08日 星期四 17时59分41秒
 #   描    述：
 #
 #================================================================
@@ -166,8 +166,8 @@ def decode_ss_link(link = ''):
             #if 'group' in dict_account:
             #    dict_account.pop('group')
 
-            item = {'redirect' : ''}
-            dict_account.update(item)
+            #item = {'redirect' : ''}
+            #dict_account.update(item)
 
             #item = {'dns_ipv6' : False}
             #dict_account.update(item)
@@ -541,11 +541,25 @@ def ss_config():
 
     gen_ss_conf(dict_account)
 
+def ss_read_config(filepath):
+    if not os.access(filepath, os.R_OK):
+        return
+    f = open(filepath, 'rb')
+    content = f.read()
+    f.close()
+    d = json.loads(content)
+    list_key_value = []
+    for key, value in d.items():
+        key_value = [key, value]
+        list_key_value.append(key_value)
+    show_list(['序列号', 'key', 'value'], list_key_value)
+
 def main(argv):
     options = optparse.OptionParser()
     options.add_option('-l', '--ssr_link', dest='ssr_link', help='ssr_link', metavar='URL', default = None)
     options.add_option('-a', '--ss_account', action='store_true', dest='ss_account', help='ss_account', default=False)
     options.add_option('-c', '--config', action='store_true', dest='ss_config', help='ss_config', default=False)
+    options.add_option('-r', '--read_config', dest='read_config', help='read_config', default=None)
     opts, args = options.parse_args(argv)
     logger.debug('opts:%s' %(opts))
     logger.debug('args:%s' %(args))
@@ -559,6 +573,8 @@ def main(argv):
         ss_link_account(opts.ssr_link)
     elif opts.ss_config:
         ss_config()
+    elif opts.read_config:
+        ss_read_config(opts.read_config)
     else:
         options.print_help()
 
