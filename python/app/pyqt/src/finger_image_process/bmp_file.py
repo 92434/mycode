@@ -6,7 +6,7 @@
 #   文件名称：bmp_file.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月13日 星期三 14时39分55秒
-#   修改日期：2018年02月07日 星期三 13时40分17秒
+#   修改日期：2018年02月08日 星期四 12时33分23秒
 #   描    述：
 #
 #================================================================
@@ -36,7 +36,7 @@ class bmp_file():
     #	int  biClrUsed;                   // number of colors used
     #	int  biClrImportant;              // number of important colors
     #};
-    def __init__(self, width, height):
+    def __init__(self, width = 0, height = 0):
         self.width = width
         self.height = height
         self.format = 'BM'
@@ -94,14 +94,8 @@ class bmp_file():
             lut += struct.pack('<4c', chr(i), chr(i), chr(i), chr(0))
         return lut
 
-    def list_buf_to_data(self, list_buf):
-        data = ''
-        for i in list_buf:
-            data += struct.pack('<c', i)
-        return data
-
-    def write_bmp(self, filename, buf):
-        self.data = buf
+    def write_bmp(self, filename, data):
+        self.data = data
         bmp_data = struct.pack(
                 self.bmp_des,
                 self.format,
@@ -123,7 +117,7 @@ class bmp_file():
                 self.lut,
                 self.data
                 )
-        filepath = "%s.bmp" %(filename)
+        filepath = "%s" %(filename)
         with open(filepath, 'wb+') as f:
             f.write(bmp_data)
 
