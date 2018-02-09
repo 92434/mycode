@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月09日 星期五 11时09分29秒
+#   修改日期：2018年02月09日 星期五 11时46分00秒
 #   描    述：
 #
 #================================================================
@@ -229,6 +229,7 @@ def select_list_item(list_content):
 
 def show_list(list_title, list_content):
     table = PrettyTable(list_title)
+    table.max_width = 80
     table.padding_width = 1
     for i, list_row in enumerate(list_content):
         if type(list_row) != list:
