@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月09日 星期五 11时46分00秒
+#   修改日期：2018年02月09日 星期五 13时41分55秒
 #   描    述：
 #
 #================================================================
@@ -467,6 +467,8 @@ def explorer_help_account():
         'http://canadassr.tk/',
         'https://cp.12345.kiwi/user',
         'https://www.xingsu.me/user',
+        'https://wumiao8.com/user',
+        'https://liberplus.io/user',
             ]
     list_des = ['网址']
     show_list(['序列号'] + list_des, list_url)
@@ -504,6 +506,8 @@ def mu_list_account():
         'https://eeeeesile.com/link/kekjVMhNKMhdVv9s?mu=0',
         'https://cp.12345.kiwi/link/HrbwvcZixExyillf?mu=1',
         'https://www.xingsu.me/link/posTCab9LJlxkjF6?mu=0',
+        'https://wumiao8.com/subscribe/18fd3e0bff89',
+        'https://www.liberplus.io/link/894IkgI6HX68mSBC?mu=0',
             ]
     show_list(['序列号', 'ssr地址'], list_url)
     url = select_list_item(list_url)
