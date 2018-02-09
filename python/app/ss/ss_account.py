@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月09日 星期五 13时41分55秒
+#   修改日期：2018年02月09日 星期五 14时41分02秒
 #   描    述：
 #
 #================================================================
@@ -466,6 +466,7 @@ def explorer_help_account():
         'https://eeeeesile.com/user',
         'http://canadassr.tk/',
         'https://cp.12345.kiwi/user',
+        #'https://free.rfcvps.com/user',
         'https://www.xingsu.me/user',
         'https://wumiao8.com/user',
         'https://liberplus.io/user',
