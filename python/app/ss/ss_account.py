@@ -6,7 +6,7 @@
 #   文件名称：ss_account.py
 #   创 建 者：肖飞
 #   创建日期：2017年12月23日 星期六 09时21分51秒
-#   修改日期：2018年02月09日 星期五 10时00分16秒
+#   修改日期：2018年02月09日 星期五 11时09分29秒
 #   描    述：
 #
 #================================================================
@@ -465,6 +465,7 @@ def explorer_help_account():
         'https://eeeeesile.com/user',
         'http://canadassr.tk/',
         'https://cp.12345.kiwi/user',
+        'https://www.xingsu.me/user',
             ]
     list_des = ['网址']
     show_list(['序列号'] + list_des, list_url)
@@ -501,6 +502,7 @@ def mu_list_account():
         'https://sssss.life/LoadSubs?token=bdpGtDtNz1sO89irBBORsFsg0lW5dU5imWg7fnmv7Ia5iqSA4CvACO2etcgVDkDjq94mALo7TBa19zZkEcTdF0r0acK6ZiWjZZcfhc55N5kGYb7nUgbLdWx0YbtGNJ+z',
         'https://eeeeesile.com/link/kekjVMhNKMhdVv9s?mu=0',
         'https://cp.12345.kiwi/link/HrbwvcZixExyillf?mu=1',
+        'https://www.xingsu.me/link/posTCab9LJlxkjF6?mu=0',
             ]
     show_list(['序列号', 'ssr地址'], list_url)
     url = select_list_item(list_url)
